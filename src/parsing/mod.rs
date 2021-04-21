@@ -3,3 +3,4 @@ pub mod authlogiclistener;
 pub mod authlogicparser;
 pub mod authlogicvisitor;
 pub mod printvisitor;
+pub mod astconstructionvisitor;

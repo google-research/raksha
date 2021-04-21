@@ -7,6 +7,9 @@ use parsing::authlogicparser::*;
 use antlr_rust::InputStream;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use crate::parsing::authlogicvisitor::AuthLogicVisitor;
+use crate::parsing::astconstructionvisitor;
+
+mod ast;
 
 fn test_print() {
     let mut lexer = AuthLogicLexer::new(
