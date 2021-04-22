@@ -2,20 +2,25 @@ use crate::parsing::authlogicvisitor::*;
 use crate::parsing::authlogicparser::*;
 use antlr_rust::tree::{ParseTree,ParseTreeVisitor};
 
+// this code is now vestigial, but shows roughly how to make a visitor that side-effects.
+
+// fn test_print() {
+//     let mut lexer = AuthLogicLexer::new(
+//         InputStream::new("foo(bar, baz).\r\n"));
+//     let token_source = CommonTokenStream::new(lexer);
+//     let mut parser = AuthLogicParser::new(token_source);
+//     let parse_result = parser.program().expect("failed to parse!");
+//     let mut pvisitor = PrintVisitor::new();
+//     pvisitor.visit_program(&parse_result);
+// }
+
 pub struct PrintVisitor {
     ret: String
 }
 
 impl PrintVisitor {
     pub fn new() -> PrintVisitor {
-        PrintVisitor{ret: String::from("")}
-    }
-}
-
-fn is_some<T> (x: Option<T>) -> bool {
-    match x {
-        Some(_) => true,
-        None => false
+        PrintVisitor { ret: String::from("") }
     }
 }
 
@@ -35,15 +40,10 @@ impl<'a> AuthLogicVisitor<'a> for PrintVisitor {
         self.visit_children(ctx)
     }
 
-
 	fn visit_predicate(&mut self, ctx: &PredicateContext<'a>) {
-        // Clearly I would rather do (for id in <something>) { ... }
-        // and ostensibly that something would be ID_all(), but actually it just emits all tokens 
-        // including non-IDs (i.e., there is a bug). get_tokens(ID) does work, but it is private.
-        // So instead, here is this hackery
         let mut idx = 0;
-        while ( is_some(ctx.ID(idx)) ) {
-            println!("id {}: {}", idx, ctx.ID(idx).unwrap().get_text());
+        while let Some(id) = ctx.ID(idx) {
+            println!("id {}: {}", idx, id.get_text());
             idx += 1;
         }
         self.visit_children(ctx)
