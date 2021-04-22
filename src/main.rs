@@ -10,6 +10,7 @@ use crate::parsing::authlogicvisitor::AuthLogicVisitor;
 use crate::parsing::astconstructionvisitor;
 
 mod ast;
+use crate::parsing::astconstructionvisitor::*;
 
 fn test_print() {
     let mut lexer = AuthLogicLexer::new(
@@ -21,6 +22,16 @@ fn test_print() {
     pvisitor.visit_program(&parse_result);
 }
 
+fn test_cons_ast() {
+    let mut lexer = AuthLogicLexer::new(
+        InputStream::new("foo(bar, baz) :- other(thing).\r\n"));
+    let token_source = CommonTokenStream::new(lexer);
+    let mut parser = AuthLogicParser::new(token_source);
+    let parse_result = parser.program().expect("failed to parse!");
+    let prog = astconstructionvisitor::construct_program(&parse_result);
+    println!("parsed\n {:#?}", prog);
+}
+
 fn main() {
-    test_print();
+    test_cons_ast();
 }

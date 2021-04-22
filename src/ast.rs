@@ -1,15 +1,18 @@
 use std::any::Any;
 
+#[derive(Debug)]
 pub struct AstPred {
     pub name: String,
     pub args: Vec<String>
 }
 
+#[derive(Debug)]
 pub enum AstAssertion {
     AstFact {p: AstPred},
     AstCondAssert {lhs: AstPred, rhs: Vec<AstPred>}
 }
 
+#[derive(Debug)]
 pub struct AstProgram {
     pub assertions: Vec<AstAssertion>
 }
