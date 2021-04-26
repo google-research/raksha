@@ -1,10 +1,32 @@
 use std::any::Any;
 
-#[derive(Debug)]
+#[derive(Debug, Hash)]
+// Hash and Eq are needed so that AstPred can be used in a HashSet in
+// SouffleEmitter. The derive strategy for Eq does not work, so it is
+// implemented manually.
 pub struct AstPred {
     pub name: String,
     pub args: Vec<String>
 }
+
+impl PartialEq for AstPred {
+    fn eq(&self, other: &Self) -> bool {
+        if (self.name != other.name ||
+            self.args.len() != other.args.len()) {
+            return false;
+        }
+        for i in (0..self.args.len()-1) {
+            if ( self.args[i] != other.args[i] ) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+// This is a hint that the compiler uses.
+// See https://doc.rust-lang.org/std/cmp/trait.Eq.html
+impl Eq for AstPred {}
 
 #[derive(Debug)]
 pub enum AstAssertion {
