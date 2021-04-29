@@ -1,15 +1,20 @@
-use std::any::Any;
+// use std::any::Any;
 
-#[derive(Debug, Hash)]
+#[derive(Debug)]
+pub struct AstPrincipal {
+    pub name: String
+}
+
 // Hash and Eq are needed so that AstPred can be used in a HashSet in
 // SouffleEmitter. The derive strategy for Eq does not work, so it is
 // implemented manually.
-pub struct AstPred {
+#[derive(Debug, Hash)]
+pub struct AstPredicate {
     pub name: String,
     pub args: Vec<String>
 }
 
-impl PartialEq for AstPred {
+impl PartialEq for AstPredicate {
     fn eq(&self, other: &Self) -> bool {
         if (self.name != other.name ||
             self.args.len() != other.args.len()) {
@@ -26,64 +31,88 @@ impl PartialEq for AstPred {
 
 // This is a hint that the compiler uses.
 // See https://doc.rust-lang.org/std/cmp/trait.Eq.html
-impl Eq for AstPred {}
+impl Eq for AstPredicate {}
+
+#[derive(Debug)]
+pub enum AstVerbPhrase {
+    AstPredPhrase {p: AstPredicate },
+    AstCanActPhrase {p: AstPrincipal }
+}
+
+#[derive(Debug)]
+pub enum AstFlatFact {
+    AstPrinFact {p: AstPrincipal, v: AstVerbPhrase },
+    AstPredFact {p: AstPredicate }
+}
+
+#[derive(Debug)]
+pub enum AstFact {
+    AstFlatFactFact { f: AstFlatFact },
+    AstCanSayFact { p: AstPrincipal, f: AstFlatFact }
+}
 
 #[derive(Debug)]
 pub enum AstAssertion {
-    AstFact {p: AstPred},
-    AstCondAssert {lhs: AstPred, rhs: Vec<AstPred>}
+    AstFactAssertion { f: AstFact },
+    AstCondAssertion { lhs: AstFact, rhs: Vec<AstFlatFact> }
+}
+
+#[derive(Debug)]
+pub struct AstSaysAssertion {
+    pub prin: AstPrincipal,
+    pub assertion: AstAssertion
 }
 
 #[derive(Debug)]
 pub struct AstProgram {
-    pub assertions: Vec<AstAssertion>
+    pub assertions: Vec<AstSaysAssertion>
 }
 
-pub trait AstObject {
-    fn get_string(&self) -> String;
-    fn as_any(&self) -> &dyn Any;
-}
-
-impl AstObject for AstPred {
-    fn get_string(&self) -> String {
-        let mut ret = self.name.clone() + "(";
-        for arg in &self.args {
-            ret += &(arg.clone() + ", ");
-        }
-        ret += ")";
-        ret
-        // TODO remove last two chars
-    }
-    fn as_any(&self) -> &dyn Any { self }
-}
-
-impl AstObject for AstAssertion {
-    fn get_string(&self) -> String {
-        match self {
-            AstAssertion::AstFact { p } =>
-                p.get_string().to_owned() + ".",
-            AstAssertion::AstCondAssert { lhs, rhs } => {
-                let mut ret = lhs.get_string().to_owned();
-                for pred in rhs {
-                    ret += &pred.get_string().to_owned();
-                }
-                ret
-            }
-        }
-    }
-    fn as_any(&self) -> &dyn Any { self }
-}
-
-impl AstObject for AstProgram {
-    fn get_string(&self) -> String { String::from("") }
-    /*
-    fn get_string(&self) -> String {
-        let mut ret = String::from("");
-        for assert in self.assertions {
-            ret += assert.get_string().to_owned();
-        }
-        ret
-    }
-    */
-    fn as_any(&self) -> &dyn Any { self }
-}
+// pub trait AstObject {
+//     fn get_string(&self) -> String;
+//     fn as_any(&self) -> &dyn Any;
+// }
+// 
+// impl AstObject for AstPred {
+//     fn get_string(&self) -> String {
+//         let mut ret = self.name.clone() + "(";
+//         for arg in &self.args {
+//             ret += &(arg.clone() + ", ");
+//         }
+//         ret += ")";
+//         ret
+//         // TODO remove last two chars
+//     }
+//     fn as_any(&self) -> &dyn Any { self }
+// }
+// 
+// impl AstObject for AstAssertion {
+//     fn get_string(&self) -> String {
+//         match self {
+//             AstAssertion::AstFact { p } =>
+//                 p.get_string().to_owned() + ".",
+//             AstAssertion::AstCondAssert { lhs, rhs } => {
+//                 let mut ret = lhs.get_string().to_owned();
+//                 for pred in rhs {
+//                     ret += &pred.get_string().to_owned();
+//                 }
+//                 ret
+//             }
+//         }
+//     }
+//     fn as_any(&self) -> &dyn Any { self }
+// }
+// 
+// impl AstObject for AstProgram {
+//     fn get_string(&self) -> String { String::from("") }
+//     /*
+//     fn get_string(&self) -> String {
+//         let mut ret = String::from("");
+//         for assert in self.assertions {
+//             ret += assert.get_string().to_owned();
+//         }
+//         ret
+//     }
+//     */
+//     fn as_any(&self) -> &dyn Any { self }
+// }
