@@ -1,16 +1,28 @@
 use std::collections::HashSet;
 use crate::ast::*;
+use crate::datalog_ir::*;
 
 pub struct SouffleEmitter<'a> {
-    decls: HashSet<&'a AstPred>,
+    decls: HashSet<&'a AstPredicate>,
 }
 
 impl<'a> SouffleEmitter<'a> {
+    // This is the only public method of the souffle emitter. When given
+    // A Datalog IR (DLIR) program, it produces text for Souffle.
+    pub fn emit_program(p: &DLIRProgram) -> String {
+        let mut emitter = SouffleEmitter::new();
+        let body = emitter.emit_program_body(p);
+        let mut text = emitter.emit_declarations();
+        text += "\r\n";
+        text += &body;
+        text
+    }
+
     fn new() -> SouffleEmitter<'a> {
         SouffleEmitter { decls: HashSet::new() }
     }
 
-    fn emit_pred(&mut self, p: &'a AstPred) -> String {
+    fn emit_pred(&mut self, p: &'a AstPredicate) -> String {
         self.decls.insert(p);
         let mut ret = String::new();
         ret += &p.name;
@@ -28,12 +40,12 @@ impl<'a> SouffleEmitter<'a> {
         ret
     }
 
-    fn emit_assertion(&mut self, a: &'a AstAssertion) -> String {
+    fn emit_assertion(&mut self, a: &'a DLIRAssertion) -> String {
         match a {
-            AstAssertion::AstFact { p } => {
+            DLIRAssertion::DLIRFactAssertion { p } => {
                 self.emit_pred(p) + "."
             }
-            AstAssertion::AstCondAssert { lhs, rhs } => {
+            DLIRAssertion::DLIRCondAssertion { lhs, rhs } => {
                 let mut ret = self.emit_pred(lhs) + " :- ";
                 let mut firstArgYet = false;
                 for p in rhs {
@@ -50,7 +62,7 @@ impl<'a> SouffleEmitter<'a> {
         }
     }
 
-    fn emit_program_body(&mut self, p: &'a AstProgram) -> String {
+    fn emit_program_body(&mut self, p: &'a DLIRProgram) -> String {
         let mut ret = "".to_owned();
         for assertion in &p.assertions {
             ret += &self.emit_assertion(&assertion);
@@ -59,7 +71,7 @@ impl<'a> SouffleEmitter<'a> {
         ret
     }
 
-    fn emit_decl(pred: &'a AstPred) -> String {
+    fn emit_decl(pred: &'a AstPredicate) -> String {
         let mut ret = ".decl ".to_owned();
         ret += &pred.name;
         ret += "(";
@@ -84,15 +96,6 @@ impl<'a> SouffleEmitter<'a> {
             ret += "\r\n";
         }
         ret
-    }
-
-    pub fn emit_program(p: &AstProgram) -> String {
-        let mut emitter = SouffleEmitter::new();
-        let body = emitter.emit_program_body(p);
-        let mut text = emitter.emit_declarations();
-        text += "\r\n";
-        text += &body;
-        text
     }
 
 }
