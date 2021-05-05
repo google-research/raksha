@@ -1,0 +1,2 @@
+Prin1 says Prin2 canSay foo(bar) :- baz(bar).
+Prin2 says baz(bar).

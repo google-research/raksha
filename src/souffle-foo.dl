@@ -1,0 +1,10 @@
+.decl says_baz(Prin2: symbol, bar: symbol)
+.decl says_foo(x: symbol, bar: symbol)
+.decl says_canSay_foo(Prin1: symbol, x: symbol, bar: symbol)
+.decl says_foo(Prin1: symbol, bar: symbol)
+.decl says_canSay_foo(Prin1: symbol, Prin2: symbol, bar: symbol)
+.decl says_baz(Prin1: symbol, bar: symbol)
+
+says_foo(Prin1, bar) :- says_foo(x, bar), says_canSay_foo(Prin1, x, bar).
+says_canSay_foo(Prin1, Prin2, bar) :- says_baz(Prin1, bar).
+says_baz(Prin2, bar).

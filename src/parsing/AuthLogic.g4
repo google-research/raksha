@@ -26,7 +26,7 @@ flatFact
 
 fact
     : flatFact #flatFactFact
-    | principal CANSAY flatFact #canSayFact
+    | principal CANSAY fact #canSayFact
     ;
 
 assertion

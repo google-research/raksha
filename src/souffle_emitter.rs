@@ -27,10 +27,10 @@ impl<'a> SouffleEmitter<'a> {
         let mut ret = String::new();
         ret += &p.name;
         ret += "(";
-        let mut firstArgYet = false;
+        let mut first_arg_yet = false;
         for arg in &p.args {
-            if !firstArgYet {
-                firstArgYet = true;
+            if !first_arg_yet {
+                first_arg_yet = true;
             } else {
                 ret += ", ";
             }
@@ -47,10 +47,10 @@ impl<'a> SouffleEmitter<'a> {
             }
             DLIRAssertion::DLIRCondAssertion { lhs, rhs } => {
                 let mut ret = self.emit_pred(lhs) + " :- ";
-                let mut firstArgYet = false;
+                let mut first_arg_yet = false;
                 for p in rhs {
-                    if !firstArgYet {
-                        firstArgYet = true;
+                    if !first_arg_yet {
+                        first_arg_yet = true;
                     } else {
                         ret += ", ";
                     }
@@ -75,10 +75,10 @@ impl<'a> SouffleEmitter<'a> {
         let mut ret = ".decl ".to_owned();
         ret += &pred.name;
         ret += "(";
-        let mut firstArgYet = false;
+        let mut first_arg_yet = false;
         for arg in &pred.args {
-            if !firstArgYet {
-                firstArgYet = true;
+            if !first_arg_yet {
+                first_arg_yet = true;
             } else {
                 ret += ", ";
             }

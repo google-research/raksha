@@ -108,8 +108,8 @@ fn construct_flat_fact_fact(ctx: &FlatFactFactContext) -> AstFact {
 
 fn construct_can_say_fact(ctx: &CanSayFactContext) -> AstFact {
     let prin = construct_principal(&ctx.principal().unwrap());
-    let flat = construct_flat_fact(&ctx.flatFact().unwrap());
-    AstFact::AstCanSayFact { p: prin, f: flat }
+    let fact = construct_fact(&ctx.fact().unwrap());
+    AstFact::AstCanSayFact { p: prin, f: Box::new(fact) }
 }
 
 fn construct_assertion(ctx: &AssertionContextAll)

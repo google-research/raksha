@@ -1,1 +1,1 @@
-bar(baz, foo) :- other(thing).
+somePrin says bar(baz, foo) :- other(thing).
