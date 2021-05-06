@@ -15,7 +15,10 @@ predicate
     ;
 
 verbphrase
-    : predicate #predphrase
+        // XXX the parser for this syntax does not fully work,
+        // but it also does not increase expressiveness (other than 
+        // superficially / for convenience).
+    : predicate #predphrase 
     | CANACTAS principal #actsAsPhrase
     ;
 

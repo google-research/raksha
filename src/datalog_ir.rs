@@ -4,11 +4,13 @@
 
 use crate::ast::*;
 
+#[derive(Clone)]
 pub enum DLIRAssertion {
     DLIRFactAssertion { p: AstPredicate },
     DLIRCondAssertion { lhs: AstPredicate, rhs: Vec<AstPredicate> }
 }
 
+#[derive(Clone)]
 pub struct DLIRProgram {
     pub assertions: Vec<DLIRAssertion>
 }

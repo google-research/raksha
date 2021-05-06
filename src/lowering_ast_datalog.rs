@@ -9,6 +9,9 @@ fn fresh_var() -> String {
     String::from("x")
 }
 
+// Note that this puts args_ on the front of the list of arguments because
+// this is the conveninet way for it to work in the contexts in which it
+// is used.
 fn push_onto_pred(modifier: String, mut args_: Vec<String>,
                   pred: &AstPredicate) -> AstPredicate {
     let new_name = modifier + &pred.name.clone();
@@ -36,14 +39,36 @@ fn verbphrase_to_dlir(v: &AstVerbPhrase) -> AstPredicate {
     }
 }
 
-// TODO need to collect some assertions here as well
-fn flat_fact_to_dlir(f: &AstFlatFact) -> AstPredicate {
+fn flat_fact_to_dlir(f: &AstFlatFact, in_lhs: bool,
+         speaker: &AstPrincipal) -> (AstPredicate,Vec<DLIRAssertion>) {
     match f {
         AstFlatFact::AstPrinFact {p, v} => {
-            push_prin(String::from("is_"), p, &verbphrase_to_dlir(v))
+            let v_dlir = verbphrase_to_dlir(v);
+            let pred = push_prin(String::from(""), p, &v_dlir);
+
+            // Need to additionally generate:
+            // speaker says x v :- speaker says x canActAs p,
+            //                     speaker says p v
+            // (where x is a fresh principal)
+            let x = AstPrincipal { name: fresh_var() };
+
+            // speaker says x v;
+            let gen_lhs = push_prin(String::from("says_"), speaker, 
+                    &push_prin(String::from(""), &x, &v_dlir));
+            // speaker says x canActAs p
+            let x_as_p = AstPredicate { name: String::from("canActAs_"),
+                args: [x.name.clone(), p.name.clone()].to_vec() };
+            let s_says_x_as_p = push_prin(String::from("says_"), speaker,
+                &x_as_p);
+            // speaker says p v
+            let s_says_p_v = push_prin(String::from("says_"), speaker, &pred);
+        
+            let gen = DLIRAssertion::DLIRCondAssertion { lhs: gen_lhs,
+                rhs: [s_says_x_as_p, s_says_p_v].to_vec() };
+
+            (pred, [gen].to_vec())
         }
-        // TODO collect assertions on this branch:
-        AstFlatFact::AstPredFact { p }  => { p.clone() }
+        AstFlatFact::AstPredFact { p }  => { (p.clone(), Vec::new()) }
     }
 }
 
@@ -53,10 +78,7 @@ fn fact_to_dlir(f: &AstFact, p: &AstPrincipal)
         -> (AstPredicate, Vec<DLIRAssertion>) {
     match f {
         AstFact::AstFlatFactFact { f: flat } => {
-            (
-                flat_fact_to_dlir(flat),
-                Vec::new()
-            )
+            flat_fact_to_dlir(flat, true, p)
         }
         AstFact::AstCanSayFact { p: q, f: f_plus } => {
             let (fact_plus_prime, mut collected) = fact_to_dlir(&*f_plus, p);
@@ -109,8 +131,9 @@ fn says_assertion_to_dlir(x: &AstSaysAssertion) -> Vec<DLIRAssertion> {
         AstAssertion::AstCondAssertion { lhs, rhs } => {
             let mut dlir_rhs = Vec::new();
             for f in rhs {
-                let flat = flat_fact_to_dlir(&f);
-                dlir_rhs.push(push_prin(String::from("says_"), &x.prin, &flat));
+                let (flat, _) = flat_fact_to_dlir(&f, false, &x.prin);
+                dlir_rhs.push(push_prin(String::from("says_"),
+                    &x.prin, &flat));
             }
             let (lhs_prime, mut assertions) = fact_to_dlir(&lhs, &x.prin);
             let dlir_lhs = push_prin(String::from("says_"), &x.prin,

@@ -34,4 +34,6 @@ fn main() {
     test_emit_souffle(&String::from("test_inputs/input_file"));
     test_cons_ast(&String::from("test_inputs/test2"));
     test_emit_souffle(&String::from("test_inputs/test2"));
+    test_cons_ast(&String::from("test_inputs/test3"));
+    test_emit_souffle(&String::from("test_inputs/test3"));
 }
