@@ -49,7 +49,7 @@ program
 // Lexer
 //-----------------------------------------------------------------------------
 DIGIT: [0-9];
-IDSTARTCHAR: [a-zA-Z];
+IDSTARTCHAR: [a-zA-Z"];
 IDCHAR
     : IDSTARTCHAR
     | DIGIT

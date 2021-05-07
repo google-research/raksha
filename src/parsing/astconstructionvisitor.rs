@@ -1,12 +1,12 @@
 // try blocks are used in antlr4-rust
 #![feature(try_blocks)]
-use crate::parsing::authlogiclexer::*;
-use crate::parsing::authlogicparser::*;
+use crate::parsing::antlr_gen::authlogiclexer::*;
+use crate::parsing::antlr_gen::authlogicparser::*;
 use antlr_rust::tree::{ParseTree,ParseTreeVisitor};
 use antlr_rust::InputStream;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use crate::ast::*;
-use crate::parsing::authlogicvisitor::AuthLogicVisitor;
+// use crate::parsing::authlogicvisitor::AuthLogicVisitor;
 
 // parse_program is the only public interface to the parser. It produces an AST
 // tree rooted with a program node when given the textual representation of a
