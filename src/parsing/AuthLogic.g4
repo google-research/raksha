@@ -54,6 +54,7 @@ IDCHAR
     : IDSTARTCHAR
     | DIGIT
     | '_'
+    | '"' // for writing constants
     ;
 
 SAYS

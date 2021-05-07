@@ -2,11 +2,11 @@ use std::collections::HashSet;
 use crate::ast::*;
 use crate::datalog_ir::*;
 
-pub struct SouffleEmitter<'a> {
-    decls: HashSet<&'a AstPredicate>,
+pub struct SouffleEmitter {
+    decls: HashSet<AstPredicate>,
 }
 
-impl<'a> SouffleEmitter<'a> {
+impl<'a> SouffleEmitter {
     // This is the only public method of the souffle emitter. When given
     // A Datalog IR (DLIR) program, it produces text for Souffle.
     pub fn emit_program(p: &DLIRProgram) -> String {
@@ -18,12 +18,29 @@ impl<'a> SouffleEmitter<'a> {
         text
     }
 
-    fn new() -> SouffleEmitter<'a> {
+    fn new() -> SouffleEmitter {
         SouffleEmitter { decls: HashSet::new() }
     }
 
+    // This function produces a normalized version of predicates to
+    // be used when generating declarations of the predicates. It replaces
+    // argument names with generic numbered ones. It is applied
+    // to predicates before they are added to the set of declarations so that
+    // there are no duplicate delcarations (which would otherwise happen
+    // whenever a predicate is referenced more than once with different
+    // arguments)
+    fn pred_to_declaration(p: &'a AstPredicate) -> AstPredicate {
+        AstPredicate {
+            name: p.name.clone(), 
+            args: (0..p.args.len())
+                .map(|i| String::from("x") + &i.to_string())
+                .collect()
+        }
+    }
+
     fn emit_pred(&mut self, p: &'a AstPredicate) -> String {
-        self.decls.insert(p);
+        let decl = SouffleEmitter::pred_to_declaration(p);
+        self.decls.insert(decl);
         let mut ret = String::new();
         ret += &p.name;
         ret += "(";
