@@ -5,3 +5,4 @@ src/parsing/antlr_gen/authlogiclexer.rs
 src/parsing/antlr_gen/authlogiclistener.rs
 src/parsing/antlr_gen/authlogicparser.rs
 src/parsing/antlr_gen/authlogicvisitor.rs
+test_outputs/**
