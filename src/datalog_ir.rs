@@ -12,5 +12,6 @@ pub enum DLIRAssertion {
 
 #[derive(Clone)]
 pub struct DLIRProgram {
-    pub assertions: Vec<DLIRAssertion>
+    pub assertions: Vec<DLIRAssertion>,
+    pub outputs: Vec<String>,
 }

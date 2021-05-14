@@ -2,6 +2,9 @@ use std::collections::HashSet;
 use crate::ast::*;
 use crate::datalog_ir::*;
 
+// TODO this was written by a someone new to rust and should be
+// made a bit more idiomatic.
+
 pub struct SouffleEmitter {
     decls: HashSet<AstPredicate>,
 }
@@ -15,6 +18,7 @@ impl<'a> SouffleEmitter {
         let mut text = emitter.emit_declarations();
         text += "\r\n";
         text += &body;
+        text += &emitter.emit_outputs(p);
         text
     }
 
@@ -113,6 +117,13 @@ impl<'a> SouffleEmitter {
             ret += "\r\n";
         }
         ret
+    }
+
+    fn emit_outputs(&self, p: &'a DLIRProgram) -> String {
+        p.outputs.iter()
+            .map(|o| String::from(".output ") + &o)
+            .collect::<Vec<String>>()
+            .join("\r\n")
     }
 
 }

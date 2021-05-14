@@ -1,10 +1,7 @@
 use crate::ast::*;
 use crate::datalog_ir::*;
 
-// TODO give a comment that explains:
-//  - how the overall translation works
-//  - that its implementation favors safety/generality over performance
-
+// TODO give a comment that explains how the overall translation works
 
 // Note that this puts args_ on the front of the list of arguments because
 // this is the conveninet way for it to work in the contexts in which it
@@ -209,12 +206,13 @@ impl LoweringToDatalogPass {
             .iter()
             .map(|query| self.query_to_dlir(&query))
             .collect();
+        let outs = prog.queries.iter().map(|q| q.name.clone()).collect();
         let dummy_assertion = DLIRAssertion::DLIRFactAssertion {
             p: LoweringToDatalogPass::dummy_fact()
         };
         dlir_assertions.append(&mut dlir_queries);
         dlir_assertions.push(dummy_assertion);
-        DLIRProgram { assertions: dlir_assertions }
+        DLIRProgram { assertions: dlir_assertions, outputs: outs }
     }
 }
 
