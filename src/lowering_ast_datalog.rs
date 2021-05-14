@@ -145,7 +145,7 @@ impl LoweringToDatalogPass {
             }
         }
     }
-    
+
     fn says_assertion_to_dlir(&mut self, x: &AstSaysAssertion) -> Vec<DLIRAssertion> {
         match &x.assertion {
             AstAssertion::AstFactAssertion { f } => {
@@ -172,13 +172,48 @@ impl LoweringToDatalogPass {
             }
         }
     }
+
+    // This can't be a const because Strings (by contrast to &str's) can't be
+    // constructed in consts
+    fn dummy_fact() -> AstPredicate {
+        AstPredicate {
+            name: "grounded_dummy".to_string(),
+            args: vec!["\"dummy_var\"".to_string()]
+        }
+    }
+
+    fn query_to_dlir(&mut self, query: &AstQuery) -> DLIRAssertion {
+        // the assertions that are normally generated during the translation
+        // from facts to dlir facts are not used for queries
+        let (mut main_fact, _) = self.fact_to_dlir(&query.fact,
+                                                   &query.principal);
+        let main_fact = push_prin(String::from("says_"), &query.principal,
+                                         &main_fact);
+        let lhs = AstPredicate {
+            name: query.name.clone(),
+            args: vec![String::from("\"dummy_var\"")]
+        };
+        DLIRAssertion::DLIRCondAssertion {
+            lhs: lhs,
+            rhs: vec![main_fact, LoweringToDatalogPass::dummy_fact()]
+        }
+    }
     
     fn prog_to_dlir(&mut self, prog: &AstProgram) -> DLIRProgram {
-        let mut dlir_assertions = Vec::new();
-        for assert in &prog.assertions {
-            let mut dlir_assert = self.says_assertion_to_dlir(&assert);
-            dlir_assertions.append(&mut dlir_assert);
-        }
+        let mut dlir_assertions: Vec<DLIRAssertion> = prog.assertions
+            .iter()
+            .map(|assert| self.says_assertion_to_dlir(&assert))
+            .flatten()
+            .collect();
+        let mut dlir_queries: Vec<DLIRAssertion> = prog.queries
+            .iter()
+            .map(|query| self.query_to_dlir(&query))
+            .collect();
+        let dummy_assertion = DLIRAssertion::DLIRFactAssertion {
+            p: LoweringToDatalogPass::dummy_fact()
+        };
+        dlir_assertions.append(&mut dlir_queries);
+        dlir_assertions.push(dummy_assertion);
         DLIRProgram { assertions: dlir_assertions }
     }
 }

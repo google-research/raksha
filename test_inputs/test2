@@ -1,2 +1,4 @@
 "prin1" says "prin2" canSay foo(thing_x) :- baz(thing_x).
+"prin2" says foo("bar").
 "prin1" says baz("bar").
+q1 = query "prin1" says foo("bar")?

@@ -15,9 +15,9 @@ predicate
     ;
 
 verbphrase
-        // XXX the parser for this syntax does not fully work,
-        // but it also does not increase expressiveness (other than 
-        // superficially / for convenience).
+    // NOTE the parser for this syntax does not fully work,
+    // but it also does not increase expressiveness (other than 
+    // superficially / for convenience).
     : predicate #predphrase 
     | CANACTAS principal #actsAsPhrase
     ;
@@ -41,8 +41,12 @@ saysAssertion
     : principal SAYS assertion
     ;
 
+query
+    : ID ' =' QUERY principal SAYS fact '?'
+    ;
+
 program
-    : (saysAssertion NEWLINE)+
+    : ((saysAssertion | query) NEWLINE)+
     ;
 
 //-----------------------------------------------------------------------------
@@ -55,6 +59,10 @@ IDCHAR
     | DIGIT
     | '_'
     | '"' // for writing constants
+    ;
+
+QUERY
+    : ' query '
     ;
 
 SAYS

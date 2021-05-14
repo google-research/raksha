@@ -39,8 +39,8 @@ pub enum AstVerbPhrase {
 
 #[derive(Debug, Clone)]
 pub enum AstFlatFact {
-    AstPrinFact {p: AstPrincipal, v: AstVerbPhrase },
-    AstPredFact {p: AstPredicate }
+    AstPrinFact { p: AstPrincipal, v: AstVerbPhrase },
+    AstPredFact { p: AstPredicate }
 }
 
 #[derive(Debug, Clone)]
@@ -62,6 +62,15 @@ pub struct AstSaysAssertion {
 }
 
 #[derive(Debug, Clone)]
-pub struct AstProgram {
-    pub assertions: Vec<AstSaysAssertion>
+pub struct AstQuery {
+    pub name: String,
+    pub principal: AstPrincipal,
+    pub fact: AstFact
 }
+
+#[derive(Debug, Clone)]
+pub struct AstProgram {
+    pub assertions: Vec<AstSaysAssertion>,
+    pub queries: Vec<AstQuery>
+}
+

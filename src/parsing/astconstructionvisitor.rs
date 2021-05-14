@@ -112,8 +112,7 @@ fn construct_can_say_fact(ctx: &CanSayFactContext) -> AstFact {
     AstFact::AstCanSayFact { p: prin, f: Box::new(fact) }
 }
 
-fn construct_assertion(ctx: &AssertionContextAll)
-    -> AstAssertion {
+fn construct_assertion(ctx: &AssertionContextAll) -> AstAssertion {
         match ctx {
             AssertionContextAll::FactAssertionContext(fctx) => {
                 construct_fact_assertion(fctx)
@@ -142,11 +141,17 @@ fn construct_hornclause(ctx: &HornClauseAssertionContext)
         AstAssertion::AstCondAssertion { lhs, rhs }
 }
 
-fn construct_says_assertion(ctx: &SaysAssertionContext)
-    -> AstSaysAssertion {
-        let prin_ = construct_principal(&ctx.principal().unwrap());
-        let assertion_ = construct_assertion(&ctx.assertion().unwrap());
-        AstSaysAssertion { prin: prin_, assertion: assertion_ }
+fn construct_says_assertion(ctx: &SaysAssertionContext) -> AstSaysAssertion {
+        let prin = construct_principal(&ctx.principal().unwrap());
+        let assertion = construct_assertion(&ctx.assertion().unwrap());
+        AstSaysAssertion { prin, assertion }
+}
+
+fn construct_query(ctx: &QueryContext) -> AstQuery {
+    let name = ctx.ID().unwrap().get_text();
+    let principal = construct_principal(&ctx.principal().unwrap());
+    let fact = construct_fact(&ctx.fact().unwrap());
+    AstQuery { name, principal, fact }
 }
 
 fn construct_program(ctx: &ProgramContext) -> AstProgram {
@@ -154,5 +159,9 @@ fn construct_program(ctx: &ProgramContext) -> AstProgram {
     for assertion_ctx in ctx.saysAssertion_all() {
         assertions.push(construct_says_assertion(&assertion_ctx));
     }
-    AstProgram { assertions }
+    let mut queries = Vec::new();
+    for query_ctx in ctx.query_all() {
+        queries.push(construct_query(&query_ctx));
+    }
+    AstProgram { assertions, queries }
 }
