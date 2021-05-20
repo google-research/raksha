@@ -40,7 +40,9 @@ pub fn run_souffle(filename: &String, outdir: &String) {
         .arg(&filename)
         .arg(&format!("-D{}/", outdir))
         .spawn()
-        .expect("had an error in run_souffle()");
+        .expect("had an error in run_souffle()")
+        .wait_with_output()
+        .expect("had an error with souffle outputs");
 }
 
 // Returns true if the contents of a file are empty. This is used
