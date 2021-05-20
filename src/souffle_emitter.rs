@@ -2,9 +2,6 @@ use std::collections::HashSet;
 use crate::ast::*;
 use crate::datalog_ir::*;
 
-// TODO this was written by a someone new to rust and should be
-// made a bit more idiomatic.
-
 pub struct SouffleEmitter {
     decls: HashSet<AstPredicate>,
 }
@@ -14,12 +11,15 @@ impl<'a> SouffleEmitter {
     // A Datalog IR (DLIR) program, it produces text for Souffle.
     pub fn emit_program(p: &DLIRProgram) -> String {
         let mut emitter = SouffleEmitter::new();
+        // It is important to generate the body first in this case
+        // because the declarations are populated by side-effect while
+        // generating the body.
         let body = emitter.emit_program_body(p);
-        let mut text = emitter.emit_declarations();
-        text += "\r\n";
-        text += &body;
-        text += &emitter.emit_outputs(p);
-        text
+        vec![
+            emitter.emit_declarations(),
+            body,
+            emitter.emit_outputs(p)
+        ].join("\r\n")
     }
 
     fn new() -> SouffleEmitter {
@@ -45,20 +45,8 @@ impl<'a> SouffleEmitter {
     fn emit_pred(&mut self, p: &'a AstPredicate) -> String {
         let decl = SouffleEmitter::pred_to_declaration(p);
         self.decls.insert(decl);
-        let mut ret = String::new();
-        ret += &p.name;
-        ret += "(";
-        let mut first_arg_yet = false;
-        for arg in &p.args {
-            if !first_arg_yet {
-                first_arg_yet = true;
-            } else {
-                ret += ", ";
-            }
-            ret += &arg;
-        }
-        ret += ")";
-        ret
+        format!("{}({})", &p.name,
+            p.args.join(", "))
     }
 
     fn emit_assertion(&mut self, a: &'a DLIRAssertion) -> String {
@@ -67,56 +55,34 @@ impl<'a> SouffleEmitter {
                 self.emit_pred(p) + "."
             }
             DLIRAssertion::DLIRCondAssertion { lhs, rhs } => {
-                let mut ret = self.emit_pred(lhs) + " :- ";
-                let mut first_arg_yet = false;
-                for p in rhs {
-                    if !first_arg_yet {
-                        first_arg_yet = true;
-                    } else {
-                        ret += ", ";
-                    }
-                    ret += &(self.emit_pred(p));
-                }
-                ret += ".";
-                ret
+                format!("{} :- {}.",
+                        self.emit_pred(lhs),
+                        rhs.iter()
+                            .map(|ast_pred| self.emit_pred(ast_pred))
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    )
             }
         }
     }
 
     fn emit_program_body(&mut self, p: &'a DLIRProgram) -> String {
-        let mut ret = "".to_owned();
-        for assertion in &p.assertions {
-            ret += &self.emit_assertion(&assertion);
-            ret += "\r\n";
-        }
-        ret
+        p.assertions.iter()
+            .map(|x| self.emit_assertion(&x))
+            .collect::<Vec<_>>()
+            .join("\r\n")
     }
 
     fn emit_decl(pred: &'a AstPredicate) -> String {
-        let mut ret = ".decl ".to_owned();
-        ret += &pred.name;
-        ret += "(";
-        let mut first_arg_yet = false;
-        for arg in &pred.args {
-            if !first_arg_yet {
-                first_arg_yet = true;
-            } else {
-                ret += ", ";
-            }
-            ret += &arg;
-            ret += ": symbol";
-        }
-        ret += ")";
-        ret
+        format!(".decl {}({})", &pred.name,
+            &pred.args.join(": symbol, "))
     }
 
     fn emit_declarations(&self) -> String {
-        let mut ret = String::new();
-        for decl in &self.decls {
-            ret += &SouffleEmitter::emit_decl(decl);
-            ret += "\r\n";
-        }
-        ret
+        self.decls.iter()
+            .map(|x| SouffleEmitter::emit_decl(x))
+            .collect::<Vec<_>>()
+            .join("\r\n")
     }
 
     fn emit_outputs(&self, p: &'a DLIRProgram) -> String {
