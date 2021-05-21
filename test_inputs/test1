@@ -1,2 +1,0 @@
-"somePrin" says bar(thing_x) :- other(thing_x).
-"somePrin" says other("foo").

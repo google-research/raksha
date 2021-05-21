@@ -1,0 +1,21 @@
+"prin1" says "prin2" canSay unconditionallyDelegatedFact(anyX) :- grounded(anyX).
+"prin1" says "prin2" canSay conditionallyDelegated(anyX) :- grounded(anyX), someCondition(anyX).
+"prin1" says undelegatedFact(anyX) :- anotherCondition(anyX).
+"prin1" says grounded("someX1").
+"prin1" says grounded("someX2").
+
+"prin2" says unconditionallyDelegatedFact("someX1").
+q_uncond1_t = query "prin1" says unconditionallyDelegatedFact("someX1")?
+q_uncond2_f = query "prin1" says unconditionallyDelegatedFact("someX2")?
+
+"prin2" says someCondition("someX1").
+"prin1" says someCondition("someX2").
+"prin2" says conditionallyDelegated("someX1").
+"prin2" says conditionallyDelegated("someX2").
+q_cond1_f = query "prin1" says conditionallyDelegated("someX1")?
+q_cond2_t = query "prin1" says conditionallyDelegated("someX2")?
+
+"prin1" says anotherCondition("someX1").
+"prin2" says anotherCondition("someX2").
+q_undel1_t = query "prin1" says undelegatedFact("someX1")?
+q_undel2_f = query "prin1" says undelegatedFact("someX2")?

@@ -1,4 +1,3 @@
-
 #[cfg(test)]
 mod tests {
     use crate::souffle_interface::*;
@@ -38,12 +37,30 @@ mod tests {
     }
 
     #[test]
-    fn test_2() {
-        run_query_test(QueryTest { 
-            filename: "test2",
-            query_expects: vec!(("q1", true), ("q2", false))
+    fn test_conditions() {
+        run_query_test(QueryTest {
+            filename: "conditions",
+            query_expects: vec!(
+                ("q_prin1_fact1", true),
+                ("q_prin1_fact2", false),
+                ("q_prin2_fact1", false)
+            )
         });
     }
 
+    #[test]
+    fn test_delegations() {
+        run_query_test(QueryTest {
+            filename: "delegations",
+            query_expects: vec!(
+                ("q_uncond1_t", true),
+                ("q_uncond2_f", false),
+                ("q_cond1_f", false),
+                ("q_cond2_t", true),
+                ("q_undel1_t", true),
+                ("q_undel2_f", false)
+            )
+        });
+    }
 
 }
