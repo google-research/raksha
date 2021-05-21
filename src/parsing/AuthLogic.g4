@@ -21,9 +21,10 @@ predicate
     ;
 
 verbphrase
-    // NOTE the parser for this syntax does not fully work,
-    // but it also does not increase expressiveness (other than 
-    // superficially / for convenience).
+    // It might look like (principal predicate(<args>)) will
+    // work the same as (predicate(principal, <args>)), but it does
+    // not exactly. Expressions of the form (principal predicate(args))
+    // can be passed to other principals using canActAs.
     : predicate #predphrase 
     | CANACTAS principal #actsAsPhrase
     ;
@@ -70,7 +71,7 @@ ID : ('"')? [a-zA-Z] [_a-zA-Z0-9]* ('"')?;
 // identifiers without quotes are variables
 
 WHITESPACE_IGNORE
-    : [ \r\t\n]+    -> skip
+    : [ \r\t\n]+ -> skip
     ;
 
 COMMENT_SINGLE

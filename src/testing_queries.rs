@@ -64,4 +64,15 @@ mod tests {
         });
     }
 
+    #[test]
+    fn test_canactas() {
+        run_query_test(QueryTest {
+            filename: "canActAs",
+            query_expects: vec!(
+                ("q_chicken", true),
+                ("q_ketchup", false)
+            )
+        });
+    }
+
 }

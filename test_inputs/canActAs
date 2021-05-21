@@ -1,0 +1,49 @@
+// soupExpert is a principal that represents a role.
+// prin1 specifies a policy for when another principal can occupy
+// this role.
+"prin1" says prinX canActAs "soupExpert" :-
+    prinX hasCertification("soupsmithing").
+
+// prin1 grants soupExperts the privilege to grant any other object
+// the ability to occupy the "soup" role.
+"prin1" says prinX canSay objectX canActAs "soup" :-
+    prinX canActAs "soupExpert",
+    grounded(objectX), grounded(prinX).
+
+// Note that, canSay does not act as a delegation on its own. It merely
+// passes *properties* from one principal to the other. So the following
+// commented out line would not cause prin1 to delegate to principals
+// that act as soupExperts:
+//
+// "prin1" says "soupExpert" canSay objectX canActAs "soup" :- 
+//      grounded(objectX).
+
+// prin1 delegates to certificate authority to produce the needed
+// credentials to act as a soup expert.
+"prin1" says "nationalInstituteOfSoupChefs" 
+    canSay prinX hasCertification("soupsmithing") :-
+        grounded(prinX).
+
+// prin1 specifies attributes of soup (that are applied
+// to any principal that occupies the soup role).
+"prin1" says "soup" hasAttribute("liquid").
+"prin1" says "soup" hasAttribute("aSubstantialMeal").
+
+// prin2, a credentialed soup expert allows chickenSoup to be
+// considered soup.
+"nationalInstituteOfSoupChefs" says
+    "prin2" hasCertification("soupsmithing").
+"prin2" says "chickenSoup" canActAs "soup".
+
+// prin3 does not have the needed credential in soupsmithing,
+// so this spurious claim is ignored by prin1
+"prin3" says "ketchup" canActAs "soup".
+
+// This is boilerplate that we can't avoid:
+"prin1" says grounded("chickenSoup").
+"prin1" says grounded("ketchup").
+"prin1" says grounded("prin2").
+"prin1" says grounded("prin3").
+
+q_chicken = query "prin1" says "chickenSoup" hasAttribute("aSubstantialMeal")?
+q_ketchup = query "prin1" says "ketchup" hasAttribute("aSubstantialMeal")?
