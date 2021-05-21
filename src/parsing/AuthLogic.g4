@@ -1,5 +1,11 @@
 grammar AuthLogic;
 
+// Note: when changing this file, errors thrown by antlr will not
+// be gracefully passed to cargo because errors in build scripts are 
+// suppressed. Instead, the rust files in antlr_gen will remain unchanged.
+// You can try to unsurpress them with "cargo build -vv", or run
+// the antlr command that build.rs runs manually.
+
 //-----------------------------------------------------------------------------
 // Parser
 //-----------------------------------------------------------------------------
@@ -11,7 +17,7 @@ principal
     ;
 
 predicate
-    : ID '(' ID (', ' ID)* ')'
+    : ID '(' ID (',' ID)* ')'
     ;
 
 verbphrase
@@ -34,7 +40,7 @@ fact
 
 assertion
     : fact '.' #factAssertion
-    | fact ' :- ' flatFact (', ' flatFact )* '.' #hornClauseAssertion
+    | fact ':-' flatFact (',' flatFact )* '.' #hornClauseAssertion
     ;
 
 saysAssertion
@@ -42,45 +48,35 @@ saysAssertion
     ;
 
 query
-    : ID ' =' QUERY principal SAYS fact '?'
+    : ID '=' QUERY principal SAYS fact '?'
     ;
 
 program
-    : ((saysAssertion | query) NEWLINE)+
+    : ((saysAssertion | query))+
     ;
 
 //-----------------------------------------------------------------------------
 // Lexer
 //-----------------------------------------------------------------------------
-DIGIT: [0-9];
-IDSTARTCHAR: [a-zA-Z"];
-IDCHAR
-    : IDSTARTCHAR
-    | DIGIT
-    | '_'
-    | '"' // for writing constants
+
+// keywords
+QUERY: 'query' ;
+SAYS: 'says';
+CANACTAS: 'canActAs';
+CANSAY: 'canSay';
+
+ID : ('"')? [a-zA-Z] [_a-zA-Z0-9]* ('"')?;
+// identifiers wrapped in quotes are constants whereas
+// identifiers without quotes are variables
+
+WHITESPACE_IGNORE
+    : [ \r\t\n]+    -> skip
     ;
 
-QUERY
-    : ' query '
+COMMENT_SINGLE
+    : '//' ~[\r\n]* '\r'? '\n' -> skip
     ;
 
-SAYS
-    : ' says '
+COMMENT_MULTI
+    : '/*' .*? '*/' -> skip
     ;
-
-CANACTAS
-    : ' canActAs '
-    ;
-
-CANSAY
-    : ' canSay '
-    ;
-
-ID
-    : IDSTARTCHAR (IDCHAR)*
-    ;
-
-//TODO a real version would catch mis-uses of keywords.
-
-NEWLINE : [\r\n]+ ;

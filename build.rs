@@ -56,6 +56,4 @@ fn main() {
     run_antlr_on("AuthLogic", &antlr_path);
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=antlr4rust.jar");
-
-    
 }

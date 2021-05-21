@@ -1,5 +1,10 @@
-"prin1" says "prin2" canSay unconditionallyDelegatedFact(anyX) :- grounded(anyX).
-"prin1" says "prin2" canSay conditionallyDelegated(anyX) :- grounded(anyX), someCondition(anyX).
+// prin1 delegates to prin2 about uDF for any variable
+"prin1" says "prin2" canSay unconditionallyDelegatedFact(anyX) :-
+    grounded(anyX).
+// prin1 delegates to prin2 about cD only if prin1 believes sC
+"prin1" says "prin2" canSay conditionallyDelegated(anyX) :-
+    grounded(anyX), someCondition(anyX).
+// prin1 believes uF if aC, but does not delegate uF
 "prin1" says undelegatedFact(anyX) :- anotherCondition(anyX).
 "prin1" says grounded("someX1").
 "prin1" says grounded("someX2").

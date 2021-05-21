@@ -16,6 +16,7 @@ mod tests {
     }
     
     fn run_query_test(t: QueryTest) {
+        clean_test_dir();
         input_to_souffle_file(&t.filename.to_string(),
             &"test_inputs".to_string(), &"test_outputs".to_string());
         run_souffle(&format!("test_outputs/{}.dl", t.filename),
