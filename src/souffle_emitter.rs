@@ -15,11 +15,9 @@ impl<'a> SouffleEmitter {
         // because the declarations are populated by side-effect while
         // generating the body.
         let body = emitter.emit_program_body(p);
-        vec![
-            emitter.emit_declarations(),
-            body,
-            emitter.emit_outputs(p)
-        ].join("\r\n")
+        let outputs = emitter.emit_outputs(p);
+        let decls = emitter.emit_declarations();
+        vec![decls, body, outputs].join("\r\n")
     }
 
     fn new() -> SouffleEmitter {
@@ -74,8 +72,13 @@ impl<'a> SouffleEmitter {
     }
 
     fn emit_decl(pred: &'a AstPredicate) -> String {
-        format!(".decl {}({})", &pred.name,
-            &pred.args.join(": symbol, "))
+        format!(".decl {}({})", 
+                &pred.name,
+                &pred.args.iter()
+                    .map(|x| format!("{}: symbol", x))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+        )
     }
 
     fn emit_declarations(&self) -> String {
