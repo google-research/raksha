@@ -1,8 +1,60 @@
 use crate::ast::*;
 use crate::datalog_ir::*;
 
-// TODO give a comment that explains how the overall translation works
 
+// This translation is essentially the same as the one given in Section 7 of
+// the SecPal paper "SecPAL: Design and Semantics of a Decentralized
+// Authorization Language" https://www.pure.ed.ac.uk/ws/files/17662538/jcs_final.pdf.
+// See that section for a formal and completely general description of this 
+// translation. This comment gives a more intuitive description using a few 
+// examples at the expense of losing some generality.
+//
+// First, predicates with modifiers like "says", "canSay", and "actAs" are
+// converted into normal predicates by appending these modifiers to the
+// predicate name and moving the principals referenced by these predicates
+// into the arguments of the predicates. So for example
+//         A says B canSay foo(x, y)
+// becomes
+//         says_canSay_foo(A, B, x, y)
+// The rest of this comment ignores this part of the translation for the sake
+// of readability.
+//
+// Next we need to add a principal for the conditions in assertions. To prove
+// an assertion like 
+//         "A says fact(x) :- fact1(x), fact2(x).
+// we need to show that *A believes* both fact1(x) and fact2(x). So we prepend
+// predicates on the RHS in "A says", producing the new assertion:
+//         A says fact(x) :- A says fact1(x), A says fact2(x)
+// (where says is actually prepended to the names of predicates and A becomes 
+// an extra argument as above).
+//
+//  Next we need to translate delegations which should pass beliefs from one
+//  principal to another. For example, if we have
+//      A says B canSay fact(x) :- fact1(x)
+//  we do the usual translation resulting in
+//      (1) A says B canSay fact(x) :- A says fact1(x)
+//  but we also add the additional rule 
+//      (2) A says fact(x) :- x says fact(x), A says x canSay fact(x)
+//  where x is a fresh variable.
+//  The result is that rule (1) gives the condition for delegation
+//  and rule (2) passes beliefs from B to A when the condition from (1) is met.
+// 
+// Finally we need to translate canActAs which should pass properties from
+// one principal to another:
+// Assertions of either the form 
+//      A says B canActAs C :- ...
+// or
+//      A says B <anyPredicate(...)> :-
+// are claims by A that B has a property (where canActAs is just a special
+// case). Syntactically these are both treated as "A says B <verbphrase>" with
+// different instances of <verbphrase>. Whenever some other principal can act 
+// as B, we want to pass these properties from B to that other principal.
+// (For the special case where this property is B canActAs C, this essentially
+// makes canActAs transitive). In either case, we add an additional rule
+//    A says x verbphrase <- A says x canActAs B, A says B verbphrase
+// which will add "verbphrase" as a property of D whenever we can prove
+// the assertion "A says D canActAsB".
+//
 // Note that this puts args_ on the front of the list of arguments because
 // this is the conveninet way for it to work in the contexts in which it
 // is used.
