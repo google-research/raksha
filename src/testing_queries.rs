@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod tests {
+mod test {
     use crate::souffle_interface::*;
     use std::process::Command;
 

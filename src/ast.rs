@@ -1,4 +1,6 @@
-#[derive(Debug, Clone)]
+use serde::*;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AstPrincipal {
     pub name: String
 }
@@ -6,7 +8,7 @@ pub struct AstPrincipal {
 // Hash and Eq are needed so that AstPred can be used in a HashSet in
 // SouffleEmitter. The derive strategy for Eq does not work, so it is
 // implemented manually.
-#[derive(Debug, Hash, Clone)]
+#[derive(Debug, Hash, Clone, Serialize, Deserialize)]
 pub struct AstPredicate {
     pub name: String,
     pub args: Vec<String>
@@ -31,44 +33,44 @@ impl PartialEq for AstPredicate {
 // See https://doc.rust-lang.org/std/cmp/trait.Eq.html
 impl Eq for AstPredicate {}
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AstVerbPhrase {
     AstPredPhrase { p: AstPredicate },
     AstCanActPhrase { p: AstPrincipal }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AstFlatFact {
     AstPrinFact { p: AstPrincipal, v: AstVerbPhrase },
     AstPredFact { p: AstPredicate }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AstFact {
     AstFlatFactFact { f: AstFlatFact },
     AstCanSayFact { p: AstPrincipal, f: Box<AstFact> }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AstAssertion {
     AstFactAssertion { f: AstFact },
     AstCondAssertion { lhs: AstFact, rhs: Vec<AstFlatFact> }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AstSaysAssertion {
     pub prin: AstPrincipal,
     pub assertion: AstAssertion
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AstQuery {
     pub name: String,
     pub principal: AstPrincipal,
     pub fact: AstFact
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AstProgram {
     pub assertions: Vec<AstSaysAssertion>,
     pub queries: Vec<AstQuery>
