@@ -3,15 +3,15 @@ use std::fs::File;
 use tink_core::{keyset, TinkError};
 use std::io::{Read,Write, Error};
 
-fn serialize_claim(claim: &AstSaysAssertion)-> Vec<u8> {
+fn serialize_claim(claim: &Vec<AstAssertion>)-> Vec<u8> {
     bincode::serialize(&claim).unwrap()
 }
 
-fn deserialize_claim(claim_bin: Vec<u8>)-> AstSaysAssertion {
+fn deserialize_claim(claim_bin: Vec<u8>)-> Vec<AstAssertion> {
     bincode::deserialize(&claim_bin[..]).unwrap()
 }
 
-pub fn serialize_to_file(claim: &AstSaysAssertion,
+pub fn serialize_to_file(claim: &Vec<AstAssertion>,
                          filename: &String) -> Result<(), Error> {
     let mut file = File::create(filename)?;
     file.write_all(&serialize_claim(claim))?;
@@ -19,7 +19,7 @@ pub fn serialize_to_file(claim: &AstSaysAssertion,
 }
 
 pub fn deserialize_from_file(filename: &String)
-    -> Result<AstSaysAssertion, Error> {
+    -> Result<Vec<AstAssertion>, Error> {
     let mut file = File::open(filename)?;
     let mut contents = Vec::new();
     file.read_to_end(&mut contents)?;
@@ -50,7 +50,7 @@ pub fn store_new_keypair_cleartext(pub_key_file: &String,
 }
 
 pub fn sign_claim(priv_key_file: &String, signature_file: &String, 
-        claim: &AstSaysAssertion) {
+        claim: &Vec<AstAssertion>) {
     // read private key from file
     let prv_file = File::open(priv_key_file).unwrap();
     let mut json_reader = keyset::JsonReader::new(prv_file);
@@ -67,7 +67,7 @@ pub fn sign_claim(priv_key_file: &String, signature_file: &String,
 }
 
 pub fn verify_claim(pub_key_file: &String,
-        signature_file: &String, claim: &AstSaysAssertion) 
+        signature_file: &String, claim: &Vec<AstAssertion>) 
             -> Result<(), TinkError> {
     // read pub key from file
     let pub_file = File::open(pub_key_file).unwrap();

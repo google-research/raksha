@@ -1,13 +1,22 @@
 use crate::ast::*;
 use crate::datalog_ir::*;
 
-
-// This translation is essentially the same as the one given in Section 7 of
-// the SecPal paper "SecPAL: Design and Semantics of a Decentralized
-// Authorization Language" https://www.pure.ed.ac.uk/ws/files/17662538/jcs_final.pdf.
-// See that section for a formal and completely general description of this 
-// translation. This comment gives a more intuitive description using a few 
-// examples at the expense of losing some generality.
+// Asside from queries, this translation is quite similar to the one given in 
+// Section 7 of the SecPal paper "SecPAL: Design and Semantics of a Decentralized
+// Authorization Language"
+// https://www.pure.ed.ac.uk/ws/files/17662538/jcs_final.pdf. See that section
+// for a formal and completely general description of this translation. This
+// comment gives a more intuitive description using a few examples at the
+// expense of losing some generality.
+//
+// This language also supports grouping assertions together as in:
+//      Prin says { assertion_1, ..., assertion_n }
+// and these are simply "unrolled" to
+//      Prin says assertion_1.
+//      ...
+//      Prin says assertion_n.
+//
+// *** Translation of assertions ***
 //
 // First, predicates with modifiers like "says", "canSay", and "actAs" are
 // converted into normal predicates by appending these modifiers to the
@@ -55,6 +64,22 @@ use crate::datalog_ir::*;
 // which will add "verbphrase" as a property of D whenever we can prove
 // the assertion "A says D canActAsB".
 //
+// *** Translation of Queries ***
+// Neither Souffle nor SecPal support queries, but this language does.
+// Queries check of a single unconditional assertion is true. A query of
+// the form:
+//
+//      Q_NAME = query ASSERTION(<ARGS>) ?
+//
+// is translated into an assertion with just one argument, and this
+// assertion is made an output, so we can simply check the CSV that
+// souffle emits as in:
+//
+//      Q_NAME("dummy_var") :- grounded("dummy_var"), ASSERTION(<ARGS>).
+//      grounded("dummy_var").
+//      .output Q_NAME
+
+
 // Note that this puts args_ on the front of the list of arguments because
 // this is the conveninet way for it to work in the contexts in which it
 // is used.
@@ -195,24 +220,33 @@ impl LoweringToDatalogPass {
         }
     }
 
-    fn says_assertion_to_dlir(&mut self, x: &AstSaysAssertion) -> Vec<DLIRAssertion> {
-        match &x.assertion {
+    fn says_assertion_to_dlir(&mut self,
+                     x: &AstSaysAssertion) -> Vec<DLIRAssertion> {
+        x.assertions.iter().map( |assertion|
+                self.says_assertion_to_dlir_inner(&x.prin, assertion)
+            ).flatten()
+            .collect()
+    }
+
+    fn says_assertion_to_dlir_inner(&mut self, speaker: &AstPrincipal,
+                    assertion: &AstAssertion) -> Vec<DLIRAssertion> {
+        match &assertion {
             AstAssertion::AstFactAssertion { f } => {
-                let (pred, mut gen_assert) = self.fact_to_dlir(&f, &x.prin);
-                let pred_prime = push_prin(String::from("says_"), &x.prin, &pred);
+                let (pred, mut gen_assert) = self.fact_to_dlir(&f, &speaker);
+                let pred_prime = push_prin(String::from("says_"), &speaker, &pred);
                 gen_assert.push(DLIRAssertion::DLIRFactAssertion { p: pred_prime });
                 gen_assert
             }
             AstAssertion::AstCondAssertion { lhs, rhs } => {
                 let mut dlir_rhs = Vec::new();
                 for f in rhs {
-                    let (flat, _) = self.flat_fact_to_dlir(&f, false, &x.prin);
+                    let (flat, _) = self.flat_fact_to_dlir(&f, false, &speaker);
                     dlir_rhs.push(push_prin(String::from("says_"),
-                        &x.prin, &flat));
+                        &speaker, &flat));
                 }
                 let (lhs_prime, mut assertions) =
-                    self.fact_to_dlir(&lhs, &x.prin);
-                let dlir_lhs = push_prin(String::from("says_"), &x.prin,
+                    self.fact_to_dlir(&lhs, &speaker);
+                let dlir_lhs = push_prin(String::from("says_"), &speaker,
                     &lhs_prime);
                 let this_assertion = DLIRAssertion::DLIRCondAssertion {
                     lhs: dlir_lhs, rhs: dlir_rhs };
@@ -220,6 +254,7 @@ impl LoweringToDatalogPass {
                 assertions
             }
         }
+
     }
 
     // This can't be a const because Strings (by contrast to &str's) can't be

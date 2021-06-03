@@ -29,6 +29,8 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
     let name_ = ctx.ID(0).unwrap().get_text();
     let mut args_ = Vec::new();
     let mut idx = 1;
+    // Note that ID_all() in the generated antlr-rust code is buggy,
+    // so rather a more idomatic iterator, "while Some(...)" is used here:
     while let Some(id) = ctx.ID(idx) {
         args_.push(id.get_text());
         idx += 1;
@@ -141,10 +143,38 @@ fn construct_hornclause(ctx: &HornClauseAssertionContext)
         AstAssertion::AstCondAssertion { lhs, rhs }
 }
 
-fn construct_says_assertion(ctx: &SaysAssertionContext) -> AstSaysAssertion {
-        let prin = construct_principal(&ctx.principal().unwrap());
-        let assertion = construct_assertion(&ctx.assertion().unwrap());
-        AstSaysAssertion { prin, assertion }
+fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
+        // let prin = construct_principal(&ctx.principal().unwrap());
+        // let assertion = construct_assertion(&ctx.assertion().unwrap());
+        // AstSaysAssertion { prin, assertion }
+        match ctx {
+            SaysAssertionContextAll::SaysSingleContext(ctxPrime) => {
+                let prin = construct_principal(&ctxPrime.principal().unwrap());
+                let assertions = vec![ construct_assertion(&ctxPrime.
+                        assertion().unwrap()) ];
+                let exportFile: Option<String> = match ctxPrime.ID() {
+                    Some(_) => { Some(ctxPrime.ID().unwrap().get_text()) }
+                    None => { None }
+                };
+                AstSaysAssertion { prin, assertions, exportFile }
+            }
+            SaysAssertionContextAll::SaysMultiContext(ctxPrime) => {
+                let prin = construct_principal(&ctxPrime.principal().unwrap());
+                let assertions:Vec<_> = (&ctxPrime).assertion_all()
+                    .iter()
+                    .map( |x| construct_assertion(x) )
+                    .collect();
+                let exportFile: Option<String> = match ctxPrime.ID() {
+                    Some(_) => { Some(ctxPrime.ID().unwrap().get_text()) }
+                    None => { None }
+                };
+                AstSaysAssertion { prin, assertions, exportFile }
+            }
+            _ => {
+                panic!("construct_says_assertion tried to build Error()");
+            }
+
+        }
 }
 
 fn construct_query(ctx: &QueryContext) -> AstQuery {

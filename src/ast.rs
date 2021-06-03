@@ -60,7 +60,8 @@ pub enum AstAssertion {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AstSaysAssertion {
     pub prin: AstPrincipal,
-    pub assertion: AstAssertion
+    pub assertions: Vec<AstAssertion>,
+    pub exportFile: Option<String>
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

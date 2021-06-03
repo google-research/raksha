@@ -45,7 +45,13 @@ assertion
     ;
 
 saysAssertion
-    : principal SAYS assertion
+    : principal SAYS assertion (EXPORT ID)? #saysSingle
+    | principal SAYS '{' assertion+ '}' (EXPORT ID)?  #saysMulti
+    ;
+
+keyBind
+    : BINDEX principal ID '.' #bindpriv
+    | BINDIM principal ID '.' #bindpub
     ;
 
 query
@@ -53,7 +59,7 @@ query
     ;
 
 program
-    : ((saysAssertion | query))+
+    : ((saysAssertion | query | keyBind))+
     ;
 
 //-----------------------------------------------------------------------------
@@ -65,6 +71,10 @@ QUERY: 'query' ;
 SAYS: 'says';
 CANACTAS: 'canActAs';
 CANSAY: 'canSay';
+EXPORT: 'exportTo';
+BINDEX: 'BindPrivKey';
+BINDIM: 'BindPubKey';
+
 
 ID : ('"')? [a-zA-Z] [_a-zA-Z0-9]* ('"')?;
 // identifiers wrapped in quotes are constants whereas

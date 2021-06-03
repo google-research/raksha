@@ -12,17 +12,14 @@ mod test {
             &"test_keys/andrew_pub.json".to_string(),
             &"test_keys/andrew_priv.json".to_string());
 
-        let test_claim1 = AstSaysAssertion{ 
-            prin: AstPrincipal { name: "Andrew".to_string() },
-            assertion: AstAssertion::AstFactAssertion {
-                f: AstFact::AstFlatFactFact { f: AstFlatFact::AstPredFact {
-                    p: AstPredicate {
-                        name: "isInLondon".to_string(),
-                        args: vec!["Highbury".to_string()]
-                    }
-                }}
-            }
-        };
+        let test_claim1 = vec![AstAssertion::AstFactAssertion {
+            f: AstFact::AstFlatFactFact { f: AstFlatFact::AstPredFact {
+                p: AstPredicate {
+                    name: "isInLondon".to_string(),
+                    args: vec!["Highbury".to_string()]
+                }
+            }}
+        }];
         
         sign_claim(
             &"test_keys/andrew_priv.json".to_string(),
@@ -37,17 +34,14 @@ mod test {
             &test_claim1
         ).is_ok());
 
-        let test_claim2 = AstSaysAssertion{ 
-            prin: AstPrincipal { name: "Andrew".to_string() },
-            assertion: AstAssertion::AstFactAssertion {
-                f: AstFact::AstFlatFactFact { f: AstFlatFact::AstPredFact {
-                    p: AstPredicate {
-                        name: "isInLondon".to_string(),
-                        args: vec!["Neptune".to_string()]
-                    }
-                }}
-            }
-        };
+        let test_claim2 = vec![AstAssertion::AstFactAssertion {
+            f: AstFact::AstFlatFactFact { f: AstFlatFact::AstPredFact {
+                p: AstPredicate {
+                    name: "isInLondon".to_string(),
+                    args: vec!["Neptune".to_string()]
+                }
+            }}
+        }];
 
         // signature check should fail
         assert!(!verify_claim(
@@ -64,17 +58,14 @@ mod test {
             &"test_keys/andrew_pub2.json".to_string(),
             &"test_keys/andrew_priv2.json".to_string());
 
-        let test_claim2 = AstSaysAssertion{ 
-            prin: AstPrincipal { name: "Andrew".to_string() },
-            assertion: AstAssertion::AstFactAssertion {
-                f: AstFact::AstFlatFactFact { f: AstFlatFact::AstPredFact {
-                    p: AstPredicate {
-                        name: "isInLondon".to_string(),
-                        args: vec!["Highbury".to_string()]
-                    }
-                }}
-            }
-        };
+        let test_claim2 = vec![AstAssertion::AstFactAssertion {
+            f: AstFact::AstFlatFactFact { f: AstFlatFact::AstPredFact {
+                p: AstPredicate {
+                    name: "isInLondon".to_string(),
+                    args: vec!["Highbury".to_string()]
+                }
+            }}
+        }];
        
         // sender
         sign_claim(
@@ -87,7 +78,6 @@ mod test {
             &test_claim2,
             &"test_outputs/claim2.obj".to_string()
         ).unwrap();
-
 
         // receiver
         let deser_claim = deserialize_from_file(
