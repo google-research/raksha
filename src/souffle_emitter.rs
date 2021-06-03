@@ -96,4 +96,3 @@ impl<'a> SouffleEmitter {
     }
 
 }
-

@@ -2,7 +2,6 @@
 mod test {
     use crate::signing::*;
     use crate::ast::*;
-    use std::process::Command;
     use tink_core::{keyset, TinkError};
 
     #[test]

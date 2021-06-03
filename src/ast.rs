@@ -1,6 +1,8 @@
 use serde::*;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+// Hash and Eq are implemented by AstPrincipal because they are used as keys
+// in HashMaps in the implementation of signature exporting
+#[derive(Debug, Hash, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct AstPrincipal {
     pub name: String
 }
@@ -61,7 +63,7 @@ pub enum AstAssertion {
 pub struct AstSaysAssertion {
     pub prin: AstPrincipal,
     pub assertions: Vec<AstAssertion>,
-    pub exportFile: Option<String>
+    pub export_file: Option<String>
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -72,8 +74,17 @@ pub struct AstQuery {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AstKeybind {
+    pub filename: String,
+    pub principal: AstPrincipal,
+    pub is_pub: bool
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AstProgram {
     pub assertions: Vec<AstSaysAssertion>,
-    pub queries: Vec<AstQuery>
+    pub queries: Vec<AstQuery>,
+    pub priv_binds: Vec<AstKeybind>,
+    pub pub_binds: Vec<AstKeybind>,
 }
 

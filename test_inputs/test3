@@ -1,5 +1,0 @@
-"prin1" says tastes_good_with("soup", "croutons").
-"prin1" says prinX canSay prinY canActAs "soup" :- is_expert_on(prinX, "soup"), is_grounded(prinY).
-"prin1" says is_expert_on("prin2", "soup").
-"prin2" says "tomato_soup" canActAs "soup".
-"prin1" says is_grounded("tomato_soup").

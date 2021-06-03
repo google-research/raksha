@@ -45,13 +45,13 @@ assertion
     ;
 
 saysAssertion
-    : principal SAYS assertion (EXPORT ID)? #saysSingle
-    | principal SAYS '{' assertion+ '}' (EXPORT ID)?  #saysMulti
+    : principal SAYS assertion (EXPORT PATH)? #saysSingle
+    | principal SAYS '{' assertion+ '}' (EXPORT PATH)?  #saysMulti
     ;
 
 keyBind
-    : BINDEX principal ID '.' #bindpriv
-    | BINDIM principal ID '.' #bindpub
+    : BINDEX principal PATH #bindpriv
+    | BINDIM principal PATH #bindpub
     ;
 
 query
@@ -76,9 +76,10 @@ BINDEX: 'BindPrivKey';
 BINDIM: 'BindPubKey';
 
 
-ID : ('"')? [a-zA-Z] [_a-zA-Z0-9]* ('"')?;
 // identifiers wrapped in quotes are constants whereas
 // identifiers without quotes are variables
+ID : ('"')? [a-zA-Z] [_a-zA-Z0-9]* ('"')?;
+PATH : [_a-zA-Z0-9/.]+;
 
 WHITESPACE_IGNORE
     : [ \r\t\n]+ -> skip

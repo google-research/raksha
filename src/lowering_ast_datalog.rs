@@ -254,7 +254,6 @@ impl LoweringToDatalogPass {
                 assertions
             }
         }
-
     }
 
     // This can't be a const because Strings (by contrast to &str's) can't be

@@ -152,11 +152,11 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
                 let prin = construct_principal(&ctxPrime.principal().unwrap());
                 let assertions = vec![ construct_assertion(&ctxPrime.
                         assertion().unwrap()) ];
-                let exportFile: Option<String> = match ctxPrime.ID() {
-                    Some(_) => { Some(ctxPrime.ID().unwrap().get_text()) }
+                let export_file: Option<String> = match ctxPrime.PATH() {
+                    Some(_) => { Some(ctxPrime.PATH().unwrap().get_text()) }
                     None => { None }
                 };
-                AstSaysAssertion { prin, assertions, exportFile }
+                AstSaysAssertion { prin, assertions, export_file }
             }
             SaysAssertionContextAll::SaysMultiContext(ctxPrime) => {
                 let prin = construct_principal(&ctxPrime.principal().unwrap());
@@ -164,11 +164,11 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
                     .iter()
                     .map( |x| construct_assertion(x) )
                     .collect();
-                let exportFile: Option<String> = match ctxPrime.ID() {
-                    Some(_) => { Some(ctxPrime.ID().unwrap().get_text()) }
+                let export_file: Option<String> = match ctxPrime.PATH() {
+                    Some(_) => { Some(ctxPrime.PATH().unwrap().get_text()) }
                     None => { None }
                 };
-                AstSaysAssertion { prin, assertions, exportFile }
+                AstSaysAssertion { prin, assertions, export_file }
             }
             _ => {
                 panic!("construct_says_assertion tried to build Error()");
@@ -184,14 +184,43 @@ fn construct_query(ctx: &QueryContext) -> AstQuery {
     AstQuery { name, principal, fact }
 }
 
+fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
+    match ctx {
+        KeyBindContextAll::BindprivContext(ctxPrime) => {
+            AstKeybind {
+                filename: ctxPrime.PATH().unwrap().get_text(),
+                principal: construct_principal(&ctxPrime.principal().unwrap()),
+                is_pub: false
+            }
+        }
+        KeyBindContextAll::BindpubContext(ctxPrime) => {
+            AstKeybind {
+                filename: ctxPrime.PATH().unwrap().get_text(),
+                principal: construct_principal(&ctxPrime.principal().unwrap()),
+                is_pub: true
+            }
+        }
+        _ => {
+            panic!("construct_keybinding tried to build Error()");
+        }
+    }
+}
+
 fn construct_program(ctx: &ProgramContext) -> AstProgram {
-    let mut assertions = Vec::new();
-    for assertion_ctx in ctx.saysAssertion_all() {
-        assertions.push(construct_says_assertion(&assertion_ctx));
+    AstProgram { 
+        assertions: ctx.saysAssertion_all().iter()
+            .map(|s| construct_says_assertion(s))
+            .collect(),
+        queries: ctx.query_all().iter()
+            .map(|q| construct_query(q))
+            .collect(),
+        priv_binds: ctx.keyBind_all().iter()
+            .map(|kb| construct_keybinding(kb))
+            .filter(|k| !k.is_pub)
+            .collect(),
+        pub_binds: ctx.keyBind_all().iter()
+            .map(|kb| construct_keybinding(kb))
+            .filter(|k| !k.is_pub)
+            .collect()
     }
-    let mut queries = Vec::new();
-    for query_ctx in ctx.query_all() {
-        queries.push(construct_query(&query_ctx));
-    }
-    AstProgram { assertions, queries }
 }

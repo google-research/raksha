@@ -6,6 +6,7 @@ use std::process::Command;
 use crate::parsing::astconstructionvisitor;
 use crate::lowering_ast_datalog::*;
 use crate::souffle_emitter::*;
+use crate::ast::*;
 
 // Given a filename containing policy code: parses it, constructs
 // an AST, translates the AST to the datalogIR, and emits a string
@@ -27,6 +28,16 @@ pub fn input_to_souffle_file(filename: &String, in_dir: &String,
     let source = fs::read_to_string(&format!("{}/{}", in_dir, filename))
         .expect("failed to read input in input_to_souffle_file");
     let prog = astconstructionvisitor::parse_program(&source[..]);
+    let dlir_prog = LoweringToDatalogPass::lower(&prog);
+    let souffle_code = SouffleEmitter::emit_program(&dlir_prog);
+    fs::write(&format!("{}/{}.dl", out_dir, filename), souffle_code)
+        .expect("failed to write output to file");
+}
+
+// Given a parsed AstProgram, this emits souffle code to a file. This is needed
+// in addition to the above function since other passes that work on the highest
+// level IR besides the one used to emit the main code.
+pub fn ast_to_souffle_file(prog: &AstProgram, filename: &String, out_dir: &String) {
     let dlir_prog = LoweringToDatalogPass::lower(&prog);
     let souffle_code = SouffleEmitter::emit_program(&dlir_prog);
     fs::write(&format!("{}/{}.dl", out_dir, filename), souffle_code)

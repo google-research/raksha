@@ -3,6 +3,8 @@ use std::fs::File;
 use tink_core::{keyset, TinkError};
 use std::io::{Read,Write, Error};
 
+// The specific choice of how serialization is done is encapsulated
+// because it is subject to change.
 fn serialize_claim(claim: &Vec<AstAssertion>)-> Vec<u8> {
     bincode::serialize(&claim).unwrap()
 }
