@@ -58,8 +58,12 @@ query
     : ID '=' QUERY principal SAYS fact '?'
     ;
 
+importAssertion
+    : IMPORT principal SAYS PATH
+    ;
+
 program
-    : ((saysAssertion | query | keyBind))+
+    : ((saysAssertion | query | keyBind | importAssertion))+
     ;
 
 //-----------------------------------------------------------------------------
@@ -71,7 +75,10 @@ QUERY: 'query' ;
 SAYS: 'says';
 CANACTAS: 'canActAs';
 CANSAY: 'canSay';
+// These are related to importing/exporting saysAssertions from other 
+// principals
 EXPORT: 'exportTo';
+IMPORT: 'import';
 BINDEX: 'BindPrivKey';
 BINDIM: 'BindPubKey';
 

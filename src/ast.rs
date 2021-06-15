@@ -81,9 +81,16 @@ pub struct AstKeybind {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AstImport {
+    pub filename: String,
+    pub principal: AstPrincipal
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AstProgram {
     pub assertions: Vec<AstSaysAssertion>,
     pub queries: Vec<AstQuery>,
+    pub imports: Vec<AstImport>,
     pub priv_binds: Vec<AstKeybind>,
     pub pub_binds: Vec<AstKeybind>,
 }

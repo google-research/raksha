@@ -206,6 +206,13 @@ fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
     }
 }
 
+fn construct_import(ctx: &ImportAssertionContext) -> AstImport {
+    AstImport {
+        principal: construct_principal(&ctx.principal().unwrap()),
+        filename: ctx.PATH().unwrap().get_text()
+    }
+}
+
 fn construct_program(ctx: &ProgramContext) -> AstProgram {
     AstProgram { 
         assertions: ctx.saysAssertion_all().iter()
@@ -214,13 +221,16 @@ fn construct_program(ctx: &ProgramContext) -> AstProgram {
         queries: ctx.query_all().iter()
             .map(|q| construct_query(q))
             .collect(),
+        imports: ctx.importAssertion_all().iter()
+            .map(|s| construct_import(s))
+            .collect(),
         priv_binds: ctx.keyBind_all().iter()
             .map(|kb| construct_keybinding(kb))
             .filter(|k| !k.is_pub)
             .collect(),
         pub_binds: ctx.keyBind_all().iter()
             .map(|kb| construct_keybinding(kb))
-            .filter(|k| !k.is_pub)
-            .collect()
+            .filter(|k| k.is_pub)
+            .collect(),
     }
 }

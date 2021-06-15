@@ -1,12 +1,12 @@
 #[cfg(test)]
-mod test {
+pub mod test {
     use crate::souffle_interface::*;
     use std::process::Command;
 
     // This gives the name of an authorization logic program in
     // test_inputs, and a vector that relates the names of queries
     // to the boolean values they should have.
-    struct QueryTest<'a> {
+    pub struct QueryTest<'a> {
         pub filename: &'a str,
         pub query_expects: Vec<(&'a str, bool)>
             // Query_expects is a vec not a HashMap because
@@ -15,8 +15,7 @@ mod test {
             // limiting dependencies is better for security/verification.
     }
     
-    fn run_query_test(t: QueryTest) {
-        clean_test_dir();
+    pub fn run_query_test(t: QueryTest) {
         input_to_souffle_file(&t.filename.to_string(),
             &"test_inputs".to_string(), &"test_outputs".to_string());
         run_souffle(&format!("test_outputs/{}.dl", t.filename),
@@ -27,7 +26,7 @@ mod test {
         }
     }
 
-    fn clean_test_dir() {
+    pub fn clean_test_dir() {
         Command::new("rm")
             .arg("-rf")
             .arg("test_outputs/*")

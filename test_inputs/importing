@@ -1,0 +1,21 @@
+// This imports the policy statement produced by
+// principal1e in test_inputs/exporting
+
+BindPubKey "principal1e" test_keys/principal1e_pub.json
+
+"principal2" says {
+    "principal1e" canSay someProposition("these_args").
+    accessGranted("these_args", "x") :- someProposition("these_args").
+    accessGranted("these_args", "y") :- otherProposition("these_args").
+}
+
+import "principal1e" test_outputs/prin1e_statement1
+
+// yes:
+q1 = query "principal2" says accessGranted("these_args", "x")?
+// no:
+q2 = query "principal2" says accessGranted("these_args", "y")?
+// yes:
+q3 = query "principal1e" says someProposition("these_args")?
+// no:
+q4 = query "principal1e" says someProposition("other_args")?
