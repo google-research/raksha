@@ -1,22 +1,12 @@
 // try blocks are used in antlr4-rust
 #![feature(try_blocks)]
 
-// This may be refactored into two crates
-
-// (1) These are about authorization logic
 mod ast;
 mod compilation_top_level;
 mod parsing;
 mod signing;
 mod souffle;
 mod test;
-
-
-// (2) these are about graphs
-mod graph_ir;
-mod low_graph_ir;
-
-// the top level parts might connect them
 
 use std::env;
 
