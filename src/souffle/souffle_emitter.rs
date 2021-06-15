@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use crate::ast::*;
-use crate::datalog_ir::*;
+use crate::souffle::datalog_ir::*;
 
 pub struct SouffleEmitter {
     decls: HashSet<AstPredicate>,

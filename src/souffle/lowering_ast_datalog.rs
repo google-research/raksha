@@ -1,5 +1,5 @@
 use crate::ast::*;
-use crate::datalog_ir::*;
+use crate::souffle::datalog_ir::*;
 
 // Asside from queries, this translation is quite similar to the one given in 
 // Section 7 of the SecPal paper "SecPAL: Design and Semantics of a Decentralized

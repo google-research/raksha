@@ -1,6 +1,6 @@
 #[cfg(test)]
 pub mod test {
-    use crate::souffle_interface::*;
+    use crate::souffle::souffle_interface::*;
     use std::process::Command;
 
     // This gives the name of an authorization logic program in

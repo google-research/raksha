@@ -4,8 +4,8 @@ use std::fs;
 use std::process::Command;
 
 use crate::parsing::astconstructionvisitor;
-use crate::lowering_ast_datalog::*;
-use crate::souffle_emitter::*;
+use crate::souffle::lowering_ast_datalog::*;
+use crate::souffle::souffle_emitter::*;
 use crate::ast::*;
 
 // Given a filename containing policy code: parses it, constructs
@@ -58,7 +58,7 @@ pub fn run_souffle(filename: &String, outdir: &String) {
 
 // Returns true if the contents of a file are empty. This is used
 // to check if queries are true. Queries are translated into souffle
-// assertions that have contain one entry if they are true and are empty
+// assertions that contain one entry if they are true and are empty
 // if they are false. These queries are emitted as CSV files by souffle.
 pub fn is_file_empty(filename: &String) -> bool {
     let contents = fs::read_to_string(filename)

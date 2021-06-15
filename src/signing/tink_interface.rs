@@ -3,8 +3,9 @@ use std::fs::File;
 use tink_core::{keyset, TinkError};
 use std::io::{Read,Write, Error};
 
-// The specific choice of how serialization is done is encapsulated
-// because it is subject to change.
+// The specific choice of how serialization is done is encapsulated because it
+// is likely to change. Binaries are brittle way of serializing objects, but
+// this was reasonable to get running and is easy to change later.
 fn serialize_claim(claim: &Vec<AstAssertion>)-> Vec<u8> {
     bincode::serialize(&claim).unwrap()
 }

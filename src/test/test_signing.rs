@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod test {
-    use crate::signing::*;
+    use crate::signing::tink_interface::*;
     use crate::ast::*;
-    use tink_core::{keyset, TinkError};
+    // use tink_core::{keyset, TinkError};
 
     #[test]
     fn test_sig_checking() {

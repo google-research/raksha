@@ -1,5 +1,5 @@
 use crate::ast::*;
-use crate::signing::*;
+use crate::signing::tink_interface::*;
 use std::collections::HashMap;
 
 

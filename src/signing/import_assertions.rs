@@ -6,8 +6,8 @@
 // If the signature checks pass, the imported assertions are added
 // to the AST.
 
-use crate::signing::*;
 use crate::ast::*;
+use crate::signing::tink_interface::*;
 use std::collections::HashMap;
 
 type BindingEnv = HashMap<AstPrincipal, String>;
@@ -38,7 +38,6 @@ fn handle_one_import(kbenv: &BindingEnv, imp: &AstImport) -> AstSaysAssertion {
 
 }
 
-
 pub fn handle_imports(ast: &AstProgram) -> AstProgram {
     let bindEnv = collect_pub_bindings(ast);
     let imported_assertions: Vec<_> = ast.imports.iter()
@@ -54,4 +53,3 @@ pub fn handle_imports(ast: &AstProgram) -> AstProgram {
         pub_binds: ast.pub_binds.clone()
     }
 }
-
