@@ -29,6 +29,9 @@ pub fn deserialize_from_file(filename: &String)
     Ok(deserialize_claim(contents))
 }
 
+// At present, this function is only used in tests, so a warning will be given
+// that this is not used. In the future, a script for generating keys might
+// also use this outside of tests.
 pub fn store_new_keypair_cleartext(pub_key_file: &String,
         priv_key_file: &String) {
     tink_signature::init();
@@ -43,13 +46,13 @@ pub fn store_new_keypair_cleartext(pub_key_file: &String,
     let mut prv_writer = keyset::JsonWriter::new(prv_file);
     // This stores the private key in plaintext, If possible, it would be better
     // to store the private key using a google cloud or aws key manager.
-    keyset::insecure::write(&key_handle, &mut prv_writer);
+    keyset::insecure::write(&key_handle, &mut prv_writer).unwrap();
 
     // write the new public key
     let pub_key_handle = key_handle.public().unwrap();
     let pub_file = File::create(pub_key_file).unwrap();
     let mut pub_writer = keyset::JsonWriter::new(pub_file);
-    keyset::insecure::write(&pub_key_handle, &mut pub_writer);
+    keyset::insecure::write(&pub_key_handle, &mut pub_writer).unwrap();
 }
 
 pub fn sign_claim(priv_key_file: &String, signature_file: &String, 
@@ -66,7 +69,7 @@ pub fn sign_claim(priv_key_file: &String, signature_file: &String,
     let signature = signer.sign(&bytes).unwrap();
 
     let mut sig_file = File::create(signature_file).unwrap();
-    sig_file.write(&signature);
+    sig_file.write(&signature).unwrap();
 }
 
 pub fn verify_claim(pub_key_file: &String,
@@ -82,7 +85,7 @@ pub fn verify_claim(pub_key_file: &String,
     let v = tink_signature::new_verifier(&pub_kh).unwrap();
     let mut signature_buf = Vec::new();
     File::open(&signature_file).unwrap()
-        .read_to_end(&mut signature_buf);
+        .read_to_end(&mut signature_buf).unwrap();
     v.verify(&signature_buf, &plaintext)
 }
 

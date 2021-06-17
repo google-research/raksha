@@ -3,6 +3,8 @@ use crate::ast::*;
 use crate::souffle::datalog_ir::*;
 
 pub struct SouffleEmitter {
+    // This is a set of predicates that need to be declared. This set is
+    // populated by side effect while traversing the program body.
     decls: HashSet<AstPredicate>,
 }
 

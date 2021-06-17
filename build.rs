@@ -1,19 +1,14 @@
 // This is adapted from:
 // https://github.com/rrevenantt/antlr4rust/blob/master/build.rs
 
-use std::convert::TryInto;
 use std::env;
-use std::env::VarError;
 use std::error::Error;
-use std::fs::{read_dir, DirEntry, File};
-use std::io::Write;
-use std::path::Path;
 use std::process::Command;
 
 fn run_antlr_on(
     grammar_file: &str,
     antlr_path: &str
-    )-> Result<(), Box<Error>> {
+    )-> Result<(), Box<dyn Error>> {
 
     let parsing_subdir = env::current_dir().unwrap().join("src/parsing");
     let full_file = grammar_file.to_owned() + ".g4";
@@ -53,7 +48,7 @@ fn main() {
         .to_owned()
         + "/antlr4rust.jar";
 
-    run_antlr_on("AuthLogic", &antlr_path);
+    run_antlr_on("AuthLogic", &antlr_path).unwrap();
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=antlr4rust.jar");
 }

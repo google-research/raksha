@@ -22,7 +22,7 @@ impl PartialEq for AstPredicate {
             self.args.len() != other.args.len() {
             return false;
         }
-        for i in (0..self.args.len()-1) {
+        for i in 0..self.args.len() - 1 {
             if self.args[i] != other.args[i] {
                 return false;
             }

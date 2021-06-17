@@ -28,7 +28,7 @@ fn export_says_assertion(says_assertion: &AstSaysAssertion,
             let obj_file = filename.clone() + ".obj";
             let sig_file = filename.clone() + ".sig";
             let priv_key_file = priv_env.get(&says_assertion.prin).unwrap();
-            serialize_to_file(&says_assertion.assertions, &obj_file);
+            serialize_to_file(&says_assertion.assertions, &obj_file).unwrap();
             sign_claim(&priv_key_file, &sig_file, &says_assertion.assertions);
         }
     }

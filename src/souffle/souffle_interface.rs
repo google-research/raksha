@@ -37,7 +37,8 @@ pub fn input_to_souffle_file(filename: &String, in_dir: &String,
 // Given a parsed AstProgram, this emits souffle code to a file. This is needed
 // in addition to the above function since other passes that work on the highest
 // level IR besides the one used to emit the main code.
-pub fn ast_to_souffle_file(prog: &AstProgram, filename: &String, out_dir: &String) {
+pub fn ast_to_souffle_file(prog: &AstProgram, filename: &String,
+                           out_dir: &String) {
     let dlir_prog = LoweringToDatalogPass::lower(&prog);
     let souffle_code = SouffleEmitter::emit_program(&dlir_prog);
     fs::write(&format!("{}/{}.dl", out_dir, filename), souffle_code)

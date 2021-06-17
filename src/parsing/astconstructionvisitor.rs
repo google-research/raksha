@@ -1,8 +1,6 @@
-// try blocks are used in antlr4-rust
-#![feature(try_blocks)]
 use crate::parsing::antlr_gen::authlogiclexer::*;
 use crate::parsing::antlr_gen::authlogicparser::*;
-use antlr_rust::tree::{ParseTree,ParseTreeVisitor};
+use antlr_rust::tree::{ParseTree};
 use antlr_rust::InputStream;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use crate::ast::*;
@@ -12,7 +10,7 @@ use crate::ast::*;
 // tree rooted with a program node when given the textual representation of a
 // program.
 pub fn parse_program(prog_text: &str) -> AstProgram {
-    let mut lexer = AuthLogicLexer::new(
+    let lexer = AuthLogicLexer::new(
         InputStream::new(prog_text));
     let token_source = CommonTokenStream::new(lexer);
     let mut parser = AuthLogicParser::new(token_source);
@@ -148,24 +146,24 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
         // let assertion = construct_assertion(&ctx.assertion().unwrap());
         // AstSaysAssertion { prin, assertion }
         match ctx {
-            SaysAssertionContextAll::SaysSingleContext(ctxPrime) => {
-                let prin = construct_principal(&ctxPrime.principal().unwrap());
-                let assertions = vec![ construct_assertion(&ctxPrime.
+            SaysAssertionContextAll::SaysSingleContext(ctx_prime) => {
+                let prin = construct_principal(&ctx_prime.principal().unwrap());
+                let assertions = vec![ construct_assertion(&ctx_prime.
                         assertion().unwrap()) ];
-                let export_file: Option<String> = match ctxPrime.PATH() {
-                    Some(_) => { Some(ctxPrime.PATH().unwrap().get_text()) }
+                let export_file: Option<String> = match ctx_prime.PATH() {
+                    Some(_) => { Some(ctx_prime.PATH().unwrap().get_text()) }
                     None => { None }
                 };
                 AstSaysAssertion { prin, assertions, export_file }
             }
-            SaysAssertionContextAll::SaysMultiContext(ctxPrime) => {
-                let prin = construct_principal(&ctxPrime.principal().unwrap());
-                let assertions:Vec<_> = (&ctxPrime).assertion_all()
+            SaysAssertionContextAll::SaysMultiContext(ctx_prime) => {
+                let prin = construct_principal(&ctx_prime.principal().unwrap());
+                let assertions:Vec<_> = (&ctx_prime).assertion_all()
                     .iter()
                     .map( |x| construct_assertion(x) )
                     .collect();
-                let export_file: Option<String> = match ctxPrime.PATH() {
-                    Some(_) => { Some(ctxPrime.PATH().unwrap().get_text()) }
+                let export_file: Option<String> = match ctx_prime.PATH() {
+                    Some(_) => { Some(ctx_prime.PATH().unwrap().get_text()) }
                     None => { None }
                 };
                 AstSaysAssertion { prin, assertions, export_file }
@@ -186,17 +184,17 @@ fn construct_query(ctx: &QueryContext) -> AstQuery {
 
 fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
     match ctx {
-        KeyBindContextAll::BindprivContext(ctxPrime) => {
+        KeyBindContextAll::BindprivContext(ctx_prime) => {
             AstKeybind {
-                filename: ctxPrime.PATH().unwrap().get_text(),
-                principal: construct_principal(&ctxPrime.principal().unwrap()),
+                filename: ctx_prime.PATH().unwrap().get_text(),
+                principal: construct_principal(&ctx_prime.principal().unwrap()),
                 is_pub: false
             }
         }
-        KeyBindContextAll::BindpubContext(ctxPrime) => {
+        KeyBindContextAll::BindpubContext(ctx_prime) => {
             AstKeybind {
-                filename: ctxPrime.PATH().unwrap().get_text(),
-                principal: construct_principal(&ctxPrime.principal().unwrap()),
+                filename: ctx_prime.PATH().unwrap().get_text(),
+                principal: construct_principal(&ctx_prime.principal().unwrap()),
                 is_pub: true
             }
         }

@@ -39,9 +39,9 @@ fn handle_one_import(kbenv: &BindingEnv, imp: &AstImport) -> AstSaysAssertion {
 }
 
 pub fn handle_imports(ast: &AstProgram) -> AstProgram {
-    let bindEnv = collect_pub_bindings(ast);
+    let bind_env = collect_pub_bindings(ast);
     let imported_assertions: Vec<_> = ast.imports.iter()
-        .map(|s| handle_one_import(&bindEnv, s))
+        .map(|s| handle_one_import(&bind_env, s))
         .collect();
 
     AstProgram {

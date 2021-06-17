@@ -20,8 +20,8 @@ fn source_file_to_ast(filename: &String, in_dir: &String) -> AstProgram {
 
 pub fn compile(filename: &String, in_dir: &String, out_dir: &String) {
     let prog = source_file_to_ast(filename, in_dir);
-    let progWithImports = import_assertions::handle_imports(&prog);
-    souffle_interface::ast_to_souffle_file(&progWithImports,
+    let prog_with_imports = import_assertions::handle_imports(&prog);
+    souffle_interface::ast_to_souffle_file(&prog_with_imports,
                                         filename, out_dir);
-    export_assertions::export_assertions(&progWithImports);
+    export_assertions::export_assertions(&prog_with_imports);
 }

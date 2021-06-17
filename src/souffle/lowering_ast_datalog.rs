@@ -9,7 +9,8 @@ use crate::souffle::datalog_ir::*;
 // comment gives a more intuitive description using a few examples at the
 // expense of losing some generality.
 //
-// This language also supports grouping assertions together as in:
+// As a minor wrinkle, this language also supports grouping assertions together
+// as in:
 //      Prin says { assertion_1, ..., assertion_n }
 // and these are simply "unrolled" to
 //      Prin says assertion_1.
@@ -138,8 +139,8 @@ impl LoweringToDatalogPass {
         }
     }
     
-    fn flat_fact_to_dlir(&mut self, f: &AstFlatFact, in_lhs: bool,
-             speaker: &AstPrincipal) -> (AstPredicate,Vec<DLIRAssertion>) {
+    fn flat_fact_to_dlir(&mut self, f: &AstFlatFact, speaker: &AstPrincipal)
+            -> (AstPredicate,Vec<DLIRAssertion>) {
         match f {
             AstFlatFact::AstPrinFact {p, v} => {
                 let v_dlir = self.verbphrase_to_dlir(v);
@@ -178,7 +179,7 @@ impl LoweringToDatalogPass {
             -> (AstPredicate, Vec<DLIRAssertion>) {
         match f {
             AstFact::AstFlatFactFact { f: flat } => {
-                self.flat_fact_to_dlir(flat, true, p)
+                self.flat_fact_to_dlir(flat, p)
             }
             AstFact::AstCanSayFact { p: q, f: f_plus } => {
                 let (fact_plus_prime, mut collected) = self.fact_to_dlir(&*f_plus, p);
@@ -240,7 +241,7 @@ impl LoweringToDatalogPass {
             AstAssertion::AstCondAssertion { lhs, rhs } => {
                 let mut dlir_rhs = Vec::new();
                 for f in rhs {
-                    let (flat, _) = self.flat_fact_to_dlir(&f, false, &speaker);
+                    let (flat, _) = self.flat_fact_to_dlir(&f, &speaker);
                     dlir_rhs.push(push_prin(String::from("says_"),
                         &speaker, &flat));
                 }
@@ -268,7 +269,7 @@ impl LoweringToDatalogPass {
     fn query_to_dlir(&mut self, query: &AstQuery) -> DLIRAssertion {
         // the assertions that are normally generated during the translation
         // from facts to dlir facts are not used for queries
-        let (mut main_fact, _) = self.fact_to_dlir(&query.fact,
+        let (main_fact, _) = self.fact_to_dlir(&query.fact,
                                                    &query.principal);
         let main_fact = push_prin(String::from("says_"), &query.principal,
                                          &main_fact);
