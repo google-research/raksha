@@ -1,0 +1,11 @@
+// This is about the same as  "exporting", but this is
+// used to generate an exported statement for the "importing" test. This is a 
+// separate file to avoid synchronization issues since tests seem to run in 
+// parallel.
+BindPrivKey "principal1e" test_keys/principal1e_priv.json
+BindPubKey "principal1e" test_keys/principal1e_pub.json
+
+"principal1e" says {
+    someProposition("these_args").
+    otherProposition("these_other_args").
+} exportTo test_outputs/prin1e_statement1
