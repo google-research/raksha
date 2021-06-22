@@ -11,6 +11,7 @@
 .type fieldList = Nil {} | Cons {e: fieldName, l: fieldList }
 .type flatModule = FlatMod { readFields: fieldList, writtenFields: fieldList }
 
+.decl groundedField(f: fieldName)
 .decl groundedList(l: fieldList)
 .decl groundedFlatMod(m: flatModule)
 
@@ -28,5 +29,7 @@ fieldListContains($Cons(e, l), f) :-
 groundedList(l) :- groundedFlatMod($FlatMod(l, _)).
 groundedList(l) :- groundedFlatMod($FlatMod(_, l)).
 groundedList(l) :- groundedList($Cons(_, l)).
+
+groundedField(f) :- fieldListContains(_, f).
 
 #endif // FLAT_MODULES

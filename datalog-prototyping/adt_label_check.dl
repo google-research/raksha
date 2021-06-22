@@ -12,7 +12,6 @@
 // of the individual fields.
 .decl fieldListHasLabel(fl: fieldList, lb: latElt)
 
-
 fieldListHasLabel($Nil(), $Bot()).
 fieldListHasLabel($Cons(f, $Nil()), l) :-
     groundedList($Cons(f, $Nil())), // needed to keep this finite

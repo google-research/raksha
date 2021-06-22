@@ -1,14 +1,15 @@
+#include "flatModules.dl"
+
 #ifndef MEMBER_LABELS
 #define MEMBER_LABELS
-
-#include "flatModules.dl:
 
 // labels are sets of labelElts
 .type labelElt <: symbol
 .type label <: symbol
 
-.decl isMember(x: labelElt, l: label)
-.decl labelFlowsTo(x: label, y: label)
+// This labelElt exists. This can also be thought of as
+// stating that a labelElt is a member of the universe
+.decl groundedLabelElt(l: labelElt)
 
 // mapping from fields to labels
 .decl fieldHasLabelElt(f: fieldName, lb: labelElt)
@@ -27,9 +28,32 @@ fieldListHasLabelElt($Cons(f, fl), l) :-
     fieldHasLabelElt(f, l).
 
 // The label of a module is the join over the labels of its inputs.
-.decl moduleHasLabelElt(m: flatModule, lb: latElt)
+.decl moduleHasLabelElt(m: flatModule, lb: labelElt)
 moduleHasLabelElt($FlatMod(inputs, outputs), l) :-
     groundedFlatMod($FlatMod(inputs, outputs)),
     fieldListHasLabelElt(inputs, l).
+
+// fields in output of a module pickup label elements of module
+fieldHasLabelElt(f, l) :- moduleHasLabelElt($FlatMod(_, outputs), l),
+    fieldListContains(outputs, f).
+
+.decl subset(f1: fieldName, f2: fieldName)
+.decl notSubset(f1: fieldName, f2: fieldName)
+
+/// To do labelchecking, we would need to check subSetEq on labels
+// label of f1 is subsetEq label of f2
+notSubset(f1, f2) :-
+    groundedField(f2),
+    groundedLabelElt(l),
+    fieldHasLabelElt(f1, l),
+    !fieldHasLabelElt(f2, l).
+
+subset(f1, f2) :- 
+    groundedField(f1),
+    groundedField(f2),
+    !notSubset(f1, f2).
+
+// ---- ground lowering rules
+groundedLabelElt(l) :- fieldHasLabelElt(_, l).
 
 #endif // MEMBER_LABELS
