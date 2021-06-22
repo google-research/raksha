@@ -1,0 +1,40 @@
+#include "semilattice.dl"
+
+#ifndef TEST_SEMILATTICE
+#define TEST_SEMILATTICE
+
+.decl test(n: number) 
+
+// NOTE at the moment, these facts need to be written manually, but ideally we
+// would generate them whenever they are encountered.
+groundedLatElt($Join($Atom("a"), $Atom("c"))).
+groundedLatElt($Join($Join($Atom("a"), $Atom("b")), $Atom("c"))).
+groundedLatElt($Join($Atom("a"), $Atom("a"))). // for test 7
+
+test(1) :- subEq($Atom("a"), $Atom("a")). // yes
+test(2) :- subEq($Atom("a"), $Atom("b")). // no
+test(3) :- subEq($Atom("a"), $Join($Atom("a"), $Atom("b"))). // yes
+test(4) :- subEq(
+    $Join($Atom("a"), $Atom("b")), 
+    $Join($Atom("a"), $Atom("b"))
+). // yes
+test(5) :- subEq(
+    $Join($Atom("a"), $Atom("c")),
+    $Join($Atom("a"), $Atom("b"))
+). // no
+test(6) :- subEq(
+    $Join($Atom("a"), $Atom("c")),
+    $Join($Join($Atom("a"), $Atom("b")), $Atom("c"))
+). //yes
+test(7) :- subEq(
+    $Join($Atom("a"), $Atom("a")), 
+    $Atom("a")
+). // yes ({a} join {a} = {a})
+test(8) :- subEq(
+    $Atom("a"), 
+    $Join($Atom("a"), $Atom("a"))
+). // yes 
+
+.output test
+.output subEq
+#endif // TEST_SEMILATTICE

@@ -1,0 +1,36 @@
+#include "flatModules.dl"
+#include "semilattice.dl"
+
+#ifndef ADT_LABEL_CHECK
+#define ADT_LABEL_CHECK
+
+// mapping from fields to labels
+.decl fieldHasLabel(f: fieldName, lb: latElt)
+
+// Lift mapping of fields to labels to lists of fields
+// by computing the join (set union) over the labels
+// of the individual fields.
+.decl fieldListHasLabel(fl: fieldList, lb: latElt)
+
+
+fieldListHasLabel($Nil(), $Bot()).
+fieldListHasLabel($Cons(f, $Nil()), l) :-
+    groundedList($Cons(f, $Nil())), // needed to keep this finite
+    fieldHasLabel(f, l).
+fieldListHasLabel($Cons(f, fl), $Join(l1, l2)) :-
+    groundedList($Cons(f, fl)),
+    fieldListHasLabel(fl, l1),
+    fieldHasLabel(f, l2).
+
+// The label of a module is the join over the labels of its inputs.
+.decl moduleHasLabel(m: flatModule, lb: latElt)
+moduleHasLabel($FlatMod(inputs, outputs), l) :-
+    groundedFlatMod($FlatMod(inputs, outputs)),
+    fieldListHasLabel(inputs, l).
+
+// The label of any field in an output of a module is the
+// label of the module.
+fieldHasLabel(f, l) :- moduleHasLabel($FlatMod(_, outputs), l),
+    fieldListContains(outputs, f).
+
+#endif // ADT_LABEL_CHECK

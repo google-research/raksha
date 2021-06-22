@@ -1,0 +1,41 @@
+#include "adt_label_check.dl"
+
+// Example graph
+
+// Module 1
+//      reads: 
+//          some_struct{ a, b }
+//          other_input
+//      writes:
+//          mod1out
+groundedFlatMod($FlatMod(
+    $Cons("some_struct.a", $Cons("some_struct.b",
+        $Cons("other_input", $Nil()))),
+    $Cons("mod1out", $Nil())
+)).
+
+// These are the ingress fields, so these are labeled
+// explicitly as part of the policy
+fieldHasLabel("some_struct.a", $Atom("raw_video")).
+fieldHasLabel("some_struct.b", $Atom("user_selection")).
+// $Bot() is like public -- nothing about this field is
+// relevant to privacy
+fieldHasLabel("other_input", $Bot()).
+
+
+// Module 2
+//      reads:
+//          mod1out
+//          input4
+//      writes:
+//         mod2out 
+groundedFlatMod($FlatMod(
+    $Cons("mod1out", $Cons("input4", $Nil())),
+    $Cons("mod2out", $Nil())
+)).
+
+// input4 is another ingress field
+fieldHasLabel("input4", $Atom("proprietary_database")).
+// but the label of mod1out has already been computed
+
+.output fieldHasLabel

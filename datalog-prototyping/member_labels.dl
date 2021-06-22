@@ -1,0 +1,35 @@
+#ifndef MEMBER_LABELS
+#define MEMBER_LABELS
+
+#include "flatModules.dl:
+
+// labels are sets of labelElts
+.type labelElt <: symbol
+.type label <: symbol
+
+.decl isMember(x: labelElt, l: label)
+.decl labelFlowsTo(x: label, y: label)
+
+// mapping from fields to labels
+.decl fieldHasLabelElt(f: fieldName, lb: labelElt)
+
+// Lift mapping of fields to labels to lists of fields
+.decl fieldListHasLabelElt(fl: fieldList, lb: labelElt)
+fieldListHasLabelElt($Cons(f, $Nil()), l) :-
+    groundedList($Cons(f, $Nil())), // needed to keep this finite
+    fieldHasLabelElt(f, l).
+// union over field and other elts of list
+fieldListHasLabelElt($Cons(f, fl), l) :-
+    groundedList($Cons(f, fl)),
+    fieldListHasLabelElt(fl, l).
+fieldListHasLabelElt($Cons(f, fl), l) :-
+    groundedList($Cons(f, fl)),
+    fieldHasLabelElt(f, l).
+
+// The label of a module is the join over the labels of its inputs.
+.decl moduleHasLabelElt(m: flatModule, lb: latElt)
+moduleHasLabelElt($FlatMod(inputs, outputs), l) :-
+    groundedFlatMod($FlatMod(inputs, outputs)),
+    fieldListHasLabelElt(inputs, l).
+
+#endif // MEMBER_LABELS

@@ -1,0 +1,46 @@
+#ifndef SEMILATTICE
+#define SEMILATTICE
+
+// This is an encoding of join semilattices over sets using ADTs. An
+// encoding of (full) lattices (e.g. using lattice axioms rather than
+// a concrete representation) would likely require SAT rather than HORNSAT.
+
+// latAtoms are the elements of the sets.
+// latElts are sets of latAtoms
+.type latAtom <: symbol
+.type latElt = 
+    Atom {e: latAtom}              // set containing just e ({e})
+    | Bot{}                        // empty set 
+    | Top{}                        // set containing everything (universe) 
+    | Join{l1: latElt, l2: latElt} // union of two sets (l1 union l2)
+
+.decl groundedAtom(a: latAtom)
+.decl groundedLatElt(e: latElt)
+
+// subEq is the lattice relation (which in this case is subset)
+.decl subEq(l: latElt, r: latElt)
+
+// {e} subsetEq {e}   (reflexivity)
+subEq($Atom(e), $Atom(e)) :- groundedAtom(e).
+// {e} subsetEq (S1 union S2) if {e} subsetEq S1 or e subsetEq S2
+subEq($Atom(e), $Join(l, r)) :-
+    groundedLatElt($Join(l, r)),
+    (subEq($Atom(e), l); subEq($Atom(e), r)).
+// (S1 union S2) subsetEq S3 if S1 subsetEq S3 and S2 ubsetEq S3
+subEq($Join(l, r), lat2) :- 
+    groundedLatElt(lat2), groundedLatElt($Join(l, r)),
+    subEq(l, lat2), subEq(r, lat2).
+subEq($Bot(), lat) :- groundedLatElt(lat).
+subEq(lat, $Top()) :- groundedLatElt(lat).
+
+
+// --- ground lowering.
+groundedAtom(e) :- groundedLatElt($Atom(e)).
+groundedLatElt($Bot()).
+groundedLatElt($Top()).
+groundedLatElt(l) :- groundedLatElt($Join(l, _)).
+groundedLatElt(r) :- groundedLatElt($Join(_, r)).
+groundedLatElt(l) :- subEq(l, _).
+groundedLatElt(r) :- subEq(_, r).
+
+#endif // SEMILATTICE
