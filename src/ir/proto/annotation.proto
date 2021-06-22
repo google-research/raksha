@@ -1,0 +1,20 @@
+// Initial version is cloned from https://www.github.com/polymerlabs/arcs
+syntax = "proto3";
+
+package raksha;
+
+// Represents the usage of an annotation.
+message AnnotationProto {
+  string name = 1;
+  repeated AnnotationParamProto params = 2;
+}
+
+// An Annotation parameter.
+message AnnotationParamProto {
+  string name = 1;
+  oneof value {
+    string str_value = 2;
+    int32 num_value = 3;
+    bool bool_value = 4;
+  }
+}
