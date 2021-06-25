@@ -1,0 +1,24 @@
+#include "policy_check.dl"
+#include "flat_mods_ex1.dl"
+
+.output can
+.output tries
+.output fail
+
+
+// data that might depend on f1 can only be sent
+// out of the system if it is the direct output
+// of code that does sanitization.
+// (Other data can always be sent out)
+
+// This policy should be satisifed by flat_mods_ex1
+
+// first rule causes error about cyclic negation...
+// need to look into this more later.
+// can("send_out", $Cons(f, $Nil()) ) :-
+//     groundedList($Cons(f, $Nil())),
+//     !dependsOn(f, "f1").
+can("send_out", $Cons(f, $Nil()) ) :-
+    groundedList($Cons(f, $Nil())),
+    dependsOn(f, "f1"),
+    guaranteeField("sanitized", f).

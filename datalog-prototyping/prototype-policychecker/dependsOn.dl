@@ -1,0 +1,31 @@
+#ifndef DEPENDS_ON
+#define DEPENDS_ON
+
+// Check if field in list -----
+.decl fieldListContains(l: fieldList, f: fieldName)
+
+fieldListContains($Cons(f, l), f) :- 
+    groundedList($Cons(f, l)).
+fieldListContains($Cons(e, l), f) :-
+    groundedList($Cons(e, l)),
+    fieldListContains(l, f).
+
+// Outputs contain a field -----
+.decl outputsContain(modName: name, f: fieldName)
+
+outputsContain(modName, f) :-
+    bindModule(modName, $FlatMod(_, outFields)),
+        fieldListContains(outFields, f).
+
+// Very simple analysis -----
+.decl dependsOn(f1: fieldName, f2: fieldName)
+
+dependsOn(f1, f2) :-
+    groundedFlatMod($FlatMod(rf, wf)),
+    fieldListContains(wf, f1), fieldListContains(rf, f2).
+dependsOn(f1, f2) :-
+    groundedFlatMod($FlatMod(rf, wf)),
+    fieldListContains(wf, f1), fieldListContains(rf, g),
+    dependsOn(g, f2).
+
+#endif // DEPENDS_ON

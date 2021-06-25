@@ -1,0 +1,101 @@
+#include "flatModules.dl"
+
+#ifndef LABEL_CHECKING
+#define LABEL_CHECKING
+
+.type label <: symbol
+.decl isLabel(ell: label)
+.decl flowsTo(ell1: label, ell2: label)
+
+isLabel("top").
+isLabel("bot").
+
+flowsTo(ell, "top") :- isLabel(ell).
+flowsTo("bot", ell) :- isLabel(ell).
+
+// refl
+flowsTo(p, p) :- isLabel(p).
+// trans
+flowsTo(p1, p3) :- flowsTo(p1, p2), flowsTo(p2, p3).
+// no antisym
+
+// saysDowngrades and saysCanSayDowngrades are a specializations of what a 
+// SecPal-like language would provide. says and canSay would be applicable to 
+// any fact. Here they are just specialized to the proposition saysDowngrades 
+// since this is a quick prototype. I'm assuming we would use a translation 
+// similar to the one described in Section 6 here:
+// http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.123.2526&rep=rep1&type=pdf
+// and that rules for the semantics in Section 3 are generated for each fact.
+//
+// This relation is used for downgrading
+.decl saysDowngrades(speaker: label, inModule: moduleName,
+    x: locationName, newLabel: label)
+
+// This relation is used for delegation
+.decl saysCanSayDowngrades(speaker: label, delegatee: label,
+    inModule: moduleName, x: locationName, newLabel: label)
+
+.decl saysCanActAs(speaker: label, acting: 
+
+// relation for delegating downgrades
+saysDowngrades(a, m, x, ell) :-
+    saysDowngrades(b, m, x, ell),
+    saysCanSayDowngrades(a, b, m, x, ell).
+
+// This is a labl environment mapping locations to labels. It is populated by 
+// the language for describing particles + policies.
+.decl labelEnvironment(loc: locationName, ell: label)
+
+// This is the relation for type judgements on locations.
+// there are two rules for proving that a location has a label:
+// - using the label of x in the label environment
+// - using a downgrade. The principal owning the label of x says the module can 
+// downgrade this to a new label.
+.decl locationHasLabel(context: moduleName, loc: locationName, ell: label)
+
+locationHasLabel(ctxt, loc, ell) :-
+    groundedModuleName(ctxt),
+    labelEnvironment(loc, ell).
+locationHasLabel(ctxt, loc, ell) :-
+    labelEnvironment(loc, ellPrime),
+    saysDowngrades(ellPrime, ctxt, loc, ell).
+
+// true if ell is a lower bound of the labels in the list
+.decl isMeetOverList(context: moduleName, ell: label, ls: locationList)
+// true if ell is an upper bound of the labels in the list
+.decl isJoinOverList(context: moduleName, ell: label, ls: locationList)
+
+
+// computes the meet over the labels of locations in in the list in the context 
+// of the current module
+isMeetOverList(context, ell, $Cons(locx, $Nil())) :- 
+    locationHasLabel(context, locx, ell1), flowsTo(ell, ell1).
+isMeetOverList(context, ell, $Cons(locx, lsPrime)) :- 
+    groundedList(lsPrime),
+    locationHasLabel(context, locx, ell1),
+    flowsTo(ell, ell1), isMeetOverList(context, ell, lsPrime).
+
+isJoinOverList(context, ell, $Cons(locx, $Nil())) :- 
+    locationHasLabel(context, locx, ell1), flowsTo(ell1, ell).
+isJoinOverList(context, ell, $Cons(locx, lsPrime)) :- 
+    groundedList(lsPrime),
+    locationHasLabel(context, locx, ell1),
+    flowsTo(ell1, ell), isJoinOverList(context, ell, lsPrime).
+
+.decl flatModLabelChecks(m: moduleName, fm: flatModule)
+// True if the module label checks
+flatModLabelChecks(m, $FlatMod(reads, writes)) :- 
+    isJoinOverList(m, readBound, reads),
+    isMeetOverList(m, writeBound, writes),
+    flowsTo(readBound, writeBound).
+
+.decl moduleLabelChecks(n: moduleName)
+moduleLabelChecks(n) :- bindModule(n, fm), flatModLabelChecks(n, fm).
+    
+
+// ground lowering rules
+isLabel(ell) :- flowsTo(ell, _).
+isLabel(ell) :- flowsTo(_, ell).
+isLabel(ell) :- labelEnvironment(_, ell).
+
+#endif // LABEL_CHECKING

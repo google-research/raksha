@@ -1,0 +1,27 @@
+#include "modules.dl"
+
+// Examples:
+// {
+//     a: int
+//     b: int
+// }
+
+groundedTyp(
+    $StructCons("a", $Base("int"),
+    $StructCons("b", $Base("int"),
+    $StructNil()))
+).
+
+// {
+//      a: {b: int, c: int}
+//      d: string
+// }
+
+groundedTyp(
+    $StructCons("a",
+        $StructCons("b", $Base("int"), $StructCons("c", $Base("int"), $StructNil())),
+    $StructNil())
+).
+
+.output groundedTyp
+.output groundedField

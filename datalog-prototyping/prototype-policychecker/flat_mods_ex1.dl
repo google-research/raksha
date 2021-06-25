@@ -1,0 +1,18 @@
+#include "moduleAnnotations.dl"
+
+bindModule("mod1", $FlatMod(
+        $Cons("f1", $Nil() ),                   // inputs
+        $Cons("out1", $Cons("out2", $Nil() ))   // outputs
+    )).
+bindModule("mod2", $FlatMod(
+        $Cons("out2", $Nil()),
+        $Cons("finalOut1", $Cons("finalOut2", $Nil()))
+    )).
+
+actionAnnotation("mod2", "send_out", $Cons("finalOut1", $Nil())).
+guaranteeAnnotation("mod2", "sanitized").
+
+.output groundedFlatMod
+.output actionAnnotation
+.output guaranteeField
+.output tries

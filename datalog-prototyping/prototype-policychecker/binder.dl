@@ -1,0 +1,59 @@
+.type principal <: symbol
+.type action <: symbol
+.type resource <: symbol
+
+// Appendix A describes a translation from binder to datalog.
+// The translation is pretty direct: "says principal proposition(<args>)"
+// can be translated into proposition(principal, <args>)
+
+// the first argument to all of these is "who believes this fact"
+
+// if "everyone" says a fact is true, it is universally believed"
+// this is like the "null" principal in Appendix A
+
+// Section 2
+.decl employee(whosays: principal,
+    person: principal, 
+    corp: principal)
+.decl boss(whosays: principal,
+    the_boss: principal,
+    the_report: principal)
+.decl approves(whosays: principal,
+    approver: principal,
+    approvee: principal,
+    a: action, r: resource)
+.decl can(whosays: principal,
+    actor: principal,
+    a: action,
+    r: resource)
+
+//-------------------- General policy
+
+// To read something, an employee must get approval from their boss
+can("everyone", p, "read", r) :-
+    employee("everyone", p, "BigCo"),
+    boss("everyone", q, p),
+    approves("everyone", q, p, "read", r).
+
+// BigCoHR is the ground truth on who is an employee of BigCo
+// as well as the hierarchy of reports
+employee("everyone", p, "BigCo") :-
+    employee("BigCoHR", p, "BigCo").
+boss("everyone", the_boss, the_report ) :-
+    boss("BigCoHR", the_boss, the_report).
+
+// An individual is authoritative about what that individual approves
+approves("everyone", p, q, a, r) :-
+    approves(p, p, q, a, r).
+
+//-------------------- Instantiation of general policy
+employee("BigCoHR", "john", "BigCo").
+boss("BigCoHR", "fred", "john").
+approves("fred", "fred", "john", "read", "amazing_design_doc").
+
+// john can read the amazing design doc
+
+.output employee
+.output boss
+.output approves
+.output can

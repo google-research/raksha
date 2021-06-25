@@ -1,0 +1,3 @@
+This is a prototype policy-checker where policies are vaguely
+similar to Arcs' ones, but this is implemented in datalog. Policies are not
+enforced by IFC or authorization logic.

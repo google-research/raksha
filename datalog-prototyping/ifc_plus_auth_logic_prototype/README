@@ -1,0 +1,4 @@
+This is a small prototype that connects information flow control to 
+authorization logic. Authorization logic is used for downgrades. After this 
+prototype, we have iterated on the interaction between IFC and auth logic, so 
+this prototype is out of date.

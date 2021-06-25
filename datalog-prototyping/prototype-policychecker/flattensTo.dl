@@ -1,0 +1,19 @@
+#include "flatModules.dl"
+
+// Holds for types that are not structs
+.decl nonStructTyp(t: typ)
+nonStructTyp($Base(b)) :- groundedBaseType(b).
+nonStructTyp($StructNil()).
+
+.decl flattenTyp(t: typ, fl: fieldList)
+.output flattenTyp
+
+// flattenTyp(t, $Nil()) :- nonStructTyp(t).
+// flattenTyp(t, $Cons(f, flP)) :-
+//     t = StructCons(f, tPrime, 
+// 
+// flattenTyp(t, $Cons(f, $Nil())) :-
+//         t = $StructCons(f, tPrime, $StructNil()),
+//         nonStructTyp(tPrime),
+//         groundedTyp(t).
+

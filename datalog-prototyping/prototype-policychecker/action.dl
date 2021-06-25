@@ -1,0 +1,12 @@
+#ifndef ACTION
+#define ACTION
+.type action <: symbol
+.decl groundedAction(a: action)
+
+.type guarantee <: symbol
+.decl groundedGuarantee(g: guarantee)
+
+// This small file exists because dependencies are a bit of a pain in Souffle.
+// If there is ever a declared relation with no rules, an error
+// is thrown.
+#endif // ACTION

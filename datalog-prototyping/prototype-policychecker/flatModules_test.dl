@@ -1,0 +1,18 @@
+#include "flatModules.dl"
+#include "dependsOn.dl"
+
+groundedFlatMod($FlatMod(
+        $Cons("f1", $Nil() ),
+        $Cons("out1", $Cons("out2", $Nil() ))
+    )).
+groundedFlatMod($FlatMod(
+        $Cons("out2", $Nil()),
+        $Cons("finalOut1", $Cons("finalOut2", $Nil()))
+    )).
+
+// names are not used here, but this is needed to prevent
+// an error
+bindModule("not_used", $FlatMod($Nil(),$Nil())).
+
+.output fieldListContains
+.output dependsOn

@@ -1,0 +1,16 @@
+#include "policy_check.dl"
+#include "flat_mods_ex1.dl"
+
+.output can
+.output tries
+.output fail
+
+// data that might depend on f1 can
+// never be sent out under any clircumstances,
+// but other data can be sent out.
+
+// This policy should NOT be satisifed by flat_mods_ex1
+
+can("send_out", $Cons(f, $Nil()) ) :-
+    groundedList($Cons(f, $Nil())),
+    !dependsOn(f, "f1").

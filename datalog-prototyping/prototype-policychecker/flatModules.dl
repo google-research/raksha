@@ -1,0 +1,28 @@
+#include "modules.dl" // for field names
+
+#ifndef FLAT_MODULES
+#define FLAT_MODULES
+
+//-----------------------------------------------------------------------------
+// Flattened modules
+//-----------------------------------------------------------------------------
+// These are code modules without nested structs at their interfaces.
+// Interfaces have been flattened into simple lists (post type-slicing).
+.type fieldList = Nil {} | Cons {e: fieldName, l: fieldList }
+.type flatModule = FlatMod { readFields: fieldList, writtenFields: fieldList }
+.type name <: symbol
+
+// A variable n is bound to a module body fm
+.decl bindModule(n: name, fm: flatModule)
+
+.decl groundedList(l: fieldList)
+.decl groundedFlatMod(m: flatModule)
+
+//---- ground lowering rules:
+// If a top-level thing is valid, make its parts valid
+groundedList(l) :- groundedFlatMod($FlatMod(l, _)).
+groundedList(l) :- groundedFlatMod($FlatMod(_, l)).
+groundedList(l) :- groundedList($Cons(_, l)).
+groundedFlatMod(m) :- bindModule(_, m).
+
+#endif // FLAT_MODULES

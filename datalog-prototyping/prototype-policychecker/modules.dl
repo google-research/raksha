@@ -1,0 +1,24 @@
+#ifndef MODULES
+#define MODULES
+
+.type baseType <: symbol
+.type fieldName <: symbol
+.type typ =
+    Base {b: baseType } |
+    StructNil {} |
+    StructCons {elt_name: fieldName, elt_typ: typ, other_fields: typ}
+
+// see modules_test.dl for examples
+
+// define which specific instances of these objects are valid
+.decl groundedTyp(t: typ)
+.decl groundedBaseType(b:baseType)
+.decl groundedField(f: fieldName)
+
+//----- ground lowering rules:
+groundedTyp(t) :- groundedTyp($StructCons(_, t, _)).
+groundedTyp(t) :- groundedTyp($StructCons(_, _, t)).
+groundedBaseType(b) :- groundedTyp($Base(b)).
+groundedField(f) :- groundedTyp($StructCons(f, _, _)).
+
+#endif // MODULES

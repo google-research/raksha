@@ -1,0 +1,19 @@
+#include "moduleAnnotations.dl"
+
+#ifndef POLICY_CHECK
+#define POLICY_CHECK
+// The policy permits action a to be performed on this 
+// list of fields
+.decl can(a: action, fl: fieldList)
+
+// There is a policy violation if fail(a, fl)
+// is not empty.
+.decl fail(a: action, fl: fieldList)
+fail(a, fl) :- 
+    groundedAction(a), groundedList(fl),
+    tries(a, fl), !can(a, fl).
+
+//---- ground lowering rules:
+groundedList(fl) :- can(_, fl).
+groundedAction(a) :- can(a, _).
+#endif // POLICY_CHECK 

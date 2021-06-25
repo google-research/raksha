@@ -1,0 +1,37 @@
+#include "dependsOn.dl"
+#include "flatModules.dl"
+#include "action.dl"
+
+#ifndef MODULE_ANNOTATIONS
+#define MODULE_ANNOTATIONS
+
+// A manifest tries to instantiate this group of modules
+.decl tries(a: action, fl: fieldList)
+
+// These are annotations that a programmer would
+// add to something like a manifest that says what
+// usages are done by a particular module
+
+// (Maybe these don't quite make sense since the module is not used
+// in tries ... )
+.decl actionAnnotation(modName: name, a: action, fl: fieldList)
+tries(a, fl) :- actionAnnotation(_, a, fl).
+
+// an annotation that a programmer writes to say that something
+// is true of all outputs ... may also make more sense to have
+// this work on specific fields as well...
+
+.decl guaranteeAnnotation(modName: name, g: guarantee)
+
+.decl guaranteeField(g: guarantee, f: fieldName)
+guaranteeField(g, f) :- 
+    outputsContain(modName, f),
+    guaranteeAnnotation(modName, g).
+
+// grounding rules -----
+groundedAction(a) :- actionAnnotation(_, a, _).
+groundedGuarantee(g) :- guaranteeAnnotation(_, g).
+groundedList(fl) :- tries(_, fl).
+groundedAction(a) :- tries(a, _).
+
+#endif // MODULE_ANNOTATIONS
