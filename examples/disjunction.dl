@@ -1,0 +1,17 @@
+#include "rules.dl"
+
+// particle P1
+//   foo: writes Foo
+//   claim foo is tag1 or is tag2
+
+// particle P2
+//   bar: reads Foo
+//   check bar is tag1 or is tag2 # check1
+
+// // recipe:
+// P1.foo -> P2. bar
+
+edge("P1.foo", "P2.bar").
+mayHaveLabel("P1.foo", "tag1").
+mayHaveLabel("P1.foo", "tag2").
+preservesClaim("P1.foo", "P2.bar", l) :- isLabel(l).

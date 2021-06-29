@@ -1,0 +1,48 @@
+// Is this symbol an access path to some data?
+.decl isAccessPath(x: symbol)
+// Is this symbol a label.
+.decl isLabel(x: symbol)
+// A data flow edge
+.decl edge(src: symbol, tgt: symbol)
+ // A data flow path
+.decl path(src: symbol, tgt: symbol)
+// Definitely has this label.
+.decl hasLabel(v: symbol, label: symbol)
+// Definitely has this label.
+.decl claimHasLabel(v: symbol, label: symbol)
+// Definitely does not have this label.
+// This is dual of `hasLabel`. We need a better name.
+.decl mayNotHaveLabel(v: symbol, label: symbol)
+// May have the label
+.decl mayHaveLabel(v: symbol, label: symbol)
+// Label l is preserved along the edge.
+.decl preservesClaim(src: symbol, tgt: symbol, label: symbol)
+
+// Some inference rules
+
+// Symbols used in edges are access paths
+isAccessPath(x) :- edge(x, _). 
+isAccessPath(y) :- edge(_, y). 
+
+// Symbols used in hasLabel or mayHaveLabel are labels
+isLabel(l) :- claimHasLabel(_, l). 
+isLabel(l) :- mayHaveLabel(_, l). 
+
+// Transitive paths
+path(from, to) :- edge(from, to).
+path(from, to) :- edge(from, intermediate), path(intermediate, to).
+
+mayHaveLabel(tgt, l) :- claimHasLabel(tgt, l).
+mayHaveLabel(tgt, l) :- edge(src, tgt), mayHaveLabel(src, l).
+
+claimHasLabel(tgt, l) :- edge(src, tgt), preservesClaim(src, tgt, l), claimHasLabel(src, l).
+   
+mayNotHaveLabel(tgt, l) :- isAccessPath(tgt), isLabel(l), !claimHasLabel(tgt, l).
+mayNotHaveLabel(tgt, l) :- edge(src, tgt), mayNotHaveLabel(src, l),  !claimHasLabel(tgt, l).
+
+hasLabel(x, l) :- mayHaveLabel(x, l), !mayNotHaveLabel(x, l).
+
+.output isAccessPath
+.output hasLabel
+.output mayNotHaveLabel
+.output mayHaveLabel

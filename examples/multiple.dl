@@ -1,0 +1,62 @@
+#include "rules.dl"
+
+// particle P1
+//   output: writes Foo
+//   claim input is tag1
+
+// Particle P2
+//   input: reads Foo
+//   output: writes Foo
+//   claim output is tag2
+//   preserves tag1 input -> output
+
+// particle P3
+//   input: reads Foo
+//   output: writes Foo
+
+// particle AP1
+//   input: writes Foo
+//   claim input is tag2
+
+// Particle AP2
+//   input: reads Foo
+//   output: writes Foo
+//   claim output is tag3
+//   preserves tag3 input -> output
+
+// particle AP3
+//   input: reads Foo
+//   output: writes Foo
+
+
+// // recipe:
+// P1.output -> P2.input -> P2.output -> P3.input
+// AP1.output -> AP2.input -> AP2.output -> P3.input
+
+
+edge("P1.output", "P2.input").
+edge("P2.input", "P2.output").
+edge("P2.output", "P3.input").
+edge("P3.input", "P3.output").
+edge("P3.output", "Egress.input").
+edge("AP1.output", "AP2.input").
+edge("AP2.input", "AP2.output").
+edge("AP2.output", "AP3.input").
+edge("AP3.input", "AP3.output").
+edge("AP3.output", "Egress.input").
+
+claimHasLabel("P1.output", "tag1").
+claimHasLabel("P2.output", "tag2").
+preservesClaim("P2.input", "P2.output", "tag1").
+claimHasLabel("AP1.output", "tag2").
+claimHasLabel("AP2.output", "tag3").
+preservesClaim("AP2.input", "AP2.output", "tag2").
+
+preservesClaim("P1.output", "P2.input", l) :- isLabel(l).
+preservesClaim("P2.output", "P3.input", l) :- isLabel(l).
+preservesClaim("P3.output", "Egress.input", l) :- isLabel(l).
+preservesClaim("AP1.output", "AP2.input", l) :- isLabel(l).
+preservesClaim("AP2.output", "AP3.input", l) :- isLabel(l).
+preservesClaim("AP3.output", "Egress.input", l) :- isLabel(l).
+
+

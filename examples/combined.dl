@@ -1,0 +1,43 @@
+#include "rules.dl"
+
+// particle P1
+//   foo: writes Foo
+//   claim foo is tag1 and is tag2
+
+// Particle P2
+//   foo: writes Foo
+//   claim foo is tag2 and is tag3
+
+// particle P3
+//   bar: reads Foo
+//   check bar is tag2 // check1
+//   check bar is (tag1 and tag2) or (tag2 and tag3) // check2
+// // recipe:
+// P1.foo -> P3.bar
+// P2.foo -> P3.bar
+
+edge("P1.foo", "P3.bar").
+edge("P2.foo", "P3.bar").
+claimHasLabel("P1.foo", "tag1").
+claimHasLabel("P1.foo", "tag2").
+claimHasLabel("P2.foo", "tag2").
+claimHasLabel("P2.foo", "tag3").
+preservesClaim("P1.foo", "P3.bar", l) :- isLabel(l).
+preservesClaim("P2.foo", "P3.bar", l) :- isLabel(l).
+
+
+// TODO:
+// .decl check2Predicate(x: symbol)
+// .decl notCheck2(x: symbol)
+// .decl check2(x: symbol)
+// check2Predicate(x) :- hasLabel(x, "tag1"), hasLabel(x, "tag2").
+// check2Predicate(x) :- hasLabel(x, "tag2"), hasLabel(x, "tag3").
+
+// notCheck2(tgt) :- isAccessPath(tgt), !check2Predicate(tgt).
+// notCheck2(tgt) :- edge(src, tgt), notCheck2(src).
+// check2(tgt) :- edge(src, tgt), !notCheck2(src).
+
+// .output check2Predicate
+// .output check2
+// .output notCheck2
+// 
