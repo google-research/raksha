@@ -1,0 +1,63 @@
+#include "flatModules.dl"
+#include "setMemberFlowsTo.dl"
+
+#ifndef SET_MEMBER_LABEL_CHECK
+#define SET_MEMBER_LABEL_CHECK
+
+.decl moduleLabelChecks(m: flatModule)
+.decl notModuleLabelChecks(m: flatModule)
+
+.decl fieldHasLabel(f: fieldName, l: label)
+
+// Intuitively, the label of a module is the join
+// over the label of its inputs, and it label checks
+// if the label of the module flows to each of its outputs.
+// We do not have universal quantifiers, though.
+
+// With ADT labels, we know how to compute the join
+// over a set of labels, but we don't have a way to get the normal form for ADT 
+// labels in datalog. (I saw some resources for how to do this in prolog). 
+// SetMember labels get around the need for a normal form
+
+// Two strategies to try:
+//  - compute join over fields using isMember labels
+//  - avoid computing this join over sets of labels by instead writing a 
+//  relation for "notLabelChecks"
+
+// We also eventually need rules that cover downgrading and non-downgrading 
+// cases.
+
+// // ---- Strategy 1: join over isMember labels
+// .decl fieldListHasLabel(f: fieldList, l: label)
+// 
+// fieldListLabelChecks($Nil(), "emptyset").
+// fieldListLabelChecks($Cons(f, fl), l) :-
+//     fieldListLabelChecks(fl, l1),
+//     hasLabel(f, l2),
+//     flowsTo(l1, l),
+//     flowsTo(l2, l).
+// 
+// moduleLabelChecks(FlatMod {readFields, writtenFields}) :-
+//     fieldListLabelChecks(readFields, l),
+//     // need to either compute meet over writtenFields (set intersection?)
+//     // or do "notLabelChecks" anyway 
+
+///---- Strategy2: Not labelChecks
+// A module does not labelcheck if there are fields
+// in the input/output lists such that the input label
+// does not flow to the output label
+notModuleLabelChecks($FlatMod (readFields, writtenFields)) :-
+    groundedList(readFields), groundedList(writtenFields),
+    fieldListContains(readFields, fr),
+    fieldListContains(writtenFields, fw),
+    fieldHasLabel(fr, lr), fieldHasLabel(fw, lw),
+    notSubset(lr, lw).
+
+moduleLabelChecks($FlatMod (readFields, writtenFields)) :- 
+    groundedList(readFields), groundedList(writtenFields),
+    !notModuleLabelChecks($FlatMod(readFields, writtenFields)).
+
+// ---- ground lowering
+groundedLabel(l) :- fieldHasLabel(_, l).
+
+#endif // SET_MEMBER_LABEL_CHECK

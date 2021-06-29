@@ -1,0 +1,36 @@
+#include "flatModules.dl"
+
+#ifndef SET_MEMBER_LABELS
+#define SET_MEMBER_LABELS
+
+.type labelElt <: symbol
+.type label <: symbol
+
+.decl isMember(le: labelElt, l: label)
+
+.decl notSubset(l1: label, l2: label)
+.decl flowsTo(l1: label, l2: label)
+
+.decl groundedLabelElt(le: labelElt)
+.decl groundedLabel(l: label)
+
+notSubset(l1, l2) :-
+    groundedLabel(l2),
+    groundedLabelElt(le),
+    isMember(le, l1),
+    !isMember(le, l2).
+
+flowsTo(l1, l2) :- 
+    groundedLabel(l1),
+    groundedLabel(l2),
+    !notSubset(l1, l2).
+
+// universe axiom (universe is "secret", emptyset is "public")
+groundedLabel("universe").
+groundedLabel("emptyset").
+isMember(le, "universe") :- groundedLabelElt(le).
+
+// ---- ground lowering
+groundedLabelElt(le) :- isMember(le, _).
+
+#endif //SET_MEMBER_LABELS
