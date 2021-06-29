@@ -1,0 +1,73 @@
+#include "setMemberLabelCheck.dl"
+
+// Module 1
+//      reads: 
+//          some_struct{ a, b }
+//          other_input
+//      writes:
+//          mod1out
+groundedFlatMod($FlatMod(
+    $Cons("some_struct.a", $Cons("some_struct.b",
+        $Cons("other_input", $Nil()))),
+    $Cons("mod1out", $Nil())
+)).
+
+// the label of "other_input" is the empty set (which makes it public).
+// so it has no label elements
+
+// Module 2
+//     reads:
+//         mod1out
+//         input4
+//     writes:
+//         mod2out 
+groundedFlatMod($FlatMod(
+    $Cons("mod1out", $Cons("input4", $Nil())),
+    $Cons("mod2out", $Nil())
+)).
+
+// Every struct just gets a label with its name
+fieldHasLabel("some_struct.a", "some_struct.a_label").
+fieldHasLabel("some_struct.b", "some_struct.b_label").
+fieldHasLabel("other_input", "other_input_label").
+fieldHasLabel("mod1out", "mod1out_label").
+fieldHasLabel("input4", "input4_label").
+fieldHasLabel("mod2out", "mod2out_label").
+
+// Manually fill in elements of labels
+// (otherwise DFA might try to guess the ones
+// that are not filled in)
+
+// Module 1 should label check
+isMember("raw_video", "some_struct.a_label").
+isMember("user_selection", "some_struct.b_label").
+    // other_input is public
+isMember("user_selection", "mod1out_label").
+isMember("raw_video", "mod1out_label").
+
+
+// Module 2 should not label check
+isMember("proprietary_data", "input4_label").
+isMember("raw_video", "mod2out_label").
+isMember("proprietary_data", "mod2out_label").
+// uncommenting this makes it label-check
+// isMember("user_selection", "mod2out_label").
+
+.decl test_label_checks(x: number)
+
+test_label_checks(1) :- moduleLabelChecks(
+    $FlatMod(
+        $Cons("some_struct.a", $Cons("some_struct.b",
+            $Cons("other_input", $Nil()))),
+        $Cons("mod1out", $Nil())
+    )
+).
+
+test_label_checks(2) :- moduleLabelChecks(
+    $FlatMod(
+        $Cons("mod1out", $Cons("input4", $Nil())),
+        $Cons("mod2out", $Nil())
+    )
+).
+
+.output test_label_checks
