@@ -45,13 +45,15 @@ isMember("user_selection", "some_struct.b_label").
 isMember("user_selection", "mod1out_label").
 isMember("raw_video", "mod1out_label").
 
-
-// Module 2 should not label check
+// Module 2 should not label check without the downgrade
 isMember("proprietary_data", "input4_label").
-isMember("raw_video", "mod2out_label").
 isMember("proprietary_data", "mod2out_label").
-// uncommenting this makes it label-check
-// isMember("user_selection", "mod2out_label").
+
+// Owners of labels, downgrades: (really what we want eventually is owners of
+// labelElts, so will iterate)
+ownsLabel("Alice", "mod1out_label").
+says_downgradesTo("Alice", "mod1out", "mod1out_label", "public").
+// there are no facts of the form isMember(_, "public"), so it really is public
 
 .decl test_label_checks(x: number)
 
@@ -70,4 +72,21 @@ test_label_checks(2) :- moduleLabelChecks(
     )
 ).
 
+test_label_checks(3) :- notModuleLabelChecks(
+    $FlatMod(
+        $Cons("mod1out", $Cons("input4", $Nil())),
+        $Cons("mod2out", $Nil())
+    )
+).
+
+test_label_checks(4) :- notModuleLabelChecksWithDown(
+    $FlatMod(
+        $Cons("mod1out", $Cons("input4", $Nil())),
+        $Cons("mod2out", $Nil())
+    )
+).
+
 .output test_label_checks
+.output fieldHasLabelDown
+.output notModuleLabelChecksWithDown
+.output notModuleLabelChecks

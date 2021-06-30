@@ -6,8 +6,15 @@
 
 .decl moduleLabelChecks(m: flatModule)
 .decl notModuleLabelChecks(m: flatModule)
+.decl notModuleLabelChecksWithDown(m: flatModule)
 
 .decl fieldHasLabel(f: fieldName, l: label)
+
+// the following is the translation of "p says downgradesTo(l1, l2)"
+// from secpal into datalog
+.decl says_downgradesTo(p: symbol, f: fieldName, l_from: label, l_to: label)
+.decl ownsLabel(p: symbol, l: label)
+.decl fieldHasLabelDown(f: fieldName, l: label)
 
 // Intuitively, the label of a module is the join
 // over the label of its inputs, and it label checks
@@ -46,6 +53,13 @@
 // A module does not labelcheck if there are fields
 // in the input/output lists such that the input label
 // does not flow to the output label
+
+// What we actually want is for labelElts to have owners rather
+// than labels. So this rule will need to be iterated upon.
+fieldHasLabel(f, l) :- 
+    fieldHasLabel(f, l_old), ownsLabel(p, l_old),
+    says_downgradesTo(p, f, l_old, l).
+
 notModuleLabelChecks($FlatMod (readFields, writtenFields)) :-
     groundedList(readFields), groundedList(writtenFields),
     fieldListContains(readFields, fr),
@@ -53,9 +67,23 @@ notModuleLabelChecks($FlatMod (readFields, writtenFields)) :-
     fieldHasLabel(fr, lr), fieldHasLabel(fw, lw),
     notSubset(lr, lw).
 
+// fieldHasLabel(f, l) :-
+//     fieldHasLabel(f, l_old), ownsLabel(p
+
+// notModuleLabelChecksWithDown($FlatMod (readFields, writtenFields)) :-
+//     groundedList(readFields), groundedList(writtenFields),
+//     fieldListContains(readFields, fr),
+//     fieldListContains(writtenFields, fw),
+//     fieldHasLabelDown(fr, lr), fieldHasLabel(fw, lw),
+//     notSubset(lr, lw).
+
 moduleLabelChecks($FlatMod (readFields, writtenFields)) :- 
     groundedList(readFields), groundedList(writtenFields),
     !notModuleLabelChecks($FlatMod(readFields, writtenFields)).
+
+// moduleLabelChecks($FlatMod (readFields, writtenFields)) :- 
+//     groundedList(readFields), groundedList(writtenFields),
+//     !notModuleLabelChecksWithDown($FlatMod(readFields, writtenFields)).
 
 // ---- ground lowering
 groundedLabel(l) :- fieldHasLabel(_, l).
