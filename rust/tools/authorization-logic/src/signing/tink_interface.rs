@@ -15,13 +15,13 @@ fn deserialize_claim(claim_bin: Vec<u8>)-> Vec<AstAssertion> {
 }
 
 pub fn serialize_to_file(claim: &Vec<AstAssertion>,
-                         filename: &String) -> Result<(), Error> {
+                         filename: &str) -> Result<(), Error> {
     let mut file = File::create(filename)?;
     file.write_all(&serialize_claim(claim))?;
     Ok(())
 }
 
-pub fn deserialize_from_file(filename: &String)
+pub fn deserialize_from_file(filename: &str)
     -> Result<Vec<AstAssertion>, Error> {
     let mut file = File::open(filename)?;
     let mut contents = Vec::new();
@@ -32,15 +32,15 @@ pub fn deserialize_from_file(filename: &String)
 // At present, this function is only used in tests, so a warning will be given
 // that this is not used. In the future, a script for generating keys might
 // also use this outside of tests.
-pub fn store_new_keypair_cleartext(pub_key_file: &String,
-        priv_key_file: &String) {
+pub fn store_new_keypair_cleartext(pub_key_file: &str,
+        priv_key_file: &str) {
     tink_signature::init();
 
-    // create new signing keypair
+    // Create a new signing keypair.
     let key_handle = tink_core::keyset::Handle::new(
         &tink_signature::ecdsa_p256_key_template()).unwrap();
 
-    // write the new private key
+    // Write the new private key.
     let prv_file = File::create(priv_key_file).unwrap();
     // See also tink_core::keyset::BinWriter/BinReader
     let mut prv_writer = keyset::JsonWriter::new(prv_file);
@@ -48,22 +48,21 @@ pub fn store_new_keypair_cleartext(pub_key_file: &String,
     // to store the private key using a google cloud or aws key manager.
     keyset::insecure::write(&key_handle, &mut prv_writer).unwrap();
 
-    // write the new public key
+    // Write the new public key.
     let pub_key_handle = key_handle.public().unwrap();
     let pub_file = File::create(pub_key_file).unwrap();
     let mut pub_writer = keyset::JsonWriter::new(pub_file);
     keyset::insecure::write(&pub_key_handle, &mut pub_writer).unwrap();
 }
 
-pub fn sign_claim(priv_key_file: &String, signature_file: &String, 
+pub fn sign_claim(priv_key_file: &str, signature_file: &str, 
         claim: &Vec<AstAssertion>) {
-    // read private key from file
+    // Read private key from file.
     let prv_file = File::open(priv_key_file).unwrap();
     let mut json_reader = keyset::JsonReader::new(prv_file);
     let priv_kh = keyset::insecure::read(&mut json_reader).unwrap();
 
-    // write signature to file
-    // let bytes = b"bytes to test signing";
+    // Write the signature to a file.
     let bytes = serialize_claim(&claim);
     let signer = tink_signature::new_signer(&priv_kh).unwrap();
     let signature = signer.sign(&bytes).unwrap();
@@ -72,15 +71,14 @@ pub fn sign_claim(priv_key_file: &String, signature_file: &String,
     sig_file.write(&signature).unwrap();
 }
 
-pub fn verify_claim(pub_key_file: &String,
-        signature_file: &String, claim: &Vec<AstAssertion>) 
+pub fn verify_claim(pub_key_file: &str,
+        signature_file: &str, claim: &Vec<AstAssertion>) 
             -> Result<(), TinkError> {
-    // read pub key from file
+    // Read the pub key from a file.
     let pub_file = File::open(pub_key_file).unwrap();
     let mut json_reader = keyset::JsonReader::new(pub_file);
     let pub_kh = keyset::insecure::read(&mut json_reader).unwrap();
 
-    // let plaintext = b"bytes to test signing";
     let plaintext = serialize_claim(&claim);
     let v = tink_signature::new_verifier(&pub_kh).unwrap();
     let mut signature_buf = Vec::new();

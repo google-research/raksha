@@ -267,7 +267,7 @@ impl LoweringToDatalogPass {
     }
 
     fn query_to_dlir(&mut self, query: &AstQuery) -> DLIRAssertion {
-        // the assertions that are normally generated during the translation
+        // The assertions that are normally generated during the translation
         // from facts to dlir facts are not used for queries
         let (main_fact, _) = self.fact_to_dlir(&query.fact,
                                                    &query.principal);

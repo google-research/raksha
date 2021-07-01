@@ -26,7 +26,6 @@ fn run_antlr_on(
         .arg("-o")
         .arg("antlr_gen")
         .arg(&full_file)
-        .arg("-visitor") // This is not actually strictly needed
         .spawn()
         .expect("antlr4rust jar failed to start")
         .wait_with_output()?;

@@ -32,7 +32,7 @@ impl<'a> SouffleEmitter {
     // to predicates before they are added to the set of declarations so that
     // there are no duplicate delcarations (which would otherwise happen
     // whenever a predicate is referenced more than once with different
-    // arguments)
+    // arguments).
     fn pred_to_declaration(p: &'a AstPredicate) -> AstPredicate {
         AstPredicate {
             name: p.name.clone(), 

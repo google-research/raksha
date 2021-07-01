@@ -91,15 +91,15 @@ Programs are sequences of assertions that are attributed to principals which we
 call statements. Statements can either be _facts_ of the form
 
 ```
-<principal_name> says <predicate_name>(arg_1, ..., arg_n).
+<principal_name> says <predicate_name>(arg_0, ..., arg_n).
 ```
 
 meaning that the principal believes predicate (applied to its arguments) to be
 true, or _rules_ of the form
 
 ```
-<principal_name> says <predicate_name>(arg_1, ..., arg_n) :-
-    <pred_1>(arg_1, ..., arg_n), ..., <pred_n>(arg_1, ..., arg_n).
+<principal_name> says <predicate_name>(arg_0, ..., arg_n) :-
+    <pred_0>(arg_0, ..., arg_n), ..., <pred_n>(arg_0, ..., arg_n).
 ```
 
 which specify the conditions under which the principal believes the predicate on
@@ -218,7 +218,7 @@ Statements can be exported using the syntax:
 
 ```
 <principal_name> says {
-    <statement_1> ...
+    <statement_0> ...
     <statement_n>
 } exportTo full/path/to/filename
 ```

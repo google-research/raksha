@@ -1,6 +1,5 @@
 // This file contains the datalog IR (DLIR) which makes the translation from
-// this authorization logic into datalog simpler. This file should not be
-// confused with the Docklands Light Railway (DLR).
+// this authorization logic into datalog simpler.
 
 use crate::ast::*;
 

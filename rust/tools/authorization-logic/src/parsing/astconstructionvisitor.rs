@@ -4,7 +4,6 @@ use antlr_rust::tree::{ParseTree};
 use antlr_rust::InputStream;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use crate::ast::*;
-// use crate::parsing::authlogicvisitor::AuthLogicVisitor;
 
 // parse_program is the only public interface to the parser. It produces an AST
 // tree rooted with a program node when given the textual representation of a
@@ -142,9 +141,6 @@ fn construct_hornclause(ctx: &HornClauseAssertionContext)
 }
 
 fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
-        // let prin = construct_principal(&ctx.principal().unwrap());
-        // let assertion = construct_assertion(&ctx.assertion().unwrap());
-        // AstSaysAssertion { prin, assertion }
         match ctx {
             SaysAssertionContextAll::SaysSingleContext(ctx_prime) => {
                 let prin = construct_principal(&ctx_prime.principal().unwrap());
