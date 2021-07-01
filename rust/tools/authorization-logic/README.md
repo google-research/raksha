@@ -1,4 +1,5 @@
 # An Authorization Logic
+
 This directory contains a research prototype implementation of an authorization 
 logic. Authorization logic is a style of policy language for authorization -
 deciding whether or not performing some action should be allowed. Examples of
@@ -10,7 +11,7 @@ and [NAL](https://www.cs.cornell.edu/fbs/publications/NexusNalRationale.pdf).
 At time of writing, this protoype is about the same as SecPal. A longer 
 description of authorization logic is given below, followed by instructions.
 
-This authoriation logic compiles programs from the source language into the 
+This authorization logic compiles programs from the source language into the 
 [Souffle](https://souffle-lang.github.io/index.html) implementation of datalog.
 Souffle should be installed by following 
 [these instructions](https://souffle-lang.github.io/install).
@@ -18,6 +19,7 @@ Souffle should be installed by following
 ## Summary of Authorization Logic
 
 ### Logic Programming
+
 Authorization logics extend some logic programming language (e.g. Datalog, 
 Prolog), and permit an action only when a specific predicate can be proved 
 using inference rules and facts written in this language. Generally, 
@@ -26,9 +28,10 @@ policy language and permits the guarded actions only when presented with a
 proof of the proposition used to grant access.
 
 ### Principals and decentralization
+
 The key feature of authorization logic is that facts are decentralized - each 
-fact or rule is attributed to a principal (or actor). For example, HR says 
-isManager(Alice) means that HR believes or claims that isManager(Alice) is 
+fact or rule is attributed to a principal (or actor). For example, `HR says 
+isManager(Alice)` means that `HR` believes or claims that `isManager(Alice)` is 
 true. Decentralizing facts in this way ensures that a resource owner retains 
 control over access to resources in an environment with mutually distrusting 
 principals. As an example, to use the rule
@@ -36,10 +39,11 @@ principals. As an example, to use the rule
 "FileServer" says canAccess(file, requestor) :- isManager(requestor),                
                                               isValidFile(file).
 ```
-requires proving that FileServer says isManager(requestor) and FileServer says 
-isValidFile(file). 
+requires proving that `FileServer` says `isManager(requestor)` and 
+`FileServer says isValidFile(file)`. 
 
 ### Delegation
+
 Because authorization logic models beliefs held by various parties rather than 
 a single global truth believed by all, we need a way to export facts from one 
 principal to another. In authorization logic, this is done by delegation. For 
@@ -48,16 +52,16 @@ example:
 ```
 FileServer says HR canSay isManager(x).
 ```
-means that HR canSay isManager(x) implies FileServer says isManager(x). The 
+means that `HR says isManager(x)` implies `FileServer says isManager(x)`. The 
 exact language-level construct for delegation has varied among authorization 
-logics, but the key point is that this gives one principal (FileServer) a way 
-of specifying when it believes claims made by another (HR). Delegations can 
+logics, but the key point is that this gives one principal (`FileServer`) a way 
+of specifying when it believes claims made by another (`HR`). Delegations can 
 also be done conditionally by placing them on the left of a proof rule.
 
-
 ### Authenticating policies
-When FileServer imports a policy statement from HR, we want to know that a 
-claim genuinely originated from HR. To authenticate policy statements, each 
+
+When `FileServer` imports a policy statement from `HR`, we want to know that a 
+claim genuinely originated from `HR`. To authenticate policy statements, each 
 principal is also associated with an asymmetric key-pair. When a policy 
 statement is exported by a principal, the statement is digitally signed, the 
 signature is sent to the recipient along with a serialization of the policy 
@@ -66,16 +70,18 @@ claim, and the recipient uses the public key to check the signature.
 ## Instructions
 
 ### Running a program
-To compile a program, run:
+
+To compile a program called FILENAME stored in INPUT\_DIR, run:
 ```
 cargo run FILENAME INPUT_DIR OUTPUT_DIR
 ```
-which will result in a souffle file (with the extension .dl) in OUTPUT\_DIR. If 
+which will result in a Souffle file called FILENAME.dl in OUTPUT\_DIR. If 
 Souffle is installed, it will be run on the generated code.
 
 ### Language Guide
 
 #### Statements, variables, and constants
+
 Programs are sequences of assertions that are attributed to principals which we 
 call statements. Statements can either be _facts_ of the form
 ```
@@ -106,6 +112,10 @@ not. For example,
 gives a rule for proving somePred for just a particular argument, `"x"`, 
 whereas the same rule replaced with `x` can be applied to any argument about 
 which we can prove `"Alice" says condition(x)`.
+
+Principals and other kinds of arguments share the same synatx -- they can be
+any sequence of lower or uppercase letters and digits, but they must begin with
+a letter. For constants, the same syntax is used within the quotes.
 
 Principal names can also be used as arguments to predicates, and quotes are used
 indicate whether a principal is a constant or variable in the same way.
@@ -150,6 +160,7 @@ Combining attributes with `canActAs` gives a way to define _roles_ which group
 privileges together.
 
 #### Queries
+
 Queries test if it is possible to prove a specific predicate given the facts 
 and rules. Queries can be written using the syntax:
 ```
@@ -171,8 +182,14 @@ To support exporting, a principal must be bound to a private key. Private and
 public keys must be serialized in JSON. See 
 [tink-rust](https://github.com/project-oak/tink-rust) for a way to generate 
 key-pairs. Private keys must be serialized in plaintext, so care must be taken.
+Anyone with a principal's private key can write (possibly forged) signatures
+as this principal, so the system in which this
+policy language is used must ensure these keys are only accessible by the right
+party. Future versions of this software may also support key management 
+services such as [Google Key Management](https://cloud.google.com/security-key-management)
+or [AWS Key Management Service](https://aws.amazon.com/kms/).
 
-A pricate key is bound to a principal using the syntax
+A predicate key is bound to a principal using the syntax
 ```
 BindPrivKey "<principal_name>" full/path/to/priv_key.json
 ```
@@ -187,7 +204,7 @@ Statements can be exported using the syntax:
 
 where the filename does not include a file extension. During compilation, this 
 will generate:
- - 1. filename.obj -- a serailization of the list of statements
+ - 1. filename.obj -- a serialization of the list of statements
 (currently serialization is just done in binary), and 
  - 2. filename.sig -- an ECDSA signature of 
 the list of statements using the private key bound to `<principal_name>`.
