@@ -1,15 +1,15 @@
 use serde::*;
 
-// Hash and Eq are implemented by AstPrincipal because they are used as keys
-// in HashMaps in the implementation of signature exporting
+/// Hash and Eq are implemented by AstPrincipal because they are used as keys
+/// in HashMaps in the implementation of signature exporting
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct AstPrincipal {
     pub name: String
 }
 
-// Hash and Eq are needed so that AstPred can be used in a HashSet in
-// SouffleEmitter. The derive strategy for Eq does not work, so it is
-// implemented manually.
+/// Hash and Eq are needed so that AstPred can be used in a HashSet in
+/// SouffleEmitter. The derive strategy for Eq does not work, so it is
+/// implemented manually.
 #[derive(Debug, Hash, Clone, Serialize, Deserialize)]
 pub struct AstPredicate {
     pub name: String,

@@ -9,8 +9,9 @@ pub struct SouffleEmitter {
 }
 
 impl<'a> SouffleEmitter {
-    // This is the only public method of the souffle emitter. When given
-    // A Datalog IR (DLIR) program, it produces text for Souffle.
+    /// The only public method of the souffle emitter is `emit_program`.
+    /// When given A Datalog IR (DLIR) program, it produces a Souffle code
+    /// as a `String`.
     pub fn emit_program(p: &DLIRProgram) -> String {
         let mut emitter = SouffleEmitter::new();
         // It is important to generate the body first in this case
