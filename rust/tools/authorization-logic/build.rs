@@ -48,7 +48,7 @@ fn main() {
     // instructions to build it: https://github.com/rrevenantt/antlr4rust
 
     let antlr_path = format!(
-        "{}/antlr4rust.jar",
+        "{}/third_party/antlr4-rust/antlr4rust.jar",
         env::current_dir()
             .unwrap()
             .into_os_string()
