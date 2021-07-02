@@ -30,8 +30,6 @@ fn run_antlr_on(
         .expect("antlr4rust jar failed to start")
         .wait_with_output()?;
 
-    println!("cargo:rerun-if-changed=src/parsing/{}.g4", grammar_file);
-
     Ok(())
 }
 
@@ -40,14 +38,12 @@ fn main() {
     // At the moment, the jar for antlr is included locally. See these
     // instructions to build it: https://github.com/rrevenantt/antlr4rust
 
-    let antlr_path = env::current_dir()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_owned()
-        + "/antlr4rust.jar";
+    let antlr_path = format!("{}/antlr4rust.jar",
+                env::current_dir()
+                .unwrap()
+                .into_os_string()
+                .into_string()
+                .unwrap());
 
     run_antlr_on("AuthLogic", &antlr_path).unwrap();
-    println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=antlr4rust.jar");
 }
