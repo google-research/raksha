@@ -19,9 +19,9 @@ pub mod test {
     use crate::souffle::souffle_interface::*;
     use std::process::Command;
 
-    // This gives the name of an authorization logic program in
-    // test_inputs, and a vector that relates the names of queries
-    // to the boolean values they should have.
+    /// The `QueryTest` struct gives the name of an authorization logic program in
+    /// test_inputs, and a vector that relates the names of queries
+    /// to the boolean values they should have.
     pub struct QueryTest<'a> {
         pub filename: &'a str,
         pub query_expects: Vec<(&'a str, bool)>, /* Query_expects is a vec not a HashMap because
