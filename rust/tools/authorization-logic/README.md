@@ -200,11 +200,14 @@ when importing.
 To support exporting, a principal must be bound to a private key. Private and
 public keys must be serialized in JSON. See
 [tink-rust](https://github.com/project-oak/tink-rust) for a way to generate
-key-pairs. Private keys must be serialized in plaintext, so care must be taken.
-Anyone with a principal's private key can write (possibly forged) signatures as
-this principal, so the system in which this policy language is used must ensure
-these keys are only accessible by the right party. Future versions of this
-software may also support key management services such as
+key-pairs and see
+[this code](https://github.com/project-oak/tink-rust/blob/main/core/src/keyset/json_io.rs)
+to better understand the serialization format for the keys. Private keys must be
+serialized in plaintext, so care must be taken. Anyone with a principal's
+private key can write (possibly forged) signatures as this principal, so the
+system in which this policy language is used must ensure these keys are only
+accessible by the right party. Future versions of this software may also support
+key management services such as
 [Google Key Management](https://cloud.google.com/security-key-management) or
 [AWS Key Management Service](https://aws.amazon.com/kms/).
 
