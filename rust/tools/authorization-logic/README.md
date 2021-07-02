@@ -126,7 +126,7 @@ gives a rule for proving somePred for just a particular argument, `"x"`, whereas
 the same rule replaced with `x` can be applied to any argument about which we
 can prove `"Alice" says condition(x)`.
 
-Principals and other kinds of arguments share the same synatx -- they can be any
+Principals and other kinds of arguments share the same syntax -- they can be any
 sequence of lower or uppercase letters and digits, but they must begin with a
 letter. For constants, the same syntax is used within the quotes.
 
