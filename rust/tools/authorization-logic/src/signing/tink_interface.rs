@@ -1,7 +1,9 @@
 use crate::ast::*;
-use std::fs::File;
+use std::{
+    fs::File,
+    io::{Error, Read, Write},
+};
 use tink_core::{keyset, TinkError};
-use std::io::{Read,Write, Error};
 
 /// The file `tink_interface.rs` contains all functions that interface between
 /// this authorization logic implementation and the tink library for
@@ -12,23 +14,21 @@ use std::io::{Read,Write, Error};
 // The specific choice of how serialization is done is encapsulated because it
 // is likely to change. Binaries are brittle way of serializing objects, but
 // this was reasonable to get running and is easy to change later.
-fn serialize_claim(claim: &Vec<AstAssertion>)-> Vec<u8> {
+fn serialize_claim(claim: &Vec<AstAssertion>) -> Vec<u8> {
     bincode::serialize(&claim).unwrap()
 }
 
-fn deserialize_claim(claim_bin: Vec<u8>)-> Vec<AstAssertion> {
+fn deserialize_claim(claim_bin: Vec<u8>) -> Vec<AstAssertion> {
     bincode::deserialize(&claim_bin[..]).unwrap()
 }
 
-pub fn serialize_to_file(claim: &Vec<AstAssertion>,
-                         filename: &str) -> Result<(), Error> {
+pub fn serialize_to_file(claim: &Vec<AstAssertion>, filename: &str) -> Result<(), Error> {
     let mut file = File::create(filename)?;
     file.write_all(&serialize_claim(claim))?;
     Ok(())
 }
 
-pub fn deserialize_from_file(filename: &str)
-    -> Result<Vec<AstAssertion>, Error> {
+pub fn deserialize_from_file(filename: &str) -> Result<Vec<AstAssertion>, Error> {
     let mut file = File::open(filename)?;
     let mut contents = Vec::new();
     file.read_to_end(&mut contents)?;
@@ -38,13 +38,12 @@ pub fn deserialize_from_file(filename: &str)
 // At present, this function is only used in tests, so a warning will be given
 // that this is not used. In the future, a script for generating keys might
 // also use this outside of tests.
-pub fn store_new_keypair_cleartext(pub_key_file: &str,
-        priv_key_file: &str) {
+pub fn store_new_keypair_cleartext(pub_key_file: &str, priv_key_file: &str) {
     tink_signature::init();
 
     // Create a new signing keypair.
-    let key_handle = tink_core::keyset::Handle::new(
-        &tink_signature::ecdsa_p256_key_template()).unwrap();
+    let key_handle =
+        tink_core::keyset::Handle::new(&tink_signature::ecdsa_p256_key_template()).unwrap();
 
     // Write the new private key.
     let prv_file = File::create(priv_key_file).unwrap();
@@ -65,8 +64,7 @@ pub fn store_new_keypair_cleartext(pub_key_file: &str,
 /// key, the name of an output file that will store a signature, and a vector
 /// of assertions. It serializes the vector of assertions, generates a signature
 /// of this serialization using the given key, and writes this signature to a file.
-pub fn sign_claim(priv_key_file: &str, signature_file: &str, 
-        claim: &Vec<AstAssertion>) {
+pub fn sign_claim(priv_key_file: &str, signature_file: &str, claim: &Vec<AstAssertion>) {
     // Read private key from file.
     let prv_file = File::open(priv_key_file).unwrap();
     let mut json_reader = keyset::JsonReader::new(prv_file);
@@ -86,9 +84,11 @@ pub fn sign_claim(priv_key_file: &str, signature_file: &str,
 /// AstAssertions, and a vector of AstAssertions. It uses the given public key
 /// to check the signature against the object and throws an error if the check
 /// fails.
-pub fn verify_claim(pub_key_file: &str,
-        signature_file: &str, claim: &Vec<AstAssertion>) 
-            -> Result<(), TinkError> {
+pub fn verify_claim(
+    pub_key_file: &str,
+    signature_file: &str,
+    claim: &Vec<AstAssertion>,
+) -> Result<(), TinkError> {
     // Read the pub key from a file.
     let pub_file = File::open(pub_key_file).unwrap();
     let mut json_reader = keyset::JsonReader::new(pub_file);
@@ -97,8 +97,9 @@ pub fn verify_claim(pub_key_file: &str,
     let plaintext = serialize_claim(&claim);
     let v = tink_signature::new_verifier(&pub_kh).unwrap();
     let mut signature_buf = Vec::new();
-    File::open(&signature_file).unwrap()
-        .read_to_end(&mut signature_buf).unwrap();
+    File::open(&signature_file)
+        .unwrap()
+        .read_to_end(&mut signature_buf)
+        .unwrap();
     v.verify(&signature_buf, &plaintext)
 }
-

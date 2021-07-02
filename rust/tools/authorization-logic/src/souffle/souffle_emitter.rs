@@ -1,6 +1,5 @@
+use crate::{ast::*, souffle::datalog_ir::*};
 use std::collections::HashSet;
-use crate::ast::*;
-use crate::souffle::datalog_ir::*;
 
 pub struct SouffleEmitter {
     // This is a set of predicates that need to be declared. This set is
@@ -24,7 +23,9 @@ impl<'a> SouffleEmitter {
     }
 
     fn new() -> SouffleEmitter {
-        SouffleEmitter { decls: HashSet::new() }
+        SouffleEmitter {
+            decls: HashSet::new(),
+        }
     }
 
     // This function produces a normalized version of predicates to
@@ -36,66 +37,69 @@ impl<'a> SouffleEmitter {
     // arguments).
     fn pred_to_declaration(p: &'a AstPredicate) -> AstPredicate {
         AstPredicate {
-            name: p.name.clone(), 
+            name: p.name.clone(),
             args: (0..p.args.len())
                 .map(|i| String::from("x") + &i.to_string())
-                .collect()
+                .collect(),
         }
     }
 
     fn emit_pred(&mut self, p: &'a AstPredicate) -> String {
         let decl = SouffleEmitter::pred_to_declaration(p);
         self.decls.insert(decl);
-        format!("{}({})", &p.name,
-            p.args.join(", "))
+        format!("{}({})", &p.name, p.args.join(", "))
     }
 
     fn emit_assertion(&mut self, a: &'a DLIRAssertion) -> String {
         match a {
-            DLIRAssertion::DLIRFactAssertion { p } => {
-                self.emit_pred(p) + "."
-            }
+            DLIRAssertion::DLIRFactAssertion { p } => self.emit_pred(p) + ".",
             DLIRAssertion::DLIRCondAssertion { lhs, rhs } => {
-                format!("{} :- {}.",
-                        self.emit_pred(lhs),
-                        rhs.iter()
-                            .map(|ast_pred| self.emit_pred(ast_pred))
-                            .collect::<Vec<_>>()
-                            .join(", ")
-                    )
+                format!(
+                    "{} :- {}.",
+                    self.emit_pred(lhs),
+                    rhs.iter()
+                        .map(|ast_pred| self.emit_pred(ast_pred))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
             }
         }
     }
 
     fn emit_program_body(&mut self, p: &'a DLIRProgram) -> String {
-        p.assertions.iter()
+        p.assertions
+            .iter()
             .map(|x| self.emit_assertion(&x))
             .collect::<Vec<_>>()
             .join("\r\n")
     }
 
     fn emit_decl(pred: &'a AstPredicate) -> String {
-        format!(".decl {}({})", 
-                &pred.name,
-                &pred.args.iter()
-                    .map(|x| format!("{}: symbol", x))
-                    .collect::<Vec<_>>()
-                    .join(", ")
+        format!(
+            ".decl {}({})",
+            &pred.name,
+            &pred
+                .args
+                .iter()
+                .map(|x| format!("{}: symbol", x))
+                .collect::<Vec<_>>()
+                .join(", ")
         )
     }
 
     fn emit_declarations(&self) -> String {
-        self.decls.iter()
+        self.decls
+            .iter()
             .map(|x| SouffleEmitter::emit_decl(x))
             .collect::<Vec<_>>()
             .join("\r\n")
     }
 
     fn emit_outputs(&self, p: &'a DLIRProgram) -> String {
-        p.outputs.iter()
+        p.outputs
+            .iter()
             .map(|o| String::from(".output ") + &o)
             .collect::<Vec<String>>()
             .join("\r\n")
     }
-
 }

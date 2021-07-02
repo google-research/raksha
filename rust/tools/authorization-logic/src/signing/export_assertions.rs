@@ -1,9 +1,8 @@
-use crate::ast::*;
-use crate::signing::tink_interface::*;
+use crate::{ast::*, signing::tink_interface::*};
 use std::collections::HashMap;
 
 /// The file `export_assertions.rs` contains a compiler pass
-/// that handles executing of policy statements. 
+/// that handles executing of policy statements.
 /// For each `SaysAssertion` with an export clause, it serializes the object
 /// that corresponds to the (set of) assertions to a file and it produces an
 /// ECDSA signature of that object in a separate file. It operates on the
@@ -15,15 +14,15 @@ use std::collections::HashMap;
 type BindingEnv = HashMap<AstPrincipal, String>;
 
 fn collect_priv_bindings(prog: &AstProgram) -> BindingEnv {
-    prog.priv_binds.iter()
+    prog.priv_binds
+        .iter()
         .map(|kb| (kb.principal.clone(), kb.filename.clone()))
         .collect()
 }
 
-fn export_says_assertion(says_assertion: &AstSaysAssertion,
-         priv_env: &BindingEnv) {
+fn export_says_assertion(says_assertion: &AstSaysAssertion, priv_env: &BindingEnv) {
     match &says_assertion.export_file {
-        None => { }
+        None => {}
         Some(filename) => {
             let obj_file = filename.clone() + ".obj";
             let sig_file = filename.clone() + ".sig";

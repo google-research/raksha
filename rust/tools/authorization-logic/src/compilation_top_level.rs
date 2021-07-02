@@ -1,9 +1,10 @@
+use crate::{
+    ast::*,
+    parsing::astconstructionvisitor,
+    signing::{export_assertions, import_assertions},
+    souffle::souffle_interface,
+};
 use std::fs;
-use crate::ast::*;
-use crate::parsing::astconstructionvisitor;
-use crate::souffle::souffle_interface;
-use crate::signing::export_assertions;
-use crate::signing::import_assertions;
 
 /// The file `compilation_top_level` has the top level function, `compile`
 /// to compile to souffle. This is a separate file and module from
@@ -23,7 +24,6 @@ fn source_file_to_ast(filename: &str, in_dir: &str) -> AstProgram {
 pub fn compile(filename: &str, in_dir: &str, out_dir: &str) {
     let prog = source_file_to_ast(filename, in_dir);
     let prog_with_imports = import_assertions::handle_imports(&prog);
-    souffle_interface::ast_to_souffle_file(&prog_with_imports,
-                                        filename, out_dir);
+    souffle_interface::ast_to_souffle_file(&prog_with_imports, filename, out_dir);
     export_assertions::export_assertions(&prog_with_imports);
 }

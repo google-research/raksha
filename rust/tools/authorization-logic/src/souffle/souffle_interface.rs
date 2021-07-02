@@ -1,19 +1,19 @@
-/// This file contains code for interfacing with souffle (a dialect and 
+/// This file contains code for interfacing with souffle (a dialect and
 /// implementation of Datalog)
 use std::fs;
 use std::process::Command;
 
-use crate::parsing::astconstructionvisitor;
-use crate::souffle::lowering_ast_datalog::*;
-use crate::souffle::souffle_emitter::*;
-use crate::ast::*;
+use crate::{
+    ast::*,
+    parsing::astconstructionvisitor,
+    souffle::{lowering_ast_datalog::*, souffle_emitter::*},
+};
 
 /// Given a filename containing policy code `emit_souffle` parses it,
 /// constructs an AST, translates the AST to the datalogIR, and emits a string
 /// contianing souffle code.
 pub fn emit_souffle(filename: &str) {
-    let source = fs::read_to_string(filename)
-        .expect("failed to read input in emit_souffle");
+    let source = fs::read_to_string(filename).expect("failed to read input in emit_souffle");
     let prog = astconstructionvisitor::parse_program(&source[..]);
     let dlir_prog = LoweringToDatalogPass::lower(&prog);
     let souffle_code = SouffleEmitter::emit_program(&dlir_prog);
@@ -23,8 +23,7 @@ pub fn emit_souffle(filename: &str) {
 /// Given a filename containing policy code `input_to_souffle_file` parses it,
 /// translates it to datalogIR, and emits souffle code to a new file with the
 /// same name as the input but with the .dl extension in the out_dir
-pub fn input_to_souffle_file(filename: &str, in_dir: &str,
-                             out_dir: &str) {
+pub fn input_to_souffle_file(filename: &str, in_dir: &str, out_dir: &str) {
     let source = fs::read_to_string(&format!("{}/{}", in_dir, filename))
         .expect("failed to read input in input_to_souffle_file");
     let prog = astconstructionvisitor::parse_program(&source[..]);
@@ -38,8 +37,7 @@ pub fn input_to_souffle_file(filename: &str, in_dir: &str,
 /// This is needed in addition to the above function since there are other
 /// passes that work on the highest level IR besides the one used to emit the
 /// main code.
-pub fn ast_to_souffle_file(prog: &AstProgram, filename: &str,
-                           out_dir: &str) {
+pub fn ast_to_souffle_file(prog: &AstProgram, filename: &str, out_dir: &str) {
     let dlir_prog = LoweringToDatalogPass::lower(&prog);
     let souffle_code = SouffleEmitter::emit_program(&dlir_prog);
     fs::write(&format!("{}/{}.dl", out_dir, filename), souffle_code)
@@ -63,7 +61,6 @@ pub fn run_souffle(filename: &str, outdir: &str) {
 /// assertions that contain one entry if they are true and are empty
 /// if they are false. These queries are emitted as CSV files by souffle.
 pub fn is_file_empty(filename: &str) -> bool {
-    let contents = fs::read_to_string(filename)
-        .expect("is_file_empty failed to read");
-    contents == "" 
+    let contents = fs::read_to_string(filename).expect("is_file_empty failed to read");
+    contents == ""
 }

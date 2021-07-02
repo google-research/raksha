@@ -1,15 +1,9 @@
 // This is adapted from:
 // https://github.com/rrevenantt/antlr4rust/blob/master/build.rs
 
-use std::env;
-use std::error::Error;
-use std::process::Command;
+use std::{env, error::Error, process::Command};
 
-fn run_antlr_on(
-    grammar_file: &str,
-    antlr_path: &str
-    )-> Result<(), Box<dyn Error>> {
-
+fn run_antlr_on(grammar_file: &str, antlr_path: &str) -> Result<(), Box<dyn Error>> {
     let parsing_subdir = env::current_dir().unwrap().join("src/parsing");
     let full_file = grammar_file.to_owned() + ".g4";
 
@@ -34,16 +28,17 @@ fn run_antlr_on(
 }
 
 fn main() {
-
     // At the moment, the jar for antlr is included locally. See these
     // instructions to build it: https://github.com/rrevenantt/antlr4rust
 
-    let antlr_path = format!("{}/antlr4rust.jar",
-                env::current_dir()
-                .unwrap()
-                .into_os_string()
-                .into_string()
-                .unwrap());
+    let antlr_path = format!(
+        "{}/antlr4rust.jar",
+        env::current_dir()
+            .unwrap()
+            .into_os_string()
+            .into_string()
+            .unwrap()
+    );
 
     run_antlr_on("AuthLogic", &antlr_path).unwrap();
 }

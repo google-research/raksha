@@ -16,6 +16,5 @@ fn main() {
     let in_dir = &args[2];
     let out_dir = &args[3];
     compilation_top_level::compile(filename, in_dir, out_dir);
-    souffle::souffle_interface::run_souffle(
-        &format!("{}/{}.dl", out_dir, filename), out_dir);
+    souffle::souffle_interface::run_souffle(&format!("{}/{}.dl", out_dir, filename), out_dir);
 }
