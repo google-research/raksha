@@ -208,7 +208,7 @@ software may also support key management services such as
 [Google Key Management](https://cloud.google.com/security-key-management) or
 [AWS Key Management Service](https://aws.amazon.com/kms/).
 
-A predicate key is bound to a principal using the syntax
+A private key is bound to a principal using the syntax
 
 ```
 BindPrivKey "<principal_name>" full/path/to/priv_key.json
