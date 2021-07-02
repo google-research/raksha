@@ -1,0 +1,77 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+// We will use the access path abtraction to refer to data during analysis.
+// Consider the following data schema (not a valid syntax):
+//  schema A {
+//    a: Integer
+//    b: schema B {
+//      bf: String
+//    }
+//  }
+//
+// Suppose that data with schema A is stored in a database that is accessible
+// through a handle `h`. `h.a`, `h.b`, and `h.b.bf` are all examples of access
+// paths. For the time being, we will use a `symbol` to represent access paths.
+// However, in the long term, it would make sense to define an ADT for this.
+//
+.type AccessPath <: symbol
+
+// A symbol representing a taint (or information flow) tag. These would be
+// strings of the form "secret", "public", "timestampInMs", etc. Just like
+// `AccessPath`, it would make sense to define an ADT in the long term.
+.type Tag <: symbol
+
+// Is this symbol an access path to some data?
+// (Useful for scoping when negation is involved.)
+.decl isAccessPath(accessPath: AccessPath)
+
+// Is this a Tag?
+// (Useful for scoping when negation is involved.)
+.decl isTag(tag: Tag)
+
+// A data flow edge.
+.decl edge(src: AccessPath, tgt: AccessPath)
+
+// A direct or transitive data flow path.
+.decl path(src: AccessPath, tgt: AccessPath)
+
+// Declares that `accessPath` may have be tainted with `tag`.
+// If false, `accessPath` *definitely* does not `tag` taint at runtime.
+// If true, `accessPath` may have the `tag` taint at runtime.
+.decl mayHaveTag(accessPath: AccessPath, tag: Tag)
+
+// There is a claim that `accessPath` definitely has `tag` taint.
+.decl claimHasTag(accessPath: AccessPath, tag: Tag)
+
+// Some inference rules
+
+// Symbols used in edges are access paths
+isAccessPath(x) :- edge(x, _).
+isAccessPath(y) :- edge(_, y).
+
+// Symbols used in hasTag or mayHaveTag are tags
+isTag(tag) :- claimHasTag(_, tag).
+isTag(tag) :- mayHaveTag(_, tag).
+
+// Transitive paths
+path(from, to) :- edge(from, to).
+path(from, to) :- edge(from, intermediate), path(intermediate, to).
+
+mayHaveTag(tgt, tag) :- claimHasTag(tgt, tag).
+mayHaveTag(tgt, tag) :- edge(src, tgt), mayHaveTag(src, tag).
+
+.output mayHaveTag
