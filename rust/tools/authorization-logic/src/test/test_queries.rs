@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 The Raksha Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #[cfg(test)]
 pub mod test {
     use crate::souffle::souffle_interface::*;
@@ -10,11 +26,9 @@ pub mod test {
         pub filename: &'a str,
         pub query_expects: Vec<(&'a str, bool)>, /* Query_expects is a vec not a HashMap because
                                                   * there is no hashmap! macro for constructing
-                                                  * HashMap
-                                                  * literals. There are crates providing this
-                                                  * macro, but
-                                                  * limiting dependencies is better for
-                                                  * security/verification. */
+                                                  * HashMap literals. There are crates providing
+                                                  * this macro, but limiting dependencies is
+                                                  * better for security/verification */
     }
 
     pub fn run_query_test(t: QueryTest) {
