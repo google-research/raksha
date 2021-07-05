@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// The file `handle_imports` is a compiler pass that imports assertions made by
 /// another principal by deserializing them from a file. Imported
 /// assertions must be accompanied by an ECDSA signature (also serialized) and
@@ -38,7 +39,7 @@ fn handle_one_import(kbenv: &BindingEnv, imp: &AstImport) -> AstSaysAssertion {
     let signature_file = imp.filename.clone() + ".sig";
     let assertion = deserialize_from_file(&(imp.filename.clone() + ".obj")).unwrap();
 
-    // TODO potentially a better error message is needed
+    // TODO: A better error message is needed, potentially.
     verify_claim(&pubkey, &signature_file, &assertion).unwrap();
 
     AstSaysAssertion {

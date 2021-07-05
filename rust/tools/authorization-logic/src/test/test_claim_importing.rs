@@ -21,7 +21,7 @@ mod test {
         test::test_queries::test::QueryTest,
     };
     use std::fs;
-    // this is used for generating keypairs:
+    // This dependency is used for generating keypairs.
     use crate::signing::tink_interface::*;
 
     fn query_test_with_imports(t: QueryTest) {
@@ -47,15 +47,15 @@ mod test {
             &"test_keys/principal1e_priv.json".to_string(),
         );
 
-        // generate exported statements from test_inputs/exporting
+        // This code generates exported statements from test_inputs/exporting.
         compile(
             &"importing_export_half".to_string(),
             &"test_inputs".to_string(),
             &"test_outputs".to_string(),
         );
 
-        // import statements into test_inputs/importing
-        // and check queries for expected results
+        // This code imports statements into test_inputs/importing
+        // and checks queries for expected results.
         query_test_with_imports(QueryTest {
             filename: "importing",
             query_expects: vec![("q1", true), ("q2", false), ("q3", true), ("q4", false)],

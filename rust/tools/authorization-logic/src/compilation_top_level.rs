@@ -20,6 +20,7 @@ use crate::{
     signing::{export_assertions, import_assertions},
     souffle::souffle_interface,
 };
+
 use std::fs;
 
 /// The file `compilation_top_level` has the top level function, `compile`

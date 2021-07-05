@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 use serde::*;
 
 /// Hash and Eq are implemented by AstPrincipal because they are used as keys

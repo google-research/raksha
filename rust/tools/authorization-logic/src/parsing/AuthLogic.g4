@@ -27,7 +27,7 @@ grammar AuthLogic;
 //-----------------------------------------------------------------------------
 // Principals are only superficially syntactically distinct from IDs at the
 // moment, but they are separate syntactic objects because the principal
-// syntax could plausibly change later
+// syntax could plausibly change later.
 principal
     : ID
     ;
@@ -92,15 +92,15 @@ SAYS: 'says';
 CANACTAS: 'canActAs';
 CANSAY: 'canSay';
 // These are related to importing/exporting saysAssertions from other 
-// principals
+// principals.
 EXPORT: 'exportTo';
 IMPORT: 'import';
 BINDEX: 'BindPrivKey';
 BINDIM: 'BindPubKey';
 
 
-// identifiers wrapped in quotes are constants whereas
-// identifiers without quotes are variables
+// Identifiers wrapped in quotes are constants whereas
+// identifiers without quotes are variables.
 ID : ('"')? [a-zA-Z] [_a-zA-Z0-9]* ('"')?;
 PATH : [_a-zA-Z0-9/.]+;
 

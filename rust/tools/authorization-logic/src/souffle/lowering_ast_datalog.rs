@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 use crate::{ast::*, souffle::datalog_ir::*};
 
 /// The file `lowering_ast_datalog` describes the translation from the AST (the

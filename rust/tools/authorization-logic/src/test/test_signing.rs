@@ -17,11 +17,10 @@
 #[cfg(test)]
 mod test {
     use crate::{ast::*, signing::tink_interface::*};
-    // use tink_core::{keyset, TinkError};
 
     #[test]
     fn test_sig_checking() {
-        // generate keypair
+        // Generate a keypair.
         store_new_keypair_cleartext(
             &"test_keys/andrew_pub.json".to_string(),
             &"test_keys/andrew_priv.json".to_string(),
@@ -44,7 +43,7 @@ mod test {
             &test_claim1,
         );
 
-        // signature check should pass
+        // The signature check should pass.
         assert!(verify_claim(
             &"test_keys/andrew_pub.json".to_string(),
             &"test_outputs/claim1.sig".to_string(),
@@ -63,7 +62,7 @@ mod test {
             },
         }];
 
-        // signature check should fail
+        // The signature check should fail.
         assert!(!verify_claim(
             &"test_keys/andrew_pub.json".to_string(),
             &"test_outputs/claim1.sig".to_string(),
@@ -90,7 +89,8 @@ mod test {
             },
         }];
 
-        // sender
+        // This code sets up the files as though a claim
+        // has been sent already so that the receiving side can be tested.
         sign_claim(
             &"test_keys/andrew_priv2.json".to_string(),
             &"test_outputs/claim2.sig".to_string(),
@@ -99,7 +99,7 @@ mod test {
 
         serialize_to_file(&test_claim2, &"test_outputs/claim2.obj".to_string()).unwrap();
 
-        // receiver
+        // This code models the recipient side by deserializing the sent claims.
         let deser_claim = deserialize_from_file(&"test_outputs/claim2.obj".to_string()).unwrap();
 
         assert!(verify_claim(

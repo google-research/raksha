@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// This file contains code for interfacing with souffle (a dialect and
 /// implementation of Datalog)
 use std::fs;

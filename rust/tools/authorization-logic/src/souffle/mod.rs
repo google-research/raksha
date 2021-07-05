@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 mod datalog_ir;
 mod lowering_ast_datalog;
 mod souffle_emitter;

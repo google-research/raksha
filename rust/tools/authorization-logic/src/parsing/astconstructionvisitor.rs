@@ -151,10 +151,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
         SaysAssertionContextAll::SaysSingleContext(ctx_prime) => {
             let prin = construct_principal(&ctx_prime.principal().unwrap());
             let assertions = vec![construct_assertion(&ctx_prime.assertion().unwrap())];
-            let export_file: Option<String> = match ctx_prime.PATH() {
-                Some(_) => Some(ctx_prime.PATH().unwrap().get_text()),
-                None => None,
-            };
+            let export_file = ctx_prime.PATH().map(|p| p.get_text());
             AstSaysAssertion {
                 prin,
                 assertions,
@@ -168,10 +165,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
                 .iter()
                 .map(|x| construct_assertion(x))
                 .collect();
-            let export_file: Option<String> = match ctx_prime.PATH() {
-                Some(_) => Some(ctx_prime.PATH().unwrap().get_text()),
-                None => None,
-            };
+            let export_file = ctx_prime.PATH().map(|p| p.get_text());
             AstSaysAssertion {
                 prin,
                 assertions,
