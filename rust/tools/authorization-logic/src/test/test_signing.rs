@@ -20,6 +20,7 @@ mod test {
 
     #[test]
     fn test_sig_checking() {
+
         // Generate a keypair.
         store_new_keypair_cleartext(
             &"test_keys/andrew_pub.json".to_string(),

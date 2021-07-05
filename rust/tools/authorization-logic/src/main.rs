@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// try blocks are used in antlr4-rust
+// Try blocks are used in antlr4-rust.
 #![feature(try_blocks)]
 
 mod ast;

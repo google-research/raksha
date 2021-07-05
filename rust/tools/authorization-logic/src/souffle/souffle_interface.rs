@@ -15,7 +15,8 @@
  */
 
 /// This file contains code for interfacing with souffle (a dialect and
-/// implementation of Datalog)
+/// implementation of Datalog).
+
 use std::fs;
 use std::process::Command;
 

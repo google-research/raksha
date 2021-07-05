@@ -21,6 +21,7 @@ mod test {
         test::test_queries::test::QueryTest,
     };
     use std::fs;
+
     // This dependency is used for generating keypairs.
     use crate::signing::tink_interface::*;
 

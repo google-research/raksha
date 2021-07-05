@@ -41,7 +41,7 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
     let mut args_ = Vec::new();
     let mut idx = 1;
     // Note that ID_all() in the generated antlr-rust code is buggy,
-    // so rather a more idomatic iterator, "while Some(...)" is used here:
+    // so rather a more idomatic iterator, "while Some(...)" is used here.
     while let Some(id) = ctx.ID(idx) {
         args_.push(id.get_text());
         idx += 1;

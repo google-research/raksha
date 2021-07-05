@@ -19,7 +19,7 @@ mod test {
     use crate::{ast::*, compilation_top_level::*, souffle::souffle_interface::*};
     use std::fs;
 
-    // This dependency is used for generating keypairs:
+    // This dependency is used for generating keypairs.
     use crate::signing::tink_interface::*;
 
     #[test]

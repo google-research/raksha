@@ -119,14 +119,13 @@ fn push_prin(modifier: String, p: &AstPrincipal, pred: &AstPredicate) -> AstPred
     push_onto_pred(modifier, args, pred)
 }
 
-// This struct only contains a counter for generating new
-// fresh variables.
+// This struct only contains a counter for generating new fresh variables.
 pub struct LoweringToDatalogPass {
     fresh_var_count: u32,
 }
 
 impl LoweringToDatalogPass {
-    // This is the only public function in the struct.
+    /// Convert an AST program into a DLIR one, which should ease translation into Souffle.
     pub fn lower(prog: &AstProgram) -> DLIRProgram {
         let mut lowering_pass = LoweringToDatalogPass::new();
         lowering_pass.prog_to_dlir(prog)
@@ -171,26 +170,28 @@ impl LoweringToDatalogPass {
                 let pred = push_prin(String::from(""), p, &v_dlir);
 
                 // Need to additionally generate:
-                // speaker says x v :- speaker says x canActAs p,
-                //                     speaker says p v
+                // `speaker says x v :- speaker says x canActAs p,
+                //                     speaker says p v`
                 // (where x is a fresh principal)
                 let x = AstPrincipal {
                     name: self.fresh_var(),
                 };
 
-                // speaker says x v;
+                // This is `speaker says x v`.
                 let gen_lhs = push_prin(
                     String::from("says_"),
                     speaker,
                     &push_prin(String::from(""), &x, &v_dlir),
                 );
-                // speaker says x canActAs p
+
+                // This is `speaker says x canActAs p`.
                 let x_as_p = AstPredicate {
                     name: String::from("canActAs"),
                     args: [x.name.clone(), p.name.clone()].to_vec(),
                 };
                 let s_says_x_as_p = push_prin(String::from("says_"), speaker, &x_as_p);
-                // speaker says p v
+
+                // This is `speaker says p v`.
                 let s_says_p_v = push_prin(String::from("says_"), speaker, &pred);
 
                 let gen = DLIRAssertion::DLIRCondAssertion {
@@ -204,14 +205,14 @@ impl LoweringToDatalogPass {
         }
     }
 
-    // When reading this, it may be useful to keep in mind that
-    // facts (by contrast to flat facts) only appear on the LHS of assertions.
     fn fact_to_dlir(
         &mut self,
         f: &AstFact,
         p: &AstPrincipal,
     ) -> (AstPredicate, Vec<DLIRAssertion>) {
         match f {
+            // When reading this, it may be useful to keep in mind that
+            // facts (by contrast to flat facts) only appear on the LHS of assertions.
             AstFact::AstFlatFactFact { f: flat } => self.flat_fact_to_dlir(flat, p),
             AstFact::AstCanSayFact { p: q, f: f_plus } => {
                 let (fact_plus_prime, mut collected) = self.fact_to_dlir(&*f_plus, p);
@@ -229,20 +230,20 @@ impl LoweringToDatalogPass {
                 // in which this appears.
 
                 // The following code generates
-                // p says fpf :- x says fpf, p says x canSay fpf
-                // where fpf is fact_plus_prime
+                // `p says fpf :- x says fpf, p says x canSay fpf`
+                // where fpf is fact_plus_prime.
 
-                // p says fact_plus_prime
+                // This is `p says fact_plus_prime`.
                 let lhs = push_prin(String::from("says_"), p, &fact_plus_prime);
-                // x says fact_plus_prime
+                // This is `x says fact_plus_prime`.
                 let x_says_term = push_prin(String::from("says_"), &x, &fact_plus_prime);
-                // p says x canSay fact_plus_prime
+                // This is `p says x canSay fact_plus_prime`.
                 let can_say_term = push_prin(
                     String::from("says_"),
                     p,
                     &push_prin(String::from("canSay_"), &x, &fact_plus_prime),
                 );
-                // p says fpf :- x says fpf, p says x canSay fpf
+                // This is `p says fpf :- x says fpf, p says x canSay fpf`.
                 let mut rhs = Vec::new();
                 rhs.push(x_says_term);
                 rhs.push(can_say_term);
@@ -293,7 +294,7 @@ impl LoweringToDatalogPass {
     }
 
     // This can't be a const because Strings (by contrast to &str's) can't be
-    // constructed in consts
+    // constructed in consts.
     fn dummy_fact() -> AstPredicate {
         AstPredicate {
             name: "grounded_dummy".to_string(),
@@ -303,7 +304,7 @@ impl LoweringToDatalogPass {
 
     fn query_to_dlir(&mut self, query: &AstQuery) -> DLIRAssertion {
         // The assertions that are normally generated during the translation
-        // from facts to dlir facts are not used for queries
+        // from facts to dlir facts are not used for queries.
         let (main_fact, _) = self.fact_to_dlir(&query.fact, &query.principal);
         let main_fact = push_prin(String::from("says_"), &query.principal, &main_fact);
         let lhs = AstPredicate {
