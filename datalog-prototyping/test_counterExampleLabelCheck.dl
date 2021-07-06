@@ -1,4 +1,4 @@
-#include "setMemberLabelCheck.dl"
+#include "counterExampleLabelCheck.dl"
 
 // Module 1
 //      reads: 

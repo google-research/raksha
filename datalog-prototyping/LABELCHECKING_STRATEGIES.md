@@ -94,7 +94,7 @@ Assuming we have `notModuleLabelChecks` and `notModuleLabelChecksDown` (where
 the downgrading one uses `fieldHaslabelDown` for the input) the top-level check
 could be:
 
-`moduleChecks :- !notModuleChecks || !notModuleLabelChecks`
+`moduleChecks :- !notModuleChecks ; !notModuleLabelChecks`
 
 but this does not work for at least the following case: suppose we have a 
 counter-example when using non-downgrading label, but there are no rules that 
@@ -104,3 +104,11 @@ we cannot prove `fieldHasLabelDown` which means we cannot prove
 notModuleLabelChecks, so `!notModuleLabelChecks` passes.
 
 ### Compute Join over inputs, Compute meet over outputs
+This approach does the check by computing the join over the labels of the 
+inputs and showing that this flows to the meet over the label of the outputs. 
+To handle downgrades, we can use two separate rules for proving that a 
+field has a label (one with and one without downgrades). This will not have the 
+same problem as the counterexample approach because the top-level check can 
+just be roughly `checks :- checksWithDowngrades || checksWithoutDowngrades` -- 
+since both rules are positive this does the desired "try and retry with 
+downgrades" check.

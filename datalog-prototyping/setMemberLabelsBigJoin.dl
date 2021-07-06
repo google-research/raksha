@@ -1,0 +1,48 @@
+#include "flatModules.dl"
+#include "setMemberFlowsTo.dl"
+
+#ifndef SET_MEMBER_LABEL_CHECK
+#define SET_MEMBER_LABEL_CHECK
+
+.decl moduleLabelChecks(m: flatModule)
+.decl fieldHasLabel(f: fieldName, l: label)
+
+// We can't directly define `joinOverFieldList(fl: fieldList, l: label)`
+// because we would need universal quantifiers (i.e., forall labelElts in
+// the fields in the field list, show they are in l). 
+
+// Instead compute the set union and set intersection of the label elements.
+// isMemberJoinOverFieldList is true if le is a member of the join over 
+// the labels of fl, and similar for isMemberMeetOverFieldList
+.decl isMemberJoinOverFieldList(fl: fieldList, le: labelElt)
+.decl isMemberMeetOverFieldList(fl: fieldList, le: labelElt)
+
+isMemberJoinOverFieldList($Cons(f, fl), le) :- 
+    groundedList($Cons(f, fl)),
+    fieldHasLabel(f, l), isMember(le, l).
+isMemberJoinOverFieldList($Cons(f, fl), le) :-
+    groundedList($Cons(f, fl)),
+    isMemberJoinOverFieldList(fl, le).
+
+isMemberMeetOverFieldList($Cons(f, fl), le) :-
+    fieldHasLabel(f, l), isMember(le, l),
+    isMemberMeetOverFieldList(fl, le).
+
+// This is !(BigJoin(LabelsOf(fl1)) subsetEq BigMeet(LabelsOf(fl2)))
+.decl notFlowsToFieldList(fl1: fieldList, fl2: fieldList)
+notFlowsToFieldList(fl1, fl2) :-
+    groundedList(fl1), groundedList(fl2),
+    groundedLabelElt(le),
+    isMemberJoinOverFieldList(fl1, le),
+    !isMemberMeetOverFieldList(fl1, le).
+
+.decl flowsToFieldList(fl1: fieldList, fl2: fieldList)
+flowsToFieldList(fl1, fl2) :-
+    groundedList(fl1), groundedList(fl2),
+    !notFlowsToFieldList(fl1, fl2).
+
+// I think this actually runs into the same problem as with
+// the approach for finding a counterexample with the moduleCheck
+    
+
+#endif // SET_MEMBER_LABEL_CHECK
