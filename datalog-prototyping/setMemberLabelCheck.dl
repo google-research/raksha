@@ -23,28 +23,23 @@
 
 // With ADT labels, we know how to compute the join
 // over a set of labels, but we don't have a way to get the normal form for ADT 
-// labels in datalog. (I saw some resources for how to do this in prolog). 
+// labels in datalog. (I saw some resources for how to do this in prolog).
 // SetMember labels get around the need for a normal form
 
 // Two strategies to try:
 //  - compute join over fields using isMember labels
-//  - avoid computing this join over sets of labels by instead writing a 
-//  relation for "notLabelChecks"
-
-// We also eventually need rules that cover downgrading and non-downgrading 
-// cases.
+//  - avoid computing this join over sets of labels by instead writing a
+// relation for "notLabelChecks"
 
 // // ---- Strategy 1: join over isMember labels
 // .decl fieldListHasLabel(f: fieldList, l: label)
-// 
-// fieldListLabelChecks($Nil(), "emptyset").
+// // fieldListLabelChecks($Nil(), "emptyset").
 // fieldListLabelChecks($Cons(f, fl), l) :-
 //     fieldListLabelChecks(fl, l1),
 //     hasLabel(f, l2),
 //     flowsTo(l1, l),
 //     flowsTo(l2, l).
-// 
-// moduleLabelChecks(FlatMod {readFields, writtenFields}) :-
+// // moduleLabelChecks(FlatMod {readFields, writtenFields}) :-
 //     fieldListLabelChecks(readFields, l),
 //     // need to either compute meet over writtenFields (set intersection?)
 //     // or do "notLabelChecks" anyway 
@@ -56,9 +51,13 @@
 
 // What we actually want is for labelElts to have owners rather
 // than labels. So this rule will need to be iterated upon.
-fieldHasLabel(f, l) :- 
-    fieldHasLabel(f, l_old), ownsLabel(p, l_old),
+fieldHasLabelDown(f, l) :- fieldHasLabel(f, l_old), ownsLabel(p, l_old),
     says_downgradesTo(p, f, l_old, l).
+
+// NOTE: we could imagine just making fieldHasLabelDown an additional rule
+// for fieldHasLabel, but then there are two ways to prove that a field has
+// label, so in the case where the downgrade is needed the overall check will
+// fail because it fails when using the non-downgrading label.
 
 notModuleLabelChecks($FlatMod (readFields, writtenFields)) :-
     groundedList(readFields), groundedList(writtenFields),
@@ -67,23 +66,20 @@ notModuleLabelChecks($FlatMod (readFields, writtenFields)) :-
     fieldHasLabel(fr, lr), fieldHasLabel(fw, lw),
     notSubset(lr, lw).
 
-// fieldHasLabel(f, l) :-
-//     fieldHasLabel(f, l_old), ownsLabel(p
-
-// notModuleLabelChecksWithDown($FlatMod (readFields, writtenFields)) :-
-//     groundedList(readFields), groundedList(writtenFields),
-//     fieldListContains(readFields, fr),
-//     fieldListContains(writtenFields, fw),
-//     fieldHasLabelDown(fr, lr), fieldHasLabel(fw, lw),
-//     notSubset(lr, lw).
+notModuleLabelChecksWithDown($FlatMod (readFields, writtenFields)) :-
+    groundedList(readFields), groundedList(writtenFields),
+    fieldListContains(readFields, fr),
+    fieldListContains(writtenFields, fw),
+    fieldHasLabelDown(fr, lr), fieldHasLabel(fw, lw),
+    notSubset(lr, lw).
 
 moduleLabelChecks($FlatMod (readFields, writtenFields)) :- 
-    groundedList(readFields), groundedList(writtenFields),
+groundedList(readFields), groundedList(writtenFields),
     !notModuleLabelChecks($FlatMod(readFields, writtenFields)).
 
-// moduleLabelChecks($FlatMod (readFields, writtenFields)) :- 
-//     groundedList(readFields), groundedList(writtenFields),
-//     !notModuleLabelChecksWithDown($FlatMod(readFields, writtenFields)).
+moduleLabelChecks($FlatMod (readFields, writtenFields)) :- 
+groundedList(readFields), groundedList(writtenFields),
+    !notModuleLabelChecksWithDown($FlatMod(readFields, writtenFields)).
 
 // ---- ground lowering
 groundedLabel(l) :- fieldHasLabel(_, l).

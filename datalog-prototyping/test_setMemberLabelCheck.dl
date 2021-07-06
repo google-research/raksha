@@ -57,6 +57,7 @@ says_downgradesTo("Alice", "mod1out", "mod1out_label", "public").
 
 .decl test_label_checks(x: number)
 
+// Module 1
 test_label_checks(1) :- moduleLabelChecks(
     $FlatMod(
         $Cons("some_struct.a", $Cons("some_struct.b",
@@ -65,6 +66,7 @@ test_label_checks(1) :- moduleLabelChecks(
     )
 ).
 
+// Module 2
 test_label_checks(2) :- moduleLabelChecks(
     $FlatMod(
         $Cons("mod1out", $Cons("input4", $Nil())),
