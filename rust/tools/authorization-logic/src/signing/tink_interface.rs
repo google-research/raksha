@@ -21,11 +21,10 @@ use std::{
 };
 use tink_core::{keyset, TinkError};
 
-/// The file `tink_interface.rs` contains all functions that interface between
-/// this authorization logic implementation and the tink library for
-/// cryptography. This is meant to help encapsulate the choice of particular
-/// cryptographic library and the choices for cryptographic primitives and
-/// serialization strategies used.
+//! This file contains all functions that interface between this authorization logic implementation
+//! and the tink library for cryptography. This is meant to help encapsulate the choice of
+//! particular cryptographic library and the choices for cryptographic primitives and
+//! serialization strategies used.
 
 // The specific choice of how serialization is done is encapsulated because it
 // is likely to change. Binaries are brittle way of serializing objects, but
@@ -76,7 +75,7 @@ pub fn store_new_keypair_cleartext(pub_key_file: &str, priv_key_file: &str) {
     keyset::insecure::write(&pub_key_handle, &mut pub_writer).unwrap();
 }
 
-/// The funciton `sign_claim` takes the name of a file containing a private ECDSA
+/// This funciton takes the name of a file containing a private ECDSA
 /// key, the name of an output file that will store a signature, and a vector
 /// of assertions. It serializes the vector of assertions, generates a signature
 /// of this serialization using the given key, and writes this signature to a file.
@@ -95,8 +94,8 @@ pub fn sign_claim(priv_key_file: &str, signature_file: &str, claim: &Vec<AstAsse
     sig_file.write(&signature).unwrap();
 }
 
-/// The function `verify_claim` takes the name of a file contianing a public
-/// ECDSA key, the name of a file storing a signature for a vector of
+/// This function takes the name of a file contianing a public ECDSA key,
+/// the name of a file storing a signature for a vector of
 /// AstAssertions, and a vector of AstAssertions. It uses the given public key
 /// to check the signature against the object and throws an error if the check
 /// fails.

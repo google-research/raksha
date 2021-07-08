@@ -20,9 +20,8 @@ use crate::{
 };
 use antlr_rust::{common_token_stream::CommonTokenStream, tree::ParseTree, InputStream};
 
-/// The only public interface to the parser is `parse_program`. It produces an
-/// abstract syntax tree (AST) rooted with a program node when given the textual
-/// representation of a program.
+/// This function produces an abstract syntax tree (AST) rooted with a program node when given the
+/// textual representation of a program.
 pub fn parse_program(prog_text: &str) -> AstProgram {
     let lexer = AuthLogicLexer::new(InputStream::new(prog_text));
     let token_source = CommonTokenStream::new(lexer);

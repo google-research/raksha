@@ -17,12 +17,11 @@
 use crate::{ast::*, signing::tink_interface::*};
 use std::collections::HashMap;
 
-/// The file `export_assertions.rs` contains a compiler pass
-/// that handles executing of policy statements.
-/// For each `SaysAssertion` with an export clause, it serializes the object
-/// that corresponds to the (set of) assertions to a file and it produces an
-/// ECDSA signature of that object in a separate file. It operates on the
-/// highest-level IR in the policy language (in ast.rs).
+//! This file contains a compiler pass that handles executing of policy statements.
+//! For each `SaysAssertion` with an export clause, it serializes the object
+//! that corresponds to the (set of) assertions to a file and it produces an
+//! ECDSA signature of that object in a separate file. It operates on the
+//! highest-level IR in the policy language (in ast.rs).
 
 /// AstPrincipal implements Hash and Eq, so different
 /// occurances of the same principal within a program will not
@@ -49,8 +48,7 @@ fn export_says_assertion(says_assertion: &AstSaysAssertion, priv_env: &BindingEn
     }
 }
 
-/// The function `export_assertions` is the only public interface to
-/// this compiler pass. When given an AstProgram it exports signatures.
+/// When given an AstProgram this function exports signatures.
 pub fn export_assertions(prog: &AstProgram) {
     let priv_env = collect_priv_bindings(&prog);
     for assertion in &prog.assertions {

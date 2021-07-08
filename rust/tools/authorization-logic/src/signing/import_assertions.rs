@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-/// The file `handle_imports` is a compiler pass that imports assertions made by
-/// another principal by deserializing them from a file. Imported
-/// assertions must be accompanied by an ECDSA signature (also serialized) and
-/// using a keypair that is assocated with the principal
-/// that made the assertion. The signature is checked during this pass.
-/// If the signature checks pass, the imported assertions are added
-/// to the AST.
+//! The file `handle_imports` is a compiler pass that imports assertions made by
+//! another principal by deserializing them from a file. Imported
+//! assertions must be accompanied by an ECDSA signature (also serialized) and
+//! using a keypair that is assocated with the principal
+//! that made the assertion. The signature is checked during this pass.
+//! If the signature checks pass, the imported assertions are added
+//! to the AST.
+
 use crate::ast::*;
 use crate::signing::tink_interface::*;
 use std::collections::HashMap;
@@ -49,7 +50,7 @@ fn handle_one_import(kbenv: &BindingEnv, imp: &AstImport) -> AstSaysAssertion {
     }
 }
 
-/// When given an AstProgram, `handle_imports` handles its imports.
+/// When given an AstProgram, this function handles its imports.
 /// It is the only public interface to this compiler pass.
 pub fn handle_imports(ast: &AstProgram) -> AstProgram {
     let bind_env = collect_pub_bindings(ast);
