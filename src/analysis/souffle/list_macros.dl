@@ -1,0 +1,7 @@
+#ifndef LIST_MACROS_H__
+#define LIST_MACROS_H__
+
+#define LIST_TYPE(EltType) EltType##List
+#define DEFINE_LIST_TYPE(EltType) .type LIST_TYPE(EltType) [ item: EltType, next: LIST_TYPE(EltType) ]
+
+#endif // #ifndef LIST_MACROS_H__

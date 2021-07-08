@@ -1,0 +1,90 @@
+// The types and relations defined in this file are used to express facts derived directly from the protos in
+// ir/proto/manifest.proto .
+// To provide a fact for the analysis in this structure, build a Manifest with a similar structure to a ManifestProto
+// and provide it as an input to the ManifestsToAnalyze relationship.
+
+#ifndef MANIFEST_PROTO_FACT_TYPES_H__
+#define MANIFEST_PROTO_FACT_TYPES_H__
+
+#include "list_macros.dl"
+
+// Base types.
+.type HandleConnectionDirection <: symbol
+.type HandleConnectionName <: symbol
+.type HandleName <: symbol
+.type HandleFate <: symbol
+.type ManifestName <: symbol
+.type TagName <: symbol
+.type ParticleSpecName <: symbol
+.type RecipeName <: symbol
+
+// ConnectionDirection is an enum. We stake out the valid values by creating this ValidConnectionDirection relationship
+// and populating it with the values we wish to accept.
+.decl ValidConnectionDirection(direction: HandleConnectionDirection)
+
+// For now, only handle the READS and WRITES directions. There are many more we need to handle in the future.
+ValidConnectionDirection("READS").
+ValidConnectionDirection("WRITES").
+
+// This indicates whether the direction is an input direction or an output direction. It's pretty trivial now, but will
+// get less so with READS_WRITES, which is both an input and output direction.
+.decl InputDirection(direction: HandleConnectionDirection)
+
+InputDirection("READS").
+
+.decl OutputDirection(direction: HandleConnectionDirection)
+
+OutputDirection("WRITES").
+
+.type HandleConnectionSpec = [name: HandleConnectionName, direction: HandleConnectionDirection]
+
+.type HandleRoot = [particle_spec: ParticleSpecName, handle_connection: HandleConnectionName]
+
+.type AccessPath = [root: HandleRoot]
+
+.type Claim =
+    AssumeClaim { access_path: AccessPath, predicate: Predicate } |
+    DerivesFromClaim { target: AccessPath, source: AccessPath }
+
+.type Predicate =
+    And { conjunct0: Predicate, conjunct1: Predicate } |
+    Or { disjunct0: Predicate, disjuct1 : Predicate } |
+    Not { predicate: Predicate } |
+    Implies { anticedent: Predicate, consequent: Predicate } |
+    Tag { tag: TagName }
+
+.type Check = [access_path: AccessPath, predicate: Predicate]
+
+DEFINE_LIST_TYPE(HandleConnectionSpec)
+DEFINE_LIST_TYPE(Claim)
+DEFINE_LIST_TYPE(Check)
+
+.type ParticleSpec = [
+    name: ParticleSpecName,
+    connections: LIST_TYPE(HandleConnectionSpec),
+    claims: LIST_TYPE(Claim),
+    checks: LIST_TYPE(Check) ]
+DEFINE_LIST_TYPE(ParticleSpec)
+
+.type HandleConnection = [ connection_name: HandleConnectionName, handle_name: HandleName]
+DEFINE_LIST_TYPE(HandleConnection)
+
+.type Particle = [ spec_name: ParticleSpecName, connections: LIST_TYPE(HandleConnection) ]
+DEFINE_LIST_TYPE(Particle)
+
+.type Handle = [ name: HandleName, fate: HandleFate]
+DEFINE_LIST_TYPE(Handle)
+
+.type Recipe = [ name: RecipeName, handles: HandleList, particles: LIST_TYPE(Particle) ]
+DEFINE_LIST_TYPE(Recipe)
+
+// It is tempting to just flatten the elements of a manifest into the top-level of the rules file. However, it might
+// be more useful to preserve the relationship. Explicitly representing the manifest allows the facts to have a more
+// similar structure to the original proto.
+.type Manifest = [ mainfest_name: ManifestName, recipes: RecipeList, particle_specs: LIST_TYPE(ParticleSpec)]
+
+.decl ManifestsToAnalyze(manifest: Manifest)
+
+.input ManifestsToAnalyze
+
+#endif // #ifndef MANIFEST_PROTO_FACT_TYPES_H__
