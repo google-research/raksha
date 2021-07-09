@@ -40,6 +40,7 @@ fn run_antlr_on(grammar_file: &str, antlr_path: &str) -> Result<(), Box<dyn Erro
         .expect("antlr4rust jar failed to start")
         .wait_with_output()?;
 
+    println!("cargo:rerun-if-changed=src/parsing/{}.g4", grammar_file);
     Ok(())
 }
 
@@ -57,4 +58,6 @@ fn main() {
     );
 
     run_antlr_on("AuthLogic", &antlr_path).unwrap();
+    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=antlr4rust.jar");
 }
