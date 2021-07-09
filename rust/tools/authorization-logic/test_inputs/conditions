@@ -1,0 +1,8 @@
+"prin1" says fact1(thing_x) :- cond1(thing_x).
+"prin1" says fact2(thing_x) :- cond1(thing_x), cond2(thing_x, "bar").
+"prin1" says cond1("foo").
+"prin2" says cond1("foo").
+
+q_prin1_fact1 = query "prin1" says fact1("foo")?
+q_prin1_fact2 = query "prin1" says fact2("foo")?
+q_prin2_fact1 = query "prin2" says fact1("foo")?

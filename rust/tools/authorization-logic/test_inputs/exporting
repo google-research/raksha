@@ -1,0 +1,7 @@
+BindPrivKey "principal1" test_keys/principal1_priv.json
+BindPubKey "principal1" test_keys/principal1_pub.json
+
+"principal1" says {
+    someProposition("these_args").
+    otherProposition("these_other_args").
+} exportTo test_outputs/prin1_statement1

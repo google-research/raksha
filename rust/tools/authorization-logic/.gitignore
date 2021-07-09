@@ -1,0 +1,11 @@
+target/
+src/parsing/antlr_gen/*interp
+src/parsing/antlr_gen/*tokens
+src/parsing/antlr_gen/authlogiclexer.rs
+src/parsing/antlr_gen/authlogiclistener.rs
+src/parsing/antlr_gen/authlogicparser.rs
+src/parsing/antlr_gen/authlogicvisitor.rs
+test_outputs/*
+!test_outputs/.gitkeep
+test_keys/*
+!test_keys/.gitkeep
