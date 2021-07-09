@@ -28,6 +28,10 @@
 // paths. For the time being, we will use a `symbol` to represent access paths.
 // However, in the long term, it would make sense to define an ADT for this.
 //
+
+#ifndef SRC_ANALYSIS_SOUFFLE_TAINT_DL_
+#define SRC_ANALYSIS_SOUFFLE_TAINT_DL_
+
 .type AccessPath <: symbol
 
 // A symbol representing a taint (or information flow) tag. These would be
@@ -74,4 +78,4 @@ path(from, to) :- edge(from, intermediate), path(intermediate, to).
 mayHaveTag(tgt, tag) :- claimHasTag(tgt, tag).
 mayHaveTag(tgt, tag) :- edge(src, tgt), mayHaveTag(src, tag).
 
-.output mayHaveTag
+#endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_
