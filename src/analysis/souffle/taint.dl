@@ -61,6 +61,9 @@
 // There is a claim that `accessPath` definitely has `tag` taint.
 .decl claimHasTag(accessPath: AccessPath, tag: Tag)
 
+// There is a check that 'accessPath' has the 'tag' taint.
+.decl checkHasTag(accessPath: AccessPath, tag: Tag)
+
 // Some inference rules
 
 // Symbols used in edges are access paths

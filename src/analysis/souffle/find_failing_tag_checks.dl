@@ -1,0 +1,11 @@
+#include "taint.dl"
+
+.input claimHasTag(IO=file, filename="claim_has_tag.facts", delimiter=",")
+.input checkHasTag(IO=file, filename="check_has_tag.facts", delimiter=",")
+.input edge(IO=file, filename="edge.facts", delimiter=",")
+
+.decl failingTagCheck(accessPath: AccessPath, tag: Tag)
+
+failingTagCheck(accessPath, tag) :- checkHasTag(accessPath, tag), !mayHaveTag(accessPath, tag).
+
+.output failingTagCheck
