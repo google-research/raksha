@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-use crate::{
-    ast::*,
-    parsing::astconstructionvisitor,
-    signing::{export_assertions, import_assertions},
-    souffle::souffle_interface,
-};
-
-use std::fs;
-
 //! This file has the top level function, `compile`
 //! to compile to souffle. This is a separate file and module from
 //! souffle-interface because part of the compilation step involces
@@ -31,6 +22,15 @@ use std::fs;
 //! fact that the particular choice of solver is datalog. This separation might
 //! make it easier to switch to a different solver later. This is also separate
 //! from main because "compile" is also used for tests.
+
+use crate::{
+    ast::*,
+    parsing::astconstructionvisitor,
+    signing::{export_assertions, import_assertions},
+    souffle::souffle_interface,
+};
+
+use std::fs;
 
 fn source_file_to_ast(filename: &str, in_dir: &str) -> AstProgram {
     let source = fs::read_to_string(&format!("{}/{}", in_dir, filename))

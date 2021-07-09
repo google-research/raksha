@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+//! This file contains all functions that interface between this authorization logic implementation
+//! and the tink library for cryptography. This is meant to help encapsulate the choice of
+//! particular cryptographic library and the choices for cryptographic primitives and
+//! serialization strategies used.
+
 use crate::ast::*;
 use std::{
     fs::File,
     io::{Error, Read, Write},
 };
 use tink_core::{keyset, TinkError};
-
-//! This file contains all functions that interface between this authorization logic implementation
-//! and the tink library for cryptography. This is meant to help encapsulate the choice of
-//! particular cryptographic library and the choices for cryptographic primitives and
-//! serialization strategies used.
 
 // The specific choice of how serialization is done is encapsulated because it
 // is likely to change. Binaries are brittle way of serializing objects, but

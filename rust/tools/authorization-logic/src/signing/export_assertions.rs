@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-use crate::{ast::*, signing::tink_interface::*};
-use std::collections::HashMap;
-
 //! This file contains a compiler pass that handles executing of policy statements.
 //! For each `SaysAssertion` with an export clause, it serializes the object
 //! that corresponds to the (set of) assertions to a file and it produces an
@@ -26,6 +23,10 @@ use std::collections::HashMap;
 /// AstPrincipal implements Hash and Eq, so different
 /// occurances of the same principal within a program will not
 /// create multiple entries in this HashMap.
+
+use crate::{ast::*, signing::tink_interface::*};
+use std::collections::HashMap;
+
 type BindingEnv = HashMap<AstPrincipal, String>;
 
 fn collect_priv_bindings(prog: &AstProgram) -> BindingEnv {

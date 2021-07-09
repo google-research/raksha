@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use crate::{ast::*, souffle::datalog_ir::*};
-
 //! This file describes the translation from the AST (the
 //! top-level language) to DLIR (the IR which is quite close to datalog).
 
@@ -99,9 +97,11 @@ use crate::{ast::*, souffle::datalog_ir::*};
 //!      grounded("dummy_var").
 //!      .output Q_NAME
 
-//! Note that this puts args_ on the front of the list of arguments because
-//! this is the conveninet way for it to work in the contexts in which it
-//! is used.
+use crate::{ast::*, souffle::datalog_ir::*};
+
+// Note that this puts args_ on the front of the list of arguments because
+// this is the conveninet way for it to work in the contexts in which it
+// is used.
 fn push_onto_pred(modifier: String, mut args_: Vec<String>, pred: &AstPredicate) -> AstPredicate {
     let new_name = modifier + &pred.name.clone();
     for a in &pred.args {
