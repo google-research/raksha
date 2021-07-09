@@ -23,7 +23,7 @@ pub struct SouffleEmitter {
     decls: HashSet<AstPredicate>,
 }
 
-impl<'a> SouffleEmitter {
+impl SouffleEmitter {
     /// Produces Souffle code as a `String` when given A Datalog IR (DLIR) program.
     pub fn emit_program(p: &DLIRProgram) -> String {
         let mut emitter = SouffleEmitter::new();
@@ -49,7 +49,7 @@ impl<'a> SouffleEmitter {
     // there are no duplicate delcarations (which would otherwise happen
     // whenever a predicate is referenced more than once with different
     // arguments).
-    fn pred_to_declaration(p: &'a AstPredicate) -> AstPredicate {
+    fn pred_to_declaration(p: &AstPredicate) -> AstPredicate {
         AstPredicate {
             name: p.name.clone(),
             args: (0..p.args.len())
@@ -58,13 +58,13 @@ impl<'a> SouffleEmitter {
         }
     }
 
-    fn emit_pred(&mut self, p: &'a AstPredicate) -> String {
+    fn emit_pred(&mut self, p: &AstPredicate) -> String {
         let decl = SouffleEmitter::pred_to_declaration(p);
         self.decls.insert(decl);
         format!("{}({})", &p.name, p.args.join(", "))
     }
 
-    fn emit_assertion(&mut self, a: &'a DLIRAssertion) -> String {
+    fn emit_assertion(&mut self, a: &DLIRAssertion) -> String {
         match a {
             DLIRAssertion::DLIRFactAssertion { p } => self.emit_pred(p) + ".",
             DLIRAssertion::DLIRCondAssertion { lhs, rhs } => {
@@ -80,7 +80,7 @@ impl<'a> SouffleEmitter {
         }
     }
 
-    fn emit_program_body(&mut self, p: &'a DLIRProgram) -> String {
+    fn emit_program_body(&mut self, p: &DLIRProgram) -> String {
         p.assertions
             .iter()
             .map(|x| self.emit_assertion(&x))
@@ -88,7 +88,7 @@ impl<'a> SouffleEmitter {
             .join("\r\n")
     }
 
-    fn emit_decl(pred: &'a AstPredicate) -> String {
+    fn emit_decl(pred: &AstPredicate) -> String {
         format!(
             ".decl {}({})",
             &pred.name,
@@ -109,7 +109,7 @@ impl<'a> SouffleEmitter {
             .join("\r\n")
     }
 
-    fn emit_outputs(&self, p: &'a DLIRProgram) -> String {
+    fn emit_outputs(&self, p: &DLIRProgram) -> String {
         p.outputs
             .iter()
             .map(|o| String::from(".output ") + &o)
