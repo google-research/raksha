@@ -1,0 +1,93 @@
+#include "flatModules.dl"
+
+#ifndef TAINT_ANALYSIS
+#define TAINT_ANALYSIS
+
+//-----------------------------------------------------------------------------
+// Type Declarations
+//-----------------------------------------------------------------------------
+
+// A taint tag, such as "video_data"
+.type tag <: symbol
+
+// An information flow label which in this model is a set of taint tags
+.type label <: symbol
+
+// A principal that makes assertions in authorization logic
+.type principal <: symbol
+
+//-----------------------------------------------------------------------------
+// Predicate Declarations
+//-----------------------------------------------------------------------------
+
+// These relations mean that the instance of the type is in the universe of
+// that type. In "flatModules", some similar predicates are called
+// "grounded(...)".
+.decl isTag(t: tag)
+.decl isLabel(ell: label)
+
+// The label of a field has a tag according to the taint analysis
+// NOTE: In practice there may be value in explicitly having a layer of
+// indirection in which fields have labels and just labels have tags.
+// In this formalization, fields also act as labels (in the sense that they
+// have tags).
+.decl fieldHasTag(f: fieldName, t: tag)
+
+// Some party asserts the claim that a field should be downgraded from
+// one tag to another.
+.decl saysDowngrades(speaker: principal, f: fieldName, t: tag)
+
+// This party is the owner of a taint tag (they have the privilege to downgrade
+// it).
+.decl ownsTag(owner: principal, t: tag)
+
+// Some field is actually downgraded (by taking into consideration the 
+// privileges of a party trying to downgrade it)
+.decl downgrades(f: fieldName, t: tag)
+
+// A tag is a member of the label ell (which is a set of tags).
+.decl isMember(t: tag, ell: label)
+
+// The label of a field does not flowTo another label
+// This is equivalent to "not (subset or equals)"
+.decl notFieldLabelFlowsTo(f: fieldName, ell: label)
+
+// The label of a field flowsTo another label
+// This is equivalent to "subset or equals". The final outputs (i.e. egress
+// points) can be checked by doing a "fieldLabelFlowsTo" check to a particular
+// label.
+.decl fieldLabelFlowsTo(f: fieldName, ell: label)
+
+//-----------------------------------------------------------------------------
+// Rules
+//-----------------------------------------------------------------------------
+
+downgrades(f, t) :- ownsTag(o, t), saysDowngrades(o, f, t).
+
+fieldHasTag(f, t) :- 
+    groundedFlatMod($FlatMod(inputs, outputs)),
+    fieldListContains(inputs, f1),
+    fieldListContains(outputs, f),
+    fieldHasTag(f1, t), !downgrades(f, t).
+
+notFieldLabelFlowsTo(f, ell) :-
+    isTag(t), isLabel(ell), groundedField(f),
+    fieldHasTag(f, t),
+    !isMember(t, ell).
+
+fieldLabelFlowsTo(f, ell) :- 
+    isLabel(ell), groundedField(f),
+    !notFieldLabelFlowsTo(f, ell).
+
+//-----------------------------------------------------------------------------
+// Ground Lowering Rules
+//-----------------------------------------------------------------------------
+// These rules add objects to the set of things that exist (i.e. predicates like
+// `isObject(..)`) whenever they are mentioned in other rules
+isLabel(ell) :- isMember(_, ell).
+
+isTag(t) :- isMember(t, _).
+isTag(t) :- ownsTag(_, t).
+isTag(t) :- saysDowngrades(_, _, t).
+
+#endif // TAINT_ANALYSIS
