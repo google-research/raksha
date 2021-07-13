@@ -8,4 +8,4 @@
 
 failingTagCheck(accessPath, tag) :- checkHasTag(accessPath, tag), !mayHaveTag(accessPath, tag).
 
-.output failingTagCheck
+.output failingTagCheck(delimiter=",")

@@ -125,5 +125,43 @@ _find_failing_tag_checks_test = rule(
     }
   )
 
-def find_failing_tag_checks_test(name, **kwargs):
-  _find_failing_tag_checks_test(name = name, **kwargs)
+def find_failing_tag_checks_test(
+    name,
+    expected_output=":expected_output.txt",
+    edge_facts_file=":edge.facts",
+    claim_has_tag_facts=":claim_has_tag.facts",
+    check_has_tag_facts=":check_has_tag.facts",
+    ):
+  package_name = native.package_name()
+  dl_file_label = "//src/analysis/souffle:find_failing_tag_checks.dl"
+  souffle_bin_label = "@souffle//:souffle"
+  native.sh_test(
+      name = name,
+      srcs = ["//arcs_fact_tests:find_failing_tag_checks_test.sh"],
+      args = [
+          "$(location {})".format(souffle_bin_label), # SOUFFLE_BIN
+          "$(location {})".format(edge_facts_file), # FACTS_DIR
+          "$(location {})".format(dl_file_label), # DL_FILE
+          "$(location {})".format(expected_output)
+          ],
+      data = [
+          souffle_bin_label,
+          edge_facts_file,
+          claim_has_tag_facts,
+          check_has_tag_facts,
+          expected_output,
+          dl_file_label,
+          ]
+      )
+
+def no_failing_tag_checks_test(
+    name,
+    edge_facts_file=":edge.facts",
+    claim_has_tag_facts=":claim_has_tag.facts",
+    check_has_tag_facts=":check_has_tag.facts"):
+  find_failing_tag_checks_test(
+      name=name,
+      expected_output="//arcs_fact_tests:no_failures.txt",
+      edge_facts_file=edge_facts_file,
+      claim_has_tag_facts=claim_has_tag_facts,
+      check_has_tag_facts=check_has_tag_facts)
