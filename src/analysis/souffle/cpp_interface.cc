@@ -17,12 +17,15 @@
 // Just a simple example to check that we can use the Souffle C++ interface.
 //
 #include <iostream>
+#include <memory>
 
 #include "souffle/SouffleInterface.h"
 
 int main() {
-  souffle::SouffleProgram* prog = souffle::ProgramFactory::newInstance("test");
-  assert(prog == nullptr);
-  std::cout << "prog is nullptr as expected.\n";
+  std::unique_ptr<souffle::SouffleProgram> prog(
+      souffle::ProgramFactory::newInstance("taint"));
+  assert(prog != nullptr);
+  std::cout << "Found taint program as expected.\n";
+  prog->run();
   return 0;
 }
