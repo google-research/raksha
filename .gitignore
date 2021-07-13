@@ -1,0 +1,6 @@
+.idea/**
+**/*.swp
+bazel-bin
+bazel-out
+bazel-raksha
+bazel-testlogs

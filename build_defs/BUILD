@@ -1,1 +1,1 @@
-licenses("[notice]")
+licenses(["notice"])

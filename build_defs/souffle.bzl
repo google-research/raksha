@@ -45,3 +45,85 @@ def souffle_cc_library(name, src, visibility = None):
         alwayslink = True,
         visibility = visibility,
     )
+
+# The following function is heavily influenced by the example of diff_test,
+# found at:
+#
+# https://github.com/bazelbuild/bazel-skylib/blob/main/rules/diff_test.bzl
+#
+# which is also owned by Google.
+def _find_failing_tag_checks_test_impl(ctx):
+  test_sh = ctx.actions.declare_file(ctx.label.name + "-tag-checks-test.sh")
+  # This is a bit of a hack: we expect all of the facts files to be in the same
+  # directory, so grab the directory of the edges fact file.
+  facts_dir = ctx.file.edge_facts_file.dirname
+  dl_file = ctx.file.dl_file
+    
+  ctx.actions.write(
+      output = test_sh,
+      content = r"""#!/bin/bash
+set -euo pipefail
+SOUFFLE_BIN="{souffle_bin}"
+FACTS_DIR="{facts_dir}"
+DL_FILE="{dl_file}"
+EXPECTED_OUTPUT_FILE="{expected_output_file}"
+if ! "$SOUFFLE_BIN" --fact-dir="$FACTS_DIR" "$DL_FILE" --output-dir=- | diff "$EXPECTED_OUTPUT_FILE" -; then
+  echo >&2 "FAIL: expected output differs from observed output for tag checks."
+  exit 1
+fi
+""".format(
+        souffle_bin = ctx.executable._souffle_binary.root.path + "/" + ctx.executable._souffle_binary.path,
+        dl_file=dl_file.path,
+        facts_dir = facts_dir,
+        expected_output_file = ctx.file.expected_output.path
+      ),
+      is_executable = True,
+  )
+  return DefaultInfo(
+      executable = test_sh,
+      files = depset(direct = [test_sh]),
+      runfiles = ctx.runfiles(
+          files = [
+              test_sh,
+              ctx.file.edge_facts_file,
+              ctx.file.claim_has_tag_facts,
+              ctx.file.check_has_tag_facts,
+              ctx.file.dl_file,
+              ctx.file.expected_output,
+              ctx.executable._souffle_binary,
+           ])
+      )
+      
+
+_find_failing_tag_checks_test = rule(
+    implementation = _find_failing_tag_checks_test_impl,
+    test = True,
+    executable = True,
+    attrs = {
+        "_souffle_binary": attr.label(
+            allow_single_file = True,
+            cfg = "target",
+            default = "@souffle//:souffle",
+            executable = True,
+        ),
+        "dl_file": attr.label(
+            allow_single_file = True,
+            default = "//src/analysis/souffle:find_failing_tag_checks.dl"
+        ),
+        "edge_facts_file": attr.label(
+            allow_single_file = True,
+        ),
+        "claim_has_tag_facts": attr.label(
+            allow_single_file = True,
+        ),
+        "check_has_tag_facts": attr.label(
+            allow_single_file = True,
+        ),
+        "expected_output": attr.label(
+            allow_single_file = True,
+        ),
+    }
+  )
+
+def find_failing_tag_checks_test(name, **kwargs):
+  _find_failing_tag_checks_test(name = name, **kwargs)
