@@ -3,6 +3,8 @@ load(
     "souffle_cc_library",
 )
 
+package(default_visibility = ["//arcs_fact_tests:__pkg__"])
+
 licenses(["notice"])
 
 cc_binary(
@@ -22,3 +24,6 @@ souffle_cc_library(
     name = "taint_dl",
     src = "taint.dl",
 )
+
+exports_files(["analyze_tag_checks.dl"])
+exports_files(["analyze_tag_checks_test_helper.dl"])

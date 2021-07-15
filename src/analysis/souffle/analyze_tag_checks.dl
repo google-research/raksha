@@ -1,0 +1,17 @@
+#ifndef SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_DL_
+#define SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_DL_
+
+#include "taint.dl"
+
+.decl passingTagCheck(accessPath: AccessPath, tag: Tag)
+
+passingTagCheck(accessPath, tag) :-
+  checkTag(accessPath, tag, "PRESENT"), mayHaveTag(accessPath, tag).
+passingTagCheck(accessPath, tag) :-
+  checkTag(accessPath, tag, "NOT_PRESENT"), !mayHaveTag(accessPath, tag).
+
+.decl failingTagCheck(accessPath: AccessPath, tag: Tag)
+failingTagCheck(accessPath, tag) :-
+  checkTag(accessPath, tag, _), !passingTagCheck(accessPath, tag).
+
+#endif // SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_DL_

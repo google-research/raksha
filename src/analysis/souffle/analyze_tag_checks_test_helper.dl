@@ -1,0 +1,74 @@
+#ifndef SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_
+#define SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_
+
+#include "taint.dl"
+#include "analyze_tag_checks.dl"
+
+// This is a tag check that does not correspond to the original test's arcs manifest. We want to
+// eventually translate the arcs manifests into facts and check them against our hand-written facts,
+// so distinguishing the extra tags will be important eventually. For now, thought, it just works
+// exactly like checkTag.
+.decl checkTagExtra(accessPath: AccessPath, tag: Tag, tagPresence: TagPresence)
+
+checkTag(accessPath, tag, tagPresence) :- checkTagExtra(accessPath, tag, tagPresence).
+
+.type TestResult <: symbol
+.decl isValidTestResult(testResult: TestResult)
+
+isValidTestResult("PASS").
+isValidTestResult("FAIL").
+
+.decl tagCheckExpectation(
+  accessPath: AccessPath,
+  tag: Tag,
+  testResult: TestResult)
+
+.type BadCheckDiagnostic <: symbol
+
+// Used to report malformed test cases.
+.decl badTagCheckExpectation(
+  accessPath: AccessPath,
+  tag: Tag,
+  testResult: TestResult,
+  diagnostic: BadCheckDiagnostic)
+
+.output badTagCheckExpectation(IO=stdout, delimiter=",")
+
+// Expectation is malformed if the expected test result is not one of the valid
+// test results.
+badTagCheckExpectation(accessPath, tag, testResult, "Invalid test result.") :-
+  tagCheckExpectation(accessPath, tag, testResult), !isValidTestResult(testResult).
+
+// Expectation is malformed if it does not correspond to a tag check.
+badTagCheckExpectation(accessPath, tag, testResult, "Expectation does not match check.") :-
+  tagCheckExpectation(accessPath, tag, testResult), !checkTag(accessPath, tag, _).
+
+// Require an expectation for every tag check.
+badTagCheckExpectation(accessPath, tag, testResult, "No expecation found.") :-
+  checkTag(accessPath, tag, _),
+  isValidTestResult(testResult),
+  !tagCheckExpectation(accessPath, tag, _).
+
+// Require expectations to not conflict.
+badTagCheckExpectation(accessPath, tag, expectation, "Conflicting check expectation.") :-
+  tagCheckExpectation(accessPath, tag, expectation),
+  tagCheckExpectation(accessPath, tag, otherExpectation),
+  expectation != otherExpectation.
+
+// Finds checks that go as expected. This is used as a helper relation for
+// tagCheckNotAsExpected, allowing us to use fewer negatives.
+.decl tagCheckAsExpected(accessPath: AccessPath, tag: Tag)
+
+tagCheckAsExpected(accessPath, tag) :-
+  passingTagCheck(accessPath, tag), tagCheckExpectation(accessPath, tag, "PASS").
+
+tagCheckAsExpected(accessPath, tag) :-
+  failingTagCheck(accessPath, tag), tagCheckExpectation(accessPath, tag, "FAIL").
+
+.decl tagCheckNotAsExpected(accessPath: AccessPath, tag: Tag)
+.output tagCheckNotAsExpected(IO=stdout, delimiter=",")
+
+tagCheckNotAsExpected(accessPath, tag) :-
+  checkTag(accessPath, tag, _), !tagCheckAsExpected(accessPath, tag).
+
+#endif // SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_

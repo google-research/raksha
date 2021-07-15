@@ -14,7 +14,7 @@
 # limitations under the License.
 #-----------------------------------------------------------------------------
 
-def souffle_cc_library(name, src, visibility = None):
+def souffle_cc_library(name, src, included_dl_scripts=[], visibility = None):
     """Generates a C++ interface for the given datalog file.
 
     Args:
@@ -23,11 +23,20 @@ def souffle_cc_library(name, src, visibility = None):
       visibility: List; List of visibilities.
     """
     cc_file = src + ".cpp"
+    include_str = ""
+
+    include_dir_opts = ["--include-dir=`dirname $(location {})`".format(include_file)
+                        for include_file in included_dl_scripts]
+
+    include_opts_str = " ".join(include_dir_opts)
+
     native.genrule(
         name = name + "_cpp",
-        srcs = [src],
+        srcs = [src] + included_dl_scripts,
         outs = [cc_file],
-        cmd = "$(location @souffle//:souffle) -g $@ $<",
+        cmd =
+          "$(location @souffle//:souffle) {include_str} -g $@ $(location {src_rule})"
+          .format(include_str = include_opts_str, src_rule = src),
         tools = ["@souffle//:souffle"],
         visibility = visibility,
     )
