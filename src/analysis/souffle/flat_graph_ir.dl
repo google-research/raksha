@@ -1,0 +1,89 @@
+#ifndef FLAT_PARTICLES
+#define FLAT_PARTICLES
+
+// This is a lower-level IR for particles in which:
+//      1) nested structs have been flattened into full access path names
+//      2) type information has been removed
+//      3) paths have been separated into reads (inputs) and writes (outputs)
+// This IR is simplified - it contains no more information than what is needed
+// to do taint tracking with authorization logic for downgrading.
+
+// There should be a higher-level IR in which particles do have nested structs,
+// and a way of converting from that higher-level IR into this one. The
+// higher-level IR could either be: 1) just in conventional programming language
+// (e.g. C++) data structures, and a conventional language pass that converts
+// from the high IR to this one; or 2) another set of datalog data structures,
+// with inference rules that convert to this one (perhaps using a relation like
+// (convertsTo(highIR, lowIR)). Introducing more IRs between this one and the
+// top level IR is also a viable way to implement this
+
+// As an example, if we have
+// ---- High IR -----
+// someParticle {
+//      reads a : someStruct {b: String, c: float}
+//      writes d : Int
+// }
+// 
+// it should become
+// ---- Low IR ------
+// someParticle { reads: ["a.b", "a.c"], writes: ["d"] }
+
+//-----------------------------------------------------------------------------
+// Type Declarations
+//-----------------------------------------------------------------------------
+.type AccessPath <: symbol
+.type AccessPathList = Nil {} | Cons {a: AccessPath, l: AccessPathList }
+.type FlatParticle = FlatParticle { readPaths: AccessPathList, 
+    writtenPaths: AccessPathList }
+.type FlatParticleName <: symbol
+
+//-----------------------------------------------------------------------------
+// Predicate Declarations
+//-----------------------------------------------------------------------------
+// A variable n is bound to a particle body p. This is a convenient way to refer
+// to a particle in more than one place without needing to redifine it.
+// This is assentially `let n := p`, where p is a particle definition.
+.decl bindFlatParticle(n: FlatParticleName, p: FlatParticle)
+
+// The list l contains path p
+.decl accessPathListContains(l: AccessPathList, a: AccessPath)
+
+//-----------------------------------------------------------------------------
+// Universe Predicates
+//-----------------------------------------------------------------------------
+// These predicates say that some object is a member of the universe for that
+// object. These are needed when working in Datalog to ensure that a fixpoint
+// can be reached. In practice, to dismiss error messages about variables not
+// being grounded when defining new rules. For example, if there is an error
+// that 'a' an acces path is not grounded when defining some rule, simply add
+// `isAccessPath(a)` to the RHS of the rule.
+
+.decl isAccessPath(a: AccessPath)
+.decl isAccessPathList(l: AccessPathList)
+.decl isFlatParticle(p: FlatParticle)
+
+//-----------------------------------------------------------------------------
+// Rules
+//-----------------------------------------------------------------------------
+accessPathListContains($Cons(f, l), f) :- 
+    isAccessPathList($Cons(f, l)).
+accessPathListContains($Cons(a1, l), a) :-
+    isAccessPathList($Cons(a1, l)),
+    accessPathListContains(l, a).
+
+//-----------------------------------------------------------------------------
+// Universe Populating Rules
+//-----------------------------------------------------------------------------
+// These are rules that add objects to the universe whenever they are mentioned
+// in rules. These are for convenience and to reduce errors caused by forgetting
+// to add thngs to the universe.
+isAccessPath(a) :- accessPathListContains(_, a).
+isAccessPath(a) :- isAccessPathList($Cons(a, _)).
+
+isAccessPathList(l) :- isFlatParticle($FlatParticle(l, _)).
+isAccessPathList(l) :- isFlatParticle($FlatParticle(_, l)).
+isAccessPathList(l) :- isAccessPathList($Cons(_, l)).
+
+isFlatParticle(p) :- bindFlatParticle(_, p).
+
+#endif // FLAT_MODULES
