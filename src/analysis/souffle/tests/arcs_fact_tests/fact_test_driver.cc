@@ -14,7 +14,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 //
-// Just a simple example to check that we can use the Souffle C++ interface.
+// This file is a simple driver to run tests expressed as a datalog script that
+// includes analyze_tag_checks_test_helper.dl and contains facts describing the
+// dataflow graph (such as edges, tag claims, and tag checks) and our
+// expectations (such as which checks pass or fail). It returns 0 if the test is
+// well-formed and all expectations are met, 0 otherwise. This allows the
+// datalog tests to be run from a bazel cc_test rule and avoids managing
+// external facts files or diffing against an expected output file.
 //
 #include <iostream>
 #include <memory>
