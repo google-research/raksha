@@ -20,6 +20,7 @@ def souffle_cc_library(name, src, included_dl_scripts=[], visibility = None):
     Args:
       name: String; Name of the library.
       src: String; The datalog program.
+      included_dl_scripts: List; List of labels indicating datalog files included by src.
       visibility: List; List of visibilities.
     """
     cc_file = src + ".cpp"
