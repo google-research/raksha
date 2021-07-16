@@ -35,7 +35,6 @@ filegroup(
     ],
     linkopts = ["-pthread"],
     args = [dl_script.replace(".dl", "")],
-
 ) for dl_script in DL_TEST_FILES]
 
 test_suite(
