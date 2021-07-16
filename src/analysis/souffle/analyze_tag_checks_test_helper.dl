@@ -7,21 +7,33 @@
 // This is a tag check that does not correspond to the original test's arcs manifest. We want to
 // eventually translate the arcs manifests into facts and check them against our hand-written facts,
 // so distinguishing the extra tags will be important eventually. For now, thought, it just works
-// exactly like checkTag.
-.decl checkTagExtra(accessPath: AccessPath, tag: Tag, tagPresence: TagPresence)
+// exactly like checkTagIsPresnet.
+.decl checkTagIsPresentExtra(accessPath: AccessPath, tag: Tag)
 
-checkTag(accessPath, tag, tagPresence) :- checkTagExtra(accessPath, tag, tagPresence).
+checkTagIsPresent(accessPath, tag) :- checkTagIsPresentExtra(accessPath, tag).
 
-.type TestResult <: symbol
-.decl isValidTestResult(testResult: TestResult)
+.type CheckResult <: symbol
+.decl isValidCheckResult(checkResult: CheckResult)
 
-isValidTestResult("PASS").
-isValidTestResult("FAIL").
+isValidCheckResult("PASS").
+isValidCheckResult("FAIL").
 
+// The arcs manifests we use as our intermediate representation will indicate that particular
+// `accessPath`s should be checked for the presence or absence of tags. Our tests, however, should
+// not always be in a passing state if all checks pass, nor should they necessarily be in a failing
+// state if some or all checks fail. Depending upon the functionality that the test is testing and
+// how we have structured the dataflow of the test, we expect that certain checks will pass and
+// certain checks will fail.
+//
+// This relation, `tagCheckExpecation`, encodes our expectation about whether the dataflow analysis
+// on the dataflow graph we have provided with edge and claim facts should cause a particular
+// check to pass or fail. A test passes when each check on a particular `accessPath` for a
+// particular `tag` passes or fails exactly when the `tagCheckExpectation` with the same
+// `accessPath` and `tag` value indicates "PASS" or "FAIL" as its `checkResult`, respectively.
 .decl tagCheckExpectation(
   accessPath: AccessPath,
   tag: Tag,
-  testResult: TestResult)
+  checkResult: CheckResult)
 
 .type BadCheckDiagnostic <: symbol
 
@@ -29,24 +41,24 @@ isValidTestResult("FAIL").
 .decl badTagCheckExpectation(
   accessPath: AccessPath,
   tag: Tag,
-  testResult: TestResult,
+  checkResult: CheckResult,
   diagnostic: BadCheckDiagnostic)
 
 .output badTagCheckExpectation(IO=stdout, delimiter=",")
 
 // Expectation is malformed if the expected test result is not one of the valid
 // test results.
-badTagCheckExpectation(accessPath, tag, testResult, "Invalid test result.") :-
-  tagCheckExpectation(accessPath, tag, testResult), !isValidTestResult(testResult).
+badTagCheckExpectation(accessPath, tag, checkResult, "Invalid test result.") :-
+  tagCheckExpectation(accessPath, tag, checkResult), !isValidCheckResult(checkResult).
 
 // Expectation is malformed if it does not correspond to a tag check.
-badTagCheckExpectation(accessPath, tag, testResult, "Expectation does not match check.") :-
-  tagCheckExpectation(accessPath, tag, testResult), !checkTag(accessPath, tag, _).
+badTagCheckExpectation(accessPath, tag, checkResult, "Expectation does not match check.") :-
+  tagCheckExpectation(accessPath, tag, checkResult), !checkTagIsPresent(accessPath, tag).
 
 // Require an expectation for every tag check.
-badTagCheckExpectation(accessPath, tag, testResult, "No expecation found.") :-
-  checkTag(accessPath, tag, _),
-  isValidTestResult(testResult),
+badTagCheckExpectation(accessPath, tag, checkResult, "No expecation found.") :-
+  checkTagIsPresent(accessPath, tag),
+  isValidCheckResult(checkResult),
   !tagCheckExpectation(accessPath, tag, _).
 
 // Require expectations to not conflict.
@@ -55,8 +67,8 @@ badTagCheckExpectation(accessPath, tag, expectation, "Conflicting check expectat
   tagCheckExpectation(accessPath, tag, otherExpectation),
   expectation != otherExpectation.
 
-// Finds checks that go as expected. This is used as a helper relation for
-// tagCheckNotAsExpected, allowing us to use fewer negatives.
+// If all checks that pass match a "PASS" `tagCheckExpectation` and all checks that fail match
+// a "FAIL" `tagCheckExpectation`, then the test has passed.
 .decl tagCheckAsExpected(accessPath: AccessPath, tag: Tag)
 
 tagCheckAsExpected(accessPath, tag) :-
@@ -65,10 +77,11 @@ tagCheckAsExpected(accessPath, tag) :-
 tagCheckAsExpected(accessPath, tag) :-
   failingTagCheck(accessPath, tag), tagCheckExpectation(accessPath, tag, "FAIL").
 
+// If any check is not in `tagCheckAsExpected`, then the test has failed.
 .decl tagCheckNotAsExpected(accessPath: AccessPath, tag: Tag)
 .output tagCheckNotAsExpected(IO=stdout, delimiter=",")
 
 tagCheckNotAsExpected(accessPath, tag) :-
-  checkTag(accessPath, tag, _), !tagCheckAsExpected(accessPath, tag).
+  accessPathIsCheckedForTag(accessPath, tag), !tagCheckAsExpected(accessPath, tag).
 
 #endif // SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_

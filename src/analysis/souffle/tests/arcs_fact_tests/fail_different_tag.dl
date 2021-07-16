@@ -21,11 +21,11 @@ edge("R.P1.foo", "R.h.Foo").
 edge("R.h.Foo", "R.P2.bar").
 
 // This check was in the original manifest. We expect it not to pass.
-checkTag("R.P2.bar", "trusted", "PRESENT").
+checkTagIsPresent("R.P2.bar", "trusted").
 
 // This check was not in the original manifest, but we add it to make sure the dataflow did
 // something.
-checkTagExtra("R.P2.bar", "notTrusted", "PRESENT").
+checkTagIsPresentExtra("R.P2.bar", "notTrusted").
 
 tagCheckExpectation("R.P2.bar", "trusted", "FAIL").
 tagCheckExpectation("R.P2.bar", "notTrusted", "PASS").

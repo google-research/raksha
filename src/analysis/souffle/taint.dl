@@ -39,14 +39,6 @@
 // `AccessPath`, it would make sense to define an ADT in the long term.
 .type Tag <: symbol
 
-// Indicates the degree of presence of a tag at a particular node.
-.type TagPresence <: symbol
-
-.decl isValidTagPresence(tagPresence: TagPresence)
-
-isValidTagPresence("PRESENT").
-isValidTagPresence("NOT_PRESENT").
-
 // Is this symbol an access path to some data?
 // (Useful for scoping when negation is involved.)
 .decl isAccessPath(accessPath: AccessPath)
@@ -69,8 +61,8 @@ isValidTagPresence("NOT_PRESENT").
 // There is a claim that `accessPath` definitely has `tag` taint.
 .decl claimHasTag(accessPath: AccessPath, tag: Tag)
 
-// There is a check that `accessPath` has a particular presence of `tag` taint.
-.decl checkTag(accessPath: AccessPath, tag: Tag, tagPresence: TagPresence)
+// There is a check that `accessPath` is tagged with a particular `tag`.
+.decl checkTagIsPresent(accessPath: AccessPath, tag: Tag)
 
 // Some inference rules
 
