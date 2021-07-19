@@ -13,6 +13,8 @@
 //    foo: writes h
 //  P2
 //    bar: reads h
+//
+// The below fact-based test is hand-derived from the above Arcs manifest test.
 #include "taint.dl"
 #include "fact_test_helper.dl"
 
