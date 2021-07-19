@@ -4,84 +4,13 @@
 #include "taint.dl"
 #include "analyze_tag_checks.dl"
 
-// This is a tag check that does not correspond to the original test's arcs manifest. We want to
-// eventually translate the arcs manifests into facts and check them against our hand-written facts,
-// so distinguishing the extra tags will be important eventually. For now, thought, it just works
-// exactly like checkTagIsPresnet.
-.decl checkTagIsPresentExtra(accessPath: AccessPath, tag: Tag)
+.type TestName <: symbol
 
-checkTagIsPresent(accessPath, tag) :- checkTagIsPresentExtra(accessPath, tag).
-
-.type CheckResult <: symbol
-.decl isValidCheckResult(checkResult: CheckResult)
-
-isValidCheckResult("PASS").
-isValidCheckResult("FAIL").
-
-// The arcs manifests we use as our intermediate representation will indicate that particular
-// `accessPath`s should be checked for the presence or absence of tags. Our tests, however, should
-// not always be in a passing state if all checks pass, nor should they necessarily be in a failing
-// state if some or all checks fail. Depending upon the functionality that the test is testing and
-// how we have structured the dataflow of the test, we expect that certain checks will pass and
-// certain checks will fail.
-//
-// This relation, `tagCheckExpecation`, encodes our expectation about whether the dataflow analysis
-// on the dataflow graph we have provided with edge and claim facts should cause a particular
-// check to pass or fail. A test passes when each check on a particular `accessPath` for a
-// particular `tag` passes or fails exactly when the `tagCheckExpectation` with the same
-// `accessPath` and `tag` value indicates "PASS" or "FAIL" as its `checkResult`, respectively.
-.decl tagCheckExpectation(
-  accessPath: AccessPath,
-  tag: Tag,
-  checkResult: CheckResult)
-
-.type BadCheckDiagnostic <: symbol
-
-// Used to report malformed test cases.
-.decl badTagCheckExpectation(
-  accessPath: AccessPath,
-  tag: Tag,
-  checkResult: CheckResult,
-  diagnostic: BadCheckDiagnostic)
-
-.output badTagCheckExpectation(IO=stdout, delimiter=",")
-
-// Expectation is malformed if the expected test result is not one of the valid
-// test results.
-badTagCheckExpectation(accessPath, tag, checkResult, "Invalid test result.") :-
-  tagCheckExpectation(accessPath, tag, checkResult), !isValidCheckResult(checkResult).
-
-// Expectation is malformed if it does not correspond to a tag check.
-badTagCheckExpectation(accessPath, tag, checkResult, "Expectation does not match check.") :-
-  tagCheckExpectation(accessPath, tag, checkResult), !checkTagIsPresent(accessPath, tag).
-
-// Require an expectation for every tag check.
-badTagCheckExpectation(accessPath, tag, checkResult, "No expecation found.") :-
-  checkTagIsPresent(accessPath, tag),
-  isValidCheckResult(checkResult),
-  !tagCheckExpectation(accessPath, tag, _).
-
-// Require expectations to not conflict.
-badTagCheckExpectation(accessPath, tag, expectation, "Conflicting check expectation.") :-
-  tagCheckExpectation(accessPath, tag, expectation),
-  tagCheckExpectation(accessPath, tag, otherExpectation),
-  expectation != otherExpectation.
-
-// If all checks that pass match a "PASS" `tagCheckExpectation` and all checks that fail match
-// a "FAIL" `tagCheckExpectation`, then the test has passed.
-.decl tagCheckAsExpected(accessPath: AccessPath, tag: Tag)
-
-tagCheckAsExpected(accessPath, tag) :-
-  passingTagCheck(accessPath, tag), tagCheckExpectation(accessPath, tag, "PASS").
-
-tagCheckAsExpected(accessPath, tag) :-
-  failingTagCheck(accessPath, tag), tagCheckExpectation(accessPath, tag, "FAIL").
-
-// If any check is not in `tagCheckAsExpected`, then the test has failed.
-.decl tagCheckNotAsExpected(accessPath: AccessPath, tag: Tag)
-.output tagCheckNotAsExpected(IO=stdout, delimiter=",")
-
-tagCheckNotAsExpected(accessPath, tag) :-
-  accessPathIsCheckedForTag(accessPath, tag), !tagCheckAsExpected(accessPath, tag).
-
-#endif // SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_
+// If a test has something in this relation, then it has passed. If not, then it has failed. Each
+// test in arcs_fact_tests must provide a rule that populates this relation indicating the
+// expectations that must be met for the test to pass. We check for whether this relation has
+// non-zero size in the test driver to decide whether to pass or fail the test. Although the test
+// driver does not care about the contents of this relation, we use the test name as the parameter
+// so printing the relation provides some useful information.
+.decl testPasses(testName: TestName)
+.output testPasses(IO=stdout, delimiter=",")

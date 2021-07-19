@@ -15,12 +15,11 @@
 //-----------------------------------------------------------------------------
 //
 // This file is a simple driver to run tests expressed as a datalog script that
-// includes analyze_tag_checks_test_helper.dl and contains facts describing the
-// dataflow graph (such as edges, tag claims, and tag checks) and our
-// expectations (such as which checks pass or fail). It returns 0 if the test is
-// well-formed and all expectations are met, 0 otherwise. This allows the
-// datalog tests to be run from a bazel cc_test rule and avoids managing
-// external facts files or diffing against an expected output file.
+// contains facts describing the dataflow graph (such as edges and tag claims)
+// and our expectations (such as which tags will be present or absent). It
+// returns 0 if the test has contents in the testPasses relation, 1 otherwise.
+// This allows the datalog tests to be run from a bazel cc_test rule and avoids
+// managing external facts files or diffing against an expected output file.
 //
 #include <iostream>
 #include <memory>
@@ -38,29 +37,17 @@ int main(int argc, char **argv) {
 
   prog->run();
 
-  souffle::Relation *bad_expectations =
-    prog->getRelation("badTagCheckExpectation");
-  souffle::Relation *unfulfilled_expectations =
-    prog->getRelation("tagCheckNotAsExpected");
-  assert(bad_expectations != nullptr);
-  assert(unfulfilled_expectations != nullptr);
+  souffle::Relation *test_passes =
+    prog->getRelation("testPasses");
 
-  char const *test_status_explanation = nullptr;
-  bool success = false;
-  if (bad_expectations->size() > 0) {
-    test_status_explanation = "has malformed expectations.";
-  } else if (unfulfilled_expectations->size() > 0) {
-    test_status_explanation = "has results that differ from expectations.";
-  } else {
-    test_status_explanation = "matched all expectations.";
-    success = true;
-  }
-
-  std::cout << "Test " << test_name << " " << test_status_explanation << std::endl;
-  if (success) {
+  int const test_passes_size = test_passes->size();
+  assert((test_passes_size == 0) || (test_passes_size == 1));
+  std::cout << "Test " << test_name;
+  if (test_passes_size == 1) {
+    std::cout << " passes." << std::endl;
     return 0;
   } else {
-    prog->printAll();
+    std::cout << " fails." << std::endl;
     return 1;
   }
 }

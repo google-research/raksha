@@ -20,12 +20,6 @@ claimHasTag("R.P1.foo", "notTrusted").
 edge("R.P1.foo", "R.h.Foo").
 edge("R.h.Foo", "R.P2.bar").
 
-// This check was in the original manifest. We expect it not to pass.
-checkTagIsPresent("R.P2.bar", "trusted").
-
-// This check was not in the original manifest, but we add it to make sure the dataflow did
-// something.
-checkTagIsPresentExtra("R.P2.bar", "notTrusted").
-
-tagCheckExpectation("R.P2.bar", "trusted", "FAIL").
-tagCheckExpectation("R.P2.bar", "notTrusted", "PASS").
+testPasses("fail_different_tag") :-
+  !mayHaveTag("R.P2.bar", "trusted"),
+  mayHaveTag("R.P2.bar", "notTrusted").
