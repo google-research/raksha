@@ -14,7 +14,7 @@
 //  P2
 //    bar: reads h
 #include "taint.dl"
-#include "analyze_tag_checks_test_helper.dl"
+#include "fact_test_helper.dl"
 
 claimHasTag("R.P1.foo", "notTrusted").
 edge("R.P1.foo", "R.h.Foo").

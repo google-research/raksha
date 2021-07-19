@@ -16,8 +16,7 @@ filegroup(
     name = dl_script.replace(".dl", "_souffle_cc_library"),
     included_dl_scripts = [
         "//src/analysis/souffle:taint.dl",
-        "//src/analysis/souffle:analyze_tag_checks.dl",
-        "//src/analysis/souffle:analyze_tag_checks_test_helper.dl",
+        "//src/analysis/souffle:fact_test_helper.dl",
     ],
     src = dl_script,
 ) for dl_script in DL_TEST_FILES]

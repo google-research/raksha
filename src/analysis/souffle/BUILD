@@ -25,8 +25,7 @@ souffle_cc_library(
     src = "taint.dl",
 )
 
-exports_files(["analyze_tag_checks.dl"])
-exports_files(["analyze_tag_checks_test_helper.dl"])
+exports_files(["fact_test_helper.dl"])
 
 test_suite(
     name = "all_tests",
