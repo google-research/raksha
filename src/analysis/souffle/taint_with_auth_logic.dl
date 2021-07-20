@@ -19,6 +19,7 @@
 
 #include "flat_graph_ir.dl"
 #include "auth_logic_interface.dl"
+#include "taint.dl"
 
 #ifndef TAINT_WITH_AUTH_LOGIC
 #define TAINT_WITH_AUTH_LOGIC
@@ -26,26 +27,13 @@
 //-----------------------------------------------------------------------------
 // Type Declarations
 //-----------------------------------------------------------------------------
-// A taint Tag, such as "video_data"
-.type Tag <: symbol
-
 // An information flow Label which in this model is a set of taint Tags. One 
 // label L1 flows to another L2 if L1 is a subset or equal to L2.
 .type IFCLabel <: symbol
 
 //-----------------------------------------------------------------------------
-// Predicate Declarations
+// Relation Declarations
 //-----------------------------------------------------------------------------
-// There is a claim that `accessPath` definitely has `tag` taint.
-.decl claimHasTag(accessPath: AccessPath, tag: Tag)
-
-// The IFCLabel of a accesPath has a Tag according to the taint analysis
-// NOTE: In practice there may be value in explicitly having a layer of
-// indirection in which accessPaths have IFCLabels and just IFCLabels have Tags.
-// In this formalization, accessPaths also act as IFCLabels (in the sense that they
-// have Tags).
-.decl mayHaveTag(path: AccessPath, tag: Tag)
-
 // This party is the owner of a taint Tag (they have the privilege to downgrade
 // it).
 .decl ownsTag(owner: Principal, tag: Tag)
@@ -68,37 +56,49 @@
 
 // Because datalog does not have universal quantifiers, accessPathLabelFlowsTo 
 // (which is "subset or equal to") is defined by proving that there is no 
-// counterexample to the subset relation. A counterexample to the predicate 
+// counterexample to the subset relation. A counterexample to the relation 
 // `isSubsetOrEqual(Set1, Set2)` is an element that is in Set1 but not Set2. 
-// The predicate `accessPathLabelDoesNotFlowTo` is true when there is a counterexample, 
-// and accessPathLabelFlowsTo is just the negation of accessPathLabelDoesNotFlowTo.
+// The relation `accessPathLabelDoesNotFlowTo` is true when there is a
+// counterexample, and accessPathLabelFlowsTo is just the negation of
+// accessPathLabelDoesNotFlowTo.
 .decl accessPathLabelDoesNotFlowTo(path: AccessPath, ell: IFCLabel)
 
+// This is a variation on the `mayHaveTag` relation defined in `taint.dl`
+// It says that an accessPath may have been tainted with tag. By contrast to 
+// the other implementation, this one takes into account downgrades (which 
+// remove tags). Downgrades happen as a result of statements made in 
+// authorization logic.
+.decl mayHaveTagAL(accessPath: AccessPath, tag: Tag)
 
 //-----------------------------------------------------------------------------
-// Universe Predicates
+// Universe Relations
 //-----------------------------------------------------------------------------
-// These predicates say that some object is a member of the universe for that
-// object.
-.decl isTag(tag: Tag)
+// These relations say that some object is a member of the universe for that
+// object. These are useful for scoping when there is negation or otherwise to 
+// ensure that variables are grounded.
 .decl isIFCLabel(ell: IFCLabel)
 
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
-
 downgrades(path, tag) :- ownsTag(owner, tag), saysDowngrades(owner, path, tag).
 
-mayHaveTag(path, tag) :- claimHasTag(path, tag).
-mayHaveTag(path, tag) :- 
-    isFlatParticle($FlatParticle(inputs, outputs)),
-    accessPathListContains(inputs, path1),
-    accessPathListContains(outputs, path),
-    mayHaveTag(path1, tag), !downgrades(path, tag).
+// The following definition of mayHaveTagAL would not work, because when a tag 
+// is downgraded from an accessPath it should also not propagate to other paths 
+// that are after it in the graph. The following incorrect implementation does 
+// not have that behavior
+// mayHaveTagAL(path, tag) :- mayHaveTag(path, tag), !downgrades(path, tag).
+
+// Real implementation of mayHaveTagAL
+
+mayHaveTagAL(tgt, tag) :- claimHasTag(tgt, tag).
+mayHaveTagAL(tgt, tag) :-
+    edge(src, tgt), mayHaveTagAL(src, tag), 
+    !downgrades(tgt, tag).
 
 accessPathLabelDoesNotFlowTo(path, ell) :-
     isTag(tag), isIFCLabel(ell), isAccessPath(path),
-    mayHaveTag(path, tag),
+    mayHaveTagAL(path, tag),
     !isMember(tag, ell).
 
 accessPathLabelFlowsTo(path, ell) :- 
@@ -108,17 +108,14 @@ accessPathLabelFlowsTo(path, ell) :-
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
 //-----------------------------------------------------------------------------
-// These rules add objects to the set of things that exist (i.e. predicates like
+// These rules add objects to the set of things that exist (i.e. relations like
 // `isObject(..)`) whenever they are mentioned in other rules
 isIFCLabel(ell) :- isMember(_, ell).
 
-isTag(tag) :- claimHasTag(_, tag).
-isTag(tag) :- isMember(tag, _).
 isTag(tag) :- ownsTag(_, tag).
 isTag(tag) :- saysDowngrades(_, _, tag).
 
-isAccessPath(path) :- claimHasTag(path, _).
-isAccessPath(path) :- mayHaveTag(path, _).
+isAccessPath(path) :- mayHaveTagAL(path, _).
 
 #endif // TAINT_WITH_AUTH_LOGIC
 

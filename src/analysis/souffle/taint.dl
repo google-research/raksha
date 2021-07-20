@@ -29,23 +29,23 @@
 // However, in the long term, it would make sense to define an ADT for this.
 //
 
+// flat_graph_ir is included just for the type definition for `AccessPath`
+#include "flat_graph_ir.dl"
+
 #ifndef SRC_ANALYSIS_SOUFFLE_TAINT_DL_
 #define SRC_ANALYSIS_SOUFFLE_TAINT_DL_
 
-.type AccessPath <: symbol
-
+//-----------------------------------------------------------------------------
+// Type Declarations
+//-----------------------------------------------------------------------------
 // A symbol representing a taint (or information flow) tag. These would be
 // strings of the form "secret", "public", "timestampInMs", etc. Just like
 // `AccessPath`, it would make sense to define an ADT in the long term.
 .type Tag <: symbol
 
-// Is this symbol an access path to some data?
-// (Useful for scoping when negation is involved.)
-.decl isAccessPath(accessPath: AccessPath)
-
-// Is this a Tag?
-// (Useful for scoping when negation is involved.)
-.decl isTag(tag: Tag)
+//-----------------------------------------------------------------------------
+// Relation Declarations
+//-----------------------------------------------------------------------------
 
 // A data flow edge.
 .decl edge(src: AccessPath, tgt: AccessPath)
@@ -54,22 +54,29 @@
 .decl path(src: AccessPath, tgt: AccessPath)
 
 // Declares that `accessPath` may have be tainted with `tag`.
-// If false, `accessPath` *definitely* does not `tag` taint at runtime.
+// If false, `accessPath` *definitely* does not have `tag` taint at runtime.
 // If true, `accessPath` may have the `tag` taint at runtime.
+// NOTE: In practice there may be value in explicitly having a layer of
+// indirection in which accessPaths have IFCLabels and just IFCLabels have Tags.
+// In this formalization, accessPaths also act as IFCLabels (in the sense that
+// they have Tags).
 .decl mayHaveTag(accessPath: AccessPath, tag: Tag)
 
 // There is a claim that `accessPath` definitely has `tag` taint.
 .decl claimHasTag(accessPath: AccessPath, tag: Tag)
 
-// Some inference rules
+//-----------------------------------------------------------------------------
+// Universe Relations
+//-----------------------------------------------------------------------------
+// These relations say that some object is a member of the universe for that
+// object. These are useful for scoping when there is negation or otherwise to 
+// ensure that variables are grounded.
 
-// Symbols used in edges are access paths
-isAccessPath(x) :- edge(x, _).
-isAccessPath(y) :- edge(_, y).
+.decl isTag(tag: Tag)
 
-// Symbols used in hasTag or mayHaveTag are tags
-isTag(tag) :- claimHasTag(_, tag).
-isTag(tag) :- mayHaveTag(_, tag).
+//-----------------------------------------------------------------------------
+// Rules
+//-----------------------------------------------------------------------------
 
 // Transitive paths
 path(from, to) :- edge(from, to).
@@ -77,5 +84,23 @@ path(from, to) :- edge(from, intermediate), path(intermediate, to).
 
 mayHaveTag(tgt, tag) :- claimHasTag(tgt, tag).
 mayHaveTag(tgt, tag) :- edge(src, tgt), mayHaveTag(src, tag).
+
+//-----------------------------------------------------------------------------
+// Universe Populating Rules
+//-----------------------------------------------------------------------------
+// These rules add objects to the set of things that exist (i.e. relations like
+// `isObject(..)`) whenever they are mentioned in other rules.
+
+// Symbols used in edges are access paths
+isAccessPath(x) :- edge(x, _).
+isAccessPath(y) :- edge(_, y).
+
+isAccessPath(path) :- claimHasTag(path, _).
+isAccessPath(path) :- mayHaveTag(path, _).
+
+// Symbols used in hasTag or mayHaveTag are tags
+isTag(tag) :- claimHasTag(_, tag).
+isTag(tag) :- mayHaveTag(_, tag).
+
 
 #endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_
