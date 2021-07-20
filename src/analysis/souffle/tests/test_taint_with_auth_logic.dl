@@ -14,11 +14,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
-#include "taint_with_auth_logic.dl"
-#include "flat_graph_ir.dl"
+#include "../taint_with_auth_logic.dl"
+#include "../flat_graph_ir.dl"
 
 // This is a datalog file that is meant to test taint_with_auth_logic.dl. It 
-// should eventually be replaced by or otherwise used as a part of an automated // test.
+// should eventually be replaced by or otherwise used as a part of an
+// automated test.
 
 //-----------------------------------------------------------------------------
 // Program Manifests
@@ -86,7 +87,7 @@ saysDowngrades("ServiceProvider", "mod2out", "model_weights").
 .decl test_label_check(x: number)
 
 // Define a label for doing the check of the final output
-isLabel("mod2out_expected_label").
+isIFCLabel("mod2out_expected_label").
 isMember("product_id", "mod2out_expected_label").
 
 // The check passes if this is true (i.e., the CSV for test_label_check 

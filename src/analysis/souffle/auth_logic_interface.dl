@@ -32,3 +32,4 @@
 isPrincipal(speaker) :- saysDowngrades(speaker, _, _).
 
 #endif // AUTH_LOGIC_INTERFACE
+

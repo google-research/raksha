@@ -103,3 +103,4 @@ isAccessPathList(l) :- isAccessPathList($Cons(_, l)).
 isFlatParticle(p) :- bindFlatParticle(_, p).
 
 #endif // FLAT_MODULES
+
