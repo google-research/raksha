@@ -1,0 +1,17 @@
+#ifndef SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_
+#define SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_
+
+#include "taint.dl"
+
+.type TestName <: symbol
+
+// If a test has something in this relation, then it has passed. If not, then it has failed. Each
+// test in arcs_fact_tests must provide a rule that populates this relation indicating the
+// expectations that must be met for the test to pass. We check for whether this relation has
+// non-zero size in the test driver to decide whether to pass or fail the test. Although the test
+// driver does not care about the contents of this relation, we use the test name as the parameter
+// so printing the relation provides some useful information.
+.decl testPasses(testName: TestName)
+.output testPasses(IO=stdout, delimiter=",")
+
+#endif // SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_
