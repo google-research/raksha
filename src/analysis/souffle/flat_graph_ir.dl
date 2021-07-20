@@ -59,10 +59,10 @@
 // A variable n is bound to a particle body p. This is a convenient way to refer
 // to a particle in more than one place without needing to redifine it.
 // This is assentially `let n := p`, where p is a particle definition.
-.decl bindFlatParticle(n: FlatParticleName, p: FlatParticle)
+.decl bindFlatParticle(name: FlatParticleName, particle: FlatParticle)
 
 // The list l contains path p
-.decl accessPathListContains(l: AccessPathList, a: AccessPath)
+.decl accessPathListContains(pathList: AccessPathList, path: AccessPath)
 
 //-----------------------------------------------------------------------------
 // Universe Predicates
@@ -74,18 +74,18 @@
 // that 'a' an acces path is not grounded when defining some rule, simply add
 // `isAccessPath(a)` to the RHS of the rule.
 
-.decl isAccessPath(a: AccessPath)
-.decl isAccessPathList(l: AccessPathList)
-.decl isFlatParticle(p: FlatParticle)
+.decl isAccessPath(path: AccessPath)
+.decl isAccessPathList(list: AccessPathList)
+.decl isFlatParticle(particle: FlatParticle)
 
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
-accessPathListContains($Cons(f, l), f) :- 
-    isAccessPathList($Cons(f, l)).
-accessPathListContains($Cons(a1, l), a) :-
-    isAccessPathList($Cons(a1, l)),
-    accessPathListContains(l, a).
+accessPathListContains($Cons(head, rest), head) :- 
+    isAccessPathList($Cons(head, rest)).
+accessPathListContains($Cons(head, rest), path) :-
+    isAccessPathList($Cons(head, rest)),
+    accessPathListContains(rest, path).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
@@ -93,14 +93,14 @@ accessPathListContains($Cons(a1, l), a) :-
 // These are rules that add objects to the universe whenever they are mentioned
 // in rules. These are for convenience and to reduce errors caused by forgetting
 // to add thngs to the universe.
-isAccessPath(a) :- accessPathListContains(_, a).
-isAccessPath(a) :- isAccessPathList($Cons(a, _)).
+isAccessPath(path) :- accessPathListContains(_, path).
+isAccessPath(path) :- isAccessPathList($Cons(path, _)).
 
-isAccessPathList(l) :- isFlatParticle($FlatParticle(l, _)).
-isAccessPathList(l) :- isFlatParticle($FlatParticle(_, l)).
-isAccessPathList(l) :- isAccessPathList($Cons(_, l)).
+isAccessPathList(list) :- isFlatParticle($FlatParticle(list, _)).
+isAccessPathList(list) :- isFlatParticle($FlatParticle(_, list)).
+isAccessPathList(list) :- isAccessPathList($Cons(_, list)).
 
-isFlatParticle(p) :- bindFlatParticle(_, p).
+isFlatParticle(path) :- bindFlatParticle(_, path).
 
 #endif // FLAT_MODULES
 
