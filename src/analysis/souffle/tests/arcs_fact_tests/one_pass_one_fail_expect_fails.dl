@@ -1,0 +1,7 @@
+// Used to ensure that a test with multiple failure conditions that fails at least one of those
+// conditions fails.
+#include "taint.dl"
+#include "fact_test_helper.dl"
+
+testFails("non_passing_test") :- 1 = 1.
+testFails("passing_test") :- 1 = 2.

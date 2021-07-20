@@ -22,6 +22,5 @@ claimHasTag("R.P1.foo", "notTrusted").
 edge("R.P1.foo", "R.h.Foo").
 edge("R.h.Foo", "R.P2.bar").
 
-testPasses("fail_different_tag") :-
-  !mayHaveTag("R.P2.bar", "trusted"),
-  mayHaveTag("R.P2.bar", "notTrusted").
+testFails("should_not_be_tagged_with_trusted") :- mayHaveTag("R.P2.bar", "trusted").
+testFails("should_be_tagged_with_notTrusted") :- !mayHaveTag("R.P2.bar", "notTrusted").

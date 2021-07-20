@@ -17,7 +17,7 @@
 // This file is a simple driver to run tests expressed as a datalog script that
 // contains facts describing the dataflow graph (such as edges and tag claims)
 // and our expectations (such as which tags will be present or absent). It
-// returns 0 if the test has contents in the testPasses relation, 1 otherwise.
+// returns 1 if the test had contents in the testFails relation, 0 otherwise.
 // This allows the datalog tests to be run from a bazel cc_test rule and avoids
 // managing external facts files or diffing against an expected output file.
 //
@@ -26,28 +26,44 @@
 
 #include "souffle/SouffleInterface.h"
 
-int main(int argc, char **argv) {
+int run_test(std::string const &test_name) {
   // We want one command line arg, the name of the current test module.
-  assert(argc == 2);
-  std::string const test_name = std::string(argv[1]);
-
   std::unique_ptr<souffle::SouffleProgram> prog(
       souffle::ProgramFactory::newInstance(test_name));
   assert(prog != nullptr);
 
   prog->run();
 
-  souffle::Relation *test_passes =
-    prog->getRelation("testPasses");
+  souffle::Relation *test_failures = prog->getRelation("testFails");
 
-  int const test_passes_size = test_passes->size();
-  assert((test_passes_size == 0) || (test_passes_size == 1));
-  std::cout << "Test " << test_name;
-  if (test_passes_size == 1) {
-    std::cout << " passes." << std::endl;
-    return 0;
-  } else {
-    std::cout << " fails." << std::endl;
+  assert(test_failures != nullptr);
+
+  bool const test_has_failures = test_failures->size() > 0;
+
+  if (test_has_failures) {
+    std::cout << "Test " << test_name << " failed." << std::endl;
+    prog->printAll();
     return 1;
+  } else {
+    std::cout << "Test " << test_name << " succeeded." << std::endl;
+    return 0;
   }
+  assert(false); // Should be unreachable.
+}
+
+int main(int argc, char **argv) {
+  // The first command line arg should be the name of the current test. The
+  // second optional argument should indicate whether or not the exit code
+  // of the test should be inverted for expected-fail tests.
+  assert((argc == 2) || (argc == 3));
+  std::string const test_name = std::string(argv[1]);
+  bool const invert_test = (argc == 3) && (std::string(argv[2]) == "invert");
+
+  int const test_exit_code = run_test(test_name);
+  if (invert_test) {
+    return (test_exit_code == 0) ? 1 : 0;
+  } else {
+    return test_exit_code;
+  }
+
 }

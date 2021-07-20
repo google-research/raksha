@@ -3,15 +3,11 @@
 
 #include "taint.dl"
 
-.type TestName <: symbol
+.type TestAspectName <: symbol
 
-// If a test has something in this relation, then it has passed. If not, then it has failed. Each
-// test in arcs_fact_tests must provide a rule that populates this relation indicating the
-// expectations that must be met for the test to pass. We check for whether this relation has
-// non-zero size in the test driver to decide whether to pass or fail the test. Although the test
-// driver does not care about the contents of this relation, we use the test name as the parameter
-// so printing the relation provides some useful information.
-.decl testPasses(testName: TestName)
-.output testPasses(IO=stdout, delimiter=",")
+// If a the testFails relation has any contents, then the test has failed. If not, it has passed.
+// Tests should create rules indicating what should not be true of the test for it to pass.
+.decl testFails(testAspectName: TestAspectName)
+.output testFails(IO=stdout, delimiter=",")
 
 #endif // SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_

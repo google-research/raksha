@@ -5,12 +5,16 @@ load(
 
 licenses(["notice"])
 
-DL_TEST_FILES = glob(["*.dl"])
+FAILURE_DL_TEST_FILES = glob(["*_expect_fails.dl"])
 
-filegroup(
-    name = "test_dl_scripts",
-    srcs = DL_TEST_FILES
-)
+ALL_DL_TEST_FILES = glob(["*.dl"])
+
+[sh_test(
+    name = dl_script.replace(".dl", "_contains_test_fails"),
+    srcs = ["contains_test_fails.sh"],
+    args = ["$(location {})".format(dl_script)],
+    data = [dl_script],
+) for dl_script in ALL_DL_TEST_FILES]
 
 [souffle_cc_library(
     name = dl_script.replace(".dl", "_souffle_cc_library"),
@@ -19,7 +23,7 @@ filegroup(
         "//src/analysis/souffle:fact_test_helper.dl",
     ],
     src = dl_script,
-) for dl_script in DL_TEST_FILES]
+) for dl_script in ALL_DL_TEST_FILES]
 
 [cc_test(
     name = dl_script.replace(".dl", "_test"),
@@ -33,10 +37,16 @@ filegroup(
         dl_script.replace(".dl", "_souffle_cc_library"),
     ],
     linkopts = ["-pthread"],
-    args = [dl_script.replace(".dl", "")],
-) for dl_script in DL_TEST_FILES]
+    args = [
+        dl_script.replace(".dl", ""),
+        "invert" if dl_script in FAILURE_DL_TEST_FILES else ""
+    ],
+) for dl_script in ALL_DL_TEST_FILES]
 
 test_suite(
     name = "arcs_fact_tests",
-    tests = [dl_script.replace(".dl", "_test") for dl_script in DL_TEST_FILES],
+    tests = [dl_script.replace(".dl", "_test")
+             for dl_script in ALL_DL_TEST_FILES] +
+            [dl_script.replace(".dl", "_contains_test_fails")
+             for dl_script in ALL_DL_TEST_FILES],
 )
