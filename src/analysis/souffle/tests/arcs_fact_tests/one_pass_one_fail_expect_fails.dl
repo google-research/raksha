@@ -1,7 +1,6 @@
-// Used to ensure that a test with multiple failure conditions that fails at least one of those
-// conditions fails.
+// Make sure that a test where one testPasses predicate passes while the other fails fails.
 #include "taint.dl"
 #include "fact_test_helper.dl"
 
-testFails("non_passing_test") :- 1 = 1.
-testFails("passing_test") :- 1 = 2.
+TEST_RULE("always_pass_rule", 1 = 1).
+TEST_RULE("always_fail_rule", 1 = 2).

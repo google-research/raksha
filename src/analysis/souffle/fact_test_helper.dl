@@ -5,9 +5,25 @@
 
 .type TestAspectName <: symbol
 
+// Any tests in this rule have passed. Should usually be populated by TEST_RULE rather than
+// directly used.
+.decl testPasses(testAspectName: TestAspectName)
+
 // If a the testFails relation has any contents, then the test has failed. If not, it has passed.
-// Tests should create rules indicating what should not be true of the test for it to pass.
+// Tests should create rules indicating what should not be true of the test for it to pass. Should
+// usually be populated by TEST_RULE rather than directly used.
 .decl testFails(testAspectName: TestAspectName)
 .output testFails(IO=stdout, delimiter=",")
+
+.decl allTests(testAspectName: TestAspectName)
+.output allTests(IO=stdout, delimiter=",")
+
+allTests(testAspectName) :- testPasses(testAspectName).
+allTests(testAspectName) :- testFails(testAspectName).
+
+#define TEST_RULE(test_aspect_name, rule) \
+  testPasses(test_aspect_name) :- rule. \
+  testFails(test_aspect_name) :- !(rule)
+
 
 #endif // SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_

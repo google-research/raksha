@@ -9,13 +9,6 @@ FAILURE_DL_TEST_FILES = glob(["*_expect_fails.dl"])
 
 ALL_DL_TEST_FILES = glob(["*.dl"])
 
-[sh_test(
-    name = dl_script.replace(".dl", "_contains_test_fails"),
-    srcs = ["contains_test_fails.sh"],
-    args = ["$(location {})".format(dl_script)],
-    data = [dl_script],
-) for dl_script in ALL_DL_TEST_FILES]
-
 [souffle_cc_library(
     name = dl_script.replace(".dl", "_souffle_cc_library"),
     included_dl_scripts = [
@@ -46,7 +39,5 @@ ALL_DL_TEST_FILES = glob(["*.dl"])
 test_suite(
     name = "arcs_fact_tests",
     tests = [dl_script.replace(".dl", "_test")
-             for dl_script in ALL_DL_TEST_FILES] +
-            [dl_script.replace(".dl", "_contains_test_fails")
-             for dl_script in ALL_DL_TEST_FILES],
+             for dl_script in ALL_DL_TEST_FILES]
 )

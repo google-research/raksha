@@ -2,4 +2,4 @@
 #include "taint.dl"
 #include "fact_test_helper.dl"
 
-testFails("not_failing_passes") :- 1 = 2.
+TEST_RULE("not_passing_fails", 1 = 1).

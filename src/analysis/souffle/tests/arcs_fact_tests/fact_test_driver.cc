@@ -35,12 +35,22 @@ int run_test(std::string const &test_name) {
   prog->run();
 
   souffle::Relation *test_failures = prog->getRelation("testFails");
+  souffle::Relation *all_tests = prog->getRelation("allTests");
 
   assert(test_failures != nullptr);
 
+  bool const test_is_trivial = all_tests->size() == 0;
   bool const test_has_failures = test_failures->size() > 0;
 
-  if (test_has_failures) {
+  if (test_is_trivial) {
+    std::cout
+      << "Test "
+      << test_name
+      << " does not have any test conditions."
+      << std::endl;
+    prog->printAll();
+    return 1;
+  } else if (test_has_failures) {
     std::cout << "Test " << test_name << " failed." << std::endl;
     prog->printAll();
     return 1;
