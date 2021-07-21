@@ -6,24 +6,33 @@
 .type TestAspectName <: symbol
 
 // Any tests in this rule have passed. Should usually be populated by TEST_RULE rather than
-// directly used.
+// directly used. If it is directly used, the test must be "declared" using an allTests fact on the
+// aspect.
 .decl testPasses(testAspectName: TestAspectName)
 
-// If a the testFails relation has any contents, then the test has failed. If not, it has passed.
-// Tests should create rules indicating what should not be true of the test for it to pass. Should
-// usually be populated by TEST_RULE rather than directly used.
-.decl testFails(testAspectName: TestAspectName)
-.output testFails(IO=stdout, delimiter=",")
-
+// All test aspects tested by a particular test. Should usually be populated by TEST_RULE rather
+// than directly used.
 .decl allTests(testAspectName: TestAspectName)
 .output allTests(IO=stdout, delimiter=",")
 
-allTests(testAspectName) :- testPasses(testAspectName).
-allTests(testAspectName) :- testFails(testAspectName).
+// If a the testFails relation has any contents, then the test has failed. Should not be populated
+// directly.
+.decl testFails(testAspectName: TestAspectName)
+.output testFails(IO=stdout, delimiter=",")
 
-#define TEST_RULE(test_aspect_name, rule) \
-  testPasses(test_aspect_name) :- rule. \
-  testFails(test_aspect_name) :- !(rule)
+testFails(testAspectName) :- allTests(testAspectName), !testPasses(testAspectName).
+
+// TEST_RULE is constructed so that it can take the place of a rule head. It "declares" a test
+// aspect via the allTests fact and sets up a testPasses head for the aspect in question. Example
+// usage:
+//
+// TEST_RULE("my_test_aspect") :- MyRelation(x), !MyOtherRelation(x).
+//
+// All recipes with a TEST_RULE head shall be seen as a condition that must be met for the test to
+// pass.
+#define TEST_RULE(test_aspect_name) \
+  allTests(test_aspect_name). \
+  testPasses(test_aspect_name)
 
 
 #endif // SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_

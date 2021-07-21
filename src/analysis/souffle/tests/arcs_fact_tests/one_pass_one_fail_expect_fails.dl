@@ -2,5 +2,5 @@
 #include "taint.dl"
 #include "fact_test_helper.dl"
 
-TEST_RULE("always_pass_rule", 1 = 1).
-TEST_RULE("always_fail_rule", 1 = 2).
+TEST_RULE("always_pass_rule") :- 1 = 1.
+TEST_RULE("always_fail_rule") :- 1 = 2.

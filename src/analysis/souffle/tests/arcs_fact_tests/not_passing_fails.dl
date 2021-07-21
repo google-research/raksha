@@ -1,5 +1,0 @@
-// Used to ensure that a test which has a testFails requirement which is unmet will pass.
-#include "taint.dl"
-#include "fact_test_helper.dl"
-
-TEST_RULE("not_passing_fails", 1 = 1).
