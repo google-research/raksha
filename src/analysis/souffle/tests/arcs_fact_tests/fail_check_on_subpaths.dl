@@ -1,0 +1,34 @@
+// Original Arcs manifest file:
+// Note: Renamed the tags "trusted" and "loggable" to "userSelection" and "screenContent", as they
+// propagate like confidentiality tags.
+// #Ingress: P1
+// #FAIL: hc:P2.foo is userSelection
+//particle P1
+//  foo: writes Foo {a: Text, b: Number}
+//  claim foo.a is userSelection
+//  claim foo.b is screenContent
+//particle P2
+//  foo: reads Foo {a: Text, b: Number}
+//  check foo is userSelection
+//recipe R
+//  P1
+//    foo: writes h
+//  P2
+//    foo: reads h
+#include "taint.dl"
+#include "fact_test_helper.dl"
+
+claimHasTag("R.P1.foo.a", "userSelection").
+claimHasTag("R.P1.foo.b", "screenContent").
+
+edge("R.P1.foo", "R.h.Foo").
+edge("R.P1.foo.a", "R.h.Foo.a").
+edge("R.P1.foo.b", "R.h.Foo.b").
+
+edge("R.h.Foo", "R.P2.foo").
+edge("R.h.Foo.a", "R.P2.foo.a").
+edge("R.h.Foo.b", "R.P2.foo.b").
+
+TEST_CASE("subpath_tag_not_in_parent") :- !mayHaveTag("R.P2.foo", "userSelection").
+TEST_CASE("subpath_tag_userSelection_in_subpath_a") :- mayHaveTag("R.P2.foo.a", "userSelection").
+TEST_CASE("subpath_tag_screenContent_in_subpath_b") :- mayHaveTag("R.P2.foo.b", "screenContent").
