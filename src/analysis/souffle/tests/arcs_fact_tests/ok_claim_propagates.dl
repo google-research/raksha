@@ -1,15 +1,17 @@
 // claim propagates through a chain of particles
+// Note: we have changed this test from the original Arcs manifest test by renaming the tag
+// "trusted" to "userData", as the tag in this test spreads like a confidentiality-aspect tag.
 // #Ingress: P1
 // #OK
 //particle P1
 //  foo: writes Foo {}
-//  claim foo is trusted
+//  claim foo is userData
 //particle P2
 //  bar: reads Foo {}
 //  foo: writes Foo {}
 //particle P3
 //  bar: reads Foo {}
-//  check bar is trusted
+//  check bar is userData
 //recipe R
 //  P1
 //    foo: writes h1
@@ -23,12 +25,12 @@
 #include "taint.dl"
 #include "fact_test_helper.dl"
 
-claimHasTag("R.P1.foo", "trusted").
+claimHasTag("R.P1.foo", "userData").
 edge("R.P1.foo", "R.h1.Foo").
 edge("R.h1.Foo", "R.P2.bar").
 edge("R.P2.bar", "R.P2.foo").
 edge("R.P2.foo", "R.h2.Foo").
 edge("R.h2.Foo", "R.P3.bar").
 
-// This test passes if R.P3.bar has the trusted tag.
-TEST_RULE("ok_claim_propagates") :- mayHaveTag("R.P3.bar", "trusted").
+// This test passes if R.P3.bar has the userData tag.
+TEST_RULE("ok_claim_propagates") :- mayHaveTag("R.P3.bar", "userData").

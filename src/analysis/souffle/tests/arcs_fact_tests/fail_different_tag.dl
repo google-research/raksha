@@ -1,13 +1,16 @@
 // Original Arcs manifest:
+// Note: We have changed this test from the original Arcs manifest test by renaming the tags
+// "trusted" and "notTrusted" to "userData1" and "userData2", as the tags in this test spread like
+// confidentiality-aspect tags.
 // Fails when different tag is claimed.
 // #Ingress: P1
-// #Fail: hc:P2.bar is trusted
+// #Fail: hc:P2.bar is userData1
 //particle P1
 //  foo: writes Foo {}
-//  claim foo is notTrusted
+//  claim foo is userData2
 //particle P2
 //  bar: reads Foo {}
-//  check bar is trusted
+//  check bar is userData1
 //recipe R
 //  P1
 //    foo: writes h
@@ -18,9 +21,9 @@
 #include "taint.dl"
 #include "fact_test_helper.dl"
 
-claimHasTag("R.P1.foo", "notTrusted").
+claimHasTag("R.P1.foo", "userData2").
 edge("R.P1.foo", "R.h.Foo").
 edge("R.h.Foo", "R.P2.bar").
 
-TEST_RULE("should_not_be_tagged_with_trusted") :- !mayHaveTag("R.P2.bar", "trusted").
-TEST_RULE("should_be_tagged_with_notTrusted") :- mayHaveTag("R.P2.bar", "notTrusted").
+TEST_RULE("should_not_be_tagged_with_userData1") :- !mayHaveTag("R.P2.bar", "userData1").
+TEST_RULE("should_be_tagged_with_userData2") :- mayHaveTag("R.P2.bar", "userData2").
