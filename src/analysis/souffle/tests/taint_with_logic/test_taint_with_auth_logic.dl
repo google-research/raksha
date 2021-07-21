@@ -14,9 +14,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
-#include "../taint.dl"
-#include "../flat_graph_ir.dl"
-#include "../edges_from_graph.dl"
+#include "../../taint.dl"
+#include "../../flat_graph_ir.dl"
+#include "../../edges_from_graph.dl"
+#include "../../fact_test_helper.dl"
 
 // This is a datalog file that is meant to test taint_with_auth_logic.dl. It 
 // should eventually be replaced by or otherwise used as a part of an
@@ -106,8 +107,6 @@ claimHasTag("selected_image_id", "product_id_tag").
 // Policy Check
 //-----------------------------------------------------------------------------
 
-.decl test_label_check(x: number)
-
 // Define a label for doing the check of the final output
 isIFCLabel("selected_image_id_expected_label").
 isMember("product_id_tag", "selected_image_id_expected_label").
@@ -116,7 +115,5 @@ isMember("product_id_tag", "selected_image_id_expected_label").
 // includes '1').
 // It is supposed to pass. If you comment out any of the "saysDowngrades" lines 
 // above, it should fail.
-test_label_check(1) :- accessPathLabelFlowsTo("selected_image_id", 
+testPasses("test_label_check_1") :- accessPathLabelFlowsTo("selected_image_id",
                             "selected_image_id_expected_label").
-
-.output test_label_check
