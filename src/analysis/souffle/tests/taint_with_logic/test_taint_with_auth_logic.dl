@@ -26,34 +26,35 @@
 // Program Manifests
 //-----------------------------------------------------------------------------
 
-// Module 1
+// Module 1: ImageDetector
 //      reads: 
-//          some_struct{ a, b }
-//          other_input
+//          sensor_data_packet { camera_feed, video_resolution }
+//          image_detection_model
 //      writes:
-//          mod1out
-bindFlatParticle("module1", $FlatParticle(
+//          image_detection_boxes
+bindFlatParticle("ImageDetector", $FlatParticle(
     /* reads */
-    $Cons("some_struct.a", $Cons("some_struct.b",
-        $Cons("other_input", $Nil()))),
+    $Cons("sensor_data_packet.camera_feed",
+        $Cons("sensor_data_packet.video_resolution",
+        $Cons("image_detection_model", $Nil()))),
     /* writes */
-    $Cons("mod1out", $Nil())
+    $Cons("image_detection_boxes", $Nil())
 )).
 
 // the label of "other_input" is the empty set (which makes it public).
 // so it has no label elements
 
-// Module 2
+// Module 2: ImageSelector
 //     reads:
-//         mod1out
-//         input4
+//         image_detection_boxes
+//         image_selection   // image selection action from user
 //     writes:
-//         mod2out 
-bindFlatParticle("module2", $FlatParticle(
+//         selected_image_id
+bindFlatParticle("ImageSelector", $FlatParticle(
     /* reads */
-    $Cons("mod1out", $Cons("input4", $Nil())),
+    $Cons("image_detection_boxes", $Cons("image_selection", $Nil())),
     /* writes */
-    $Cons("mod2out", $Nil())
+    $Cons("selected_image_id", $Nil())
 )).
 
 //-----------------------------------------------------------------------------
@@ -61,25 +62,45 @@ bindFlatParticle("module2", $FlatParticle(
 //-----------------------------------------------------------------------------
 
 // Assign owners to tags
-ownsTag("Alice", "raw_video").
-ownsTag("Alice", "image_selection").
-ownsTag("Alice", "product_id").
-ownsTag("ServiceProvider", "model_weights").
+ownsTag("Alice", "raw_video_tag").
+ownsTag("Alice", "detected_images_tag").
+ownsTag("Alice", "image_selection_tag").
+ownsTag("Alice", "product_id_tag").
+ownsTag("ServiceProvider", "image_detection_model_tag").
 
 // Assign tags to initial inputs
-claimHasTag("some_struct.a", "raw_video").
-claimHasTag("some_struct.b", "image_selection").
-claimHasTag("input4", "model_weights").
+claimHasTag("sensor_data_packet.camera_feed", "raw_video_tag").
+// the access path, sensor_data_packet.video_resolution does not have sensitive 
+// data in this example -- it's just a configuration option that is 
+// uninteresting w.r.t privacy, so it has no tags (it's fully public / the empty set).
+claimHasTag("image_selection", "image_selection_tag").
+claimHasTag("detection_model", "image_detection_model_tag").
 
-// The label of mod1out is downgraded to public (= empty set) 
-// because both the raw_video and image_selection tags are removed, and then
-// upgraded to {"product_id"} with this line:
-claimHasTag("mod1out", "product_id").
+// The label of the access path "image_detection_boxes" is downgraded from
+// {raw_video_tag, image_detection_model_tag} to {detected_images_tag}. This happens in two 
+// steps -- first the label is downgraded from {raw_video_tag, 
+// image_detection_tag} to {} (the empty set, which is totally public -- can go 
+// anywher). This downgrade happens with
+//      saysDowngrades(Alice, raw_video_tag, image_detection_boxes)
+// and
+//      saysDowngrades(ServiceProvider, image_detection_model_tag, 
+//            image_detection_boxes)
+// Then it is "upgraded" from {} to {product_id} because the label
+// {product_id} is more constrained. The upgrade happens with
+// 
+//      claimHasTag(image_detection_boxes, product_id).
 
-// Set the downgrades permitted by both parties
-saysDowngrades("Alice", "mod1out", "raw_video").
-saysDowngrades("Alice", "mod1out", "image_selection").
-saysDowngrades("ServiceProvider", "mod2out", "model_weights").
+saysDowngrades("Alice", "image_detection_boxes", "raw_video_tag").
+saysDowngrades("ServiceProvider", "image_detection_boxes", 
+    "image_detection_model_tag").
+claimHasTag("image_detection_boxes", "image_selection_tag").
+
+// The output of the image selector is downgraded from 
+// {image_detection_model_tag} to {select
+saysDowngrades("Alice", "selected_image_id", "image_selection_tag").
+saysDowngrades("Alice", "selected_image_id", "detected_images_tag").
+claimHasTag("selected_image_id", "product_id_tag").
+
 
 //----------------------------------------------------------------------------- 
 // Policy Check
@@ -88,14 +109,14 @@ saysDowngrades("ServiceProvider", "mod2out", "model_weights").
 .decl test_label_check(x: number)
 
 // Define a label for doing the check of the final output
-isIFCLabel("mod2out_expected_label").
-isMember("product_id", "mod2out_expected_label").
+isIFCLabel("selected_image_id_expected_label").
+isMember("product_id_tag", "selected_image_id_expected_label").
 
 // The check passes if this is true (i.e., the CSV for test_label_check 
 // includes '1').
 // It is supposed to pass. If you comment out any of the "saysDowngrades" lines 
 // above, it should fail.
-test_label_check(1) :- accessPathLabelFlowsTo("mod2out", 
-                            "mod2out_expected_label").
+test_label_check(1) :- accessPathLabelFlowsTo("selected_image_id", 
+                            "selected_image_id_expected_label").
 
 .output test_label_check
