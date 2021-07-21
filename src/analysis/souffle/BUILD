@@ -3,6 +3,8 @@ load(
     "souffle_cc_library",
 )
 
+package(default_visibility=["__subpackages__"])
+
 licenses(["notice"])
 
 cc_binary(
@@ -14,11 +16,18 @@ cc_binary(
     ],
     deps = [
         "@souffle//:souffle_lib",
-        ":taint_dl"
+        ":taint_dl",
     ],
 )
 
 souffle_cc_library(
     name = "taint_dl",
     src = "taint.dl",
+)
+
+exports_files(["fact_test_helper.dl"])
+
+test_suite(
+    name = "all_tests",
+    tests = ["//src/analysis/souffle/tests:all_tests"],
 )

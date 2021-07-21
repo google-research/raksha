@@ -1,0 +1,34 @@
+// claim propagates through a chain of particles
+// #Ingress: P1
+// #OK
+//particle P1
+//  foo: writes Foo {}
+//  claim foo is trusted
+//particle P2
+//  bar: reads Foo {}
+//  foo: writes Foo {}
+//particle P3
+//  bar: reads Foo {}
+//  check bar is trusted
+//recipe R
+//  P1
+//    foo: writes h1
+//  P2
+//    bar: reads h1
+//    foo: writes h2
+//  P3
+//    bar: reads h2
+//
+// The below fact-based test is hand-derived from the above Arcs manifest test.
+#include "taint.dl"
+#include "fact_test_helper.dl"
+
+claimHasTag("R.P1.foo", "trusted").
+edge("R.P1.foo", "R.h1.Foo").
+edge("R.h1.Foo", "R.P2.bar").
+edge("R.P2.bar", "R.P2.foo").
+edge("R.P2.foo", "R.h2.Foo").
+edge("R.h2.Foo", "R.P3.bar").
+
+// This test passes if R.P3.bar has the trusted tag.
+testPasses("ok_claim_propagates") :- mayHaveTag("R.P3.bar", "trusted").
