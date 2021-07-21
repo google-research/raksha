@@ -31,6 +31,7 @@
 
 // flat_graph_ir is included just for the type definition for `AccessPath`
 #include "flat_graph_ir.dl"
+#include "auth_logic_interface.dl"
 
 #ifndef SRC_ANALYSIS_SOUFFLE_TAINT_DL_
 #define SRC_ANALYSIS_SOUFFLE_TAINT_DL_
@@ -43,6 +44,10 @@
 // `AccessPath`, it would make sense to define an ADT in the long term.
 .type Tag <: symbol
 
+// An information flow Label which in this model is a set of taint Tags. One 
+// label L1 flows to another L2 if L1 is a subset or equal to L2.
+.type IFCLabel <: symbol
+
 //-----------------------------------------------------------------------------
 // Relation Declarations
 //-----------------------------------------------------------------------------
@@ -52,6 +57,9 @@
 
 // A direct or transitive data flow path.
 .decl path(src: AccessPath, tgt: AccessPath)
+
+// A Tag is a member of the IFCLabel ell (which is a set of Tags).
+.decl isMember(tag: Tag, ell: IFCLabel)
 
 // Declares that `accessPath` may have be tainted with `tag`.
 // If false, `accessPath` *definitely* does not have `tag` taint at runtime.
@@ -65,6 +73,32 @@
 // There is a claim that `accessPath` definitely has `tag` taint.
 .decl claimHasTag(accessPath: AccessPath, tag: Tag)
 
+// This party is the owner of a taint Tag (they have the privilege to downgrade
+// it).
+.decl ownsTag(owner: Principal, tag: Tag)
+
+// Some accessPath is actually downgraded (by taking into consideration the
+// privileges of a party trying to downgrade it, and as a result of that party
+// deciding to downgrade it). Because here IFC labels are sets of tags (ordered
+// by the subset or equals relation), the downgrade works by removing a tag
+// from the set (making it "lower" in the order).
+.decl downgrades(path: AccessPath, tag: Tag)
+
+// The IFCLabel of an accessPath flowsTo another IFCLabel.
+// This is equivalent to "subset or equals". The final outputs (i.e. egress
+// points) can be checked by doing a "accessPathIFCLabelFlowsTo" check to a
+// particular expected IFCLabel.
+.decl accessPathLabelFlowsTo(path: AccessPath, ell: IFCLabel)
+
+// Because datalog does not have universal quantifiers, accessPathLabelFlowsTo 
+// (which is "subset or equal to") is defined by proving that there is no 
+// counterexample to the subset relation. A counterexample to the relation 
+// `isSubsetOrEqual(Set1, Set2)` is an element that is in Set1 but not Set2. 
+// The relation `accessPathLabelDoesNotFlowTo` is true when there is a
+// counterexample, and accessPathLabelFlowsTo is just the negation of
+// accessPathLabelDoesNotFlowTo.
+.decl accessPathLabelDoesNotFlowTo(path: AccessPath, ell: IFCLabel)
+
 //-----------------------------------------------------------------------------
 // Universe Relations
 //-----------------------------------------------------------------------------
@@ -74,6 +108,8 @@
 
 .decl isTag(tag: Tag)
 
+.decl isIFCLabel(ell: IFCLabel)
+
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
@@ -82,8 +118,21 @@
 path(from, to) :- edge(from, to).
 path(from, to) :- edge(from, intermediate), path(intermediate, to).
 
+downgrades(path, tag) :- ownsTag(owner, tag), saysDowngrades(owner, path, tag).
+
 mayHaveTag(tgt, tag) :- claimHasTag(tgt, tag).
-mayHaveTag(tgt, tag) :- edge(src, tgt), mayHaveTag(src, tag).
+mayHaveTag(tgt, tag) :-
+    edge(src, tgt), mayHaveTag(src, tag),
+    !downgrades(tgt, tag).
+
+accessPathLabelDoesNotFlowTo(path, ell) :-
+    isTag(tag), isIFCLabel(ell), isAccessPath(path),
+    mayHaveTag(path, tag),
+    !isMember(tag, ell).
+
+accessPathLabelFlowsTo(path, ell) :- 
+    isIFCLabel(ell), isAccessPath(path),
+    !accessPathLabelDoesNotFlowTo(path, ell).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
@@ -101,6 +150,9 @@ isAccessPath(path) :- mayHaveTag(path, _).
 // Symbols used in hasTag or mayHaveTag are tags
 isTag(tag) :- claimHasTag(_, tag).
 isTag(tag) :- mayHaveTag(_, tag).
+isTag(tag) :- ownsTag(_, tag).
+isTag(tag) :- saysDowngrades(_, _, tag).
 
+isIFCLabel(ell) :- isMember(_, ell).
 
 #endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_

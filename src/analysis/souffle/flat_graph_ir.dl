@@ -14,8 +14,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
-#ifndef FLAT_PARTICLES
-#define FLAT_PARTICLES
+#ifndef FLAT_GRAPH_IR_DL_
+#define FLAT_GRAPH_IR_DL_
 
 // This is a lower-level IR for particles in which:
 //      1) nested structs have been flattened into full access path names
@@ -102,5 +102,5 @@ isAccessPathList(list) :- isAccessPathList($Cons(_, list)).
 
 isFlatParticle(path) :- bindFlatParticle(_, path).
 
-#endif // FLAT_MODULES
+#endif // FLAT_GRAPH_IR_DL_
 

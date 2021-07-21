@@ -21,13 +21,13 @@
 // defined in `taint.dl` when given a graph of particles in the low-level IR 
 // defined in flat_graph_ir.dl
 
-#ifndef EDGES_FROM_GRAPH
-#define EDGES_FROM_GRAPH
+#ifndef EDGES_FROM_GRAPH_DL_
+#define EDGES_FROM_GRAPH_DL_
 
 edge(from, to) :-
     isFlatParticle($FlatParticle(inputs, outputs)),
     accessPathListContains(inputs, from),
     accessPathListContains(outputs, to).
     
-#endif // EDGES_FROM_GRAPH
+#endif // EDGES_FROM_GRAPH_DL
 

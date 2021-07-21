@@ -17,19 +17,19 @@
 // This file defines the interface between authorization logic and taint 
 // tracking / information flow control.
 
-#ifndef AUTH_LOGIC_INTERFACE 
-#define AUTH_LOGIC_INTERFACE
+#ifndef AUTH_LOGIC_INTERFACE_DL_
+#define AUTH_LOGIC_INTERFACE_DL_
 
 // A Principal that makes assertions in authorization logic
 .type Principal <: symbol
 
-// Some party asserts the claim that an accessPath should be downgraded from
-// one Tag to another.
+// Some party asserts the claim that the label of an access path should be 
+// downgraded by removing the referenced tag from the set.
 .decl saysDowngrades(speaker: Principal, p: AccessPath, t: Tag)
 
 .decl isPrincipal(p: Principal)
 
 isPrincipal(speaker) :- saysDowngrades(speaker, _, _).
 
-#endif // AUTH_LOGIC_INTERFACE
+#endif // AUTH_LOGIC_INTERFACE_DL_
 

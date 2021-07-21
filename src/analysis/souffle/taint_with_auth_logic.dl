@@ -21,8 +21,8 @@
 #include "auth_logic_interface.dl"
 #include "taint.dl"
 
-#ifndef TAINT_WITH_AUTH_LOGIC
-#define TAINT_WITH_AUTH_LOGIC
+#ifndef TAINT_WITH_AUTH_LOGIC_DL_
+#define TAINT_WITH_AUTH_LOGIC_DL_
 
 //-----------------------------------------------------------------------------
 // Type Declarations
@@ -117,5 +117,5 @@ isTag(tag) :- saysDowngrades(_, _, tag).
 
 isAccessPath(path) :- mayHaveTagAL(path, _).
 
-#endif // TAINT_WITH_AUTH_LOGIC
+#endif // TAINT_WITH_AUTH_LOGIC_DL_
 

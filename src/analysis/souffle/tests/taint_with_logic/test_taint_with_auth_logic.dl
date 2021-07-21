@@ -14,7 +14,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
-#include "../taint_with_auth_logic.dl"
+#include "../taint.dl"
 #include "../flat_graph_ir.dl"
 #include "../edges_from_graph.dl"
 
