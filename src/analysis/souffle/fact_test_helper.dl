@@ -15,7 +15,7 @@
 .decl allTests(testAspectName: TestAspectName)
 .output allTests(IO=stdout, delimiter=",")
 
-// If a the testFails relation has any contents, then the test has failed. Should not be populated
+// If the testFails relation has any contents, then the test has failed. Should not be populated
 // directly.
 .decl testFails(testAspectName: TestAspectName)
 .output testFails(IO=stdout, delimiter=",")
