@@ -32,26 +32,9 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_TAINT_DL_
 #define SRC_ANALYSIS_SOUFFLE_TAINT_DL_
 
+#include "tags.dl"
+
 .type AccessPath <: symbol
-
-// A symbol representing a taint tag. SecrecyTags indicate that the data upon which they are
-// annotated potentially contain information that should be handled with some sort of special care
-// and should not be exposed to some outside group. The conservative approximation for SecrecyTags
-// is, when you are in doubt whether a particular datum should have this tag, annotate it. This
-// causes these tags to spread like taint.
-.type SecrecyTag <: symbol
-
-// A symbol representing a guarantee tag. IntegrityTags indicate that the data upon which they are
-// annotated have some critical property that handlers must take care to preserve. The conservative
-// approximation for IntegrityTags is, when you are in doubt whether a particular datum should have
-// this tag, do not annotate it. This causes these tags to disappear unless carefully handled.
-.type IntegrityTag <: symbol
-
-// This is a tag that a user or some principal claims is present upon some accessPath. This
-// introduces *both* a privacy and integrity tag upon that accessPath, which will each
-// independently spread through the graph from that point according to their different behavior
-// patterns.
-.type ClaimedTag <: symbol
 
 // Is this symbol an access path to some data?
 // (Useful for scoping when negation is involved.)
