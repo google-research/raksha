@@ -58,7 +58,7 @@
 // A direct or transitive data flow path.
 .decl path(src: AccessPath, tgt: AccessPath)
 
-// A Tag is a member of the IFCLabel ell (which is a set of Tags).
+// A Tag is declared as a member of the IFCLabel ell (which is a set of Tags).
 .decl isMember(tag: Tag, ell: IFCLabel)
 
 // Declares that `accessPath` may have be tainted with `tag`.
@@ -77,12 +77,25 @@
 // it).
 .decl ownsTag(owner: Principal, tag: Tag)
 
+// A statement from authorization logic that a path should be downgraded to a
+// particular label. This allows for multiple downgrades as well as "upgrades"
+// (increases to labels) to happen with the same relation.
+// NOTE: this is not in auth_logic_interface.dl because this relies on IFCLabel 
+.decl saysDowngradesLabel(speaker: Principal, path: AccessPath, newLabel: IFCLabel)
+
 // Some accessPath is actually downgraded (by taking into consideration the
 // privileges of a party trying to downgrade it, and as a result of that party
 // deciding to downgrade it). Because here IFC labels are sets of tags (ordered
 // by the subset or equals relation), the downgrade works by removing a tag
 // from the set (making it "lower" in the order).
 .decl downgrades(path: AccessPath, tag: Tag)
+
+// This relation captures tags that are upgraded as a part of the downgrade.
+// NOTE: At the moment, there are only confidentiality tags, so it is always
+// fine to add new tags (i.e., do an upgrade) as part of a downgrade. This rule
+// captures upgraded labels resulting from downgrades. (For integrity, an
+// "upgrade" would be removing a tag rather than adding one).
+.decl upgrades(path: AccessPath, tag: Tag)
 
 // The IFCLabel of an accessPath flowsTo another IFCLabel.
 // This is equivalent to "subset or equals". The final outputs (i.e. egress
@@ -118,12 +131,22 @@
 path(from, to) :- edge(from, to).
 path(from, to) :- edge(from, intermediate), path(intermediate, to).
 
-downgrades(path, tag) :- ownsTag(owner, tag), saysDowngrades(owner, path, tag).
+downgrades(path, tag) :- ownsTag(speaker, tag), saysDowngrades(speaker, path, tag).
+
+// Collect the tags that are legally downgraded from the label of a path when 
+// given a downgrade statement with a target "newLabel"
+downgrades(path, tag) :- saysDowngradesLabel(speaker, path, newLabel),
+    ownsTag(speaker, tag), !isMember(tag, newLabel).
+
+// collect upgraded tags resulting from downgrade statements
+upgrades(path, tag) :- saysDowngradesLabel(_, path, newLabel), 
+    isMember(tag, newLabel).
 
 mayHaveTag(tgt, tag) :- claimHasTag(tgt, tag).
 mayHaveTag(tgt, tag) :-
     edge(src, tgt), mayHaveTag(src, tag),
     !downgrades(tgt, tag).
+mayHaveTag(tgt, tag) :- upgrades(tgt, tag).
 
 accessPathLabelDoesNotFlowTo(path, ell) :-
     isTag(tag), isIFCLabel(ell), isAccessPath(path),

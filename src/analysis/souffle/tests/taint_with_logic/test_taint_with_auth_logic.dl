@@ -81,26 +81,29 @@ claimHasTag("detection_model", "image_detection_model_tag").
 // {raw_video_tag, image_detection_model_tag} to {detected_images_tag}. This happens in two 
 // steps -- first the label is downgraded from {raw_video_tag, 
 // image_detection_tag} to {} (the empty set, which is totally public -- can go 
-// anywher). This downgrade happens with
-//      saysDowngrades(Alice, raw_video_tag, image_detection_boxes)
-// and
-//      saysDowngrades(ServiceProvider, image_detection_model_tag, 
-//            image_detection_boxes)
-// Then it is "upgraded" from {} to {product_id} because the label
-// {product_id} is more constrained. The upgrade happens with
-// 
-//      claimHasTag(image_detection_boxes, product_id).
+// anywhere).
 
-saysDowngrades("Alice", "image_detection_boxes", "raw_video_tag").
-saysDowngrades("ServiceProvider", "image_detection_boxes", 
-    "image_detection_model_tag").
-claimHasTag("image_detection_boxes", "detected_images_tag").
+// Target label for the downgrade specified by both
+// Alice and ServiceProvider is {detected_images_tag}
+isIFCLabel("image_detection_boxes_label").
+isMember("detected_images_tag", "image_detection_boxes_label").
+
+// Both Alice and ServiceProvider agree to this (which is needed to
+// downgrade the tags that they each own -- "raw_video_tag" from Alice
+// and "image_detection_model_tag" from ServiceProvider)
+saysDowngradesLabel("Alice", "image_detection_boxes",
+    "image_detection_boxes_label").
+saysDowngradesLabel("ServiceProvider", "image_detection_boxes", 
+    "image_detection_boxes_label").
 
 // The output of the image selector is downgraded from 
-// {image_detection_model_tag} to {select
-saysDowngrades("Alice", "selected_image_id", "image_selection_tag").
-saysDowngrades("Alice", "selected_image_id", "detected_images_tag").
-claimHasTag("selected_image_id", "product_id_tag").
+// {detected_images_tag, image_selection_tag} to {product_id_tag}
+// The needed agreement is given from both Alice and ServiceProvider
+isIFCLabel("selected_image_label").
+isMember("product_id_tag", "selected_image_label").
+saysDowngradesLabel("Alice", "selected_image_id", "selected_image_label").
+saysDowngradesLabel("ServiceProvider", "selected_image_id", 
+    "selected_image_label").
 
 
 //----------------------------------------------------------------------------- 
