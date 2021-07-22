@@ -94,7 +94,7 @@ claimHasTag("detection_model", "image_detection_model_tag").
 saysDowngrades("Alice", "image_detection_boxes", "raw_video_tag").
 saysDowngrades("ServiceProvider", "image_detection_boxes", 
     "image_detection_model_tag").
-claimHasTag("image_detection_boxes", "image_selection_tag").
+claimHasTag("image_detection_boxes", "detected_images_tag").
 
 // The output of the image selector is downgraded from 
 // {image_detection_model_tag} to {select
@@ -111,9 +111,10 @@ claimHasTag("selected_image_id", "product_id_tag").
 isIFCLabel("selected_image_id_expected_label").
 isMember("product_id_tag", "selected_image_id_expected_label").
 
-// The check passes if this is true (i.e., the CSV for test_label_check 
+// The check passes if this is true (i.e., the CSV for test_label_check
 // includes '1').
-// It is supposed to pass. If you comment out any of the "saysDowngrades" lines 
+// It is supposed to pass. If you comment out any of the "saysDowngrades" lines
 // above, it should fail.
-TEST_CASE("egress_should_label_check") :- accessPathLabelFlowsTo("selected_image_id",
-                            "selected_image_id_expected_label").
+TEST_CASE("egress_should_label_check") :-
+    accessPathLabelFlowsTo("selected_image_id",
+            "selected_image_id_expected_label").
