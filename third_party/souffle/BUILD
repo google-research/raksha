@@ -35,7 +35,7 @@ genrule(
         "src/parser/parser.hh",
         "src/parser/stack.hh",
     ],
-    cmd = "M4=$(M4) $(BISON) -d --output=$(RULEDIR)/src/parser/parser.cc $<",
+    cmd = "M4=$(M4) $(BISON) -d --warnings=none --output=$(RULEDIR)/src/parser/parser.cc $<",
     toolchains = [
         "@rules_bison//bison:current_bison_toolchain",
         "@rules_m4//m4:current_m4_toolchain",
@@ -73,6 +73,9 @@ cc_library(
     hdrs = glob(["src/**/*.h"]) + [":parser_gen"],
     copts = [
         "-std=c++17",
+        # We don't want warnings in 3rd party packages to obscure issues in our
+        # own code that we are more likely to need to fix.
+        "-w",
     ],
     includes = [
         "src",
@@ -93,7 +96,12 @@ cc_library(
 cc_binary(
     name = "souffle",
     srcs = ["src/main.cpp"],
-    copts = ["-std=c++17"],
+    copts = [
+        "-std=c++17",
+        # We don't want warnings in 3rd party packages to obscure issues in our
+        # own code that we are more likely to need to fix.
+        "-w",
+    ],
     linkopts = ["-pthread"],
     deps = [":souffle_lib"],
 )

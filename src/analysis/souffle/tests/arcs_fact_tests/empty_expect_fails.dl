@@ -1,0 +1,3 @@
+// Used to ensure that a test with no requirements fails.
+#include "taint.dl"
+#include "fact_test_helper.dl"

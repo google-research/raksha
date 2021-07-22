@@ -1,0 +1,6 @@
+// Make sure that a test where one testPasses predicate passes while the other fails fails.
+#include "taint.dl"
+#include "fact_test_helper.dl"
+
+TEST_CASE("always_pass_rule") :- 1 = 1.
+TEST_CASE("always_fail_rule") :- 1 = 2.
