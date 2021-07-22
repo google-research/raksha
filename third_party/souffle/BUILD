@@ -98,8 +98,8 @@ cc_binary(
     srcs = ["src/main.cpp"],
     copts = [
         "-std=c++17",
-        # We don't care about non-critical issues in the third-party Souffle
-        # project.
+        # We don't want warnings in 3rd party packages to obscure issues in our
+        # own code that we are more likely to need to fix.
         "-w",
     ],
     linkopts = ["-pthread"],
