@@ -34,12 +34,12 @@
 
 .type AccessPath <: symbol
 
-// A symbol representing a taint tag. PrivacyTags indicate that the data upon which they are
+// A symbol representing a taint tag. SecrecyTags indicate that the data upon which they are
 // annotated potentially contain information that should be handled with some sort of special care
-// and should not be exposed to some outside group. The conservative approximation for PrivacyTags
+// and should not be exposed to some outside group. The conservative approximation for SecrecyTags
 // is, when you are in doubt whether a particular datum should have this tag, annotate it. This
 // causes these tags to spread like taint.
-.type PrivacyTag <: symbol
+.type SecrecyTag <: symbol
 
 // A symbol representing a guarantee tag. IntegrityTags indicate that the data upon which they are
 // annotated have some critical property that handlers must take care to preserve. The conservative
@@ -59,7 +59,7 @@
 
 // The set of all privacy tags.
 // (Useful for scoping when negation is involved.)
-.decl allPrivacyTags(privacyTag: PrivacyTag)
+.decl allSecrecyTags(secrecyTag: SecrecyTag)
 
 // The set of all integrity tags.
 // (Useful for scoping when negation is involved.)
@@ -75,10 +75,10 @@
 // A direct or transitive data flow path.
 .decl path(src: AccessPath, tgt: AccessPath)
 
-// Declares that `accessPath` may have be tainted with `privacyTag`.
-// If false, `accessPath` *definitely* does not `privacyTag` taint at runtime.
-// If true, `accessPath` may have the `privacyTag` taint at runtime.
-.decl mayHavePrivacyTag(accessPath: AccessPath, privacyTag: PrivacyTag)
+// Declares that `accessPath` may have be tainted with `secrecyTag`.
+// If false, `accessPath` *definitely* does not `secrecyTag` taint at runtime.
+// If true, `accessPath` may have the `secrecyTag` taint at runtime.
+.decl mayHaveSecrecyTag(accessPath: AccessPath, secrecyTag: SecrecyTag)
 
 // Declares that `accessPath` must be tagged with `integrityTag`.
 // If false, `accessPath` may or may not have the integrity property indicated by tag at runtime.
@@ -95,8 +95,8 @@
 isAccessPath(x) :- edge(x, _).
 isAccessPath(y) :- edge(_, y).
 
-allPrivacyTags(as(claimedTag, PrivacyTag)) :- claimHasTag(_, claimedTag).
-allPrivacyTags(privacyTag) :- mayHavePrivacyTag(_, privacyTag).
+allSecrecyTags(as(claimedTag, SecrecyTag)) :- claimHasTag(_, claimedTag).
+allSecrecyTags(secrecyTag) :- mayHaveSecrecyTag(_, secrecyTag).
 
 allIntegrityTags(as(claimedTag, IntegrityTag)) :- claimHasTag(_, claimedTag).
 allIntegrityTags(integrityTag) :- mustHaveIntegrityTag(_, integrityTag).
@@ -105,8 +105,8 @@ allIntegrityTags(integrityTag) :- mustHaveIntegrityTag(_, integrityTag).
 path(from, to) :- edge(from, to).
 path(from, to) :- edge(from, intermediate), path(intermediate, to).
 
-mayHavePrivacyTag(tgt, as(claimedTag, PrivacyTag)) :- claimHasTag(tgt, claimedTag).
-mayHavePrivacyTag(tgt, privacyTag) :- edge(src, tgt), mayHavePrivacyTag(src, privacyTag).
+mayHaveSecrecyTag(tgt, as(claimedTag, SecrecyTag)) :- claimHasTag(tgt, claimedTag).
+mayHaveSecrecyTag(tgt, secrecyTag) :- edge(src, tgt), mayHaveSecrecyTag(src, secrecyTag).
 
 // TODO: Implement the rule that causes integrity tags to propagate. Right now, they are only
 // annotated where initially claimed.

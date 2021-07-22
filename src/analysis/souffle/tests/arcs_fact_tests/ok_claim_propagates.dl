@@ -32,9 +32,9 @@ edge("R.P2.bar", "R.P2.foo").
 edge("R.P2.foo", "R.h2.Foo").
 edge("R.h2.Foo", "R.P3.bar").
 
-TEST_CASE("initial_has_privacy") :- mayHavePrivacyTag("R.P1.foo", "userSelection").
+TEST_CASE("initial_has_secrecy") :- mayHaveSecrecyTag("R.P1.foo", "userSelection").
 TEST_CASE("initial_has_integrity") :- mustHaveIntegrityTag("R.P1.foo", "userSelection").
 // This test passes if R.P3.bar has the userSelection tag.
-TEST_CASE("ok_claim_propagates_privacy") :- mayHavePrivacyTag("R.P3.bar", "userSelection").
+TEST_CASE("ok_claim_propagates_secrecy") :- mayHaveSecrecyTag("R.P3.bar", "userSelection").
 TEST_CASE("ok_claim_not_propagates_integrity") :-
   allIntegrityTags("userSelection"), !mustHaveIntegrityTag("R.P3.bar", "userSelection").

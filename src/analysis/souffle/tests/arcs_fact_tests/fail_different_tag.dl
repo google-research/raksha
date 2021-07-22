@@ -26,17 +26,17 @@ edge("R.P1.foo", "R.h.Foo").
 edge("R.h.Foo", "R.P2.bar").
 
 TEST_CASE("initial_should_have_user_selection_tags") :-
-  mayHavePrivacyTag("R.P1.foo", "userSelection"),
+  mayHaveSecrecyTag("R.P1.foo", "userSelection"),
   mustHaveIntegrityTag("R.P1.foo", "userSelection").
 
 TEST_CASE("initial_should_not_have_screen_content_tags") :-
-  !mayHavePrivacyTag("R.P1.foo", "screenContent"),
+  !mayHaveSecrecyTag("R.P1.foo", "screenContent"),
   !mustHaveIntegrityTag("R.P1.foo", "screenContent").
 
-TEST_CASE("should_not_be_tagged_with_privacy_screenContent") :-
-  !mayHavePrivacyTag("R.P2.bar", "screenContent").
-TEST_CASE("should_be_tagged_with_privacy_userSelection") :-
-  mayHavePrivacyTag("R.P2.bar", "userSelection").
+TEST_CASE("should_not_be_tagged_with_secrecy_screenContent") :-
+  !mayHaveSecrecyTag("R.P2.bar", "screenContent").
+TEST_CASE("should_be_tagged_with_secrecy_userSelection") :-
+  mayHaveSecrecyTag("R.P2.bar", "userSelection").
 
 TEST_CASE("should_not_be_tagged_with_integrity_screenContent") :-
   !mustHaveIntegrityTag("R.P2.bar", "screenContent").
