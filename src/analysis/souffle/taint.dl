@@ -34,18 +34,40 @@
 
 .type AccessPath <: symbol
 
-// A symbol representing a taint (or information flow) tag. These would be
-// strings of the form "secret", "public", "timestampInMs", etc. Just like
-// `AccessPath`, it would make sense to define an ADT in the long term.
-.type Tag <: symbol
+// A symbol representing a taint tag. PrivacyTags indicate that the data upon which they are
+// annotated potentially contain information that should be handled with some sort of special care
+// and should not be exposed to some outside group. The conservative approximation for PrivacyTags
+// is, when you are in doubt whether a particular datum should have this tag, annotate it. This
+// causes these tags to spread like taint.
+.type PrivacyTag <: symbol
+
+// A symbol representing a guarantee tag. IntegrityTags indicate that the data upon which they are
+// annotated have some critical property that handlers must take care to preserve. The conservative
+// approximation for IntegrityTags is, when you are in doubt whether a particular datum should have
+// this tag, do not annotate it. This causes these tags to disappear unless carefully handled.
+.type IntegrityTag <: symbol
+
+// This is a tag that a user or some principal claims is present upon some accessPath. This
+// introduces *both* a privacy and integrity tag upon that accessPath, which will each
+// independently spread through the graph from that point according to their different behavior
+// patterns.
+.type ClaimedTag <: symbol
 
 // Is this symbol an access path to some data?
 // (Useful for scoping when negation is involved.)
 .decl isAccessPath(accessPath: AccessPath)
 
-// Is this a Tag?
+// The set of all privacy tags.
 // (Useful for scoping when negation is involved.)
-.decl isTag(tag: Tag)
+.decl allPrivacyTags(privacyTag: PrivacyTag)
+
+// The set of all integrity tags.
+// (Useful for scoping when negation is involved.)
+.decl allIntegrityTags(integrityTag: IntegrityTag)
+
+// The set of all claimed tags.
+// (Useful for scoping when negation is involved.)
+.decl allClaimedTags(claimedTag: ClaimedTag)
 
 // A data flow edge.
 .decl edge(src: AccessPath, tgt: AccessPath)
@@ -53,13 +75,19 @@
 // A direct or transitive data flow path.
 .decl path(src: AccessPath, tgt: AccessPath)
 
-// Declares that `accessPath` may have be tainted with `tag`.
-// If false, `accessPath` *definitely* does not `tag` taint at runtime.
-// If true, `accessPath` may have the `tag` taint at runtime.
-.decl mayHaveTag(accessPath: AccessPath, tag: Tag)
+// Declares that `accessPath` may have be tainted with `privacyTag`.
+// If false, `accessPath` *definitely* does not `privacyTag` taint at runtime.
+// If true, `accessPath` may have the `privacyTag` taint at runtime.
+.decl mayHavePrivacyTag(accessPath: AccessPath, privacyTag: PrivacyTag)
 
-// There is a claim that `accessPath` definitely has `tag` taint.
-.decl claimHasTag(accessPath: AccessPath, tag: Tag)
+// Declares that `accessPath` must be tagged with `integrityTag`.
+// If false, `accessPath` may or may not have the integrity property indicated by tag at runtime.
+// If true, `accessPath` *definitely* has the integrity property indicated by tag at runtime.
+.decl mustHaveIntegrityTag(accessPath: AccessPath, integrityTag: IntegrityTag)
+
+// There is a claim that `accessPath` definitely has `tag`. This introduces *both* a privacy and
+// integrity tag.
+.decl claimHasTag(accessPath: AccessPath, claimedTag: ClaimedTag)
 
 // Some inference rules
 
@@ -67,15 +95,21 @@
 isAccessPath(x) :- edge(x, _).
 isAccessPath(y) :- edge(_, y).
 
-// Symbols used in hasTag or mayHaveTag are tags
-isTag(tag) :- claimHasTag(_, tag).
-isTag(tag) :- mayHaveTag(_, tag).
+allPrivacyTags(as(claimedTag, PrivacyTag)) :- claimHasTag(_, claimedTag).
+allPrivacyTags(privacyTag) :- mayHavePrivacyTag(_, privacyTag).
+
+allIntegrityTags(as(claimedTag, IntegrityTag)) :- claimHasTag(_, claimedTag).
+allIntegrityTags(integrityTag) :- mustHaveIntegrityTag(_, integrityTag).
 
 // Transitive paths
 path(from, to) :- edge(from, to).
 path(from, to) :- edge(from, intermediate), path(intermediate, to).
 
-mayHaveTag(tgt, tag) :- claimHasTag(tgt, tag).
-mayHaveTag(tgt, tag) :- edge(src, tgt), mayHaveTag(src, tag).
+mayHavePrivacyTag(tgt, as(claimedTag, PrivacyTag)) :- claimHasTag(tgt, claimedTag).
+mayHavePrivacyTag(tgt, privacyTag) :- edge(src, tgt), mayHavePrivacyTag(src, privacyTag).
+
+// TODO: Implement the rule that causes integrity tags to propagate. Right now, they are only
+// annotated where initially claimed.
+mustHaveIntegrityTag(tgt, as(claimedTag, IntegrityTag)) :- claimHasTag(tgt, claimedTag).
 
 #endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_
