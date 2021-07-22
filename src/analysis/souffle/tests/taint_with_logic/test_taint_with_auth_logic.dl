@@ -115,5 +115,5 @@ isMember("product_id_tag", "selected_image_id_expected_label").
 // includes '1').
 // It is supposed to pass. If you comment out any of the "saysDowngrades" lines 
 // above, it should fail.
-testPasses("test_label_check_1") :- accessPathLabelFlowsTo("selected_image_id",
+TEST_CASE("egress_should_label_check") :- accessPathLabelFlowsTo("selected_image_id",
                             "selected_image_id_expected_label").
