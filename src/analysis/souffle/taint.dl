@@ -40,7 +40,7 @@
 // (Useful for scoping when negation is involved.)
 .decl isAccessPath(accessPath: AccessPath)
 
-// The set of all privacy tags.
+// The set of all secrecy tags.
 // (Useful for scoping when negation is involved.)
 .decl allSecrecyTags(secrecyTag: SecrecyTag)
 
@@ -68,7 +68,7 @@
 // If true, `accessPath` *definitely* has the integrity property indicated by tag at runtime.
 .decl mustHaveIntegrityTag(accessPath: AccessPath, integrityTag: IntegrityTag)
 
-// There is a claim that `accessPath` definitely has `tag`. This introduces *both* a privacy and
+// There is a claim that `accessPath` definitely has `tag`. This introduces *both* a secrecy and
 // integrity tag.
 .decl claimHasTag(accessPath: AccessPath, claimedTag: ClaimedTag)
 

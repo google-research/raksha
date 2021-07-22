@@ -33,7 +33,7 @@
 .type IntegrityTag <: symbol
 
 // This is a tag that a user or some principal claims is present upon some accessPath. This
-// introduces *both* a privacy and integrity tag upon that accessPath, which will each
+// introduces *both* a secrecy and integrity tag upon that accessPath, which will each
 // independently spread through the graph from that point according to their different behavior
 // patterns.
 .type ClaimedTag <: symbol
