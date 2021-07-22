@@ -29,5 +29,5 @@ edge(from, to) :-
     accessPathListContains(inputs, from),
     accessPathListContains(outputs, to).
     
-#endif // EDGES_FROM_GRAPH_DL
+#endif // EDGES_FROM_GRAPH_DL_
 
