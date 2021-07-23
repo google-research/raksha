@@ -39,14 +39,13 @@
 //-----------------------------------------------------------------------------
 // Type Declarations
 //-----------------------------------------------------------------------------
+// An information flow Label which in this model is a set of taint Tags. One 
+// label L1 flows to another L2 if L1 is a subset or equal to L2.
+
 // A symbol representing a taint (or information flow) tag. These would be
 // strings of the form "secret", "public", "timestampInMs", etc. Just like
 // `AccessPath`, it would make sense to define an ADT in the long term.
 .type Tag <: symbol
-
-// An information flow Label which in this model is a set of taint Tags. One 
-// label L1 flows to another L2 if L1 is a subset or equal to L2.
-.type IFCLabel <: symbol
 
 //-----------------------------------------------------------------------------
 // Relation Declarations
@@ -57,9 +56,6 @@
 
 // A direct or transitive data flow path.
 .decl path(src: AccessPath, tgt: AccessPath)
-
-// A Tag is a member of the IFCLabel ell (which is a set of Tags).
-.decl isMember(tag: Tag, ell: IFCLabel)
 
 // Declares that `accessPath` may have be tainted with `tag`.
 // If false, `accessPath` *definitely* does not have `tag` taint at runtime.
@@ -84,21 +80,6 @@
 // from the set (making it "lower" in the order).
 .decl downgrades(path: AccessPath, tag: Tag)
 
-// The IFCLabel of an accessPath flowsTo another IFCLabel.
-// This is equivalent to "subset or equals". The final outputs (i.e. egress
-// points) can be checked by doing a "accessPathIFCLabelFlowsTo" check to a
-// particular expected IFCLabel.
-.decl accessPathLabelFlowsTo(path: AccessPath, ell: IFCLabel)
-
-// Because datalog does not have universal quantifiers, accessPathLabelFlowsTo 
-// (which is "subset or equal to") is defined by proving that there is no 
-// counterexample to the subset relation. A counterexample to the relation 
-// `isSubsetOrEqual(Set1, Set2)` is an element that is in Set1 but not Set2. 
-// The relation `accessPathLabelDoesNotFlowTo` is true when there is a
-// counterexample, and accessPathLabelFlowsTo is just the negation of
-// accessPathLabelDoesNotFlowTo.
-.decl accessPathLabelDoesNotFlowTo(path: AccessPath, ell: IFCLabel)
-
 //-----------------------------------------------------------------------------
 // Universe Relations
 //-----------------------------------------------------------------------------
@@ -107,8 +88,6 @@
 // ensure that variables are grounded.
 
 .decl isTag(tag: Tag)
-
-.decl isIFCLabel(ell: IFCLabel)
 
 //-----------------------------------------------------------------------------
 // Rules
@@ -124,15 +103,6 @@ mayHaveTag(tgt, tag) :- claimHasTag(tgt, tag).
 mayHaveTag(tgt, tag) :-
     edge(src, tgt), mayHaveTag(src, tag),
     !downgrades(tgt, tag).
-
-accessPathLabelDoesNotFlowTo(path, ell) :-
-    isTag(tag), isIFCLabel(ell), isAccessPath(path),
-    mayHaveTag(path, tag),
-    !isMember(tag, ell).
-
-accessPathLabelFlowsTo(path, ell) :- 
-    isIFCLabel(ell), isAccessPath(path),
-    !accessPathLabelDoesNotFlowTo(path, ell).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
@@ -152,7 +122,5 @@ isTag(tag) :- claimHasTag(_, tag).
 isTag(tag) :- mayHaveTag(_, tag).
 isTag(tag) :- ownsTag(_, tag).
 isTag(tag) :- saysDowngrades(_, _, tag).
-
-isIFCLabel(ell) :- isMember(_, ell).
 
 #endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_

@@ -107,14 +107,27 @@ claimHasTag("selected_image_id", "product_id_tag").
 // Policy Check
 //-----------------------------------------------------------------------------
 
-// Define a label for doing the check of the final output
-isIFCLabel("selected_image_id_expected_label").
-isMember("product_id_tag", "selected_image_id_expected_label").
+// The point of this test is to check that the actual label of the
+// final output flows to an expected label. The expected label is the singleton 
+// set {product_id_tag}.
+
+// Create a path just for testing purposes that has just the expected tag
+claimHasTag("output_expected_label", "product_id_tag").
+
+// define subset or equals (flowsTo) by finding a counterexample
+.decl isNotSubsetOrEquals(p1: AccessPath, p2: AccessPath)
+.decl subsetOrEquals(p1: AccessPath, p2: AccessPath)
+
+isNotSubsetOrEquals(p1, p2) :- 
+    isAccessPath(p2),
+    mayHaveTag(p1, t), !mayHaveTag(p2, t).
+subsetOrEquals(p1, p2) :- 
+    isAccessPath(p1), isAccessPath(p2),
+    !isNotSubsetOrEquals(p1, p2).
 
 // The check passes if this is true (i.e., the CSV for test_label_check
 // includes '1').
 // It is supposed to pass. If you comment out any of the "saysDowngrades" lines
 // above, it should fail.
 TEST_CASE("egress_should_label_check") :-
-    accessPathLabelFlowsTo("selected_image_id",
-            "selected_image_id_expected_label").
+    subsetOrEquals("selected_image_id", "output_expected_label").
