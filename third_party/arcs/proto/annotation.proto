@@ -1,7 +1,9 @@
-// Initial version is cloned from https://www.github.com/polymerlabs/arcs
 syntax = "proto3";
 
-package raksha;
+package arcs;
+
+option java_package = "arcs.core.data.proto";
+option java_multiple_files = true;
 
 // Represents the usage of an annotation.
 message AnnotationProto {
