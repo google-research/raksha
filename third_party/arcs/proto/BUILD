@@ -6,6 +6,14 @@ load(
 
 licenses(["notice"])
 
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "proto_files",
+    srcs = glob(["*.proto"]),
+    visibility = ["//third_party/arcs/tools/manifest2proto:__subpackages__"],
+)
+
 proto_library(
     name = "annotation_proto",
     srcs = ["annotation.proto"],

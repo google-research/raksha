@@ -1,9 +1,11 @@
-// Initial version is cloned from https://www.github.com/polymerlabs/arcs
 syntax = "proto3";
 
-package raksha;
+package arcs;
 
-import "src/ir/proto/annotation.proto";
+option java_package = "arcs.core.data.proto";
+option java_multiple_files = true;
+
+import "java/arcs/core/data/proto/annotation.proto";
 
 // Defines a data usage policy.
 message PolicyProto {
