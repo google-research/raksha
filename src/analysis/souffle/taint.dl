@@ -123,4 +123,13 @@ isTag(tag) :- mayHaveTag(_, tag).
 isTag(tag) :- ownsTag(_, tag).
 isTag(tag) :- saysDowngrades(_, _, tag).
 
+// An access path may have a tag if some subpath to a member field has that tag. This allows
+// checking for some inner node in the access path whether any leaf node of that node might have
+// a particular tag.
+mayHaveTag(base, tag) :-
+  isAccessPath(base),
+  isAccessPath(member),
+  mayHaveTag(member, tag),
+  contains(cat(base, "."), member).
+
 #endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_
