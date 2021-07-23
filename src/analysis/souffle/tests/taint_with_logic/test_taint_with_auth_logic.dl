@@ -1,0 +1,133 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+#include "../../taint.dl"
+#include "../../flat_graph_ir.dl"
+#include "../../edges_from_graph.dl"
+#include "../../fact_test_helper.dl"
+
+// This is a datalog file that is meant to test taint_with_auth_logic.dl. It 
+// should eventually be replaced by or otherwise used as a part of an
+// automated test.
+
+//-----------------------------------------------------------------------------
+// Program Manifests
+//-----------------------------------------------------------------------------
+
+// Module 1: ImageDetector
+//      reads: 
+//          sensor_data_packet { camera_feed, video_resolution }
+//          image_detection_model
+//      writes:
+//          image_detection_boxes
+bindFlatParticle("ImageDetector", $FlatParticle(
+    /* reads */
+    $Cons("sensor_data_packet.camera_feed",
+        $Cons("sensor_data_packet.video_resolution",
+        $Cons("image_detection_model", $Nil()))),
+    /* writes */
+    $Cons("image_detection_boxes", $Nil())
+)).
+
+// the label of "other_input" is the empty set (which makes it public).
+// so it has no label elements
+
+// Module 2: ImageSelector
+//     reads:
+//         image_detection_boxes
+//         image_selection   // image selection action from user
+//     writes:
+//         selected_image_id
+bindFlatParticle("ImageSelector", $FlatParticle(
+    /* reads */
+    $Cons("image_detection_boxes", $Cons("image_selection", $Nil())),
+    /* writes */
+    $Cons("selected_image_id", $Nil())
+)).
+
+//-----------------------------------------------------------------------------
+// Policy
+//-----------------------------------------------------------------------------
+
+// Assign owners to tags
+ownsTag("Alice", "raw_video_tag").
+ownsTag("Alice", "detected_images_tag").
+ownsTag("Alice", "image_selection_tag").
+ownsTag("Alice", "product_id_tag").
+ownsTag("ServiceProvider", "image_detection_model_tag").
+
+// Assign tags to initial inputs
+claimHasTag("sensor_data_packet.camera_feed", "raw_video_tag").
+// the access path, sensor_data_packet.video_resolution does not have sensitive 
+// data in this example -- it's just a configuration option that is 
+// uninteresting w.r.t privacy, so it has no tags (it's fully public / the empty set).
+claimHasTag("image_selection", "image_selection_tag").
+claimHasTag("detection_model", "image_detection_model_tag").
+
+// The label of the access path "image_detection_boxes" is downgraded from
+// {raw_video_tag, image_detection_model_tag} to {detected_images_tag}. This happens in two 
+// steps -- first the label is downgraded from {raw_video_tag, 
+// image_detection_tag} to {} (the empty set, which is totally public -- can go 
+// anywher). This downgrade happens with
+//      saysDowngrades(Alice, raw_video_tag, image_detection_boxes)
+// and
+//      saysDowngrades(ServiceProvider, image_detection_model_tag, 
+//            image_detection_boxes)
+// Then it is "upgraded" from {} to {product_id} because the label
+// {product_id} is more constrained. The upgrade happens with
+// 
+//      claimHasTag(image_detection_boxes, product_id).
+
+saysDowngrades("Alice", "image_detection_boxes", "raw_video_tag").
+saysDowngrades("ServiceProvider", "image_detection_boxes", 
+    "image_detection_model_tag").
+claimHasTag("image_detection_boxes", "detected_images_tag").
+
+// The output of the image selector is downgraded from 
+// {image_detection_model_tag} to {select
+saysDowngrades("Alice", "selected_image_id", "image_selection_tag").
+saysDowngrades("Alice", "selected_image_id", "detected_images_tag").
+claimHasTag("selected_image_id", "product_id_tag").
+
+
+//----------------------------------------------------------------------------- 
+// Policy Check
+//-----------------------------------------------------------------------------
+
+// The point of this test is to check that the actual label of the
+// final output flows to an expected label. The expected label is the singleton 
+// set {product_id_tag}.
+
+// Create a path just for testing purposes that has just the expected tag
+claimHasTag("output_expected_label", "product_id_tag").
+
+// define subset or equals (flowsTo) by finding a counterexample
+.decl isNotSubsetOrEquals(p1: AccessPath, p2: AccessPath)
+.decl subsetOrEquals(p1: AccessPath, p2: AccessPath)
+
+isNotSubsetOrEquals(p1, p2) :- 
+    isAccessPath(p2),
+    mayHaveTag(p1, t), !mayHaveTag(p2, t).
+subsetOrEquals(p1, p2) :- 
+    isAccessPath(p1), isAccessPath(p2),
+    !isNotSubsetOrEquals(p1, p2).
+
+// The check passes if this is true (i.e., the CSV for test_label_check
+// includes '1').
+// It is supposed to pass. If you comment out any of the "saysDowngrades" lines
+// above, it should fail.
+TEST_CASE("egress_should_label_check") :-
+    subsetOrEquals("selected_image_id", "output_expected_label").

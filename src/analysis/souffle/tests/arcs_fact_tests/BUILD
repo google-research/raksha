@@ -12,6 +12,9 @@ ALL_DL_TEST_FILES = glob(["*.dl"])
 [souffle_cc_library(
     name = dl_script.replace(".dl", "_souffle_cc_library"),
     included_dl_scripts = [
+        "//src/analysis/souffle:flat_graph_ir.dl",
+        "//src/analysis/souffle:auth_logic_interface.dl",
+        "//src/analysis/souffle:edges_from_graph.dl",
         "//src/analysis/souffle:taint.dl",
         "//src/analysis/souffle:fact_test_helper.dl",
     ],

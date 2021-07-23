@@ -25,7 +25,12 @@ souffle_cc_library(
     src = "taint.dl",
 )
 
-exports_files(["fact_test_helper.dl"])
+exports_files([
+    "fact_test_helper.dl",
+    "flat_graph_ir.dl",
+    "auth_logic_interface.dl",
+    "edges_from_graph.dl"
+])
 
 test_suite(
     name = "all_tests",
