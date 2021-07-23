@@ -1,6 +1,6 @@
 // Original Arcs manifest file:
 // Note: Replaced the tags "trusted" and "loggable" to "userSelection" and "screenContent" to test
-// how privacy tags would move along the dataflow graph provided by this manifest.
+// how confidentiality tags would move along the dataflow graph provided by this manifest.
 // TODO(Issue #50): The original test was checking that integrity tags would not propagate to
 // parents; that is, just because "R.P2.foo.a" is trustworthy, that does not mean that all of
 // "R.P2.foo" is. We should update this test to test this originally-intended integrity aspect once
