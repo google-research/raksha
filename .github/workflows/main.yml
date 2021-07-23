@@ -31,3 +31,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: bazel test :all_tests
+
+      # Verifies that the Arcs parser works
+      - name: Verify that Arcs parser works.
+        run: bazel build //third_party/arcs/examples:consume
