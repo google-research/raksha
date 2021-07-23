@@ -12,8 +12,22 @@
 
 // All test aspects tested by a particular test. Should usually be populated by TEST_CASE rather
 // than directly used.
+.decl allTestsAndCaseNum(testAspectName: TestAspectName, caseNum: number)
+
 .decl allTests(testAspectName: TestAspectName)
 .output allTests(IO=stdout, delimiter=",")
+
+allTests(testAspectName) :- allTestsAndCaseNum(testAspectName, _).
+
+.decl duplicateTestCaseNames(testAspectName: TestAspectName)
+.output duplicateTestCaseNames(IO=stdout, delimiter=",")
+
+// Catch if the user provides duplicate test aspect names. We can use this to print an error in the
+// test handler.
+duplicateTestCaseNames(testAspectName) :-
+  allTestsAndCaseNum(testAspectName, caseNum1),
+  allTestsAndCaseNum(testAspectName, caseNum2),
+  caseNum1 != caseNum2.
 
 // If the testFails relation has any contents, then the test has failed. Should not be populated
 // directly.
@@ -23,15 +37,18 @@
 testFails(testAspectName) :- allTests(testAspectName), !testPasses(testAspectName).
 
 // TEST_CASE is constructed so that it can take the place of a rule head. It "declares" a test
-// aspect via the allTests fact and sets up a testPasses head for the aspect in question. Example
-// usage:
+// aspect via the allTestsAndCaseNum fact and sets up a testPasses head for the aspect in question.
+// The $ functor used in the argument to allTestsAndCaseNum allows assigning each test case
+// a unique number, useful for catching if the user accidentally used the same name for two
+// different test cases.
+// Example usage:
 //
 // TEST_CASE("my_test_aspect") :- MyRelation(x), !MyOtherRelation(x).
 //
 // All recipes with a TEST_CASE head shall be seen as a condition that must be met for the test to
 // pass.
 #define TEST_CASE(test_aspect_name) \
-  allTests(test_aspect_name). \
+  allTestsAndCaseNum(test_aspect_name, $) :- 1 = 1. \
   testPasses(test_aspect_name)
 
 

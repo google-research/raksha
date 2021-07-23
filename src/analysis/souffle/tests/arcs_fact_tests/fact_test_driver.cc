@@ -36,11 +36,14 @@ int run_test(std::string const &test_name) {
 
   souffle::Relation *test_failures = prog->getRelation("testFails");
   souffle::Relation *all_tests = prog->getRelation("allTests");
+  souffle::Relation *duplicate_test_case_names =
+    prog->getRelation("duplicateTestCaseNames");
 
   assert(test_failures != nullptr);
 
   bool const test_is_trivial = all_tests->size() == 0;
   bool const test_has_failures = test_failures->size() > 0;
+  bool const test_has_duplicate_names = duplicate_test_case_names->size() > 0;
 
   if (test_is_trivial) {
     std::cout
@@ -48,17 +51,20 @@ int run_test(std::string const &test_name) {
       << test_name
       << " does not have any test conditions."
       << std::endl;
-    prog->printAll();
-    return 1;
+  } else if (test_has_duplicate_names) {
+    std::cout
+      << "Test "
+      << test_name
+      << " has multiple test cases with the same name."
+      << std::endl;
   } else if (test_has_failures) {
     std::cout << "Test " << test_name << " failed." << std::endl;
-    prog->printAll();
-    return 1;
   } else {
     std::cout << "Test " << test_name << " succeeded." << std::endl;
     return 0;
   }
-  assert(false); // Should be unreachable.
+  prog->printAll();
+  return 1;
 }
 
 int main(int argc, char **argv) {
