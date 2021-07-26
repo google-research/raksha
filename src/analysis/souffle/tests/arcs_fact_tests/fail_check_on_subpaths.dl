@@ -25,15 +25,14 @@
 claimHasTag("R.P1.foo.a", "userSelection").
 claimHasTag("R.P1.foo.b", "screenContent").
 
-edge("R.P1.foo", "R.h.Foo").
 edge("R.P1.foo.a", "R.h.Foo.a").
 edge("R.P1.foo.b", "R.h.Foo.b").
 
-edge("R.h.Foo", "R.P2.foo").
 edge("R.h.Foo.a", "R.P2.foo.a").
 edge("R.h.Foo.b", "R.P2.foo.b").
 
-TEST_CASE("subpath_tag_userSelection_in_subpath_a") :- mayHaveTag("R.P2.foo.a", "userSelection").
-TEST_CASE("subpath_tag_screenContent_in_subpath_b") :- mayHaveTag("R.P2.foo.b", "screenContent").
-TEST_CASE("subpath_tags_in_parent") :-
-  mayHaveTag("R.P2.foo", "userSelection"), mayHaveTag("R.P2.foo", "screenContent").
+CHECK_TAG_PRESENT("R.P2.foo.a", "userSelection").
+CHECK_TAG_PRESENT("R.P2.foo.b", "screenContent").
+
+CHECK_TAG_PRESENT("R.P2.foo", "userSelection").
+CHECK_TAG_PRESENT("R.P2.foo", "screenContent").

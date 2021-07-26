@@ -33,4 +33,4 @@ edge("R.P2.foo", "R.h2.Foo").
 edge("R.h2.Foo", "R.P3.bar").
 
 // This test passes if R.P3.bar has the trusted tag.
-TEST_CASE("ok_claim_propagates") :- mayHaveTag("R.P3.bar", "userSelection").
+CHECK_TAG_PRESENT("R.P3.bar", "userSelection").

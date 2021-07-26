@@ -51,5 +51,14 @@ testFails(testAspectName) :- allTests(testAspectName), !testPasses(testAspectNam
   allTestsAndCaseNum(test_aspect_name, $) :- 1 = 1. \
   testPasses(test_aspect_name)
 
+#define CHECK_TAG_PRESENT(access_path, tag) \
+  isAccessPath(access_path). \
+  TEST_CASE(cat(cat(cat("is_", tag), "_present_in_"), access_path)) :- \
+    isAccessPath(access_path), mayHaveTag(access_path, tag)
+
+#define CHECK_TAG_NOT_PRESENT(access_path, tag) \
+  isAccessPath(access_path). \
+  TEST_CASE(cat(cat(cat("is_", tag), "_not_present_in_"), access_path)) :- \
+    isAccessPath(access_path), !mayHaveTag(access_path, tag)
 
 #endif // SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_

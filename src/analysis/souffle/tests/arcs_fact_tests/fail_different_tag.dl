@@ -25,5 +25,5 @@ claimHasTag("R.P1.foo", "userSelection").
 edge("R.P1.foo", "R.h.Foo").
 edge("R.h.Foo", "R.P2.bar").
 
-TEST_CASE("should_not_be_tagged_with_trusted") :- !mayHaveTag("R.P2.bar", "screenContent").
-TEST_CASE("should_be_tagged_with_notTrusted") :- mayHaveTag("R.P2.bar", "userSelection").
+CHECK_TAG_NOT_PRESENT("R.P2.bar", "screenContent").
+CHECK_TAG_PRESENT("R.P2.bar", "userSelection").

@@ -1,0 +1,55 @@
+#include "taint.dl"
+#include "fact_test_helper.dl"
+
+claimHasTag("R.foo.a", "userSelection").
+edge("R.foo.a", "R.bar.a").
+edge("R.foo.b", "R.bar.b").
+edge("R.foobaz.a", "R.bar.c").
+
+// Make R, R.foo, and R.foobaz checked access paths, but not foo.bar
+isAccessPath("R").
+isAccessPath("R.foo").
+isAccessPath("R.foobaz").
+
+// We use this to ensure that we select exactly the (base, member) pairs we expect to see in
+// isMemberOf.
+.decl expectedIsMemberOf(base: AccessPath, member: AccessPath)
+
+expectedIsMemberOf("R", "R.foo").
+expectedIsMemberOf("R", "R.foobaz").
+
+expectedIsMemberOf("R", "R.foo.a").
+expectedIsMemberOf("R", "R.foo.b").
+
+expectedIsMemberOf("R.foo", "R.foo.a").
+expectedIsMemberOf("R.foo", "R.foo.b").
+
+expectedIsMemberOf("R", "R.bar.a").
+expectedIsMemberOf("R", "R.bar.b").
+expectedIsMemberOf("R", "R.bar.c").
+
+expectedIsMemberOf("R", "R.foobaz.a").
+expectedIsMemberOf("R.foobaz", "R.foobaz.a").
+
+// Used to report expectations that went unmatched.
+.decl unmatched(base: AccessPath, member: AccessPath, from: symbol)
+
+// Useful to make these output relations if things fail.
+.output isAccessPath(IO=stdout, delimiter=",")
+.output unmatched(IO=stdout, delimiter=",")
+.output isMemberOf(IO=stdout, delimiter=",")
+
+unmatched(base, member, "expected") :-
+  expectedIsMemberOf(base, member), !isMemberOf(base, member).
+
+unmatched(base, member, "actual") :-
+  !expectedIsMemberOf(base, member), isMemberOf(base, member).
+
+TEST_CASE("unmatched_is_empty") :- count : { unmatched(_, _, _) } = 0.
+
+TEST_CASE("size_of_expected_and_actual_match_and_not_zero") :-
+  count_expected = count : { expectedIsMemberOf(_, _) },
+  count_actual = count : { isMemberOf(_, _) },
+  count_expected != 0,
+  count_actual != 0,
+  count_expected = count_actual.
