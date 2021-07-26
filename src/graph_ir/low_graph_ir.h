@@ -27,6 +27,10 @@
 
 #include <string>
 #include <vector>
+#include <set>
+
+#ifndef LOW_GRAPH_IR_
+#define LOW_GRAPH_IR_
 
 using namespace std;
 
@@ -50,3 +54,7 @@ class LowGraphNode {
     public:
         static string PrettyPrintAPVec(vector<LowGraphAccessPath>);
 };
+
+typedef vector<LowGraphNode> LowGraph;
+#endif // LOW_GRAPH_IR_
+

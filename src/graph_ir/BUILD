@@ -12,3 +12,15 @@ cc_binary(
         "-std=c++17",
     ],
 )
+
+cc_binary(
+    name = "low_graph_souffle_emitter",
+    srcs = [
+        "low_graph_souffle_emitter.cc",
+        "low_graph_souffle_emitter.h"
+    ],
+    deps = ["low_graph_ir"],
+    copts = [
+        "-std=c++17",
+    ],
+)
