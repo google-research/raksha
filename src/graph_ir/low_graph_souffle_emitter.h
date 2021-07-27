@@ -14,21 +14,26 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
+
+#ifndef LOW_GRAPH_SOUFFLE_EMITTER_H_
+#define LOW_GRAPH_SOUFFLE_EMITTER_H_
+
 #include <string>
 #include "low_graph_ir.h"
 
-#ifndef LOW_GRAPH_SOUFFLE_EMITTER_
-#define LOW_GRAPH_SOUFFLE_EMITTER_
+namespace raksha_graph_ir {
 
 class LowGraphSouffleEmitter {
     public:
-        static string EmitSouffleFromLowGraph(LowGraph);
+        static std::string EmitSouffleFromLowGraph(LowGraph);
 
     private:
-        static string EmitNode(LowGraphNode);
-        static string EmitNodeBody(LowGraphNode);
-        static string EmitPathList(vector<LowGraphAccessPath>);
+        static std::string EmitNode(LowGraphNode);
+        static std::string EmitNodeBody(LowGraphNode);
+        static std::string EmitPathList(std::vector<LowGraphAccessPath>);
 };
 
-#endif // LOW_GRAPH_SOUFFLE_EMITTER_
+} // raksha_graph_ir
+
+#endif // LOW_GRAPH_SOUFFLE_EMITTER_H_
 

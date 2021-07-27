@@ -16,33 +16,37 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 #include "low_graph_souffle_emitter.h"
 
-using namespace std;
+namespace raksha_graph_ir {
 
-string LowGraphSouffleEmitter::EmitPathList(
-        vector<LowGraphAccessPath> pathList) {
-    string ret = "$Nil()";
+std::string LowGraphSouffleEmitter::EmitPathList(
+        std::vector<LowGraphAccessPath> pathList) {
+    std::string ret = "$Nil()";
     for (auto path: pathList) {
-        ret = "$Cons(" + path.full_path_name + ", " + ret + ")";
+        ret = "$Cons(" + path.PrettyPrint() + ", " + ret + ")";
     }
     return ret;
 };
 
-string LowGraphSouffleEmitter::EmitNodeBody(LowGraphNode node) {
-    return "$FlatParticle(" + EmitPathList(node.inputs) + ", " +
-        EmitPathList(node.outputs) + ")";
+std::string LowGraphSouffleEmitter::EmitNodeBody(LowGraphNode node) {
+    return "$FlatParticle(" + EmitPathList(node.GetInputs()) + ", " +
+        EmitPathList(node.GetOutputs()) + ")";
 }
 
-string LowGraphSouffleEmitter::EmitNode(LowGraphNode node) {
-    return "bindFlatParticle(" + node.name + ", " +
+std::string LowGraphSouffleEmitter::EmitNode(LowGraphNode node) {
+    return "bindFlatParticle(" + node.GetName() + ", " +
         EmitNodeBody(node) + ").";
 }
 
-string LowGraphSouffleEmitter::EmitSouffleFromLowGraph(LowGraph low_graph) {
-    string ret = "";
+std::string LowGraphSouffleEmitter::EmitSouffleFromLowGraph(
+        LowGraph low_graph) {
+    std::ostringstream ss;
     for (auto node : low_graph) {
-        ret = ret += EmitNode(node) + "\n\n";
+        ss << EmitNode(node) << std::endl << std::endl;
     }
-    return ret;
+    return ss.str();
 }
+
+} // raksha_graph_ir

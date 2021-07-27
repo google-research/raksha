@@ -19,16 +19,33 @@
 #include <vector>
 #include <sstream>
 
-using namespace std;
+namespace raksha_graph_ir {
 
-string LowGraphAccessPath::PrettyPrint() {
-    // to copy string
-    string pretty = full_path_name;
-    return pretty;
+const std::string& LowGraphAccessPath::GetName() const {
+    return full_path_name;
 }
 
-string LowGraphNode::PrettyPrintAPVec(vector<LowGraphAccessPath> vec) {
-    stringstream ss;
+const std::string& LowGraphAccessPath::PrettyPrint() const { 
+    return full_path_name;
+}
+
+const std::string& LowGraphNode::GetName() const {
+    return name;
+}
+
+const std::vector<LowGraphAccessPath>&
+LowGraphNode::GetInputs() const {
+    return inputs;
+}
+
+const std::vector<LowGraphAccessPath>&
+LowGraphNode::GetOutputs() const {
+    return outputs;
+}
+
+std::string LowGraphNode::PrettyPrintAPVec(
+        std::vector<LowGraphAccessPath> vec) {
+    std::ostringstream ss;
     bool isFirstItem = true;
     ss << "[";
     for (auto accessPath : vec) {
@@ -43,11 +60,13 @@ string LowGraphNode::PrettyPrintAPVec(vector<LowGraphAccessPath> vec) {
     return ss.str();
 }
 
-string LowGraphNode::PrettyPrint() {
-    stringstream ss;
-    ss << "Particle " << name << " {" << endl;
-    ss << "    inputs: " << PrettyPrintAPVec(inputs) << endl;
-    ss << "    outputs: " << PrettyPrintAPVec(outputs) << endl;
-    ss << "}" << endl;
+std::string LowGraphNode::PrettyPrint() const {
+    std::ostringstream ss;
+    ss << "Particle " << name << " {" << std::endl;
+    ss << "    inputs: " << PrettyPrintAPVec(inputs) << std::endl;
+    ss << "    outputs: " << PrettyPrintAPVec(outputs) << std::endl;
+    ss << "}" << std::endl;
     return ss.str();
 }
+
+} // raksha_graph_ir

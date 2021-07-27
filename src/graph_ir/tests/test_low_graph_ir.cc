@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-using namespace std;
+namespace raksha_graph_ir {
 
 int main() {
     LowGraphAccessPath* p_a = new LowGraphAccessPath("a");
@@ -16,4 +16,6 @@ int main() {
     cout << g->PrettyPrint() << endl;
 
     return 0;
+}
+
 }
