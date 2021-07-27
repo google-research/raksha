@@ -30,7 +30,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Run a one-line script
-        run: bazel test :all_tests
+        run: bazel test //src/...
 
       # Verifies that the Arcs parser works
       - name: Verify that Arcs parser works.
