@@ -33,8 +33,3 @@ exports_files([
     "auth_logic_interface.dl",
     "edges_from_graph.dl",
 ])
-
-test_suite(
-    name = "all_tests",
-    tests = ["//src/analysis/souffle/tests:all_tests"],
-)
