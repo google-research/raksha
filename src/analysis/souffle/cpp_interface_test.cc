@@ -20,12 +20,10 @@
 #include <memory>
 
 #include "souffle/SouffleInterface.h"
+#include "src/common/testing/gtest.h"
 
-int main() {
+TEST(CppInterfaceTest, CanLoadDatalogProgram) {
   std::unique_ptr<souffle::SouffleProgram> prog(
       souffle::ProgramFactory::newInstance("taint"));
-  assert(prog != nullptr);
-  std::cout << "Found taint program as expected.\n";
-  prog->run();
-  return 0;
+  EXPECT_NE(prog, nullptr);
 }

@@ -3,20 +3,22 @@ load(
     "souffle_cc_library",
 )
 
-package(default_visibility=["__subpackages__"])
+package(default_visibility = ["//src:__subpackages__"])
 
 licenses(["notice"])
 
-cc_binary(
-    name = "cpp_interface",
-    srcs = ["cpp_interface.cc"],
+cc_test(
+    name = "cpp_interface_test",
+    srcs = ["cpp_interface_test.cc"],
     copts = [
         "-Iexternal/souffle/src/include/souffle",
         "-std=c++17",
     ],
+    linkopts = ["-pthread"],
     deps = [
-        "@souffle//:souffle_lib",
         ":taint_dl",
+        "//src/common/testing:gtest",
+        "@souffle//:souffle_lib",
     ],
 )
 
@@ -29,7 +31,7 @@ exports_files([
     "fact_test_helper.dl",
     "flat_graph_ir.dl",
     "auth_logic_interface.dl",
-    "edges_from_graph.dl"
+    "edges_from_graph.dl",
 ])
 
 test_suite(
