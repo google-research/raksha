@@ -13,21 +13,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
+#ifndef SRC_ANALYSIS_SOUFFLE_DATAFLOW_GRAPH_DL_
+#define SRC_ANALYSIS_SOUFFLE_DATAFLOW_GRAPH_DL_
 
-#include "flat_graph_ir.dl"
-#include "taint.dl"
+#include "access_path.dl"
 
-// This file populates the edge(path1: AccessPath, path2: AccessPath) relation 
-// defined in `taint.dl` when given a graph of particles in the low-level IR 
-// defined in flat_graph_ir.dl
+// A data flow edge.
+.decl edge(src: AccessPath, tgt: AccessPath)
 
-#ifndef EDGES_FROM_GRAPH_DL_
-#define EDGES_FROM_GRAPH_DL_
+// A direct or transitive data flow path.
+.decl path(src: AccessPath, tgt: AccessPath)
 
-edge(from, to) :-
-    isFlatParticle($FlatParticle(inputs, outputs)),
-    accessPathListContains(inputs, from),
-    accessPathListContains(outputs, to).
-    
-#endif // EDGES_FROM_GRAPH_DL_
+//-----------------------------------------------------------------------------
+// Rules
+//-----------------------------------------------------------------------------
+// Transitive paths
+path(from, to) :- edge(from, to).
+path(from, to) :- edge(from, intermediate), path(intermediate, to).
 
+// Symbols used in edges are access paths
+isAccessPath(x) :- edge(x, _).
+isAccessPath(y) :- edge(_, y).
+
+#endif // SRC_ANALYSIS_SOUFFLE_DATAFLOW_GRAPH_DL_

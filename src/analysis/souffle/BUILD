@@ -28,8 +28,10 @@ souffle_cc_library(
 )
 
 exports_files([
+    "access_path.dl",
+    "authorization_logic.dl",
+    "dataflow_graph.dl",
     "fact_test_helper.dl",
     "flat_graph_ir.dl",
-    "auth_logic_interface.dl",
-    "edges_from_graph.dl",
+    "tags.dl",
 ])
