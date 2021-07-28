@@ -13,10 +13,12 @@ ALL_DL_TEST_FILES = glob(["*.dl"])
     name = dl_script.replace(".dl", "_souffle_cc_library"),
     src = dl_script,
     included_dl_scripts = [
+        "//src/analysis/souffle:access_path.dl",
         "//src/analysis/souffle:flat_graph_ir.dl",
-        "//src/analysis/souffle:auth_logic_interface.dl",
-        "//src/analysis/souffle:edges_from_graph.dl",
+        "//src/analysis/souffle:authorization_logic.dl",
+        "//src/analysis/souffle:dataflow_graph.dl",
         "//src/analysis/souffle:taint.dl",
+        "//src/analysis/souffle:tags.dl",
         "//src/analysis/souffle:fact_test_helper.dl",
     ],
 ) for dl_script in ALL_DL_TEST_FILES]

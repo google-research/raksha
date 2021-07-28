@@ -14,8 +14,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
-#ifndef FLAT_GRAPH_IR_DL_
-#define FLAT_GRAPH_IR_DL_
+#ifndef SRC_ANALYSIS_SOUFFLE_FLAT_GRAPH_IR_DL_
+#define SRC_ANALYSIS_SOUFFLE_FLAT_GRAPH_IR_DL_
+
+#include "access_path.dl"
+#include "dataflow_graph.dl"
 
 // This is a lower-level IR for particles in which:
 //      1) nested structs have been flattened into full access path names
@@ -39,7 +42,7 @@
 //      reads a : someStruct {b: String, c: float}
 //      writes d : Int
 // }
-// 
+//
 // it should become
 // ---- Low IR ------
 // someParticle { reads: ["a.b", "a.c"], writes: ["d"] }
@@ -47,9 +50,7 @@
 //-----------------------------------------------------------------------------
 // Type Declarations
 //-----------------------------------------------------------------------------
-.type AccessPath <: symbol
-.type AccessPathList = Nil {} | Cons {a: AccessPath, l: AccessPathList }
-.type FlatParticle = FlatParticle { readPaths: AccessPathList, 
+.type FlatParticle = FlatParticle { readPaths: AccessPathList,
     writtenPaths: AccessPathList }
 .type FlatParticleName <: symbol
 
@@ -61,9 +62,6 @@
 // This is assentially `let n := p`, where p is a particle definition.
 .decl bindFlatParticle(name: FlatParticleName, particle: FlatParticle)
 
-// The list l contains path p
-.decl accessPathListContains(pathList: AccessPathList, path: AccessPath)
-
 //-----------------------------------------------------------------------------
 // Universe Predicates
 //-----------------------------------------------------------------------------
@@ -71,21 +69,18 @@
 // object. These are needed when working in Datalog to ensure that a fixpoint
 // can be reached. In practice, to dismiss error messages about variables not
 // being grounded when defining new rules. For example, if there is an error
-// that 'a' an acces path is not grounded when defining some rule, simply add
-// `isAccessPath(a)` to the RHS of the rule.
-
-.decl isAccessPath(path: AccessPath)
-.decl isAccessPathList(list: AccessPathList)
+// that 'a' `FlatParticle` is not grounded when defining some rule, simply add
+// `isFlatParticle(a)` to the RHS of the rule.
 .decl isFlatParticle(particle: FlatParticle)
 
-//-----------------------------------------------------------------------------
-// Rules
-//-----------------------------------------------------------------------------
-accessPathListContains($Cons(head, rest), head) :- 
-    isAccessPathList($Cons(head, rest)).
-accessPathListContains($Cons(head, rest), path) :-
-    isAccessPathList($Cons(head, rest)),
-    accessPathListContains(rest, path).
+
+// populates the edge(path1: AccessPath, path2: AccessPath) relation defined in
+// `dataflow_graph.dl" when given a graph of particles in the low-level IR
+// defined in flat_graph_ir.dl
+edge(from, to) :-
+    isFlatParticle($FlatParticle(inputs, outputs)),
+    accessPathListContains(inputs, from),
+    accessPathListContains(outputs, to).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
@@ -93,14 +88,10 @@ accessPathListContains($Cons(head, rest), path) :-
 // These are rules that add objects to the universe whenever they are mentioned
 // in rules. These are for convenience and to reduce errors caused by forgetting
 // to add thngs to the universe.
-isAccessPath(path) :- accessPathListContains(_, path).
-isAccessPath(path) :- isAccessPathList($Cons(path, _)).
-
 isAccessPathList(list) :- isFlatParticle($FlatParticle(list, _)).
 isAccessPathList(list) :- isFlatParticle($FlatParticle(_, list)).
-isAccessPathList(list) :- isAccessPathList($Cons(_, list)).
 
 isFlatParticle(path) :- bindFlatParticle(_, path).
 
-#endif // FLAT_GRAPH_IR_DL_
+#endif // SRC_ANALYSIS_SOUFFLE_FLAT_GRAPH_IR_DL_
 

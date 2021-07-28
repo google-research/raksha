@@ -13,23 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
+#ifndef SRC_ANALYSIS_SOUFFLE_TAGS_DL_
+#define SRC_ANALYSIS_SOUFFLE_TAGS_DL_
 
-// This file defines the interface between authorization logic and taint 
-// tracking / information flow control.
+//-----------------------------------------------------------------------------
+// Type Declarations
+//-----------------------------------------------------------------------------
+// An information flow Label which in this model is a set of taint Tags. One
+// label L1 flows to another L2 if L1 is a subset or equal to L2.
 
-#ifndef AUTH_LOGIC_INTERFACE_DL_
-#define AUTH_LOGIC_INTERFACE_DL_
+// A symbol representing a taint (or information flow) tag. These would be
+// strings of the form "secret", "public", "timestampInMs", etc. Just like
+// `AccessPath`, it would make sense to define an ADT in the long term.
+.type Tag <: symbol
+.decl isTag(tag: Tag)
 
-// A Principal that makes assertions in authorization logic
-.type Principal <: symbol
-
-// Some party asserts the claim that the label of an access path should be 
-// downgraded by removing the referenced tag from the set.
-.decl saysDowngrades(speaker: Principal, p: AccessPath, t: Tag)
-
-.decl isPrincipal(p: Principal)
-
-isPrincipal(speaker) :- saysDowngrades(speaker, _, _).
-
-#endif // AUTH_LOGIC_INTERFACE_DL_
-
+#endif // SRC_ANALYSIS_SOUFFLE_TAGS_DL_
