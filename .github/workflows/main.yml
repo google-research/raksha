@@ -32,6 +32,6 @@ jobs:
       - name: Run a one-line script
         run: bazel test //src/...
 
-      # Verifies that the Arcs parser works
-      - name: Verify that Arcs parser works.
-        run: bazel build //third_party/arcs/examples:consume
+      # Verifies that the Arcs parser and proto works.
+      - name: Verify that Arcs parser and proto works.
+        run: bazel build //third_party/arcs/examples:consume third_party/arcs/proto:manifest_cc_proto
