@@ -1,6 +1,8 @@
 #include "taint.dl"
 #include "fact_test_helper.dl"
 
+// Note: these claims and edges are just used to introduce access paths in a fashion that is
+// similar to what we might see in the wild.
 claimHasTag("R.foo.a", "userSelection").
 edge("R.foo.a", "R.bar.a").
 edge("R.foo.b", "R.bar.b").
