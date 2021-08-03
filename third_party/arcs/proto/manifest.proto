@@ -5,8 +5,8 @@ package arcs;
 option java_package = "arcs.core.data.proto";
 option java_multiple_files = true;
 
-import "java/arcs/core/data/proto/annotation.proto";
-import "java/arcs/core/data/proto/policy.proto";
+import "third_party/arcs/proto/annotation.proto";
+import "third_party/arcs/proto/policy.proto";
 
 // A manifest containing multiple recipes and particle specs.
 message ManifestProto {
