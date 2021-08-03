@@ -58,6 +58,17 @@ isAccessPath(path) :- mayHaveTag(path, _).
 isTag(tag) :- claimHasTag(_, tag).
 isTag(tag) :- mayHaveTag(_, tag).
 
+// A pair of (base, member) is in this set if the base access path is a non-trivial subpath of the
+// member access path.
+.decl isMemberOf(base: AccessPath, member: AccessPath)
+
+// The member is a member of the base if it starts with the base plus '.'.
+isMemberOf(base, member) :-
+  isAccessPath(base),
+  isAccessPath(member),
+  strlen(base) + 1 < strlen(member),
+  cat(base, ".") = substr(member, 0, strlen(base) + 1).
+
 // An access path may have a tag if some subpath to a member field has that tag. This allows
 // checking for some inner node in the access path whether any leaf node of that node might have
 // a particular tag.
@@ -65,6 +76,6 @@ mayHaveTag(base, tag) :-
   isAccessPath(base),
   isAccessPath(member),
   mayHaveTag(member, tag),
-  contains(cat(base, "."), member).
+  isMemberOf(base, member).
 
 #endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_
