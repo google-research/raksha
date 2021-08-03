@@ -1,14 +1,18 @@
 #include "taint.dl"
 #include "fact_test_helper.dl"
 
-// Note: these claims and edges are just used to introduce access paths in a fashion that is
-// similar to what we might see in the wild.
-claimHasTag("R.foo.a", "userSelection").
-edge("R.foo.a", "R.bar.a").
-edge("R.foo.b", "R.bar.b").
-edge("R.foobaz.a", "R.bar.c").
+// Leaf AccessPaths: These are AccessPaths to leaf fields, similar to what we expect might be
+// introduced by a claim or an edge.
+isAccessPath("R.foo.a").
+isAccessPath("R.foo.b").
 
-// Make R, R.foo, and R.foobaz checked access paths, but not foo.bar
+isAccessPath("R.bar.a").
+isAccessPath("R.bar.b").
+isAccessPath("R.bar.c").
+
+isAccessPath("R.foobaz.a").
+
+// Inner node AccessPaths. Make R, R.foo, and R.foobaz checked access paths, but not foo.bar.
 isAccessPath("R").
 isAccessPath("R.foo").
 isAccessPath("R.foobaz").
