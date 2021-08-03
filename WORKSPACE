@@ -97,7 +97,7 @@ http_archive(
 http_archive(
     name = "souffle",
     urls = ["https://github.com/souffle-lang/souffle/archive/fbb4c4b967bf58cccb7aca58e3d200a799218d98.zip"],
-    build_file = "@//third_party/souffle:BUILD",
+    build_file = "@//third_party/souffle:BUILD.souffle",
     sha256 = "654c1b33b2b3f20fdc1f0983dfed562c24a0baa230fd431401cc0004464c6b4d",
     strip_prefix = "souffle-fbb4c4b967bf58cccb7aca58e3d200a799218d98",
     patch_args = ["-p0"],
