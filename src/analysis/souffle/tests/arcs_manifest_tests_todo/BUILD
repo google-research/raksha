@@ -6,7 +6,10 @@ BUILD_ERROR_ARCS_MANIFEST_PATTERNS = [
     "*ok_join_simple_with_nullables.arcs",
 ]
 
-BUILDING_ARCS_MANIFESTS = glob(["*.arcs"], BUILD_ERROR_ARCS_MANIFEST_PATTERNS)
+BUILDING_ARCS_MANIFESTS = glob(
+    ["*.arcs"],
+    exclude = BUILD_ERROR_ARCS_MANIFEST_PATTERNS
+)
 
 [arcs_manifest_proto(
     name = manifest.replace(".arcs", "_proto"),
