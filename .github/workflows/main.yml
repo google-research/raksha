@@ -29,9 +29,13 @@ jobs:
         run: sudo apt-get install autoconf automake bison build-essential clang doxygen flex g++ git libffi-dev libncurses5-dev libtool libsqlite3-dev make mcpp python sqlite zlib1g-dev
 
       # Runs a single command using the runners shell
-      - name: Run a one-line script
+      - name: Run all tests
         run: bazel test //src/...
 
       # Verifies that the Arcs parser and proto works.
       - name: Verify that Arcs parser and proto works.
         run: bazel build //third_party/arcs/examples:consume third_party/arcs/proto:manifest_cc_proto
+
+      # Verifies that Arcs manifest tests that we do not yet handle parse correctly.
+      - name: Verify that disabled Arcs manifest tests build.
+        run: bazel build //src/analysis/souffle/tests/arcs_manifest_tests_todo/...
