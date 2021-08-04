@@ -36,5 +36,9 @@ proto_library(
 
 cc_proto_library(
     name = "manifest_cc_proto",
-    deps = [":manifest_proto"],
+    protos = [
+        ":manifest_proto",
+        ":annotation_proto",
+        ":policy_proto",
+    ],
 )
