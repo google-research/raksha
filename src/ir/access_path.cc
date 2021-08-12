@@ -11,21 +11,11 @@
 
 namespace raksha::ir {
 
-// Check the components of the two access paths for equality. First, ensure
-// that they have the same number of components, then check component by
-// component.
+// Check the components of the two access paths for equality. This is the
+// same as their component vectors being equal according to std::vector's
+// operator==.
 bool AccessPath::operator==(const AccessPath &other) const {
-  if (reverse_components_.size() != other.reverse_components_.size()) {
-    return false;
-  }
-
-  for (uint64_t idx = 0; idx < reverse_components_.size(); ++idx) {
-    if (reverse_components_.at(idx) != other.reverse_components_.at(idx)) {
-      return false;
-    }
-  }
-
-  return true;
+  return reverse_components_ == other.reverse_components_;
 }
 
 // We create the AccessPath string by just joining the contents of the
