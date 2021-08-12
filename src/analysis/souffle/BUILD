@@ -12,7 +12,6 @@ cc_test(
     srcs = ["cpp_interface_test.cc"],
     copts = [
         "-Iexternal/souffle/src/include/souffle",
-        "-std=c++17",
     ],
     linkopts = ["-pthread"],
     deps = [
