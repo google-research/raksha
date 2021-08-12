@@ -1,4 +1,4 @@
-#include "access_path.h"
+#include "src/ir/access_path.h"
 
 #include "src/common/testing/gtest.h"
 #include "absl/status/statusor.h"
@@ -6,11 +6,11 @@
 
 #include <string>
 
-namespace raksha::transform::utils {
+namespace raksha::ir {
 
 // Access paths are easier to read and write in their string form, so this is
 // very useful for creating readable test inputs.
-static absl::StatusOr<utils::AccessPath> make_access_path_from_string(
+static absl::StatusOr<AccessPath> make_access_path_from_string(
     const absl::string_view str) {
   const std::vector<absl::string_view> components =
       absl::StrSplit(str, '.');
@@ -156,4 +156,4 @@ TEST(AccessPathFailTest, CompoundAccessPathParentComponent) {
       "compound; only simple component names are allowed.");
 }
 
-} // namespace raksha::transform::utils
+} // namespace raksha::ir
