@@ -18,7 +18,7 @@ static absl::StatusOr<utils::AccessPath> make_access_path_from_string(
   // Instantiate the AccessPath with the last element initially.
   auto components_rev_iter = components.rbegin();
   absl::StatusOr<AccessPath> access_path =
-      AccessPath::create(*components_rev_iter);
+      AccessPath::Create(*components_rev_iter);
   if (!access_path.ok()) {
     return access_path.status();
   }
@@ -26,7 +26,7 @@ static absl::StatusOr<utils::AccessPath> make_access_path_from_string(
 
   // Add all others as parents.
   for (; components_rev_iter < components.rend(); ++components_rev_iter) {
-    access_path = AccessPath::create_parent(
+    access_path = AccessPath::CreateParent(
         *components_rev_iter,
         *access_path);
     if (!access_path.ok()) {
@@ -94,7 +94,7 @@ TEST_P(AccessPathTest, CanRoundTripAccessPathString) {
 
   ASSERT_TRUE(access_path.ok());
   // Assert that the result of to_string is the same as the original AccessPath.
-  ASSERT_EQ(access_path->to_string(), original_access_path);
+  ASSERT_EQ(access_path->ToString(), original_access_path);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -104,7 +104,7 @@ INSTANTIATE_TEST_SUITE_P(
 );
 
 TEST(AccessPathFailTest, EmptyAccessPathLeafComponent) {
-  absl::StatusOr<AccessPath> empty_result = AccessPath::create("");
+  absl::StatusOr<AccessPath> empty_result = AccessPath::Create("");
   ASSERT_FALSE(empty_result.ok());
   ASSERT_EQ(empty_result.status().code(), absl::StatusCode::kInvalidArgument);
   ASSERT_EQ(
@@ -113,10 +113,10 @@ TEST(AccessPathFailTest, EmptyAccessPathLeafComponent) {
 }
 
 TEST(AccessPathFailTest, EmptyAccessPathParentComponent) {
-  absl::StatusOr<AccessPath> leaf = AccessPath::create("leaf");
+  absl::StatusOr<AccessPath> leaf = AccessPath::Create("leaf");
   ASSERT_TRUE(leaf.ok());
   absl::StatusOr<AccessPath> empty_parent_result =
-      AccessPath::create_parent("", *leaf);
+      AccessPath::CreateParent("", *leaf);
   ASSERT_FALSE(empty_parent_result.ok());
   ASSERT_EQ(
       empty_parent_result.status().code(),
@@ -128,7 +128,7 @@ TEST(AccessPathFailTest, EmptyAccessPathParentComponent) {
 
 TEST(AccessPathFailTest, CompoundAccessPathLeafComponent) {
    absl::StatusOr<AccessPath> compound_result =
-       AccessPath::create("compound.leaf");
+       AccessPath::Create("compound.leaf");
   ASSERT_FALSE(compound_result.ok());
   ASSERT_EQ(
       compound_result.status().code(),
@@ -142,10 +142,10 @@ TEST(AccessPathFailTest, CompoundAccessPathLeafComponent) {
 }
 
 TEST(AccessPathFailTest, CompoundAccessPathParentComponent) {
-  absl::StatusOr<AccessPath> leaf = AccessPath::create("leaf");
+  absl::StatusOr<AccessPath> leaf = AccessPath::Create("leaf");
   ASSERT_TRUE(leaf.ok());
   absl::StatusOr<AccessPath> compound_parent_result =
-      AccessPath::create_parent("compound.parent", *leaf);
+      AccessPath::CreateParent("compound.parent", *leaf);
   ASSERT_FALSE(compound_parent_result.ok());
   ASSERT_EQ(
       compound_parent_result.status().code(),

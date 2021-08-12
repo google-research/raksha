@@ -26,12 +26,12 @@ class AccessPath {
   // f in the type T in particle P in recipe R will produce the string:
   //
   // "R.P.T.f"
-  std::string to_string() const;
+  std::string ToString() const;
 
   // Create a leaf AccessPath from a string indicating a single string
   // component. This will return an error status if
   // check_component_allowed(leaf_component) does not return Status::Ok.
-  static absl::StatusOr<AccessPath> create(absl::string_view leaf_component);
+  static absl::StatusOr<AccessPath> Create(absl::string_view leaf_component);
 
   // Create a new AccessPath that is a parent of the parameter access_path by
   // adding parent_component directly above the contents of access_path. If
@@ -42,7 +42,7 @@ class AccessPath {
   //
   // This will return an error status if
   // check_component_allowed(parent_component) does not return Status::Ok.
-  static absl::StatusOr<AccessPath> create_parent(
+  static absl::StatusOr<AccessPath> CreateParent(
       absl::string_view parent_component,
       AccessPath access_path);
 
@@ -54,7 +54,7 @@ class AccessPath {
 
   // Checks that the passed-in component is legal. Currently this means that
   // it is not empty and does not contain a dot separator.
-  static absl::Status check_component_allowed(absl::string_view component);
+  static absl::Status CheckComponentAllowed(absl::string_view component);
 
   // We store the path components in reverse order. We do this because we
   // will be creating access paths by recursing down to the bottom of a

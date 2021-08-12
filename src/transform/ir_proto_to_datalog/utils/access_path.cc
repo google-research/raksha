@@ -30,7 +30,7 @@ bool AccessPath::operator==(const AccessPath &other) const {
 
 // We create the AccessPath string by just joining the contents of the
 // component vector in reverse, using '.' as a separator.
-std::string AccessPath::to_string() const {
+std::string AccessPath::ToString() const {
   return absl::StrJoin(
       reverse_components_.rbegin(),
       reverse_components_.rend(),
@@ -40,8 +40,7 @@ std::string AccessPath::to_string() const {
 // Check that the component is nonempty and does not contain a '.'. Both of
 // these cases seem malformed and may indicate confusion in deserializing the
 // Manifest protos.
-absl::Status AccessPath::check_component_allowed(
-    const absl::string_view component) {
+absl::Status AccessPath::CheckComponentAllowed(absl::string_view component) {
   if (component.empty()) {
     return absl::InvalidArgumentError(
         "Empty component name not allowed in AccessPath.");
@@ -61,10 +60,10 @@ absl::Status AccessPath::check_component_allowed(
 
 // Check that the component is allowed, and if so, create a new AccessPath
 // having it as a leaf component.
-absl::StatusOr<AccessPath> AccessPath::create(
+absl::StatusOr<AccessPath> AccessPath::Create(
     const absl::string_view component) {
   const absl::Status component_allowed_status =
-      check_component_allowed(component);
+      CheckComponentAllowed(component);
   if (!component_allowed_status.ok()) {
     return component_allowed_status;
   }
@@ -79,11 +78,12 @@ absl::StatusOr<AccessPath> AccessPath::create(
 // passed into this factory. If that is the case, then add_parent_component
 // will just push the new component onto the end of the existing access_path,
 // making this very efficient.
-absl::StatusOr<AccessPath> AccessPath::create_parent(
-    absl::string_view parent_component,
-    AccessPath access_path) {
+absl::StatusOr<AccessPath> AccessPath::CreateParent(
+    const absl::string_view parent_component,
+    AccessPath access_path)
+{
   const absl::Status component_allowed_status =
-      check_component_allowed(parent_component);
+      CheckComponentAllowed(parent_component);
   if (!component_allowed_status.ok()) {
     return component_allowed_status;
   }
