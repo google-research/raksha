@@ -1,5 +1,5 @@
-#ifndef SRC_TRANSFORM_IR_PROTO_TO_DATALOG_UTILS_ACCESS_PATH_H_
-#define SRC_TRANSFORM_IR_PROTO_TO_DATALOG_UTILS_ACCESS_PATH_H_
+#ifndef SRC_IR_ACCESS_PATH_H_
+#define SRC_IR_ACCESS_PATH_H_
 
 #include "absl/strings/string_view.h"
 #include "absl/status/status.h"
@@ -7,7 +7,7 @@
 
 #include <vector>
 
-namespace raksha::transform::utils {
+namespace raksha::ir {
 
 // Represents an AccessPath descending through Manifest substructures. This
 // is eventually used for printing edges to the resultant Datalog file. It
@@ -65,6 +65,6 @@ class AccessPath {
   std::vector<absl::string_view> reverse_components_;
 };
 
-}  // namespace raksha::transform::utils
+}  // namespace raksha::ir
 
-#endif  // SRC_TRANSFORM_IR_PROTO_TO_DATALOG_UTILS_ACCESS_PATH_H_
+#endif  // SRC_IR_ACCESS_PATH_H_

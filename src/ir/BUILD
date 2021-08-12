@@ -1,7 +1,7 @@
 package(default_visibility = ["//src/transform:__subpackages__"])
 
 cc_library(
-    name = "utils",
+    name = "ir",
     srcs = ["access_path.cc"],
     hdrs = ["access_path.h"],
     linkopts = select({
@@ -22,7 +22,7 @@ cc_test(
     name = "access_path_test",
     srcs = ["access_path_test.cc"],
     deps = [
-        ":utils",
+        ":ir",
         "//src/common/testing:gtest",
         "@absl//absl/status",
         "@absl//absl/status:statusor",

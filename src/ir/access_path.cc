@@ -1,4 +1,4 @@
-#include "access_path.h"
+#include "src/ir/access_path.h"
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
@@ -9,7 +9,7 @@
 
 #include <string>
 
-namespace raksha::transform::utils {
+namespace raksha::ir {
 
 // Check the components of the two access paths for equality. First, ensure
 // that they have the same number of components, then check component by
@@ -93,4 +93,4 @@ absl::StatusOr<AccessPath> AccessPath::CreateParent(
 }
 
 
-}  // namespace raksha::transform::utils
+}  // namespace raksha::ir
