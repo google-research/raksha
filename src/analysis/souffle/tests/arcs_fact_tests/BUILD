@@ -32,7 +32,6 @@ ALL_DL_TEST_FILES = glob(["*.dl"])
     ],
     copts = [
         "-Iexternal/souffle/src/include/souffle",
-        "-std=c++17",
     ],
     linkopts = ["-pthread"],
     deps = [
