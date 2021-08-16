@@ -2,8 +2,11 @@ package(default_visibility = ["//src/transform:__subpackages__"])
 
 cc_library(
     name = "ir",
-    srcs = ["access_path.cc"],
-    hdrs = ["access_path.h"],
+    srcs = glob(
+        ["*.cc"],
+        exclude = ["*_test.cc"],
+    ),
+    hdrs = glob(["*.h"]),
     linkopts = select({
         "@bazel_tools//src/conditions:linux_x86_64": [
             "-ldl",
@@ -12,20 +15,23 @@ cc_library(
         ],
     }),
     deps = [
+        "@absl//absl/container:flat_hash_set",
+        "@absl//absl/hash",
         "@absl//absl/status",
         "@absl//absl/status:statusor",
         "@absl//absl/strings",
+        "@absl//absl/types:variant",
     ],
 )
 
 cc_test(
-    name = "access_path_test",
-    srcs = ["access_path_test.cc"],
+    name = "selector_access_path_test",
+    srcs = ["selector_access_path_test.cc"],
     deps = [
         ":ir",
         "//src/common/testing:gtest",
-        "@absl//absl/status",
-        "@absl//absl/status:statusor",
+        "@absl//absl/hash",
+        "@absl//absl/hash:hash_testing",
         "@absl//absl/strings",
     ],
 )
