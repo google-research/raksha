@@ -5,12 +5,17 @@
 
 namespace raksha::ir {
 
+// Represents descending through the type tree by taking the field of an
+// EntityType in an AccessPath.
 class FieldSelector {
  public:
   FieldSelector(const std::string field_name) : field_name_(field_name) {}
 
+  // Prints the string representing dereferencing the field in the AccessPath.
+  // This will just be the "." punctuation plus the name of the field.
   std::string ToString() const;
 
+  // Two fields selectors are equal exactly when their names are equal.
   bool operator==(const FieldSelector &other) const {
     return field_name_ == other.field_name_;
   }
@@ -21,6 +26,7 @@ class FieldSelector {
   }
 
  private:
+  // All of the specialness of a FieldSelector is contained within its name.
   std::string field_name_;
 };
 
