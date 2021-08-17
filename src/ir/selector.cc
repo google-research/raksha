@@ -4,6 +4,8 @@
 
 namespace raksha::ir {
 
+// A callable struct used to dispatch to the specific selector's
+// implementation of ToString.
 struct GenericSelectorToStringFunction {
  public:
   template<class T>
@@ -12,10 +14,14 @@ struct GenericSelectorToStringFunction {
   }
 };
 
+// Apply the callable ToString struct to the specific_selector_ variant to
+// get the result of the specific_selector_'s ToString.
 std::string Selector::ToString() const {
   return absl::visit(GenericSelectorToStringFunction(), specific_selector_);
 }
 
+// absl::variant has a pre-packaged operator equals that handles the dispatch
+// to the specific selector as we would expect.
 bool Selector::operator==(const Selector &other) const {
   return specific_selector_ == other.specific_selector_;
 }

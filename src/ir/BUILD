@@ -35,3 +35,27 @@ cc_test(
         "@absl//absl/strings",
     ],
 )
+
+cc_test(
+    name = "field_selector_test",
+    srcs = ["field_selector_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+        "@absl//absl/hash",
+        "@absl//absl/hash:hash_testing",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "selector_test",
+    srcs = ["selector_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+        "@absl//absl/hash",
+        "@absl//absl/hash:hash_testing",
+        "@absl//absl/strings",
+    ],
+)
