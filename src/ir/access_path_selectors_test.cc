@@ -125,16 +125,4 @@ TEST(AccessPathHashTest, SelectorAccessPathHashTest) {
       absl::VerifyTypeImplementsAbslHashCorrectly(access_paths_to_check));
 }
 
-TEST_P(AccessPathTest, CopyWorksAsExpected) {
-  const std::string original_access_path = GetParam();
-  const absl::StatusOr<AccessPathSelectors> access_path_w_status =
-      MakeSelectorAccessPathFromString(original_access_path);
-  ASSERT_TRUE(access_path_w_status.ok());
-
-  const AccessPathSelectors &inner_access_path = *access_path_w_status;
-  AccessPathSelectors access_path_copy = inner_access_path.Copy();
-  ASSERT_TRUE(inner_access_path == access_path_copy);
-  ASSERT_FALSE(&inner_access_path == &access_path_copy);
-}
-
 } // namespace raksha::ir

@@ -54,7 +54,6 @@ cc_test(
     deps = [
         ":ir",
         "//src/common/testing:gtest",
-        "//src/util",
         "@absl//absl/hash",
         "@absl//absl/hash:hash_testing",
         "@absl//absl/strings",
