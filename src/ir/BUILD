@@ -25,7 +25,7 @@ cc_library(
 )
 
 cc_test(
-    name = "selector_access_path_test",
+    name = "access_path_selectors_test",
     srcs = ["access_path_selectors_test.cc"],
     deps = [
         ":ir",
