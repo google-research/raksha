@@ -56,8 +56,19 @@ class AccessPathSelectors {
   }
 
   // Turns this AccessPathSelectors into a string representation chaining
-  // together the string representations of the various selectors.
-  std::string ToString() const;
+  // together the string representations of the various selectors. Just
+  // concatenates together the string representation of all Selectors from
+  // parent selector to child selector (which is the reverse order of how
+  // they are stored internally).
+  std::string ToString() const {
+      return absl::StrJoin(
+      reverse_selectors_.rbegin(),
+      reverse_selectors_.rend(),
+      "",
+      [](std::string *out, const Selector &selector){
+        out->append(selector.ToString()); });
+
+  }
 
   template<typename H>
   friend H AbslHashValue(H h, const AccessPathSelectors &instance) {
