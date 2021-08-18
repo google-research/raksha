@@ -1,8 +1,8 @@
-#include "selector.h"
-
-#include "src/common/testing/gtest.h"
+#include "src/ir/selector.h"
 
 #include "absl/hash/hash_testing.h"
+#include "src/common/testing/gtest.h"
+#include "src/util/copyable.h"
 
 namespace raksha::ir {
 
@@ -11,7 +11,7 @@ enum SelectorKind {
 };
 
 struct ExampleSelectorAndInfo {
-  Selector selector;
+  raksha::util::Copyable<Selector> selector;
   SelectorKind selector_kind;
   std::string original_str;
   std::string expected_to_string;
@@ -19,12 +19,14 @@ struct ExampleSelectorAndInfo {
 
 static ExampleSelectorAndInfo example_selectors[] = {
     {
-      .selector = Selector(FieldSelector("field1")),
+      .selector = raksha::util::Copyable(
+          Selector(FieldSelector("field1"))),
       .selector_kind = kFieldSelector,
       .original_str = "field1",
       .expected_to_string = ".field1" },
     {
-      .selector = Selector(FieldSelector("another_field")),
+      .selector = raksha::util::Copyable(
+          Selector(FieldSelector("another_field"))),
       .selector_kind = kFieldSelector,
       .original_str = "another_field",
       .expected_to_string = ".another_field" },
@@ -35,7 +37,7 @@ class SelectorTest : public ::testing::TestWithParam<ExampleSelectorAndInfo> {};
 TEST_P(SelectorTest, ToStringAsExpected) {
   const ExampleSelectorAndInfo info = GetParam();
 
-  ASSERT_EQ(info.selector.ToString(), info.expected_to_string);
+  ASSERT_EQ(info.selector->ToString(), info.expected_to_string);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -46,7 +48,7 @@ INSTANTIATE_TEST_SUITE_P(
 TEST(SelectorHashTest, SelectorHashTest) {
   std::vector<Selector> selectors_to_check;
   for (ExampleSelectorAndInfo info : example_selectors) {
-    selectors_to_check.push_back(info.selector);
+    selectors_to_check.push_back(info.selector->Copy());
   }
   ASSERT_TRUE(
       absl::VerifyTypeImplementsAbslHashCorrectly(selectors_to_check));
@@ -67,7 +69,7 @@ TEST_P(SelectorPairTest, SelectorEqTest) {
       (info1.selector_kind == info2.selector_kind) &&
       (info1.original_str == info2.original_str);
 
-  bool const actually_equal = info1.selector == info2.selector;
+  bool const actually_equal = (*info1.selector) == (*info2.selector);
   ASSERT_EQ(actually_equal, expect_equal);
 }
 

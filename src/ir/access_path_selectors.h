@@ -1,17 +1,17 @@
-#ifndef SRC_IR_SELECTOR_ACCESS_PATH_H_
-#define SRC_IR_SELECTOR_ACCESS_PATH_H_
+#ifndef SRC_IR_ACCESS_PATH_SELECTORS_H_
+#define SRC_IR_ACCESS_PATH_SELECTORS_H_
 
-#include "selector.h"
+#include "src/ir/selector.h"
+
+#include <vector>
 
 #include "absl/hash/hash.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 
-#include <vector>
-
 namespace raksha::ir {
 
-// Represents an SelectorAccessPath descending through the members of types in a
+// Represents an AccessPathSelectors descending through the members of types in a
 // Manifest. This is eventually used for printing edges to the resultant Datalog
 // file.
 //
@@ -31,55 +31,59 @@ namespace raksha::ir {
 // "mutation" is done only by constructing a new object from a previous
 // object. That prevents many forms of state-manipulation bugs.
 //
-// 4. The name SelectorAccessPath is a bit more self-documenting.
-class SelectorAccessPath {
+// 4. The name AccessPathSelectors is a bit more self-documenting.
+class AccessPathSelectors {
  public:
-  // Create a leaf SelectorAccessPath from a single leaf selector.
-  explicit SelectorAccessPath(const Selector leaf) : reverse_selectors_{leaf} {}
+  // Create a leaf AccessPathSelectors from a single leaf selector.
+  explicit AccessPathSelectors(Selector leaf) {
+    reverse_selectors_.push_back(std::move(leaf));
+  }
 
-  // Use the default move constructor for SelectorAccessPath.
-  SelectorAccessPath(SelectorAccessPath &&other) = default;
-  SelectorAccessPath &operator=(SelectorAccessPath &&other) = default;
+  // Use the default move constructor for AccessPathSelectors.
+  AccessPathSelectors(AccessPathSelectors &&other) = default;
+  AccessPathSelectors &operator=(AccessPathSelectors &&other) = default;
 
-  SelectorAccessPath(Selector parent_selector, SelectorAccessPath child_path)
-    : SelectorAccessPath(std::move(child_path))
+  AccessPathSelectors(Selector parent_selector, AccessPathSelectors child_path)
+    : AccessPathSelectors(std::move(child_path))
   {
     reverse_selectors_.push_back(std::move(parent_selector));
   }
 
   // Are two AccessPaths equal. Should be true exactly when they have
   // equivalent string representations.
-  bool operator==(const SelectorAccessPath &other) const;
+  bool operator==(const AccessPathSelectors &other) const;
 
-  // Turns this SelectorAccessPath into a string representation chaining
+  // Turns this AccessPathSelectors into a string representation chaining
   // together the string representations of the various selectors.
   std::string ToString() const;
 
   template<typename H>
-  friend H AbslHashValue(H h, const SelectorAccessPath &instance) {
+  friend H AbslHashValue(H h, const AccessPathSelectors &instance) {
     return H::combine(std::move(h), instance.reverse_selectors_);
   }
 
-  // Allow SelectorAccessPath to be copied explicitly.
-  SelectorAccessPath Copy() const {
-    return SelectorAccessPath(*this);
+  // Allow AccessPathSelectors to be copied explicitly.
+  AccessPathSelectors Copy() const {
+    std::vector<Selector> new_reverse_selector_vec;
+    for (const Selector &selector : reverse_selectors_) {
+      new_reverse_selector_vec.push_back(selector.Copy());
+    }
+    return AccessPathSelectors(std::move(new_reverse_selector_vec));
   }
 
  private:
-  // Copying AccessPaths unintentionally could end up with superlinear
-  // performance rather quickly. Make sure we know when we are doing that by
-  // forcing an explicit copy.
-  explicit SelectorAccessPath(const SelectorAccessPath &other) = default;
+  explicit AccessPathSelectors(std::vector<Selector> reverse_selectors)
+    : reverse_selectors_(std::move(reverse_selectors)) {}
 
   // We store the path components in reverse order. We do this because we
   // will be creating access paths by recursing down to the bottom of a
   // manifest's tree and then returning up, collecting components as we go.
   // Storing it as a vector in reverse order allows us to continually push
-  // the components onto the end of the vector in a single SelectorAccessPath
+  // the components onto the end of the vector in a single AccessPathSelectors
   // that is moved from callee towards caller.
   std::vector<Selector> reverse_selectors_;
 };
 
 }  // namespace raksha::ir
 
-#endif  // SRC_IR_SELECTOR_ACCESS_PATH_H_
+#endif  // SRC_IR_ACCESS_PATH_SELECTORS_H_
