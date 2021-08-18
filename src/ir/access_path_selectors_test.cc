@@ -31,18 +31,18 @@ static absl::StatusOr<AccessPathSelectors> MakeSelectorAccessPathFromString(
   auto selector_rev_iter = selector_strs.rbegin();
 
   // Create a leaf selector from the first selector string.
-  AccessPathSelectors selector_access_path =
+  AccessPathSelectors access_path_selectors =
       AccessPathSelectors(Selector(FieldSelector(*selector_rev_iter)));
   ++selector_rev_iter;
 
   // Add all others as parents.
   for (; selector_rev_iter < selector_strs.rend(); ++selector_rev_iter) {
-    selector_access_path = AccessPathSelectors(
+    access_path_selectors = AccessPathSelectors(
         Selector(FieldSelector(*selector_rev_iter)),
-        std::move(selector_access_path));
+        std::move(access_path_selectors));
   }
 
-  return selector_access_path;
+  return access_path_selectors;
 }
 
 class AccessPathEqualsTest :
