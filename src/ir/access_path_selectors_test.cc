@@ -24,7 +24,7 @@ static absl::StatusOr<AccessPathSelectors> MakeSelectorAccessPathFromString(
 
   if (selector_strs.empty()) {
     return absl::InvalidArgumentError(
-        "Expected a valid AccessPathSelectors string to have a"
+        "Expected a valid AccessPathSelectors string to have a "
         "non-trivial leaf element.");
   }
 
@@ -48,6 +48,9 @@ static absl::StatusOr<AccessPathSelectors> MakeSelectorAccessPathFromString(
 class AccessPathEqualsTest :
    public ::testing::TestWithParam<::std::tuple<std::string, std::string>> {};
 
+// This test ensures that, given a pair of access path strings, the access
+// paths will be equal only if the original strings are equal. This allows us
+// to have some confidence that equals works as expected.
 TEST_P(AccessPathEqualsTest, AccessPathsForEqualStringsCompareEquals) {
   std::string access_path_str1;
   std::string access_path_str2;
@@ -79,6 +82,7 @@ static const std::string access_path_strs[] = {
   ".w.x.y.z"
 };
 
+// For the Equals test, test it on each pair of strings from access_path_strs.
 INSTANTIATE_TEST_SUITE_P(
     AccessPathEqTestSuite,
     AccessPathEqualsTest,
@@ -89,10 +93,10 @@ INSTANTIATE_TEST_SUITE_P(
 
 class AccessPathTest : public ::testing::TestWithParam<std::string> {};
 
-// A string with components separated by dots and an AccessPathSelectors are different
-// representations of the same information. We should lose no information by
-// moving from one to the other and then back and should be able to round
-// trip between these representations.
+// A string with components separated by dots and an AccessPathSelectors are
+// different representations of the same information. We should lose no
+// information by moving from one to the other and then back and should be able
+// to round trip between these representations.
 //
 // Perform this with a number of access paths.
 TEST_P(AccessPathTest, CanRoundTripAccessPathString) {
@@ -112,6 +116,8 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn(access_path_strs)
 );
 
+// Check that our Absl hash function works as expected for the
+// AccessPathSelectors we provide.
 TEST(AccessPathHashTest, SelectorAccessPathHashTest) {
   std::vector<AccessPathSelectors> access_paths_to_check;
   for (const std::string &access_path_str : access_path_strs) {

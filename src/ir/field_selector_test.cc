@@ -7,6 +7,7 @@
 
 namespace raksha::ir {
 
+// A list of "interesting" field names to feed into various tests below.
 static const std::string sample_field_names[] = {
     "foo",
     "bar",
@@ -18,6 +19,8 @@ static const std::string sample_field_names[] = {
 
 class FieldSelectorTest : public ::testing::TestWithParam<std::string> {};
 
+// Each FieldSelector should have a string representation that is just the
+// field name from which it was constructed with a '.' prepended.
 TEST_P(FieldSelectorTest, ToStringJustDotPlusFieldName) {
   const std::string field_name = GetParam();
   FieldSelector field_selector(field_name);
@@ -31,6 +34,8 @@ INSTANTIATE_TEST_SUITE_P(
     FieldSelectorTest,
     testing::ValuesIn(sample_field_names));
 
+// Check that the hash function works as expected for at least the field
+// names in sample_field_names.
 TEST(FieldSelectorHashTest, FieldSelectorHashTest) {
   std::vector<FieldSelector> field_selectors_to_check;
   for (std::string field_name : sample_field_names) {
@@ -43,6 +48,9 @@ TEST(FieldSelectorHashTest, FieldSelectorHashTest) {
 class FieldSelectorPairTest :
    public ::testing::TestWithParam<::std::tuple<std::string, std::string>> {};
 
+// For each pair of field names from sample_field_names, ensure that the two
+// FieldSelectors constructed from those field names are equal only when the
+// original field names are equal.
 TEST_P(FieldSelectorPairTest, FieldSelectorEqualsTest) {
   std::string field_name1;
   std::string field_name2;
