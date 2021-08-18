@@ -7,7 +7,7 @@
 
 namespace raksha::ir {
 
-static std::string sample_field_names[] = {
+static const std::string sample_field_names[] = {
     "foo",
     "bar",
     "foobar",

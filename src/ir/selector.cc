@@ -26,18 +26,4 @@ bool Selector::operator==(const Selector &other) const {
   return specific_selector_ == other.specific_selector_;
 }
 
-// A callable struct used to dispatch to the specific selector's
-// implementation of Copy.
-struct GenericSelectorCopyFunction {
- public:
-  template<class T>
-  Selector operator()(const T &specific_selector) const {
-    return Selector(specific_selector.Copy());
-  }
-};
-
-Selector Selector::Copy() const {
-  return absl::visit(GenericSelectorCopyFunction(), specific_selector_);
-}
-
 }  // namespace raksha::ir

@@ -19,10 +19,6 @@ class Selector {
   explicit Selector(FieldSelector field_selector)
     : specific_selector_(std::move(field_selector)) {}
 
-  // Allow moving Selectors.
-  Selector(Selector &&other) = default;
-  Selector &operator=(Selector &&other) = default;
-
   // Print the string representing a selector's participation in the
   // AccessPath. This will include the punctuation indicating the method of
   // selection (such as . for string, [ for index, etc) and the string
@@ -37,8 +33,6 @@ class Selector {
   friend H AbslHashValue(H h, const Selector &selector) {
     return H::combine(std::move(h), selector.specific_selector_);
   }
-
-  Selector Copy() const;
 
  private:
   // The variant storing the specific type of selector. We will dispatch
