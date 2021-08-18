@@ -1,10 +1,9 @@
-#include "field_selector.h"
-
-#include "src/common/testing/gtest.h"
-
-#include "absl/hash/hash_testing.h"
+#include "src/ir/field_selector.h"
 
 #include <string>
+
+#include "absl/hash/hash_testing.h"
+#include "src/common/testing/gtest.h"
 
 namespace raksha::ir {
 

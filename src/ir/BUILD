@@ -26,7 +26,7 @@ cc_library(
 
 cc_test(
     name = "selector_access_path_test",
-    srcs = ["selector_access_path_test.cc"],
+    srcs = ["access_path_selectors_test.cc"],
     deps = [
         ":ir",
         "//src/common/testing:gtest",
@@ -54,6 +54,7 @@ cc_test(
     deps = [
         ":ir",
         "//src/common/testing:gtest",
+        "//src/util",
         "@absl//absl/hash",
         "@absl//absl/hash:hash_testing",
         "@absl//absl/strings",

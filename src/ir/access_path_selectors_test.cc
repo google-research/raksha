@@ -1,43 +1,43 @@
-#include "selector_access_path.h"
-#include "field_selector.h"
-#include "selector.h"
-#include "src/common/testing/gtest.h"
+#include "src/ir/access_path_selectors.h"
+
+#include <string>
+#include <vector>
 
 #include "absl/hash/hash_testing.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_split.h"
-
-#include <string>
-#include <vector>
+#include "src/common/testing/gtest.h"
+#include "src/ir/field_selector.h"
+#include "src/ir/selector.h"
 
 namespace raksha::ir {
 
 // Selector Access paths are easier to read and write in their string form, so
 // this is very useful for creating readable test inputs. This could possibly
-// be useful as a method in SelectorAccessPath itself, but, it's a bit
+// be useful as a method in AccessPathSelectors itself, but, it's a bit
 // simplified right now, as it only splits on '.', the field separator
 // character. Also, I haven't found a use for it in non-test code yet.
-static absl::StatusOr<SelectorAccessPath> MakeSelectorAccessPathFromString(
+static absl::StatusOr<AccessPathSelectors> MakeSelectorAccessPathFromString(
     const std::string str) {
   const std::vector<std::string> selector_strs =
       absl::StrSplit(str, '.', absl::SkipEmpty());
 
   if (selector_strs.empty()) {
     return absl::InvalidArgumentError(
-        "Expected a valid SelectorAccessPath string to have a"
+        "Expected a valid AccessPathSelectors string to have a"
         "non-trivial leaf element.");
   }
 
   auto selector_rev_iter = selector_strs.rbegin();
 
   // Create a leaf selector from the first selector string.
-  SelectorAccessPath selector_access_path =
-      SelectorAccessPath(Selector(FieldSelector(*selector_rev_iter)));
+  AccessPathSelectors selector_access_path =
+      AccessPathSelectors(Selector(FieldSelector(*selector_rev_iter)));
   ++selector_rev_iter;
 
   // Add all others as parents.
   for (; selector_rev_iter < selector_strs.rend(); ++selector_rev_iter) {
-    selector_access_path = SelectorAccessPath(
+    selector_access_path = AccessPathSelectors(
         Selector(FieldSelector(*selector_rev_iter)),
         std::move(selector_access_path));
   }
@@ -55,11 +55,11 @@ TEST_P(AccessPathEqualsTest, AccessPathsForEqualStringsCompareEquals) {
 
   const bool access_paths_strs_equal = access_path_str1 == access_path_str2;
 
-  const absl::StatusOr<SelectorAccessPath> access_path1 =
+  const absl::StatusOr<AccessPathSelectors> access_path1 =
       MakeSelectorAccessPathFromString(access_path_str1);
   ASSERT_TRUE(access_path1.ok());
 
-  const absl::StatusOr<SelectorAccessPath> access_path2 =
+  const absl::StatusOr<AccessPathSelectors> access_path2 =
       MakeSelectorAccessPathFromString(access_path_str2);
   ASSERT_TRUE(access_path2.ok());
 
@@ -89,7 +89,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 class AccessPathTest : public ::testing::TestWithParam<std::string> {};
 
-// A string with components separated by dots and an SelectorAccessPath are different
+// A string with components separated by dots and an AccessPathSelectors are different
 // representations of the same information. We should lose no information by
 // moving from one to the other and then back and should be able to round
 // trip between these representations.
@@ -98,11 +98,11 @@ class AccessPathTest : public ::testing::TestWithParam<std::string> {};
 TEST_P(AccessPathTest, CanRoundTripAccessPathString) {
   const std::string original_access_path = GetParam();
 
-  const absl::StatusOr<SelectorAccessPath> access_path =
+  const absl::StatusOr<AccessPathSelectors> access_path =
       MakeSelectorAccessPathFromString(original_access_path);
 
   ASSERT_TRUE(access_path.ok());
-  // Assert that the result of to_string is the same as the original SelectorAccessPath.
+  // Assert that the result of to_string is the same as the original AccessPathSelectors.
   ASSERT_EQ(access_path->ToString(), original_access_path);
 }
 
@@ -113,9 +113,9 @@ INSTANTIATE_TEST_SUITE_P(
 );
 
 TEST(AccessPathHashTest, SelectorAccessPathHashTest) {
-  std::vector<SelectorAccessPath> access_paths_to_check;
+  std::vector<AccessPathSelectors> access_paths_to_check;
   for (const std::string &access_path_str : access_path_strs) {
-    absl::StatusOr<SelectorAccessPath> access_path =
+    absl::StatusOr<AccessPathSelectors> access_path =
         MakeSelectorAccessPathFromString(access_path_str);
     ASSERT_TRUE(access_path.ok());
     access_paths_to_check.push_back(std::move(*access_path));
@@ -127,12 +127,12 @@ TEST(AccessPathHashTest, SelectorAccessPathHashTest) {
 
 TEST_P(AccessPathTest, CopyWorksAsExpected) {
   const std::string original_access_path = GetParam();
-  const absl::StatusOr<SelectorAccessPath> access_path_w_status =
+  const absl::StatusOr<AccessPathSelectors> access_path_w_status =
       MakeSelectorAccessPathFromString(original_access_path);
   ASSERT_TRUE(access_path_w_status.ok());
 
-  const SelectorAccessPath &inner_access_path = *access_path_w_status;
-  SelectorAccessPath access_path_copy = inner_access_path.Copy();
+  const AccessPathSelectors &inner_access_path = *access_path_w_status;
+  AccessPathSelectors access_path_copy = inner_access_path.Copy();
   ASSERT_TRUE(inner_access_path == access_path_copy);
   ASSERT_FALSE(&inner_access_path == &access_path_copy);
 }

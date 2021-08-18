@@ -1,11 +1,11 @@
 #ifndef SRC_IR_SELECTOR_H_
 #define SRC_IR_SELECTOR_H_
 
-#include "field_selector.h"
+#include <string>
 
 #include "absl/types/variant.h"
+#include "src/ir/field_selector.h"
 
-#include <string>
 
 namespace raksha::ir {
 
@@ -16,8 +16,12 @@ namespace raksha::ir {
 // For now, however, we only have implemented the FieldSelector portion.
 class Selector {
  public:
-  explicit Selector(const FieldSelector field_selector)
-    : specific_selector_(field_selector) {}
+  explicit Selector(FieldSelector field_selector)
+    : specific_selector_(std::move(field_selector)) {}
+
+  // Allow moving Selectors.
+  Selector(Selector &&other) = default;
+  Selector &operator=(Selector &&other) = default;
 
   // Print the string representing a selector's participation in the
   // AccessPath. This will include the punctuation indicating the method of
@@ -33,6 +37,8 @@ class Selector {
   friend H AbslHashValue(H h, const Selector &selector) {
     return H::combine(std::move(h), selector.specific_selector_);
   }
+
+  Selector Copy() const;
 
  private:
   // The variant storing the specific type of selector. We will dispatch
