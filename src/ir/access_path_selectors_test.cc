@@ -18,7 +18,7 @@ namespace raksha::ir {
 // simplified right now, as it only splits on '.', the field separator
 // character. Also, I haven't found a use for it in non-test code yet.
 static absl::StatusOr<AccessPathSelectors> MakeSelectorAccessPathFromString(
-    const std::string str) {
+    std::string str) {
   const std::vector<std::string> selector_strs =
       absl::StrSplit(str, '.', absl::SkipEmpty());
 
@@ -100,7 +100,7 @@ class AccessPathTest : public ::testing::TestWithParam<std::string> {};
 //
 // Perform this with a number of access paths.
 TEST_P(AccessPathTest, CanRoundTripAccessPathString) {
-  const std::string original_access_path = GetParam();
+  std::string original_access_path = GetParam();
 
   const absl::StatusOr<AccessPathSelectors> access_path =
       MakeSelectorAccessPathFromString(original_access_path);
