@@ -7,13 +7,6 @@
 
 namespace raksha::ir {
 
-// Check the components of the two access paths for equality. This is the
-// same as their component vectors being equal according to std::vector's
-// operator==.
-bool AccessPathSelectors::operator==(const AccessPathSelectors &other) const {
-  return reverse_selectors_ == other.reverse_selectors_;
-}
-
 // We create the AccessPathSelectors string by just joining the contents of the
 // component vector in reverse, using '.' as a separator.
 std::string AccessPathSelectors::ToString() const {
