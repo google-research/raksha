@@ -49,9 +49,11 @@ class AccessPathSelectors {
     reverse_selectors_.push_back(std::move(parent_selector));
   }
 
-  // Are two AccessPaths equal. Should be true exactly when they have
-  // equivalent string representations.
-  bool operator==(const AccessPathSelectors &other) const;
+  // Are two AccessPathSelectors equal. This is the same as their component
+  // vectors being equal according to std::vector's operator==.
+  bool operator==(const AccessPathSelectors &other) const {
+    return reverse_selectors_ == other.reverse_selectors_;
+  }
 
   // Turns this AccessPathSelectors into a string representation chaining
   // together the string representations of the various selectors.
