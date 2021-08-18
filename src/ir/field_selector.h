@@ -15,9 +15,7 @@ class FieldSelector {
 
   // Prints the string representing dereferencing the field in the AccessPath.
   // This will just be the "." punctuation plus the name of the field.
-  std::string ToString() const {
-    return absl::StrCat(".", field_name_);
-  }
+  std::string ToString() const { return absl::StrCat(".", field_name_); }
 
   // Two fields selectors are equal exactly when their names are equal.
   bool operator==(const FieldSelector &other) const {
