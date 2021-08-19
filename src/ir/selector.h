@@ -23,11 +23,20 @@ class Selector {
   // AccessPath. This will include the punctuation indicating the method of
   // selection (such as . for string, [ for index, etc) and the string
   // contents of the selector itself.
-  std::string ToString() const;
+  std::string ToString() const {
+  return absl::visit(
+      [](auto specific_selector){ return specific_selector.ToString(); },
+      specific_selector_);
+  }
 
   // Whether two selectors are equal. Will be true if they are the same type
   // of selector and those two types also compare equal.
-  bool operator==(const Selector &other) const;
+  //
+  // absl::variant has a pre-packaged operator equals that handles the dispatch
+  // to the specific selector as we would expect.
+  bool operator==(const Selector &other) const {
+    return specific_selector_ == other.specific_selector_;
+  }
 
   template<typename H>
   friend H AbslHashValue(H h, const Selector &selector) {
