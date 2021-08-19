@@ -3,3 +3,5 @@ bazel-out
 bazel-raksha
 bazel-testlogs
 **/*.swp
+.vscode/**
+.clwb/**
