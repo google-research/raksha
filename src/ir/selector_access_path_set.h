@@ -14,16 +14,6 @@ namespace raksha::ir {
 // unique anyway. We lazily unique the entries when it matters.
 class SelectorAccessPathSet {
  public:
-  // Allow the default constructor to just construct an empty set.
-  SelectorAccessPathSet() = default;
-
-  // Because these are variable-size containers and we are returning them up
-  // a tree, we want to disallow implicitly-requested copies and allow moves
-  // to protect against accidentally copying our way to quadratic runtime
-  // performance.
-  SelectorAccessPathSet(SelectorAccessPathSet &&) = default;
-  SelectorAccessPathSet& operator=(SelectorAccessPathSet &&) = default;
-
   // Returns a set that is the union of the two passed-in sets.
   static SelectorAccessPathSet Union(
       SelectorAccessPathSet set1, SelectorAccessPathSet set2);
@@ -50,20 +40,12 @@ class SelectorAccessPathSet {
     return inner_vec_.empty();
   }
 
-  // Function explicitly requesting that the set be copied.
-  SelectorAccessPathSet Copy() const {
-    return SelectorAccessPathSet(*this);
-  }
-
   // Move the contents of this SelectorAccessPathSet into a new
   // absl::flat_hash_set. This uniques and provides access to the contents of
   // this "set".
   absl::flat_hash_set<SelectorAccessPath> MoveIntoAbslSet();
 
  private:
-  // Make the copy constructor explicit and private to prevent silent copies.
-  explicit SelectorAccessPathSet(const SelectorAccessPathSet &);
-
   // The inner vector implementing the set. It is not guaranteed that the
   // contents of this vector are unique (although, due to the invariants of
   // the type tree, we suspect they may well be). It is not guaranteed (and

@@ -60,11 +60,4 @@ absl::flat_hash_set<SelectorAccessPath>
   return result;
 }
 
-SelectorAccessPathSet::SelectorAccessPathSet(
-    const SelectorAccessPathSet &other) {
-  for (const SelectorAccessPath &access_path : other.inner_vec_) {
-    inner_vec_.push_back(access_path.Copy());
-  }
-}
-
 }  // namespace raksha::ir
