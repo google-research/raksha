@@ -7,18 +7,8 @@ cc_library(
         exclude = ["*_test.cc"],
     ),
     hdrs = glob(["*.h"]),
-    linkopts = select({
-        "@bazel_tools//src/conditions:linux_x86_64": [
-            "-ldl",
-        ],
-        "//conditions:default": [
-        ],
-    }),
     deps = [
-        "@absl//absl/container:flat_hash_set",
         "@absl//absl/hash",
-        "@absl//absl/status",
-        "@absl//absl/status:statusor",
         "@absl//absl/strings",
         "@absl//absl/types:variant",
     ],
@@ -31,6 +21,8 @@ cc_test(
         ":ir",
         "//src/common/testing:gtest",
         "@absl//absl/hash",
+        "@absl//absl/status",
+        "@absl//absl/status:statusor",
         "@absl//absl/hash:hash_testing",
         "@absl//absl/strings",
     ],
