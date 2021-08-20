@@ -12,8 +12,9 @@
 
 namespace raksha::ir {
 
-// Represents an AccessPathSelectors descending through the members of types in
-// a. This is eventually used for printing edges to the resultant Datalog file.
+// Represents an AccessPathSelectors descending through the members of types.
+// This is eventually used for printing edges, checks, and claims to the
+// resultant Datalog file.
 //
 // We use this class instead of a bare vector for the following reasons:
 //
