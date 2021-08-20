@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "absl/hash/hash.h"
-#include "absl/status/status.h"
 #include "absl/strings/str_join.h"
 
 namespace raksha::ir {
