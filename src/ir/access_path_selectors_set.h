@@ -14,36 +14,67 @@ namespace raksha::ir {
 // unique anyway. We lazily unique the entries when it matters.
 class AccessPathSelectorsSet {
  public:
+  // The default constructor will construct an empty set.
+  AccessPathSelectorsSet() = default;
+
+  // Allow creating an AccessPathSelectorSet with an explicit list of items
+  // that should be in that set.
+  explicit AccessPathSelectorsSet(std::vector<AccessPathSelectors> contents)
+    : inner_vec_(std::move(contents)) {}
+
   // Returns a set that is the union of the two passed-in sets.
   static AccessPathSelectorsSet Union(
-      AccessPathSelectorsSet set1, AccessPathSelectorsSet set2);
+      AccessPathSelectorsSet set1, AccessPathSelectorsSet set2) {
+    set1.inner_vec_.insert(
+        set1.inner_vec_.end(),
+        std::make_move_iterator(set2.inner_vec_.begin()),
+        std::make_move_iterator(set2.inner_vec_.end()));
+    return set1;
+  }
 
   // Returns a set that is the intersection of the two passed-in sets.
   static AccessPathSelectorsSet Intersect(
-      AccessPathSelectorsSet set1, AccessPathSelectorsSet set2);
+      AccessPathSelectorsSet set1, AccessPathSelectorsSet set2) {
+    AccessPathSelectorsSet result;
+
+    // Make the first set into a hash set for efficient lookup.
+    absl::flat_hash_set<AccessPathSelectors> hash_set1 =
+      AccessPathSelectorsSet::CreateAbslSet(std::move(set1));
+
+    // Place items from the second set into the result only if they were in
+    // the first set.
+    for (AccessPathSelectors &path : set2.inner_vec_) {
+      if (hash_set1.contains(path)) {
+        result.inner_vec_.push_back(std::move(path));
+      }
+    }
+
+    return result;
+  }
 
   // Returns a set that has the same elements as child_set but with
   // parent_selector added as a parent to each of them.
   static AccessPathSelectorsSet AddParentToAll(
-      Selector parent_selector, AccessPathSelectorsSet child_set);
+      Selector parent_selector, AccessPathSelectorsSet child_set) {
+    AccessPathSelectorsSet result;
 
-  // Add a single access_path to the set.
-  void Add(AccessPathSelectors access_path) {
-    inner_vec_.push_back(std::move(access_path));
+    for (AccessPathSelectors &path : child_set.inner_vec_) {
+      result.inner_vec_.push_back(
+          AccessPathSelectors(parent_selector, std::move(path)));
+    }
+
+    return result;
   }
 
-  // Add all entries from the other set to this set.
-  void AddAll(AccessPathSelectorsSet other);
-
-  // Return if the set is empty.
-  bool IsEmpty() const {
-    return inner_vec_.empty();
-  }
-
-  // Move the contents of this AccessPathSelectorsSet into a new
+  // Move the contents of the given AccessPathSelectorsSet into a new
   // absl::flat_hash_set. This uniques and provides access to the contents of
   // this "set".
-  absl::flat_hash_set<AccessPathSelectors> MoveIntoAbslSet();
+  static absl::flat_hash_set<AccessPathSelectors> CreateAbslSet(
+      AccessPathSelectorsSet original_set) {
+    return absl::flat_hash_set<AccessPathSelectors>(
+        std::make_move_iterator(original_set.inner_vec_.begin()),
+        std::make_move_iterator(original_set.inner_vec_.end()));
+  }
 
  private:
   // The inner vector implementing the set. It is not guaranteed that the
