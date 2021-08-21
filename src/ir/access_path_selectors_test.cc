@@ -4,46 +4,12 @@
 #include <vector>
 
 #include "absl/hash/hash_testing.h"
-#include "absl/status/statusor.h"
 #include "absl/strings/str_split.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/field_selector.h"
 #include "src/ir/selector.h"
 
 namespace raksha::ir {
-
-// Selector Access paths are easier to read and write in their string form, so
-// this is very useful for creating readable test inputs. This could possibly
-// be useful as a method in AccessPathSelectors itself, but, it's a bit
-// simplified right now, as it only splits on '.', the field separator
-// character. Also, I haven't found a use for it in non-test code yet.
-static absl::StatusOr<AccessPathSelectors> MakeSelectorAccessPathFromString(
-    std::string str) {
-  const std::vector<std::string> selector_strs =
-      absl::StrSplit(str, '.', absl::SkipEmpty());
-
-  if (selector_strs.empty()) {
-    return absl::InvalidArgumentError(
-        "Expected a valid AccessPathSelectors string to have a "
-        "non-trivial leaf element.");
-  }
-
-  auto selector_rev_iter = selector_strs.rbegin();
-
-  // Create a leaf selector from the first selector string.
-  AccessPathSelectors access_path_selectors =
-      AccessPathSelectors(Selector(FieldSelector(*selector_rev_iter)));
-  ++selector_rev_iter;
-
-  // Add all others as parents.
-  for (; selector_rev_iter < selector_strs.rend(); ++selector_rev_iter) {
-    access_path_selectors = AccessPathSelectors(
-        Selector(FieldSelector(*selector_rev_iter)),
-        std::move(access_path_selectors));
-  }
-
-  return access_path_selectors;
-}
 
 class AccessPathEqualsTest :
    public ::testing::TestWithParam<::std::tuple<std::string, std::string>> {};
@@ -58,20 +24,19 @@ TEST_P(AccessPathEqualsTest, AccessPathsForEqualStringsCompareEquals) {
 
   const bool access_paths_strs_equal = access_path_str1 == access_path_str2;
 
-  const absl::StatusOr<AccessPathSelectors> access_path1 =
-      MakeSelectorAccessPathFromString(access_path_str1);
-  ASSERT_TRUE(access_path1.ok());
+  const AccessPathSelectors access_path1 =
+      AccessPathSelectors::CreateFromString(access_path_str1);
 
-  const absl::StatusOr<AccessPathSelectors> access_path2 =
-      MakeSelectorAccessPathFromString(access_path_str2);
-  ASSERT_TRUE(access_path2.ok());
+  const AccessPathSelectors access_path2 =
+      AccessPathSelectors::CreateFromString(access_path_str2);
 
-  ASSERT_EQ(*access_path1 == *access_path2, access_paths_strs_equal);
+  ASSERT_EQ(access_path1 == access_path2, access_paths_strs_equal);
 }
 
 // A selection of interesting and valid access_path_strs to use as inputs to
 // various tests.
 static const std::string access_path_strs[] = {
+  "",
   ".comp1",
   ".comp2",
   ".comp1.comp2",
@@ -102,12 +67,11 @@ class AccessPathTest : public ::testing::TestWithParam<std::string> {};
 TEST_P(AccessPathTest, CanRoundTripAccessPathString) {
   std::string original_access_path = GetParam();
 
-  const absl::StatusOr<AccessPathSelectors> access_path =
-      MakeSelectorAccessPathFromString(original_access_path);
+  const AccessPathSelectors access_path =
+      AccessPathSelectors::CreateFromString(original_access_path);
 
-  ASSERT_TRUE(access_path.ok());
   // Assert that the result of to_string is the same as the original AccessPathSelectors.
-  ASSERT_EQ(access_path->ToString(), original_access_path);
+  ASSERT_EQ(access_path.ToString(), original_access_path);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -121,10 +85,9 @@ INSTANTIATE_TEST_SUITE_P(
 TEST(AccessPathHashTest, SelectorAccessPathHashTest) {
   std::vector<AccessPathSelectors> access_paths_to_check;
   for (const std::string &access_path_str : access_path_strs) {
-    absl::StatusOr<AccessPathSelectors> access_path =
-        MakeSelectorAccessPathFromString(access_path_str);
-    ASSERT_TRUE(access_path.ok());
-    access_paths_to_check.push_back(std::move(*access_path));
+    AccessPathSelectors access_path =
+        AccessPathSelectors::CreateFromString(access_path_str);
+    access_paths_to_check.push_back(std::move(access_path));
   }
 
   EXPECT_TRUE(

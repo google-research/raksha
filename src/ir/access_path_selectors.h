@@ -28,11 +28,24 @@ namespace raksha::ir {
 // 3. The name AccessPathSelectors is a bit more self-documenting.
 class AccessPathSelectors {
  public:
+
+  // Given a string representation of an AccessPathSelectors object, return
+  // the equivalent structured representation.
+  static AccessPathSelectors CreateFromString(std::string str);
+
+  // Default empty constructor creates an access path with no Selectors. This
+  // would correspond to a type tree consisting of a primitive type at the
+  // root.
+  AccessPathSelectors() = default;
+
   // Create a leaf AccessPathSelectors from a single leaf selector.
   explicit AccessPathSelectors(Selector leaf) {
     reverse_selectors_.push_back(std::move(leaf));
   }
 
+  // Create a new AccessPathSelectors object from a Selector and an
+  // AccessPathSelectors object, with the Selector added as the parent of the
+  // path elements of the AccessPathSelectors object.
   AccessPathSelectors(Selector parent_selector, AccessPathSelectors child_path)
     : AccessPathSelectors(std::move(child_path))
   {

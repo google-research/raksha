@@ -21,8 +21,6 @@ cc_test(
         ":ir",
         "//src/common/testing:gtest",
         "@absl//absl/hash",
-        "@absl//absl/status",
-        "@absl//absl/status:statusor",
         "@absl//absl/hash:hash_testing",
         "@absl//absl/strings",
     ],
