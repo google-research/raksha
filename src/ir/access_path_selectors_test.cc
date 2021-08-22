@@ -17,32 +17,20 @@ namespace raksha::ir {
 // be useful as a method in AccessPathSelectors itself, but, it's a bit
 // simplified right now, as it only splits on '.', the field separator
 // character. Also, I haven't found a use for it in non-test code yet.
-static absl::StatusOr<AccessPathSelectors> MakeSelectorAccessPathFromString(
+static AccessPathSelectors MakeSelectorAccessPathFromString(
     std::string str) {
-  const std::vector<std::string> selector_strs =
-      absl::StrSplit(str, '.', absl::SkipEmpty());
+  std::vector<std::string> selector_strs =
+      absl::StrSplit(std::move(str), '.', absl::SkipEmpty());
 
-  if (selector_strs.empty()) {
-    return absl::InvalidArgumentError(
-        "Expected a valid AccessPathSelectors string to have a "
-        "non-trivial leaf element.");
+  // Start with an empty path and add all Selectors as parents.
+  AccessPathSelectors result;
+  for ( auto iter = selector_strs.rbegin();
+        iter != selector_strs.rend(); ++iter) {
+    result = AccessPathSelectors(
+        Selector(FieldSelector(std::move(*iter))), std::move(result));
   }
 
-  auto selector_rev_iter = selector_strs.rbegin();
-
-  // Create a leaf selector from the first selector string.
-  AccessPathSelectors access_path_selectors =
-      AccessPathSelectors(Selector(FieldSelector(*selector_rev_iter)));
-  ++selector_rev_iter;
-
-  // Add all others as parents.
-  for (; selector_rev_iter < selector_strs.rend(); ++selector_rev_iter) {
-    access_path_selectors = AccessPathSelectors(
-        Selector(FieldSelector(*selector_rev_iter)),
-        std::move(access_path_selectors));
-  }
-
-  return access_path_selectors;
+  return result;
 }
 
 class AccessPathEqualsTest :
@@ -72,6 +60,7 @@ TEST_P(AccessPathEqualsTest, AccessPathsForEqualStringsCompareEquals) {
 // A selection of interesting and valid access_path_strs to use as inputs to
 // various tests.
 static const std::string access_path_strs[] = {
+  "",
   ".comp1",
   ".comp2",
   ".comp1.comp2",
