@@ -6,8 +6,6 @@
 #include <vector>
 
 #include "absl/hash/hash.h"
-#include "absl/status/status.h"
-#include "absl/status/statusor.h"
 #include "absl/strings/str_join.h"
 
 namespace raksha::ir {
@@ -29,6 +27,10 @@ namespace raksha::ir {
 // 3. The name AccessPathSelectors is a bit more self-documenting.
 class AccessPathSelectors {
  public:
+  // Allow constructing an empty AccessPathSelectors object. This represents
+  // an empty access path, such as one involving only a primitive type.
+  explicit AccessPathSelectors() = default;
+
   // Create a leaf AccessPathSelectors from a single leaf selector.
   explicit AccessPathSelectors(Selector leaf) {
     reverse_selectors_.push_back(std::move(leaf));
