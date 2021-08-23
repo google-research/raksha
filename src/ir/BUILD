@@ -8,6 +8,7 @@ cc_library(
     ),
     hdrs = glob(["*.h"]),
     deps = [
+        "@absl//absl/container:flat_hash_set",
         "@absl//absl/hash",
         "@absl//absl/strings",
         "@absl//absl/types:variant",
@@ -21,8 +22,22 @@ cc_test(
         ":ir",
         "//src/common/testing:gtest",
         "@absl//absl/hash",
+        "@absl//absl/hash:hash_testing",
         "@absl//absl/status",
         "@absl//absl/status:statusor",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "access_path_selectors_set_test",
+    srcs = ["access_path_selectors_set_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+        "@absl//absl/container:btree",
+        "@absl//absl/container:flat_hash_set",
+        "@absl//absl/hash",
         "@absl//absl/hash:hash_testing",
         "@absl//absl/strings",
     ],
