@@ -24,7 +24,7 @@ static AccessPathSelectors MakeSelectorAccessPathFromString(
 
   // Start with an empty path and add all Selectors as parents.
   AccessPathSelectors result;
-  for ( auto iter = selector_strs.rbegin();
+  for (auto iter = selector_strs.rbegin();
         iter != selector_strs.rend(); ++iter) {
     result = AccessPathSelectors(
         Selector(FieldSelector(std::move(*iter))), std::move(result));
