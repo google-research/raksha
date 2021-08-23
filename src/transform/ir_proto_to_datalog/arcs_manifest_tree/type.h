@@ -9,6 +9,9 @@ namespace raksha::transform::arcs_manifest_tree {
 
 class Type {
  public:
+  static std::unique_ptr<Type> CreateFromProto(
+      const arcs::TypeProto &type_proto);
+
   virtual ~Type() {}
   virtual raksha::ir::AccessPathSelectorsSet GetAccessPaths() const = 0;
 };

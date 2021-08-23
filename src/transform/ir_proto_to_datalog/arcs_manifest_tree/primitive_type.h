@@ -4,6 +4,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "src/ir/access_path_selectors_set.h"
 #include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/type.h"
+#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::transform::arcs_manifest_tree {
 
@@ -13,6 +14,11 @@ namespace raksha::transform::arcs_manifest_tree {
 // them in in the future.
 class PrimitiveType : public Type {
  public:
+  static PrimitiveType CreateFromProto(
+      const arcs::PrimitiveTypeProto &primitive_type_proto) {
+    return PrimitiveType();
+  }
+
   // For now, a primitive type has no members and a trivial constructor. This
   // will change as we add more cases to this translator in the future.
   PrimitiveType() = default;
