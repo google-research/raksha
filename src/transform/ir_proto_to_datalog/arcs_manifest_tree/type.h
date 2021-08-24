@@ -9,11 +9,16 @@ namespace raksha::transform::arcs_manifest_tree {
 
 class Type {
  public:
+  // Create a Type from the given Arcs manifest TypeProto and return it via
+  // an owning pointer. Will delegate to the various base types of Type
+  // according to the oneof field data within TypeProto.
   static std::unique_ptr<Type> CreateFromProto(
       const arcs::TypeProto &type_proto);
 
   virtual ~Type() {}
+
   virtual raksha::ir::AccessPathSelectorsSet GetAccessPaths() const = 0;
+  virtual arcs::TypeProto MakeProto() const = 0;
 };
 
 }  // namespace raksha::transform::arcs_manifest_tree

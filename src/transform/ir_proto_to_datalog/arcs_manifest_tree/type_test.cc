@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <memory>
+#include <google/protobuf/util/message_differencer.h>
+#include <google/protobuf/text_format.h>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_split.h"
@@ -195,8 +197,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 
 class TypeProducesAccessPathStrsTest :
- public testing::TestWithParam<
-  std::tuple<const Type *, std::vector<std::string>>> {};
+    public testing::TestWithParam<
+      std::tuple<const Type *, std::vector<std::string>>> {};
 
 TEST_P(TypeProducesAccessPathStrsTest, TypeProducesAccessPathStrsTest) {
   const auto &param_pair = GetParam();
@@ -227,5 +229,76 @@ INSTANTIATE_TEST_SUITE_P(
     TypeProducesAccessPathStrsTest,
     TypeProducesAccessPathStrsTest,
     testing::ValuesIn(types_to_access_path_lists));
+
+class RoundTripTypeProtoThroughTypeTest :
+ public testing::TestWithParam<
+  std::tuple<std::string, std::vector<std::string>>> {};
+
+TEST_P(RoundTripTypeProtoThroughTypeTest, RoundTripTypeProtoThroughTypeTest) {
+  arcs::TypeProto orig_type_proto;
+  const std::string &type_as_textproto = std::get<0>(GetParam());
+  std::vector<std::string> expected_access_path_strs = std::get<1>(GetParam());
+  google::protobuf::TextFormat::ParseFromString(type_as_textproto, &orig_type_proto);
+  std::unique_ptr<Type> type = Type::CreateFromProto(orig_type_proto);
+  std::vector<std::string> access_path_str_vec =
+      GetAccessPathStrVecFromAccessPathSelectorsSet(type->GetAccessPaths());
+  EXPECT_THAT(
+      access_path_str_vec,
+      testing::UnorderedElementsAreArray(expected_access_path_strs));
+  arcs::TypeProto result_type_proto = type->MakeProto();
+  ASSERT_TRUE(
+      google::protobuf::util::MessageDifferencer::Equals(
+          orig_type_proto, result_type_proto));
+}
+
+const std::tuple<std::string, std::vector<std::string>>
+  type_proto_and_access_path_strings[] = {
+    // Simple primitive type.
+    { "primitive: TEXT", { "" } },
+    // Entity with no fields.
+    {"entity: { schema: { } }", { "" } },
+    // Entity with one primitive field, field1.
+    {
+    "entity: { "
+    "  schema: { "
+    "    fields [ { key: \"field1\", value: { primitive: TEXT } } ]"
+    " } }", { ".field1" } },
+    // Entity with one primitive field and a named schema
+    {
+    "entity: { "
+    "  schema: { "
+    "    names: [\"my_schema\"] "
+    "    fields: [ { key: \"field1\", value: { primitive: TEXT } } ]"
+    " } }", { ".field1" } },
+    // Entity with multiple primitive fields.
+    {
+    "entity: { "
+    "  schema: { "
+    "    fields: [ "
+    "      { key: \"field1\", value: { primitive: TEXT } },"
+    "      { key: \"x\", value: { primitive: TEXT } },"
+    "      { key: \"hello\", value: { primitive: TEXT } }"
+    "    ]"
+    " } }", {".field1", ".x", ".hello"} },
+    // Entity with sub entities and primitive fields.
+    {
+    "entity: { "
+    "  schema: { "
+    "    fields: [ "
+    "      { key: \"field1\", value: { primitive: TEXT }},"
+    "      { key: \"x\", value: { "
+    "        entity: { schema: { names: [\"embedded\"], fields: ["
+    "          { key: \"sub_field1\", value: { primitive: TEXT } },"
+    "          { key: \"sub_field2\", value: { primitive: TEXT } }"
+    "       ]}}}},"
+    "      { key: \"hello\", value: { primitive: TEXT } }"
+    "    ]"
+    " } }", {".field1", ".x.sub_field1", ".x.sub_field2", ".hello"}},
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    RoundTripTypeProtoThroughTypeTest,
+    RoundTripTypeProtoThroughTypeTest,
+    testing::ValuesIn(type_proto_and_access_path_strings));
 
 }  // namespace raksha::transform::arcs_manifest_tree

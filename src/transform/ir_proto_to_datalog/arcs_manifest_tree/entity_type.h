@@ -28,6 +28,17 @@ class EntityType : public Type {
     return schema_.GetAccessPaths();
   }
 
+  // Create a TypeProto containing an EntityTypeProto with this type's
+  // information.
+  arcs::TypeProto MakeProto() const {
+    arcs::EntityTypeProto entity_type_proto;
+    *entity_type_proto.mutable_schema() = schema_.MakeProto();
+
+    arcs::TypeProto type_proto;
+    *type_proto.mutable_entity() = std::move(entity_type_proto);
+    return type_proto;
+  }
+
  private:
   Schema schema_;
 };

@@ -29,6 +29,15 @@ class PrimitiveType : public Type {
     return raksha::ir::AccessPathSelectorsSet(
         { raksha::ir::AccessPathSelectors() });
   }
+
+  // Make a TypeProto containing a PrimitiveTypeProto with this primitive
+  // type's information.
+  arcs::TypeProto MakeProto() const {
+    arcs::TypeProto type_proto;
+    // For now, just set all primitives to TEXT when serializing.
+    type_proto.set_primitive(arcs::PrimitiveTypeProto::TEXT);
+    return type_proto;
+  }
 };
 
 }  // namespace raksha::transform::arcs_manifest_tree
