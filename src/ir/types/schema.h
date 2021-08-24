@@ -15,7 +15,7 @@ class Schema {
   explicit Schema(
     absl::optional<std::string> name,
     absl::flat_hash_map<std::string, std::unique_ptr<Type>> fields)
-    : name_(name), fields_(std::move(fields)) {}
+    : name_(std::move(name)), fields_(std::move(fields)) {}
 
   raksha::ir::AccessPathSelectorsSet GetAccessPaths() const;
  private:
