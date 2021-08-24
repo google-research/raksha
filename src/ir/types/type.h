@@ -14,7 +14,9 @@ class Type {
   // according to the oneof field data within TypeProto.
   static std::unique_ptr<Type> CreateFromProto(
       const arcs::TypeProto &type_proto);
+
   virtual ~Type() {}
+
   virtual raksha::ir::AccessPathSelectorsSet
     GetAccessPathSelectorsSet() const = 0;
 
