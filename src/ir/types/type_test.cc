@@ -1,4 +1,4 @@
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/type.h"
+#include "src/ir/types/type.h"
 
 #include <algorithm>
 #include <memory>
@@ -9,11 +9,11 @@
 #include "src/ir/access_path_selectors_set.h"
 #include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/entity_type.h"
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/primitive_type.h"
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/schema.h"
+#include "src/ir/types/entity_type.h"
+#include "src/ir/types/primitive_type.h"
+#include "src/ir/types/schema.h"
 
-namespace raksha::transform::arcs_manifest_tree {
+namespace raksha::ir::types {
 
 // Helper function for making an unnamed schema from a field map.
 static Schema MakeAnonymousSchema(
@@ -228,4 +228,4 @@ INSTANTIATE_TEST_SUITE_P(
     TypeProducesAccessPathStrsTest,
     testing::ValuesIn(types_to_access_path_lists));
 
-}  // namespace raksha::transform::arcs_manifest_tree
+}  // namespace raksha::transform::types

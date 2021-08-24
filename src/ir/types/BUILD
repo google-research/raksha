@@ -1,5 +1,5 @@
 cc_library(
-    name = "arcs_manifest_tree_lib",
+    name = "types",
     srcs = glob(
         ["*.cc"],
         exclude = ["*_test.cc"],
@@ -20,7 +20,7 @@ cc_test(
     name = "primitive_type_test",
     srcs = ["primitive_type_test.cc"],
     deps = [
-        ":arcs_manifest_tree_lib",
+        ":types",
         "//src/common/testing:gtest",
         "//src/ir",
     ],
@@ -30,7 +30,7 @@ cc_test(
     name = "type_test",
     srcs = ["type_test.cc"],
     deps = [
-        ":arcs_manifest_tree_lib",
+        ":types",
         "//src/common/logging",
         "//src/common/testing:gtest",
         "//src/ir",

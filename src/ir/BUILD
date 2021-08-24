@@ -1,4 +1,4 @@
-package(default_visibility = ["//src/transform:__subpackages__"])
+package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
     name = "ir",

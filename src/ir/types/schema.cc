@@ -1,11 +1,11 @@
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/schema.h"
+#include "src/ir/types/schema.h"
 
 #include "absl/types/optional.h"
 #include "src/ir/access_path_selectors_set.h"
 #include "src/ir/selector.h"
 #include "src/ir/field_selector.h"
 
-namespace raksha::transform::arcs_manifest_tree {
+namespace raksha::ir::types {
 
 namespace ir = raksha::ir;
 
@@ -35,4 +35,4 @@ ir::AccessPathSelectorsSet Schema::GetAccessPaths() const {
   return result;
 }
 
-}  // namespace raksha::transform::arcs_manifest_tree
+}  // namespace raksha::transform::types
