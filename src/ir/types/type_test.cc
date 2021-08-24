@@ -184,7 +184,7 @@ TEST_P(RoundTripStrsThroughTypeTest, RoundTripStrsThroughTypeTest) {
       MakeMinimalTypeFromAccessPathStrings(original_strs);
   std::vector<std::string> result_strs =
       GetAccessPathStrVecFromAccessPathSelectorsSet(
-          generated_type->GetAccessPaths());
+          generated_type->GetAccessPathSelectorsSet());
 
   EXPECT_THAT(result_strs, testing::UnorderedElementsAreArray(original_strs));
 }
@@ -204,7 +204,8 @@ TEST_P(TypeProducesAccessPathStrsTest, TypeProducesAccessPathStrsTest) {
   const std::vector<std::string> expected_strs = std::get<1>(param_pair);
 
   const std::vector<std::string> result_strs =
-      GetAccessPathStrVecFromAccessPathSelectorsSet(type->GetAccessPaths());
+      GetAccessPathStrVecFromAccessPathSelectorsSet(
+          type->GetAccessPathSelectorsSet());
 
   EXPECT_THAT(result_strs, testing::UnorderedElementsAreArray(expected_strs));
 }

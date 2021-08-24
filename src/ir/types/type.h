@@ -10,7 +10,8 @@ namespace raksha::ir::types {
 class Type {
  public:
   virtual ~Type() {}
-  virtual raksha::ir::AccessPathSelectorsSet GetAccessPaths() const = 0;
+  virtual raksha::ir::AccessPathSelectorsSet
+    GetAccessPathSelectorsSet() const = 0;
 };
 
 }  // namespace raksha::ir::types

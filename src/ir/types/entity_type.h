@@ -14,8 +14,8 @@ class EntityType : public Type {
  public:
   explicit EntityType(Schema schema) : schema_(std::move(schema)) {}
 
-  raksha::ir::AccessPathSelectorsSet GetAccessPaths() const {
-    return schema_.GetAccessPaths();
+  raksha::ir::AccessPathSelectorsSet GetAccessPathSelectorsSet() const {
+    return schema_.GetAccessPathSelectorsSet();
   }
 
  private:

@@ -13,7 +13,7 @@ TEST(TestGetAccessPaths, TestGetAccessPaths) {
   absl::flat_hash_set<ir::AccessPathSelectors>
       access_path_selectors_set =
         ir::AccessPathSelectorsSet::CreateAbslSet(
-            primitive_type.GetAccessPaths());
+            primitive_type.GetAccessPathSelectorsSet());
   ASSERT_EQ(access_path_selectors_set.size(), 1);
   ASSERT_EQ(*access_path_selectors_set.begin(), ir::AccessPathSelectors());
 }

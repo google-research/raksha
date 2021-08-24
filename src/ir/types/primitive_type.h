@@ -19,7 +19,8 @@ class PrimitiveType : public Type {
 
   // A primitive type marks the end of a single access path to be built.
   // Return a set containing an empty AccessPathSelectors object.
-  raksha::ir::AccessPathSelectorsSet GetAccessPaths() const override {
+  raksha::ir::AccessPathSelectorsSet
+    GetAccessPathSelectorsSet() const override {
     return raksha::ir::AccessPathSelectorsSet(
         { raksha::ir::AccessPathSelectors() });
   }
