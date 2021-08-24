@@ -1,4 +1,4 @@
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/type.h"
+#include "src/ir/types/type.h"
 
 #include <algorithm>
 #include <memory>
@@ -11,11 +11,11 @@
 #include "src/ir/access_path_selectors_set.h"
 #include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/entity_type.h"
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/primitive_type.h"
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/schema.h"
+#include "src/ir/types/entity_type.h"
+#include "src/ir/types/primitive_type.h"
+#include "src/ir/types/schema.h"
 
-namespace raksha::transform::arcs_manifest_tree {
+namespace raksha::ir::types {
 
 // Helper function for making an unnamed schema from a field map.
 static Schema MakeAnonymousSchema(
@@ -186,7 +186,7 @@ TEST_P(RoundTripStrsThroughTypeTest, RoundTripStrsThroughTypeTest) {
       MakeMinimalTypeFromAccessPathStrings(original_strs);
   std::vector<std::string> result_strs =
       GetAccessPathStrVecFromAccessPathSelectorsSet(
-          generated_type->GetAccessPaths());
+          generated_type->GetAccessPathSelectorsSet());
 
   EXPECT_THAT(result_strs, testing::UnorderedElementsAreArray(original_strs));
 }
@@ -206,7 +206,8 @@ TEST_P(TypeProducesAccessPathStrsTest, TypeProducesAccessPathStrsTest) {
   const std::vector<std::string> expected_strs = std::get<1>(param_pair);
 
   const std::vector<std::string> result_strs =
-      GetAccessPathStrVecFromAccessPathSelectorsSet(type->GetAccessPaths());
+      GetAccessPathStrVecFromAccessPathSelectorsSet(
+          type->GetAccessPathSelectorsSet());
 
   EXPECT_THAT(result_strs, testing::UnorderedElementsAreArray(expected_strs));
 }
@@ -241,7 +242,8 @@ TEST_P(RoundTripTypeProtoThroughTypeTest, RoundTripTypeProtoThroughTypeTest) {
   google::protobuf::TextFormat::ParseFromString(type_as_textproto, &orig_type_proto);
   std::unique_ptr<Type> type = Type::CreateFromProto(orig_type_proto);
   std::vector<std::string> access_path_str_vec =
-      GetAccessPathStrVecFromAccessPathSelectorsSet(type->GetAccessPaths());
+      GetAccessPathStrVecFromAccessPathSelectorsSet(
+          type->GetAccessPathSelectorsSet());
   EXPECT_THAT(
       access_path_str_vec,
       testing::UnorderedElementsAreArray(expected_access_path_strs));
@@ -301,4 +303,4 @@ INSTANTIATE_TEST_SUITE_P(
     RoundTripTypeProtoThroughTypeTest,
     testing::ValuesIn(type_proto_and_access_path_strings));
 
-}  // namespace raksha::transform::arcs_manifest_tree
+}  // namespace raksha::transform::types

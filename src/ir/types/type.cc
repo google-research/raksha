@@ -1,14 +1,13 @@
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/type.h"
+#include "src/ir/types/type.h"
 
 #include <memory>
 
 #include "src/common/logging/logging.h"
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/entity_type.h"
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/primitive_type.h"
-#include "src/transform/ir_proto_to_datalog/arcs_manifest_tree/type.h"
+#include "src/ir/types/entity_type.h"
+#include "src/ir/types/primitive_type.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
-namespace raksha::transform::arcs_manifest_tree {
+namespace raksha::ir::types {
 
 // Delegate to the various CreateFromProto implementations on the base types
 // depending upon which specific type is contained within the TypeProto.
@@ -34,4 +33,4 @@ std::unique_ptr<Type> Type::CreateFromProto(const arcs::TypeProto &type_proto) {
     CHECK(false) << "Unreachable!";
   }
 
-}  // namespace raksha::transform::arcs_manifest_tree
+}  // namespace raksha::ir::types
