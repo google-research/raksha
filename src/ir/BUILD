@@ -68,3 +68,12 @@ cc_test(
         "@absl//absl/strings",
     ],
 )
+
+cc_test(
+    name = "access_path_test",
+    srcs = ["access_path_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+    ],
+)
