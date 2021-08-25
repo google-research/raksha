@@ -4,6 +4,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "src/ir/access_path_selectors_set.h"
 #include "src/ir/types/type.h"
+#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types {
 
@@ -13,6 +14,11 @@ namespace raksha::ir::types {
 // them in in the future.
 class PrimitiveType : public Type {
  public:
+  static PrimitiveType CreateFromProto(
+      const arcs::PrimitiveTypeProto &primitive_type_proto) {
+    return PrimitiveType();
+  }
+
   // For now, a primitive type has no members and a trivial constructor. This
   // will change as we add more cases to this translator in the future.
   PrimitiveType() = default;
@@ -23,6 +29,15 @@ class PrimitiveType : public Type {
     GetAccessPathSelectorsSet() const override {
     return raksha::ir::AccessPathSelectorsSet(
         { raksha::ir::AccessPathSelectors() });
+  }
+
+  // Make a TypeProto containing a PrimitiveTypeProto with this primitive
+  // type's information.
+  arcs::TypeProto MakeProto() const {
+    arcs::TypeProto type_proto;
+    // For now, just set all primitives to TEXT when serializing.
+    type_proto.set_primitive(arcs::PrimitiveTypeProto::TEXT);
+    return type_proto;
   }
 };
 

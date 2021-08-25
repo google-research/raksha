@@ -6,6 +6,7 @@ cc_library(
     ),
     hdrs = glob(["*.h"]),
     deps = [
+        "//src/common/logging",
         "//src/ir",
         "//third_party/arcs/proto:manifest_cc_proto",
         "@absl//absl/container:flat_hash_map",
