@@ -19,17 +19,11 @@ class HandleConnectionSpec {
   static HandleConnectionSpec CreateFromProto(
       const arcs::HandleConnectionSpecProto &handle_connection_spec_proto);
 
-  const std::string &name() const {
-    return name_;
-  }
+  const std::string &name() const {   return name_;  }
 
-  bool reads() const {
-    return reads_;
-  }
+  bool reads() const {   return reads_;  }
 
-  bool writes() const {
-    return writes_;
-  }
+  bool writes() const {  return writes_;  }
 
   // Make an arcs HandleConnectionSpecProto from this object.
   arcs::HandleConnectionSpecProto MakeProto() const {
