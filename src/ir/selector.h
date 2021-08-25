@@ -4,8 +4,9 @@
 #include <string>
 
 #include "absl/types/variant.h"
+#include "src/common/logging/logging.h"
 #include "src/ir/field_selector.h"
-
+#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
 
@@ -16,6 +17,16 @@ namespace raksha::ir {
 // For now, however, we only have implemented the FieldSelector portion.
 class Selector {
  public:
+
+  // A factory creating a Selector from a Manifest proto selector. Currently
+  // only implements the FieldSelector proto.
+  static Selector CreateFromProto(arcs::AccessPathProto_Selector selector) {
+    if (selector.has_field()) {
+      return Selector(FieldSelector(selector.field()));
+    }
+    LOG(FATAL) << "Found a Selector with an unimplemented specific type.";
+  }
+
   explicit Selector(FieldSelector field_selector)
     : specific_selector_(std::move(field_selector)) {}
 
@@ -24,9 +35,9 @@ class Selector {
   // selection (such as . for string, [ for index, etc) and the string
   // contents of the selector itself.
   std::string ToString() const {
-  return absl::visit(
-      [](auto specific_selector){ return specific_selector.ToString(); },
-      specific_selector_);
+    return absl::visit(
+      [](const auto &specific_selector) {
+          return specific_selector.ToString(); }, specific_selector_);
   }
 
   // Whether two selectors are equal. Will be true if they are the same type
@@ -38,10 +49,19 @@ class Selector {
     return specific_selector_ == other.specific_selector_;
   }
 
+  // Make a proto from the current selector. Just uses absl::visit to
+  // delegate to the specific type of the Selector.
+  arcs::AccessPathProto_Selector MakeProto() const {
+    auto visitor = [](const auto &specific_selector) {
+      return specific_selector.MakeProto(); };
+    return absl::visit(visitor, specific_selector_);
+  }
+
   template<typename H>
   friend H AbslHashValue(H h, const Selector &selector) {
     return H::combine(std::move(h), selector.specific_selector_);
   }
+
 
  private:
   // The variant storing the specific type of selector. We will dispatch
