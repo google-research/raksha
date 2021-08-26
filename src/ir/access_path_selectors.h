@@ -32,7 +32,7 @@ class AccessPathSelectors {
   // ignores the rest of the access_path_proto message.
   static AccessPathSelectors CreateFromProto(
       const arcs::AccessPathProto &access_path_proto) {
-    auto selector_list = access_path_proto.selectors();
+    const auto &selector_list = access_path_proto.selectors();
     AccessPathSelectors access_path_selectors;
     for (auto iter = selector_list.rbegin(); iter != selector_list.rend();
       ++iter) {
