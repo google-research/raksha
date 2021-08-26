@@ -77,3 +77,12 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
+
+cc_test(
+    name = "edge_test",
+    srcs = ["edge_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+    ],
+)
