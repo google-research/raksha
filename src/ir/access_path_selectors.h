@@ -27,6 +27,22 @@ namespace raksha::ir {
 // 3. The name AccessPathSelectors is a bit more self-documenting.
 class AccessPathSelectors {
  public:
+  // Create an AccessPathSelectors object from the selector list on an
+  // AccessPathProto. Note that this considers *only* the selector list and
+  // ignores the rest of the access_path_proto message.
+  static AccessPathSelectors CreateFromProto(
+      const arcs::AccessPathProto &access_path_proto) {
+    auto selector_list = access_path_proto.selectors();
+    AccessPathSelectors access_path_selectors;
+    for (auto iter = selector_list.rbegin(); iter != selector_list.rend();
+      ++iter) {
+      access_path_selectors = AccessPathSelectors(
+              Selector::CreateFromProto(*iter),
+              std::move(access_path_selectors));
+    }
+    return access_path_selectors;
+  }
+
   // Allow constructing an empty AccessPathSelectors object. This represents
   // an empty access path, such as one involving only a primitive type.
   explicit AccessPathSelectors() = default;
@@ -61,6 +77,15 @@ class AccessPathSelectors {
       [](std::string *out, const Selector &selector){
         out->append(selector.ToString()); });
 
+  }
+
+  // Fill the selectors of an arcs::AccessPathProto message using the
+  // information in the AccessPathSelectors object.
+  void FillSelectors(arcs::AccessPathProto &access_path_proto) const {
+    for (auto iter = reverse_selectors_.rbegin();
+      iter != reverse_selectors_.rend(); ++iter) {
+      *access_path_proto.add_selectors() = iter->MakeProto();
+    }
   }
 
   template<typename H>
