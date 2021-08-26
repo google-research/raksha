@@ -1,0 +1,26 @@
+// This is supposed to be about the same as the example policy in 
+// src/analysis/souffle/tests/taint_with_auth_logic.dl
+// particularly under the banner "Program Manifests"
+
+particle ImageDetector
+    sensor_data_packet: reads SensorDataPacket {
+        camera_feed: Number,
+        video_resolution: Number
+    }
+    image_detection_model: reads ImageDetectionModel {
+        imag_detection_model: Number
+    }
+    detection_boxes: writes ImageDetectionBoxes {
+        detection_boxes: Number
+    }
+
+particle ImageSelector
+    detection_boxes: reads ImageDetectionBoxes {
+        image_detection_boxes: Number
+    }
+    user_selection_action: reads UserSelectionAction {
+        user_selection_action: Number
+    }
+    select_image_id: writes SelectImageId {
+        select_image_id: Number
+    }

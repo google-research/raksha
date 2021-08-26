@@ -9,3 +9,9 @@ arcs_manifest_proto(
         "Schemas.arcs",
     ],
 )
+
+arcs_manifest_proto(
+    name = "vision_pipeline",
+    src = "VisionPipeline.arcs",
+    deps = [],
+)
