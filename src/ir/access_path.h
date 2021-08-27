@@ -30,17 +30,14 @@ class AccessPath {
     return CreateSpecAccessPath(selectors);
   }
 
-  // Return a new AccessPath, identical to the passed-in spec_access_path
-  // except with the AccessPath root replaced with the indicated concrete root.
-  // Note that this expects the passed-in spec_access_path to not already be
-  // instantiated.
-  static AccessPath Instantiate(
-      ConcreteAccessPathRoot new_root, AccessPath spec_access_path) {
-    CHECK(!spec_access_path.root_.IsInstantiated())
+  // Return a new AccessPath, identical to *this, except with the AccessPath
+  // root replaced with the indicated concrete root. Note that this expects the
+  // passed-in spec_access_path to not already be instantiated.
+  AccessPath Instantiate(ConcreteAccessPathRoot new_root) const {
+    CHECK(!root_.IsInstantiated())
       << "Attempt to instantiate an AccessPath that is already instantiated.";
     return AccessPath(
-        AccessPathRoot(std::move(new_root)),
-        std::move(spec_access_path.access_path_selectors_));
+        AccessPathRoot(std::move(new_root)), access_path_selectors_);
   }
 
   explicit AccessPath(

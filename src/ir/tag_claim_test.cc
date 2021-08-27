@@ -30,8 +30,8 @@ TEST_P(TagClaimToStringWithRootTest, TagClaimToStringWithRootTest) {
       assume_textproto, &assume_proto);
   TagClaim unrooted_tag_claim =
       TagClaim::CreateFromProto(assume_proto);
-  TagClaim tag_claim = TagClaim::Instantiate(
-      ConcreteAccessPathRoot(root_string), unrooted_tag_claim);
+  TagClaim tag_claim =
+      unrooted_tag_claim.Instantiate(ConcreteAccessPathRoot(root_string));
   // Expect the version with the concrete root to match the expected_tostring
   // when ToString is called upon it.
   ASSERT_EQ(tag_claim.ToString(), expected_tostring);

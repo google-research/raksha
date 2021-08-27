@@ -45,11 +45,10 @@ TEST(InstantiateAccessPathTest, InstantiateAccessPathTest) {
       AccessPath::CreateSpecAccessPath(
           AccessPathSelectors(Selector(FieldSelector("x"))));
   AccessPath access_path =
-      AccessPath::Instantiate(ConcreteAccessPathRoot("concrete"),
-                              spec_access_path);
+      spec_access_path.Instantiate(ConcreteAccessPathRoot("concrete"));
   ASSERT_EQ(access_path.ToString(), "concrete.x");
   ASSERT_DEATH(
-      AccessPath::Instantiate(ConcreteAccessPathRoot("uhoh"), access_path),
+      access_path.Instantiate(ConcreteAccessPathRoot("uhoh")),
       "Attempt to instantiate an AccessPath that is already instantiated.");
 }
 
@@ -77,7 +76,7 @@ TEST_P(AccessPathFromProtoTest, AccessPathFromProtoTest) {
 
   ConcreteAccessPathRoot root("root");
   ASSERT_EQ(
-      AccessPath::Instantiate(root, access_path).ToString(),
+      access_path.Instantiate(root).ToString(),
       "root" + expected_tostring_suffix);
   ASSERT_DEATH(
       access_path.ToString(),
