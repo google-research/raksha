@@ -1,6 +1,7 @@
 #include "src/ir/edge.h"
 
 #include "src/common/testing/gtest.h"
+#include "src/ir/access_path_root.h"
 
 namespace raksha::ir {
 
@@ -11,18 +12,23 @@ static const AccessPathSelectors x_y_access_path_selectors =
 
 static const std::tuple<Edge, std::string> edge_tostring_pairs[] = {
     { Edge(
-        AccessPath("recipe.handle",
+        AccessPath(AccessPathRoot(ConcreteAccessPathRoot("recipe.handle")),
                    AccessPathSelectors(Selector(FieldSelector("field1")))),
-        AccessPath("particle.connection",
-                  AccessPathSelectors(Selector(FieldSelector("field2"))))),
+        AccessPath(
+            AccessPathRoot(ConcreteAccessPathRoot("particle.connection")),
+            AccessPathSelectors(Selector(FieldSelector("field2"))))),
         "edge(\"recipe.handle.field1\", \"particle.connection.field2\").\n"},
     { Edge(
-            AccessPath("r.h", x_y_access_path_selectors),
-            AccessPath("r.p", x_y_access_path_selectors)),
+            AccessPath(AccessPathRoot(ConcreteAccessPathRoot("r.h")),
+                       x_y_access_path_selectors),
+            AccessPath(AccessPathRoot(ConcreteAccessPathRoot("r.p")),
+                       x_y_access_path_selectors)),
       "edge(\"r.h.x.y\", \"r.p.x.y\").\n" },
     { Edge(
-          AccessPath("prefix1", AccessPathSelectors()),
-          AccessPath("prefix2", AccessPathSelectors())),
+          AccessPath(AccessPathRoot(ConcreteAccessPathRoot("prefix1")),
+                     AccessPathSelectors()),
+          AccessPath(AccessPathRoot(ConcreteAccessPathRoot("prefix2")),
+                     AccessPathSelectors())),
       "edge(\"prefix1\", \"prefix2\").\n"} };
 
 class EdgeToStringTest :

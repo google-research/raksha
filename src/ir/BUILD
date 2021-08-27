@@ -99,11 +99,10 @@ cc_test(
 )
 
 cc_test(
-    name = "root_instantiated_test",
-    srcs = ["root_instantiated_test.cc"],
+    name = "access_path_root_test",
+    srcs = ["access_path_root_test.cc"],
     deps = [
         ":ir",
         "//src/common/testing:gtest",
-        "@absl//absl/strings",
     ],
 )

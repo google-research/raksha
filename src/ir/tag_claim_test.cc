@@ -28,13 +28,22 @@ TEST_P(TagClaimToStringWithRootTest, TagClaimToStringWithRootTest) {
   arcs::ClaimProto_Assume assume_proto;
   google::protobuf::TextFormat::ParseFromString(
       assume_textproto, &assume_proto);
-  UnrootedTagClaim unrooted_tag_claim =
-      UnrootedTagClaim::CreateFromProto(assume_proto);
-  ASSERT_EQ(
-      unrooted_tag_claim.ToStringWithRoot(root_string), expected_tostring);
+  TagClaim unrooted_tag_claim =
+      TagClaim::CreateFromProto(assume_proto);
+  TagClaim tag_claim = TagClaim::Instantiate(
+      ConcreteAccessPathRoot(root_string), unrooted_tag_claim);
+  // Expect the version with the concrete root to match the expected_tostring
+  // when ToString is called upon it.
+  ASSERT_EQ(tag_claim.ToString(), expected_tostring);
+  // However, the version with the spec root should fail when ToString is
+  // called.
+  EXPECT_DEATH(
+      unrooted_tag_claim.ToString(),
+      "Attempted to print out an AccessPath before connecting it to a "
+      "fully-instantiated root!");
 }
 
-// Sample root strings we can use to turn UnrootedTagClaims into TagClaims.
+// Sample root strings we can use to turn TagClaims into TagClaims.
 static std::string root_strings[] = {
     "recipe.handle",
     "recipe.particle",
@@ -45,7 +54,7 @@ static std::string root_strings[] = {
 // Pairs of textprotos and format strings. The format strings will become the
 // expected ToString output when the root string is substituted for the %s.
 // This allows us to test the result of combining each of the
-// UnrootedTagClaims derived from the textprotos with each of the root strings.
+// TagClaims derived from the textprotos with each of the root strings.
 static std::tuple<std::string, absl::string_view>
     textproto_to_expected_format_string[] = {
     { "access_path: { selectors: { field: \"field1\" } }, "

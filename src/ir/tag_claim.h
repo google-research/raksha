@@ -8,39 +8,36 @@
 
 namespace raksha::ir {
 
-// This is a TagClaim that is "unrooted"; it is a claim upon a particular
-// SelectorAccessPath, but does not yet have full root information. This will
-// be the case for claims in ParticleSpecs until we visit the Particle(s)
-// that implement that ParticleSpec. This class can have a root provided to
-// it on the fly as a parameter to the ToStringWithRoot function, or can be
-// associated with a root via the RootInstantiated class.
-class UnrootedTagClaim {
+class TagClaim {
  public:
-  // Create an unrooted tag claim from an arcs Assume proto. Despite the fact
+  // Create a tag claim from an arcs Assume proto. Despite the fact
   // that the access path indicated by a claim indicates a root, it's not
   // rooted deeply enough for us; the root goes only to the particle spec name,
-  // whereas we'd like to go all the way to the recipe name.
-  static UnrootedTagClaim CreateFromProto(
+  // whereas we'd like to go all the way to the recipe name. Therefore, the
+  // resulting TagClaim has a SpecAccessPathRoot.
+  static TagClaim CreateFromProto(
       const arcs::ClaimProto_Assume &assume_proto);
 
-  explicit UnrootedTagClaim(
-      AccessPathSelectors access_path_selectors, std::string tag)
-  : access_path_selectors_(std::move(access_path_selectors)),
-    tag_(std::move(tag)) {}
+  static TagClaim Instantiate(
+      ConcreteAccessPathRoot new_root, TagClaim tag_claim) {
+    return TagClaim(
+        AccessPath::Instantiate(
+            std::move(new_root), std::move(tag_claim.access_path_)),
+        std::move(tag_claim.tag_));
+  }
 
-  // Print out a tag claim for this class with the provided root. While this
-  // can be called by anyone, it is likely that this will be called through
-  // a RootInstantiated wrapper's ToString function.
-  std::string ToStringWithRoot(std::string root) const {
+  // Produce a string containing a datalog fact for this TagClaim.
+  std::string ToString() const {
     return absl::StrCat(
-        "claimHasTag(\"",
-        AccessPath(std::move(root), access_path_selectors_).ToString(),
-        "\", \"", tag_, "\").\n");
+        "claimHasTag(\"", access_path_.ToString(), "\", \"", tag_, "\").\n");
   }
 
  private:
-  // The AccessPathSelectors which this object claims has the tag tag_.
-  AccessPathSelectors access_path_selectors_;
+  explicit TagClaim(AccessPath access_path, std::string tag)
+  : access_path_(std::move(access_path)), tag_(std::move(tag)) {}
+
+  // The AccessPath which this object claims has the tag tag_.
+  AccessPath access_path_;
   // The tag claimed to be on access_path_selectors_ by this object.
   std::string tag_;
 };

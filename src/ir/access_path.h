@@ -3,26 +3,48 @@
 
 #include "absl/strings/str_cat.h"
 #include "src/ir/access_path_selectors.h"
+#include "src/ir/access_path_root.h"
 
 namespace raksha::ir {
 
 // An AccessPath is a fully-qualified path from the root of the data. At this
-// time, it is just an AccessPathSelectors, describing the path through the
-// type tree, and a root string, describing the path before that. More
-// structure may be added to the root in the future.
+// time, it is an AccessPathSelectors, describing the path through the type
+// tree, and an AccessPathRoot, describing the path before that.
 class AccessPath {
  public:
-  explicit AccessPath(
-      std::string root_string, AccessPathSelectors access_path_selectors)
-      : root_string_(std::move(root_string)),
-        access_path_selectors_(std::move(access_path_selectors)) {}
+  static AccessPath CreateSpecAccessPath(
+      AccessPathSelectors access_path_selectors) {
+    return AccessPath(
+        AccessPathRoot(SpecAccessPathRoot()), std::move(access_path_selectors));
+  }
 
+  // Return a new AccessPath, identical to the passed-in spec_access_path
+  // except with the AccessPath root replaced with the indicated concrete root.
+  // Note that this expects the passed-in spec_access_path to not already be
+  // instantiated.
+  static AccessPath Instantiate(
+      ConcreteAccessPathRoot new_root, AccessPath spec_access_path) {
+    CHECK(!spec_access_path.root_.IsInstantiated())
+      << "Attempt to instantiate an AccessPath that is already instantiated.";
+    return AccessPath(
+        AccessPathRoot(std::move(new_root)),
+        std::move(spec_access_path.access_path_selectors_));
+  }
+
+  explicit AccessPath(
+    AccessPathRoot root, AccessPathSelectors access_path_selectors)
+    : root_(std::move(root)),
+      access_path_selectors_(std::move(access_path_selectors)) {}
+
+  // Express the AccessPath as a string. This is accomplished by
+  // concatenating the root string and the selectors string.
   std::string ToString() const {
-    return absl::StrCat(root_string_, access_path_selectors_.ToString());
+    return absl::StrCat(root_.ToString(), access_path_selectors_.ToString());
   }
 
  private:
-  std::string root_string_;
+
+  AccessPathRoot root_;
   AccessPathSelectors access_path_selectors_;
 };
 

@@ -9,15 +9,17 @@ static Selector MakeFieldSelector(std::string field_name) {
 
 static const std::tuple<AccessPath, std::string>
     access_path_and_expected_tostring_pairs[] = {
-    {AccessPath("a.b",
+    {AccessPath(AccessPathRoot(ConcreteAccessPathRoot("a.b")),
              AccessPathSelectors(
                  MakeFieldSelector("c"),
                  AccessPathSelectors(
                      MakeFieldSelector("d"), AccessPathSelectors()))),
      "a.b.c.d" },
-    { AccessPath("foo", AccessPathSelectors()), "foo" },
     { AccessPath(
-        "foo.bar",
+        AccessPathRoot(ConcreteAccessPathRoot("foo")), AccessPathSelectors()),
+      "foo" },
+    { AccessPath(
+        AccessPathRoot(ConcreteAccessPathRoot("foo.bar")),
         AccessPathSelectors(
             MakeFieldSelector("baz"), AccessPathSelectors())), "foo.bar.baz"}
 };
@@ -34,6 +36,19 @@ TEST_P(AccessPathToStringTest, AccessPathToStringTest) {
 INSTANTIATE_TEST_SUITE_P(
     AccessPathToStringTest, AccessPathToStringTest,
     testing::ValuesIn(access_path_and_expected_tostring_pairs));
+
+TEST(InstantiateAccessPathTest, InstantiateAccessPathTest) {
+  AccessPath spec_access_path =
+      AccessPath::CreateSpecAccessPath(
+          AccessPathSelectors(Selector(FieldSelector("x"))));
+  AccessPath access_path =
+      AccessPath::Instantiate(ConcreteAccessPathRoot("concrete"),
+                              spec_access_path);
+  ASSERT_EQ(access_path.ToString(), "concrete.x");
+  ASSERT_DEATH(
+      AccessPath::Instantiate(ConcreteAccessPathRoot("uhoh"), access_path),
+      "Attempt to instantiate an AccessPath that is already instantiated.");
+}
 
 
 }  // namespace raksha::ir
