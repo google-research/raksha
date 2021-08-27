@@ -1,5 +1,8 @@
-#include "src/common/testing/gtest.h"
 #include "src/ir/access_path.h"
+
+#include <google/protobuf/text_format.h>
+
+#include "src/common/testing/gtest.h"
 
 namespace raksha::ir {
 
@@ -50,5 +53,39 @@ TEST(InstantiateAccessPathTest, InstantiateAccessPathTest) {
       "Attempt to instantiate an AccessPath that is already instantiated.");
 }
 
+static const std::tuple<std::string, std::string>
+  access_path_proto_tostring_pairs[] {
+    {"", ""},
+    { "selectors: { field: \"foo\" }", ".foo" },
+    { "selectors: [{ field: \"foo\" }, { field: \"bar\" }]", ".foo.bar" },
+    { "selectors: [{ field: \"foo\" }, { field: \"bar\" }, { field: \"baz\" }]",
+      ".foo.bar.baz" },
+};
+
+class AccessPathFromProtoTest
+ : public testing::TestWithParam<std::tuple<std::string, std::string>> {};
+
+TEST_P(AccessPathFromProtoTest, AccessPathFromProtoTest) {
+  std::string textproto;
+  std::string expected_tostring_suffix;
+  std::tie(textproto, expected_tostring_suffix) = GetParam();
+
+  arcs::AccessPathProto access_path_proto;
+  google::protobuf::TextFormat::ParseFromString(textproto, &access_path_proto);
+
+  AccessPath access_path = AccessPath::CreateFromProto(access_path_proto);
+
+  ConcreteAccessPathRoot root("root");
+  ASSERT_EQ(
+      AccessPath::Instantiate(root, access_path).ToString(),
+      "root" + expected_tostring_suffix);
+  ASSERT_DEATH(
+      access_path.ToString(),
+      "Attempted to print out an AccessPath before connecting it to a "
+      "fully-instantiated root!");
+}
+
+INSTANTIATE_TEST_SUITE_P(AccessPathFromProtoTest, AccessPathFromProtoTest,
+                         testing::ValuesIn(access_path_proto_tostring_pairs));
 
 }  // namespace raksha::ir

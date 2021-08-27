@@ -9,13 +9,7 @@ TagClaim TagClaim::CreateFromProto(
   CHECK(assume_proto.has_access_path())
     << "Expected Assume claim message to have access_path field.";
   const arcs::AccessPathProto &access_path_proto = assume_proto.access_path();
-  AccessPathSelectors access_path_selectors =
-      AccessPathSelectors::CreateFromProto(access_path_proto);
-  // The proto contains an access path only from the particle spec through
-  // the type. We need to root it at the recipe. Therefore, fill the
-  // AccessPath's root with a SpecAccessPathRoot for now.
-  AccessPath access_path =
-      AccessPath::CreateSpecAccessPath(std::move(access_path_selectors));
+  AccessPath access_path = AccessPath::CreateFromProto(access_path_proto);
   CHECK(assume_proto.has_predicate())
     << "Expected Assume claim message to have predicate field.";
   const arcs::InformationFlowLabelProto_Predicate &predicate =

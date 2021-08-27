@@ -18,6 +18,18 @@ class AccessPath {
         AccessPathRoot(SpecAccessPathRoot()), std::move(access_path_selectors));
   }
 
+  // Create an AccessPath from the equivalent Arcs proto. We currently only
+  // handle the case in which an AccessPathProto is rooted at a
+  // (particle_spec, handle_connection), in which case it
+  static AccessPath CreateFromProto(
+      const arcs::AccessPathProto &access_path_proto) {
+    CHECK(!access_path_proto.has_store_id())
+      << "Currently, access paths involving stores are not implemented.";
+    AccessPathSelectors selectors =
+        AccessPathSelectors::CreateFromProto(access_path_proto);
+    return CreateSpecAccessPath(selectors);
+  }
+
   // Return a new AccessPath, identical to the passed-in spec_access_path
   // except with the AccessPath root replaced with the indicated concrete root.
   // Note that this expects the passed-in spec_access_path to not already be
