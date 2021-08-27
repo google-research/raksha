@@ -97,3 +97,13 @@ cc_test(
         "@absl//absl/strings:str_format",
     ],
 )
+
+cc_test(
+    name = "root_instantiated_test",
+    srcs = ["root_instantiated_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)

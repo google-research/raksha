@@ -11,8 +11,9 @@ namespace raksha::ir {
 // This is a TagClaim that is "unrooted"; it is a claim upon a particular
 // SelectorAccessPath, but does not yet have full root information. This will
 // be the case for claims in ParticleSpecs until we visit the Particle(s)
-// that implement that ParticleSpec. This class is used only to eventually
-// produce a full TagClaim.
+// that implement that ParticleSpec. This class can have a root provided to
+// it on the fly as a parameter to the ToStringWithRoot function, or can be
+// associated with a root via the RootInstantiated class.
 class UnrootedTagClaim {
  public:
   // Create an unrooted tag claim from an arcs Assume proto. Despite the fact
@@ -27,39 +28,20 @@ class UnrootedTagClaim {
   : access_path_selectors_(std::move(access_path_selectors)),
     tag_(std::move(tag)) {}
 
-  // Make the TagClaim class a friend. This allows us to make the
-  // UnrootedTagClaim otherwise completely opaque. The TagClaim will read the
-  // private fields during its constructor.
-  friend class TagClaim;
+  // Print out a tag claim for this class with the provided root. While this
+  // can be called by anyone, it is likely that this will be called through
+  // a RootInstantiated wrapper's ToString function.
+  std::string ToStringWithRoot(std::string root) const {
+    return absl::StrCat(
+        "claimHasTag(\"",
+        AccessPath(std::move(root), access_path_selectors_).ToString(),
+        "\", \"", tag_, "\").\n");
+  }
 
  private:
   // The AccessPathSelectors which this object claims has the tag tag_.
   AccessPathSelectors access_path_selectors_;
   // The tag claimed to be on access_path_selectors_ by this object.
-  std::string tag_;
-};
-
-// A claim that a particular access path has a particular tag. This is how
-// tags are introduced to the dataflow graph.
-class TagClaim {
- public:
-  explicit TagClaim(
-      std::string root_string, UnrootedTagClaim unrooted_tag_claim)
-      : access_path_(
-          std::move(root_string),
-          std::move(unrooted_tag_claim.access_path_selectors_)),
-        tag_(std::move(unrooted_tag_claim.tag_)) {}
-
-  // Produce a string from the TagClaim containing an equivalent datalog fact.
-  std::string ToString() const {
-    return absl::StrCat(
-        "claimHasTag(\"", access_path_.ToString(), "\", \"", tag_, "\").\n");
-  }
-
- private:
-  // The full, rooted access path that this object claims has the tag tag_.
-  AccessPath access_path_;
-  // The tag claimed to be on access_path_ by this object.
   std::string tag_;
 };
 

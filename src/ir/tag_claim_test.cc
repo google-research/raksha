@@ -9,12 +9,12 @@
 
 namespace raksha::ir {
 
-class TagClaimToStringTest :
+class TagClaimToStringWithRootTest :
     public testing::TestWithParam<
       std::tuple<std::tuple<std::string, absl::string_view>, std::string>>
       {};
 
-TEST_P(TagClaimToStringTest, TagClaimToStringTest) {
+TEST_P(TagClaimToStringWithRootTest, TagClaimToStringWithRootTest) {
   const std::tuple<std::string, absl::string_view>
       &textproto_format_string_pair = std::get<0>(GetParam());
   const std::string &assume_textproto =
@@ -30,8 +30,8 @@ TEST_P(TagClaimToStringTest, TagClaimToStringTest) {
       assume_textproto, &assume_proto);
   UnrootedTagClaim unrooted_tag_claim =
       UnrootedTagClaim::CreateFromProto(assume_proto);
-  TagClaim tag_claim(root_string, unrooted_tag_claim);
-  ASSERT_EQ(tag_claim.ToString(), expected_tostring);
+  ASSERT_EQ(
+      unrooted_tag_claim.ToStringWithRoot(root_string), expected_tostring);
 }
 
 // Sample root strings we can use to turn UnrootedTagClaims into TagClaims.
@@ -59,7 +59,7 @@ static std::tuple<std::string, absl::string_view>
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    TagClaimToStringTest, TagClaimToStringTest,
+    TagClaimToStringWithRootTest, TagClaimToStringWithRootTest,
     testing::Combine(testing::ValuesIn(textproto_to_expected_format_string),
                      testing::ValuesIn(root_strings)));
 
