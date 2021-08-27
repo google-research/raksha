@@ -26,7 +26,7 @@
 // Relation Declarations
 //-----------------------------------------------------------------------------
 
-// Declares that `accessPath` may have be tainted with `tag`.
+// Declares that `accessPath` may have been tainted with `tag`.
 // If false, `accessPath` *definitely* does not have `tag` taint at runtime.
 // If true, `accessPath` may have the `tag` taint at runtime.
 // NOTE: In practice there may be value in explicitly having a layer of

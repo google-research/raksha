@@ -3,24 +3,40 @@
 // particularly under the banner "Program Manifests"
 
 particle ImageDetector
-    sensor_data_packet: reads SensorDataPacket {
+    id_sensor_data_packet: reads SensorDataPacket {
         camera_feed: Number,
         video_resolution: Number
     }
-    image_detection_model: reads ImageDetectionModel {
-        imag_detection_model: Number
-    }
-    detection_boxes: writes ImageDetectionBoxes {
-        detection_boxes: Number
-    }
+    id_image_detection_model: reads ImageDetectionModel {}
+    id_detection_boxes: writes ImageDetectionBoxes {}
+        // the label of id_sensor_packet.video_resolution is the empty set (public)
+    claim id_sensor_data_packet.camera_feed is raw_video_tag
+    claim id_image_detection_model is image_detection_model_tag
+        // id_detection_boxes is downgraded from
+        // {raw_video_tag, image_detection_model_tag} to {detected_images_tag}
+        // The old tags are removed by auth logic and this part adds the
+        // new tag in:
+    claim id_detection_boxes is detected_images_tag
 
 particle ImageSelector
-    detection_boxes: reads ImageDetectionBoxes {
-        image_detection_boxes: Number
-    }
-    user_selection_action: reads UserSelectionAction {
-        user_selection_action: Number
-    }
-    select_image_id: writes SelectImageId {
-        select_image_id: Number
-    }
+    is_detection_boxes: reads ImageDetectionBoxes {}
+    is_user_selection_action: reads UserSelectionAction {}
+    is_select_image_id: writes SelectImageId {}
+    claim is_user_selection_action is user_selection_tag
+        // The label of is_selected_image_id is downgraded from
+        // {detected_images_tag, user_selection_tag} to {product_id_tag}
+    claim is_selected_image_id is product_id_tag
+        // check that the output of is_selected_image_id flowsTo 
+        // {product_id_tag}.
+    check is_selected_image_id is product_id_tag
+
+recipe VisionPipeline
+    ImageDetector
+        id_sensor_data_packet: reads sensor_data_packet
+        id_image_detection_model: reads image_detection_model
+        id_detection_boxes: writes detection_boxes
+    ImageSelector
+        is_detection_boxes: reads detection_boxes
+        is_user_selection_action: reads user_selection_action
+        is_select_image_id: reads select_image_id
+     

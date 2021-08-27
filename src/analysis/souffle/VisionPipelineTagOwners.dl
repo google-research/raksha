@@ -1,0 +1,16 @@
+#include "authorization_logic.dl"
+
+// This code assign owners to tags for the VisionPipeline.arcs example.
+// This is not generated code. This is policy code that is written directly
+// in datalog (for now).
+//
+// This is the only bit of "policy" code that
+// isn't expressed in authorization logic, and it isn't in authorization logic
+// just because these facts are "universally true" rather than having a 
+// "speaker". We might also try making these "SomePrincipal says ownsTag(...)"
+// instead later, but this seems like a simpler way to start.
+ownsTag("EndUser", "raw_video_tag").
+ownsTag("EndUser", "detected_images_tag").
+ownsTag("EndUser", "image_selection_tag").
+ownsTag("EndUser", "product_id_tag").
+ownsTag("ServiceProvider", "image_detection_model_tag").
