@@ -25,7 +25,7 @@ TEST_P(ConcreteAccessPathRootTest, ConcreteAccessPathRootTest) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    ConcreateAccessPathRootTest, ConcreteAccessPathRootTest,
+    ConcreteAccessPathRootTest, ConcreteAccessPathRootTest,
     testing::Values("recipe.particle", "recipe.handle", "arbitrary"));
 
 }  // namespace raksha::ir
