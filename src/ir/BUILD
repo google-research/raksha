@@ -99,6 +99,17 @@ cc_test(
 )
 
 cc_test(
+    name = "tag_check_test",
+    srcs = ["tag_check_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
     name = "access_path_root_test",
     srcs = ["access_path_root_test.cc"],
     deps = [

@@ -4,6 +4,7 @@
 #include "absl/strings/str_cat.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/access_path.h"
+#include "src/ir/tag_annotation_on_access_path.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
@@ -16,29 +17,35 @@ class TagClaim {
   // whereas we'd like to go all the way to the recipe name. Therefore, the
   // resulting TagClaim has a SpecAccessPathRoot.
   static TagClaim CreateFromProto(
-      const arcs::ClaimProto_Assume &assume_proto);
+      const arcs::ClaimProto_Assume &assume_proto) {
+    return TagClaim(
+        TagAnnotationOnAccessPath::CreateFromProto(assume_proto, "Assume"));
+  }
 
   // Return a TagClaim that is the same as *this, but with the root new_root.
   // Note that this expects the current root to be uninstantiated.
   TagClaim Instantiate(AccessPathRoot new_root) const {
     return TagClaim(
-        access_path_.Instantiate(std::move(new_root)), std::move(tag_));
+        tag_annotation_on_access_path_.Instantiate(std::move(new_root)));
   }
 
   // Produce a string containing a datalog fact for this TagClaim.
   std::string ToString() const {
     return absl::StrCat(
-        "claimHasTag(\"", access_path_.ToString(), "\", \"", tag_, "\").\n");
+        "claimHasTag(\"",
+        tag_annotation_on_access_path_.access_path().ToString(),
+        "\", \"", tag_annotation_on_access_path_.tag(), "\").\n");
   }
 
  private:
-  explicit TagClaim(AccessPath access_path, std::string tag)
-  : access_path_(std::move(access_path)), tag_(std::move(tag)) {}
+  explicit TagClaim(TagAnnotationOnAccessPath tag_annotation_on_access_path)
+  : tag_annotation_on_access_path_(std::move(tag_annotation_on_access_path)) {}
 
-  // The AccessPath which this object claims has the tag tag_.
-  AccessPath access_path_;
-  // The tag claimed to be on access_path_selectors_ by this object.
-  std::string tag_;
+   // Internally, we represent the data as a TagAnnotationOnAccessPath object.
+  // This allows us to share code with TagCheck. While TagCheck and TagClaim
+  // are semantically very different, they are very similar in their internal
+  // representation, both here and in Arcs manifest protos.
+  TagAnnotationOnAccessPath tag_annotation_on_access_path_;
 };
 
 }  // namespace raksha::ir
