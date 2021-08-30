@@ -7,11 +7,9 @@
 #include "third_party/arcs/proto/manifest.pb.h"
 
 // The classes in this file describe the root of an AccessPath. At the moment,
-// we have only two types of roots: a SpecRoot and a ConcreteRoot,
-// distinguishing between AccessPaths that have been constructed relative to
-// some abstract structure (such as a ParticleSpec) and those that have been
-// constructed relative to a concrete structure (such as a Particle).
-
+// we have only two types of roots: a HandleConnectionSpecAccessPathRoot and
+// a HandleConnectionAccessPathRoot, describing a HandleConnectionSpec in a
+// ParticleSpec and a Handle in a Particle, respectively.
 namespace raksha::ir {
 
 // A HandleConnectionSpecAccessPathRoot describes the root as a
@@ -73,9 +71,10 @@ class HandleConnectionSpecAccessPathRoot {
 
 };
 
-// Represents the root of an access path connected to a fully-instantiated
-// construct. We currently just wrap a string for this case to allow us
-// flexibility to more fully describe the structure as the Raksha IR matures.
+// Represents the root of an access path connected to a HandleConnection on a
+// fully-instantiated Particle. This contains three strings: the recipe,
+// particle, and handle that identify the path to this handle from the root
+// of the Arcs manifest data.
 class HandleConnectionAccessPathRoot {
  public:
   HandleConnectionAccessPathRoot(
