@@ -6,7 +6,7 @@
 #include "src/common/logging/logging.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
-namespace src::xform_to_datalog::arcs_manifest_tree {
+namespace raksha::xform_to_datalog::arcs_manifest_tree {
 
 // A class used to gather information about HandleConnectionSpecs from the
 // equivalent ArcsManifestProtos. Currently, the only thing we care about
@@ -48,6 +48,6 @@ class HandleConnectionSpec {
   bool writes_;
 };
 
-}  // namespace src::xform_to_datalog::arcs_manifest_tree
+}  // namespace raksha::xform_to_datalog::arcs_manifest_tree
 
 #endif  // SRC_XFORM_TO_DATALOG_ARCS_MANIFEST_TREE_HANDLE_CONNECTION_SPEC_H_
