@@ -12,24 +12,31 @@ static const AccessPathSelectors x_y_access_path_selectors =
 
 static const std::tuple<Edge, std::string> edge_tostring_pairs[] = {
     { Edge(
-        AccessPath(AccessPathRoot(ConcreteAccessPathRoot("recipe.handle")),
+        AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
+            "recipe", "particle", "handle")),
                    AccessPathSelectors(Selector(FieldSelector("field1")))),
         AccessPath(
-            AccessPathRoot(ConcreteAccessPathRoot("particle.connection")),
+            AccessPathRoot(HandleConnectionAccessPathRoot(
+                "recipe2", "particle2", "handle2")),
             AccessPathSelectors(Selector(FieldSelector("field2"))))),
-        "edge(\"recipe.handle.field1\", \"particle.connection.field2\").\n"},
+        "edge(\"recipe.particle.handle.field1\", "
+        "\"recipe2.particle2.handle2.field2\").\n"},
     { Edge(
-            AccessPath(AccessPathRoot(ConcreteAccessPathRoot("r.h")),
+            AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
+                "r", "p", "h")),
                        x_y_access_path_selectors),
-            AccessPath(AccessPathRoot(ConcreteAccessPathRoot("r.p")),
+            AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
+                "r", "p", "h2")),
                        x_y_access_path_selectors)),
-      "edge(\"r.h.x.y\", \"r.p.x.y\").\n" },
+      "edge(\"r.p.h.x.y\", \"r.p.h2.x.y\").\n" },
     { Edge(
-          AccessPath(AccessPathRoot(ConcreteAccessPathRoot("prefix1")),
+          AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
+              "pre", "fix", "1")),
                      AccessPathSelectors()),
-          AccessPath(AccessPathRoot(ConcreteAccessPathRoot("prefix2")),
+          AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
+              "pre", "fix", "2")),
                      AccessPathSelectors())),
-      "edge(\"prefix1\", \"prefix2\").\n"} };
+      "edge(\"pre.fix.1\", \"pre.fix.2\").\n"} };
 
 class EdgeToStringTest :
     public testing::TestWithParam<std::tuple<Edge, std::string>> {};

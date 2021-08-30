@@ -12,12 +12,6 @@ namespace raksha::ir {
 // tree, and an AccessPathRoot, describing the path before that.
 class AccessPath {
  public:
-  static AccessPath CreateSpecAccessPath(
-      AccessPathSelectors access_path_selectors) {
-    return AccessPath(
-        AccessPathRoot(SpecAccessPathRoot()), std::move(access_path_selectors));
-  }
-
   // Create an AccessPath from the equivalent Arcs proto. We currently only
   // handle the case in which an AccessPathProto is rooted at a
   // (particle_spec, handle_connection), in which case it
@@ -25,19 +19,16 @@ class AccessPath {
       const arcs::AccessPathProto &access_path_proto) {
     CHECK(!access_path_proto.has_store_id())
       << "Currently, access paths involving stores are not implemented.";
+    CHECK(access_path_proto.has_handle())
+      << "Expected AccessPathProto to contain a handle member.";
+    HandleConnectionSpecAccessPathRoot hcs_access_path_root =
+        HandleConnectionSpecAccessPathRoot::CreateFromProto(
+            access_path_proto.handle());
+
     AccessPathSelectors selectors =
         AccessPathSelectors::CreateFromProto(access_path_proto);
-    return CreateSpecAccessPath(selectors);
-  }
-
-  // Return a new AccessPath, identical to *this, except with the AccessPath
-  // root replaced with the indicated concrete root. Note that this expects the
-  // passed-in spec_access_path to not already be instantiated.
-  AccessPath Instantiate(ConcreteAccessPathRoot new_root) const {
-    CHECK(!root_.IsInstantiated())
-      << "Attempt to instantiate an AccessPath that is already instantiated.";
     return AccessPath(
-        AccessPathRoot(std::move(new_root)), access_path_selectors_);
+        AccessPathRoot(std::move(hcs_access_path_root)), std::move(selectors));
   }
 
   explicit AccessPath(
@@ -51,8 +42,19 @@ class AccessPath {
     return absl::StrCat(root_.ToString(), access_path_selectors_.ToString());
   }
 
- private:
+  // Return a new AccessPath, identical to *this, except with the AccessPath
+  // root replaced with the indicated instantiated root. Note that this expects
+  // the current access path to not already be instantiated.
+  AccessPath Instantiate(AccessPathRoot new_root) const {
+    CHECK(!root_.IsInstantiated())
+      << "Attempt to instantiate an AccessPath that is already instantiated.";
+    CHECK(new_root.IsInstantiated())
+      << "Attempt to instantiate an AccessPath with an uninstantiated root.";
+    return AccessPath(std::move(new_root), access_path_selectors_);
+  }
 
+
+ private:
   AccessPathRoot root_;
   AccessPathSelectors access_path_selectors_;
 };

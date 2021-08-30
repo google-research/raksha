@@ -11,27 +11,27 @@ namespace raksha::ir {
 
 class TagClaimToStringWithRootTest :
     public testing::TestWithParam<
-      std::tuple<std::tuple<std::string, absl::string_view>, std::string>>
+      std::tuple<
+        std::tuple<std::string, absl::ParsedFormat<'s'>>, AccessPathRoot>>
       {};
 
 TEST_P(TagClaimToStringWithRootTest, TagClaimToStringWithRootTest) {
-  const std::tuple<std::string, absl::string_view>
+  const std::tuple<std::string, absl::ParsedFormat<'s'>>
       &textproto_format_string_pair = std::get<0>(GetParam());
   const std::string &assume_textproto =
       std::get<0>(textproto_format_string_pair);
-  const absl::string_view expected_tostring_format_string =
+  const absl::ParsedFormat<'s'> expected_tostring_format_string =
     std::get<1>(textproto_format_string_pair);
-  const std::string &root_string = std::get<1>(GetParam());
+  const AccessPathRoot &root = std::get<1>(GetParam());
 
   const std::string &expected_tostring = absl::StrFormat(
-      expected_tostring_format_string, root_string);
+      expected_tostring_format_string, root.ToString());
   arcs::ClaimProto_Assume assume_proto;
   google::protobuf::TextFormat::ParseFromString(
       assume_textproto, &assume_proto);
   TagClaim unrooted_tag_claim =
       TagClaim::CreateFromProto(assume_proto);
-  TagClaim tag_claim =
-      unrooted_tag_claim.Instantiate(ConcreteAccessPathRoot(root_string));
+  TagClaim tag_claim = unrooted_tag_claim.Instantiate(root);
   // Expect the version with the concrete root to match the expected_tostring
   // when ToString is called upon it.
   ASSERT_EQ(tag_claim.ToString(), expected_tostring);
@@ -43,33 +43,42 @@ TEST_P(TagClaimToStringWithRootTest, TagClaimToStringWithRootTest) {
       "fully-instantiated root!");
 }
 
-// Sample root strings we can use to turn TagClaims into TagClaims.
-static std::string root_strings[] = {
-    "recipe.handle",
-    "recipe.particle",
-    "r2.handle",
-    "r2.particle"
+// Sample roots we can use to instantiate TagClaims.
+static AccessPathRoot instantiated_roots[] = {
+    AccessPathRoot(HandleConnectionAccessPathRoot(
+        "recipe", "particle", "handle")),
+    AccessPathRoot(HandleConnectionAccessPathRoot(
+        "recipe2", "particle2", "handle2")),
+    AccessPathRoot(HandleConnectionAccessPathRoot("r2", "p2", "h2")),
+    AccessPathRoot(HandleConnectionAccessPathRoot("r2", "particle", "handle"))
 };
 
 // Pairs of textprotos and format strings. The format strings will become the
 // expected ToString output when the root string is substituted for the %s.
 // This allows us to test the result of combining each of the
 // TagClaims derived from the textprotos with each of the root strings.
-static std::tuple<std::string, absl::string_view>
+static std::tuple<std::string, absl::ParsedFormat<'s'>>
     textproto_to_expected_format_string[] = {
-    { "access_path: { selectors: { field: \"field1\" } }, "
+    { "access_path: { "
+      "handle: { particle_spec: \"ps\", " "handle_connection: \"hc\" } "
+      "selectors: { field: \"field1\" } }, "
       "predicate: { label: { semantic_tag: \"tag\"} }",
-      "claimHasTag(\"%s.field1\", \"tag\").\n" },
-    { "access_path: { }, predicate: { label: { semantic_tag: \"tag2\"} }",
-      "claimHasTag(\"%s\", \"tag2\").\n" },
-    { "access_path: { selectors: [{ field: \"x\" }, { field: \"y\" }] }, "
+      absl::ParsedFormat<'s'>("claimHasTag(\"%s.field1\", \"tag\").\n") },
+    { "access_path: {"
+      "handle: { particle_spec: \"ps\", " "handle_connection: \"hc\" } }, "
+      "predicate: { label: { semantic_tag: \"tag2\"} }",
+      absl::ParsedFormat<'s'>("claimHasTag(\"%s\", \"tag2\").\n") },
+    { "access_path: { "
+      "handle: { particle_spec: \"ps\", " "handle_connection: \"hc\" }, "
+      "selectors: [{ field: \"x\" }, { field: \"y\" }] }, "
       "predicate: { label: { semantic_tag: \"user_selection\"} }",
-      "claimHasTag(\"%s.x.y\", \"user_selection\").\n" }
+      absl::ParsedFormat<'s'>(
+          "claimHasTag(\"%s.x.y\", \"user_selection\")" ".\n") }
 };
 
 INSTANTIATE_TEST_SUITE_P(
     TagClaimToStringWithRootTest, TagClaimToStringWithRootTest,
     testing::Combine(testing::ValuesIn(textproto_to_expected_format_string),
-                     testing::ValuesIn(root_strings)));
+                     testing::ValuesIn(instantiated_roots)));
 
 }  // namespace raksha::ir

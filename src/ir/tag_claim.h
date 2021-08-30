@@ -20,10 +20,9 @@ class TagClaim {
 
   // Return a TagClaim that is the same as *this, but with the root new_root.
   // Note that this expects the current root to be uninstantiated.
-  TagClaim Instantiate(ConcreteAccessPathRoot new_root) const {
+  TagClaim Instantiate(AccessPathRoot new_root) const {
     return TagClaim(
-        access_path_.Instantiate(std::move(new_root)),
-        std::move(tag_));
+        access_path_.Instantiate(std::move(new_root)), std::move(tag_));
   }
 
   // Produce a string containing a datalog fact for this TagClaim.

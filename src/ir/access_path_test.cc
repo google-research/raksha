@@ -12,19 +12,21 @@ static Selector MakeFieldSelector(std::string field_name) {
 
 static const std::tuple<AccessPath, std::string>
     access_path_and_expected_tostring_pairs[] = {
-    {AccessPath(AccessPathRoot(ConcreteAccessPathRoot("a.b")),
+    {AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot("a", "b", "c")),
              AccessPathSelectors(
-                 MakeFieldSelector("c"),
+                 MakeFieldSelector("d"),
                  AccessPathSelectors(
-                     MakeFieldSelector("d"), AccessPathSelectors()))),
-     "a.b.c.d" },
+                     MakeFieldSelector("e"), AccessPathSelectors()))),
+     "a.b.c.d.e" },
     { AccessPath(
-        AccessPathRoot(ConcreteAccessPathRoot("foo")), AccessPathSelectors()),
-      "foo" },
+        AccessPathRoot(HandleConnectionAccessPathRoot("foo", "bar", "baz")),
+        AccessPathSelectors()),
+      "foo.bar.baz" },
     { AccessPath(
-        AccessPathRoot(ConcreteAccessPathRoot("foo.bar")),
+        AccessPathRoot(HandleConnectionAccessPathRoot("foo", "bar", "baz")),
         AccessPathSelectors(
-            MakeFieldSelector("baz"), AccessPathSelectors())), "foo.bar.baz"}
+            MakeFieldSelector("field"), AccessPathSelectors())),
+      "foo.bar.baz.field"}
 };
 
 class AccessPathToStringTest :
@@ -41,23 +43,33 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn(access_path_and_expected_tostring_pairs));
 
 TEST(InstantiateAccessPathTest, InstantiateAccessPathTest) {
-  AccessPath spec_access_path =
-      AccessPath::CreateSpecAccessPath(
-          AccessPathSelectors(Selector(FieldSelector("x"))));
+  AccessPath spec_access_path(
+      AccessPathRoot(
+          HandleConnectionSpecAccessPathRoot(
+              "particle_spec", "handle_connection")),
+      AccessPathSelectors(Selector(FieldSelector("x"))));
   AccessPath access_path =
-      spec_access_path.Instantiate(ConcreteAccessPathRoot("concrete"));
-  ASSERT_EQ(access_path.ToString(), "concrete.x");
+      spec_access_path.Instantiate(
+          AccessPathRoot(
+              HandleConnectionAccessPathRoot("recipe", "particle", "handle")));
+  ASSERT_EQ(access_path.ToString(), "recipe.particle.handle.x");
   ASSERT_DEATH(
-      access_path.Instantiate(ConcreteAccessPathRoot("uhoh")),
+      access_path.Instantiate(
+          AccessPathRoot(
+              HandleConnectionAccessPathRoot(
+                  "recipe2", "particle2", "handle2"))),
       "Attempt to instantiate an AccessPath that is already instantiated.");
 }
 
 static const std::tuple<std::string, std::string>
   access_path_proto_tostring_pairs[] {
-    {"", ""},
-    { "selectors: { field: \"foo\" }", ".foo" },
-    { "selectors: [{ field: \"foo\" }, { field: \"bar\" }]", ".foo.bar" },
-    { "selectors: [{ field: \"foo\" }, { field: \"bar\" }, { field: \"baz\" }]",
+    { "handle: { particle_spec: \"ps\", handle_connection: \"hc\" }", ""},
+    { "handle: { particle_spec: \"ps\", handle_connection: \"hc\" } "
+      "selectors: { field: \"foo\" }", ".foo" },
+    { "handle: { particle_spec: \"ps\", handle_connection: \"hc\" } "
+      "selectors: [{ field: \"foo\" }, { field: \"bar\" }]", ".foo.bar" },
+    { "handle: { particle_spec: \"ps\", handle_connection: \"hc\" } "
+      "selectors: [{ field: \"foo\" }, { field: \"bar\" }, { field: \"baz\" }]",
       ".foo.bar.baz" },
 };
 
@@ -74,10 +86,11 @@ TEST_P(AccessPathFromProtoTest, AccessPathFromProtoTest) {
 
   AccessPath access_path = AccessPath::CreateFromProto(access_path_proto);
 
-  ConcreteAccessPathRoot root("root");
+  AccessPathRoot root(
+      HandleConnectionAccessPathRoot("recipe", "particle", "handle"));
   ASSERT_EQ(
       access_path.Instantiate(root).ToString(),
-      "root" + expected_tostring_suffix);
+      "recipe.particle.handle" + expected_tostring_suffix);
   ASSERT_DEATH(
       access_path.ToString(),
       "Attempted to print out an AccessPath before connecting it to a "
