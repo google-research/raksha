@@ -68,4 +68,72 @@ INSTANTIATE_TEST_SUITE_P(
     ConnectionSpecRootProtoTest, ConnectionSpecRootProtoTest,
     testing::ValuesIn(textproto_particle_spec_and_handle_connections));
 
+enum AccessPathRootKind {
+  kHandleConnectionSpec,
+  kHandleConnection
+};
+
+// An AccessPathRoot, an enum indicating which AccessPathRoot was
+// constructed, and a vector of strings used to construct the root. The roots
+// should be equal exactly when the enum and arg vectors are equal.
+struct AccessPathRootTypeAndArgs {
+  AccessPathRoot root;
+  AccessPathRootKind kind;
+  std::vector<std::string> arg_strings;
+};
+
+class AccessPathRootEqTest :
+ public testing::TestWithParam<
+  std::tuple<AccessPathRootTypeAndArgs, AccessPathRootTypeAndArgs>> {};
+
+TEST_P(AccessPathRootEqTest, AccessPathRootEqTest) {
+  const AccessPathRootTypeAndArgs &info1 = std::get<0>(GetParam());
+  const AccessPathRootTypeAndArgs &info2 = std::get<1>(GetParam());
+
+  bool kinds_equal = info1.kind == info2.kind;
+  bool args_equal = info1.arg_strings == info2.arg_strings;
+
+  ASSERT_EQ(info1.root == info2.root, kinds_equal && args_equal);
+}
+
+static AccessPathRootTypeAndArgs root_and_info_array[] = {
+    { .root = AccessPathRoot(HandleConnectionSpecAccessPathRoot(
+          "particle_spec1", "handle_connection")),
+      .kind = kHandleConnectionSpec,
+      .arg_strings = {"particle_spec1", "handle_connection"} },
+    { .root = AccessPathRoot(HandleConnectionSpecAccessPathRoot(
+          "particle_spec1", "handle_connection2")),
+      .kind = kHandleConnectionSpec,
+      .arg_strings = {"particle_spec1", "handle_connection2"} },
+    { .root = AccessPathRoot(HandleConnectionSpecAccessPathRoot(
+          "particle_spec2", "handle_connection")),
+      .kind = kHandleConnectionSpec,
+      .arg_strings = {"particle_spec2", "handle_connection"} },
+    { .root = AccessPathRoot(HandleConnectionSpecAccessPathRoot(
+          "handle_connection", "particle_spec1")),
+      .kind = kHandleConnectionSpec,
+      .arg_strings = {"handle_connection", "particle_spec1"} },
+    { .root = AccessPathRoot(HandleConnectionAccessPathRoot(
+        "recipe", "particle", "handle")),
+      .kind = kHandleConnection,
+      .arg_strings = {"recipe", "particle", "handle"}  },
+    { .root = AccessPathRoot(HandleConnectionAccessPathRoot(
+        "recipe2", "particle", "handle")),
+      .kind = kHandleConnection,
+      .arg_strings = {"recipe2", "particle", "handle"}  },
+    { .root = AccessPathRoot(HandleConnectionAccessPathRoot(
+        "recipe", "particle2", "handle")),
+      .kind = kHandleConnection,
+      .arg_strings = {"recipe", "particle2", "handle"}  },
+    { .root = AccessPathRoot(HandleConnectionAccessPathRoot(
+        "recipe", "particle", "handle2")),
+      .kind = kHandleConnection,
+      .arg_strings = {"recipe", "particle", "handle2"}  },
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    AccessPathRootEqTest, AccessPathRootEqTest,
+    testing::Combine(testing::ValuesIn(root_and_info_array),
+                     testing::ValuesIn(root_and_info_array)));
+
 }  // namespace raksha::ir

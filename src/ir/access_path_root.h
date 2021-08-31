@@ -65,6 +65,11 @@ class HandleConnectionSpecAccessPathRoot {
     return handle_connection_spec_name_;
   }
 
+  bool operator==(const HandleConnectionSpecAccessPathRoot &other) const {
+    return (particle_spec_name_ == other.particle_spec_name_) &&
+      (handle_connection_spec_name_ == other.handle_connection_spec_name_);
+  }
+
  private:
   std::string particle_spec_name_;
   std::string handle_connection_spec_name_;
@@ -92,6 +97,12 @@ class HandleConnectionAccessPathRoot {
   // A ConcreteAccessPathRoot is instantiated.
   bool IsInstantiated() const {
     return true;
+  }
+
+  bool operator==(const HandleConnectionAccessPathRoot &other) const {
+    return (recipe_name_ == other.recipe_name_) &&
+      (particle_name_ == other.particle_name_) &&
+      (handle_name_ == other.handle_name_);
   }
 
  private:
@@ -124,6 +135,10 @@ class AccessPathRoot {
      return absl::visit(
         [](const auto &variant){ return variant.IsInstantiated(); },
         specific_root_);
+  }
+
+  bool operator==(const AccessPathRoot &other) const {
+    return specific_root_ == other.specific_root_;
   }
 
  private:

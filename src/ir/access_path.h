@@ -53,6 +53,11 @@ class AccessPath {
     return AccessPath(std::move(new_root), access_path_selectors_);
   }
 
+  const AccessPathRoot &root() const { return root_; }
+
+  const AccessPathSelectors &selectors() const {
+    return access_path_selectors_;
+  }
 
  private:
   AccessPathRoot root_;
