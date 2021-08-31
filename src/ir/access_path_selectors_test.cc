@@ -97,7 +97,8 @@ TEST_P(AccessPathTest, CanRoundTripAccessPathString) {
       MakeSelectorAccessPathFromString(original_access_path);
 
   ASSERT_TRUE(access_path.ok());
-  // Assert that the result of to_string is the same as the original AccessPathSelectors.
+  // Assert that the result of to_string is the same as the original
+  // AccessPathSelectors.
   ASSERT_EQ(access_path->ToString(), original_access_path);
 }
 

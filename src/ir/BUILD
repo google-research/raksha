@@ -86,3 +86,23 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
+
+cc_test(
+    name = "tag_claim_test",
+    srcs = ["tag_claim_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "access_path_root_test",
+    srcs = ["access_path_root_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+    ],
+)
