@@ -68,7 +68,6 @@ class HandleConnectionSpecAccessPathRoot {
  private:
   std::string particle_spec_name_;
   std::string handle_connection_spec_name_;
-
 };
 
 // Represents the root of an access path connected to a HandleConnection on a

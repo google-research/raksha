@@ -5,7 +5,7 @@
 
 #include "src/common/testing/gtest.h"
 
-namespace src::xform_to_datalog::arcs_manifest_tree {
+namespace raksha::xform_to_datalog::arcs_manifest_tree {
 
 struct ProtoStringAndExpectations {
   std::string proto_str;
@@ -52,4 +52,4 @@ INSTANTIATE_TEST_SUITE_P(
     RoundTripHandleConnectionSpecProtoTest,
     testing::ValuesIn(string_and_expections_array));
 
-}  // namespace src::xform_to_datalog::arcs_manifest_tree
+}  // namespace raksha::xform_to_datalog::arcs_manifest_tree

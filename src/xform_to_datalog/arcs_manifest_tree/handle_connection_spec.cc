@@ -1,6 +1,6 @@
 #include "src/xform_to_datalog/arcs_manifest_tree/handle_connection_spec.h"
 
-namespace src::xform_to_datalog::arcs_manifest_tree {
+namespace raksha::xform_to_datalog::arcs_manifest_tree {
 
 HandleConnectionSpec HandleConnectionSpec::CreateFromProto(
     const arcs::HandleConnectionSpecProto &handle_connection_spec_proto) {
@@ -29,4 +29,4 @@ HandleConnectionSpec HandleConnectionSpec::CreateFromProto(
   return HandleConnectionSpec(name, reads, writes);
 }
 
-}  // namespace src::xform_to_datalog::arcs_manifest_tree
+}  // namespace raksha::xform_to_datalog::arcs_manifest_tree
