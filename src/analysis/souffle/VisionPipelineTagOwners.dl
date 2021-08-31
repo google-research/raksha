@@ -11,6 +11,6 @@
 // instead later, but this seems like a simpler way to start.
 ownsTag("EndUser", "raw_video_tag").
 ownsTag("EndUser", "detected_images_tag").
-ownsTag("EndUser", "image_selection_tag").
+ownsTag("EndUser", "user_selection_tag").
 ownsTag("EndUser", "product_id_tag").
 ownsTag("ServiceProvider", "image_detection_model_tag").

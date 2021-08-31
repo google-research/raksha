@@ -53,6 +53,8 @@ mayHaveTag(tgt, tag) :-
 // `isObject(..)`) whenever they are mentioned in other rules.
 isAccessPath(path) :- claimHasTag(path, _).
 isAccessPath(path) :- mayHaveTag(path, _).
+isAccessPath(path) :- edge(path, _).
+isAccessPath(path) :- edge(_, path).
 
 // Symbols used in hasTag or mayHaveTag are tags
 isTag(tag) :- claimHasTag(_, tag).

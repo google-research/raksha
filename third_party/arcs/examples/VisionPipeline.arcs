@@ -1,5 +1,5 @@
 // This is supposed to be about the same as the example policy in 
-// src/analysis/souffle/tests/taint_with_auth_logic.dl
+// src/analysis/souffle/tests/taint_with_logic/taint_with_auth_logic.dl
 // particularly under the banner "Program Manifests"
 
 particle ImageDetector
