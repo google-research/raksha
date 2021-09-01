@@ -79,10 +79,7 @@ subsetOrEquals(p1, p2) :-
 theOneCheck(1) :- subsetOrEquals("selected_image_id",
     "dummy_check_selected_image_id").
 
-.output mayHaveTag
 .output theOneCheck
-.output downgrades
-.output saysDowngrades
 
 // theOneCheck.csv should have just "1" in it
 

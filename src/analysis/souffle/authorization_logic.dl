@@ -28,11 +28,13 @@
 
 // Some party asserts the claim that the label of an access path should be
 // downgraded by removing the referenced tag from the set.
-.decl saysDowngrades(speaker: Principal, p: AccessPath, t: Tag)
+// This relation needs to be in snake case because outputs from the 
+// authorization logic will be in snake case.
+.decl says_downgrades(speaker: Principal, p: AccessPath, t: Tag)
 
 .decl isPrincipal(p: Principal)
 
-isPrincipal(speaker) :- saysDowngrades(speaker, _, _).
+isPrincipal(speaker) :- says_downgrades(speaker, _, _).
 
 // This party is the owner of a taint Tag (they have the privilege to downgrade
 // it).
@@ -48,9 +50,9 @@ isPrincipal(speaker) :- saysDowngrades(speaker, _, _).
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
-downgrades(path, tag) :- ownsTag(owner, tag), saysDowngrades(owner, path, tag).
+downgrades(path, tag) :- ownsTag(owner, tag), says_downgrades(owner, path, tag).
 
 isTag(tag) :- ownsTag(_, tag).
-isTag(tag) :- saysDowngrades(_, _, tag).
+isTag(tag) :- says_downgrades(_, _, tag).
 
 #endif // SRC_ANALYSIS_SOUFFLE_AUTHORIZATION_LOGIC_DL_

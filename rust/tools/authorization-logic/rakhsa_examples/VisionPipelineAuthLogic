@@ -13,14 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#include "authorization_logic.dl"
 
-// This file is roughly what should be produced by authorization logic as an 
-// output. I think in reality there are gaps (one is that the output from the 
-// authorization logic does not use types, but the code here does). 
-says_downgrades("ServiceProvider", "detection_boxes", 
+"ServiceProvider" says downgrades("detection_boxes", 
     "image_detection_model_tag").
 
-says_downgrades("EndUser", "detection_boxes", "raw_video_tag").
-says_downgrades("EndUser", "selected_image_id", "user_selection_tag").
-says_downgrades("EndUser", "selected_image_id", "detected_images_tag").
+"EndUser" says {
+    downgrades("detection_boxes", "raw_video_tag").
+    downgrades("selected_image_id", "user_selection_tag").
+    downgrades("selected_image_id", "detected_images_tag").
+}
