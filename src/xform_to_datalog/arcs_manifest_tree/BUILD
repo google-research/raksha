@@ -24,3 +24,12 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
+
+cc_test(
+    name = "particle_spec_test",
+    srcs = ["particle_spec_test.cc"],
+    deps = [
+        ":arcs_manifest_tree",
+        "//src/common/testing:gtest",
+    ],
+)

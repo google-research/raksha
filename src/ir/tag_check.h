@@ -37,6 +37,11 @@ class TagCheck {
         "\").\n");
   }
 
+  bool operator==(const TagCheck &other) const {
+    return tag_annotation_on_access_path_ ==
+      other.tag_annotation_on_access_path_;
+  }
+
  private:
   // Internally, we represent the data as a TagAnnotationOnAccessPath object.
   // This allows us to share code with TagClaim. While TagCheck and TagClaim

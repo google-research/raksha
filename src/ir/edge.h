@@ -20,6 +20,10 @@ class Edge {
         "edge(\"", from_.ToString(), "\", \"", to_.ToString(), "\").\n");
   }
 
+  bool operator==(const Edge &other) const {
+    return (from_ == other.from_) && (to_ == other.to_);
+  }
+
  private:
   // The AccessPath we are drawing the edge from.
   AccessPath from_;

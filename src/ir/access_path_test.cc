@@ -100,4 +100,55 @@ TEST_P(AccessPathFromProtoTest, AccessPathFromProtoTest) {
 INSTANTIATE_TEST_SUITE_P(AccessPathFromProtoTest, AccessPathFromProtoTest,
                          testing::ValuesIn(access_path_proto_tostring_pairs));
 
+class AccessPathEqualsTest :
+ public testing::TestWithParam<
+  std::tuple<
+    std::tuple<ir::AccessPathRoot, ir::AccessPathSelectors>,
+    std::tuple<ir::AccessPathRoot, ir::AccessPathSelectors>>> {};
+
+TEST_P(AccessPathEqualsTest, AccessPathEqualsTest) {
+  const std::tuple<ir::AccessPathRoot, ir::AccessPathSelectors>
+      access_path_args1 = std::get<0>(GetParam());
+  const std::tuple<ir::AccessPathRoot, ir::AccessPathSelectors>
+    access_path_args2 = std::get<1>(GetParam());
+
+  AccessPath access_path1(
+      std::get<0>(access_path_args1), std::get<1>(access_path_args1));
+  AccessPath access_path2(
+    std::get<0>(access_path_args2), std::get<1>(access_path_args2));
+
+  EXPECT_EQ(
+      access_path1 == access_path2, access_path_args1 == access_path_args2);
+}
+
+// Note: be careful adding elements to sample_roots and sample_selectors. We
+// create an access path for each combination of elements in
+// (sample_roots, sample_selectors) and then compare each of those access
+// paths against each other. That means that we generate a number of tests
+// equal to the square of the size of sample_roots * sample_selectors.
+static AccessPathRoot sample_roots[] = {
+    ir::AccessPathRoot(ir::HandleConnectionSpecAccessPathRoot(
+        "spec1", "handle_spec1")),
+    ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
+        "recipe", "particle", "handle")),
+};
+
+static AccessPathSelectors sample_selectors[] = {
+    ir::AccessPathSelectors(),
+    ir::AccessPathSelectors(ir::Selector(ir::FieldSelector("field1"))),
+    ir::AccessPathSelectors(
+        ir::Selector(ir::FieldSelector("x")),
+        ir::AccessPathSelectors(ir::Selector(ir::FieldSelector("y"))))
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    AccessPathEqualsTest, AccessPathEqualsTest,
+    testing::Combine(
+        testing::Combine(
+            testing::ValuesIn(sample_roots),
+            testing::ValuesIn(sample_selectors)),
+        testing::Combine(
+            testing::ValuesIn(sample_roots),
+            testing::ValuesIn(sample_selectors))));
+
 }  // namespace raksha::ir

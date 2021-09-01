@@ -81,4 +81,40 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Combine(testing::ValuesIn(textproto_to_expected_format_string),
                      testing::ValuesIn(instantiated_roots)));
 
+class TestTagClaimEquals : public testing::TestWithParam<
+    std::tuple<
+      std::tuple<AccessPath, std::string>,
+      std::tuple<AccessPath, std::string>>> {};
+
+TEST_P(TestTagClaimEquals, TestTagClaimEquals) {
+  const std::tuple<AccessPath, std::string> tag_claim_args1 =
+      std::get<0>(GetParam());
+  const std::tuple<AccessPath, std::string> tag_claim_args2 =
+    std::get<1>(GetParam());
+
+  const TagClaim tag_claim1(TagAnnotationOnAccessPath(
+      std::get<0>(tag_claim_args1), std::get<1>(tag_claim_args1)));
+  const TagClaim tag_claim2(TagAnnotationOnAccessPath(
+    std::get<0>(tag_claim_args2), std::get<1>(tag_claim_args2)));
+
+  EXPECT_EQ(tag_claim1 == tag_claim2, tag_claim_args1 == tag_claim_args2);
+}
+
+static std::string sample_tags[] = {"tag1", "userSelection", "screen"};
+static AccessPath sample_access_paths[] = {
+    AccessPath(AccessPathRoot(
+        HandleConnectionAccessPathRoot("recipe", "particle", "handle")),
+               AccessPathSelectors(Selector(FieldSelector("field1")))),
+    AccessPath(AccessPathRoot(
+        HandleConnectionSpecAccessPathRoot("particle_spec", "handle_spec")),
+               AccessPathSelectors(Selector(FieldSelector("field2")))) };
+
+INSTANTIATE_TEST_SUITE_P(
+    TestTagClaimEquals, TestTagClaimEquals,
+    testing::Combine(
+        testing::Combine(testing::ValuesIn(sample_access_paths),
+                         testing::ValuesIn(sample_tags)),
+        testing::Combine(testing::ValuesIn(sample_access_paths),
+           testing::ValuesIn(sample_tags))));
+
 }  // namespace raksha::ir
