@@ -1,3 +1,5 @@
+package(default_visibility = ["//src:__subpackages__"])
+
 cc_library(
     name = "types",
     srcs = glob(
