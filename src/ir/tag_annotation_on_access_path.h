@@ -46,6 +46,13 @@ class TagAnnotationOnAccessPath {
         access_path_.Instantiate(std::move(new_root)), tag_);
   }
 
+  TagAnnotationOnAccessPath BulkInstantiate(
+      const absl::flat_hash_map<AccessPathRoot, AccessPathRoot>
+          &instantiation_map) const {
+    return TagAnnotationOnAccessPath(
+        access_path_.BulkInstantiate(instantiation_map), tag_);
+  }
+
   explicit TagAnnotationOnAccessPath(
       AccessPath access_path, std::string tag)
       : access_path_(access_path), tag_(tag) {}

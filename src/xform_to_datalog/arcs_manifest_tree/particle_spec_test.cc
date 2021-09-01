@@ -240,4 +240,120 @@ INSTANTIATE_TEST_SUITE_P(
     ParticleSpecFromProtoTest, ParticleSpecFromProtoTest,
     testing::ValuesIn(spec_proto_and_expected_info));
 
+// This example textproto contains checks, claims, and connections. We're
+// going to use it to show that BulkInstantiate will successfully give us the
+// instantiated versions of all of these facts.
+static const std::string kTextprotoWithAllFacts =
+    "name: \"PS1\" claims: [ { assume: {"
+    "  access_path: {"
+    "    handle: {"
+    "      particle_spec: \"PS1\", "
+    "      handle_connection: \"out_handle\" }, "
+    "    selectors: { field: \"field1\" } }, "
+    "  predicate: { label: { semantic_tag: \"tag1\"} } } },"
+    "  { assume: {"
+    "  access_path: {"
+    "    handle: {"
+    "      particle_spec: \"PS1\", "
+    "      handle_connection: \"in_out_handle\" }, "
+    "    selectors: { field: \"field2\" } }, "
+    "  predicate: { label: { semantic_tag: \"tag2\"} } } }"
+    "]"
+    "checks: [ {"
+    "  access_path: {"
+    "    handle: {"
+    "      particle_spec: \"PS1\", "
+    "      handle_connection: \"in_handle\" }, "
+    "    selectors: { field: \"field1\" } }, "
+    "  predicate: { label: { semantic_tag: \"tag3\"} } },"
+    "  {"
+    "  access_path: {"
+    "    handle: {"
+    "      particle_spec: \"PS1\", "
+    "      handle_connection: \"in_out_handle\" }, "
+    "    selectors: { field: \"field2\" } }, "
+    "  predicate: { label: { semantic_tag: \"tag4\"} } }"
+    "]"
+    "connections: ["
+    "  {"
+    "    name: \"out_handle\" direction: WRITES "
+    "    type: {"
+    "    entity: { "
+    "      schema: { "
+    "        fields: [ "
+    "          { key: \"field1\", value: { primitive: TEXT } } ]"
+    " } } } },"
+    "  {"
+    "    name: \"in_handle\" direction: READS "
+    "    type: {"
+    "    entity: { "
+    "      schema: { "
+    "        fields: [ "
+    "          { key: \"field2\", value: { primitive: TEXT } } ] } } } },"
+    "  {"
+    "    name: \"in_out_handle\" direction: READS_WRITES "
+    "    type: {"
+    "    entity: { "
+    "      schema: { "
+    "        fields: [ "
+    "          { key: \"field3\", value: { primitive: TEXT } }"
+    "    ]"
+    " } } } } ]";
+
+TEST(BulkInstantiateTest, BulkInstantiateTest) {
+  arcs::ParticleSpecProto particle_spec_proto;
+  google::protobuf::TextFormat::ParseFromString(
+      kTextprotoWithAllFacts, &particle_spec_proto);
+  ParticleSpec particle_spec =
+      ParticleSpec::CreateFromProto(particle_spec_proto);
+
+  const ir::AccessPathRoot p1_in_impl(
+      ir::HandleConnectionAccessPathRoot("recipe", "P1", "in_impl"));
+  const ir::AccessPathRoot p1_out_impl(
+      ir::HandleConnectionAccessPathRoot("recipe", "P1", "out_impl"));
+  const ir::AccessPathRoot p1_in_out_impl(
+      ir::HandleConnectionAccessPathRoot("recipe", "P1", "in_out_impl"));
+
+  const absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
+      instantiation_map {
+    { kPs1InHandleRoot, p1_in_impl }, { kPs1OutHandleRoot, p1_out_impl },
+    { kPs1InOutHandleRoot, p1_in_out_impl } };
+
+  InstantiatedParticleSpecFacts instantiated_facts =
+      particle_spec.BulkInstantiate(instantiation_map);
+
+  ASSERT_THAT(
+      instantiated_facts.claims,
+      testing::UnorderedElementsAreArray({
+        ir::TagClaim(ir::TagAnnotationOnAccessPath(ir::AccessPath(
+          p1_out_impl, MakeSingleFieldSelectors("field1")), "tag1")),
+        ir::TagClaim(ir::TagAnnotationOnAccessPath(ir::AccessPath(
+            p1_in_out_impl, MakeSingleFieldSelectors("field2")), "tag2"))}));
+
+  ASSERT_THAT(
+      instantiated_facts.checks,
+      testing::UnorderedElementsAreArray({
+        ir::TagCheck(ir::TagAnnotationOnAccessPath(ir::AccessPath(
+            p1_in_impl, MakeSingleFieldSelectors("field1")), "tag3")),
+        ir::TagCheck(ir::TagAnnotationOnAccessPath(ir::AccessPath(
+            p1_in_out_impl, MakeSingleFieldSelectors("field2")), "tag4"))}));
+
+  ASSERT_THAT(
+      instantiated_facts.edges,
+      testing::UnorderedElementsAreArray({
+        ir::Edge(
+            ir::AccessPath(p1_in_impl, MakeSingleFieldSelectors("field2")),
+            ir::AccessPath(p1_out_impl, MakeSingleFieldSelectors("field1"))),
+        ir::Edge(
+            ir::AccessPath(p1_in_impl, MakeSingleFieldSelectors("field2")),
+            ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3"))),
+        ir::Edge(
+            ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3")),
+            ir::AccessPath(p1_out_impl, MakeSingleFieldSelectors("field1"))),
+        ir::Edge(
+          ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3")),
+          ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3"))),
+      }));
+}
+
 }  // namespace raksha::xform_to_datalog::arcs_manifest_tree

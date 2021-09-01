@@ -24,6 +24,15 @@ class TagCheck {
         tag_annotation_on_access_path_.Instantiate(access_path_root));
   }
 
+  // Allow this TagCheck to participate in a bulk instantiation of multiple
+  // uninstantiated AccessPaths.
+  TagCheck BulkInstantiate(
+      const absl::flat_hash_map<AccessPathRoot, AccessPathRoot>
+          &instantiation_map) const {
+    return TagCheck(tag_annotation_on_access_path_.BulkInstantiate(
+        instantiation_map));
+  }
+
   // Print out the tag check as a Datalog fact. This is currently very
   // simplified relative to the arbitrary boolean expression predicate we
   // will eventually want, but is enough to get some simple Arcs tests

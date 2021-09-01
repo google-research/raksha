@@ -3,6 +3,7 @@
 #include <google/protobuf/util/message_differencer.h>
 #include <google/protobuf/text_format.h>
 
+#include "absl/hash/hash_testing.h"
 #include "src/common/testing/gtest.h"
 
 namespace raksha::ir {
@@ -135,5 +136,13 @@ INSTANTIATE_TEST_SUITE_P(
     AccessPathRootEqTest, AccessPathRootEqTest,
     testing::Combine(testing::ValuesIn(root_and_info_array),
                      testing::ValuesIn(root_and_info_array)));
+
+TEST(AccessPathRootHashTest, AccessPathRootHashTest) {
+  std::vector<AccessPathRoot> interesting_roots;
+  for (const AccessPathRootTypeAndArgs &info : root_and_info_array) {
+    interesting_roots.push_back(info.root);
+  }
+  EXPECT_TRUE(absl::VerifyTypeImplementsAbslHashCorrectly(interesting_roots));
+}
 
 }  // namespace raksha::ir

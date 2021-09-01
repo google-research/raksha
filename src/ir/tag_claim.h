@@ -33,6 +33,15 @@ class TagClaim {
         tag_annotation_on_access_path_.Instantiate(std::move(new_root)));
   }
 
+  // Allow this TagClaim to participate in a bulk instantiation of multiple
+  // uninstantiated AccessPaths.
+  TagClaim BulkInstantiate(
+      const absl::flat_hash_map<AccessPathRoot, AccessPathRoot>
+          &instantiation_map) const {
+    return TagClaim(tag_annotation_on_access_path_.BulkInstantiate(
+        instantiation_map));
+  }
+
   // Produce a string containing a datalog fact for this TagClaim.
   std::string ToString() const {
     return absl::StrCat(

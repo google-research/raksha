@@ -10,6 +10,7 @@ cc_library(
     deps = [
         "//src/common/logging",
         "//third_party/arcs/proto:manifest_cc_proto",
+        "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/hash",
         "@absl//absl/strings",
@@ -115,5 +116,6 @@ cc_test(
     deps = [
         ":ir",
         "//src/common/testing:gtest",
+        "@absl//absl/hash:hash_testing",
     ],
 )
