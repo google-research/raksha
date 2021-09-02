@@ -25,7 +25,10 @@
 #include "VisionPipelineTagOwners.dl"
 #include "VisionPipelineAuthLogicOutput.dl"
 
-// Particle 1: ImageDetector
+// Here there are just edges drawn when a particle has
+// both handles that it reads and handles that it writes.
+
+// Particle: ImageDetector
 // Dataflow edges
 edge("sensor_data_packet.camera_feed", "detection_boxes").
 edge("sensor_data_packet.video_resolution", "detection_boxes").
@@ -35,7 +38,7 @@ claimHasTag("sensor_data_packet.camera_feed", "raw_video_tag").
 claimHasTag("image_detection_model", "image_detection_model_tag").
 claimHasTag("detection_boxes", "detected_images_tag").
 
-// Particle 2: ImageSelector
+// Particle: ImageSelector
 // Dataflow edges
 edge("detection_boxes", "selected_image_id").
 edge("user_selection_action", "selected_image_id").
