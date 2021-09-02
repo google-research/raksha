@@ -13,6 +13,14 @@
 
 namespace raksha::xform_to_datalog::arcs_manifest_tree {
 
+// This struct is used to return the members of a ParticleSpec after being
+// instantiated.
+struct InstantiatedParticleSpecFacts {
+  std::vector<raksha::ir::TagClaim> claims;
+  std::vector<raksha::ir::TagCheck> checks;
+  std::vector<raksha::ir::Edge> edges;
+};
+
 // A class representing a ParticleSpec. This contains the relevant
 // information for the dataflow graph: checks, claims, and edges within the
 // ParticleSpec. All such information uses this ParticleSpec as the root.
@@ -32,6 +40,22 @@ class ParticleSpec {
   const std::vector<raksha::ir::TagClaim> &claims() const { return claims_; }
 
   const std::vector<raksha::ir::Edge> &edges() const { return edges_; }
+
+  InstantiatedParticleSpecFacts BulkInstantiate(
+      const absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
+          &instantiation_map) const {
+    InstantiatedParticleSpecFacts result;
+    for (const raksha::ir::TagCheck &check : checks_) {
+      result.checks.push_back(check.BulkInstantiate(instantiation_map));
+    }
+    for (const raksha::ir::TagClaim &claim : claims_) {
+      result.claims.push_back(claim.BulkInstantiate(instantiation_map));
+    }
+    for (const raksha::ir::Edge &edge : edges_) {
+      result.edges.push_back(edge.BulkInstantiate(instantiation_map));
+    }
+    return result;
+  }
 
  private:
   ParticleSpec(

@@ -70,6 +70,13 @@ class HandleConnectionSpecAccessPathRoot {
       (handle_connection_spec_name_ == other.handle_connection_spec_name_);
   }
 
+  template<typename H>
+  friend H AbslHashValue(
+      H h, const HandleConnectionSpecAccessPathRoot &hcs_access_path_root) {
+    return H::combine(std::move(h), hcs_access_path_root.particle_spec_name_,
+                      hcs_access_path_root.handle_connection_spec_name_);
+  }
+
  private:
   std::string particle_spec_name_;
   std::string handle_connection_spec_name_;
@@ -103,6 +110,14 @@ class HandleConnectionAccessPathRoot {
     return (recipe_name_ == other.recipe_name_) &&
       (particle_name_ == other.particle_name_) &&
       (handle_name_ == other.handle_name_);
+  }
+
+  template<typename H>
+  friend H AbslHashValue(
+      H h, const HandleConnectionAccessPathRoot &hc_access_path_root) {
+    return H::combine(
+        std::move(h), hc_access_path_root.recipe_name_,
+        hc_access_path_root.particle_name_, hc_access_path_root.handle_name_);
   }
 
  private:
@@ -139,6 +154,11 @@ class AccessPathRoot {
 
   bool operator==(const AccessPathRoot &other) const {
     return specific_root_ == other.specific_root_;
+  }
+
+  template<typename H>
+  friend H AbslHashValue(H h, const AccessPathRoot &access_path_root) {
+    return H::combine(std::move(h), access_path_root.specific_root_);
   }
 
  private:
