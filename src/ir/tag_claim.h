@@ -22,6 +22,10 @@ class TagClaim {
         TagAnnotationOnAccessPath::CreateFromProto(assume_proto, "Assume"));
   }
 
+  explicit TagClaim(TagAnnotationOnAccessPath tag_annotation_on_access_path)
+    : tag_annotation_on_access_path_(std::move(tag_annotation_on_access_path))
+    {}
+
   // Return a TagClaim that is the same as *this, but with the root new_root.
   // Note that this expects the current root to be uninstantiated.
   TagClaim Instantiate(AccessPathRoot new_root) const {
@@ -37,11 +41,13 @@ class TagClaim {
         "\", \"", tag_annotation_on_access_path_.tag(), "\").\n");
   }
 
- private:
-  explicit TagClaim(TagAnnotationOnAccessPath tag_annotation_on_access_path)
-  : tag_annotation_on_access_path_(std::move(tag_annotation_on_access_path)) {}
+  bool operator==(const TagClaim &other) const {
+    return tag_annotation_on_access_path_ ==
+      other.tag_annotation_on_access_path_;
+  }
 
-   // Internally, we represent the data as a TagAnnotationOnAccessPath object.
+ private:
+  // Internally, we represent the data as a TagAnnotationOnAccessPath object.
   // This allows us to share code with TagCheck. While TagCheck and TagClaim
   // are semantically very different, they are very similar in their internal
   // representation, both here and in Arcs manifest protos.

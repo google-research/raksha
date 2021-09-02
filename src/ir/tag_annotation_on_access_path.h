@@ -58,6 +58,10 @@ class TagAnnotationOnAccessPath {
     return tag_;
   }
 
+  bool operator==(const TagAnnotationOnAccessPath &other) const {
+    return (access_path_ == other.access_path_) && (tag_ == other.tag_);
+  }
+
  private:
   // The AccessPath upon which the tag is annotated.
   AccessPath access_path_;

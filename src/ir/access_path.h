@@ -59,6 +59,11 @@ class AccessPath {
     return access_path_selectors_;
   }
 
+  bool operator==(const AccessPath &other) const {
+    return (root_ == other.root_) &&
+      (access_path_selectors_ == other.access_path_selectors_);
+  }
+
  private:
   AccessPathRoot root_;
   AccessPathSelectors access_path_selectors_;
