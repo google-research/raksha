@@ -77,18 +77,19 @@ claimHasTag("image_selection", "image_selection_tag").
 claimHasTag("detection_model", "image_detection_model_tag").
 
 // The label of the access path "image_detection_boxes" is downgraded from
-// {raw_video_tag, image_detection_model_tag} to {detected_images_tag}. This happens in two 
-// steps -- first the label is downgraded from {raw_video_tag, 
-// image_detection_tag} to {} (the empty set, which is totally public -- can go 
-// anywher). This downgrade happens with
-//      saysDowngrades(Alice, raw_video_tag, image_detection_boxes)
+// {raw_video_tag, image_detection_model_tag} to {detected_images_tag}. This
+// happens in two steps -- first the label is downgraded from {raw_video_tag,
+// image_detection_model_tag} to {} (the empty set, which is totally public -- can go
+// anywhere). This downgrade happens with
+//      saysDowngrades(Alice, image_detection_boxes, raw_video_tag)
 // and
-//      saysDowngrades(ServiceProvider, image_detection_model_tag, 
-//            image_detection_boxes)
-// Then it is "upgraded" from {} to {product_id} because the label
-// {product_id} is more constrained. The upgrade happens with
+//      saysDowngrades(ServiceProvider, image_detection_boxes, 
+//            image_detection_model_tag)
+// Then it is "upgraded" from {} to {detected_image_tag}. (This is an
+// "upgrade" because the label {detected_image_tag} is more constrained.
+// Upgrades are always allowed). The upgrade happens with
 // 
-//      claimHasTag(image_detection_boxes, product_id).
+//      claimHasTag(image_detection_boxes, detected_images_tag).
 
 saysDowngrades("Alice", "image_detection_boxes", "raw_video_tag").
 saysDowngrades("ServiceProvider", "image_detection_boxes", 
@@ -96,7 +97,8 @@ saysDowngrades("ServiceProvider", "image_detection_boxes",
 claimHasTag("image_detection_boxes", "detected_images_tag").
 
 // The output of the image selector is downgraded from 
-// {image_detection_model_tag} to {select
+// {image_detection_model_tag, detected_images_tag} to
+// {product_id_tag}
 saysDowngrades("Alice", "selected_image_id", "image_selection_tag").
 saysDowngrades("Alice", "selected_image_id", "detected_images_tag").
 claimHasTag("selected_image_id", "product_id_tag").

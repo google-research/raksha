@@ -28,6 +28,8 @@
 
 // Some party asserts the claim that the label of an access path should be
 // downgraded by removing the referenced tag from the set.
+// This relation needs to be in snake case because outputs from the 
+// authorization logic will be in snake case.
 .decl saysDowngrades(speaker: Principal, p: AccessPath, t: Tag)
 
 .decl isPrincipal(p: Principal)
