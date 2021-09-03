@@ -74,7 +74,6 @@ class AccessPath {
     return Instantiate(std::move(new_root));
   }
 
-
   const AccessPathRoot &root() const { return root_; }
 
   const AccessPathSelectors &selectors() const {

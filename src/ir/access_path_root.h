@@ -90,18 +90,19 @@ class HandleConnectionAccessPathRoot {
  public:
   HandleConnectionAccessPathRoot(
       std::string recipe_name, std::string particle_name,
-      std::string handle_name)
+      std::string handle_connection_name)
     : recipe_name_(recipe_name), particle_name_(particle_name),
-      handle_name_(handle_name) {}
+      handle_connection_name_(handle_connection_name) {}
 
 
   // A HandleConnectionAccessPathRoot joins together its recipe, particle,
   // and handle name to generate its string.
   std::string ToString() const {
-    return absl::StrJoin({ recipe_name_, particle_name_, handle_name_ }, ".");
+    return absl::StrJoin({
+      recipe_name_, particle_name_, handle_connection_name_ }, ".");
   }
 
-  // A ConcreteAccessPathRoot is instantiated.
+  // A HandleConnectionAccessPathRoot is instantiated.
   bool IsInstantiated() const {
     return true;
   }
@@ -109,7 +110,7 @@ class HandleConnectionAccessPathRoot {
   bool operator==(const HandleConnectionAccessPathRoot &other) const {
     return (recipe_name_ == other.recipe_name_) &&
       (particle_name_ == other.particle_name_) &&
-      (handle_name_ == other.handle_name_);
+      (handle_connection_name_ == other.handle_connection_name_);
   }
 
   template<typename H>
@@ -117,12 +118,50 @@ class HandleConnectionAccessPathRoot {
       H h, const HandleConnectionAccessPathRoot &hc_access_path_root) {
     return H::combine(
         std::move(h), hc_access_path_root.recipe_name_,
-        hc_access_path_root.particle_name_, hc_access_path_root.handle_name_);
+        hc_access_path_root.particle_name_,
+        hc_access_path_root.handle_connection_name_);
   }
 
  private:
   std::string recipe_name_;
   std::string particle_name_;
+  std::string handle_connection_name_;
+};
+
+// A root representing a handle in a recipe.
+class HandleAccessPathRoot {
+ public:
+  explicit HandleAccessPathRoot(
+      std::string recipe_name, std::string handle_name)
+      : recipe_name_(std::move(recipe_name)),
+        handle_name_(std::move(handle_name)) {}
+
+  // The string representation of a HandleAccessPathRoot is just
+  // recipe_name_.handle_name_
+  std::string ToString() const {
+    return absl::StrJoin({recipe_name_, handle_name_}, ".");
+  }
+
+  // A HandleAccessPathRoot is instantiated.
+  bool IsInstantiated() const {
+    return true;
+  }
+
+  bool operator==(const HandleAccessPathRoot &other) const {
+    return (recipe_name_ == other.recipe_name_) &&
+      (handle_name_ == other.handle_name_);
+  }
+
+  template<typename H>
+  friend H AbslHashValue(
+      H h, const HandleAccessPathRoot &hc_access_path_root) {
+    return H::combine(
+        std::move(h), hc_access_path_root.recipe_name_,
+        hc_access_path_root.handle_name_);
+  }
+
+ private:
+  std::string recipe_name_;
   std::string handle_name_;
 };
 
@@ -134,7 +173,8 @@ class AccessPathRoot {
   // specific root types. Prevents the types used in the constructor and the
   // field from getting out of sync.
   using RootVariant = absl::variant<
-      HandleConnectionSpecAccessPathRoot, HandleConnectionAccessPathRoot>;
+      HandleConnectionSpecAccessPathRoot, HandleConnectionAccessPathRoot,
+      HandleAccessPathRoot>;
 
   explicit AccessPathRoot(RootVariant specific_root)
     : specific_root_(std::move(specific_root)) {}
