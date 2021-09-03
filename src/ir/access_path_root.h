@@ -122,6 +122,14 @@ class HandleConnectionAccessPathRoot {
         hc_access_path_root.handle_connection_name_);
   }
 
+  template<typename H>
+  friend H AbslHashValue(
+      H h, const HandleConnectionAccessPathRoot &hc_access_path_root) {
+    return H::combine(
+        std::move(h), hc_access_path_root.recipe_name_,
+        hc_access_path_root.particle_name_, hc_access_path_root.handle_name_);
+  }
+
  private:
   std::string recipe_name_;
   std::string particle_name_;

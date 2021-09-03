@@ -69,8 +69,8 @@ std::vector<ir::Edge> ParticleSpec::GenerateEdges(
   // explicit DerivesFrom claims to and from a nexus AccessPath to produce a
   // linear number of edges instead.
   std::vector<ir::Edge> edges;
-  for (ir::AccessPath input : input_access_paths) {
-    for (ir::AccessPath output : output_access_paths) {
+  for (const ir::AccessPath &input : input_access_paths) {
+    for (const ir::AccessPath &output : output_access_paths) {
       edges.push_back(ir::Edge(input, output));
     }
   }
