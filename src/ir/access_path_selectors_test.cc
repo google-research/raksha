@@ -2,6 +2,8 @@
 
 #include <string>
 #include <vector>
+#include <google/protobuf/util/message_differencer.h>
+#include <google/protobuf/text_format.h>
 
 #include "absl/hash/hash_testing.h"
 #include "absl/status/statusor.h"
@@ -95,7 +97,8 @@ TEST_P(AccessPathTest, CanRoundTripAccessPathString) {
       MakeSelectorAccessPathFromString(original_access_path);
 
   ASSERT_TRUE(access_path.ok());
-  // Assert that the result of to_string is the same as the original AccessPathSelectors.
+  // Assert that the result of to_string is the same as the original
+  // AccessPathSelectors.
   ASSERT_EQ(access_path->ToString(), original_access_path);
 }
 
@@ -119,5 +122,46 @@ TEST(AccessPathHashTest, SelectorAccessPathHashTest) {
   EXPECT_TRUE(
       absl::VerifyTypeImplementsAbslHashCorrectly(access_paths_to_check));
 }
+
+static const std::tuple<std::string, std::string>
+  access_path_selectors_proto_tostring_pairs[] {
+    {"", ""},
+    { "selectors: { field: \"foo\" }", ".foo" },
+    { "selectors: [{ field: \"foo\" }, { field: \"bar\" }]", ".foo.bar" },
+    { "selectors: [{ field: \"foo\" }, { field: \"bar\" }, { field: \"baz\" }]",
+      ".foo.bar.baz" },
+};
+
+class AccessPathSelectorsFromProtoTest
+ : public testing::TestWithParam<std::tuple<std::string, std::string>> {};
+
+TEST_P(AccessPathSelectorsFromProtoTest, AccessPathSelectorsFromProtoTest) {
+  std::string access_path_textproto = std::get<0>(GetParam());
+  std::string expected_to_string = std::get<1>(GetParam());
+
+  arcs::AccessPathProto orig_access_path_proto;
+  google::protobuf::TextFormat::ParseFromString(
+      access_path_textproto, &orig_access_path_proto);
+
+  // If this test were given an AccessPathProto with a root element, it would
+  // fail because this class handles the selector piece only. Guard ourselves
+  // from confusion due to bad inputs by checking that our input does not
+  // have a root.
+  EXPECT_FALSE(orig_access_path_proto.has_handle());
+  EXPECT_FALSE(orig_access_path_proto.has_store_id());
+
+  AccessPathSelectors access_path_selectors =
+      AccessPathSelectors::CreateFromProto(orig_access_path_proto);
+  EXPECT_EQ(access_path_selectors.ToString(), expected_to_string);
+
+  arcs::AccessPathProto result_access_path_proto;
+  access_path_selectors.FillSelectors(result_access_path_proto);
+  EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
+      result_access_path_proto, orig_access_path_proto));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    AccessPathSelectorsFromProtoTest, AccessPathSelectorsFromProtoTest,
+    testing::ValuesIn(access_path_selectors_proto_tostring_pairs));
 
 } // namespace raksha::ir

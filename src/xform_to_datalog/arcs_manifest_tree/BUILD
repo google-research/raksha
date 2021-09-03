@@ -10,6 +10,7 @@ cc_library(
     deps = [
         "//src/common/logging",
         "//src/ir",
+        "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",
         "@absl//absl/container:flat_hash_map",
     ],
@@ -18,6 +19,15 @@ cc_library(
 cc_test(
     name = "handle_connection_spec_test",
     srcs = ["handle_connection_spec_test.cc"],
+    deps = [
+        ":arcs_manifest_tree",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_test(
+    name = "particle_spec_test",
+    srcs = ["particle_spec_test.cc"],
     deps = [
         ":arcs_manifest_tree",
         "//src/common/testing:gtest",

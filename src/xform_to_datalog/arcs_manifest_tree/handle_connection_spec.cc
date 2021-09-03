@@ -1,10 +1,12 @@
 #include "src/xform_to_datalog/arcs_manifest_tree/handle_connection_spec.h"
 
-namespace src::xform_to_datalog::arcs_manifest_tree {
+namespace raksha::xform_to_datalog::arcs_manifest_tree {
+
+namespace types = raksha::ir::types;
 
 HandleConnectionSpec HandleConnectionSpec::CreateFromProto(
     const arcs::HandleConnectionSpecProto &handle_connection_spec_proto) {
-  const std::string &name = handle_connection_spec_proto.name();
+  std::string name = handle_connection_spec_proto.name();
   CHECK(!name.empty()) << "Found connection spec without required name.";
   bool reads = false;
   bool writes = false;
@@ -26,7 +28,11 @@ HandleConnectionSpec HandleConnectionSpec::CreateFromProto(
       LOG(FATAL)
         << "Unimplemented direction in connection spec " << name << ".";
   }
-  return HandleConnectionSpec(name, reads, writes);
+  CHECK(handle_connection_spec_proto.has_type())
+    << "Found connection spec " << name << " without required type.";
+  std::unique_ptr<types::Type> type =
+      types::Type::CreateFromProto(handle_connection_spec_proto.type());
+  return HandleConnectionSpec(std::move(name), reads, writes, std::move(type));
 }
 
-}  // namespace src::xform_to_datalog::arcs_manifest_tree
+}  // namespace raksha::xform_to_datalog::arcs_manifest_tree

@@ -10,6 +10,7 @@ cc_library(
     deps = [
         "//src/common/logging",
         "//third_party/arcs/proto:manifest_cc_proto",
+        "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/hash",
         "@absl//absl/strings",
@@ -75,5 +76,46 @@ cc_test(
     deps = [
         ":ir",
         "//src/common/testing:gtest",
+    ],
+)
+
+cc_test(
+    name = "edge_test",
+    srcs = ["edge_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_test(
+    name = "tag_claim_test",
+    srcs = ["tag_claim_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "tag_check_test",
+    srcs = ["tag_check_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "access_path_root_test",
+    srcs = ["access_path_root_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+        "@absl//absl/hash:hash_testing",
     ],
 )
