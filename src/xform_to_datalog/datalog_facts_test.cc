@@ -287,10 +287,6 @@ static const std::string kNamedRecipePs1Inst1InHandleField1 =
     absl::StrJoin({kNamedRecipeName, kPs1Inst1Name, kInHcName, kField1Name },
                   ".");
 
-static const std::string kNamedRecipePs1Inst1InHandleField2 =
-    absl::StrJoin({kNamedRecipeName, kPs1Inst1Name, kInHcName, kField2Name },
-              ".");
-
 static const std::string kNamedRecipePs1Inst1OutHandleField1 =
     absl::StrJoin({kNamedRecipeName, kPs1Inst1Name, kOutHcName, kField1Name},
                   ".");
@@ -320,8 +316,6 @@ static const std::string kGenRecipeH4Field1 =
 static const std::string kGenRecipePs1Inst0InHandleField1 =
     absl::StrJoin({kGenRecipeName, kPs1Inst0Name, kInHcName, kField1Name}, ".");
 
-static const std::string kGenRecipePs1Inst0InHandleField2 =
-    absl::StrJoin({kGenRecipeName, kPs1Inst0Name, kInHcName, kField2Name}, ".");
 static const std::string kGenRecipePs1Inst0OutHandleField1 =
     absl::StrJoin({kGenRecipeName, kPs1Inst0Name, kOutHcName, kField1Name},
                   ".");
