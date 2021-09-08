@@ -1,0 +1,31 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+#include "authorization_logic.dl"
+
+// This code assign owners to tags for the VisionPipeline.arcs example.
+// This is not generated code. This is policy code that is written directly
+// in datalog (for now).
+//
+// This is the only bit of "policy" code that
+// isn't expressed in authorization logic, and it isn't in authorization logic
+// just because these facts are "universally true" rather than having a 
+// "speaker". We might also try making these "SomePrincipal says ownsTag(...)"
+// instead later, but this seems like a simpler way to start.
+ownsTag("EndUser", "raw_video_tag").
+ownsTag("EndUser", "detected_images_tag").
+ownsTag("EndUser", "user_selection_tag").
+ownsTag("EndUser", "product_id_tag").
+ownsTag("ServiceProvider", "image_detection_model_tag").
