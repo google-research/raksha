@@ -81,163 +81,163 @@ INSTANTIATE_TEST_SUITE_P(DatalogFactsToStringTest, DatalogFactsToStringTest,
 //
 // TODO(#107): This is currently quite complex. After the MVP, we should break
 // this up into smaller, more focused tests.
-static const std::string kManifestTextproto =
-    "particle_specs: [\n"
-    "{ name: \"PS1\" connections: [\n"
-    "  {\n"
-    "    name: \"out_handle\" direction: WRITES \n"
-    "    type: {\n"
-    "    entity: { \n"
-    "      schema: { \n"
-    "        fields: [ \n"
-    "          { key: \"field1\" value: { primitive: TEXT } }\n"
-    "    ]\n"
-    " } } } },\n"
-    "  {\n"
-    "    name: \"in_handle\" direction: READS \n"
-    "    type: {\n"
-    "    entity: { \n"
-    "      schema: { \n"
-    "        fields: [ \n"
-    "          { key: \"field1\" value: { primitive: TEXT } }\n"
-    "    ]\n"
-    " } } } } ],\n"
-    " claims: [\n"
-    "   { assume: {\n"
-    "       access_path: {\n"
-    "         handle: {\n"
-    "           particle_spec: \"PS1\",\n"
-    "           handle_connection: \"out_handle\" },\n"
-    "         selectors: { field: \"field1\" } }"
-    "       predicate: { label: { semantic_tag: \"tag1\"} } } }"
-    " ],\n"
-    " checks: [\n"
-    "   {\n"
-    "     access_path: {\n"
-    "         handle: {\n"
-    "           particle_spec: \"PS1\",\n"
-    "           handle_connection: \"in_handle\" },\n"
-    "         selectors: { field: \"field1\" } }"
-    "     predicate: { label: { semantic_tag: \"tag2\"} } }"
-    " ]\n"
-    "},\n"
-    "{ name: \"PS2\" connections: [\n"
-    "  {\n"
-    "    name: \"out_handle\" direction: WRITES \n"
-    "    type: {\n"
-    "    entity: { \n"
-    "      schema: { \n"
-    "        fields: [ \n"
-    "          { key: \"field1\" value: { primitive: TEXT } }\n"
-    "    ]\n"
-    " } } } },\n"
-    "  {\n"
-    "    name: \"in_handle\" direction: READS \n"
-    "    type: {\n"
-    "    entity: { \n"
-    "      schema: { \n"
-    "        fields: [ \n"
-    "          { key: \"field1\" value: { primitive: TEXT } }\n"
-    "    ]\n"
-    " } } } } ],"
-    " claims: [\n"
-    "   { assume: {\n"
-    "       access_path: {\n"
-    "         handle: {\n"
-    "           particle_spec: \"PS2\", \n"
-    "           handle_connection: \"out_handle\" },\n"
-    "         selectors: { field: \"field1\" } }\n"
-    "       predicate: { label: { semantic_tag: \"tag3\"} } } }\n"
-    " ],\n"
-    " checks: [\n"
-    "   {\n"
-    "     access_path: {\n"
-    "       handle: {\n"
-    "         particle_spec: \"PS2\", handle_connection: \"in_handle\" },\n"
-    "       selectors: { field: \"field1\" } }"
-    "     predicate: { label: { semantic_tag: \"tag4\"} } }\n"
-    " ]\n"
-    "}\n"
-    "] \n"
-    "recipes: [\n"
-    " { name: \"NamedR\"\n"
-    "   particles: [\n"
-    "     { spec_name: \"PS1\"\n"
-    "       connections: [\n"
-    "         { name: \"in_handle\" handle: \"h1\" type: {\n"
-    "           entity: { \n"
-    "             schema: { \n"
-    "               fields: [ \n"
-    "                 { key: \"field1\", value: { primitive: TEXT } },\n"
-    "                 { key: \"field2\", value: { primitive: TEXT }}]}}}},\n"
-    "         { name: \"out_handle\" handle: \"h2\" type: {\n"
-    "           entity: { \n"
-    "             schema: { \n"
-    "               fields: [ \n"
-    "                 { key: \"field1\", value: { primitive: TEXT }}]}}}}]},\n"
-    "     { spec_name: \"PS1\"\n"
-    "       connections: [\n"
-    "         { name: \"in_handle\" handle: \"h2\" type: {\n"
-    "           entity: { \n"
-    "             schema: { \n"
-    "               fields: [ \n"
-    "                 { key: \"field1\", value: { primitive: TEXT }}]}}}},\n"
-    "         { name: \"out_handle\" handle: \"h3\" type: {\n"
-    "           entity: { \n"
-    "             schema: { \n"
-    "               fields: [ \n"
-    "                 { key: \"field1\", value: { primitive: TEXT } }]}}}}]},\n"
-    "     { spec_name: \"PS2\"\n"
-    "       connections: [\n"
-    "         { name: \"in_handle\" handle: \"h3\" type: {\n"
-    "           entity: { \n"
-    "             schema: { \n"
-    "               fields: [\n"
-    "                 { key: \"field1\", value: { primitive: TEXT }}]}}}},\n"
-    "         { name: \"out_handle\" handle: \"h4\" type: {\n"
-    "           entity: { \n"
-    "             schema: { \n"
-    "               fields: [ \n"
-    "              { key: \"field1\", value: { primitive: TEXT } } ]}}}}]}]},\n"
-    " {\n"
-    "   particles: [\n"
-    "     { spec_name: \"PS1\"\n"
-    "       connections: [\n"
-    "         { name: \"in_handle\" handle: \"h1\" type: {\n"
-    "           entity: { \n"
-    "             schema: { \n"
-    "               fields: [ \n"
-    "                 { key: \"field1\", value: { primitive: TEXT } }]}}}},\n"
-    "         { name: \"out_handle\" handle: \"h2\" type: {\n"
-    "           entity: { \n"
-    "             schema: { \n"
-    "               fields: [ \n"
-    "                { key: \"field1\", value: { primitive: TEXT } } ]}}}}]},\n"
-    "     { spec_name: \"PS2\"\n"
-    "       connections: [\n"
-    "         { name: \"in_handle\" handle: \"h2\" type: {\n"
-    "           entity: { \n"
-    "             schema: { \n"
-    "               fields: [ \n"
-    "                 { key: \"field1\", value: { primitive: TEXT }}]}}}},\n"
-    "         { name: \"out_handle\" handle: \"h3\" type: {\n"
-    "           entity: { \n"
-    "             schema: { \n"
-    "               fields: [ \n"
-    "                { key: \"field1\", value: { primitive: TEXT } } ]}}}}]},\n"
-    "     { spec_name: \"PS2\"\n"
-    "       connections: [\n"
-    "         { name: \"in_handle\" handle: \"h3\" type: {\n"
-    "           entity: { \n"
-    "             schema: { \n"
-    "               fields: [ \n"
-    "                 { key: \"field1\", value: { primitive: TEXT }}]}}}},\n"
-    "         { name: \"out_handle\" handle: \"h4\" type: {\n"
-    "           entity: { \n"
-    "             schema: { \n"
-    "               fields: [ \n"
-    "               { key: \"field1\", value: { primitive: TEXT } } ]}}}}]}]}\n"
-    "]";
+static const std::string kManifestTextproto = R"MANIFEST(
+    particle_specs: [
+    { name: "PS1" connections: [
+      {
+        name: "out_handle" direction: WRITES
+        type: {
+        entity: {
+          schema: {
+            fields: [
+              { key: "field1" value: { primitive: TEXT } }
+        ]
+     } } } },
+      {
+        name: "in_handle" direction: READS
+        type: {
+        entity: {
+          schema: {
+            fields: [
+              { key: "field1" value: { primitive: TEXT } }
+        ]
+     } } } } ],
+     claims: [
+       { assume: {
+           access_path: {
+             handle: {
+               particle_spec: "PS1",
+               handle_connection: "out_handle" },
+             selectors: { field: "field1" } }
+           predicate: { label: { semantic_tag: "tag1"} } } }
+     ],
+     checks: [
+       {
+         access_path: {
+             handle: {
+               particle_spec: "PS1",
+               handle_connection: "in_handle" },
+             selectors: { field: "field1" } }
+         predicate: { label: { semantic_tag: "tag2"} } }
+     ]
+    },
+    { name: "PS2" connections: [
+      {
+        name: "out_handle" direction: WRITES
+        type: {
+        entity: {
+          schema: {
+            fields: [
+              { key: "field1" value: { primitive: TEXT } }
+        ]
+     } } } },
+      {
+        name: "in_handle" direction: READS
+        type: {
+        entity: {
+          schema: {
+            fields: [
+              { key: "field1" value: { primitive: TEXT } }
+        ]
+     } } } } ]
+     claims: [
+       { assume: {
+           access_path: {
+             handle: {
+               particle_spec: "PS2",
+               handle_connection: "out_handle" },
+             selectors: { field: "field1" } }
+           predicate: { label: { semantic_tag: "tag3"} } } }
+     ],
+     checks: [
+       {
+         access_path: {
+           handle: {
+             particle_spec: "PS2", handle_connection: "in_handle" },
+           selectors: { field: "field1" } }
+         predicate: { label: { semantic_tag: "tag4"} } }
+     ]
+    }
+    ]
+    recipes: [
+     { name: "NamedR"
+       particles: [
+         { spec_name: "PS1"
+           connections: [
+             { name: "in_handle" handle: "h1" type: {
+               entity: {
+                 schema: {
+                   fields: [
+                     { key: "field1", value: { primitive: TEXT } },
+                     { key: "field2", value: { primitive: TEXT }}]}}}},
+             { name: "out_handle" handle: "h2" type: {
+               entity: {
+                 schema: {
+                   fields: [
+                     { key: "field1", value: { primitive: TEXT }}]}}}}]},
+         { spec_name: "PS1"
+           connections: [
+             { name: "in_handle" handle: "h2" type: {
+               entity: {
+                 schema: {
+                   fields: [
+                     { key: "field1", value: { primitive: TEXT }}]}}}},
+             { name: "out_handle" handle: "h3" type: {
+               entity: {
+                 schema: {
+                   fields: [
+                     { key: "field1", value: { primitive: TEXT } }]}}}}]},
+         { spec_name: "PS2"
+           connections: [
+             { name: "in_handle" handle: "h3" type: {
+               entity: {
+                 schema: {
+                   fields: [
+                     { key: "field1", value: { primitive: TEXT }}]}}}},
+             { name: "out_handle" handle: "h4" type: {
+               entity: {
+                 schema: {
+                   fields: [
+                  { key: "field1", value: { primitive: TEXT } } ]}}}}]}]},
+     {
+       particles: [
+         { spec_name: "PS1"
+           connections: [
+             { name: "in_handle" handle: "h1" type: {
+               entity: {
+                 schema: {
+                   fields: [
+                     { key: "field1", value: { primitive: TEXT } }]}}}},
+             { name: "out_handle" handle: "h2" type: {
+               entity: {
+                 schema: {
+                   fields: [
+                    { key: "field1", value: { primitive: TEXT } } ]}}}}]},
+         { spec_name: "PS2"
+           connections: [
+             { name: "in_handle" handle: "h2" type: {
+               entity: {
+                 schema: {
+                   fields: [
+                     { key: "field1", value: { primitive: TEXT }}]}}}},
+             { name: "out_handle" handle: "h3" type: {
+               entity: {
+                 schema: {
+                   fields: [
+                    { key: "field1", value: { primitive: TEXT } } ]}}}}]},
+         { spec_name: "PS2"
+           connections: [
+             { name: "in_handle" handle: "h3" type: {
+               entity: {
+                 schema: {
+                   fields: [
+                     { key: "field1", value: { primitive: TEXT }}]}}}},
+             { name: "out_handle" handle: "h4" type: {
+               entity: {
+                 schema: {
+                   fields: [
+                   { key: "field1", value: { primitive: TEXT } } ]}}}}]}]}
+    "])MANIFEST";
 
 // These are a bunch of static constants to make building the expected facts
 // a little easier to understand.
