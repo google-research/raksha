@@ -29,23 +29,20 @@ ParticleSpec ParticleSpec::CreateFromProto(
     checks.push_back(ir::TagCheck::CreateFromProto(check));
   }
 
-  std::vector<ir::Edge> edges =
-      GenerateEdges(name, std::move(handle_connection_specs));
-
   return ParticleSpec(
-      std::move(name), std::move(checks), std::move(claims), std::move(edges));
+      std::move(name), std::move(checks), std::move(claims),
+      std::move(handle_connection_specs));
 }
 
-std::vector<ir::Edge> ParticleSpec::GenerateEdges(
-    std::string particle_spec_name,
-    std::vector<HandleConnectionSpec> connection_specs) {
+void ParticleSpec::GenerateEdges() {
   // First, find all of the access paths that are input to the particle spec
   // and output from the particle spec.
   std::vector<ir::AccessPath> input_access_paths;
   std::vector<ir::AccessPath> output_access_paths;
-  for (HandleConnectionSpec &connection_spec : connection_specs) {
+  for (const auto &name_hcs_pair : handle_connection_specs_) {
+    const HandleConnectionSpec &connection_spec = name_hcs_pair.second;
     std::vector<ir::AccessPath> access_paths =
-        connection_spec.GetAccessPaths(particle_spec_name);
+        connection_spec.GetAccessPaths(name_);
     if (connection_spec.reads()) {
       // Note: we cannot move the access_paths here because handles can be both
       // read and written. Therefore, it may be used in the writes() case after
@@ -68,13 +65,11 @@ std::vector<ir::Edge> ParticleSpec::GenerateEdges(
   // output access paths. This is quadratic; we should draw all edges without
   // explicit DerivesFrom claims to and from a nexus AccessPath to produce a
   // linear number of edges instead.
-  std::vector<ir::Edge> edges;
   for (const ir::AccessPath &input : input_access_paths) {
     for (const ir::AccessPath &output : output_access_paths) {
-      edges.push_back(ir::Edge(input, output));
+      edges_.push_back(ir::Edge(input, output));
     }
   }
-  return edges;
 }
 
 }  // namespace raksha::xform_to_datalog::arcs_manifest_tree

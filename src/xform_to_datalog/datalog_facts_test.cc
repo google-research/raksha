@@ -392,12 +392,9 @@ static const std::string kExpectedEdgeStrings[] = {
     // Named recipe edges:
     // Edges connecting h1 to NamedR.PS1#0 for fields {field1, field2}.
     MakeEdgeStr(kNamedRecipeH1Field1, kNamedRecipePs1Inst0InHandleField1),
-    MakeEdgeStr(kNamedRecipePs1Inst0InHandleField1, kNamedRecipeH1Field1),
     MakeEdgeStr(kNamedRecipeH1Field2, kNamedRecipePs1Inst0InHandleField2),
-    MakeEdgeStr(kNamedRecipePs1Inst0InHandleField2, kNamedRecipeH1Field2),
 
     // Edges connecting h2 to NamedR.PS1#0 for field1
-    MakeEdgeStr(kNamedRecipeH2Field1, kNamedRecipePs1Inst0OutHandleField1),
     MakeEdgeStr(kNamedRecipePs1Inst0OutHandleField1, kNamedRecipeH2Field1),
 
     // Intra-particle connection
@@ -406,10 +403,8 @@ static const std::string kExpectedEdgeStrings[] = {
 
     // Edges connecting h2 to NamedR.PS1#1 for field1.
     MakeEdgeStr(kNamedRecipeH2Field1, kNamedRecipePs1Inst1InHandleField1),
-    MakeEdgeStr(kNamedRecipePs1Inst1InHandleField1, kNamedRecipeH2Field1),
 
     // Edges connecting h3 to NamedR.PS1#1 for field1
-    MakeEdgeStr(kNamedRecipeH3Field1, kNamedRecipePs1Inst1OutHandleField1),
     MakeEdgeStr(kNamedRecipePs1Inst1OutHandleField1, kNamedRecipeH3Field1),
 
     // Intra-particle connection
@@ -418,10 +413,8 @@ static const std::string kExpectedEdgeStrings[] = {
 
     // Edges connecting h3 to NamedR.PS2#2 for field1
     MakeEdgeStr(kNamedRecipeH3Field1, kNamedRecipePs2Inst2InHandleField1),
-    MakeEdgeStr(kNamedRecipePs2Inst2InHandleField1, kNamedRecipeH3Field1),
 
     // Edges connecting h4 to NamedR.Ps2#2 for field1
-    MakeEdgeStr(kNamedRecipeH4Field1, kNamedRecipePs2Inst2OutHandleField1),
     MakeEdgeStr(kNamedRecipePs2Inst2OutHandleField1, kNamedRecipeH4Field1),
 
     // Intra-particle connection
@@ -431,10 +424,8 @@ static const std::string kExpectedEdgeStrings[] = {
 
     // Unnamed recipe edges:
     MakeEdgeStr(kGenRecipeH1Field1, kGenRecipePs1Inst0InHandleField1),
-    MakeEdgeStr(kGenRecipePs1Inst0InHandleField1, kGenRecipeH1Field1),
 
     // Edges connecting h2 to NamedR.PS1#0 for field1
-    MakeEdgeStr(kGenRecipeH2Field1, kGenRecipePs1Inst0OutHandleField1),
     MakeEdgeStr(kGenRecipePs1Inst0OutHandleField1, kGenRecipeH2Field1),
 
     // Intra-particle connection
@@ -443,10 +434,8 @@ static const std::string kExpectedEdgeStrings[] = {
 
     // Edges connecting h2 to NamedR.PS2#1 for field1.
     MakeEdgeStr(kGenRecipeH2Field1, kGenRecipePs2Inst1InHandleField1),
-    MakeEdgeStr(kGenRecipePs2Inst1InHandleField1, kGenRecipeH2Field1),
 
     // Edges connecting h3 to NamedR.PS2#1 for field1
-    MakeEdgeStr(kGenRecipeH3Field1, kGenRecipePs2Inst1OutHandleField1),
     MakeEdgeStr(kGenRecipePs2Inst1OutHandleField1, kGenRecipeH3Field1),
 
     // Intra-particle connection
@@ -455,10 +444,8 @@ static const std::string kExpectedEdgeStrings[] = {
 
     // Edges connecting h3 to NamedR.PS2#2 for field1
     MakeEdgeStr(kGenRecipeH3Field1, kGenRecipePs2Inst2InHandleField1),
-    MakeEdgeStr(kGenRecipePs2Inst2InHandleField1, kGenRecipeH3Field1),
 
     // Edges connecting h4 to NamedR.PS2#2 for field1
-    MakeEdgeStr(kGenRecipeH4Field1, kGenRecipePs2Inst2OutHandleField1),
     MakeEdgeStr(kGenRecipePs2Inst2OutHandleField1, kGenRecipeH4Field1),
 
     // Intra-particle connection

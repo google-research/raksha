@@ -83,6 +83,14 @@ DatalogFacts DatalogFacts::CreateFromManifestProto(
       const std::string particle_name =
           absl::StrCat(particle_spec_name, "#", particle_num++);
 
+      // Find the ParticleSpec referenced by this Particle. The information
+      // contained in the spec will be needed for all facts produced within a
+      // Particle.
+      auto find_res = particle_specs.find(particle_spec_name);
+      CHECK(find_res != particle_specs.end())
+        << "Could not find particle spec " << particle_spec_name;
+      const amt::ParticleSpec &particle_spec = find_res->second;
+
       // Each ParticleSpec already contains lists of TagClaims, TagChecks,
       // and Edges that shall be generated for each Particle implementing that
       // Spec, but which are rooted at the ParticleSpec rather than the
@@ -97,7 +105,7 @@ DatalogFacts DatalogFacts::CreateFromManifestProto(
           instantiation_map;
       for (const arcs::HandleConnectionProto &connection_proto :
         particle_proto.connections()) {
-        std::string handle_spec_name = connection_proto.name();
+        const std::string &handle_spec_name = connection_proto.name();
         CHECK(!handle_spec_name.empty())
           << "Handle connection with empty name field not allowed.";
         std::string handle_name = connection_proto.handle();
@@ -108,7 +116,7 @@ DatalogFacts DatalogFacts::CreateFromManifestProto(
             particle_spec_name, handle_spec_name);
         raksha::ir::HandleConnectionAccessPathRoot
           instantiated_handle_root(
-              recipe_name, particle_name, std::move(handle_spec_name));
+              recipe_name, particle_name, handle_spec_name);
 
         // Set up the map to replace the HandleConnectionSpec root with the
         // HandleConnection root when instantiating the Particle.
@@ -126,16 +134,13 @@ DatalogFacts DatalogFacts::CreateFromManifestProto(
         ir::AccessPathSelectorsSet access_path_selectors_set =
             connection_type->GetAccessPathSelectorsSet();
 
-        // For each Selector path from a root to a leaf, draw dataflow edges
-        // to and from the AccessPaths rooted at the handle of the particle's
-        // handle connection. Because we consider the input/output behavior of
-        // HandleConnectionSpecs while drawing the edges within a ParticleSpec,
-        // we can rely upon that to filter out the unnecessary edges drawn into
-        // and out of a Particle. Note that while the additional edges are, in
-        // some sense, "wasted", the worst case is that we draw twice as many
-        // edges as we need to, which doesn't affect asymptotic complexity. In
-        // particular, the dataflow graph remains correct, if not as minimal as
-        // it could be.
+        // Look up the HandleConnectionSpec to see if the handle connection
+        // will read and/or write.
+        const amt::HandleConnectionSpec &handle_connection_spec =
+            particle_spec.getHandleConnectionSpec(handle_spec_name);
+        const bool handle_connection_reads = handle_connection_spec.reads();
+        const bool handle_connection_writes = handle_connection_spec.writes();
+
         for (const ir::AccessPathSelectors &selectors :
              ir::AccessPathSelectorsSet::CreateAbslSet(
                  access_path_selectors_set)) {
@@ -143,18 +148,23 @@ DatalogFacts DatalogFacts::CreateFromManifestProto(
               ir::AccessPathRoot(handle_root), selectors);
           ir::AccessPath handle_connection_access_path(
               ir::AccessPathRoot(instantiated_handle_root), selectors);
-          result_edges.push_back(
-              ir::Edge(handle_access_path, handle_connection_access_path));
-          result_edges.push_back(
-              ir::Edge(handle_connection_access_path, handle_access_path));
+
+          // If the handle connection reads, draw a dataflow edge from the
+          // handle to the handle connection.
+          if (handle_connection_reads) {
+            result_edges.push_back(
+                ir::Edge(handle_access_path, handle_connection_access_path));
+          }
+
+          // If the handle connection writes, draw a dataflow edge from the
+          // handle connection to the handle.
+          if (handle_connection_writes) {
+            result_edges.push_back(
+                ir::Edge(handle_connection_access_path, handle_access_path));
+          }
         }
       }
 
-      auto find_res = particle_specs.find(particle_spec_name);
-      CHECK(find_res != particle_specs.end())
-        << "Could not find particle spec " << particle_spec_name;
-
-      const amt::ParticleSpec &particle_spec = find_res->second;
       amt::InstantiatedParticleSpecFacts particle_spec_facts =
           particle_spec.BulkInstantiate(instantiation_map);
       result_claims.insert(
