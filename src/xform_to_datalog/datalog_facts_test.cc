@@ -18,6 +18,7 @@
 
 #include <google/protobuf/text_format.h>
 
+#include "absl/strings/str_format.h"
 #include "src/common/testing/gtest.h"
 
 namespace raksha::xform_to_datalog {
@@ -54,7 +55,14 @@ static const ir::AccessPath kHandleConnectionOutAccessPath(
 
 static std::tuple<DatalogFacts, std::string>
   datalog_facts_and_output_strings[] = {
-    { DatalogFacts({}, {}, {}), "// Claims:\n\n// Checks:\n\n// Edges:\n" },
+    { DatalogFacts({}, {}, {}),
+      R"(
+// Claims:
+
+// Checks:
+
+// Edges:
+)" },
     { DatalogFacts(
         { ir::TagClaim(ir::TagAnnotationOnAccessPath(
             kHandleConnectionOutAccessPath, "tag")) },
@@ -64,11 +72,19 @@ static std::tuple<DatalogFacts, std::string>
           ir::Edge(kHandleConnectionInAccessPath,
                    kHandleConnectionOutAccessPath),
            ir::Edge(kHandleConnectionOutAccessPath, kHandleH2AccessPath)}),
-      "// Claims:\nclaimHasTag(\"recipe.particle.out\", \"tag\").\n"
-      "\n// Checks:\ncheckHasTag(\"recipe.particle.in\", \"tag2\").\n"
-      "\n// Edges:\nedge(\"recipe.h1\", \"recipe.particle.in\").\n"
-      "edge(\"recipe.particle.in\", \"recipe.particle.out\").\n"
-      "edge(\"recipe.particle.out\", \"recipe.h2\").\n" }
+      R"EXPECTED(
+// Claims:
+claimHasTag("recipe.particle.out", "tag").
+
+// Checks:
+checkHasTag("recipe.particle.in", "tag2").
+
+// Edges:
+edge("recipe.h1", "recipe.particle.in").
+edge("recipe.particle.in", "recipe.particle.out").
+edge("recipe.particle.out", "recipe.h2").
+)EXPECTED"
+    }
 };
 
 INSTANTIATE_TEST_SUITE_P(DatalogFactsToStringTest, DatalogFactsToStringTest,
@@ -335,8 +351,10 @@ static const std::string kGenRecipePs2Inst2OutHandleField1 =
                   ".");
 
 static std::string MakeClaimStr(std::string access_path_str, std::string tag) {
-  return absl::StrCat(
-      "claimHasTag(\"", access_path_str, "\", \"", tag, "\").\n");
+  constexpr absl::string_view claimHasTagFormat =
+      R"FORMAT(claimHasTag("%s", "%s").
+)FORMAT";
+  return absl::StrFormat(claimHasTagFormat, access_path_str, tag);
 }
 
 static const std::string kExpectedClaimStrings[] = {
@@ -349,8 +367,10 @@ static const std::string kExpectedClaimStrings[] = {
 };
 
 static std::string MakeCheckStr(std::string access_path_str, std::string tag) {
-  return absl::StrCat(
-      "checkHasTag(\"", access_path_str, "\", \"", tag, "\").\n");
+  constexpr absl::string_view checkHasTagFormat =
+      R"FORMAT(checkHasTag("%s", "%s").
+)FORMAT";
+  return absl::StrFormat(checkHasTagFormat, access_path_str, tag);
 }
 
 static std::string kExpectedCheckStrings[] = {
@@ -363,7 +383,9 @@ static std::string kExpectedCheckStrings[] = {
 };
 
 static std::string MakeEdgeStr(std::string ap1, std::string ap2) {
-  return absl::StrCat("edge(\"", ap1, "\", \"", ap2, "\").\n");
+  constexpr absl::string_view edgeFormat = R"FORMAT(edge("%s", "%s").
+)FORMAT";
+  return absl::StrFormat(edgeFormat, ap1, ap2);
 }
 
 static const std::string kExpectedEdgeStrings[] = {

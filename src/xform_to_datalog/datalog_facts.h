@@ -19,6 +19,7 @@
 
 #include <vector>
 
+#include "absl/strings/str_format.h"
 #include "src/ir/edge.h"
 #include "src/ir/tag_check.h"
 #include "src/ir/tag_claim.h"
@@ -44,12 +45,11 @@ class DatalogFacts {
   std::string ToString() const {
     auto tostring_formatter = [](std::string *out, const auto &arg) {
       out->append(arg.ToString()); };
-    return absl::StrCat(
-        "// Claims:\n",
+
+    return absl::StrFormat(
+        kFactOutputFormat,
         absl::StrJoin(claims_, "", tostring_formatter),
-        "\n// Checks:\n",
         absl::StrJoin(checks_, "", tostring_formatter),
-        "\n// Edges:\n",
         absl::StrJoin(edges_, "", tostring_formatter));
   }
 
@@ -60,6 +60,14 @@ class DatalogFacts {
   const std::vector<raksha::ir::Edge> &edges() const { return edges_; }
 
  private:
+  static constexpr absl::string_view kFactOutputFormat = R"FORMAT(
+// Claims:
+%s
+// Checks:
+%s
+// Edges:
+%s)FORMAT";
+
   std::vector<raksha::ir::TagClaim> claims_;
   std::vector<raksha::ir::TagCheck> checks_;
   std::vector<raksha::ir::Edge> edges_;
