@@ -53,17 +53,11 @@ class DatalogFacts {
         absl::StrJoin(edges_, "", tostring_formatter));
   }
 
-  const std::vector<raksha::ir::TagClaim> claims() const {
-    return claims_;
-  }
+  const std::vector<raksha::ir::TagClaim> &claims() const { return claims_; }
 
-  const std::vector<raksha::ir::TagCheck> checks() const {
-    return checks_;
-  }
+  const std::vector<raksha::ir::TagCheck> &checks() const { return checks_; }
 
-  const std::vector<raksha::ir::Edge> edges() const {
-    return edges_;
-  }
+  const std::vector<raksha::ir::Edge> &edges() const { return edges_; }
 
  private:
   std::vector<raksha::ir::TagClaim> claims_;
