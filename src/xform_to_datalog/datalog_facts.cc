@@ -114,7 +114,7 @@ DatalogFacts DatalogFacts::CreateFromManifestProto(
         // HandleConnection root when instantiating the Particle.
         instantiation_map.insert({
           ir::AccessPathRoot(std::move(spec_handle_root)),
-          ir::AccessPathRoot(std::move(instantiated_handle_root)) });
+          ir::AccessPathRoot(instantiated_handle_root) });
 
         raksha::ir::HandleAccessPathRoot handle_root(
             recipe_name, std::move(handle_name));
