@@ -127,15 +127,15 @@ DatalogFacts DatalogFacts::CreateFromManifestProto(
             connection_type->GetAccessPathSelectorsSet();
 
         // For each Selector path from a root to a leaf, draw dataflow edges
-        // to and from the AccessPaths rooted at the handle at at the
-        // particle's handle connection. Because we consider the input/output
-        // behavior of HandleConnectionSpecs while drawing the edges within a
-        // ParticleSpec, we can rely upon that to filter out the unnecessary
-        // edges drawn into and out of a Particle. Note that while the
-        // additional edges are, in some sense, "wasted", the worst case is that
-        // we draw twice as many edges as we need to, which doesn't affect
-        // asymptotic complexity. In particular, the dataflow graph remains
-        // correct, if not as minimal as it could be.
+        // to and from the AccessPaths rooted at the handle of the particle's
+        // handle connection. Because we consider the input/output behavior of
+        // HandleConnectionSpecs while drawing the edges within a ParticleSpec,
+        // we can rely upon that to filter out the unnecessary edges drawn into
+        // and out of a Particle. Note that while the additional edges are, in
+        // some sense, "wasted", the worst case is that we draw twice as many
+        // edges as we need to, which doesn't affect asymptotic complexity. In
+        // particular, the dataflow graph remains correct, if not as minimal as
+        // it could be.
         for (const ir::AccessPathSelectors &selectors :
              ir::AccessPathSelectorsSet::CreateAbslSet(
                  access_path_selectors_set)) {
