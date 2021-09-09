@@ -27,6 +27,13 @@ TEST(HandleConnectionAccessPathRootTest, HandleConnectionAccessPathRootTest) {
   EXPECT_EQ(test_access_path_root.ToString(), "recipe.particle.handle");
 }
 
+TEST(HandleAccessPathRootTest, HandleAccessPathRootTest) {
+  HandleAccessPathRoot handle_connection_access_path_root("recipe", "handle");
+  AccessPathRoot test_access_path_root(handle_connection_access_path_root);
+  EXPECT_TRUE(test_access_path_root.IsInstantiated());
+  EXPECT_EQ(test_access_path_root.ToString(), "recipe.handle");
+}
+
 class ConnectionSpecRootProtoTest :
     public testing::TestWithParam<
       std::tuple<std::string, std::string, std::string>>{};
@@ -71,7 +78,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 enum AccessPathRootKind {
   kHandleConnectionSpec,
-  kHandleConnection
+  kHandleConnection,
+  kHandle
 };
 
 // An AccessPathRoot, an enum indicating which AccessPathRoot was
@@ -129,7 +137,16 @@ static AccessPathRootTypeAndArgs root_and_info_array[] = {
     { .root = AccessPathRoot(HandleConnectionAccessPathRoot(
         "recipe", "particle", "handle2")),
       .kind = kHandleConnection,
-      .arg_strings = {"recipe", "particle", "handle2"}  },
+      .arg_strings = {"recipe", "particle", "handle2"} },
+    { .root = AccessPathRoot(HandleAccessPathRoot("recipe", "handle")),
+      .kind = kHandle,
+      .arg_strings = {"recipe", "handle"} },
+    { .root = AccessPathRoot(HandleAccessPathRoot("recipe2", "handle")),
+      .kind = kHandle,
+      .arg_strings = {"recipe2", "handle"} },
+    { .root = AccessPathRoot(HandleAccessPathRoot("recipe", "handle2")),
+      .kind = kHandle,
+      .arg_strings = {"recipe", "handle2"} },
 };
 
 INSTANTIATE_TEST_SUITE_P(

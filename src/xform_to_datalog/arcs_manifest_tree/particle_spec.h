@@ -41,6 +41,15 @@ class ParticleSpec {
 
   const std::vector<raksha::ir::Edge> &edges() const { return edges_; }
 
+  const HandleConnectionSpec &getHandleConnectionSpec(
+      const absl::string_view hcs_name) const {
+    auto find_res = handle_connection_specs_.find(hcs_name);
+    CHECK(find_res != handle_connection_specs_.end())
+      << "Could not find a HandleConnectionSpec with name " << hcs_name
+      << " in ParticleSpec " << name_ << ".";
+    return find_res->second;
+  }
+
   InstantiatedParticleSpecFacts BulkInstantiate(
       const absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
           &instantiation_map) const {
@@ -62,14 +71,22 @@ class ParticleSpec {
       std::string name,
       std::vector<raksha::ir::TagCheck> checks,
       std::vector<raksha::ir::TagClaim> claims,
-      std::vector<raksha::ir::Edge> edges)
+      std::vector<HandleConnectionSpec> handle_connection_specs)
       : name_(std::move(name)), checks_(std::move(checks)),
-        claims_(std::move(claims)), edges_(std::move(edges)) { }
+        claims_(std::move(claims)) {
+    for (HandleConnectionSpec &handle_connection_spec :
+      handle_connection_specs) {
+      std::string hcs_name = handle_connection_spec.name();
+      auto ins_res = handle_connection_specs_.insert({
+        std::move(hcs_name), std::move(handle_connection_spec) });
+      CHECK(ins_res.second)
+        << "Found two HandleConnectionSpecs with same name.";
+    }
+    GenerateEdges();
+  }
 
   // Generate the edges between HandleConnectionSpecs within this ParticleSpec.
-  static std::vector<raksha::ir::Edge> GenerateEdges(
-      std::string particle_spec_name,
-      std::vector<HandleConnectionSpec> connection_specs);
+  void GenerateEdges();
 
   // The name of this ParticleSpec.
   std::string name_;
@@ -83,6 +100,9 @@ class ParticleSpec {
   // HandleConnectionSpecs. These edges are all between uninstantiated
   // AccessPaths.
   std::vector<raksha::ir::Edge> edges_;
+  // A map of HandleConnectionSpec names to HandleConnectionSpecs.
+  absl::flat_hash_map<std::string, HandleConnectionSpec>
+    handle_connection_specs_;
 };
 
 }  // namespace raksha::xform_to_datalog::arcs_manifest_tree
