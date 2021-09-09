@@ -76,6 +76,7 @@ cc_test(
     deps = [
         ":ir",
         "//src/common/testing:gtest",
+        "@absl//absl/hash:hash_testing",
     ],
 )
 
@@ -117,5 +118,16 @@ cc_test(
         ":ir",
         "//src/common/testing:gtest",
         "@absl//absl/hash:hash_testing",
+    ],
+)
+
+cc_test(
+    name = "derives_from_claim_test",
+    srcs = ["derives_from_claim_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
     ],
 )

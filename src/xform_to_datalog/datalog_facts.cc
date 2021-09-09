@@ -169,8 +169,8 @@ DatalogFacts DatalogFacts::CreateFromManifestProto(
           particle_spec.BulkInstantiate(instantiation_map);
       result_claims.insert(
           result_claims.end(),
-          std::move_iterator(particle_spec_facts.claims.begin()),
-          std::move_iterator(particle_spec_facts.claims.end()));
+          std::move_iterator(particle_spec_facts.tag_claims.begin()),
+          std::move_iterator(particle_spec_facts.tag_claims.end()));
       result_checks.insert(
         result_checks.end(),
         std::move_iterator(particle_spec_facts.checks.begin()),

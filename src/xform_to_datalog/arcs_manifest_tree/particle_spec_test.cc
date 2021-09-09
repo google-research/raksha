@@ -29,7 +29,7 @@ TEST_P(ParticleSpecFromProtoTest, ParticleSpecFromProtoTest) {
 
   EXPECT_EQ(particle_spec.name(), param.expected_name);
   EXPECT_THAT(
-      particle_spec.claims(),
+      particle_spec.tag_claims(),
       testing::UnorderedElementsAreArray(param.expected_claims));
   EXPECT_THAT(
       particle_spec.checks(),
@@ -112,6 +112,253 @@ name: "PS1" connections: [
               kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
           ir::AccessPath(
               kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
+    } },
+        { .textproto = R"(
+name: "PS1"
+connections: [
+  {
+    name: "out_handle" direction: WRITES
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field1", value: { primitive: TEXT } },
+            { key: "field2", value: { primitive: TEXT } },
+            { key: "field3", value: { primitive: TEXT } } ] } } } },
+  {
+    name: "in_handle" direction: READS
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field2", value: { primitive: TEXT } },
+            { key: "world", value: { primitive: TEXT } } ] } } } } ],
+claims: [
+  { derives_from: {
+      target: {
+        handle: { particle_spec: "PS1" handle_connection: "out_handle" }
+        selectors: { field: "field2" } }
+      source: {
+        handle: { particle_spec: "PS1" handle_connection: "in_handle" }
+        selectors: { field: "field2" } } } } ])",
+    .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
+    .expected_edges = {
+        ir::Edge(
+            ir::AccessPath(
+                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
+            ir::AccessPath(
+                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
+        ir::Edge(
+            ir::AccessPath(
+                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
+            ir::AccessPath(
+                kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
+        ir::Edge(
+          ir::AccessPath(
+              kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
+          ir::AccessPath(
+              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
+        ir::Edge(
+            ir::AccessPath(
+                kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
+            ir::AccessPath(
+                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
+        ir::Edge(
+          ir::AccessPath(
+              kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
+          ir::AccessPath(
+              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
+    } },
+    { .textproto = R"(
+name: "PS1"
+connections: [
+  {
+    name: "out_handle" direction: WRITES
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field1", value: { primitive: TEXT } },
+            { key: "field2", value: { primitive: TEXT } },
+            { key: "field3", value: { primitive: TEXT } } ] } } } },
+  {
+    name: "in_handle" direction: READS
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field2", value: { primitive: TEXT } },
+            { key: "world", value: { primitive: TEXT } } ] } } } } ],
+claims: [
+  { derives_from: {
+      target: {
+        handle: { particle_spec: "PS1" handle_connection: "out_handle" }
+        selectors: { field: "field2" } }
+      source: {
+        handle: { particle_spec: "PS1" handle_connection: "in_handle" }
+        selectors: { field: "field2" } } } },
+  { derives_from: {
+      target: {
+        handle: { particle_spec: "PS1" handle_connection: "out_handle" }
+        selectors: { field: "field1" } }
+      source: {
+        handle: { particle_spec: "PS1" handle_connection: "in_handle" }
+        selectors: { field: "world" } } } }
+ ])",
+    .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
+    .expected_edges = {
+        ir::Edge(
+            ir::AccessPath(
+                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
+            ir::AccessPath(
+                kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
+        ir::Edge(
+          ir::AccessPath(
+              kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
+          ir::AccessPath(
+              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
+        ir::Edge(
+            ir::AccessPath(
+                kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
+            ir::AccessPath(
+                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
+        ir::Edge(
+          ir::AccessPath(
+              kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
+          ir::AccessPath(
+              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
+    } },
+    { .textproto = R"(
+name: "PS1"
+connections: [
+  {
+    name: "out_handle" direction: WRITES
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field1", value: { primitive: TEXT } },
+            { key: "field2", value: { primitive: TEXT } },
+            { key: "field3", value: { primitive: TEXT } } ] } } } },
+  {
+    name: "in_handle" direction: READS
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field2", value: { primitive: TEXT } },
+            { key: "world", value: { primitive: TEXT } } ] } } } } ],
+claims: [
+  { derives_from: {
+      target: {
+        handle: { particle_spec: "PS1" handle_connection: "out_handle" }
+        selectors: { field: "field2" } }
+      source: {
+        handle: { particle_spec: "PS1" handle_connection: "in_handle" }
+        selectors: { field: "field2" } } } },
+  { derives_from: {
+      target: {
+        handle: { particle_spec: "PS1" handle_connection: "out_handle" }
+        selectors: { field: "field2" } }
+      source: {
+        handle: { particle_spec: "PS1" handle_connection: "in_handle" }
+        selectors: { field: "world" } } } },
+  { derives_from: {
+      target: {
+        handle: { particle_spec: "PS1" handle_connection: "out_handle" }
+        selectors: { field: "field1" } }
+      source: {
+        handle: { particle_spec: "PS1" handle_connection: "in_handle" }
+        selectors: { field: "world" } } } }
+ ])",
+    .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
+    .expected_edges = {
+        ir::Edge(
+            ir::AccessPath(
+                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
+            ir::AccessPath(
+                kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
+        ir::Edge(
+            ir::AccessPath(
+                kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
+            ir::AccessPath(
+                kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
+        ir::Edge(
+          ir::AccessPath(
+              kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
+          ir::AccessPath(
+              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
+        ir::Edge(
+            ir::AccessPath(
+                kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
+            ir::AccessPath(
+                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
+        ir::Edge(
+          ir::AccessPath(
+              kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
+          ir::AccessPath(
+              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
+    } },
+    { .textproto = R"(
+name: "PS1"
+connections: [
+  {
+    name: "out_handle" direction: WRITES
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field1", value: { primitive: TEXT } },
+            { key: "field2", value: { primitive: TEXT } },
+            { key: "field3", value: { primitive: TEXT } } ] } } } },
+  {
+    name: "in_handle" direction: READS
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field2", value: { primitive: TEXT } },
+            { key: "world", value: { primitive: TEXT } } ] } } } } ],
+claims: [
+  { derives_from: {
+      target: {
+        handle: { particle_spec: "PS1" handle_connection: "out_handle" }
+        selectors: { field: "field2" } }
+      source: {
+        handle: { particle_spec: "PS1" handle_connection: "in_handle" }
+        selectors: { field: "field2" } } } },
+  { derives_from: {
+      target: {
+        handle: { particle_spec: "PS1" handle_connection: "out_handle" }
+        selectors: { field: "field1" } }
+      source: {
+        handle: { particle_spec: "PS1" handle_connection: "in_handle" }
+        selectors: { field: "world" } } } },
+  { derives_from: {
+      target: {
+        handle: { particle_spec: "PS1" handle_connection: "out_handle" }
+        selectors: { field: "field3" } }
+      source: {
+        handle: { particle_spec: "PS1" handle_connection: "in_handle" }
+        selectors: { field: "field2" } } } }
+ ])",
+    .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
+    .expected_edges = {
+        ir::Edge(
+            ir::AccessPath(
+                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
+            ir::AccessPath(
+                kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
+        ir::Edge(
+          ir::AccessPath(
+              kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
+          ir::AccessPath(
+              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
+        ir::Edge(
+            ir::AccessPath(
+                kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
+            ir::AccessPath(
+                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
     } },
     { .textproto = R"(
 name: "PS1" connections: [
@@ -313,7 +560,7 @@ TEST(BulkInstantiateTest, BulkInstantiateTest) {
       particle_spec.BulkInstantiate(instantiation_map);
 
   ASSERT_THAT(
-      instantiated_facts.claims,
+      instantiated_facts.tag_claims,
       testing::UnorderedElementsAreArray({
         ir::TagClaim(ir::TagAnnotationOnAccessPath(ir::AccessPath(
           p1_out_impl, MakeSingleFieldSelectors("field1")), "tag1")),
