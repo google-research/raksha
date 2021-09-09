@@ -38,6 +38,9 @@
 // There is a claim that `accessPath` definitely has `tag` taint.
 .decl claimHasTag(accessPath: AccessPath, tag: Tag)
 
+// Check that `accessPath` definitely has `tag` taint.
+.decl checkHasTag(accessPath: AccessPath, tag: Tag)
+
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
@@ -77,5 +80,7 @@ mayHaveTag(base, tag) :-
   isAccessPath(member),
   mayHaveTag(member, tag),
   isMemberOf(base, member).
+
+.output checkHasTag
 
 #endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_
