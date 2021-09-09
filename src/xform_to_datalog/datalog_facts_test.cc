@@ -18,7 +18,6 @@
 
 #include <google/protobuf/text_format.h>
 
-#include "absl/strings/str_format.h"
 #include "src/common/testing/gtest.h"
 
 namespace raksha::xform_to_datalog {
@@ -97,7 +96,7 @@ INSTANTIATE_TEST_SUITE_P(DatalogFactsToStringTest, DatalogFactsToStringTest,
 //
 // TODO(#107): This is currently quite complex. After the MVP, we should break
 // this up into smaller, more focused tests.
-static const std::string kManifestTextproto = R"MANIFEST(
+static const std::string kManifestTextproto = R"(
     particle_specs: [
     { name: "PS1" connections: [
       {
@@ -253,204 +252,114 @@ static const std::string kManifestTextproto = R"MANIFEST(
                  schema: {
                    fields: [
                    { key: "field1", value: { primitive: TEXT } } ]}}}}]}]}
-    "])MANIFEST";
-
-// These are a bunch of static constants to make building the expected facts
-// a little easier to understand.
-
-// Access path component strings.
-static const std::string kNamedRecipeName = "NamedR";
-static const std::string kH1HandleName = "h1";
-static const std::string kH2HandleName = "h2";
-static const std::string kH3HandleName = "h3";
-static const std::string kH4HandleName = "h4";
-static const std::string kField1Name = "field1";
-static const std::string kField2Name = "field2";
-static const std::string kPs1Inst0Name = "PS1#0";
-static const std::string kPs1Inst1Name = "PS1#1";
-static const std::string kPs2Inst1Name = "PS2#1";
-static const std::string kPs2Inst2Name = "PS2#2";
-static const std::string kInHcName = "in_handle";
-static const std::string kOutHcName = "out_handle";
-
-// Access path strings.
-static const std::string kNamedRecipeH1Field1 =
-    absl::StrJoin({kNamedRecipeName, kH1HandleName, kField1Name}, ".");
-static const std::string kNamedRecipeH1Field2 =
-    absl::StrJoin({kNamedRecipeName, kH1HandleName, kField2Name}, ".");
-
-static const std::string kNamedRecipeH2Field1 =
-    absl::StrJoin({kNamedRecipeName, kH2HandleName, kField1Name}, ".");
-
-static const std::string kNamedRecipeH3Field1 =
-  absl::StrJoin({kNamedRecipeName, kH3HandleName, kField1Name}, ".");
-
-static const std::string kNamedRecipeH4Field1 =
-    absl::StrJoin({kNamedRecipeName, kH4HandleName, kField1Name}, ".");
-
-static const std::string kNamedRecipePs1Inst0InHandleField1 =
-    absl::StrJoin({kNamedRecipeName, kPs1Inst0Name, kInHcName, kField1Name},
-                  ".");
-
-static const std::string kNamedRecipePs1Inst0InHandleField2 =
-        absl::StrJoin({kNamedRecipeName, kPs1Inst0Name, kInHcName, kField2Name},
-                  ".");
-static const std::string kNamedRecipePs1Inst0OutHandleField1 =
-    absl::StrJoin({kNamedRecipeName, kPs1Inst0Name, kOutHcName, kField1Name},
-          ".");
-
-static const std::string kNamedRecipePs1Inst1InHandleField1 =
-    absl::StrJoin({kNamedRecipeName, kPs1Inst1Name, kInHcName, kField1Name },
-                  ".");
-
-static const std::string kNamedRecipePs1Inst1OutHandleField1 =
-    absl::StrJoin({kNamedRecipeName, kPs1Inst1Name, kOutHcName, kField1Name},
-                  ".");
-
-static const std::string kNamedRecipePs2Inst2InHandleField1 =
-    absl::StrJoin({kNamedRecipeName, kPs2Inst2Name, kInHcName, kField1Name},
-                  ".");
-
-static const std::string kNamedRecipePs2Inst2OutHandleField1 =
-    absl::StrJoin({kNamedRecipeName, kPs2Inst2Name, kOutHcName, kField1Name},
-                  ".");
-
-static const std::string kGenRecipeName = "GENERATED_RECIPE_NAME0";
-
-static const std::string kGenRecipeH1Field1 =
-    absl::StrJoin({kGenRecipeName, kH1HandleName, kField1Name}, ".");
-
-static const std::string kGenRecipeH2Field1 =
-    absl::StrJoin({kGenRecipeName, kH2HandleName, kField1Name}, ".");
-
-static const std::string kGenRecipeH3Field1 =
-    absl::StrJoin({kGenRecipeName, kH3HandleName, kField1Name}, ".");
-
-static const std::string kGenRecipeH4Field1 =
-    absl::StrJoin({kGenRecipeName, kH4HandleName, kField1Name}, ".");
-
-static const std::string kGenRecipePs1Inst0InHandleField1 =
-    absl::StrJoin({kGenRecipeName, kPs1Inst0Name, kInHcName, kField1Name}, ".");
-
-static const std::string kGenRecipePs1Inst0OutHandleField1 =
-    absl::StrJoin({kGenRecipeName, kPs1Inst0Name, kOutHcName, kField1Name},
-                  ".");
-
-static const std::string kGenRecipePs2Inst1InHandleField1 =
-    absl::StrJoin({kGenRecipeName, kPs2Inst1Name, kInHcName, kField1Name}, ".");
-
-static const std::string kGenRecipePs2Inst1OutHandleField1 =
-    absl::StrJoin({kGenRecipeName, kPs2Inst1Name, kOutHcName, kField1Name},
-                  ".");
-
-static const std::string kGenRecipePs2Inst2InHandleField1 =
-    absl::StrJoin({kGenRecipeName, kPs2Inst2Name, kInHcName, kField1Name}, ".");
-
-static const std::string kGenRecipePs2Inst2OutHandleField1 =
-    absl::StrJoin({kGenRecipeName, kPs2Inst2Name, kOutHcName, kField1Name},
-                  ".");
-
-static std::string MakeClaimStr(std::string access_path_str, std::string tag) {
-  constexpr absl::string_view claimHasTagFormat =
-      R"FORMAT(claimHasTag("%s", "%s").
-)FORMAT";
-  return absl::StrFormat(claimHasTagFormat, access_path_str, tag);
-}
+    "])";
 
 static const std::string kExpectedClaimStrings[] = {
-    MakeClaimStr(kNamedRecipePs1Inst0OutHandleField1, "tag1"),
-    MakeClaimStr(kNamedRecipePs1Inst1OutHandleField1, "tag1"),
-    MakeClaimStr(kNamedRecipePs2Inst2OutHandleField1, "tag3"),
-    MakeClaimStr(kGenRecipePs1Inst0OutHandleField1, "tag1"),
-    MakeClaimStr(kGenRecipePs2Inst1OutHandleField1, "tag3"),
-    MakeClaimStr(kGenRecipePs2Inst2OutHandleField1, "tag3"),
+    R"(claimHasTag("NamedR.PS1#0.out_handle.field1", "tag1").
+)",
+    R"(claimHasTag("NamedR.PS1#1.out_handle.field1", "tag1").
+)",
+    R"(claimHasTag("NamedR.PS2#2.out_handle.field1", "tag3").
+)",
+    R"(claimHasTag("GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", "tag1").
+)",
+    R"(claimHasTag("GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "tag3").
+)",
+    R"(claimHasTag("GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "tag3").
+)",
 };
-
-static std::string MakeCheckStr(std::string access_path_str, std::string tag) {
-  constexpr absl::string_view checkHasTagFormat =
-      R"FORMAT(checkHasTag("%s", "%s").
-)FORMAT";
-  return absl::StrFormat(checkHasTagFormat, access_path_str, tag);
-}
 
 static std::string kExpectedCheckStrings[] = {
-    MakeCheckStr(kNamedRecipePs1Inst0InHandleField1, "tag2"),
-    MakeCheckStr(kNamedRecipePs1Inst1InHandleField1, "tag2"),
-    MakeCheckStr(kNamedRecipePs2Inst2InHandleField1, "tag4"),
-    MakeCheckStr(kGenRecipePs1Inst0InHandleField1, "tag2"),
-    MakeCheckStr(kGenRecipePs2Inst1InHandleField1, "tag4"),
-    MakeCheckStr(kGenRecipePs2Inst2InHandleField1, "tag4"),
+    R"(checkHasTag("NamedR.PS1#0.in_handle.field1", "tag2").
+)",
+    R"(checkHasTag("NamedR.PS1#1.in_handle.field1", "tag2").
+)",
+    R"(checkHasTag("NamedR.PS2#2.in_handle.field1", "tag4").
+)",
+    R"(checkHasTag("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2").
+)",
+    R"(checkHasTag("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4").
+)",
+    R"(checkHasTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4").
+)",
 };
-
-static std::string MakeEdgeStr(std::string ap1, std::string ap2) {
-  constexpr absl::string_view edgeFormat = R"FORMAT(edge("%s", "%s").
-)FORMAT";
-  return absl::StrFormat(edgeFormat, ap1, ap2);
-}
 
 static const std::string kExpectedEdgeStrings[] = {
     // Named recipe edges:
     // Edges connecting h1 to NamedR.PS1#0 for fields {field1, field2}.
-    MakeEdgeStr(kNamedRecipeH1Field1, kNamedRecipePs1Inst0InHandleField1),
-    MakeEdgeStr(kNamedRecipeH1Field2, kNamedRecipePs1Inst0InHandleField2),
+    R"(edge("NamedR.h1.field1", "NamedR.PS1#0.in_handle.field1").
+)",
+    R"(edge("NamedR.h1.field2", "NamedR.PS1#0.in_handle.field2").
+)",
 
     // Edges connecting h2 to NamedR.PS1#0 for field1
-    MakeEdgeStr(kNamedRecipePs1Inst0OutHandleField1, kNamedRecipeH2Field1),
+     R"(edge("NamedR.PS1#0.out_handle.field1", "NamedR.h2.field1").
+)",
 
     // Intra-particle connection
-    MakeEdgeStr(kNamedRecipePs1Inst0InHandleField1,
-             kNamedRecipePs1Inst0OutHandleField1),
+    R"(edge("NamedR.PS1#0.in_handle.field1", "NamedR.PS1#0.out_handle.field1").
+)",
 
     // Edges connecting h2 to NamedR.PS1#1 for field1.
-    MakeEdgeStr(kNamedRecipeH2Field1, kNamedRecipePs1Inst1InHandleField1),
+    R"(edge("NamedR.h2.field1", "NamedR.PS1#1.in_handle.field1").
+)",
 
     // Edges connecting h3 to NamedR.PS1#1 for field1
-    MakeEdgeStr(kNamedRecipePs1Inst1OutHandleField1, kNamedRecipeH3Field1),
+    R"(edge("NamedR.PS1#1.out_handle.field1", "NamedR.h3.field1").
+)",
 
     // Intra-particle connection
-    MakeEdgeStr(kNamedRecipePs1Inst1InHandleField1,
-             kNamedRecipePs1Inst1OutHandleField1),
+    R"(edge("NamedR.PS1#1.in_handle.field1", "NamedR.PS1#1.out_handle.field1").
+)",
 
     // Edges connecting h3 to NamedR.PS2#2 for field1
-    MakeEdgeStr(kNamedRecipeH3Field1, kNamedRecipePs2Inst2InHandleField1),
+    R"(edge("NamedR.h3.field1", "NamedR.PS2#2.in_handle.field1").
+)",
 
     // Edges connecting h4 to NamedR.Ps2#2 for field1
-    MakeEdgeStr(kNamedRecipePs2Inst2OutHandleField1, kNamedRecipeH4Field1),
+    R"(edge("NamedR.PS2#2.out_handle.field1", "NamedR.h4.field1").
+)",
 
     // Intra-particle connection
 
-    MakeEdgeStr(kNamedRecipePs2Inst2InHandleField1,
-                kNamedRecipePs2Inst2OutHandleField1),
+    R"(edge("NamedR.PS2#2.in_handle.field1", "NamedR.PS2#2.out_handle.field1").
+)",
 
     // Unnamed recipe edges:
-    MakeEdgeStr(kGenRecipeH1Field1, kGenRecipePs1Inst0InHandleField1),
+    R"(edge("GENERATED_RECIPE_NAME0.h1.field1", "GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1").
+)",
 
     // Edges connecting h2 to NamedR.PS1#0 for field1
-    MakeEdgeStr(kGenRecipePs1Inst0OutHandleField1, kGenRecipeH2Field1),
+    R"(edge("GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", "GENERATED_RECIPE_NAME0.h2.field1").
+)",
 
     // Intra-particle connection
-    MakeEdgeStr(kGenRecipePs1Inst0InHandleField1,
-             kGenRecipePs1Inst0OutHandleField1),
+    R"(edge("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1").
+)",
 
     // Edges connecting h2 to NamedR.PS2#1 for field1.
-    MakeEdgeStr(kGenRecipeH2Field1, kGenRecipePs2Inst1InHandleField1),
+    R"(edge("GENERATED_RECIPE_NAME0.h2.field1", "GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1").
+)",
 
     // Edges connecting h3 to NamedR.PS2#1 for field1
-    MakeEdgeStr(kGenRecipePs2Inst1OutHandleField1, kGenRecipeH3Field1),
+    R"(edge("GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "GENERATED_RECIPE_NAME0.h3.field1").
+)",
 
     // Intra-particle connection
-    MakeEdgeStr(kGenRecipePs2Inst1InHandleField1,
-             kGenRecipePs2Inst1OutHandleField1),
+    R"(edge("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1").
+)",
 
     // Edges connecting h3 to NamedR.PS2#2 for field1
-    MakeEdgeStr(kGenRecipeH3Field1, kGenRecipePs2Inst2InHandleField1),
+    R"(edge("GENERATED_RECIPE_NAME0.h3.field1", "GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1").
+)",
 
     // Edges connecting h4 to NamedR.PS2#2 for field1
-    MakeEdgeStr(kGenRecipePs2Inst2OutHandleField1, kGenRecipeH4Field1),
+    R"(edge("GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "GENERATED_RECIPE_NAME0.h4.field1").
+)",
 
     // Intra-particle connection
-    MakeEdgeStr(kGenRecipePs2Inst2InHandleField1,
-                kGenRecipePs2Inst2OutHandleField1)
+    R"(edge("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1").
+)"
 };
 
 TEST(CreateFactsFromManifestProtoTest, CreateFactsFromManifestProtoTest) {
