@@ -2,7 +2,7 @@
 #define SRC_IR_EDGE_H_
 
 #include "src/ir/access_path.h"
-#include "absl/strings/str_cat.h"
+#include "absl/strings/str_format.h"
 
 namespace raksha::ir {
 
@@ -16,8 +16,8 @@ class Edge {
 
   // Print the edge as a string containing a Datalog fact.
   std::string ToString() const {
-    return absl::StrCat(
-        "edge(\"", from_.ToString(), "\", \"", to_.ToString(), "\").\n");
+    constexpr absl::string_view kEdgeFormat = R"(edge("%s", "%s").)";
+    return absl::StrFormat(kEdgeFormat, from_.ToString(), to_.ToString());
   }
 
   bool operator==(const Edge &other) const {

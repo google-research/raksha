@@ -1,7 +1,7 @@
 #ifndef SRC_IR_TAG_CLAIM_H_
 #define SRC_IR_TAG_CLAIM_H_
 
-#include "absl/strings/str_cat.h"
+#include "absl/strings/str_format.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/access_path.h"
 #include "src/ir/tag_annotation_on_access_path.h"
@@ -44,10 +44,12 @@ class TagClaim {
 
   // Produce a string containing a datalog fact for this TagClaim.
   std::string ToString() const {
-    return absl::StrCat(
-        "claimHasTag(\"",
+    constexpr absl::string_view kClaimHasTagFormat =
+        R"(claimHasTag("%s", "%s").)";
+    return absl::StrFormat(
+        kClaimHasTagFormat,
         tag_annotation_on_access_path_.access_path().ToString(),
-        "\", \"", tag_annotation_on_access_path_.tag(), "\").\n");
+        tag_annotation_on_access_path_.tag());
   }
 
   bool operator==(const TagClaim &other) const {

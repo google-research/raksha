@@ -45,12 +45,11 @@ class DatalogFacts {
   std::string ToString() const {
     auto tostring_formatter = [](std::string *out, const auto &arg) {
       out->append(arg.ToString()); };
-
     return absl::StrFormat(
         kFactOutputFormat,
-        absl::StrJoin(claims_, "", tostring_formatter),
-        absl::StrJoin(checks_, "", tostring_formatter),
-        absl::StrJoin(edges_, "", tostring_formatter));
+        absl::StrJoin(claims_, "\n", tostring_formatter),
+        absl::StrJoin(checks_, "\n", tostring_formatter),
+        absl::StrJoin(edges_, "\n", tostring_formatter));
   }
 
   const std::vector<raksha::ir::TagClaim> &claims() const { return claims_; }
@@ -60,13 +59,16 @@ class DatalogFacts {
   const std::vector<raksha::ir::Edge> &edges() const { return edges_; }
 
  private:
-  static constexpr absl::string_view kFactOutputFormat = R"FORMAT(
+  static constexpr absl::string_view kFactOutputFormat = R"(
 // Claims:
 %s
+
 // Checks:
 %s
+
 // Edges:
-%s)FORMAT";
+%s
+)";
 
   std::vector<raksha::ir::TagClaim> claims_;
   std::vector<raksha::ir::TagCheck> checks_;
