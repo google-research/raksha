@@ -63,17 +63,17 @@ static std::tuple<std::string, absl::ParsedFormat<'s'>>
       "handle: { particle_spec: \"ps\", " "handle_connection: \"hc\" } "
       "selectors: { field: \"field1\" } }, "
       "predicate: { label: { semantic_tag: \"tag\"} }",
-      absl::ParsedFormat<'s'>("claimHasTag(\"%s.field1\", \"tag\").\n") },
+      absl::ParsedFormat<'s'>("claimHasTag(\"%s.field1\", \"tag\").") },
     { "access_path: {"
       "handle: { particle_spec: \"ps\", " "handle_connection: \"hc\" } }, "
       "predicate: { label: { semantic_tag: \"tag2\"} }",
-      absl::ParsedFormat<'s'>("claimHasTag(\"%s\", \"tag2\").\n") },
+      absl::ParsedFormat<'s'>("claimHasTag(\"%s\", \"tag2\").") },
     { "access_path: { "
       "handle: { particle_spec: \"ps\", " "handle_connection: \"hc\" }, "
       "selectors: [{ field: \"x\" }, { field: \"y\" }] }, "
       "predicate: { label: { semantic_tag: \"user_selection\"} }",
       absl::ParsedFormat<'s'>(
-          "claimHasTag(\"%s.x.y\", \"user_selection\")" ".\n") }
+          "claimHasTag(\"%s.x.y\", \"user_selection\")" ".") }
 };
 
 INSTANTIATE_TEST_SUITE_P(

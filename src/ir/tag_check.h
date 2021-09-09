@@ -1,6 +1,7 @@
 #ifndef SRC_IR_TAG_CHECK_H_
 #define SRC_IR_TAG_CHECK_H_
 
+#include "absl/strings/str_format.h"
 #include "src/ir/tag_annotation_on_access_path.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
@@ -38,12 +39,12 @@ class TagCheck {
   // will eventually want, but is enough to get some simple Arcs tests
   // passing for the MVP.
   std::string ToString() const {
-    return absl::StrCat(
-        "checkHasTag(\"",
+    constexpr absl::string_view kCheckHasTagFormat =
+        R"(checkHasTag("%s", "%s").)";
+    return absl::StrFormat(
+        kCheckHasTagFormat,
         tag_annotation_on_access_path_.access_path().ToString(),
-        "\", \"",
-        tag_annotation_on_access_path_.tag(),
-        "\").\n");
+        tag_annotation_on_access_path_.tag());
   }
 
   bool operator==(const TagCheck &other) const {
