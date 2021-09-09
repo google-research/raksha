@@ -254,6 +254,22 @@ static const std::string kManifestTextproto = R"(
                    { key: "field1", value: { primitive: TEXT } } ]}}}}]}]}
     "])";
 
+class ParseBigManifestTest : public testing::Test {
+ public:
+  ParseBigManifestTest() : datalog_facts_(ParseDatalogFacts()) { }
+
+ protected:
+  static DatalogFacts ParseDatalogFacts() {
+     arcs::ManifestProto manifest_proto;
+     google::protobuf::TextFormat::ParseFromString(
+         kManifestTextproto, &manifest_proto);
+
+     return DatalogFacts::CreateFromManifestProto(manifest_proto);
+  }
+
+  DatalogFacts datalog_facts_;
+};
+
 static const std::string kExpectedClaimStrings[] = {
     R"(claimHasTag("NamedR.PS1#0.out_handle.field1", "tag1").
 )",
@@ -269,6 +285,18 @@ static const std::string kExpectedClaimStrings[] = {
 )",
 };
 
+TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
+  // Go through all of the facts, convert them to strings, and compare them
+  // against our expected strings. Strings are much easier to read on a test
+  // failure than structured datalog facts.
+  std::vector<std::string> claim_datalog_strings;
+  for (const ir::TagClaim &claim : datalog_facts_.claims()) {
+    claim_datalog_strings.push_back(claim.ToString());
+  }
+  EXPECT_THAT(claim_datalog_strings,
+              testing::UnorderedElementsAreArray(kExpectedClaimStrings));
+}
+
 static std::string kExpectedCheckStrings[] = {
     R"(checkHasTag("NamedR.PS1#0.in_handle.field1", "tag2").
 )",
@@ -283,6 +311,18 @@ static std::string kExpectedCheckStrings[] = {
     R"(checkHasTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4").
 )",
 };
+
+TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {
+  // Go through all of the facts, convert them to strings, and compare them
+  // against our expected strings. Strings are much easier to read on a test
+  // failure than structured datalog facts.
+  std::vector<std::string> check_datalog_strings;
+  for (const ir::TagCheck &check : datalog_facts_.checks()) {
+    check_datalog_strings.push_back(check.ToString());
+  }
+  EXPECT_THAT(check_datalog_strings,
+              testing::UnorderedElementsAreArray(kExpectedCheckStrings));
+}
 
 static const std::string kExpectedEdgeStrings[] = {
     // Named recipe edges:
@@ -362,43 +402,16 @@ static const std::string kExpectedEdgeStrings[] = {
 )"
 };
 
-TEST(CreateFactsFromManifestProtoTest, CreateFactsFromManifestProtoTest) {
-  arcs::ManifestProto manifest_proto;
-  google::protobuf::TextFormat::ParseFromString(
-      kManifestTextproto, &manifest_proto);
-
-  DatalogFacts datalog_facts =
-      DatalogFacts::CreateFromManifestProto(manifest_proto);
-
+TEST_F(ParseBigManifestTest, ManifestProtoEdgesTest) {
   // Go through all of the facts, convert them to strings, and compare them
   // against our expected strings. Strings are much easier to read on a test
   // failure than structured datalog facts.
-
-  {
-    std::vector<std::string> claim_datalog_strings;
-    for (const ir::TagClaim &claim : datalog_facts.claims()) {
-      claim_datalog_strings.push_back(claim.ToString());
-    }
-    EXPECT_THAT(claim_datalog_strings,
-                testing::UnorderedElementsAreArray(kExpectedClaimStrings));
-  }
-
-  {
-    std::vector<std::string> check_datalog_strings;
-    for (const ir::TagCheck &check : datalog_facts.checks()) {
-      check_datalog_strings.push_back(check.ToString());
-    }
-    EXPECT_THAT(check_datalog_strings,
-                testing::UnorderedElementsAreArray(kExpectedCheckStrings));
-  }
-
   std::vector<std::string> edge_datalog_strings;
-  for (const ir::Edge &edge : datalog_facts.edges()) {
+  for (const ir::Edge &edge : datalog_facts_.edges()) {
     edge_datalog_strings.push_back(edge.ToString());
   }
-  EXPECT_THAT(
-      edge_datalog_strings,
-      testing::UnorderedElementsAreArray(kExpectedEdgeStrings));
+  EXPECT_THAT(edge_datalog_strings,
+              testing::UnorderedElementsAreArray(kExpectedEdgeStrings));
 }
 
 }  // namespace raksha::xform_to_datalog
