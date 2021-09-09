@@ -59,31 +59,27 @@ static ir::AccessPathSelectors MakeSingleFieldSelectors(
 }
 
 static ParticleSpecProtoAndExpectedInfo spec_proto_and_expected_info[] = {
-    { .textproto = "name: \"p_spec\"", .expected_name = "p_spec",
+    { .textproto = R"(name: "p_spec")", .expected_name = "p_spec",
       .expected_claims = { }, .expected_checks = { },  .expected_edges = { } },
-    { .textproto =
-        "name: \"PS1\" connections: ["
-        "  {"
-        "    name: \"out_handle\" direction: WRITES "
-        "    type: {"
-        "    entity: { "
-        "      schema: { "
-        "        fields: [ "
-        "          { key: \"field1\", value: { primitive: TEXT } },"
-        "          { key: \"field2\", value: { primitive: TEXT } },"
-        "          { key: \"field3\", value: { primitive: TEXT } }"
-        "    ]"
-        " } } } },"
-        "  {"
-        "    name: \"in_handle\" direction: READS "
-        "    type: {"
-        "    entity: { "
-        "      schema: { "
-        "        fields: [ "
-        "          { key: \"field2\", value: { primitive: TEXT } },"
-        "          { key: \"world\", value: { primitive: TEXT } }"
-        "    ]"
-        " } } } } ]",
+    { .textproto = R"(
+name: "PS1" connections: [
+  {
+    name: "out_handle" direction: WRITES
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field1", value: { primitive: TEXT } },
+            { key: "field2", value: { primitive: TEXT } },
+            { key: "field3", value: { primitive: TEXT } }] } } } },
+  {
+    name: "in_handle" direction: READS
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field2", value: { primitive: TEXT } },
+            { key: "world", value: { primitive: TEXT } } ] } } } } ])",
     .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
     .expected_edges = {
         ir::Edge(
@@ -117,32 +113,29 @@ static ParticleSpecProtoAndExpectedInfo spec_proto_and_expected_info[] = {
           ir::AccessPath(
               kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
     } },
-    { .textproto =
-        "name: \"PS1\" connections: ["
-        "  {"
-        "    name: \"out_handle\" direction: WRITES "
-        "    type: {"
-        "    entity: { "
-        "      schema: { "
-        "        fields: [ "
-        "          { key: \"field1\", value: { primitive: TEXT } } ]"
-        " } } } },"
-        "  {"
-        "    name: \"in_handle\" direction: READS "
-        "    type: {"
-        "    entity: { "
-        "      schema: { "
-        "        fields: [ "
-        "          { key: \"field2\", value: { primitive: TEXT } } ] } } } },"
-        "  {"
-        "    name: \"in_out_handle\" direction: READS_WRITES "
-        "    type: {"
-        "    entity: { "
-        "      schema: { "
-        "        fields: [ "
-        "          { key: \"field3\", value: { primitive: TEXT } },"
-        "    ]"
-        " } } } } ]",
+    { .textproto = R"(
+name: "PS1" connections: [
+  {
+    name: "out_handle" direction: WRITES
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field1", value: { primitive: TEXT } } ] } } } },
+  {
+    name: "in_handle" direction: READS
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field2", value: { primitive: TEXT } } ] } } } },
+  {
+    name: "in_out_handle" direction: READS_WRITES
+      type: {
+        entity: {
+          schema: {
+            fields: [
+              { key: "field3", value: { primitive: TEXT } } ] } } } } ] )",
     .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
     .expected_edges = {
         ir::Edge(
@@ -167,21 +160,22 @@ static ParticleSpecProtoAndExpectedInfo spec_proto_and_expected_info[] = {
               kPs1InOutHandleRoot, MakeSingleFieldSelectors("field3"))),
     } },
     {
-      .textproto = "name: \"PS2\" checks: [ {"
-                   "  access_path: {"
-                   "    handle: {"
-                   "      particle_spec: \"PS2\", "
-                   "      handle_connection: \"hc\" }, "
-                   "    selectors: { field: \"field1\" } }, "
-                   "  predicate: { label: { semantic_tag: \"tag1\"} } },"
-                   "  {"
-                   "  access_path: {"
-                   "    handle: {"
-                   "      particle_spec: \"PS2\", "
-                   "      handle_connection: \"hc2\" }, "
-                   "    selectors: { field: \"field2\" } }, "
-                   "  predicate: { label: { semantic_tag: \"tag2\"} } },"
-                   "]",
+      .textproto = R"(
+name: "PS2"
+checks: [ {
+  access_path: {
+    handle: {
+      particle_spec: "PS2",
+      handle_connection: "hc" },
+    selectors: { field: "field1" } },
+  predicate: { label: { semantic_tag: "tag1"} } },
+  {
+   access_path: {
+     handle: {
+       particle_spec: "PS2",
+       handle_connection: "hc2" },
+     selectors: { field: "field2" } },
+   predicate: { label: { semantic_tag: "tag2"} } } ])",
       .expected_name = "PS2",
       .expected_claims = { },
       .expected_checks = {
@@ -201,21 +195,22 @@ static ParticleSpecProtoAndExpectedInfo spec_proto_and_expected_info[] = {
       .expected_edges = { }
     },
     {
-      .textproto = "name: \"PS2\" claims: [ { assume: {"
-                   "  access_path: {"
-                   "    handle: {"
-                   "      particle_spec: \"PS2\", "
-                   "      handle_connection: \"hc\" }, "
-                   "    selectors: { field: \"field1\" } }, "
-                   "  predicate: { label: { semantic_tag: \"tag1\"} } } },"
-                   "  { assume: {"
-                   "  access_path: {"
-                   "    handle: {"
-                   "      particle_spec: \"PS2\", "
-                   "      handle_connection: \"hc2\" }, "
-                   "    selectors: { field: \"field2\" } }, "
-                   "  predicate: { label: { semantic_tag: \"tag2\"} } } },"
-                   "]",
+      .textproto = R"(
+name: "PS2"
+claims: [ { assume: {
+  access_path: {
+    handle: {
+      particle_spec: "PS2",
+      handle_connection: "hc" },
+    selectors: { field: "field1" } },
+  predicate: { label: { semantic_tag: "tag1"} } } },
+{ assume: {
+    access_path: {
+      handle: {
+        particle_spec: "PS2",
+        handle_connection: "hc2" },
+      selectors: { field: "field2" } },
+    predicate: { label: { semantic_tag: "tag2"} } } } ])",
       .expected_name = "PS2",
       .expected_claims = {
           ir::TagClaim(
@@ -243,62 +238,57 @@ INSTANTIATE_TEST_SUITE_P(
 // This example textproto contains checks, claims, and connections. We're
 // going to use it to show that BulkInstantiate will successfully give us the
 // instantiated versions of all of these facts.
-static const std::string kTextprotoWithAllFacts =
-    "name: \"PS1\" claims: [ { assume: {"
-    "  access_path: {"
-    "    handle: {"
-    "      particle_spec: \"PS1\", "
-    "      handle_connection: \"out_handle\" }, "
-    "    selectors: { field: \"field1\" } }, "
-    "  predicate: { label: { semantic_tag: \"tag1\"} } } },"
-    "  { assume: {"
-    "  access_path: {"
-    "    handle: {"
-    "      particle_spec: \"PS1\", "
-    "      handle_connection: \"in_out_handle\" }, "
-    "    selectors: { field: \"field2\" } }, "
-    "  predicate: { label: { semantic_tag: \"tag2\"} } } }"
-    "]"
-    "checks: [ {"
-    "  access_path: {"
-    "    handle: {"
-    "      particle_spec: \"PS1\", "
-    "      handle_connection: \"in_handle\" }, "
-    "    selectors: { field: \"field1\" } }, "
-    "  predicate: { label: { semantic_tag: \"tag3\"} } },"
-    "  {"
-    "  access_path: {"
-    "    handle: {"
-    "      particle_spec: \"PS1\", "
-    "      handle_connection: \"in_out_handle\" }, "
-    "    selectors: { field: \"field2\" } }, "
-    "  predicate: { label: { semantic_tag: \"tag4\"} } }"
-    "]"
-    "connections: ["
-    "  {"
-    "    name: \"out_handle\" direction: WRITES "
-    "    type: {"
-    "    entity: { "
-    "      schema: { "
-    "        fields: [ "
-    "          { key: \"field1\", value: { primitive: TEXT } } ]"
-    " } } } },"
-    "  {"
-    "    name: \"in_handle\" direction: READS "
-    "    type: {"
-    "    entity: { "
-    "      schema: { "
-    "        fields: [ "
-    "          { key: \"field2\", value: { primitive: TEXT } } ] } } } },"
-    "  {"
-    "    name: \"in_out_handle\" direction: READS_WRITES "
-    "    type: {"
-    "    entity: { "
-    "      schema: { "
-    "        fields: [ "
-    "          { key: \"field3\", value: { primitive: TEXT } }"
-    "    ]"
-    " } } } } ]";
+static const std::string kTextprotoWithAllFacts = R"(
+name: "PS1" claims: [ { assume: {
+  access_path: {
+    handle: {
+      particle_spec: "PS1",
+      handle_connection: "out_handle" },
+    selectors: { field: "field1" } },
+  predicate: { label: { semantic_tag: "tag1"} } } },
+{ assume: {
+  access_path: {
+    handle: {
+      particle_spec: "PS1",
+      handle_connection: "in_out_handle" },
+    selectors: { field: "field2" } },
+  predicate: { label: { semantic_tag: "tag2"} } } } ]
+checks: [ {
+  access_path: {
+    handle: {
+      particle_spec: "PS1",
+        handle_connection: "in_handle" },
+    selectors: { field: "field1" } },
+  predicate: { label: { semantic_tag: "tag3"} } },
+{
+  access_path: {
+    handle: {
+      particle_spec: "PS1",
+      handle_connection: "in_out_handle" },
+    selectors: { field: "field2" } },
+  predicate: { label: { semantic_tag: "tag4"} } } ]
+connections: [
+  {
+    name: "out_handle" direction: WRITES
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field1", value: { primitive: TEXT } } ] } } } },
+  {
+    name: "in_handle" direction: READS
+    type: {
+      entity: {
+        schema: {
+          fields: [
+            { key: "field2", value: { primitive: TEXT } } ] } } } },
+{
+  name: "in_out_handle" direction: READS_WRITES
+  type: {
+    entity: {
+      schema: {
+        fields: [
+          { key: "field3", value: { primitive: TEXT } } ] } } } } ])";
 
 TEST(BulkInstantiateTest, BulkInstantiateTest) {
   arcs::ParticleSpecProto particle_spec_proto;
