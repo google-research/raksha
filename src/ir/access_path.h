@@ -85,6 +85,12 @@ class AccessPath {
       (access_path_selectors_ == other.access_path_selectors_);
   }
 
+  template<typename H>
+  friend H AbslHashValue(H h, const AccessPath &access_path) {
+    return H::combine(
+        std::move(h), access_path.root_, access_path.access_path_selectors_);
+  }
+
  private:
   AccessPathRoot root_;
   AccessPathSelectors access_path_selectors_;

@@ -2,6 +2,7 @@
 
 #include <google/protobuf/text_format.h>
 
+#include "absl/hash/hash_testing.h"
 #include "src/common/testing/gtest.h"
 
 namespace raksha::ir {
@@ -131,6 +132,7 @@ static AccessPathRoot sample_roots[] = {
         "spec1", "handle_spec1")),
     ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
         "recipe", "particle", "handle")),
+    ir::AccessPathRoot(ir::HandleAccessPathRoot("recipe", "handle"))
 };
 
 static AccessPathSelectors sample_selectors[] = {
@@ -150,5 +152,16 @@ INSTANTIATE_TEST_SUITE_P(
         testing::Combine(
             testing::ValuesIn(sample_roots),
             testing::ValuesIn(sample_selectors))));
+
+TEST(AccessPathHashTest, AccessPathHashTest) {
+  std::vector<AccessPath> test_access_paths;
+  for (const AccessPathRoot &access_path_root : sample_roots) {
+    for (const AccessPathSelectors &access_path_selectors : sample_selectors) {
+      test_access_paths.push_back(
+          AccessPath(access_path_root, access_path_selectors));
+    }
+  }
+  EXPECT_TRUE(absl::VerifyTypeImplementsAbslHashCorrectly(test_access_paths));
+}
 
 }  // namespace raksha::ir

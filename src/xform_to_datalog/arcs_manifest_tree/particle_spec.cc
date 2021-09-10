@@ -16,12 +16,23 @@ ParticleSpec ParticleSpec::CreateFromProto(
         HandleConnectionSpec::CreateFromProto(hcs_proto));
   }
 
-  std::vector<ir::TagClaim> claims;
+  std::vector<ir::TagClaim> tag_claims;
+  std::vector<ir::DerivesFromClaim> derives_from_claims;
   for (const arcs::ClaimProto &claim : particle_spec_proto.claims()) {
-    CHECK(!claim.has_derives_from())
-      << "DerivesFrom claims not yet implemented";
-    CHECK(claim.has_assume()) << "Expected claim to carry an Assume field.";
-    claims.push_back(ir::TagClaim::CreateFromProto(claim.assume()));
+    switch(claim.claim_case()) {
+      case arcs::ClaimProto::kDerivesFrom: {
+        derives_from_claims.push_back(
+            ir::DerivesFromClaim::CreateFromProto(claim.derives_from()));
+        continue;
+      }
+      case arcs::ClaimProto::kAssume: {
+        tag_claims.push_back(ir::TagClaim::CreateFromProto(claim.assume()));
+        continue;
+      }
+      default: {
+        LOG(FATAL) << "Unexpected claim variant.";
+      }
+    }
   }
 
   std::vector<ir::TagCheck> checks;
@@ -30,43 +41,69 @@ ParticleSpec ParticleSpec::CreateFromProto(
   }
 
   return ParticleSpec(
-      std::move(name), std::move(checks), std::move(claims),
+      std::move(name), std::move(checks), std::move(tag_claims),
+      std::move(derives_from_claims),
       std::move(handle_connection_specs));
 }
 
 void ParticleSpec::GenerateEdges() {
-  // First, find all of the access paths that are input to the particle spec
-  // and output from the particle spec.
+  // First, iterate over the DerivesFrom claims to see which AccessPaths
+  // explicitly derive from some group of inputs. Draw the edges implied by
+  // those claims.
+  absl::flat_hash_set<ir::AccessPath> derives_from_targets;
+  for (const ir::DerivesFromClaim &derives_from_claim : derives_from_claims_) {
+    derives_from_targets.insert(derives_from_claim.target());
+    edges_.push_back(derives_from_claim.GetAsEdge());
+  }
+
+  // Now that we have handle the explicit edges, draw the default-dataflow
+  // edges (ie, assume that all inputs flow to all outputs without an
+  // explicit DerivesFrom claim).
+  // Find all of the access paths that are input to the particle spec
+  // and output from the particle spec which did not have an explicit
+  // derivation.
   std::vector<ir::AccessPath> input_access_paths;
-  std::vector<ir::AccessPath> output_access_paths;
+  std::vector<ir::AccessPath> default_derivation_output_access_paths;
   for (const auto &name_hcs_pair : handle_connection_specs_) {
     const HandleConnectionSpec &connection_spec = name_hcs_pair.second;
     std::vector<ir::AccessPath> access_paths =
         connection_spec.GetAccessPaths(name_);
-    if (connection_spec.reads()) {
-      // Note: we cannot move the access_paths here because handles can be both
-      // read and written. Therefore, it may be used in the writes() case after
-      // being used here. We could eliminate the potential copy with an
-      // additional case for reading and writing, but the decreased readability
-      // and code reuse is probably not worth the potential performance gains.
-      input_access_paths.insert(
-          input_access_paths.end(), access_paths.begin(), access_paths.end());
-    }
+    // While we want to consider all read HandleConnectionSpecs as inputs, we
+    // want to consider only those which are written and do not have explicit
+    // DerivesFrom claims as outputs for drawing default dataflow edges.
     if (connection_spec.writes()) {
-      output_access_paths.insert(
-          output_access_paths.end(),
+      for (ir::AccessPath &access_path : access_paths) {
+        if (derives_from_targets.contains(access_path)) continue;
+        // Note: we cannot move here because this connection spec may also be
+        // read. We could check whether it is not read and move in that case,
+        // but that's too ugly to bother with unless we get data that this is
+        // performance-critical.
+        default_derivation_output_access_paths.push_back(access_path);
+      }
+    }
+
+    if (connection_spec.reads()) {
+      input_access_paths.insert(
+          input_access_paths.end(),
           std::make_move_iterator(access_paths.begin()),
           std::make_move_iterator(access_paths.end()));
     }
   }
 
-  // Now that we have populated all of the access paths, draw the edges.
+  // Now that we have populated all of the access paths, draw the edges for
+  // default dataflow.
   // TODO(#99): Right now, we draw edges from all input access paths to all
   // output access paths. This is quadratic; we should draw all edges without
   // explicit DerivesFrom claims to and from a nexus AccessPath to produce a
   // linear number of edges instead.
-  for (const ir::AccessPath &input : input_access_paths) {
-    for (const ir::AccessPath &output : output_access_paths) {
+  // Note: we iterate over output paths in the outer loop and input edges in
+  // the inner loop. We do this because it is entirely possible that there
+  // was a DerivesFrom claim for each output, making the
+  // default_derivation_output_access_paths empty. Putting the outputs in the
+  // outer loop allows us to do 0 iterations in that case instead of I, where
+  // I is the number of input_access_paths.
+  for (const ir::AccessPath &output : default_derivation_output_access_paths) {
+    for (const ir::AccessPath &input : input_access_paths) {
       edges_.push_back(ir::Edge(input, output));
     }
   }

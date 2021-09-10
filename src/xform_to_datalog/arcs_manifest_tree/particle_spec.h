@@ -5,6 +5,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "src/common/logging/logging.h"
+#include "src/ir/derives_from_claim.h"
 #include "src/ir/edge.h"
 #include "src/ir/tag_check.h"
 #include "src/ir/tag_claim.h"
@@ -16,7 +17,7 @@ namespace raksha::xform_to_datalog::arcs_manifest_tree {
 // This struct is used to return the members of a ParticleSpec after being
 // instantiated.
 struct InstantiatedParticleSpecFacts {
-  std::vector<raksha::ir::TagClaim> claims;
+  std::vector<raksha::ir::TagClaim> tag_claims;
   std::vector<raksha::ir::TagCheck> checks;
   std::vector<raksha::ir::Edge> edges;
 };
@@ -37,7 +38,9 @@ class ParticleSpec {
 
   const std::vector<raksha::ir::TagCheck> &checks() const { return checks_; }
 
-  const std::vector<raksha::ir::TagClaim> &claims() const { return claims_; }
+  const std::vector<raksha::ir::TagClaim> &tag_claims() const {
+    return tag_claims_;
+  }
 
   const std::vector<raksha::ir::Edge> &edges() const { return edges_; }
 
@@ -57,8 +60,8 @@ class ParticleSpec {
     for (const raksha::ir::TagCheck &check : checks_) {
       result.checks.push_back(check.BulkInstantiate(instantiation_map));
     }
-    for (const raksha::ir::TagClaim &claim : claims_) {
-      result.claims.push_back(claim.BulkInstantiate(instantiation_map));
+    for (const raksha::ir::TagClaim &claim : tag_claims_) {
+      result.tag_claims.push_back(claim.BulkInstantiate(instantiation_map));
     }
     for (const raksha::ir::Edge &edge : edges_) {
       result.edges.push_back(edge.BulkInstantiate(instantiation_map));
@@ -70,10 +73,12 @@ class ParticleSpec {
   ParticleSpec(
       std::string name,
       std::vector<raksha::ir::TagCheck> checks,
-      std::vector<raksha::ir::TagClaim> claims,
+      std::vector<raksha::ir::TagClaim> tag_claims,
+      std::vector<raksha::ir::DerivesFromClaim> derives_from_claims,
       std::vector<HandleConnectionSpec> handle_connection_specs)
       : name_(std::move(name)), checks_(std::move(checks)),
-        claims_(std::move(claims)) {
+        tag_claims_(std::move(tag_claims)),
+        derives_from_claims_(std::move(derives_from_claims)) {
     for (HandleConnectionSpec &handle_connection_spec :
       handle_connection_specs) {
       std::string hcs_name = handle_connection_spec.name();
@@ -95,7 +100,10 @@ class ParticleSpec {
   std::vector<raksha::ir::TagCheck> checks_;
   // The claims this ParticleSpec performs upon its AccessPaths. All such
   // claims are made upon uninstantiated AccessPaths.
-  std::vector<raksha::ir::TagClaim> claims_;
+  std::vector<raksha::ir::TagClaim> tag_claims_;
+  // Claims that a particular AccessPath in this ParticleSpec derives from
+  // some other AccessPath.
+  std::vector<raksha::ir::DerivesFromClaim> derives_from_claims_;
   // The dataflow edges within this ParticleSpec connecting its
   // HandleConnectionSpecs. These edges are all between uninstantiated
   // AccessPaths.
