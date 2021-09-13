@@ -40,11 +40,13 @@ class TagCheck {
   // passing for the MVP.
   std::string ToString() const {
     constexpr absl::string_view kCheckHasTagFormat =
-        R"(checkHasTag("%s", "%s").)";
-    return absl::StrFormat(
-        kCheckHasTagFormat,
-        tag_annotation_on_access_path_.access_path().ToString(),
-        tag_annotation_on_access_path_.tag());
+        R"(checkHasTag("%s", "%s") :- mayHaveTag("%s", "%s").)";
+    std::string access_path =
+        tag_annotation_on_access_path_.access_path().ToString();
+    std::string tag = tag_annotation_on_access_path_.tag();
+
+    return absl::StrFormat(kCheckHasTagFormat, access_path, tag, access_path,
+                           tag);
   }
 
   bool operator==(const TagCheck &other) const {

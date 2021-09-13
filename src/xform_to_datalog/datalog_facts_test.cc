@@ -79,7 +79,7 @@ static std::tuple<DatalogFacts, std::string>
 claimHasTag("recipe.particle.out", "tag").
 
 // Checks:
-checkHasTag("recipe.particle.in", "tag2").
+checkHasTag("recipe.particle.in", "tag2") :- mayHaveTag("recipe.particle.in", "tag2").
 
 // Edges:
 edge("recipe.h1", "recipe.particle.in").
@@ -295,12 +295,12 @@ TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
 }
 
 static std::string kExpectedCheckStrings[] = {
-    R"(checkHasTag("NamedR.PS1#0.in_handle.field1", "tag2").)",
-    R"(checkHasTag("NamedR.PS1#1.in_handle.field1", "tag2").)",
-    R"(checkHasTag("NamedR.PS2#2.in_handle.field1", "tag4").)",
-    R"(checkHasTag("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2").)",
-    R"(checkHasTag("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4").)",
-    R"(checkHasTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4").)",
+    R"(checkHasTag("NamedR.PS1#0.in_handle.field1", "tag2") :- mayHaveTag("NamedR.PS1#0.in_handle.field1", "tag2").)",
+    R"(checkHasTag("NamedR.PS1#1.in_handle.field1", "tag2") :- mayHaveTag("NamedR.PS1#1.in_handle.field1", "tag2").)",
+    R"(checkHasTag("NamedR.PS2#2.in_handle.field1", "tag4") :- mayHaveTag("NamedR.PS2#2.in_handle.field1", "tag4").)",
+    R"(checkHasTag("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2").)",
+    R"(checkHasTag("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4").)",
+    R"(checkHasTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4").)",
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {
