@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
 
 #include "absl/container/flat_hash_map.h"
-#include "src/xform_to_datalog/datalog_facts.h"
+#include "src/xform_to_datalog/manifest_datalog_facts.h"
 
 #include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
 
@@ -31,7 +31,7 @@ namespace amt = raksha::xform_to_datalog::arcs_manifest_tree;
 //  entirety of the traversal of instantiation structures as one big
 //  traversal. This works, but it is hard to read and hard to test. We should
 //  break this up.
-DatalogFacts DatalogFacts::CreateFromManifestProto(
+ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
     const arcs::ManifestProto &manifest_proto) {
   // These collections will be used as inputs to the constructor that we
   // return from this function.
@@ -182,8 +182,9 @@ DatalogFacts DatalogFacts::CreateFromManifestProto(
     }
   }
 
-  return DatalogFacts(std::move(result_claims), std::move(result_checks),
-                      std::move(result_edges));
+  return ManifestDatalogFacts(std::move(result_claims),
+                              std::move(result_checks),
+                              std::move(result_edges));
 }
 
 }  // namespace raksha::xform_to_datalog

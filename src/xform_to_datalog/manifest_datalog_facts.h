@@ -14,8 +14,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
-#ifndef SRC_XFORM_TO_DATALOG_DATALOG_FACTS_H_
-#define SRC_XFORM_TO_DATALOG_DATALOG_FACTS_H_
+#ifndef SRC_XFORM_TO_DATALOG_MANIFEST_DATALOG_FACTS_H_
+#define SRC_XFORM_TO_DATALOG_MANIFEST_DATALOG_FACTS_H_
 
 #include <vector>
 
@@ -27,12 +27,12 @@
 
 namespace raksha::xform_to_datalog {
 
-class DatalogFacts {
+class ManifestDatalogFacts {
  public:
-  static DatalogFacts CreateFromManifestProto(
+  static ManifestDatalogFacts CreateFromManifestProto(
       const arcs::ManifestProto &manifest_proto);
 
-  DatalogFacts(
+  ManifestDatalogFacts(
       std::vector<raksha::ir::TagClaim> claims,
       std::vector<raksha::ir::TagCheck> checks,
       std::vector<raksha::ir::Edge> edges)
@@ -77,4 +77,4 @@ class DatalogFacts {
 
 }  // namespace raksha::xform_to_datalog
 
-#endif  // SRC_XFORM_TO_DATALOG_DATALOG_FACTS_H_
+#endif  // SRC_XFORM_TO_DATALOG_MANIFEST_DATALOG_FACTS_H_

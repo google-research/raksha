@@ -1,12 +1,9 @@
 licenses(["notice"])
 
 cc_library(
-    name = "xform_to_datalog",
-    srcs = glob(
-        ["*.cc"],
-        exclude = ["*_test.cc"],
-    ),
-    hdrs = glob(["*.h"]),
+    name = "manifest_datalog_facts",
+    srcs = ["manifest_datalog_facts.cc"],
+    hdrs = ["manifest_datalog_facts.h"],
     deps = [
         "//src/ir",
         "//src/xform_to_datalog/arcs_manifest_tree",
@@ -15,10 +12,10 @@ cc_library(
 )
 
 cc_test(
-    name = "datalog_facts_test",
-    srcs = ["datalog_facts_test.cc"],
+    name = "manifest_datalog_facts_test",
+    srcs = ["manifest_datalog_facts_test.cc"],
     deps = [
-        ":xform_to_datalog",
+        ":manifest_datalog_facts",
         "//src/common/testing:gtest",
     ],
 )
