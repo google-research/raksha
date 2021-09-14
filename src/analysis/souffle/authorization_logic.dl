@@ -66,6 +66,13 @@ claimHasTag(principal, path, tag) :- saysHasTag(principal, path, tag).
 // a tag.
 ownsTag(owner, tag) :- saysOwnsTag(_, owner, tag).
 
+// This rule says that any principal that creates a tag owns it. This rule is 
+// just a starting point to allow all aspects of the policy to come from 
+// authorization logic -- it is just a simple way to generate ownsTag from 
+// something with a speaker. This rule is likely to change. It does not rule
+// out the case that two different principals both create the same tag.
+ownsTag(speaker, tag) :- saysCreateTag(speaker, tag).
+
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
 //-----------------------------------------------------------------------------
