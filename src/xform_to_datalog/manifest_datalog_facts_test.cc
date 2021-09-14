@@ -14,7 +14,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
-#include "src/xform_to_datalog/datalog_facts.h"
+#include "src/xform_to_datalog/manifest_datalog_facts.h"
 
 #include <google/protobuf/text_format.h>
 
@@ -24,11 +24,11 @@ namespace raksha::xform_to_datalog {
 
 namespace ir = raksha::ir;
 
-class DatalogFactsToStringTest :
-   public testing::TestWithParam<std::tuple<DatalogFacts, std::string>> {};
+class ManifestDatalogFactsToStringTest :
+   public testing::TestWithParam<std::tuple<ManifestDatalogFacts, std::string>> {};
 
-TEST_P(DatalogFactsToStringTest, DatalogFactsToStringTest) {
-  const DatalogFacts &datalog_facts = std::get<0>(GetParam());
+TEST_P(ManifestDatalogFactsToStringTest, ManifestDatalogFactsToStringTest) {
+  const ManifestDatalogFacts &datalog_facts = std::get<0>(GetParam());
   const std::string &expected_result_string = std::get<1>(GetParam());
 
   EXPECT_EQ(datalog_facts.ToString(), expected_result_string);
@@ -52,9 +52,9 @@ static const ir::AccessPath kHandleConnectionOutAccessPath(
         "recipe", "particle", "out")),
     ir::AccessPathSelectors());
 
-static std::tuple<DatalogFacts, std::string>
+static std::tuple<ManifestDatalogFacts, std::string>
   datalog_facts_and_output_strings[] = {
-    { DatalogFacts({}, {}, {}),
+    { ManifestDatalogFacts({}, {}, {}),
       R"(
 // Claims:
 
@@ -65,7 +65,7 @@ static std::tuple<DatalogFacts, std::string>
 // Edges:
 
 )" },
-    { DatalogFacts(
+    { ManifestDatalogFacts(
         { ir::TagClaim(ir::TagAnnotationOnAccessPath(
             kHandleConnectionOutAccessPath, "tag")) },
         { ir::TagCheck(ir::TagAnnotationOnAccessPath(
@@ -89,10 +89,10 @@ edge("recipe.particle.out", "recipe.h2").
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(DatalogFactsToStringTest, DatalogFactsToStringTest,
+INSTANTIATE_TEST_SUITE_P(ManifestDatalogFactsToStringTest, ManifestDatalogFactsToStringTest,
                          testing::ValuesIn(datalog_facts_and_output_strings));
 
-// Create a manifest textproto to test constructing DatalogFacts from
+// Create a manifest textproto to test constructing ManifestDatalogFacts from
 // a ManifestProto. The ParticleSpecs will be pretty simple, as we have
 // tested creating ParticleSpecs from ParticleSpecProtos in more depth
 // elsewhere. We're focusing more on connecting these to particles here.
@@ -259,18 +259,18 @@ static const std::string kManifestTextproto = R"(
 
 class ParseBigManifestTest : public testing::Test {
  public:
-  ParseBigManifestTest() : datalog_facts_(ParseDatalogFacts()) { }
+  ParseBigManifestTest() : datalog_facts_(ParseManifestDatalogFacts()) { }
 
  protected:
-  static DatalogFacts ParseDatalogFacts() {
+  static ManifestDatalogFacts ParseManifestDatalogFacts() {
      arcs::ManifestProto manifest_proto;
      google::protobuf::TextFormat::ParseFromString(
          kManifestTextproto, &manifest_proto);
 
-     return DatalogFacts::CreateFromManifestProto(manifest_proto);
+     return ManifestDatalogFacts::CreateFromManifestProto(manifest_proto);
   }
 
-  DatalogFacts datalog_facts_;
+  ManifestDatalogFacts datalog_facts_;
 };
 
 static const std::string kExpectedClaimStrings[] = {
