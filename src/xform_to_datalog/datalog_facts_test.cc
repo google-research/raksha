@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-
 #include "src/xform_to_datalog/datalog_facts.h"
 
 #include "src/common/testing/gtest.h"
@@ -21,37 +20,55 @@
 
 namespace raksha::xform_to_datalog {
 
-namespace ir = raksha::ir;
-
-constexpr char kDatalogFileTemplate[] =
-    R"(// GENERATED FILE, DO NOT EDIT!
-
-#include "taint.dl"
-%s
-.output checkHasTag
-)";
-
-class DatalogFactsTest : public testing::TestWithParam<ManifestDatalogFacts> {};
+class DatalogFactsTest : public testing::TestWithParam<
+                             std::pair<ManifestDatalogFacts, std::string>> {};
 
 TEST_P(DatalogFactsTest, IncludesManifestFactsWithCorrectPrefixAndSuffix) {
-  const ManifestDatalogFacts &manifest_datalog_facts = GetParam();
-  std::string expected_result_string =
-      absl::StrFormat(kDatalogFileTemplate, manifest_datalog_facts.ToString());
+  const auto& [manifest_datalog_facts, expected_string] = GetParam();
   DatalogFacts datalog_facts(manifest_datalog_facts);
-  EXPECT_EQ(datalog_facts.ToString(), expected_result_string);
+  EXPECT_EQ(datalog_facts.ToString(), expected_string);
 }
 
 INSTANTIATE_TEST_SUITE_P(
     DatalogFactsTest, DatalogFactsTest,
-    testing::ValuesIn(
-        {ManifestDatalogFacts({}, {}, {}),
-         ManifestDatalogFacts(
-             {ir::TagClaim(ir::TagAnnotationOnAccessPath(
-                 ir::AccessPath(
-                     ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
-                         "recipe", "particle", "out")),
-                     ir::AccessPathSelectors()),
-                 "tag"))},
-             {}, {})}));
+    testing::Values(
+        std::make_pair(ManifestDatalogFacts({}, {}, {}),
+                       R"(// GENERATED FILE, DO NOT EDIT!
+
+#include "taint.dl"
+.output checkHasTag
+
+// Claims:
+
+
+// Checks:
+
+
+// Edges:
+
+)"),
+        std::make_pair(
+            ManifestDatalogFacts(
+                {ir::TagClaim(ir::TagAnnotationOnAccessPath(
+                    ir::AccessPath(
+                        ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
+                            "recipe", "particle", "out")),
+                        ir::AccessPathSelectors()),
+                    "tag"))},
+                {}, {}),
+            R"(// GENERATED FILE, DO NOT EDIT!
+
+#include "taint.dl"
+.output checkHasTag
+
+// Claims:
+claimHasTag("recipe.particle.out", "tag").
+
+// Checks:
+
+
+// Edges:
+
+)")));
 
 }  // namespace raksha::xform_to_datalog

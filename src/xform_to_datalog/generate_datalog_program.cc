@@ -41,20 +41,19 @@ int main(int argc, char* argv[]) {
   absl::ParseCommandLine(argc, argv);
 
   // Verify command line arguments
-  //
   std::filesystem::path manifest_filepath(absl::GetFlag(FLAGS_manifest_proto));
   if (!std::filesystem::exists(manifest_filepath)) {
     LOG(ERROR) << "Manifest proto file " << manifest_filepath
                << " does not exist!";
-    return -1;
+    return 1;
   }
 
   bool force_overwrite = absl::GetFlag(FLAGS_overwrite);
   std::filesystem::path datalog_filepath(absl::GetFlag(FLAGS_datalog_file));
-  if (std::filesystem::exists(datalog_filepath) && !force_overwrite) {
+  if (!force_overwrite && std::filesystem::exists(datalog_filepath)) {
     LOG(ERROR) << "Output datalog file " << datalog_filepath
                << " exists! Forgot `--overwrite`?";
-    return -1;
+    return 1;
   }
 
   // Parse manifest stream and dump as datalog program.
@@ -62,7 +61,7 @@ int main(int argc, char* argv[]) {
   if (!manifest_proto_stream) {
     LOG(ERROR) << "Error reading manifest proto file " << manifest_filepath
                << ":" << strerror(errno);
-    return -1;
+    return 1;
   }
 
   arcs::ManifestProto manifest_proto;
@@ -79,7 +78,7 @@ int main(int argc, char* argv[]) {
   if (!datalog_file) {
     LOG(ERROR) << "Error creating " << datalog_filepath << " :"
                << strerror(errno);
-    return -1;
+    return 1;
   }
 
   datalog_file << datalog_facts.ToString();

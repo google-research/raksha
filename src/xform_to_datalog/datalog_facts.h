@@ -28,22 +28,29 @@
 
 namespace raksha::xform_to_datalog {
 
+// A utility class that is used to generate a datalog program by combining
+// datalog facts from different sources and adding the necessary headers.
 class DatalogFacts {
  public:
   DatalogFacts(ManifestDatalogFacts manifest_datalog_facts)
       : manifest_datalog_facts_(std::move(manifest_datalog_facts)) {}
 
-  // Print out all contained facts as a single datalog string. Note: this
-  // does not contain the header files that would be necessary to run this
-  // against the datalog scripts; it contains only facts and comments.
+  // Returns the datalog program with necessary headers.
   std::string ToString() const {
-    return absl::StrCat(
-        "// GENERATED FILE, DO NOT EDIT!\n\n", "#include \"taint.dl\"\n",
-        manifest_datalog_facts_.ToString(), "\n.output checkHasTag\n");
+    return absl::StrCat(kDatalogFilePrefix, manifest_datalog_facts_.ToString());
   }
 
  private:
   ManifestDatalogFacts manifest_datalog_facts_;
+
+  // The prefix that should be added to the datalog program.
+  static constexpr char kDatalogFilePrefix[] =
+      R"(// GENERATED FILE, DO NOT EDIT!
+
+#include "taint.dl"
+.output checkHasTag
+)";
+
 };
 
 }  // namespace raksha::xform_to_datalog
