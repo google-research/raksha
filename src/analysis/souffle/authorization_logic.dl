@@ -40,6 +40,10 @@ isPrincipal(speaker) :- saysDowngrades(speaker, _, _).
 // it).
 .decl ownsTag(owner: Principal, tag: Tag)
 
+// For now, all principals own all tags. This is a temporary workaround until
+// we have something real for authorization logic here.
+ownsTag(owner, tag) :- isPrincipal(owner), isTag(tag).
+
 // Some accessPath is actually downgraded (by taking into consideration the
 // privileges of a party trying to downgrade it, and as a result of that party
 // deciding to downgrade it). Because here IFC labels are sets of tags (ordered
@@ -52,7 +56,8 @@ isPrincipal(speaker) :- saysDowngrades(speaker, _, _).
 //-----------------------------------------------------------------------------
 downgrades(path, tag) :- ownsTag(owner, tag), saysDowngrades(owner, path, tag).
 
-isTag(tag) :- ownsTag(_, tag).
+// TODO: Add this back in once ownsTag has a real implementation.
+// isTag(tag) :- ownsTag(_, tag).
 isTag(tag) :- saysDowngrades(_, _, tag).
 
 #endif // SRC_ANALYSIS_SOUFFLE_AUTHORIZATION_LOGIC_DL_

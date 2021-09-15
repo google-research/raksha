@@ -22,8 +22,8 @@
 #include "taint.dl"
 #include "fact_test_helper.dl"
 
-claimHasTag("R.P1.foo.a", "userSelection").
-claimHasTag("R.P1.foo.b", "screenContent").
+claimHasTag("P1", "R.P1.foo.a", "userSelection").
+claimHasTag("P1", "R.P1.foo.b", "screenContent").
 
 edge("R.P1.foo.a", "R.h.Foo.a").
 edge("R.P1.foo.b", "R.h.Foo.b").

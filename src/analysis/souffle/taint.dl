@@ -26,6 +26,11 @@
 // Relation Declarations
 //-----------------------------------------------------------------------------
 
+// Indicates that an access path definitely has a tag. Differs from mayHaveTag
+// below in that mayHaveTag indicates only that it is possible that an
+// accessPath has a tag.
+.decl hasTag(accessPath: AccessPath, tag: Tag)
+
 // Declares that `accessPath` may have been tainted with `tag`.
 // If false, `accessPath` *definitely* does not have `tag` taint at runtime.
 // If true, `accessPath` may have the `tag` taint at runtime.
@@ -35,28 +40,34 @@
 // they have Tags).
 .decl mayHaveTag(accessPath: AccessPath, tag: Tag)
 
-// There is a claim that `accessPath` definitely has `tag` taint.
-.decl claimHasTag(accessPath: AccessPath, tag: Tag)
+// There is a claim that `accessPath` definitely has `tag` taint. This claim
+// is made by `principal`.
+.decl claimHasTag(principal: Principal, accessPath: AccessPath, tag: Tag)
+
+// Any Principal used in a claim is in the universe of isPrincipal.
+isPrincipal(principal) :- claimHasTag(principal, _, _).
 
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
-mayHaveTag(tgt, tag) :- claimHasTag(tgt, tag).
+hasTag(tgt, tag) :- claimHasTag(principal, tgt, tag), ownsTag(principal, tag).
+
+mayHaveTag(tgt, tag) :- hasTag(tgt, tag).
+
 mayHaveTag(tgt, tag) :-
-    edge(src, tgt), mayHaveTag(src, tag),
-    !downgrades(tgt, tag).
+  edge(src, tgt), mayHaveTag(src, tag), !downgrades(tgt, tag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
 //-----------------------------------------------------------------------------
 // These rules add objects to the set of things that exist (i.e. relations like
 // `isObject(..)`) whenever they are mentioned in other rules.
-isAccessPath(path) :- claimHasTag(path, _).
+isAccessPath(path) :- claimHasTag(_, path, _).
+isAccessPath(path) :- hasTag(path, _).
 isAccessPath(path) :- mayHaveTag(path, _).
 
 // Symbols used in hasTag or mayHaveTag are tags
-isTag(tag) :- claimHasTag(_, tag).
-isTag(tag) :- mayHaveTag(_, tag).
+isTag(tag) :- claimHasTag(_, _, tag).
 
 // A pair of (base, member) is in this set if the base access path is a non-trivial subpath of the
 // member access path.

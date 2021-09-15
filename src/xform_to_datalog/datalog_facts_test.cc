@@ -49,10 +49,13 @@ INSTANTIATE_TEST_SUITE_P(
 )"),
         std::make_pair(
             ManifestDatalogFacts(
-                {ir::TagClaim(ir::TagAnnotationOnAccessPath(
-                    ir::AccessPath(
-                        ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
-                            "recipe", "particle", "out")),
+                {ir::TagClaim(
+                    "particle",
+                    ir::TagAnnotationOnAccessPath(
+                        ir::AccessPath(
+                            ir::AccessPathRoot(
+                                ir::HandleConnectionAccessPathRoot(
+                                    "recipe", "particle", "out")),
                         ir::AccessPathSelectors()),
                     "tag"))},
                 {}, {}),
@@ -62,7 +65,7 @@ INSTANTIATE_TEST_SUITE_P(
 .output checkHasTag
 
 // Claims:
-claimHasTag("recipe.particle.out", "tag").
+claimHasTag("particle", "recipe.particle.out", "tag").
 
 // Checks:
 

@@ -69,18 +69,24 @@ ownsTag("Alice", "product_id_tag").
 ownsTag("ServiceProvider", "image_detection_model_tag").
 
 // Assign tags to initial inputs
-claimHasTag("sensor_data_packet.camera_feed", "raw_video_tag").
+// Note: SensorDataSource is the hypothetical source of the
+// sensor_data_packet, it isn't explicitly described above. Similar with
+// other Source principals below.
+claimHasTag(
+    "SensorDataSource", "sensor_data_packet.camera_feed", "raw_video_tag").
 // the access path, sensor_data_packet.video_resolution does not have sensitive 
 // data in this example -- it's just a configuration option that is 
-// uninteresting w.r.t privacy, so it has no tags (it's fully public / the empty set).
-claimHasTag("image_selection", "image_selection_tag").
-claimHasTag("detection_model", "image_detection_model_tag").
+// uninteresting w.r.t privacy, so it has no tags (it's fully public / the empty
+// set).
+claimHasTag("ImageSelectionSource", "image_selection", "image_selection_tag").
+claimHasTag(
+    "DetectionModelSource", "detection_model", "image_detection_model_tag").
 
 // The label of the access path "image_detection_boxes" is downgraded from
 // {raw_video_tag, image_detection_model_tag} to {detected_images_tag}. This
 // happens in two steps -- first the label is downgraded from {raw_video_tag,
-// image_detection_model_tag} to {} (the empty set, which is totally public -- can go
-// anywhere). This downgrade happens with
+// image_detection_model_tag} to {} (the empty set, which is totally public --
+// can go anywhere). This downgrade happens with
 //      saysDowngrades(Alice, image_detection_boxes, raw_video_tag)
 // and
 //      saysDowngrades(ServiceProvider, image_detection_boxes, 
@@ -89,20 +95,20 @@ claimHasTag("detection_model", "image_detection_model_tag").
 // "upgrade" because the label {detected_image_tag} is more constrained.
 // Upgrades are always allowed). The upgrade happens with
 // 
-//      claimHasTag(image_detection_boxes, detected_images_tag).
+//      claimHasTag(
+//        "ImageDetector", "image_detection_boxes", "detected_images_tag").
 
 saysDowngrades("Alice", "image_detection_boxes", "raw_video_tag").
 saysDowngrades("ServiceProvider", "image_detection_boxes", 
     "image_detection_model_tag").
-claimHasTag("image_detection_boxes", "detected_images_tag").
+claimHasTag("ImageDetector", "image_detection_boxes", "detected_images_tag").
 
 // The output of the image selector is downgraded from 
 // {image_detection_model_tag, detected_images_tag} to
 // {product_id_tag}
 saysDowngrades("Alice", "selected_image_id", "image_selection_tag").
 saysDowngrades("Alice", "selected_image_id", "detected_images_tag").
-claimHasTag("selected_image_id", "product_id_tag").
-
+claimHasTag("ImageSelector", "selected_image_id", "product_id_tag").
 
 //----------------------------------------------------------------------------- 
 // Policy Check
@@ -113,7 +119,8 @@ claimHasTag("selected_image_id", "product_id_tag").
 // set {product_id_tag}.
 
 // Create a path just for testing purposes that has just the expected tag
-claimHasTag("output_expected_label", "product_id_tag").
+claimHasTag(
+    "OutputExpectedLabelSource", "output_expected_label", "product_id_tag").
 
 // define subset or equals (flowsTo) by finding a counterexample
 .decl isNotSubsetOrEquals(p1: AccessPath, p2: AccessPath)

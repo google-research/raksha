@@ -21,12 +21,16 @@ ParticleSpec ParticleSpec::CreateFromProto(
   for (const arcs::ClaimProto &claim : particle_spec_proto.claims()) {
     switch(claim.claim_case()) {
       case arcs::ClaimProto::kDerivesFrom: {
+        // TODO(#120): Also attach the particle name to these DerivesFrom
+        //  claims to allow authorization logic to mediate whether edges are
+        //  drawn for these claims or not.
         derives_from_claims.push_back(
             ir::DerivesFromClaim::CreateFromProto(claim.derives_from()));
         continue;
       }
       case arcs::ClaimProto::kAssume: {
-        tag_claims.push_back(ir::TagClaim::CreateFromProto(claim.assume()));
+        tag_claims.push_back(
+            ir::TagClaim::CreateFromProto(name, claim.assume()));
         continue;
       }
       default: {
