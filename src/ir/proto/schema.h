@@ -13,24 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_IR_PROTO_PRIMITIVE_TYPE_H_
-#define SRC_IR_PROTO_PRIMITIVE_TYPE_H_
+#ifndef SRC_IR_PROTO_SCHEMA_H_
+#define SRC_IR_PROTO_SCHEMA_H_
 
-#include "src/ir/types/primitive_type.h"
+#include "src/ir/types/schema.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types::proto {
 
-// Decodes the given `primitive_type_proto` as a PrimitiveType.
-PrimitiveType decode(const arcs::PrimitiveTypeProto& primitive_type_proto);
+// Decodes the given `schema_proto` and returns the resulting Schema.
+Schema decode(const arcs::SchemaProto& schema_proto);
 
-// Encodes the given `primitive_type` as an PrimitiveTypeProto.
-arcs::PrimitiveTypeProto encode(const PrimitiveType& primitive_type);
-
-// Returns a TypeProto with the given `primitive_type`.
-arcs::TypeProto encodeAsTypeProto(const PrimitiveType& primitive_type);
+// Encodes the given `schema` as an arcs::SchemaProto.
+arcs::SchemaProto encode(const Schema& schema);
 
 }  // namespace raksha::ir::types::proto
 
-#endif  // SRC_IR_PROTO_PRIMITIVE_TYPE_H_
-
+#endif  // SRC_IR_PROTO_SCHEMA_H_

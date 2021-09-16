@@ -18,17 +18,17 @@ package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
     name = "types",
-    hdrs = ["types.h"],
-    deps = [
-        ":primitive_type",
+    srcs = [
+        "entity_type.cc",
+        "primitive_type.cc",
+        "schema.cc",
+        "type.cc",
     ],
-)
-
-cc_library(
-    name = "primitive_type",
-    srcs = ["primitive_type.cc"],
     hdrs = [
+        "entity_type.h",
         "primitive_type.h",
+        "schema.h",
+        "type.h",
     ],
     deps = [
         "//src/ir/types",

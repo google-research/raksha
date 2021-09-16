@@ -13,9 +13,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_IR_PROTO_TYPES_H_
-#define SRC_IR_PROTO_TYPES_H_
+#ifndef SRC_IR_PROTO_ENTITY_TYPE_H_
+#define SRC_IR_PROTO_ENTITY_TYPE_H_
 
-#include "src/ir/proto/primitive_type.h"
+#include "src/ir/types/entity_type.h"
+#include "third_party/arcs/proto/manifest.pb.h"
 
-#endif  // SRC_IR_PROTO_TYPES_H_
+namespace raksha::ir::types::proto {
+
+// Decodes the given `entity_type_proto` as an EntityType.
+EntityType decode(const arcs::EntityTypeProto& entity_type_proto);
+
+// Encodes the given `entity_type` as an EntityTypeProto.
+arcs::EntityTypeProto encode(const EntityType& entity_type);
+
+// Returns a TypeProto with the given entity_type.
+arcs::TypeProto encodeAsTypeProto(const EntityType& entity_type);
+
+}  // namespace raksha::ir::types::proto
+
+#endif  // SRC_IR_PROTO_ENTITY_TYPE_H_

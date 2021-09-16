@@ -13,24 +13,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_IR_PROTO_PRIMITIVE_TYPE_H_
-#define SRC_IR_PROTO_PRIMITIVE_TYPE_H_
+#include "src/ir/proto/entity_type.h"
 
-#include "src/ir/types/primitive_type.h"
-#include "third_party/arcs/proto/manifest.pb.h"
+#include "src/ir/proto/schema.h"
 
 namespace raksha::ir::types::proto {
 
-// Decodes the given `primitive_type_proto` as a PrimitiveType.
-PrimitiveType decode(const arcs::PrimitiveTypeProto& primitive_type_proto);
+EntityType decode(const arcs::EntityTypeProto& entity_type_proto) {
+  CHECK(entity_type_proto.has_schema())
+      << "Schema is required for Entity types.";
+  return EntityType(decode(entity_type_proto.schema()));
+}
 
-// Encodes the given `primitive_type` as an PrimitiveTypeProto.
-arcs::PrimitiveTypeProto encode(const PrimitiveType& primitive_type);
+arcs::EntityTypeProto encode(const EntityType& entity_type) {
+  arcs::EntityTypeProto entity_type_proto;
+  *entity_type_proto.mutable_schema() = encode(entity_type.schema());
+  return entity_type_proto;
+}
 
-// Returns a TypeProto with the given `primitive_type`.
-arcs::TypeProto encodeAsTypeProto(const PrimitiveType& primitive_type);
+arcs::TypeProto encodeAsTypeProto(const EntityType& entity_type) {
+  arcs::TypeProto type_proto;
+  *type_proto.mutable_entity() = std::move(encode(entity_type));
+  return type_proto;
+}
 
 }  // namespace raksha::ir::types::proto
-
-#endif  // SRC_IR_PROTO_PRIMITIVE_TYPE_H_
-

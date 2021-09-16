@@ -12,10 +12,6 @@ namespace raksha::ir::types {
 
 class Schema {
  public:
-
-  // Make a Schema object from an arcs::SchemaProto message.
-  static Schema CreateFromProto(arcs::SchemaProto schema_proto);
-
   explicit Schema(
     absl::optional<std::string> name,
     absl::flat_hash_map<std::string, std::unique_ptr<Type>> fields)
@@ -23,11 +19,14 @@ class Schema {
 
   raksha::ir::AccessPathSelectorsSet GetAccessPathSelectorsSet() const;
 
-  // Create an arcs::SchemaProto message from the contents of this Schema
-  // object.
-  arcs::SchemaProto MakeProto() const;
- private:
+  const absl::optional<std::string>& name() const { return name_; }
 
+  const absl::flat_hash_map<std::string, std::unique_ptr<Type>>& fields()
+      const {
+    return fields_;
+  }
+
+ private:
   absl::optional<std::string> name_;
   absl::flat_hash_map<std::string, std::unique_ptr<Type>> fields_;
 };
