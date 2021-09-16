@@ -5,6 +5,7 @@
 
 #include "src/common/logging/logging.h"
 #include "src/ir/access_path.h"
+#include "src/ir/proto/type.h"
 #include "src/ir/types/type.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
@@ -36,7 +37,7 @@ class HandleConnectionSpec {
         : (reads_) ? arcs::HandleConnectionSpecProto_Direction_READS
                    : arcs::HandleConnectionSpecProto_Direction_WRITES);
     result.set_name(name_);
-    *result.mutable_type() = type_->MakeProto();
+    *result.mutable_type() = raksha::ir::types::proto::encode(*type_);
     return result;
   }
 

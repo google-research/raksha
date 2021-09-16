@@ -31,7 +31,7 @@ HandleConnectionSpec HandleConnectionSpec::CreateFromProto(
   CHECK(handle_connection_spec_proto.has_type())
     << "Found connection spec " << name << " without required type.";
   std::unique_ptr<types::Type> type =
-      types::Type::CreateFromProto(handle_connection_spec_proto.type());
+      raksha::ir::types::proto::decode(handle_connection_spec_proto.type());
   return HandleConnectionSpec(std::move(name), reads, writes, std::move(type));
 }
 

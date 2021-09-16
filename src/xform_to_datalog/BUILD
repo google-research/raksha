@@ -41,6 +41,7 @@ cc_library(
     hdrs = ["manifest_datalog_facts.h"],
     deps = [
         "//src/ir",
+        "//src/ir/proto:types",
         "//src/xform_to_datalog/arcs_manifest_tree",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],

@@ -2,15 +2,16 @@
 
 #include <algorithm>
 #include <memory>
-#include <google/protobuf/util/message_differencer.h>
-#include <google/protobuf/text_format.h>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_split.h"
-#include "src/ir/access_path_selectors.h"
-#include "src/ir/access_path_selectors_set.h"
+#include "google/protobuf/text_format.h"
+#include "google/protobuf/util/message_differencer.h"
 #include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/access_path_selectors.h"
+#include "src/ir/access_path_selectors_set.h"
+#include "src/ir/proto/type.h"
 #include "src/ir/types/entity_type.h"
 #include "src/ir/types/primitive_type.h"
 #include "src/ir/types/schema.h"
@@ -231,26 +232,24 @@ INSTANTIATE_TEST_SUITE_P(
     TypeProducesAccessPathStrsTest,
     testing::ValuesIn(types_to_access_path_lists));
 
-class RoundTripTypeProtoThroughTypeTest :
+class GetAccessPathSelectorsWithProtoTest :
  public testing::TestWithParam<
   std::tuple<std::string, std::vector<std::string>>> {};
 
-TEST_P(RoundTripTypeProtoThroughTypeTest, RoundTripTypeProtoThroughTypeTest) {
+TEST_P(GetAccessPathSelectorsWithProtoTest,
+       GetAccessPathSelectorsWithProtoTest) {
+  const auto &[type_as_textproto, expected_access_path_strs] = GetParam();
   arcs::TypeProto orig_type_proto;
-  const std::string &type_as_textproto = std::get<0>(GetParam());
-  std::vector<std::string> expected_access_path_strs = std::get<1>(GetParam());
-  google::protobuf::TextFormat::ParseFromString(type_as_textproto, &orig_type_proto);
-  std::unique_ptr<Type> type = Type::CreateFromProto(orig_type_proto);
+  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(type_as_textproto,
+                                                          &orig_type_proto))
+      << "Failed to parse text proto!";
+  std::unique_ptr<Type> type = proto::decode(orig_type_proto);
   std::vector<std::string> access_path_str_vec =
       GetAccessPathStrVecFromAccessPathSelectorsSet(
           type->GetAccessPathSelectorsSet());
   EXPECT_THAT(
       access_path_str_vec,
       testing::UnorderedElementsAreArray(expected_access_path_strs));
-  arcs::TypeProto result_type_proto = type->MakeProto();
-  ASSERT_TRUE(
-      google::protobuf::util::MessageDifferencer::Equals(
-          orig_type_proto, result_type_proto));
 }
 
 const std::tuple<std::string, std::vector<std::string>>
@@ -299,8 +298,8 @@ const std::tuple<std::string, std::vector<std::string>>
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    RoundTripTypeProtoThroughTypeTest,
-    RoundTripTypeProtoThroughTypeTest,
+    GetAccessPathSelectorsWithProtoTest,
+    GetAccessPathSelectorsWithProtoTest,
     testing::ValuesIn(type_proto_and_access_path_strings));
 
 // TODO(#122): This test should be moved to appropriate file while refactoring.

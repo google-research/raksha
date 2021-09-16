@@ -37,6 +37,7 @@ cc_test(
         "//src/common/logging",
         "//src/common/testing:gtest",
         "//src/ir",
+        "//src/ir/proto:types",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings",
     ],

@@ -37,10 +37,21 @@ cc_library(
 )
 
 cc_test(
+    name = "entity_type_test",
+    srcs = ["entity_type_test.cc"],
+    deps = [
+        "types",
+        "//src/common/testing:gtest",
+        "//src/ir/types",
+        "//third_party/arcs/proto:manifest_cc_proto",
+    ],
+)
+
+cc_test(
     name = "primitive_type_test",
     srcs = ["primitive_type_test.cc"],
     deps = [
-        ":primitive_type",
+        "types",
         "//src/common/testing:gtest",
         "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",
