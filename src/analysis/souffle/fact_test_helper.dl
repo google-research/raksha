@@ -1,6 +1,7 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_
 #define SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_
 
+#include "authorization_logic.dl"
 #include "taint.dl"
 
 .type TestAspectName <: symbol
@@ -35,6 +36,10 @@ duplicateTestCaseNames(testAspectName) :-
 .output testFails(IO=stdout, delimiter=",")
 
 testFails(testAspectName) :- allTests(testAspectName), !testPasses(testAspectName).
+
+// For the fact tests, consider all principals as owning all tags. This allows us to avoid writing
+// ownership relations, which are not the point of those tests.
+ownsTag(principal, tag) :- isPrincipal(principal), isTag(tag).
 
 // TEST_CASE is constructed so that it can take the place of a rule head. It "declares" a test
 // aspect via the allTestsAndCaseNum fact and sets up a testPasses head for the aspect in question.

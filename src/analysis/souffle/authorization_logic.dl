@@ -40,10 +40,6 @@ isPrincipal(speaker) :- saysDowngrades(speaker, _, _).
 // it).
 .decl ownsTag(owner: Principal, tag: Tag)
 
-// For now, all principals own all tags. This is a temporary workaround until
-// we have something real for authorization logic here.
-ownsTag(owner, tag) :- isPrincipal(owner), isTag(tag).
-
 // Some accessPath is actually downgraded (by taking into consideration the
 // privileges of a party trying to downgrade it, and as a result of that party
 // deciding to downgrade it). Because here IFC labels are sets of tags (ordered
@@ -56,7 +52,11 @@ ownsTag(owner, tag) :- isPrincipal(owner), isTag(tag).
 //-----------------------------------------------------------------------------
 downgrades(path, tag) :- ownsTag(owner, tag), saysDowngrades(owner, path, tag).
 
-// TODO: Add this back in once ownsTag has a real implementation.
+// TODO(#126): Fix the universe populating rules, potentially by deleting
+//  them entirely.
+//
+// For now, we need to not populate isTag to handle cases where the tests
+// cause all principals to be associated with all tags.
 // isTag(tag) :- ownsTag(_, tag).
 isTag(tag) :- saysDowngrades(_, _, tag).
 
