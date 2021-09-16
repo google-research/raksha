@@ -303,4 +303,10 @@ INSTANTIATE_TEST_SUITE_P(
     RoundTripTypeProtoThroughTypeTest,
     testing::ValuesIn(type_proto_and_access_path_strings));
 
+// TODO(#122): This test should be moved to appropriate file while refactoring.
+TEST(EntityTypeTest, KindReturnsCorrectKind) {
+  EntityType entity_type(Schema(absl::nullopt, {}));
+  EXPECT_EQ(entity_type.kind(), Type::Kind::kEntity);
+}
+
 }  // namespace raksha::transform::types

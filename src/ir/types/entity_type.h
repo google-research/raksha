@@ -22,6 +22,8 @@ class EntityType : public Type {
 
   explicit EntityType(Schema schema) : schema_(std::move(schema)) {}
 
+  Type::Kind kind() const override { return Type::Kind::kEntity; }
+
   raksha::ir::AccessPathSelectorsSet GetAccessPathSelectorsSet() const {
     return schema_.GetAccessPathSelectorsSet();
   }

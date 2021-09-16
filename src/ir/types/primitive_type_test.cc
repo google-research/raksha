@@ -8,6 +8,11 @@ namespace raksha::ir::types {
 
 namespace ir = raksha::ir;
 
+TEST(PrimitiveTypeTest, KindReturnsCorrectKind) {
+  PrimitiveType primitive_type;
+  EXPECT_EQ(primitive_type.kind(), Type::Kind::kPrimitive);
+}
+
 TEST(TestGetAccessPaths, TestGetAccessPaths) {
   PrimitiveType primitive_type;
   absl::flat_hash_set<ir::AccessPathSelectors>
