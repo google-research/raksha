@@ -52,7 +52,12 @@ isPrincipal(speaker) :- saysDowngrades(speaker, _, _).
 //-----------------------------------------------------------------------------
 downgrades(path, tag) :- ownsTag(owner, tag), saysDowngrades(owner, path, tag).
 
-isTag(tag) :- ownsTag(_, tag).
+// TODO(#126): Fix the universe populating rules, potentially by deleting
+//  them entirely.
+//
+// For now, we need to not populate isTag to handle cases where the tests
+// cause all principals to be associated with all tags.
+// isTag(tag) :- ownsTag(_, tag).
 isTag(tag) :- saysDowngrades(_, _, tag).
 
 #endif // SRC_ANALYSIS_SOUFFLE_AUTHORIZATION_LOGIC_DL_

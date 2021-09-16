@@ -66,8 +66,10 @@ static std::tuple<ManifestDatalogFacts, std::string>
 
 )" },
     { ManifestDatalogFacts(
-        { ir::TagClaim(ir::TagAnnotationOnAccessPath(
-            kHandleConnectionOutAccessPath, "tag")) },
+        { ir::TagClaim(
+            "particle",
+            ir::TagAnnotationOnAccessPath(
+                kHandleConnectionOutAccessPath, "tag")) },
         { ir::TagCheck(ir::TagAnnotationOnAccessPath(
             kHandleConnectionInAccessPath, "tag2")) },
         { ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),
@@ -76,7 +78,7 @@ static std::tuple<ManifestDatalogFacts, std::string>
            ir::Edge(kHandleConnectionOutAccessPath, kHandleH2AccessPath)}),
       R"(
 // Claims:
-claimHasTag("recipe.particle.out", "tag").
+claimHasTag("particle", "recipe.particle.out", "tag").
 
 // Checks:
 checkHasTag("recipe.particle.in", "tag2") :- mayHaveTag("recipe.particle.in", "tag2").
@@ -274,12 +276,12 @@ class ParseBigManifestTest : public testing::Test {
 };
 
 static const std::string kExpectedClaimStrings[] = {
-    R"(claimHasTag("NamedR.PS1#0.out_handle.field1", "tag1").)",
-    R"(claimHasTag("NamedR.PS1#1.out_handle.field1", "tag1").)",
-    R"(claimHasTag("NamedR.PS2#2.out_handle.field1", "tag3").)",
-    R"(claimHasTag("GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", "tag1").)",
-    R"(claimHasTag("GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "tag3").)",
-    R"(claimHasTag("GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "tag3").)",
+    R"(claimHasTag("PS1", "NamedR.PS1#0.out_handle.field1", "tag1").)",
+    R"(claimHasTag("PS1", "NamedR.PS1#1.out_handle.field1", "tag1").)",
+    R"(claimHasTag("PS2", "NamedR.PS2#2.out_handle.field1", "tag3").)",
+    R"(claimHasTag("PS1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", "tag1").)",
+    R"(claimHasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "tag3").)",
+    R"(claimHasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "tag3").)",
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {

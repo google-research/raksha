@@ -461,12 +461,14 @@ claims: [ { assume: {
       .expected_name = "PS2",
       .expected_claims = {
           ir::TagClaim(
+              "PS2",
               ir::TagAnnotationOnAccessPath(
                   ir::AccessPath(
                       kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
                       "tag1")
               ),
           ir::TagClaim(
+              "PS2",
               ir::TagAnnotationOnAccessPath(
                   ir::AccessPath(
                       kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
@@ -562,10 +564,16 @@ TEST(BulkInstantiateTest, BulkInstantiateTest) {
   ASSERT_THAT(
       instantiated_facts.tag_claims,
       testing::UnorderedElementsAreArray({
-        ir::TagClaim(ir::TagAnnotationOnAccessPath(ir::AccessPath(
-          p1_out_impl, MakeSingleFieldSelectors("field1")), "tag1")),
-        ir::TagClaim(ir::TagAnnotationOnAccessPath(ir::AccessPath(
-            p1_in_out_impl, MakeSingleFieldSelectors("field2")), "tag2"))}));
+        ir::TagClaim(
+            "PS1",
+            ir::TagAnnotationOnAccessPath(ir::AccessPath(
+                p1_out_impl, MakeSingleFieldSelectors("field1")), "tag1")),
+        ir::TagClaim(
+            "PS1",
+            ir::TagAnnotationOnAccessPath(
+                ir::AccessPath(
+                    p1_in_out_impl,
+                    MakeSingleFieldSelectors("field2")), "tag2"))}));
 
   ASSERT_THAT(
       instantiated_facts.checks,
