@@ -1,0 +1,96 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+"EndUser" says {
+    ownsTag("raw_video_tag").
+    ownsTag("user_selection_tag").
+    ownsTag("product_id_tag").
+       
+    // "becomes" removes one tag and adds another. (It's the same as declassify 
+    // + saysHasTag).
+    "ThirdPartyPrivacyReviewer" canSay becomes(pathX, "raw_video_tag", "product_id_tag") :-
+        objectSelected("EndUser", pathX),
+        isAccessPath(pathX).
+
+    "ThirdPartyPrivacyReviewer" canSay objectSelected("EndUser", "identified_product").
+        // Ideally, we would check that the value of the 
+        // identified product matches a value produced by the particle,
+        // but this requires some amount of dynamic enforcement.
+
+    // Delegates TPPR the ability to apply tags anywhere
+    "ThirdPartyPrivacyReviewer" canSay hasTag(x, y) :- 
+        isAccessPath(x), isTag(y).
+
+    // Delegate the right to claim that particles are "Local" to TPPR.
+    // (We can think of the principal "LocalDevice" as a group)
+    "ThirdPartyPrivacyReviewer" canSay principalX canActAs "LocalDevice"
+
+    "LocalDevice" may doPureComputation() using "raw_video_tag".
+        // this might ideally be
+        // "LocalDevice" may x() using "product_id_tag" :- x != egressTo
+        // but to express this we would need another language above this one
+    "LocalDevice" may egressTo("ShoppingService") using "product_id_tag".
+
+    // Could also give different permissions to RemoteService for once it
+    // has "product_id_tag".
+}
+
+"ThirdPartyPrivacyReviewer" says {
+    "VideoDataSource" canActAs "LocalDevice".
+    "ImageDetector" canActAs "LocalDevice".
+    "ImageSelector" canActAs "LocalDevice".
+    "ProductIdOutput" canActAs "LocalDevice".
+    
+    // TPPR delegates the data transformation to ImageSelector
+    "ImageSelector" canSay becomes(pathX, "raw_video_tag", "product_id_tag") :-
+        isAccessPath(pathX).
+    "ImageSelector" canSay objectSelected("EndUser", pathX) :-
+        isAccessPath(pathX).
+}
+
+// Maybe we want this part of the policy to sit closer to the particles
+// because sometimes relations will refer to path names ?
+// (We can ostensibly do this as long as we can write
+// `claim <RelationName(...)>` in manifests)
+"VideoDataSource" says will doPureComputation() using "raw_video_tag".
+"ImageDetector" says will doPureComputation() using "raw_video_tag".
+"ImageSelector" says {
+    will doPureComputation() using "raw_video_tag".
+    becomes(pathX, "raw_video_tag", "product_id_tag").
+    objectSelected("EndUser", pathX).
+}
+
+/// Some language features are just "imagined" at the moment. 
+//
+// Becomes:
+// `becomes(path, oldTag, newTag)` which is the same as 
+// declassify(path, oldTag, newTag) and claimHasTag(path, oldTag, newTag)
+// (Maybe a more general way to implement this is macros in auth logic)
+//
+// May / Will:
+// These are used to specify allowed usages and a check that only the allowed 
+// usages are done. The check depends on the taint analysis. Roughly:
+//
+// For each particle P, for each tag t in union over tags in read edges of P,
+//      for each statement of the form:
+//          `P says will <RELATION> using <TAG>`
+//      prove
+//          `ownsTag(Q, <TAG>)`
+//          `Q says may <RELATION> using <TAG>`
+//
+// Notably "may" is a keyword rather than just another relation itself because it 
+// seems useful to let usages be arbitrary relations (with potentially varying 
+// signatures).
