@@ -305,7 +305,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // TODO(#122): This test should be moved to appropriate file while refactoring.
 TEST(EntityTypeTest, KindReturnsCorrectKind) {
-  EntityType entity_type(Schema(std::nullopt, {}));
+  EntityType entity_type(Schema(absl::nullopt, {}));
   EXPECT_EQ(entity_type.kind(), Type::Kind::kEntity);
 }
 
