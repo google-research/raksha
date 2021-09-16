@@ -44,9 +44,6 @@
 // is made by `principal`.
 .decl claimHasTag(principal: Principal, accessPath: AccessPath, tag: Tag)
 
-// Any Principal used in a claim is in the universe of isPrincipal.
-isPrincipal(principal) :- claimHasTag(principal, _, _).
-
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
@@ -62,6 +59,10 @@ mayHaveTag(tgt, tag) :-
 //-----------------------------------------------------------------------------
 // These rules add objects to the set of things that exist (i.e. relations like
 // `isObject(..)`) whenever they are mentioned in other rules.
+
+// Any Principal used in a claim is in the universe of isPrincipal.
+isPrincipal(principal) :- claimHasTag(principal, _, _).
+
 isAccessPath(path) :- claimHasTag(_, path, _).
 isAccessPath(path) :- hasTag(path, _).
 isAccessPath(path) :- mayHaveTag(path, _).
