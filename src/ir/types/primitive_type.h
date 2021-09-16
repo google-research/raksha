@@ -23,6 +23,8 @@ class PrimitiveType : public Type {
   // will change as we add more cases to this translator in the future.
   PrimitiveType() = default;
 
+  Type::Kind kind() const override { return Type::Kind::kPrimitive; }
+
   // A primitive type marks the end of a single access path to be built.
   // Return a set containing an empty AccessPathSelectors object.
   raksha::ir::AccessPathSelectorsSet
