@@ -168,11 +168,10 @@ TEST_P(IntersectionTest, IntersectionTest) {
       MakeOrderedStrSet(AccessPathSelectorsSet::Intersect(set1, set2));
 
   absl::btree_set<std::string> std_set_intersection_result;
-  auto intersected_str_set_end_iter =
-      std::set_intersection(
-          str_set1.begin(), str_set1.end(), str_set2.begin(), str_set2.end(),
-          std::inserter(std_set_intersection_result,
-                        std_set_intersection_result.begin()));
+  std::set_intersection(
+      str_set1.begin(), str_set1.end(), str_set2.begin(), str_set2.end(),
+      std::inserter(std_set_intersection_result,
+                    std_set_intersection_result.begin()));
 
   ASSERT_EQ(intersected_str_set, std_set_intersection_result);
 }
