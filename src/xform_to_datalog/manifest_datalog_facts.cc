@@ -13,10 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-
-#include "absl/container/flat_hash_map.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
 
+#include "absl/container/flat_hash_map.h"
+#include "src/ir/proto/type.h"
 #include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
 
 namespace raksha::xform_to_datalog {
@@ -130,7 +130,7 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
         CHECK(connection_proto.has_type())
           << "Handle connection with absent type not allowed.";
         std::unique_ptr<types::Type> connection_type =
-            types::Type::CreateFromProto(connection_proto.type());
+            ir::types::proto::decode(connection_proto.type());
         ir::AccessPathSelectorsSet access_path_selectors_set =
             connection_type->GetAccessPathSelectorsSet();
 

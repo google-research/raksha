@@ -10,7 +10,6 @@ cc_library(
     deps = [
         "//src/common/logging",
         "//src/ir",
-        "//third_party/arcs/proto:manifest_cc_proto",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/strings",
@@ -37,6 +36,7 @@ cc_test(
         "//src/common/logging",
         "//src/common/testing:gtest",
         "//src/ir",
+        "//src/ir/proto:types",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings",
     ],
