@@ -20,8 +20,8 @@
 // //third_party/arcs/examples/VisionPipeline.arcs into
 // datalog (presumably by converting it into protos in between)
 
-#include "taint.dl"
-#include "authorization_logic.dl"
+#include "../../taint.dl"
+#include "../../authorization_logic.dl"
 #include "VisionPipelineTagOwners.dl"
 #include "VisionPipelineAuthLogicOutput.dl"
 
