@@ -4,7 +4,6 @@
 #include <string>
 
 #include "absl/strings/str_cat.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
 
@@ -14,6 +13,8 @@ class FieldSelector {
  public:
   FieldSelector(std::string field_name) : field_name_(std::move(field_name)) {}
 
+  const std::string &field_name() const { return field_name_; }
+
   // Prints the string representing dereferencing the field in the AccessPath.
   // This will just be the "." punctuation plus the name of the field.
   std::string ToString() const { return absl::StrCat(".", field_name_); }
@@ -21,13 +22,6 @@ class FieldSelector {
   // Two fields selectors are equal exactly when their names are equal.
   bool operator==(const FieldSelector &other) const {
     return field_name_ == other.field_name_;
-  }
-
-  // Make a Manifest proto Selector from this FieldSelector.
-  arcs::AccessPathProto_Selector MakeProto() const {
-    arcs::AccessPathProto_Selector selector;
-    selector.set_field(field_name_);
-    return selector;
   }
 
   template<typename H>

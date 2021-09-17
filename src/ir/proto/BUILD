@@ -36,6 +36,46 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "access_path",
+    srcs = ["access_path.cc"],
+    hdrs = ["access_path.h"],
+    deps = [
+        "//src/ir:access_path",
+        "//third_party/arcs/proto:manifest_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "access_path_test",
+    srcs = ["access_path_test.cc"],
+    deps = [
+        ":access_path",
+        "//src/common/testing:gtest",
+        "//src/ir",
+    ],
+)
+
+cc_test(
+    name = "access_path_root_test",
+    srcs = ["access_path_root_test.cc"],
+    deps = [
+        ":access_path",
+        "//src/common/testing:gtest",
+        "//src/ir",
+    ],
+)
+
+cc_test(
+    name = "access_path_selector_test",
+    srcs = ["access_path_selector_test.cc"],
+    deps = [
+        ":access_path",
+        "//src/common/testing:gtest",
+        "//src/ir",
+    ],
+)
+
 cc_test(
     name = "entity_type_test",
     srcs = ["entity_type_test.cc"],

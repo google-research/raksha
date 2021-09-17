@@ -19,6 +19,7 @@
 
 #include "src/ir/access_path.h"
 #include "src/ir/edge.h"
+#include "src/ir/proto/access_path.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
@@ -37,9 +38,8 @@ class DerivesFromClaim {
       << "DerivesFrom proto does not have required field source.";
     CHECK(derives_from_proto.has_target())
       << "DerivesFrom proto does not have required field target.";
-    return DerivesFromClaim(
-        AccessPath::CreateFromProto(derives_from_proto.target()),
-        AccessPath::CreateFromProto(derives_from_proto.source()));
+    return DerivesFromClaim(proto::Decode(derives_from_proto.target()),
+                            proto::Decode(derives_from_proto.source()));
   }
 
   explicit DerivesFromClaim(AccessPath target, AccessPath source)

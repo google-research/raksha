@@ -6,7 +6,6 @@
 
 #include "src/common/logging/logging.h"
 #include "src/ir/field_selector.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
 
@@ -17,18 +16,10 @@ namespace raksha::ir {
 // For now, however, we only have implemented the FieldSelector portion.
 class Selector {
  public:
-
-  // A factory creating a Selector from a Manifest proto selector. Currently
-  // only implements the FieldSelector proto.
-  static Selector CreateFromProto(arcs::AccessPathProto_Selector selector) {
-    if (selector.has_field()) {
-      return Selector(FieldSelector(selector.field()));
-    }
-    LOG(FATAL) << "Found a Selector with an unimplemented specific type.";
-  }
-
   explicit Selector(FieldSelector field_selector)
     : specific_selector_(std::move(field_selector)) {}
+
+  std::variant<FieldSelector> variant() const { return specific_selector_; }
 
   // Print the string representing a selector's participation in the
   // AccessPath. This will include the punctuation indicating the method of
@@ -49,19 +40,10 @@ class Selector {
     return specific_selector_ == other.specific_selector_;
   }
 
-  // Make a proto from the current selector. Just uses std::visit to
-  // delegate to the specific type of the Selector.
-  arcs::AccessPathProto_Selector MakeProto() const {
-    auto visitor = [](const auto &specific_selector) {
-      return specific_selector.MakeProto(); };
-    return std::visit(visitor, specific_selector_);
-  }
-
   template<typename H>
   friend H AbslHashValue(H h, const Selector &selector) {
     return H::combine(std::move(h), selector.specific_selector_);
   }
-
 
  private:
   // The variant storing the specific type of selector. We will dispatch
