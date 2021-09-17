@@ -82,6 +82,28 @@ INSTANTIATE_TEST_SUITE_P(
         testing::ValuesIn(access_path_strs),
         testing::ValuesIn(access_path_strs)));
 
+class AccessPathSelectorsIteratorTest
+    : public ::testing::TestWithParam<std::string> {};
+
+TEST_P(AccessPathSelectorsIteratorTest, SelectorsCanBeIteratedInOrder) {
+  const auto& path_string = GetParam();
+  const absl::StatusOr<AccessPathSelectors> access_path_selectors =
+      MakeSelectorAccessPathFromString(path_string);
+  ASSERT_TRUE(access_path_selectors.ok());
+
+  // Run StrJoin from the selectors instance and make sure it is right order.
+  EXPECT_EQ(absl::StrJoin(access_path_selectors->begin(),
+                          access_path_selectors->end(), "",
+                          [](std::string* result, const auto& x) {
+                            result->append(x.ToString());
+                          }),
+            path_string);
+}
+
+INSTANTIATE_TEST_SUITE_P(AccessPathSelectorsIteratorTest,
+                         AccessPathSelectorsIteratorTest,
+                         testing::ValuesIn(access_path_strs));
+
 class AccessPathTest : public ::testing::TestWithParam<std::string> {};
 
 // A string with components separated by dots and an AccessPathSelectors are

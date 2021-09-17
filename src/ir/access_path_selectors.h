@@ -88,6 +88,16 @@ class AccessPathSelectors {
     }
   }
 
+  // TODO(#98): This exposes the fact that the internal collection is a vector.
+  // Iterator methods to iterate over underlying selectors in right order.
+  std::vector<Selector>::const_reverse_iterator begin() const {
+    return reverse_selectors_.rbegin();
+  }
+
+  std::vector<Selector>::const_reverse_iterator end() const {
+    return reverse_selectors_.rend();
+  }
+
   template<typename H>
   friend H AbslHashValue(H h, const AccessPathSelectors &instance) {
     return H::combine(std::move(h), instance.reverse_selectors_);
