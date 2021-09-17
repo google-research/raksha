@@ -6,10 +6,42 @@ cc_library(
         ["*.cc"],
         exclude = ["*_test.cc"],
     ),
-    hdrs = glob(["*.h"]),
+    hdrs = glob(
+        ["*.h"],
+        exclude = [
+            "access_path.h",
+            "access_path_root.h",
+            "access_path_selectors.h",
+            "access_path_selectors_set.h",
+            "field_selector.h",
+            "selector.h",
+        ],
+    ),
+    deps = [
+        ":access_path",
+        "//src/common/logging",
+        "//src/ir/proto:access_path",
+        "//third_party/arcs/proto:manifest_cc_proto",
+        "@absl//absl/container:flat_hash_map",
+        "@absl//absl/container:flat_hash_set",
+        "@absl//absl/hash",
+        "@absl//absl/strings",
+        "@absl//absl/types:variant",
+    ],
+)
+
+cc_library(
+    name = "access_path",
+    hdrs = [
+        "access_path.h",
+        "access_path_root.h",
+        "access_path_selectors.h",
+        "access_path_selectors_set.h",
+        "field_selector.h",
+        "selector.h",
+    ],
     deps = [
         "//src/common/logging",
-        "//third_party/arcs/proto:manifest_cc_proto",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/hash",

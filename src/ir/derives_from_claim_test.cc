@@ -21,6 +21,7 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/proto/access_path.h"
 
 namespace raksha::ir {
 
@@ -69,7 +70,7 @@ class DerivesFromAsAccessPathPairTest :
     const std::string &textproto = std::get<ParamNum>(GetParam());
     google::protobuf::TextFormat::ParseFromString(
         textproto, &access_path_proto);
-    return AccessPath::CreateFromProto(access_path_proto);
+    return proto::Decode(access_path_proto);
   }
 
   DerivesFromClaim derives_from_claim_;

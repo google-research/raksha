@@ -4,8 +4,9 @@
 #include <string>
 
 #include "src/common/logging/logging.h"
-#include "src/ir/access_path_selectors.h"
 #include "src/ir/access_path.h"
+#include "src/ir/access_path_selectors.h"
+#include "src/ir/proto/access_path.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
@@ -27,7 +28,7 @@ class TagAnnotationOnAccessPath {
     CHECK(proto.has_access_path())
       << "Expected " << proto_name << " message to have access_path field.";
     const arcs::AccessPathProto &access_path_proto = proto.access_path();
-    AccessPath access_path = AccessPath::CreateFromProto(access_path_proto);
+    AccessPath access_path = proto::Decode(access_path_proto);
     CHECK(proto.has_predicate())
       << "Expected " << proto_name << " message to have predicate field.";
     const arcs::InformationFlowLabelProto_Predicate &predicate =
