@@ -44,10 +44,6 @@
 // is made by `principal`.
 .decl claimHasTag(principal: Principal, accessPath: AccessPath, tag: Tag)
 
-// There is a claim that `accessPath` definitely does not have `tag` taint
-// (even if the taint analysis would otherwise have this taint).
-.decl claimNotHasTag(accessPath: AccessPath, tag: Tag)
-
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
@@ -57,7 +53,7 @@ mayHaveTag(tgt, tag) :- hasTag(tgt, tag).
 
 mayHaveTag(tgt, tag) :-
     edge(src, tgt), mayHaveTag(src, tag),
-    !claimNotHasTag(tgt, tag).
+    !downgrades(tgt, tag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
