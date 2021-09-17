@@ -165,14 +165,14 @@ class HandleAccessPathRoot {
   std::string handle_name_;
 };
 
-// The generic AccessPathRoot. Contains an absl::variant holding the specific
-// root type and delegates to it using absl::visit.
+// The generic AccessPathRoot. Contains an std::variant holding the specific
+// root type and delegates to it using std::visit.
 class AccessPathRoot {
  public:
-  // Use a using type alias to define the absl::variant type describing the
+  // Use a using type alias to define the std::variant type describing the
   // specific root types. Prevents the types used in the constructor and the
   // field from getting out of sync.
-  using RootVariant = absl::variant<
+  using RootVariant = std::variant<
       HandleConnectionSpecAccessPathRoot, HandleConnectionAccessPathRoot,
       HandleAccessPathRoot>;
 
@@ -181,13 +181,13 @@ class AccessPathRoot {
 
   // Dispatch ToString to the specific kind of AccessPathRoot.
   std::string ToString() const {
-    return absl::visit(
+    return std::visit(
         [](const auto &variant){ return variant.ToString(); }, specific_root_);
   }
 
   // Dispatch IsInstantiated to the specific kind of AccessPathRoot.
   bool IsInstantiated() const {
-     return absl::visit(
+     return std::visit(
         [](const auto &variant){ return variant.IsInstantiated(); },
         specific_root_);
   }

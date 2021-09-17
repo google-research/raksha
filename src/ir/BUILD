@@ -14,7 +14,6 @@ cc_library(
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/hash",
         "@absl//absl/strings",
-        "@absl//absl/types:variant",
     ],
 )
 
