@@ -50,7 +50,7 @@ class TagClaim {
   }
 
   // Produce a string containing a datalog fact for this TagClaim.
-  std::string ToString() const {
+  std::string ToDatalog() const {
     constexpr absl::string_view kClaimHasTagFormat =
         R"(claimHasTag("%s", "%s", "%s").)";
     return absl::StrFormat(
