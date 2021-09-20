@@ -30,8 +30,8 @@ TEST_P(TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest) {
   const std::string &expected_todatalog = absl::StrFormat(
       expected_todatalog_format_string, particle_spec_name, root.ToString());
   arcs::ClaimProto_Assume assume_proto;
-  google::protobuf::TextFormat::ParseFromString(
-      assume_textproto, &assume_proto);
+  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
+      assume_textproto, &assume_proto));
   TagClaim unrooted_tag_claim =
       TagClaim::CreateFromProto(particle_spec_name, assume_proto);
   TagClaim tag_claim = unrooted_tag_claim.Instantiate(root);
@@ -69,21 +69,23 @@ static AccessPathRoot instantiated_roots[] = {
 // TagClaims derived from the textprotos with each of the root strings.
 static std::tuple<std::string, absl::ParsedFormat<'s', 's'>>
     textproto_to_expected_format_string[] = {
-    { "access_path: { "
-      "handle: { particle_spec: \"ps\", " "handle_connection: \"hc\" } "
-      "selectors: { field: \"field1\" } }, "
-      "predicate: { label: { semantic_tag: \"tag\"} }",
+    { R"(
+access_path: {
+  handle: { particle_spec: "ps", handle_connection: "hc" }
+  selectors: { field: "field1" } },
+predicate: { label: { semantic_tag: "tag"} })",
       absl::ParsedFormat<'s', 's'>(
           R"(claimHasTag("%s", "%s.field1", "tag").)") },
-    { "access_path: {"
-      "handle: { particle_spec: \"ps\", " "handle_connection: \"hc\" } }, "
-      "predicate: { label: { semantic_tag: \"tag2\"} }",
-      absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s", "tag2").)") },
-    { "access_path: { "
-      "handle: { particle_spec: \"ps\", " "handle_connection: \"hc\" }, "
-      "selectors: [{ field: \"x\" }, { field: \"y\" }] }, "
-      "predicate: { label: { semantic_tag: \"user_selection\"} }",
+    { R"(
+access_path: {
+  handle: { particle_spec: "ps", handle_connection: "hc" } },
+predicate: { label: { semantic_tag: "tag2"} })",
+      absl::ParsedFormat<'s', 's'>(R"(claimHasTag("%s", "%s", "tag2").)") },
+    { R"(
+access_path: {
+  handle: { particle_spec: "ps", handle_connection: "hc" },
+  selectors: [{ field: "x" }, { field: "y" }] },
+predicate: { label: { semantic_tag: "user_selection"} })",
       absl::ParsedFormat<'s', 's'>(
           R"(claimHasTag("%s", "%s.x.y", "user_selection").)") }
 };
