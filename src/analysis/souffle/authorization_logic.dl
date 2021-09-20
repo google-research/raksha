@@ -56,7 +56,7 @@ downgrades(path, tag) :- ownsTag(owner, tag), saysDowngrades(owner, path, tag).
 // a tag, then it has the tag according to the taint analysis. This rule is
 // likely to be adjusted later. For confidentiality tags this should be OK to
 // start with.
-claimHasTag(path, tag) :- ownsTag(owner, tag), saysHasTag(_, path, tag).
+claimHasTag(principal, path, tag) :- saysHasTag(principal, path, tag).
 
 // This rule says that any principal can say that another principal owns a tag.
 // This rule is just a starting point to allow all aspects of the policy to
@@ -76,9 +76,6 @@ ownsTag(speaker, tag) :- saysOwnsTag(speaker, owner, tag).
 // cause all principals to be associated with all tags.
 // isTag(tag) :- ownsTag(_, tag).
 
-isTag(tag) :- saysDowngrades(_, _, tag).
-
-isPrincipal(speaker) :- saysDowngrades(speaker, _, _).
 isPrincipal(owner) :- ownsTag(owner, _).
 
 #endif // SRC_ANALYSIS_SOUFFLE_AUTHORIZATION_LOGIC_DL_
