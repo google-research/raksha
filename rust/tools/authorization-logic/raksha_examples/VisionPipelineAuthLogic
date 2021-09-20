@@ -26,7 +26,8 @@
     //
     // It might look like this ideally:
     //
-    // "ThirdPartyPrivacyReviewer" canSay becomes(pathX, "raw_video_tag", "product_id_tag") :-
+    // "ThirdPartyPrivacyReviewer" canSay becomes(pathX, "raw_video_tag",
+    //              "product_id_tag") :-
     //     objectSelected("EndUser", pathX),
     //     isAccessPath(pathX).
     //
@@ -49,13 +50,19 @@
         isPrincipal(principalX).
 
     "LocalDevice" may("do_pure_computation", "raw_video_tag").
-        // this might ideally be
-        // "LocalDevice" may x() using "product_id_tag" :- x != egressTo
-        // but to express this we would need another language above this one
     "LocalDevice" may("egress_to_shopping_service", "product_id_tag").
 
     // Could also give different permissions to RemoteService for once it
     // has "product_id_tag".
+
+    // These are rules we should get rid of in the real thing.
+    // The universe relations probably don't need to be decentralized. We could
+    // have rules that populate a "centralized" universe and passes this 
+    // to all the principals. (Or there could be other ways to deal with this).
+    isPrincipal("VideoDataSource").
+    isPrincipal("ImageDetector").
+    isPrincipal("ImageSelector").
+    isPrincipal("ProductIdOutput").
 }
 
 "ThirdPartyPrivacyReviewer" says {
@@ -82,15 +89,46 @@
 // (We can ostensibly do this as long as we can write
 // `claim <RelationName(...)>` in manifests)
 "VideoDataSource" says "VideoDataSource"
-    will("doPureComputation", "raw_video_tag").
+    will("do_pure_computation", "raw_video_tag").
 "ImageDetector" says "ImageDetecor"
-    will("doPureComputation", "raw_video_tag").
+    will("do_pure_computation", "raw_video_tag").
 "ImageSelector" says {
     "ImageSelector" will("do_pure_computation", "raw_video_tag").
     declassifies("is_select_image_id", "raw_video_tag").
     hasTag("is_select_image_id", "product_id_tag").
     objectSelected("EndUser", "is_selected_image_id").
 }
+
+// Some queries to test this policy:
+video_is_local = query "EndUser" says   
+    "VideoDataSource" canActAs "LocalDevice"?
+
+local_can_do_computation = query "EndUser" says
+    "LocalDevice" may("do_pure_computation", "raw_video_tag")?
+
+////// These are the queries from the "will" relations that need to be checked
+////// against the "may" relations.
+
+// expected: true
+may_video_do_computation = query "EndUser" says 
+    "VideoDataSource" may("do_pure_computation", "raw_video_tag")?
+
+// expected: true
+may_detector_do_computation = query "EndUser" says
+    "ImageDetector" may("do_pure_computation", "raw_video_tag")?
+
+// expected: true
+may_selector_do_computation = query "EndUser" says
+    "ImageSelector" may("do_pure_computation", "raw_video_tag")?
+
+// expected: true
+may_selector_declassify = query "EndUser" says
+    declassifies("is_selected_image_id", "raw_video_tag")?
+
+////// Sanity check for some false thing
+// expected: false
+may_other_prin_do_computation = query "EndUser" says
+    "SomeOtherPrincipal" may("do_pure_computation", "raw_video_tag")?
 
 /// Some language features are just "imagined" at the moment. 
 //
