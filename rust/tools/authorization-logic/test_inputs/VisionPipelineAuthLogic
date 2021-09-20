@@ -45,7 +45,8 @@
 
     // Delegate the right to claim that particles are "Local" to TPPR.
     // (We can think of the principal "LocalDevice" as a group)
-    "ThirdPartyPrivacyReviewer" canSay principalX canActAs "LocalDevice"
+    "ThirdPartyPrivacyReviewer" canSay principalX canActAs "LocalDevice" :-
+        isPrincipal(principalX).
 
     "LocalDevice" may("do_pure_computation", "raw_video_tag").
         // this might ideally be
@@ -70,7 +71,8 @@
         hasTag(pathX, "product_id_tag"),   // raw_video_tag is only removed if 
         objectSelected("EndUser", pathX),  // product_id_tag is added
         isAccessPath(pathX).
-    "ImageSelector" canSay hasTag(pathX, "product_id_tag").
+    "ImageSelector" canSay hasTag(pathX, "product_id_tag") :- 
+        isAccessPath(pathX).
     "ImageSelector" canSay objectSelected("EndUser", pathX) :-
         isAccessPath(pathX).
 }
@@ -84,7 +86,7 @@
 "ImageDetector" says "ImageDetecor"
     will("doPureComputation", "raw_video_tag").
 "ImageSelector" says {
-    will("do_pure_computation", "raw_video_tag").
+    "ImageSelector" will("do_pure_computation", "raw_video_tag").
     declassifies("is_select_image_id", "raw_video_tag").
     hasTag("is_select_image_id", "product_id_tag").
     objectSelected("EndUser", "is_selected_image_id").
