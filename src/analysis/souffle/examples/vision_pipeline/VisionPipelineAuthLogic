@@ -18,17 +18,26 @@
     ownsTag("raw_video_tag").
     ownsTag("user_selection_tag").
     ownsTag("product_id_tag").
-       
-    // "becomes" removes one tag and adds another. (It's the same as declassify 
-    // + saysHasTag).
-    "ThirdPartyPrivacyReviewer" canSay becomes(pathX, "raw_video_tag", "product_id_tag") :-
-        objectSelected("EndUser", pathX),
+      
+    // These lines say the end user trusts (i.e., delegates to) the TPPR to
+    // faithfully say when a data transformation from raw camera video to the 
+    // name of a product has taken place, but only when the user has selected 
+    // an object.
+    //
+    // It might look like this ideally:
+    //
+    // "ThirdPartyPrivacyReviewer" canSay becomes(pathX, "raw_video_tag", "product_id_tag") :-
+    //     objectSelected("EndUser", pathX),
+    //     isAccessPath(pathX).
+    //
+    // For now it has to be done like this:
+    "ThirdPartyPrivacyReviewer" canSay declassifies(pathX, "raw_video_tag") :-
+        hasTag(pathX, "product_id_tag"),   // raw_video_tag is only removed if 
+        objectSelected("EndUser", pathX),  // product_id_tag is added
         isAccessPath(pathX).
 
-    "ThirdPartyPrivacyReviewer" canSay objectSelected("EndUser", "identified_product").
-        // Ideally, we would check that the value of the 
-        // identified product matches a value produced by the particle,
-        // but this requires some amount of dynamic enforcement.
+    "ThirdPartyPrivacyReviewer" canSay
+        objectSelected("EndUser", "identified_product").
 
     // Delegates TPPR the ability to apply tags anywhere
     "ThirdPartyPrivacyReviewer" canSay hasTag(x, y) :- 
@@ -38,11 +47,11 @@
     // (We can think of the principal "LocalDevice" as a group)
     "ThirdPartyPrivacyReviewer" canSay principalX canActAs "LocalDevice"
 
-    "LocalDevice" may doPureComputation() using "raw_video_tag".
+    "LocalDevice" may("do_pure_computation", "raw_video_tag").
         // this might ideally be
         // "LocalDevice" may x() using "product_id_tag" :- x != egressTo
         // but to express this we would need another language above this one
-    "LocalDevice" may egressTo("ShoppingService") using "product_id_tag".
+    "LocalDevice" may("egress_to_shopping_service", "product_id_tag").
 
     // Could also give different permissions to RemoteService for once it
     // has "product_id_tag".
@@ -55,8 +64,13 @@
     "ProductIdOutput" canActAs "LocalDevice".
     
     // TPPR delegates the data transformation to ImageSelector
-    "ImageSelector" canSay becomes(pathX, "raw_video_tag", "product_id_tag") :-
+    // "ImageSelector" canSay becomes(pathX, "raw_video_tag", "product_id_tag") :-
+    //     isAccessPath(pathX).
+    "ImageSelector" canSay declassifies(pathX, "raw_video_tag") :-
+        hasTag(pathX, "product_id_tag"),   // raw_video_tag is only removed if 
+        objectSelected("EndUser", pathX),  // product_id_tag is added
         isAccessPath(pathX).
+    "ImageSelector" canSay hasTag(pathX, "product_id_tag").
     "ImageSelector" canSay objectSelected("EndUser", pathX) :-
         isAccessPath(pathX).
 }
@@ -65,12 +79,15 @@
 // because sometimes relations will refer to path names ?
 // (We can ostensibly do this as long as we can write
 // `claim <RelationName(...)>` in manifests)
-"VideoDataSource" says will doPureComputation() using "raw_video_tag".
-"ImageDetector" says will doPureComputation() using "raw_video_tag".
+"VideoDataSource" says "VideoDataSource"
+    will("doPureComputation", "raw_video_tag").
+"ImageDetector" says "ImageDetecor"
+    will("doPureComputation", "raw_video_tag").
 "ImageSelector" says {
-    will doPureComputation() using "raw_video_tag".
-    becomes(pathX, "raw_video_tag", "product_id_tag").
-    objectSelected("EndUser", pathX).
+    will("do_pure_computation", "raw_video_tag").
+    declassifies("is_select_image_id", "raw_video_tag").
+    hasTag("is_select_image_id", "product_id_tag").
+    objectSelected("EndUser", "is_selected_image_id").
 }
 
 /// Some language features are just "imagined" at the moment. 
