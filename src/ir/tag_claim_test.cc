@@ -9,7 +9,7 @@
 
 namespace raksha::ir {
 
-class TagClaimToStringWithRootTest :
+class TagClaimToDatalogWithRootTest :
     public testing::TestWithParam<
       std::tuple<
         std::string,
@@ -17,31 +17,31 @@ class TagClaimToStringWithRootTest :
         AccessPathRoot>>
       {};
 
-TEST_P(TagClaimToStringWithRootTest, TagClaimToStringWithRootTest) {
+TEST_P(TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest) {
   const std::string particle_spec_name = std::get<0>(GetParam());
   const std::tuple<std::string, absl::ParsedFormat<'s', 's'>>
       &textproto_format_string_pair = std::get<1>(GetParam());
   const std::string &assume_textproto =
       std::get<0>(textproto_format_string_pair);
-  const absl::ParsedFormat<'s', 's'> expected_tostring_format_string =
+  const absl::ParsedFormat<'s', 's'> expected_todatalog_format_string =
     std::get<1>(textproto_format_string_pair);
   const AccessPathRoot &root = std::get<2>(GetParam());
 
-  const std::string &expected_tostring = absl::StrFormat(
-      expected_tostring_format_string, particle_spec_name, root.ToString());
+  const std::string &expected_todatalog = absl::StrFormat(
+      expected_todatalog_format_string, particle_spec_name, root.ToString());
   arcs::ClaimProto_Assume assume_proto;
   google::protobuf::TextFormat::ParseFromString(
       assume_textproto, &assume_proto);
   TagClaim unrooted_tag_claim =
       TagClaim::CreateFromProto(particle_spec_name, assume_proto);
   TagClaim tag_claim = unrooted_tag_claim.Instantiate(root);
-  // Expect the version with the concrete root to match the expected_tostring
-  // when ToString is called upon it.
-  ASSERT_EQ(tag_claim.ToString(), expected_tostring);
-  // However, the version with the spec root should fail when ToString is
+  // Expect the version with the concrete root to match the expected_todatalog
+  // when ToDatalog is called upon it.
+  ASSERT_EQ(tag_claim.ToDatalog(), expected_todatalog);
+  // However, the version with the spec root should fail when ToDatalog is
   // called.
   EXPECT_DEATH(
-      unrooted_tag_claim.ToString(),
+      unrooted_tag_claim.ToDatalog(),
       "Attempted to print out an AccessPath before connecting it to a "
       "fully-instantiated root!");
 }
@@ -64,7 +64,7 @@ static AccessPathRoot instantiated_roots[] = {
 };
 
 // Pairs of textprotos and format strings. The format strings will become the
-// expected ToString output when the root string is substituted for the %s.
+// expected ToDatalog output when the root string is substituted for the %s.
 // This allows us to test the result of combining each of the
 // TagClaims derived from the textprotos with each of the root strings.
 static std::tuple<std::string, absl::ParsedFormat<'s', 's'>>
@@ -89,7 +89,7 @@ static std::tuple<std::string, absl::ParsedFormat<'s', 's'>>
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    TagClaimToStringWithRootTest, TagClaimToStringWithRootTest,
+    TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest,
     testing::Combine(
         testing::ValuesIn(particle_spec_names),
         testing::ValuesIn(textproto_to_expected_format_string),

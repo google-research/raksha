@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  datalog_file << datalog_facts.ToString();
+  datalog_file << datalog_facts.ToDatalog();
 
   return 0;
 }
