@@ -64,7 +64,7 @@ claimHasTag(principal, path, tag) :- saysHasTag(principal, path, tag).
 // ownsTag from something with a speaker. This rule is likely to change. It
 // does not rule out the case that two different principals claim ownership of
 // a tag.
-ownsTag(speaker, tag) :- saysOwnsTag(speaker, owner, tag).
+ownsTag(owner, tag) :- saysOwnsTag(_, owner, tag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
