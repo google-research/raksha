@@ -1,6 +1,7 @@
 #include "src/ir/types/schema.h"
 
-#include "absl/types/optional.h"
+#include <optional>
+
 #include "src/common/logging/logging.h"
 #include "src/ir/access_path_selectors_set.h"
 #include "src/ir/selector.h"

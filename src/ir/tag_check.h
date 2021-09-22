@@ -38,7 +38,7 @@ class TagCheck {
   // simplified relative to the arbitrary boolean expression predicate we
   // will eventually want, but is enough to get some simple Arcs tests
   // passing for the MVP.
-  std::string ToString() const {
+  std::string ToDatalog() const {
     constexpr absl::string_view kCheckHasTagFormat =
         R"(checkHasTag("%s", "%s") :- mayHaveTag("%s", "%s").)";
     std::string access_path =
