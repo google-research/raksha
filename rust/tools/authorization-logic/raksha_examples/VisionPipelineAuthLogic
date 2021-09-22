@@ -88,8 +88,11 @@
 // because sometimes relations will refer to path names ?
 // (We can ostensibly do this as long as we can write
 // `claim <RelationName(...)>` in manifests)
-"VideoDataSource" says "VideoDataSource"
-    will("do_pure_computation", "raw_video_tag").
+//
+// NOTE: maybe the "will" relations should refer to handles rather than tags, 
+// but the "may"s still refer to the tags, and we figure out which tags to
+// get permissions about based on the taint analysis (for now both still 
+// operate on the tags).
 "ImageDetector" says "ImageDetector"
     will("do_pure_computation", "raw_video_tag").
 "ImageSelector" says {
@@ -98,6 +101,8 @@
     hasTag("is_select_image_id", "product_id_tag").
     objectSelected("EndUser", "is_selected_image_id").
 }
+"ProductIdOutput" says 
+    "ProductIdOutput" will("egress_to_shopping_service", "product_id_tag").
 
 // Some queries to test this policy:
 video_is_local = query "EndUser" says   
@@ -106,24 +111,65 @@ video_is_local = query "EndUser" says
 local_can_do_computation = query "EndUser" says
     "LocalDevice" may("do_pure_computation", "raw_video_tag")?
 
-////// These are the queries from the "will" relations that need to be checked
-////// against the "may" relations.
+// May / Will check:
+// May describes actions data owners permit with their data.
+// Will describes how data is used.
+// The taint analysis tracks sensitive data as it moves, and this taint
+// analysis is used to check that all the uses described with `will` are 
+// permitted by the owners (using `may'). Roughly this is:
+//
+// For each particle P, for each tag t in union over tags in read edges of P,
+//      for each statement of the form:
+//          `P says will <RELATION> using <TAG>`
+//      prove
+//          `ownsTag(Q, <TAG>)`
+//          `Q says may <RELATION> using <TAG>`
 
-// expected: true
+// These queries mechanically test the "checks" that should happen using the 
+// data. The comments illustrate the taint analysis which is used to figure out
+// what checks need to happen.
+
+// Particle: VideoDataSource
+// No read handles
+
+// Particle: Image Detector
+// taint of read handles: 
+//    taint(id_sensor_packet.camera_feed) = { "raw_video_tag" }
+//    taint(id_sensor_packet.video_resolution) = { }
+//    taint(id_image_detection_model) = { }
+// Usage:
+//    will("do_pure_computation", "raw_video_tag").
+//      Owner("raw_video_tag") = "EndUser"
 may_video_do_computation = query "EndUser" says 
-    "VideoDataSource" may("do_pure_computation", "raw_video_tag")?
-
-// expected: true
-may_detector_do_computation = query "EndUser" says
     "ImageDetector" may("do_pure_computation", "raw_video_tag")?
 
-// expected: true
+// Particle: UserSelectionActionSource
+// No read handles
+
+// Particle: ImageSelector
+// taint of read handles:
+//      taint(is_detection_boxes) = { "raw_video_tag" }
+//      taint(is_user_selection_action) = { }
+// usage: 
+//      will("do_pure_computation", "raw_video_tag")
 may_selector_do_computation = query "EndUser" says
     "ImageSelector" may("do_pure_computation", "raw_video_tag")?
 
-// expected: true
+// Particle: ProductIdOutput
+// taint of read handles 
+//   before declassification:
+//      taint(pio_select_image_id) = { "raw_video_tag" }
+//   after declassification:
+//      taint(pio_select_image_id) = { "product_id_tag" }
+// usage:
+//      will("egress_to_shopping_service", "product_id_tag")
+
+// This tests that the declassification is also permitted as expected:
 may_selector_declassify = query "EndUser" says
     declassifies("is_selected_image_id", "raw_video_tag")?
+
+may_shopping_service_egress = query "EndUser" says
+    "ProductIdOutput" may("egress_to_shopping_service", "product_id_tag")?
 
 ////// Sanity check for some false thing
 // expected: false
@@ -137,16 +183,6 @@ may_other_prin_do_computation = query "EndUser" says
 // declassify(path, oldTag, newTag) and claimHasTag(path, oldTag, newTag)
 // (Maybe a more general way to implement this is macros in auth logic)
 //
-// May / Will:
-// These are used to specify allowed usages and a check that only the allowed 
-// usages are done. The check depends on the taint analysis. Roughly:
-//
-// For each particle P, for each tag t in union over tags in read edges of P,
-//      for each statement of the form:
-//          `P says will <RELATION> using <TAG>`
-//      prove
-//          `ownsTag(Q, <TAG>)`
-//          `Q says may <RELATION> using <TAG>`
 //
 // Notably "may" is a keyword rather than just another relation itself because it 
 // seems useful to let usages be arbitrary relations (with potentially varying 
