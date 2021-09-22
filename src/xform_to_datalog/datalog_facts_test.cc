@@ -51,13 +51,13 @@ INSTANTIATE_TEST_SUITE_P(
             ManifestDatalogFacts(
                 {ir::TagClaim(
                     "particle",
-                    ir::TagAnnotationOnAccessPath(
-                        ir::AccessPath(
-                            ir::AccessPathRoot(
-                                ir::HandleConnectionAccessPathRoot(
-                                    "recipe", "particle", "out")),
-                        ir::AccessPathSelectors()),
-                    "tag"))},
+                      ir::AccessPath(
+                          ir::AccessPathRoot(
+                              ir::HandleConnectionAccessPathRoot(
+                                  "recipe", "particle", "out")),
+                      ir::AccessPathSelectors()),
+                      true,
+                      "tag")},
                 {}, {}),
             R"(// GENERATED FILE, DO NOT EDIT!
 
