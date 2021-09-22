@@ -90,7 +90,7 @@
 // `claim <RelationName(...)>` in manifests)
 "VideoDataSource" says "VideoDataSource"
     will("do_pure_computation", "raw_video_tag").
-"ImageDetector" says "ImageDetecor"
+"ImageDetector" says "ImageDetector"
     will("do_pure_computation", "raw_video_tag").
 "ImageSelector" says {
     "ImageSelector" will("do_pure_computation", "raw_video_tag").
