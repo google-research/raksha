@@ -28,17 +28,17 @@
 
 // Some party asserts the claim that the label of an access path should be
 // downgraded by removing the referenced tag from the set.
-// This relation needs to be in snake case because outputs from the 
-// authorization logic will be in snake case.
 .decl saysDowngrades(speaker: Principal, p: AccessPath, t: Tag)
 
 .decl isPrincipal(p: Principal)
 
-isPrincipal(speaker) :- saysDowngrades(speaker, _, _).
-
 // This party is the owner of a taint Tag (they have the privilege to downgrade
 // it).
 .decl ownsTag(owner: Principal, tag: Tag)
+
+.decl saysOwnsTag(speaker: Principal, owner: Principal, tag: Tag)
+
+.decl saysHasTag(speaker: Principal, path: AccessPath, t: Tag)
 
 // Some accessPath is actually downgraded (by taking into consideration the
 // privileges of a party trying to downgrade it, and as a result of that party
@@ -52,12 +52,30 @@ isPrincipal(speaker) :- saysDowngrades(speaker, _, _).
 //-----------------------------------------------------------------------------
 downgrades(path, tag) :- ownsTag(owner, tag), saysDowngrades(owner, path, tag).
 
+// This rule conservatively says that if _any_ principal claims that a path has
+// a tag, then it has the tag according to the taint analysis. This rule is
+// likely to be adjusted later. For confidentiality tags this should be OK to
+// start with.
+claimHasTag(principal, path, tag) :- saysHasTag(principal, path, tag).
+
+// This rule says that any principal can say that another principal owns a tag.
+// This rule is just a starting point to allow all aspects of the policy to
+// come from authorization logic -- it is just a simple way to generate
+// ownsTag from something with a speaker. This rule is likely to change. It
+// does not rule out the case that two different principals claim ownership of
+// a tag.
+ownsTag(owner, tag) :- saysOwnsTag(_, owner, tag).
+
+//-----------------------------------------------------------------------------
+// Universe Populating Rules
+//-----------------------------------------------------------------------------
+
 // TODO(#126): Fix the universe populating rules, potentially by deleting
 //  them entirely.
-//
 // For now, we need to not populate isTag to handle cases where the tests
 // cause all principals to be associated with all tags.
 // isTag(tag) :- ownsTag(_, tag).
-isTag(tag) :- saysDowngrades(_, _, tag).
+
+isPrincipal(owner) :- ownsTag(owner, _).
 
 #endif // SRC_ANALYSIS_SOUFFLE_AUTHORIZATION_LOGIC_DL_

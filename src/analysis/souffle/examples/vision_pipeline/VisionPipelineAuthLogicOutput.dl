@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#include "authorization_logic.dl"
+#include "../../authorization_logic.dl"
 
 // This file is roughly what should be produced by authorization logic as an 
 // output. I think in reality there are gaps (one is that the output from the 
