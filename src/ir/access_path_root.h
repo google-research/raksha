@@ -4,7 +4,6 @@
 #include "absl/types/variant.h"
 #include "absl/strings/str_join.h"
 #include "src/common/logging/logging.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 // The classes in this file describe the root of an AccessPath. At the moment,
 // we have only two types of roots: a HandleConnectionSpecAccessPathRoot and
@@ -18,19 +17,6 @@ namespace raksha::ir {
 // locations.
 class HandleConnectionSpecAccessPathRoot {
  public:
-  static HandleConnectionSpecAccessPathRoot CreateFromProto(
-      const arcs::AccessPathProto_HandleRoot &handle_root_proto) {
-    std::string particle_spec_name = handle_root_proto.particle_spec();
-    CHECK(!particle_spec_name.empty())
-      << "Expected a HandleRoot message to have a non-empty particle_spec.";
-    std::string handle_connection_spec_name =
-        handle_root_proto.handle_connection();
-    CHECK(!handle_connection_spec_name.empty())
-      << "Expected a HandleRoot message to have a non-empty handle_connection.";
-    return HandleConnectionSpecAccessPathRoot(
-        particle_spec_name, handle_connection_spec_name);
-  }
-
   explicit HandleConnectionSpecAccessPathRoot(
       std::string particle_spec_name, std::string handle_connection_spec_name)
       : particle_spec_name_(std::move(particle_spec_name)),
@@ -42,14 +28,6 @@ class HandleConnectionSpecAccessPathRoot {
   std::string ToString() const {
     LOG(FATAL) << "Attempted to print out an AccessPath before connecting it "
                   "to a fully-instantiated root!";
-  }
-
-  // Make this class back into an arcs HandleRoot proto.
-  arcs::AccessPathProto_HandleRoot MakeProto() const {
-    arcs::AccessPathProto_HandleRoot result;
-    result.set_particle_spec(particle_spec_name_);
-    result.set_handle_connection(handle_connection_spec_name_);
-    return result;
   }
 
   // A HandleConnectionSpecAccessPathRoot has not been fully instantiated.
@@ -165,14 +143,14 @@ class HandleAccessPathRoot {
   std::string handle_name_;
 };
 
-// The generic AccessPathRoot. Contains an absl::variant holding the specific
-// root type and delegates to it using absl::visit.
+// The generic AccessPathRoot. Contains an std::variant holding the specific
+// root type and delegates to it using std::visit.
 class AccessPathRoot {
  public:
-  // Use a using type alias to define the absl::variant type describing the
+  // Use a using type alias to define the std::variant type describing the
   // specific root types. Prevents the types used in the constructor and the
   // field from getting out of sync.
-  using RootVariant = absl::variant<
+  using RootVariant = std::variant<
       HandleConnectionSpecAccessPathRoot, HandleConnectionAccessPathRoot,
       HandleAccessPathRoot>;
 
@@ -181,13 +159,13 @@ class AccessPathRoot {
 
   // Dispatch ToString to the specific kind of AccessPathRoot.
   std::string ToString() const {
-    return absl::visit(
+    return std::visit(
         [](const auto &variant){ return variant.ToString(); }, specific_root_);
   }
 
   // Dispatch IsInstantiated to the specific kind of AccessPathRoot.
   bool IsInstantiated() const {
-     return absl::visit(
+     return std::visit(
         [](const auto &variant){ return variant.IsInstantiated(); },
         specific_root_);
   }

@@ -13,25 +13,6 @@ namespace raksha::ir {
 // tree, and an AccessPathRoot, describing the path before that.
 class AccessPath {
  public:
-  // Create an AccessPath from the equivalent Arcs proto. We currently only
-  // handle the case in which an AccessPathProto is rooted at a
-  // (particle_spec, handle_connection), in which case it
-  static AccessPath CreateFromProto(
-      const arcs::AccessPathProto &access_path_proto) {
-    CHECK(!access_path_proto.has_store_id())
-      << "Currently, access paths involving stores are not implemented.";
-    CHECK(access_path_proto.has_handle())
-      << "Expected AccessPathProto to contain a handle member.";
-    HandleConnectionSpecAccessPathRoot hcs_access_path_root =
-        HandleConnectionSpecAccessPathRoot::CreateFromProto(
-            access_path_proto.handle());
-
-    AccessPathSelectors selectors =
-        AccessPathSelectors::CreateFromProto(access_path_proto);
-    return AccessPath(
-        AccessPathRoot(std::move(hcs_access_path_root)), std::move(selectors));
-  }
-
   explicit AccessPath(
     AccessPathRoot root, AccessPathSelectors access_path_selectors)
     : root_(std::move(root)),

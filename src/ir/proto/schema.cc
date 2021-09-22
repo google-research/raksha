@@ -15,7 +15,8 @@
 //-----------------------------------------------------------------------------
 #include "src/ir/proto/schema.h"
 
-#include "absl/types/optional.h"
+#include <optional>
+
 #include "src/common/logging/logging.h"
 #include "src/ir/proto/type.h"
 
@@ -25,7 +26,7 @@ Schema decode(const arcs::SchemaProto& schema_proto) {
   auto schema_names = schema_proto.names();
   CHECK(schema_names.size() <= 1)
     << "Multiple names for a Schema not yet supported.";
-  absl::optional<std::string> name;
+  std::optional<std::string> name;
   if (schema_names.size() == 1) {
     name = schema_names.at(0);
   }

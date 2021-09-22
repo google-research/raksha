@@ -26,7 +26,7 @@ class DatalogFactsTest : public testing::TestWithParam<
 TEST_P(DatalogFactsTest, IncludesManifestFactsWithCorrectPrefixAndSuffix) {
   const auto& [manifest_datalog_facts, expected_string] = GetParam();
   DatalogFacts datalog_facts(manifest_datalog_facts);
-  EXPECT_EQ(datalog_facts.ToString(), expected_string);
+  EXPECT_EQ(datalog_facts.ToDatalog(), expected_string);
 }
 
 INSTANTIATE_TEST_SUITE_P(

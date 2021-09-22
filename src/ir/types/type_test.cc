@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <optional>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_split.h"
@@ -21,7 +22,7 @@ namespace raksha::ir::types {
 // Helper function for making an unnamed schema from a field map.
 static Schema MakeAnonymousSchema(
     absl::flat_hash_map<std::string, std::unique_ptr<Type>> field_map) {
-  return Schema(absl::optional<std::string>(), std::move(field_map));
+  return Schema(std::nullopt, std::move(field_map));
 }
 
 // Helper function for making an entity type with an unnamed schema from a
@@ -304,7 +305,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // TODO(#122): This test should be moved to appropriate file while refactoring.
 TEST(EntityTypeTest, KindReturnsCorrectKind) {
-  EntityType entity_type(Schema(absl::nullopt, {}));
+  EntityType entity_type(Schema(std::nullopt, {}));
   EXPECT_EQ(entity_type.kind(), Type::Kind::kEntity);
 }
 

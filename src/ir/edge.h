@@ -15,7 +15,7 @@ class Edge {
     : from_(std::move(from)), to_(std::move(to)) {}
 
   // Print the edge as a string containing a Datalog fact.
-  std::string ToString() const {
+  std::string ToDatalog() const {
     constexpr absl::string_view kEdgeFormat = R"(edge("%s", "%s").)";
     return absl::StrFormat(kEdgeFormat, from_.ToString(), to_.ToString());
   }

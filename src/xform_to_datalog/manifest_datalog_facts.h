@@ -42,14 +42,14 @@ class ManifestDatalogFacts {
   // Print out all contained facts as a single datalog string. Note: this
   // does not contain the header files that would be necessary to run this
   // against the datalog scripts; it contains only facts and comments.
-  std::string ToString() const {
-    auto tostring_formatter = [](std::string *out, const auto &arg) {
-      out->append(arg.ToString()); };
+  std::string ToDatalog() const {
+    auto todatalog_formatter = [](std::string *out, const auto &arg) {
+      out->append(arg.ToDatalog()); };
     return absl::StrFormat(
         kFactOutputFormat,
-        absl::StrJoin(claims_, "\n", tostring_formatter),
-        absl::StrJoin(checks_, "\n", tostring_formatter),
-        absl::StrJoin(edges_, "\n", tostring_formatter));
+        absl::StrJoin(claims_, "\n", todatalog_formatter),
+        absl::StrJoin(checks_, "\n", todatalog_formatter),
+        absl::StrJoin(edges_, "\n", todatalog_formatter));
   }
 
   const std::vector<raksha::ir::TagClaim> &claims() const { return claims_; }
