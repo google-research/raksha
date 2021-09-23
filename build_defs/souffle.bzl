@@ -14,7 +14,7 @@
 # limitations under the License.
 #-----------------------------------------------------------------------------
 
-def souffle_cc_library(name, src, included_dl_scripts=[], visibility = None):
+def souffle_cc_library(name, src, all_principals_own_all_tags = False, included_dl_scripts=[], visibility = None):
     """Generates a C++ interface for the given datalog file.
 
     Args:
@@ -23,7 +23,10 @@ def souffle_cc_library(name, src, included_dl_scripts=[], visibility = None):
       included_dl_scripts: List; List of labels indicating datalog files included by src.
       visibility: List; List of visibilities.
     """
-    cc_file = src + ".cpp"
+    if all_principals_own_all_tags:
+      cc_file = src + "_no_owners.cpp"
+    else:
+      cc_file = src + ".cpp"
     include_str = ""
 
     include_dir_opts = ["--include-dir=`dirname $(location {})`".format(include_file)
@@ -31,13 +34,17 @@ def souffle_cc_library(name, src, included_dl_scripts=[], visibility = None):
 
     include_opts_str = " ".join(include_dir_opts)
 
+    tag_ownership_str = ""
+    if all_principals_own_all_tags:
+      tag_ownership_str = "--macro='ALL_PRINCIPALS_OWN_ALL_TAGS=1'"
+
     native.genrule(
         name = name + "_cpp",
         srcs = [src] + included_dl_scripts,
         outs = [cc_file],
         cmd =
-          "$(location @souffle//:souffle) {include_str} -g $@ $(location {src_rule})"
-          .format(include_str = include_opts_str, src_rule = src),
+          "$(location @souffle//:souffle) {include_str} {tag_ownership} -g $@ $(location {src_rule})"
+          .format(include_str = include_opts_str, tag_ownership=tag_ownership_str, src_rule = src),
         tools = ["@souffle//:souffle"],
         visibility = visibility,
     )

@@ -21,18 +21,37 @@
 // A data flow edge.
 .decl edge(src: AccessPath, tgt: AccessPath)
 
+// Use the previous relations to map an edge to a generated access path
+// representing its midpoint.
+.decl edgeToMidpointAccessPath(src: AccessPath, tgt: AccessPath, midpoint: AccessPath)
+
+// An "innerEdge" is an internal concept. When the user requests an edge with an
+// edge fact, we actually produce the following facts internally: an innerEdge
+// going from the src to a generated midway point AccessPath, that midway point
+// AccessPath, and the midway point AccessPath to the tgt. That allows us to
+// effectively eliminate edges from the dataflow graph by eliminating all tags
+// from the midway point. Paths are defined in terms of innerEdges.
+.decl innerEdge(src: AccessPath, tgt: AccessPath)
+
 // A direct or transitive data flow path.
 .decl path(src: AccessPath, tgt: AccessPath)
 
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
-// Transitive paths
-path(from, to) :- edge(from, to).
-path(from, to) :- edge(from, intermediate), path(intermediate, to).
+// Generate a midpoint access path for each edge.
+edgeToMidpointAccessPath(src, tgt, cat("##midpoint_", to_string($))) :- edge(src, tgt).
 
-// Symbols used in edges are access paths
-isAccessPath(x) :- edge(x, _).
-isAccessPath(y) :- edge(_, y).
+// Generate inner edges to and from that midpoint for each edge.
+innerEdge(src, midpoint) :- edgeToMidpointAccessPath(src, _, midpoint).
+innerEdge(midpoint, tgt) :- edgeToMidpointAccessPath(_, tgt, midpoint).
+
+// Transitive paths
+path(from, to) :- innerEdge(from, to).
+path(from, to) :- innerEdge(from, intermediate), path(intermediate, to).
+
+// Symbols used in innerEdges are access paths
+isAccessPath(x) :- innerEdge(x, _).
+isAccessPath(y) :- innerEdge(_, y).
 
 #endif // SRC_ANALYSIS_SOUFFLE_DATAFLOW_GRAPH_DL_
