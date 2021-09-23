@@ -39,3 +39,6 @@ jobs:
       # Verifies that Arcs manifest tests that we do not yet handle parse correctly.
       - name: Verify that disabled Arcs manifest tests build.
         run: bazel build //src/analysis/souffle/tests/arcs_manifest_tests_todo/...
+
+      - name: Verify that we can build authorization logic code with bazel
+        run: bazel build //rust/tools/authorization-logic:authorization_logic
