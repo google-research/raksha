@@ -22,13 +22,13 @@ use std::{env, error::Error, process::Command};
 fn run_antlr_on(grammar_file: &str, antlr_path: &str) -> Result<(), Box<dyn Error>> {
     let parsing_subdir = env::current_dir().unwrap().join("src/parsing");
     let full_file = grammar_file.to_owned() + ".g4";
-
+    let java_bin = env::var("JAVA").unwrap_or("java".to_string());
     // When debugging either this build script or the antlr, code it may be
     // useful to build with
     // 'cargo build -vv &> output file'
     // because cargo omits errors generated from executed commands otherwise
 
-    Command::new("java")
+    Command::new(java_bin)
         .current_dir(parsing_subdir)
         .arg("-jar")
         .arg(antlr_path)
