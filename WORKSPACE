@@ -178,5 +178,5 @@ http_archive(
 
 load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
-# We need this specific repository for authorization logic.
+# TODO(#143): We need this specific repository for authorization logic.
 rust_repositories(version = "nightly", iso_date = "2021-07-01", edition="2018")
