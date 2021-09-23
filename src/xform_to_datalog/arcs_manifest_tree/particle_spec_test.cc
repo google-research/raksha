@@ -1,3 +1,19 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
 #include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
 
 #include <google/protobuf/text_format.h>
@@ -462,18 +478,16 @@ claims: [ { assume: {
       .expected_claims = {
           ir::TagClaim(
               "PS2",
-              ir::TagAnnotationOnAccessPath(
-                  ir::AccessPath(
-                      kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
-                      "tag1")
-              ),
+              ir::AccessPath(
+                  kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
+              true,
+              "tag1"),
           ir::TagClaim(
               "PS2",
-              ir::TagAnnotationOnAccessPath(
-                  ir::AccessPath(
-                      kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
-                      "tag2")
-              )
+              ir::AccessPath(
+                  kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
+              true,
+              "tag2")
       },
       .expected_checks = { },
       .expected_edges = { }
@@ -566,14 +580,14 @@ TEST(BulkInstantiateTest, BulkInstantiateTest) {
       testing::UnorderedElementsAreArray({
         ir::TagClaim(
             "PS1",
-            ir::TagAnnotationOnAccessPath(ir::AccessPath(
-                p1_out_impl, MakeSingleFieldSelectors("field1")), "tag1")),
+            ir::AccessPath(p1_out_impl, MakeSingleFieldSelectors("field1")),
+            true,
+            "tag1"),
         ir::TagClaim(
             "PS1",
-            ir::TagAnnotationOnAccessPath(
-                ir::AccessPath(
-                    p1_in_out_impl,
-                    MakeSingleFieldSelectors("field2")), "tag2"))}));
+            ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field2")),
+            true,
+            "tag2")}));
 
   ASSERT_THAT(
       instantiated_facts.checks,

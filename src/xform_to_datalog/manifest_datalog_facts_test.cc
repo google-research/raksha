@@ -68,9 +68,7 @@ static std::tuple<ManifestDatalogFacts, std::string>
 )" },
     { ManifestDatalogFacts(
         { ir::TagClaim(
-            "particle",
-            ir::TagAnnotationOnAccessPath(
-                kHandleConnectionOutAccessPath, "tag")) },
+            "particle", kHandleConnectionOutAccessPath, true, "tag") },
         { ir::TagCheck(ir::TagAnnotationOnAccessPath(
             kHandleConnectionInAccessPath, "tag2")) },
         { ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),

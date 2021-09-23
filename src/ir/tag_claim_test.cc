@@ -1,3 +1,19 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
 #include "src/ir/tag_claim.h"
 
 #include <google/protobuf/util/message_differencer.h>
@@ -13,35 +29,46 @@ class TagClaimToDatalogWithRootTest :
     public testing::TestWithParam<
       std::tuple<
         std::string,
-        std::tuple<std::string, absl::ParsedFormat<'s', 's'>>,
+        std::tuple<std::string, std::vector<absl::ParsedFormat<'s', 's'>>>,
         AccessPathRoot>>
       {};
 
 TEST_P(TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest) {
   const std::string particle_spec_name = std::get<0>(GetParam());
-  const std::tuple<std::string, absl::ParsedFormat<'s', 's'>>
+  const std::tuple<std::string, std::vector<absl::ParsedFormat<'s', 's'>>>
       &textproto_format_string_pair = std::get<1>(GetParam());
   const std::string &assume_textproto =
       std::get<0>(textproto_format_string_pair);
-  const absl::ParsedFormat<'s', 's'> expected_todatalog_format_string =
-    std::get<1>(textproto_format_string_pair);
+  const std::vector<absl::ParsedFormat<'s', 's'>>
+      expected_todatalog_format_string_vec =
+          std::get<1>(textproto_format_string_pair);
   const AccessPathRoot &root = std::get<2>(GetParam());
 
-  const std::string &expected_todatalog = absl::StrFormat(
-      expected_todatalog_format_string, particle_spec_name, root.ToString());
+  std::vector<std::string> expected_todatalog_vec;
+  for (auto &format_str : expected_todatalog_format_string_vec) {
+    expected_todatalog_vec.push_back(
+        absl::StrFormat(format_str, particle_spec_name, root.ToString()));
+  }
   arcs::ClaimProto_Assume assume_proto;
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
       assume_textproto, &assume_proto));
-  TagClaim unrooted_tag_claim =
+  std::vector<TagClaim> unrooted_tag_claim_vec =
       TagClaim::CreateFromProto(particle_spec_name, assume_proto);
-  TagClaim tag_claim = unrooted_tag_claim.Instantiate(root);
+  std::vector<TagClaim> rooted_tag_claim_vec;
+  for (const TagClaim &unrooted_claim : unrooted_tag_claim_vec) {
+    rooted_tag_claim_vec.push_back(unrooted_claim.Instantiate(root));
+  }
   // Expect the version with the concrete root to match the expected_todatalog
   // when ToDatalog is called upon it.
-  ASSERT_EQ(tag_claim.ToDatalog(), expected_todatalog);
+  ASSERT_EQ(rooted_tag_claim_vec.size(), expected_todatalog_vec.size());
+  for (uint64_t i = 0; i < rooted_tag_claim_vec.size(); ++i) {
+    EXPECT_EQ(
+        rooted_tag_claim_vec.at(i).ToDatalog(), expected_todatalog_vec.at(i));
+  }
   // However, the version with the spec root should fail when ToDatalog is
   // called.
   EXPECT_DEATH(
-      unrooted_tag_claim.ToDatalog(),
+      unrooted_tag_claim_vec.at(0).ToDatalog(),
       "Attempted to print out an AccessPath before connecting it to a "
       "fully-instantiated root!");
 }
@@ -67,27 +94,102 @@ static AccessPathRoot instantiated_roots[] = {
 // expected ToDatalog output when the root string is substituted for the %s.
 // This allows us to test the result of combining each of the
 // TagClaims derived from the textprotos with each of the root strings.
-static std::tuple<std::string, absl::ParsedFormat<'s', 's'>>
+static std::tuple<std::string, std::vector<absl::ParsedFormat<'s', 's'>>>
     textproto_to_expected_format_string[] = {
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
   selectors: { field: "field1" } },
 predicate: { label: { semantic_tag: "tag"} })",
-      absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s.field1", "tag").)") },
+      { absl::ParsedFormat<'s', 's'>(
+          R"(claimHasTag("%s", "%s.field1", "tag").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" } },
 predicate: { label: { semantic_tag: "tag2"} })",
-      absl::ParsedFormat<'s', 's'>(R"(claimHasTag("%s", "%s", "tag2").)") },
+      { absl::ParsedFormat<'s', 's'>(R"(claimHasTag("%s", "%s", "tag2").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" },
   selectors: [{ field: "x" }, { field: "y" }] },
 predicate: { label: { semantic_tag: "user_selection"} })",
-      absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s.x.y", "user_selection").)") }
+      { absl::ParsedFormat<'s', 's'>(
+          R"(claimHasTag("%s", "%s.x.y", "user_selection").)") } },
+    { R"(
+access_path: {
+  handle: { particle_spec: "ps", handle_connection: "hc" },
+  selectors: [{ field: "x" }, { field: "y" }] },
+predicate: {
+not: { predicate: { label: { semantic_tag: "user_selection"} } } })",
+      { absl::ParsedFormat<'s', 's'>(
+          R"(saysDowngrades("%s", "%s.x.y", "user_selection").)") } },
+    { R"(
+access_path: {
+  handle: { particle_spec: "ps", handle_connection: "hc" }
+  selectors: { field: "field1" } },
+predicate: { and: {
+  conjunct0: { label: { semantic_tag: "tag"} }
+  conjunct1: { label: { semantic_tag: "tag2"} } } })",
+      { absl::ParsedFormat<'s', 's'>(
+          R"(claimHasTag("%s", "%s.field1", "tag").)"),
+        absl::ParsedFormat<'s', 's'>(
+          R"(claimHasTag("%s", "%s.field1", "tag2").)") } },
+    { R"(
+access_path: {
+  handle: { particle_spec: "ps", handle_connection: "hc" }
+  selectors: { field: "field1" } },
+predicate: { and: {
+  conjunct0: { not: { predicate: { label: { semantic_tag: "tag"} } } }
+  conjunct1: { label: { semantic_tag: "tag2"} } } })",
+      { absl::ParsedFormat<'s', 's'>(
+          R"(saysDowngrades("%s", "%s.field1", "tag").)"),
+        absl::ParsedFormat<'s', 's'>(
+          R"(claimHasTag("%s", "%s.field1", "tag2").)") } },
+    { R"(
+access_path: {
+  handle: { particle_spec: "ps", handle_connection: "hc" } },
+predicate: { and: {
+  conjunct0: { label: { semantic_tag: "tag"} }
+  conjunct1: { not: { predicate: { label: { semantic_tag: "tag2"} } } } } })",
+      { absl::ParsedFormat<'s', 's'>(
+          R"(claimHasTag("%s", "%s", "tag").)"),
+        absl::ParsedFormat<'s', 's'>(
+          R"(saysDowngrades("%s", "%s", "tag2").)") } },
+     { R"(
+access_path: {
+  handle: { particle_spec: "ps", handle_connection: "hc" }
+  selectors: { field: "field1" } },
+predicate: { and: {
+  conjunct0: { and: {
+    conjunct0: { label: { semantic_tag: "tag"} }
+    conjunct1: { not: { predicate: { label: { semantic_tag: "tag2"} } } } } }
+  conjunct1: { label: { semantic_tag: "tag3"} } } })",
+      { absl::ParsedFormat<'s', 's'>(
+          R"(claimHasTag("%s", "%s.field1", "tag").)"),
+        absl::ParsedFormat<'s', 's'>(
+          R"(saysDowngrades("%s", "%s.field1", "tag2").)"),
+        absl::ParsedFormat<'s', 's'>(
+          R"(claimHasTag("%s", "%s.field1", "tag3").)") } },
+     { R"(
+access_path: {
+  handle: { particle_spec: "ps", handle_connection: "hc" }
+  selectors: { field: "field1" } },
+predicate: { and: {
+  conjunct0: { and: {
+    conjunct0: { label: { semantic_tag: "tag"} }
+    conjunct1: { not: { predicate: { label: { semantic_tag: "tag2"} } } } } }
+  conjunct1: { and: {
+    conjunct0: { not: { predicate: { label: { semantic_tag: "tag3"} } } }
+    conjunct1: { label: { semantic_tag: "tag4" } } } } } })",
+      { absl::ParsedFormat<'s', 's'>(
+          R"(claimHasTag("%s", "%s.field1", "tag").)"),
+        absl::ParsedFormat<'s', 's'>(
+          R"(saysDowngrades("%s", "%s.field1", "tag2").)"),
+        absl::ParsedFormat<'s', 's'>(
+          R"(saysDowngrades("%s", "%s.field1", "tag3").)"),
+        absl::ParsedFormat<'s', 's'>(
+          R"(claimHasTag("%s", "%s.field1", "tag4").)")
+          } },
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -99,23 +201,21 @@ INSTANTIATE_TEST_SUITE_P(
 
 class TestTagClaimEquals : public testing::TestWithParam<
     std::tuple<
-      std::tuple<std::string, AccessPath, std::string>,
-      std::tuple<std::string, AccessPath, std::string>>> {};
+      std::tuple<std::string, AccessPath, bool, std::string>,
+      std::tuple<std::string, AccessPath, bool, std::string>>> {};
 
 TEST_P(TestTagClaimEquals, TestTagClaimEquals) {
-  const std::tuple<std::string, AccessPath, std::string> tag_claim_args1 =
+  const std::tuple<std::string, AccessPath, bool, std::string> tag_claim_args1 =
       std::get<0>(GetParam());
-  const std::tuple<std::string, AccessPath, std::string> tag_claim_args2 =
+  const std::tuple<std::string, AccessPath, bool, std::string> tag_claim_args2 =
     std::get<1>(GetParam());
 
   const TagClaim tag_claim1(
-      std::get<0>(tag_claim_args1),
-      TagAnnotationOnAccessPath(
-          std::get<1>(tag_claim_args1), std::get<2>(tag_claim_args1)));
+      std::get<0>(tag_claim_args1), std::get<1>(tag_claim_args1),
+      std::get<2>(tag_claim_args1), std::get<3>(tag_claim_args1));
   const TagClaim tag_claim2(
-      std::get<0>(tag_claim_args2),
-      TagAnnotationOnAccessPath(
-          std::get<1>(tag_claim_args2), std::get<2>(tag_claim_args2)));
+    std::get<0>(tag_claim_args2), std::get<1>(tag_claim_args2),
+    std::get<2>(tag_claim_args2), std::get<3>(tag_claim_args2));
 
   EXPECT_EQ(tag_claim1 == tag_claim2, tag_claim_args1 == tag_claim_args2);
 }
@@ -135,10 +235,12 @@ INSTANTIATE_TEST_SUITE_P(
         testing::Combine(
             testing::ValuesIn(particle_spec_names),
             testing::ValuesIn(sample_access_paths),
+            testing::Values(true, false),
             testing::ValuesIn(sample_tags)),
         testing::Combine(
             testing::ValuesIn(particle_spec_names),
             testing::ValuesIn(sample_access_paths),
+            testing::Values(true, false),
             testing::ValuesIn(sample_tags))));
 
 }  // namespace raksha::ir
