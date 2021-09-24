@@ -26,10 +26,16 @@
 .decl edgeToMidpointAccessPath(src: AccessPath, tgt: AccessPath, midpoint: AccessPath)
 
 // An "innerEdge" is an internal concept. When the user requests an edge with an
-// edge fact, we actually produce the following facts internally: an innerEdge
-// going from the src to a generated midway point AccessPath, that midway point
-// AccessPath, and the midway point AccessPath to the tgt. That allows us to
-// effectively eliminate edges from the dataflow graph by eliminating all tags
+// edge fact, we will expand that into innerEdges in one of two ways:
+//
+// 1. The edge is not the subject of a claimNotEdge, in which case an
+// innerEdge directly corresponding to the edge is created.
+//
+// 2. The edge is the subject of a claimNotEdge, in which case three facts
+// are created: a generated midway point AccessPath, an innerEdge going from the
+// src of the original edge to the midway point, and the midway point AccessPath
+// to the tgt. That allows us to effectively eliminate edges that are the
+// subject of a claimNotEdge from the dataflow graph by eliminating all tags
 // from the midway point. Paths are defined in terms of innerEdges.
 .decl innerEdge(src: AccessPath, tgt: AccessPath)
 
@@ -39,12 +45,18 @@
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
-// Generate a midpoint access path for each edge.
-edgeToMidpointAccessPath(src, tgt, cat("##midpoint_", to_string($))) :- edge(src, tgt).
+// Generate a midpoint access path for each edge that is the subject of a
+// claimNotEdge from any principal.
+edgeToMidpointAccessPath(src, tgt, cat("##midpoint_", to_string($))) :-
+  edge(src, tgt), claimNotEdge(_, src, tgt).
 
-// Generate inner edges to and from that midpoint for each edge.
-innerEdge(src, midpoint) :- edgeToMidpointAccessPath(src, _, midpoint).
-innerEdge(midpoint, tgt) :- edgeToMidpointAccessPath(_, tgt, midpoint).
+// Generate inner edges to and from that midpoint for each edge with a midpoint.
+innerEdge(src, midpoint), innerEdge(midpoint, tgt) :-
+  edgeToMidpointAccessPath(src, tgt, midpoint).
+
+// For edges for which a midpoint was not generated, generate an innerEdge
+// corresponding to the original edge.
+innerEdge(src, tgt) :- edge(src, tgt), !edgeToMidpointAccessPath(src, tgt, _).
 
 // Transitive paths
 path(from, to) :- innerEdge(from, to).
