@@ -38,11 +38,6 @@ particle ImageDetector
     }
     id_image_detection_model: reads ImageDetectionModel {}
     id_detection_boxes: writes ImageDetectionBoxes {}
-        // id_detection_boxes is downgraded from
-        // {raw_video_tag, image_detection_model_tag} to {detected_images_tag}
-        // The old tags are removed by auth logic and this part adds the
-        // new tag in:
-    claim id_detection_boxes is detected_images_tag
 
 particle UserSelectionActionSource
     usas_user_selection_action: writes UserSelectionAction {} 
@@ -53,14 +48,11 @@ particle ImageSelector
     is_user_selection_action: reads UserSelectionAction {}
     is_select_image_id: writes SelectImageId {}
         // The label of is_select_image_id is downgraded from
-        // {detected_images_tag, user_selection_tag} to {product_id_tag}
+        // {raw_video_tag, user_selection_tag} to {product_id_tag}
     claim is_select_image_id is product_id_tag
 
 particle ProductIdOutput
     pio_select_image_id: reads SelectImageId {}
-        // check that the output of is_select_image_id flowsTo 
-        // {product_id_tag}.
-    check pio_select_image_id is product_id_tag
 
 recipe VisionPipeline
     VideoDataSource
