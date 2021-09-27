@@ -36,7 +36,7 @@ genrule(
     srcs = ["src/parsing/AuthLogic.g4"],
     tools = [
         ":antlr4rust_jar",
-	":antlr_gen_mod_rs",
+        ":antlr_gen_mod_rs",
         "@bazel_tools//tools/jdk:current_java_runtime",
         "@bazel_tools//tools/jdk:java",
     ],
@@ -46,11 +46,11 @@ genrule(
        "antlr_gen/authlogicparser.rs",
        "antlr_gen/lib.rs",
     ],
-    cmd = "pwd; $(execpath @bazel_tools//tools/jdk:java) " +
+    cmd = "$(execpath @bazel_tools//tools/jdk:java) " +
           "-jar $(location :antlr4rust_jar) " +
-	  "-Dlanguage=Rust -Xexact-output-dir -o $(RULEDIR)/antlr_gen $< ;" +
-	  "echo \"#![feature(try_blocks)]\" >  $(RULEDIR)/antlr_gen/lib.rs ;" +
-	  "cat $(location :antlr_gen_mod_rs) >> $(RULEDIR)/antlr_gen/lib.rs"
+          "-Dlanguage=Rust -Xexact-output-dir -o $(RULEDIR)/antlr_gen $< ;" +
+          "echo \"#![feature(try_blocks)]\" >  $(RULEDIR)/antlr_gen/lib.rs ;" +
+          "cat $(location :antlr_gen_mod_rs) >> $(RULEDIR)/antlr_gen/lib.rs"
 )
 
 rust_library(
@@ -88,7 +88,7 @@ rust_binary(
         "--cfg=feature=\"bazel_build\""
     ],
     deps = [
-	":antlr_gen",
+        ":antlr_gen",
         "//rust/tools/authorization-logic/cargo:antlr_rust",
         "//rust/tools/authorization-logic/cargo:bincode",
         "//rust/tools/authorization-logic/cargo:serde",
