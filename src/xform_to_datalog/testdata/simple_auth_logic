@@ -1,0 +1,2 @@
+"prin1" says fact1(thing_x) :- cond1(thing_x).
+"prin1" says cond1("foo").
