@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
+#[cfg(not(feature = "bazel_build"))]
 mod antlr_gen;
+
 pub mod astconstructionvisitor;

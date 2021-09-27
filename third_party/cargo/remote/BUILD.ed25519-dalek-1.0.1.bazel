@@ -1,0 +1,71 @@
+"""
+@generated
+cargo-raze crate build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+
+# buildifier: disable=load
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+# buildifier: disable=load
+load(
+    "@rules_rust//rust:rust.bzl",
+    "rust_binary",
+    "rust_library",
+    "rust_test",
+)
+
+package(default_visibility = [
+    # Public for visibility by "@raze__crate__version//" targets.
+    #
+    # Prefer access through "//third_party/cargo", which limits external
+    # visibility to explicit Cargo.toml dependencies.
+    "//visibility:public",
+])
+
+licenses([
+    "notice",  # BSD-3-Clause from expression "BSD-3-Clause"
+])
+
+# Generated Targets
+
+# Unsupported target "ed25519_benchmarks" with type "bench" omitted
+
+rust_library(
+    name = "ed25519_dalek",
+    srcs = glob(["**/*.rs"]),
+    aliases = {
+        "@raze__serde__1_0_126//:serde": "serde_crate",
+    },
+    crate_features = [
+        "default",
+        "rand",
+        "serde_crate",
+        "std",
+        "u64_backend",
+    ],
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    data = [],
+    edition = "2018",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "1.0.1",
+    # buildifier: leave-alone
+    deps = [
+        "@raze__curve25519_dalek__3_1_0//:curve25519_dalek",
+        "@raze__ed25519__1_1_1//:ed25519",
+        "@raze__rand__0_7_3//:rand",
+        "@raze__serde__1_0_126//:serde",
+        "@raze__sha2__0_9_5//:sha2",
+        "@raze__zeroize__1_3_0//:zeroize",
+    ],
+)
+
+# Unsupported target "ed25519" with type "test" omitted
