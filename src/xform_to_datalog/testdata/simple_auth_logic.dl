@@ -1,0 +1,6 @@
+.decl says_cond1(x0: symbol, x1: symbol)
+.decl grounded_dummy(x0: symbol)
+.decl says_fact1(x0: symbol, x1: symbol)
+says_fact1("prin1", thing_x) :- says_cond1("prin1", thing_x).
+says_cond1("prin1", "foo").
+grounded_dummy("dummy_var").
