@@ -39,6 +39,7 @@
 // In this formalization, accessPaths also act as IFCLabels (in the sense that
 // they have Tags).
 .decl mayHaveTag(accessPath: AccessPath, tag: Tag)
+.decl mayHaveTagNoDown(accessPath: AccessPath, tag: Tag)
 
 // There is a claim that `accessPath` definitely has `tag` taint. This claim
 // is made by `principal`.
@@ -86,7 +87,12 @@
 //      permission for edge removal indirectly by granting permission to remove 
 //      tags (abstract representations of their data).
 
-saysDowngrades(principal, path, tag) :- claimNotEdge(principal, path, _), isTag(tag).
+mayHaveTagNoDown(tgt, tag) :- hasTag(tgt, tag).
+mayHaveTagNoDown(tgt, tag) :- 
+    edge(src, tgt), mayHaveTagNoDown(src, tag).
+
+saysDowngrades(principal, tgt, tag) :-
+    mayHaveTagNoDown(src, tag), edge(src, tgt), claimNotEdge(principal, src, tgt).
 
 hasTag(tgt, tag) :- claimHasTag(principal, tgt, tag), ownsTag(principal, tag).
 
