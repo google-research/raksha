@@ -25,4 +25,3 @@ filegroup(
     ],
     testonly = True
 )
-    

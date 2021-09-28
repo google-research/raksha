@@ -24,8 +24,6 @@
 
 namespace fs = std::filesystem;
 
-#include <iostream>
-
 namespace raksha::xform_to_datalog {
 
 class AuthorizationLogicTest : public ::testing::Test {
