@@ -10,7 +10,7 @@ static const AccessPathSelectors x_y_access_path_selectors =
         Selector(FieldSelector("x")),
         AccessPathSelectors(Selector(FieldSelector("y"))));
 
-static const std::tuple<Edge, std::string> edge_tostring_pairs[] = {
+static const std::tuple<Edge, std::string> edge_todatalog_pairs[] = {
     { Edge(
         AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
             "recipe", "particle", "handle")),
@@ -38,18 +38,18 @@ static const std::tuple<Edge, std::string> edge_tostring_pairs[] = {
                      AccessPathSelectors())),
       "edge(\"pre.fix.1\", \"pre.fix.2\")."} };
 
-class EdgeToStringTest :
+class EdgeToDatalogTest :
     public testing::TestWithParam<std::tuple<Edge, std::string>> {};
 
-TEST_P(EdgeToStringTest, EdgeToStringTest) {
+TEST_P(EdgeToDatalogTest, EdgeToDatalogTest) {
   const Edge &edge = std::get<0>(GetParam());
   const std::string &expected_to_string = std::get<1>(GetParam());
 
-  EXPECT_EQ(edge.ToString(), expected_to_string);
+  EXPECT_EQ(edge.ToDatalog(), expected_to_string);
 }
 
-INSTANTIATE_TEST_SUITE_P(EdgeToStringTest, EdgeToStringTest,
-                         testing::ValuesIn(edge_tostring_pairs));
+INSTANTIATE_TEST_SUITE_P(EdgeToDatalogTest, EdgeToDatalogTest,
+                         testing::ValuesIn(edge_todatalog_pairs));
 
 class EdgeEqTest : public testing::TestWithParam<
     std::tuple<

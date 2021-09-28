@@ -9,34 +9,34 @@
 
 namespace raksha::ir {
 
-class TagCheckToStringWithRootTest :
+class TagCheckToDatalogWithRootTest :
     public testing::TestWithParam<
       std::tuple<
         std::tuple<std::string, absl::ParsedFormat<'s', 's'>>, AccessPathRoot>>
       {};
 
-TEST_P(TagCheckToStringWithRootTest, TagCheckToStringWithRootTest) {
+TEST_P(TagCheckToDatalogWithRootTest, TagCheckToDatalogWithRootTest) {
   const std::tuple<std::string, absl::ParsedFormat<'s', 's'>>
       &textproto_format_string_pair = std::get<0>(GetParam());
   const std::string &check_textproto =
       std::get<0>(textproto_format_string_pair);
-  const absl::ParsedFormat<'s', 's'> expected_tostring_format_string =
+  const absl::ParsedFormat<'s', 's'> expected_todatalog_format_string =
     std::get<1>(textproto_format_string_pair);
   const AccessPathRoot &root = std::get<1>(GetParam());
   std::string root_string = root.ToString();
-  const std::string &expected_tostring = absl::StrFormat(
-      expected_tostring_format_string, root_string, root_string);
+  const std::string &expected_todatalog = absl::StrFormat(
+      expected_todatalog_format_string, root_string, root_string);
   arcs::CheckProto check_proto;
   google::protobuf::TextFormat::ParseFromString(check_textproto, &check_proto);
   TagCheck unrooted_tag_check = TagCheck::CreateFromProto(check_proto);
   TagCheck tag_check = unrooted_tag_check.Instantiate(root);
-  // Expect the version with the concrete root to match the expected_tostring
-  // when ToString is called upon it.
-  ASSERT_EQ(tag_check.ToString(), expected_tostring);
-  // However, the version with the spec root should fail when ToString is
+  // Expect the version with the concrete root to match the expected_todatalog
+  // when ToDatalog is called upon it.
+  ASSERT_EQ(tag_check.ToDatalog(), expected_todatalog);
+  // However, the version with the spec root should fail when ToDatalog is
   // called.
   EXPECT_DEATH(
-      unrooted_tag_check.ToString(),
+      unrooted_tag_check.ToDatalog(),
       "Attempted to print out an AccessPath before connecting it to a "
       "fully-instantiated root!");
 }
@@ -52,7 +52,7 @@ static AccessPathRoot instantiated_roots[] = {
 };
 
 // Pairs of textprotos and format strings. The format strings will become the
-// expected ToString output when the root string is substituted for the %s.
+// expected ToDatalog output when the root string is substituted for the %s.
 // This allows us to test the result of combining each of the
 // TagChecks derived from the textprotos with each of the root strings.
 static std::tuple<std::string, absl::ParsedFormat<'s', 's'>>
@@ -78,7 +78,7 @@ static std::tuple<std::string, absl::ParsedFormat<'s', 's'>>
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    TagCheckToStringWithRootTest, TagCheckToStringWithRootTest,
+    TagCheckToDatalogWithRootTest, TagCheckToDatalogWithRootTest,
     testing::Combine(testing::ValuesIn(textproto_to_expected_format_string),
                      testing::ValuesIn(instantiated_roots)));
 

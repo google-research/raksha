@@ -51,6 +51,7 @@
 
     "LocalDevice" may("do_pure_computation", "raw_video_tag").
 
+
     // "EndUser" opts-in to a policy about data egress.
     // It delegates to this policy the right to decide what modules can egress
     // any of "EndUser's" data.
@@ -60,6 +61,8 @@
     // "allowEgress":
     "EndUser" hasPrivacyPreference("allowEgress").
         
+    "LocalDevice" may("egress_to_shopping_service", "product_id_tag").
+
     // Could also give different permissions to RemoteService for once it
     // has "product_id_tag".
 
@@ -136,7 +139,8 @@
     "ProductIdOutput" may("egress_to_shopping_service",
         "image_detection_model_tag") :-
         // This policy DOES care about ServiceProvider's preference:
-        "ServiceProvider" hasPreference("allowEgress:).
+        "ServiceProvider" hasPreference("allowEgress").
+
 }
 
 "ThirdPartyPrivacyReviewer" says {
@@ -157,7 +161,6 @@
     "ImageSelector" canSay objectSelected("EndUser", pathX) :-
         isAccessPath(pathX).
 }
-
 
 // Maybe we want this part of the policy to sit closer to the particles
 // because sometimes relations will refer to path names ?
@@ -180,9 +183,9 @@
     hasTag("is_select_image_id", "product_id_tag").
     objectSelected("EndUser", "is_selected_image_id").
 }
-"ProductIdOutput" says {
-    "ProductIdOutput" will("egress_to_shopping_service", "pa_product_id").
-}
+
+"ProductIdOutput" says 
+    "ProductIdOutput" will("egress_to_shopping_service", "product_id_tag").
 
 // Some queries to test this policy:
 video_is_local = query "EndUser" says   
@@ -222,6 +225,10 @@ local_can_do_computation = query "EndUser" says
 //    will("do_pure_computation", "id_image_detection_model")
 // owner:
 //    owner("raw_video_tag") = "EndUser"
+//    taint(id_image_detection_model) = { }
+// Usage:
+//    will("do_pure_computation", "raw_video_tag").
+//      Owner("raw_video_tag") = "EndUser"
 may_video_do_computation = query "EndUser" says 
     "ImageDetector" may("do_pure_computation", "raw_video_tag")?
 

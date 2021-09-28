@@ -1,8 +1,5 @@
 #include "src/ir/selector.h"
 
-#include <google/protobuf/util/message_differencer.h>
-#include <google/protobuf/text_format.h>
-
 #include "absl/hash/hash_testing.h"
 #include "src/common/testing/gtest.h"
 
@@ -93,33 +90,5 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Combine(
         testing::ValuesIn(example_selectors),
         testing::ValuesIn(example_selectors)));
-
-class RoundTripSelectorProtoTest :
- public testing::TestWithParam<std::tuple<std::string, std::string>> {};
-
-TEST_P(RoundTripSelectorProtoTest, RoundTripSelectorProtoTest) {
-  arcs::AccessPathProto_Selector orig_selector_proto;
-  const std::string &selector_as_textproto = std::get<0>(GetParam());
-  const std::string &expected_selector_to_string = std::get<1>(GetParam());
-  google::protobuf::TextFormat::ParseFromString(
-      selector_as_textproto, &orig_selector_proto);
-  Selector selector = Selector::CreateFromProto(orig_selector_proto);
-  EXPECT_EQ(selector.ToString(), expected_selector_to_string);
-  arcs::AccessPathProto_Selector result_selector_proto = selector.MakeProto();
-  ASSERT_TRUE(
-      google::protobuf::util::MessageDifferencer::Equals(
-          orig_selector_proto, result_selector_proto));
-}
-
-static const std::tuple<std::string, std::string>
-  selector_proto_and_tostring_pairs[] = {
-    { "field: \"foo\"", ".foo" },
-    { "field: \"x\"", ".x" },
-    { "field: \"bar\"", ".bar"}
-};
-
-INSTANTIATE_TEST_SUITE_P(
-    RoundTripSelectorProtoTest, RoundTripSelectorProtoTest,
-    testing::ValuesIn(selector_proto_and_tostring_pairs));
 
 }  // namespace raksha::ir

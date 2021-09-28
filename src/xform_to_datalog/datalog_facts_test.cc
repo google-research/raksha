@@ -26,7 +26,7 @@ class DatalogFactsTest : public testing::TestWithParam<
 TEST_P(DatalogFactsTest, IncludesManifestFactsWithCorrectPrefixAndSuffix) {
   const auto& [manifest_datalog_facts, expected_string] = GetParam();
   DatalogFacts datalog_facts(manifest_datalog_facts);
-  EXPECT_EQ(datalog_facts.ToString(), expected_string);
+  EXPECT_EQ(datalog_facts.ToDatalog(), expected_string);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -51,13 +51,13 @@ INSTANTIATE_TEST_SUITE_P(
             ManifestDatalogFacts(
                 {ir::TagClaim(
                     "particle",
-                    ir::TagAnnotationOnAccessPath(
-                        ir::AccessPath(
-                            ir::AccessPathRoot(
-                                ir::HandleConnectionAccessPathRoot(
-                                    "recipe", "particle", "out")),
-                        ir::AccessPathSelectors()),
-                    "tag"))},
+                      ir::AccessPath(
+                          ir::AccessPathRoot(
+                              ir::HandleConnectionAccessPathRoot(
+                                  "recipe", "particle", "out")),
+                      ir::AccessPathSelectors()),
+                      true,
+                      "tag")},
                 {}, {}),
             R"(// GENERATED FILE, DO NOT EDIT!
 

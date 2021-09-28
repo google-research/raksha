@@ -24,14 +24,15 @@ namespace raksha::xform_to_datalog {
 
 namespace ir = raksha::ir;
 
-class ManifestDatalogFactsToStringTest :
-   public testing::TestWithParam<std::tuple<ManifestDatalogFacts, std::string>> {};
+class ManifestDatalogFactsToDatalogTest :
+   public testing::TestWithParam<std::tuple<ManifestDatalogFacts, std::string>>
+   {};
 
-TEST_P(ManifestDatalogFactsToStringTest, ManifestDatalogFactsToStringTest) {
+TEST_P(ManifestDatalogFactsToDatalogTest, ManifestDatalogFactsToDatalogTest) {
   const ManifestDatalogFacts &datalog_facts = std::get<0>(GetParam());
   const std::string &expected_result_string = std::get<1>(GetParam());
 
-  EXPECT_EQ(datalog_facts.ToString(), expected_result_string);
+  EXPECT_EQ(datalog_facts.ToDatalog(), expected_result_string);
 }
 
 static const ir::AccessPath kHandleH1AccessPath(
@@ -67,9 +68,7 @@ static std::tuple<ManifestDatalogFacts, std::string>
 )" },
     { ManifestDatalogFacts(
         { ir::TagClaim(
-            "particle",
-            ir::TagAnnotationOnAccessPath(
-                kHandleConnectionOutAccessPath, "tag")) },
+            "particle", kHandleConnectionOutAccessPath, true, "tag") },
         { ir::TagCheck(ir::TagAnnotationOnAccessPath(
             kHandleConnectionInAccessPath, "tag2")) },
         { ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),
@@ -91,8 +90,9 @@ edge("recipe.particle.out", "recipe.h2").
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(ManifestDatalogFactsToStringTest, ManifestDatalogFactsToStringTest,
-                         testing::ValuesIn(datalog_facts_and_output_strings));
+INSTANTIATE_TEST_SUITE_P(
+    ManifestDatalogFactsToDatalogTest, ManifestDatalogFactsToDatalogTest,
+    testing::ValuesIn(datalog_facts_and_output_strings));
 
 // Create a manifest textproto to test constructing ManifestDatalogFacts from
 // a ManifestProto. The ParticleSpecs will be pretty simple, as we have
@@ -290,7 +290,7 @@ TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
   // failure than structured datalog facts.
   std::vector<std::string> claim_datalog_strings;
   for (const ir::TagClaim &claim : datalog_facts_.claims()) {
-    claim_datalog_strings.push_back(claim.ToString());
+    claim_datalog_strings.push_back(claim.ToDatalog());
   }
   EXPECT_THAT(claim_datalog_strings,
               testing::UnorderedElementsAreArray(kExpectedClaimStrings));
@@ -311,7 +311,7 @@ TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {
   // failure than structured datalog facts.
   std::vector<std::string> check_datalog_strings;
   for (const ir::TagCheck &check : datalog_facts_.checks()) {
-    check_datalog_strings.push_back(check.ToString());
+    check_datalog_strings.push_back(check.ToDatalog());
   }
   EXPECT_THAT(check_datalog_strings,
               testing::UnorderedElementsAreArray(kExpectedCheckStrings));
@@ -381,7 +381,7 @@ TEST_F(ParseBigManifestTest, ManifestProtoEdgesTest) {
   // failure than structured datalog facts.
   std::vector<std::string> edge_datalog_strings;
   for (const ir::Edge &edge : datalog_facts_.edges()) {
-    edge_datalog_strings.push_back(edge.ToString());
+    edge_datalog_strings.push_back(edge.ToDatalog());
   }
   EXPECT_THAT(edge_datalog_strings,
               testing::UnorderedElementsAreArray(kExpectedEdgeStrings));

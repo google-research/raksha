@@ -36,8 +36,9 @@ class DatalogFacts {
       : manifest_datalog_facts_(std::move(manifest_datalog_facts)) {}
 
   // Returns the datalog program with necessary headers.
-  std::string ToString() const {
-    return absl::StrCat(kDatalogFilePrefix, manifest_datalog_facts_.ToString());
+  std::string ToDatalog() const {
+    return absl::StrCat(
+        kDatalogFilePrefix, manifest_datalog_facts_.ToDatalog());
   }
 
  private:

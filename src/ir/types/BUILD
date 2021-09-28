@@ -13,8 +13,6 @@ cc_library(
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/strings",
-        "@absl//absl/types:optional",
-        "@absl//absl/types:variant",
     ],
 )
 

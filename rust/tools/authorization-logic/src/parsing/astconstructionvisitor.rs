@@ -16,8 +16,16 @@
 
 use crate::{
     ast::*,
+};
+
+#[cfg(feature = "bazel_build")]
+use antlr_gen::{authlogiclexer::*, authlogicparser::*};
+
+#[cfg(not(feature = "bazel_build"))]
+use crate::{
     parsing::antlr_gen::{authlogiclexer::*, authlogicparser::*},
 };
+
 use antlr_rust::{common_token_stream::CommonTokenStream, tree::ParseTree, InputStream};
 
 /// This function produces an abstract syntax tree (AST) rooted with a program node when given the
