@@ -86,16 +86,18 @@
 //! Neither Souffle nor SecPal support queries, but this language does.
 //! Queries check of a single unconditional assertion is true. A query of
 //! the form:
-//!
-//!      // Q_NAME = query ASSERTION(<ARGS>) ?
+//! ```Datalog
+//!      Q_NAME = query ASSERTION(<ARGS>) ?
+//! ```
 //!
 //! is translated into an assertion with just one argument, and this
 //! assertion is made an output, so we can simply check the CSV that
 //! souffle emits as in:
-//!
-//!      // Q_NAME("dummy_var") :- grounded("dummy_var"), ASSERTION(<ARGS>).
-//!      // grounded("dummy_var").
-//!      // .output Q_NAME
+//! ```Datalog
+//!      Q_NAME("dummy_var") :- grounded("dummy_var"), ASSERTION(<ARGS>).
+//!      grounded("dummy_var").
+//!      .output Q_NAME
+//! ```
 
 use crate::{ast::*, souffle::datalog_ir::*};
 
