@@ -16,7 +16,8 @@ class EntityType : public Type {
 
   Type::Kind kind() const override { return Type::Kind::kEntity; }
 
-  raksha::ir::AccessPathSelectorsSet GetAccessPathSelectorsSet() const {
+  raksha::ir::AccessPathSelectorsSet
+  GetAccessPathSelectorsSet() const override {
     return schema_.GetAccessPathSelectorsSet();
   }
 
