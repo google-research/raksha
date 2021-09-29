@@ -24,15 +24,15 @@ pub struct SouffleEmitter {
 }
 
 impl SouffleEmitter {
-    /// Produces Souffle code as a `String` when given A Datalog IR (DLIR) program.
-    pub fn emit_program(p: &DLIRProgram) -> String {
+    /// Produces Souffle code as a `String` when given a Datalog IR (DLIR) program.
+    pub fn emit_program(p: &DLIRProgram, decl_skip: Option<&Vec<&str>>) -> String {
         let mut emitter = SouffleEmitter::new();
         // It is important to generate the body first in this case
         // because the declarations are populated by side-effect while
         // generating the body.
         let body = emitter.emit_program_body(p);
         let outputs = emitter.emit_outputs(p);
-        let decls = emitter.emit_declarations();
+        let decls = emitter.emit_declarations(decl_skip.unwrap_or(&Vec::new()));
         vec![decls, body, outputs].join("\r\n")
     }
 
@@ -101,10 +101,13 @@ impl SouffleEmitter {
         )
     }
 
-    fn emit_declarations(&self) -> String {
+    fn emit_declarations(&self, decl_skip: &Vec<&str>) -> String {
         self.decls
             .iter()
-            .map(|x| SouffleEmitter::emit_decl(x))
+            .map(|x| 
+                 let name = &x.name: &str;
+                 if (&decl_skip).contains(name)
+                { "".to_string() } else { SouffleEmitter::emit_decl(x) })
             .collect::<Vec<_>>()
             .join("\r\n")
     }

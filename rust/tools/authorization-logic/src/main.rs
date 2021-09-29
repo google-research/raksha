@@ -31,6 +31,8 @@ fn main() {
     let filename = &args[1];
     let in_dir = &args[2];
     let out_dir = &args[3];
-    compilation_top_level::compile(filename, in_dir, out_dir);
-    souffle::souffle_interface::run_souffle(&format!("{}/{}.dl", out_dir, filename), out_dir);
+    let decl_skip = &args[4].split(',').collect::<Vec<_>>();
+    compilation_top_level::compile(filename, in_dir, out_dir, decl_skip);
+    souffle::souffle_interface::run_souffle(&format!("{}/{}.dl", out_dir,
+                                                    filename), out_dir);
 }
