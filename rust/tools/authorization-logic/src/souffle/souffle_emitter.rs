@@ -33,7 +33,7 @@ impl SouffleEmitter {
         let body = emitter.emit_program_body(p);
         let outputs = emitter.emit_outputs(p);
         let decls = emitter.emit_declarations();
-        vec![decls, body, outputs].join("\r\n")
+        vec![decls, body, outputs].join("\n")
     }
 
     fn new() -> SouffleEmitter {
@@ -85,7 +85,7 @@ impl SouffleEmitter {
             .iter()
             .map(|x| self.emit_assertion(&x))
             .collect::<Vec<_>>()
-            .join("\r\n")
+            .join("\n")
     }
 
     fn emit_decl(pred: &AstPredicate) -> String {
@@ -106,7 +106,7 @@ impl SouffleEmitter {
             .iter()
             .map(|x| SouffleEmitter::emit_decl(x))
             .collect::<Vec<_>>()
-            .join("\r\n")
+            .join("\n")
     }
 
     fn emit_outputs(&self, p: &DLIRProgram) -> String {
@@ -114,6 +114,6 @@ impl SouffleEmitter {
             .iter()
             .map(|o| String::from(".output ") + &o)
             .collect::<Vec<String>>()
-            .join("\r\n")
+            .join("\n")
     }
 }
