@@ -17,6 +17,8 @@
 
 #include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/map_instantiator.h"
+#include "src/ir/noop_instantiator.h"
 
 namespace raksha::ir::proto {
 
@@ -35,13 +37,13 @@ TEST_P(AccessPathFromProtoTest, AccessPathFromProtoTest) {
 
   AccessPathRoot root(
       HandleConnectionAccessPathRoot("recipe", "particle", "handle"));
+  absl::flat_hash_map<AccessPathRoot, AccessPathRoot> instantiation_map {
+      {AccessPathRoot(HandleConnectionSpecAccessPathRoot("ps", "hc")),
+       AccessPathRoot(root)}
+  };
   ASSERT_EQ(
-      access_path.Instantiate(root).ToString(),
+      access_path.ToString(MapInstantiator(instantiation_map)),
       "recipe.particle.handle" + expected_tostring_suffix);
-  ASSERT_DEATH(
-      access_path.ToString(),
-      "Attempted to print out an AccessPath before connecting it to a "
-      "fully-instantiated root!");
 }
 
 static const std::tuple<std::string, std::string>

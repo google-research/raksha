@@ -1,7 +1,25 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//----------------------------------------------------------------------------
+
 #include "src/ir/access_path.h"
 
 #include "absl/hash/hash_testing.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/map_instantiator.h"
+#include "src/ir/noop_instantiator.h"
 
 namespace raksha::ir {
 
@@ -34,7 +52,8 @@ class AccessPathToStringTest :
 TEST_P(AccessPathToStringTest, AccessPathToStringTest) {
   const AccessPath &access_path = std::get<0>(GetParam());
   const std::string &expected_to_string = std::get<1>(GetParam());
-  EXPECT_EQ(access_path.ToString(), expected_to_string);
+  EXPECT_EQ(
+      access_path.ToString(NoopInstantiator::Get()), expected_to_string);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -47,17 +66,15 @@ TEST(InstantiateAccessPathTest, InstantiateAccessPathTest) {
           HandleConnectionSpecAccessPathRoot(
               "particle_spec", "handle_connection")),
       AccessPathSelectors(Selector(FieldSelector("x"))));
-  AccessPath access_path =
-      spec_access_path.Instantiate(
-          AccessPathRoot(
-              HandleConnectionAccessPathRoot("recipe", "particle", "handle")));
-  ASSERT_EQ(access_path.ToString(), "recipe.particle.handle.x");
-  ASSERT_DEATH(
-      access_path.Instantiate(
-          AccessPathRoot(
-              HandleConnectionAccessPathRoot(
-                  "recipe2", "particle2", "handle2"))),
-      "Attempt to instantiate an AccessPath that is already instantiated.");
+
+  MapInstantiator map_instantiator(
+      absl::flat_hash_map<AccessPathRoot, AccessPathRoot>{
+        { AccessPathRoot(HandleConnectionSpecAccessPathRoot(
+            "particle_spec", "handle_connection")),
+        AccessPathRoot(HandleConnectionAccessPathRoot(
+            "recipe", "particle", "handle")) } });
+  ASSERT_EQ(
+      spec_access_path.ToString(map_instantiator), "recipe.particle.handle.x");
 }
 
 class AccessPathEqualsTest :

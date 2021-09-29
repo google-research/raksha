@@ -21,8 +21,10 @@
 
 #include "absl/strings/str_format.h"
 #include "src/ir/edge.h"
+#include "src/ir/instance_fact.h"
 #include "src/ir/tag_check.h"
 #include "src/ir/tag_claim.h"
+#include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::xform_to_datalog {
@@ -33,11 +35,18 @@ class ManifestDatalogFacts {
       const arcs::ManifestProto &manifest_proto);
 
   ManifestDatalogFacts(
-      std::vector<raksha::ir::TagClaim> claims,
-      std::vector<raksha::ir::TagCheck> checks,
-      std::vector<raksha::ir::Edge> edges)
+      std::vector<raksha::ir::InstanceFact<raksha::ir::TagClaim>> claims,
+      std::vector<raksha::ir::InstanceFact<raksha::ir::TagCheck>> checks,
+      std::vector<raksha::ir::InstanceFact<raksha::ir::Edge>> edges,
+      std::vector<std::unique_ptr<
+          raksha::xform_to_datalog::arcs_manifest_tree::ParticleSpec>>
+          owned_particle_specs,
+      std::vector<std::unique_ptr<raksha::ir::Instantiator>>
+        owned_instantiators)
       : claims_(std::move(claims)), checks_(std::move(checks)),
-        edges_(std::move(edges)) {}
+        edges_(std::move(edges)),
+        owned_particle_specs_(std::move(owned_particle_specs)),
+        owned_instantiators_(std::move(owned_instantiators)) {}
 
   // Print out all contained facts as a single datalog string. Note: this
   // does not contain the header files that would be necessary to run this
@@ -52,11 +61,14 @@ class ManifestDatalogFacts {
         absl::StrJoin(edges_, "\n", todatalog_formatter));
   }
 
-  const std::vector<raksha::ir::TagClaim> &claims() const { return claims_; }
+  const std::vector<raksha::ir::InstanceFact<raksha::ir::TagClaim>> &
+    claims() const { return claims_; }
 
-  const std::vector<raksha::ir::TagCheck> &checks() const { return checks_; }
+  const std::vector<raksha::ir::InstanceFact<raksha::ir::TagCheck>> &
+    checks() const { return checks_; }
 
-  const std::vector<raksha::ir::Edge> &edges() const { return edges_; }
+  const std::vector<raksha::ir::InstanceFact<raksha::ir::Edge>> &
+    edges() const { return edges_; }
 
  private:
   static constexpr absl::string_view kFactOutputFormat = R"(
@@ -70,9 +82,19 @@ class ManifestDatalogFacts {
 %s
 )";
 
-  std::vector<raksha::ir::TagClaim> claims_;
-  std::vector<raksha::ir::TagCheck> checks_;
-  std::vector<raksha::ir::Edge> edges_;
+  // Instantiated IR facts which can be used to print Datalog facts.
+  std::vector<raksha::ir::InstanceFact<raksha::ir::TagClaim>> claims_;
+  std::vector<raksha::ir::InstanceFact<raksha::ir::TagCheck>> checks_;
+  std::vector<raksha::ir::InstanceFact<raksha::ir::Edge>> edges_;
+
+  // Used to hold ParticleSpecs referred to by the above facts until this
+  // class is deallocated.
+  std::vector<std::unique_ptr<
+    raksha::xform_to_datalog::arcs_manifest_tree::ParticleSpec>>
+    owned_particle_specs_;
+  // This is used to hold Instantiators referenced by the above facts until
+  // this class is deallocated.
+  std::vector<std::unique_ptr<raksha::ir::Instantiator>> owned_instantiators_;
 };
 
 }  // namespace raksha::xform_to_datalog

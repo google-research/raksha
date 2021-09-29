@@ -1,9 +1,26 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//----------------------------------------------------------------------------
+
 #ifndef SRC_IR_ACCESS_PATH_ROOT_H_
 #define SRC_IR_ACCESS_PATH_ROOT_H_
 
 #include "absl/types/variant.h"
 #include "absl/strings/str_join.h"
 #include "src/common/logging/logging.h"
+#include "src/ir/instantiator.h"
 
 // The classes in this file describe the root of an AccessPath. At the moment,
 // we have only two types of roots: a HandleConnectionSpecAccessPathRoot and
@@ -23,12 +40,10 @@ class HandleConnectionSpecAccessPathRoot {
         handle_connection_spec_name_(std::move(handle_connection_spec_name))
   {}
 
-  // Do not allow printing a HandleConnectionSpecAccessPathRoot to datalog,
-  // as it has not been fully instantiated.
-  std::string ToString() const {
-    LOG(FATAL) << "Attempted to print out an AccessPath before connecting it "
-                  "to a fully-instantiated root!";
-  }
+  // Convert this root to an instantiated root using the given instantiator.
+  // The body is in the associated .cc file because it needs to reference
+  // AccessPathRoot, which is not fully defined yet.
+  std::string ToString(const Instantiator &instantiator) const;
 
   // A HandleConnectionSpecAccessPathRoot has not been fully instantiated.
   bool IsInstantiated() const {
@@ -75,7 +90,7 @@ class HandleConnectionAccessPathRoot {
 
   // A HandleConnectionAccessPathRoot joins together its recipe, particle,
   // and handle name to generate its string.
-  std::string ToString() const {
+  std::string ToString(const Instantiator &) const {
     return absl::StrJoin({
       recipe_name_, particle_name_, handle_connection_name_ }, ".");
   }
@@ -116,7 +131,7 @@ class HandleAccessPathRoot {
 
   // The string representation of a HandleAccessPathRoot is just
   // recipe_name_.handle_name_
-  std::string ToString() const {
+  std::string ToString(const Instantiator &) const {
     return absl::StrJoin({recipe_name_, handle_name_}, ".");
   }
 
@@ -158,9 +173,10 @@ class AccessPathRoot {
     : specific_root_(std::move(specific_root)) {}
 
   // Dispatch ToString to the specific kind of AccessPathRoot.
-  std::string ToString() const {
+  std::string ToString(const Instantiator &instantiator) const {
     return std::visit(
-        [](const auto &variant){ return variant.ToString(); }, specific_root_);
+        [&](const auto &variant){ return variant.ToString(instantiator); },
+        specific_root_);
   }
 
   // Dispatch IsInstantiated to the specific kind of AccessPathRoot.

@@ -16,6 +16,9 @@
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
 
 #include "absl/container/flat_hash_map.h"
+#include "src/ir/instance_fact.h"
+#include "src/ir/instantiator.h"
+#include "src/ir/map_instantiator.h"
 #include "src/ir/proto/type.h"
 #include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
 
@@ -27,7 +30,7 @@ namespace amt = raksha::xform_to_datalog::arcs_manifest_tree;
 
 // Traverse the substructures of the manifest proto to create datalog fact
 // objects.
-// #TODO(#107): In the interest of prototyping speed, I wrote out the
+// TODO(#107): In the interest of prototyping speed, I wrote out the
 //  entirety of the traversal of instantiation structures as one big
 //  traversal. This works, but it is hard to read and hard to test. We should
 //  break this up.
@@ -35,20 +38,28 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
     const arcs::ManifestProto &manifest_proto) {
   // These collections will be used as inputs to the constructor that we
   // return from this function.
-  std::vector<ir::TagClaim> result_claims;
-  std::vector<ir::TagCheck> result_checks;
-  std::vector<ir::Edge> result_edges;
+  std::vector<ir::InstanceFact<ir::TagClaim>> result_claims;
+  std::vector<ir::InstanceFact<ir::TagCheck>> result_checks;
+  std::vector<ir::InstanceFact<ir::Edge>> result_edges;
+
+  // This vector just holds Instantiators owned by the ManifestDatalogFacts,
+  // ensuring that they do not get deallocated before the
+  // ManifestDatalogFacts gets deallocated.
+  std::vector<std::unique_ptr<ir::Instantiator>> owned_instantiators;
+  // Similar to the above, but for ParticleSpecs.
+  std::vector<std::unique_ptr<amt::ParticleSpec>> owned_particle_specs;
 
   // Turn each ParticleSpecProto indicated in the manifest_proto into a
   // ParticleSpec object, which we can use directly.
-  absl::flat_hash_map<std::string, amt::ParticleSpec> particle_specs;
+  absl::flat_hash_map<std::string, const amt::ParticleSpec *> particle_specs;
   for (const arcs::ParticleSpecProto &particle_spec_proto :
     manifest_proto.particle_specs()) {
-    amt::ParticleSpec particle_spec =
-        amt::ParticleSpec::CreateFromProto(particle_spec_proto);
-    std::string particle_spec_name = particle_spec.name();
-    auto ins_res = particle_specs.insert({
-      std::move(particle_spec_name), std::move(particle_spec) });
+    owned_particle_specs.push_back(std::unique_ptr<amt::ParticleSpec>(
+        new amt::ParticleSpec(
+            amt::ParticleSpec::CreateFromProto(particle_spec_proto))));
+    const amt::ParticleSpec *particle_spec = owned_particle_specs.back().get();
+    auto ins_res = particle_specs.insert(
+        { particle_spec->name(), particle_spec });
     CHECK(ins_res.second) << "Name collision on particle spec.";
   }
 
@@ -89,7 +100,7 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
       auto find_res = particle_specs.find(particle_spec_name);
       CHECK(find_res != particle_specs.end())
         << "Could not find particle spec " << particle_spec_name;
-      const amt::ParticleSpec &particle_spec = find_res->second;
+      const amt::ParticleSpec &particle_spec = *find_res->second;
 
       // Each ParticleSpec already contains lists of TagClaims, TagChecks,
       // and Edges that shall be generated for each Particle implementing that
@@ -137,7 +148,7 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
         // Look up the HandleConnectionSpec to see if the handle connection
         // will read and/or write.
         const amt::HandleConnectionSpec &handle_connection_spec =
-            particle_spec.getHandleConnectionSpec(handle_spec_name);
+            particle_spec.GetHandleConnectionSpec(handle_spec_name);
         const bool handle_connection_reads = handle_connection_spec.reads();
         const bool handle_connection_writes = handle_connection_spec.writes();
 
@@ -153,20 +164,29 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
           // handle to the handle connection.
           if (handle_connection_reads) {
             result_edges.push_back(
-                ir::Edge(handle_access_path, handle_connection_access_path));
+                ir::CreateImmediateInstanceFact(ir::Edge(
+                    handle_access_path, handle_connection_access_path)));
           }
 
           // If the handle connection writes, draw a dataflow edge from the
           // handle connection to the handle.
           if (handle_connection_writes) {
             result_edges.push_back(
-                ir::Edge(handle_connection_access_path, handle_access_path));
+                ir::CreateImmediateInstanceFact(ir::Edge(
+                  handle_connection_access_path, handle_access_path)));
           }
         }
       }
 
+      std::unique_ptr<ir::MapInstantiator> map_instantiator(
+          new ir::MapInstantiator(std::move(instantiation_map)));
+      owned_instantiators.push_back(std::move(map_instantiator));
+
+      const ir::Instantiator &current_instantiator =
+          *owned_instantiators.back().get();
       amt::InstantiatedParticleSpecFacts particle_spec_facts =
-          particle_spec.BulkInstantiate(instantiation_map);
+          particle_spec.Instantiate(current_instantiator);
+
       result_claims.insert(
           result_claims.end(),
           std::move_iterator(particle_spec_facts.tag_claims.begin()),
@@ -184,7 +204,9 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
 
   return ManifestDatalogFacts(std::move(result_claims),
                               std::move(result_checks),
-                              std::move(result_edges));
+                              std::move(result_edges),
+                              std::move(owned_particle_specs),
+                              std::move(owned_instantiators));
 }
 
 }  // namespace raksha::xform_to_datalog

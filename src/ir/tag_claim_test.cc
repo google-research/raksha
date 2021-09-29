@@ -22,6 +22,9 @@
 #include "absl/strings/str_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/access_path_selectors.h"
+#include "src/ir/instance_fact.h"
+#include "src/ir/map_instantiator.h"
+#include "src/ir/noop_instantiator.h"
 
 namespace raksha::ir {
 
@@ -43,20 +46,27 @@ TEST_P(TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest) {
       expected_todatalog_format_string_vec =
           std::get<1>(textproto_format_string_pair);
   const AccessPathRoot &root = std::get<2>(GetParam());
+  const MapInstantiator kMapInstantiator(
+      absl::flat_hash_map<AccessPathRoot, AccessPathRoot>{
+        { AccessPathRoot(HandleConnectionSpecAccessPathRoot("ps", "hc")), root }
+      });
 
   std::vector<std::string> expected_todatalog_vec;
   for (auto &format_str : expected_todatalog_format_string_vec) {
     expected_todatalog_vec.push_back(
-        absl::StrFormat(format_str, particle_spec_name, root.ToString()));
+        absl::StrFormat(
+            format_str, particle_spec_name,
+            root.ToString(NoopInstantiator::Get())));
   }
   arcs::ClaimProto_Assume assume_proto;
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
       assume_textproto, &assume_proto));
   std::vector<TagClaim> unrooted_tag_claim_vec =
       TagClaim::CreateFromProto(particle_spec_name, assume_proto);
-  std::vector<TagClaim> rooted_tag_claim_vec;
+  std::vector<InstanceFact<TagClaim>> rooted_tag_claim_vec;
   for (const TagClaim &unrooted_claim : unrooted_tag_claim_vec) {
-    rooted_tag_claim_vec.push_back(unrooted_claim.Instantiate(root));
+    rooted_tag_claim_vec.push_back(CreateInstantiatedInstanceFact(
+        unrooted_claim, kMapInstantiator));
   }
   // Expect the version with the concrete root to match the expected_todatalog
   // when ToDatalog is called upon it.
@@ -66,11 +76,11 @@ TEST_P(TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest) {
         rooted_tag_claim_vec.at(i).ToDatalog(), expected_todatalog_vec.at(i));
   }
   // However, the version with the spec root should fail when ToDatalog is
-  // called.
+  // called without providing a replacement root.
   EXPECT_DEATH(
-      unrooted_tag_claim_vec.at(0).ToDatalog(),
-      "Attempted to print out an AccessPath before connecting it to a "
-      "fully-instantiated root!");
+      unrooted_tag_claim_vec.at(0).ToDatalog(NoopInstantiator::Get()),
+      "Attempt to instantiate a non-instantiated root with the "
+      "NoopInstantiator!");
 }
 
 // Sample particle spec names used in generating a TagClaim.

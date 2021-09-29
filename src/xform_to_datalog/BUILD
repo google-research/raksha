@@ -1,3 +1,4 @@
+#-------------------------------------------------------------------------------
 # Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +19,7 @@ licenses(["notice"])
 cc_library(
     name = "authorization_logic",
     hdrs = ["authorization_logic.h"],
-    deps = ["//rust/tools/authorization-logic:authorization_logic_lib"]
+    deps = ["//rust/tools/authorization-logic:authorization_logic_lib"],
 )
 
 cc_test(
@@ -28,7 +29,7 @@ cc_test(
     deps = [
         ":authorization_logic",
         "//src/common/testing:gtest",
-    ]
+    ],
 )
 
 cc_library(
@@ -42,11 +43,24 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "manifest_datalog_facts_to_datalog_test",
+    testonly = True,
+    hdrs = ["manifest_datalog_facts_to_datalog_test.h"],
+    deps = [
+        ":datalog_facts",
+        "//src/common/testing:gtest",
+        "//src/ir",
+        "//src/ir:access_path",
+    ],
+)
+
 cc_test(
     name = "datalog_facts_test",
     srcs = ["datalog_facts_test.cc"],
     deps = [
         ":datalog_facts",
+        ":manifest_datalog_facts_to_datalog_test",
         "//src/common/testing:gtest",
     ],
 )
@@ -68,6 +82,7 @@ cc_test(
     srcs = ["manifest_datalog_facts_test.cc"],
     deps = [
         ":manifest_datalog_facts",
+        ":manifest_datalog_facts_to_datalog_test",
         "//src/common/testing:gtest",
     ],
 )

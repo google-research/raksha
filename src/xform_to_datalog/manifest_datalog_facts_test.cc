@@ -19,20 +19,14 @@
 #include <google/protobuf/text_format.h>
 
 #include "src/common/testing/gtest.h"
+#include "src/xform_to_datalog/manifest_datalog_facts_to_datalog_test.h"
 
 namespace raksha::xform_to_datalog {
 
 namespace ir = raksha::ir;
 
-class ManifestDatalogFactsToDatalogTest :
-   public testing::TestWithParam<std::tuple<ManifestDatalogFacts, std::string>>
-   {};
-
 TEST_P(ManifestDatalogFactsToDatalogTest, ManifestDatalogFactsToDatalogTest) {
-  const ManifestDatalogFacts &datalog_facts = std::get<0>(GetParam());
-  const std::string &expected_result_string = std::get<1>(GetParam());
-
-  EXPECT_EQ(datalog_facts.ToDatalog(), expected_result_string);
+  EXPECT_EQ(GetDatalogFacts().ToDatalog(), expected_result_string_);
 }
 
 static const ir::AccessPath kHandleH1AccessPath(
@@ -53,9 +47,13 @@ static const ir::AccessPath kHandleConnectionOutAccessPath(
         "recipe", "particle", "out")),
     ir::AccessPathSelectors());
 
-static std::tuple<ManifestDatalogFacts, std::string>
-  datalog_facts_and_output_strings[] = {
-    { ManifestDatalogFacts({}, {}, {}),
+static const std::tuple<
+    std::vector<ir::InstanceFact<ir::TagClaim>>,
+    std::vector<ir::InstanceFact<ir::TagCheck>>,
+    std::vector<ir::InstanceFact<ir::Edge>>,
+    std::string> kManifestDatalogFactArgsToExpectedOutput[] = {
+    {
+      {}, {}, {},
       R"(
 // Claims:
 
@@ -66,15 +64,18 @@ static std::tuple<ManifestDatalogFacts, std::string>
 // Edges:
 
 )" },
-    { ManifestDatalogFacts(
-        { ir::TagClaim(
-            "particle", kHandleConnectionOutAccessPath, true, "tag") },
-        { ir::TagCheck(ir::TagAnnotationOnAccessPath(
-            kHandleConnectionInAccessPath, "tag2")) },
-        { ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),
-          ir::Edge(kHandleConnectionInAccessPath,
-                   kHandleConnectionOutAccessPath),
-           ir::Edge(kHandleConnectionOutAccessPath, kHandleH2AccessPath)}),
+   {
+      { ir::CreateImmediateInstanceFact(ir::TagClaim(
+          "particle", kHandleConnectionOutAccessPath, true, "tag")) },
+      { ir::CreateImmediateInstanceFact(ir::TagCheck(
+        ir::TagAnnotationOnAccessPath(
+          kHandleConnectionInAccessPath, "tag2"))) },
+      { ir::CreateImmediateInstanceFact(
+          ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath)),
+        ir::CreateImmediateInstanceFact(ir::Edge(
+            kHandleConnectionInAccessPath, kHandleConnectionOutAccessPath)),
+        ir::CreateImmediateInstanceFact(ir::Edge(
+            kHandleConnectionOutAccessPath, kHandleH2AccessPath))},
       R"(
 // Claims:
 claimHasTag("particle", "recipe.particle.out", "tag").
@@ -92,7 +93,7 @@ edge("recipe.particle.out", "recipe.h2").
 
 INSTANTIATE_TEST_SUITE_P(
     ManifestDatalogFactsToDatalogTest, ManifestDatalogFactsToDatalogTest,
-    testing::ValuesIn(datalog_facts_and_output_strings));
+    testing::ValuesIn(kManifestDatalogFactArgsToExpectedOutput));
 
 // Create a manifest textproto to test constructing ManifestDatalogFacts from
 // a ManifestProto. The ParticleSpecs will be pretty simple, as we have
@@ -256,8 +257,7 @@ static const std::string kManifestTextproto = R"(
                entity: {
                  schema: {
                    fields: [
-                   { key: "field1", value: { primitive: TEXT } } ]}}}}]}]}
-    "])";
+                   { key: "field1", value: { primitive: TEXT } } ]}}}}]}]}])";
 
 class ParseBigManifestTest : public testing::Test {
  public:
@@ -266,8 +266,9 @@ class ParseBigManifestTest : public testing::Test {
  protected:
   static ManifestDatalogFacts ParseManifestDatalogFacts() {
      arcs::ManifestProto manifest_proto;
-     google::protobuf::TextFormat::ParseFromString(
-         kManifestTextproto, &manifest_proto);
+     CHECK(google::protobuf::TextFormat::ParseFromString(
+         kManifestTextproto, &manifest_proto))
+         << "Big manifest test textproto did not parse correctly!";
 
      return ManifestDatalogFacts::CreateFromManifestProto(manifest_proto);
   }
@@ -289,7 +290,7 @@ TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
   // against our expected strings. Strings are much easier to read on a test
   // failure than structured datalog facts.
   std::vector<std::string> claim_datalog_strings;
-  for (const ir::TagClaim &claim : datalog_facts_.claims()) {
+  for (const ir::InstanceFact<ir::TagClaim> &claim : datalog_facts_.claims()) {
     claim_datalog_strings.push_back(claim.ToDatalog());
   }
   EXPECT_THAT(claim_datalog_strings,
@@ -310,7 +311,7 @@ TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {
   // against our expected strings. Strings are much easier to read on a test
   // failure than structured datalog facts.
   std::vector<std::string> check_datalog_strings;
-  for (const ir::TagCheck &check : datalog_facts_.checks()) {
+  for (const ir::InstanceFact<ir::TagCheck> &check : datalog_facts_.checks()) {
     check_datalog_strings.push_back(check.ToDatalog());
   }
   EXPECT_THAT(check_datalog_strings,
@@ -380,7 +381,7 @@ TEST_F(ParseBigManifestTest, ManifestProtoEdgesTest) {
   // against our expected strings. Strings are much easier to read on a test
   // failure than structured datalog facts.
   std::vector<std::string> edge_datalog_strings;
-  for (const ir::Edge &edge : datalog_facts_.edges()) {
+  for (const ir::InstanceFact<ir::Edge> &edge : datalog_facts_.edges()) {
     edge_datalog_strings.push_back(edge.ToDatalog());
   }
   EXPECT_THAT(edge_datalog_strings,

@@ -1,3 +1,19 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//----------------------------------------------------------------------------
+
 #ifndef SRC_XFORM_TO_DATALOG_ARCS_MANIFEST_TREE_PARTICLE_SPEC_H_
 #define SRC_XFORM_TO_DATALOG_ARCS_MANIFEST_TREE_PARTICLE_SPEC_H_
 
@@ -7,6 +23,7 @@
 #include "src/common/logging/logging.h"
 #include "src/ir/derives_from_claim.h"
 #include "src/ir/edge.h"
+#include "src/ir/instance_fact.h"
 #include "src/ir/tag_check.h"
 #include "src/ir/tag_claim.h"
 #include "src/xform_to_datalog/arcs_manifest_tree/handle_connection_spec.h"
@@ -17,9 +34,9 @@ namespace raksha::xform_to_datalog::arcs_manifest_tree {
 // This struct is used to return the members of a ParticleSpec after being
 // instantiated.
 struct InstantiatedParticleSpecFacts {
-  std::vector<raksha::ir::TagClaim> tag_claims;
-  std::vector<raksha::ir::TagCheck> checks;
-  std::vector<raksha::ir::Edge> edges;
+  std::vector<raksha::ir::InstanceFact<raksha::ir::TagClaim>> tag_claims;
+  std::vector<raksha::ir::InstanceFact<raksha::ir::TagCheck>> checks;
+  std::vector<raksha::ir::InstanceFact<raksha::ir::Edge>> edges;
 };
 
 // A class representing a ParticleSpec. This contains the relevant
@@ -44,7 +61,7 @@ class ParticleSpec {
 
   const std::vector<raksha::ir::Edge> &edges() const { return edges_; }
 
-  const HandleConnectionSpec &getHandleConnectionSpec(
+  const HandleConnectionSpec &GetHandleConnectionSpec(
       const absl::string_view hcs_name) const {
     auto find_res = handle_connection_specs_.find(hcs_name);
     CHECK(find_res != handle_connection_specs_.end())
@@ -53,18 +70,20 @@ class ParticleSpec {
     return find_res->second;
   }
 
-  InstantiatedParticleSpecFacts BulkInstantiate(
-      const absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
-          &instantiation_map) const {
+  InstantiatedParticleSpecFacts Instantiate(
+      const raksha::ir::Instantiator &instantiator) const {
     InstantiatedParticleSpecFacts result;
     for (const raksha::ir::TagCheck &check : checks_) {
-      result.checks.push_back(check.BulkInstantiate(instantiation_map));
+      result.checks.push_back(
+          raksha::ir::CreateInstantiatedInstanceFact(check, instantiator));
     }
     for (const raksha::ir::TagClaim &claim : tag_claims_) {
-      result.tag_claims.push_back(claim.BulkInstantiate(instantiation_map));
+      result.tag_claims.push_back(
+          raksha::ir::CreateInstantiatedInstanceFact(claim, instantiator));
     }
     for (const raksha::ir::Edge &edge : edges_) {
-      result.edges.push_back(edge.BulkInstantiate(instantiation_map));
+      result.edges.push_back(
+          raksha::ir::CreateInstantiatedInstanceFact(edge, instantiator));
     }
     return result;
   }

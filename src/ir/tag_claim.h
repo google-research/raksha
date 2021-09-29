@@ -20,6 +20,7 @@
 #include "absl/strings/str_format.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/access_path.h"
+#include "src/ir/instantiator.h"
 #include "src/ir/tag_annotation_on_access_path.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
@@ -61,37 +62,15 @@ class TagClaim {
       tag_(std::move(tag))
     {}
 
-  // Return a TagClaim that is the same as *this, but with the root new_root.
-  // Note that this expects the current root to be uninstantiated.
-  TagClaim Instantiate(AccessPathRoot new_root) const {
-    return TagClaim(
-        claiming_particle_name_,
-        access_path_.Instantiate(new_root),
-        claim_tag_is_present_,
-        tag_);
-  }
-
-  // Allow this TagClaim to participate in a bulk instantiation of multiple
-  // uninstantiated AccessPaths.
-  TagClaim BulkInstantiate(
-      const absl::flat_hash_map<AccessPathRoot, AccessPathRoot>
-          &instantiation_map) const {
-    return TagClaim(
-        claiming_particle_name_,
-        access_path_.BulkInstantiate(instantiation_map),
-        claim_tag_is_present_,
-        tag_);
-  }
-
   // Produce a string containing a datalog fact for this TagClaim.
-  std::string ToDatalog() const {
+  std::string ToDatalog(const Instantiator &instantiator) const {
     constexpr absl::string_view kClaimTagFormat =
         R"(%s("%s", "%s", "%s").)";
     absl::string_view relation_name =
         (claim_tag_is_present_) ? "claimHasTag" : "saysDowngrades";
     return absl::StrFormat(
         kClaimTagFormat, relation_name, claiming_particle_name_,
-        access_path_.ToString(), tag_);
+        access_path_.ToString(instantiator), tag_);
   }
 
   bool operator==(const TagClaim &other) const {

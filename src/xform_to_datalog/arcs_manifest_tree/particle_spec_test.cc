@@ -19,6 +19,8 @@
 #include <google/protobuf/text_format.h>
 
 #include "src/common/testing/gtest.h"
+#include "src/ir/instantiator.h"
+#include "src/ir/map_instantiator.h"
 
 namespace raksha::xform_to_datalog::arcs_manifest_tree {
 
@@ -553,7 +555,7 @@ connections: [
         fields: [
           { key: "field3", value: { primitive: TEXT } } ] } } } } ])";
 
-TEST(BulkInstantiateTest, BulkInstantiateTest) {
+TEST(InstantiateTest, InstantiateTest) {
   arcs::ParticleSpecProto particle_spec_proto;
   google::protobuf::TextFormat::ParseFromString(
       kTextprotoWithAllFacts, &particle_spec_proto);
@@ -572,46 +574,42 @@ TEST(BulkInstantiateTest, BulkInstantiateTest) {
     { kPs1InHandleRoot, p1_in_impl }, { kPs1OutHandleRoot, p1_out_impl },
     { kPs1InOutHandleRoot, p1_in_out_impl } };
 
+  ir::MapInstantiator map_instantiator(instantiation_map);
   InstantiatedParticleSpecFacts instantiated_facts =
-      particle_spec.BulkInstantiate(instantiation_map);
+      particle_spec.Instantiate(map_instantiator);
 
+  std::vector<std::string> claims_as_datalog_strings;
+  for (const auto &claim : instantiated_facts.tag_claims) {
+    claims_as_datalog_strings.push_back(claim.ToDatalog());
+  }
   ASSERT_THAT(
-      instantiated_facts.tag_claims,
+      claims_as_datalog_strings,
       testing::UnorderedElementsAreArray({
-        ir::TagClaim(
-            "PS1",
-            ir::AccessPath(p1_out_impl, MakeSingleFieldSelectors("field1")),
-            true,
-            "tag1"),
-        ir::TagClaim(
-            "PS1",
-            ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field2")),
-            true,
-            "tag2")}));
+        R"(claimHasTag("PS1", "recipe.P1.out_impl.field1", "tag1").)",
+        R"(claimHasTag("PS1", "recipe.P1.in_out_impl.field2", "tag2").)"}));
 
+  std::vector<std::string> checks_as_datalog_strings;
+  for (const auto &check : instantiated_facts.checks) {
+    checks_as_datalog_strings.push_back(check.ToDatalog());
+  }
   ASSERT_THAT(
-      instantiated_facts.checks,
+      checks_as_datalog_strings,
       testing::UnorderedElementsAreArray({
-        ir::TagCheck(ir::TagAnnotationOnAccessPath(ir::AccessPath(
-            p1_in_impl, MakeSingleFieldSelectors("field1")), "tag3")),
-        ir::TagCheck(ir::TagAnnotationOnAccessPath(ir::AccessPath(
-            p1_in_out_impl, MakeSingleFieldSelectors("field2")), "tag4"))}));
+        R"(checkHasTag("recipe.P1.in_impl.field1", "tag3") :- mayHaveTag("recipe.P1.in_impl.field1", "tag3").)",
+        R"(checkHasTag("recipe.P1.in_out_impl.field2", "tag4") :- mayHaveTag("recipe.P1.in_out_impl.field2", "tag4").)"
+      }));
 
+  std::vector<std::string> edges_as_datalog_strings;
+  for (const auto &edge : instantiated_facts.edges) {
+    edges_as_datalog_strings.push_back(edge.ToDatalog());
+  }
   ASSERT_THAT(
-      instantiated_facts.edges,
+      edges_as_datalog_strings,
       testing::UnorderedElementsAreArray({
-        ir::Edge(
-            ir::AccessPath(p1_in_impl, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(p1_out_impl, MakeSingleFieldSelectors("field1"))),
-        ir::Edge(
-            ir::AccessPath(p1_in_impl, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3"))),
-        ir::Edge(
-            ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3")),
-            ir::AccessPath(p1_out_impl, MakeSingleFieldSelectors("field1"))),
-        ir::Edge(
-          ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3")),
-          ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3"))),
+        R"(edge("recipe.P1.in_impl.field2", "recipe.P1.out_impl.field1").)",
+        R"(edge("recipe.P1.in_impl.field2", "recipe.P1.in_out_impl.field3").)",
+        R"(edge("recipe.P1.in_out_impl.field3", "recipe.P1.out_impl.field1").)",
+        R"(edge("recipe.P1.in_out_impl.field3", "recipe.P1.in_out_impl.field3").)",
       }));
 }
 

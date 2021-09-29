@@ -17,23 +17,24 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
+#include "src/xform_to_datalog/manifest_datalog_facts_to_datalog_test.h"
 
 namespace raksha::xform_to_datalog {
 
-class DatalogFactsTest : public testing::TestWithParam<
-                             std::pair<ManifestDatalogFacts, std::string>> {};
-
-TEST_P(DatalogFactsTest, IncludesManifestFactsWithCorrectPrefixAndSuffix) {
-  const auto& [manifest_datalog_facts, expected_string] = GetParam();
-  DatalogFacts datalog_facts(manifest_datalog_facts);
-  EXPECT_EQ(datalog_facts.ToDatalog(), expected_string);
+TEST_P(ManifestDatalogFactsToDatalogTest,
+       IncludesManifestFactsWithCorrectPrefixAndSuffix) {
+  DatalogFacts datalog_facts(GetDatalogFacts());
+  EXPECT_EQ(datalog_facts.ToDatalog(), expected_result_string_);
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    DatalogFactsTest, DatalogFactsTest,
+    DatalogFactsTest, ManifestDatalogFactsToDatalogTest,
     testing::Values(
-        std::make_pair(ManifestDatalogFacts({}, {}, {}),
-                       R"(// GENERATED FILE, DO NOT EDIT!
+        std::tuple<
+            std::vector<raksha::ir::InstanceFact<raksha::ir::TagClaim>>,
+            std::vector<raksha::ir::InstanceFact<raksha::ir::TagCheck>>,
+            std::vector<raksha::ir::InstanceFact<raksha::ir::Edge>>,
+            std::string>{ {}, {}, {}, R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
 .output checkHasTag
@@ -46,10 +47,13 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Edges:
 
-)"),
-        std::make_pair(
-            ManifestDatalogFacts(
-                {ir::TagClaim(
+)" },
+   std::tuple<
+      std::vector<raksha::ir::InstanceFact<raksha::ir::TagClaim>>,
+      std::vector<raksha::ir::InstanceFact<raksha::ir::TagCheck>>,
+      std::vector<raksha::ir::InstanceFact<raksha::ir::Edge>>,
+      std::string>{ {
+      ir::CreateImmediateInstanceFact(ir::TagClaim(
                     "particle",
                       ir::AccessPath(
                           ir::AccessPathRoot(
@@ -57,9 +61,7 @@ INSTANTIATE_TEST_SUITE_P(
                                   "recipe", "particle", "out")),
                       ir::AccessPathSelectors()),
                       true,
-                      "tag")},
-                {}, {}),
-            R"(// GENERATED FILE, DO NOT EDIT!
+                      "tag")) }, {}, {}, R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
 .output checkHasTag
@@ -72,6 +74,6 @@ claimHasTag("particle", "recipe.particle.out", "tag").
 
 // Edges:
 
-)")));
+)"} ));
 
 }  // namespace raksha::xform_to_datalog

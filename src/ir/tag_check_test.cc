@@ -1,3 +1,19 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//----------------------------------------------------------------------------
+
 #include "src/ir/tag_check.h"
 
 #include <google/protobuf/util/message_differencer.h>
@@ -6,6 +22,8 @@
 #include "absl/strings/str_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/access_path_selectors.h"
+#include "src/ir/noop_instantiator.h"
+#include "src/ir/map_instantiator.h"
 
 namespace raksha::ir {
 
@@ -23,22 +41,27 @@ TEST_P(TagCheckToDatalogWithRootTest, TagCheckToDatalogWithRootTest) {
   const absl::ParsedFormat<'s', 's'> expected_todatalog_format_string =
     std::get<1>(textproto_format_string_pair);
   const AccessPathRoot &root = std::get<1>(GetParam());
-  std::string root_string = root.ToString();
+  const AccessPathRoot uninstantiated_root =
+      AccessPathRoot(HandleConnectionSpecAccessPathRoot("ps", "hc"));
+  const MapInstantiator kMapInstantiator(
+      absl::flat_hash_map<AccessPathRoot, AccessPathRoot>{
+        { uninstantiated_root, root }
+      });
+
+  std::string root_string = root.ToString(NoopInstantiator::Get());
   const std::string &expected_todatalog = absl::StrFormat(
       expected_todatalog_format_string, root_string, root_string);
   arcs::CheckProto check_proto;
   google::protobuf::TextFormat::ParseFromString(check_textproto, &check_proto);
   TagCheck unrooted_tag_check = TagCheck::CreateFromProto(check_proto);
-  TagCheck tag_check = unrooted_tag_check.Instantiate(root);
-  // Expect the version with the concrete root to match the expected_todatalog
-  // when ToDatalog is called upon it.
-  ASSERT_EQ(tag_check.ToDatalog(), expected_todatalog);
-  // However, the version with the spec root should fail when ToDatalog is
-  // called.
+  // Expect the version with an appropriate corresponding instantiation to
+  // match the expected_todatalog when ToDatalog is called upon it.
+  ASSERT_EQ(unrooted_tag_check.ToDatalog(kMapInstantiator), expected_todatalog);
+  // However, the noop instantiator should fail when ToDatalog is called.
   EXPECT_DEATH(
-      unrooted_tag_check.ToDatalog(),
-      "Attempted to print out an AccessPath before connecting it to a "
-      "fully-instantiated root!");
+      unrooted_tag_check.ToDatalog(NoopInstantiator::Get()),
+      "Attempt to instantiate a non-instantiated root with the "
+      "NoopInstantiator!");
 }
 
 // Sample roots we can use to instantiate TagChecks.
