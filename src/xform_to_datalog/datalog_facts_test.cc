@@ -16,23 +16,30 @@
 #include "src/xform_to_datalog/datalog_facts.h"
 
 #include "src/common/testing/gtest.h"
+#include "src/xform_to_datalog/authorization_logic_test_utils.h"
+#include "src/xform_to_datalog/authorization_logic_datalog_facts.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
 
 namespace raksha::xform_to_datalog {
 
 class DatalogFactsTest : public testing::TestWithParam<
-                             std::pair<ManifestDatalogFacts, std::string>> {};
+  std::tuple<ManifestDatalogFacts, AuthorizationLogicDatalogFacts, std::string>>
+{};
 
 TEST_P(DatalogFactsTest, IncludesManifestFactsWithCorrectPrefixAndSuffix) {
-  const auto& [manifest_datalog_facts, expected_string] = GetParam();
-  DatalogFacts datalog_facts(manifest_datalog_facts);
+  const auto& [manifest_datalog_facts,
+               auth_logic_datalog_facts,
+               expected_string] = GetParam();
+  DatalogFacts datalog_facts(manifest_datalog_facts, auth_logic_datalog_facts);
   EXPECT_EQ(datalog_facts.ToDatalog(), expected_string);
 }
 
 INSTANTIATE_TEST_SUITE_P(
     DatalogFactsTest, DatalogFactsTest,
     testing::Values(
-        std::make_pair(ManifestDatalogFacts({}, {}, {}),
+        std::make_tuple(ManifestDatalogFacts({}, {}, {}),
+                        *(AuthorizationLogicDatalogFacts::create(
+                          AuthorizationLogicTest::GetTestDataDir().c_str(), "empty_auth_logic")),
                        R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
@@ -46,8 +53,10 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Edges:
 
+.decl grounded_dummy(x0: symbol)
+grounded_dummy("dummy_var").
 )"),
-        std::make_pair(
+        std::make_tuple(
             ManifestDatalogFacts(
                 {ir::TagClaim(
                     "particle",
@@ -59,6 +68,8 @@ INSTANTIATE_TEST_SUITE_P(
                       true,
                       "tag")},
                 {}, {}),
+            *(AuthorizationLogicDatalogFacts::create(
+              AuthorizationLogicTest::GetTestDataDir().c_str(), "simple_auth_logic")),
             R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
@@ -72,6 +83,12 @@ claimHasTag("particle", "recipe.particle.out", "tag").
 
 // Edges:
 
+.decl grounded_dummy(x0: symbol)
+.decl says_cond1(x0: symbol, x1: symbol)
+.decl says_fact1(x0: symbol, x1: symbol)
+says_fact1("prin1", thing_x) :- says_cond1("prin1", thing_x).
+says_cond1("prin1", "foo").
+grounded_dummy("dummy_var").
 )")));
 
 }  // namespace raksha::xform_to_datalog
