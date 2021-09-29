@@ -61,12 +61,12 @@ rust_library(
     ]
 )
 
-rust_binary(
-    name = "authorization_logic",
+filegroup(
+    name = "lib_sources",
     srcs = [
         "src/ast.rs",
         "src/compilation_top_level.rs",
-        "src/main.rs",
+        "src/lib.rs",
         "src/parsing/astconstructionvisitor.rs",
         "src/parsing/mod.rs",
         "src/signing/export_assertions.rs",
@@ -78,11 +78,43 @@ rust_binary(
         "src/souffle/mod.rs",
         "src/souffle/souffle_emitter.rs",
         "src/souffle/souffle_interface.rs",
+    ],
+)
+
+filegroup(
+    name = "test_sources",
+    srcs = [
         "src/test/mod.rs",
         "src/test/test_claim_importing.rs",
         "src/test/test_export_signatures.rs",
         "src/test/test_queries.rs",
         "src/test/test_signing.rs",
+    ],
+)
+
+rust_library(
+    name = "authorization_logic_lib",
+    srcs = [":lib_sources"],
+    rustc_flags = [
+        "--cfg=feature=\"bazel_build\"",
+    ],
+    deps = [
+        ":antlr_gen",
+        "//rust/tools/authorization-logic/cargo:antlr_rust",
+        "//rust/tools/authorization-logic/cargo:bincode",
+        "//rust/tools/authorization-logic/cargo:serde",
+        "//rust/tools/authorization-logic/cargo:tink_core",
+        "//rust/tools/authorization-logic/cargo:tink_signature",
+    ],
+    crate_type = "staticlib",
+)
+
+rust_binary(
+    name = "authorization_logic",
+    srcs = [
+        "src/main.rs",
+        ":lib_sources",
+        ":test_sources",
     ],
     rustc_flags = [
         "--cfg=feature=\"bazel_build\""

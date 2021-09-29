@@ -16,6 +16,22 @@
 licenses(["notice"])
 
 cc_library(
+    name = "authorization_logic",
+    hdrs = ["authorization_logic.h"],
+    deps = ["//rust/tools/authorization-logic:authorization_logic_lib"]
+)
+
+cc_test(
+    name = "authorization_logic_test",
+    srcs = ["authorization_logic_test.cc"],
+    data = ["//src/xform_to_datalog/testdata:auth_logic"],
+    deps = [
+        ":authorization_logic",
+        "//src/common/testing:gtest",
+    ]
+)
+
+cc_library(
     name = "datalog_facts",
     hdrs = ["datalog_facts.h"],
     deps = [
