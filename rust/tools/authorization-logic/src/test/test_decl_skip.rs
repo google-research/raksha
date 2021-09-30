@@ -16,12 +16,7 @@ mod test {
     #[test]
     pub fn test_decl_skip() {
         // Compile with declarations
-        compile(
-            &"testDeclSkip".to_string(),
-            &"test_inputs".to_string(),
-            &"test_outputs".to_string(),
-            &None
-        );
+        compile("testDeclSkip", "test_inputs", "test_outputs", "");
         let contents1 = file_line_list(&"test_outputs/testDeclSkip.dl");
         assert!(contents1.contains(&".decl grounded_dummy(x0: symbol)".to_string()));
         assert!(contents1.contains(
@@ -29,14 +24,8 @@ mod test {
             .to_string()));
         
         // Compile with some declarations removed
-        compile(
-            &"testDeclSkip".to_string(),
-            &"test_inputs".to_string(),
-            &"test_outputs".to_string(),
-            &Some(vec![
-                  "grounded_dummy".to_string(),
-                  "says_isRelevantFor".to_string()])
-        );
+        compile("testDeclSkip", "test_inputs","test_outputs",
+            "grounded_dummy,says_isRelevantFor");
         let contents2 = file_line_list(&"test_outputs/testDeclSkip.dl");
         assert!(!contents2.contains(&".decl grounded_dummy(x0: symbol)".to_string()));
         assert!(!contents2.contains(
