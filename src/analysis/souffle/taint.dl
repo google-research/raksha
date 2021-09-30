@@ -95,7 +95,7 @@ hasTag(tgt, tag) :- claimHasTag(principal, tgt, tag), ownsTag(principal, tag).
 mayHaveTag(tgt, tag) :- hasTag(tgt, tag).
 
 mayHaveTag(tgt, tag) :-
-    innerEdge(src, tgt), mayHaveTag(src, tag), !downgrades(tgt, tag).
+    resolvedEdge(src, tgt), mayHaveTag(src, tag), !downgrades(tgt, tag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
