@@ -33,6 +33,7 @@ def extracted_datalog_string_test(
 
     native.cc_binary(
         name = "dl_string_test_file_generator_for_" + name,
+        testonly = True,
         srcs = ["//src/test_utils/dl_string_extractor:dl_string_test_file_generator.cc"],
         copts = ["-std=c++17"],
         deps = [
@@ -45,6 +46,7 @@ def extracted_datalog_string_test(
     native.genrule(
         name = name + "_dl",
         outs = [name + ".dl"],
+        testonly = True,
         cmd =
             "$(location dl_string_test_file_generator_for_{name}) $@".format(name = name),
         tools = ["dl_string_test_file_generator_for_" + name],
@@ -54,6 +56,7 @@ def extracted_datalog_string_test(
     souffle_cc_library(
         name = name + "_souffle_lib",
         src = name + "_dl",
+        testonly = True,
         included_dl_scripts = [
             "//src/analysis/souffle:access_path.dl",
             "//src/analysis/souffle:flat_graph_ir.dl",

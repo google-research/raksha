@@ -188,6 +188,7 @@ cc_test(
 
 cc_library(
     name = "predicate_textproto_to_rule_body_testdata",
+    testonly = True,
     srcs = ["predicate_textproto_to_rule_body_testdata.cc"],
     hdrs = ["predicate_textproto_to_rule_body_testdata.h"],
     deps = [
