@@ -25,13 +25,7 @@
 
 namespace raksha::ir::proto {
 
-// Decode the predicate which applies to the given AccessPath. While all
-// terms in the Arcs manifest implicitly apply to a single access_path, we
-// would like to ensure that if we encounter systems that need to check the
-// presence of tags on separate access paths in the same expression, we have
-// the flexibility of doing so; therefore, our TagPresence class holds the
-// AccessPath about which it speaks and we must provide the AccessPath to
-// attach to it here.
+// Decode the predicate indicated by the given proto.
 std::unique_ptr<raksha::ir::Predicate> Decode(
     const arcs::InformationFlowLabelProto_Predicate &predicate_proto);
 
