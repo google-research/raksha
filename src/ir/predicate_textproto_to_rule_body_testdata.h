@@ -28,26 +28,41 @@ namespace raksha::ir {
 // path substitution points are indicated with $0 instead of %s.
 static constexpr std::tuple<absl::string_view, absl::string_view>
 predicate_textproto_to_rule_body_format[] = {
+    // Each of the tests is preceded by a snippet of what the predicate
+    // might look like in an Arcs manifest file, with the AccessPath
+    // represented by ap.
+
+    // ap is tag1
     { R"(label: { semantic_tag: "tag1"})",
       R"(mayHaveTag("$0", "tag1"))" },
+
+    // ap is tag1 and is tag2
     { R"(
 and: {
   conjunct0: { label: { semantic_tag: "tag1"} }
   conjunct1: { label: { semantic_tag: "tag2"} } })",
   R"(((mayHaveTag("$0", "tag1")), (mayHaveTag("$0", "tag2"))))"},
+
+  // ap is tag1 or is tag2
   { R"(
 or: {
   disjunct0: { label: { semantic_tag: "tag1"} }
   disjunct1: { label: { semantic_tag: "tag2"} } })",
   R"(((mayHaveTag("$0", "tag1")); (mayHaveTag("$0", "tag2"))))"},
+
+  // ap is not tag1
   { R"(not: { predicate: { label: { semantic_tag: "tag1"} } })",
     R"(!(mayHaveTag("$0", "tag1")))"},
+
+  // ap is tag1 implies is tag2
   { R"(
 implies: {
   antecedent: { label: { semantic_tag: "tag1"} }
   consequent: { label: { semantic_tag: "tag2"} } })",
      R"(!(mayHaveTag("$0", "tag1")); ((mayHaveTag("$0", "tag1")), (mayHaveTag("$0", "tag2"))))"
   },
+
+  // ap is tag1 and (is tag2 or is tag3)
   { R"(
 and: {
   conjunct0: { label: { semantic_tag: "tag1"} }
@@ -55,6 +70,8 @@ and: {
     disjunct0: { label: { semantic_tag: "tag2"} }
     disjunct1: { label: { semantic_tag: "tag3"} } } } })",
   R"(((mayHaveTag("$0", "tag1")), (((mayHaveTag("$0", "tag2")); (mayHaveTag("$0", "tag3"))))))"},
+
+  // ap (is tag1 or tag2) and is tag3
   { R"(
 and: {
   conjunct0: {  or: {
@@ -63,6 +80,8 @@ and: {
   conjunct1: { label: { semantic_tag: "tag3"} } }
 )",
   R"(((((mayHaveTag("$0", "tag1")); (mayHaveTag("$0", "tag2")))), (mayHaveTag("$0", "tag3"))))"},
+
+  // ap is tag1 or (is tag2 and is tag3)
   { R"(
 or: {
   disjunct0: { label: { semantic_tag: "tag1"} }
@@ -70,6 +89,8 @@ or: {
     conjunct0: { label: { semantic_tag: "tag2"} }
     conjunct1: { label: { semantic_tag: "tag3"} } } } })",
   R"(((mayHaveTag("$0", "tag1")); (((mayHaveTag("$0", "tag2")), (mayHaveTag("$0", "tag3"))))))"},
+
+  // ap (is tag1 or tag2) and is tag3.
   { R"(
 or: {
   disjunct0: {  and: {
@@ -78,6 +99,8 @@ or: {
   disjunct1: { label: { semantic_tag: "tag3"} } }
 )",
   R"(((((mayHaveTag("$0", "tag1")), (mayHaveTag("$0", "tag2")))); (mayHaveTag("$0", "tag3"))))"},
+
+  // ap (is tag1 implies is tag2) implies (is tag3 implies is tag4)
   { R"(
 implies: {
   antecedent: {
