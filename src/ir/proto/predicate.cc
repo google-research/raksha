@@ -41,12 +41,8 @@ std::unique_ptr<pred::Predicate> Decode(
         << "Found an And predicate without required field conjunct0.";
       CHECK(and_predicate.has_conjunct1())
         << "Found an And predicate without required field conjunct1.";
-      std::unique_ptr<pred::Predicate> conjunct0_predicate =
-          Decode(and_predicate.conjunct0());
-      std::unique_ptr<pred::Predicate> conjunct1_predicate =
-          Decode(and_predicate.conjunct1());
       return std::make_unique<pred::And>(
-          std::move(conjunct0_predicate), std::move(conjunct1_predicate));
+          Decode(and_predicate.conjunct0()), Decode(and_predicate.conjunct1()));
     }
     case arcs::InformationFlowLabelProto_Predicate::kImplies: {
        const arcs::InformationFlowLabelProto_Predicate_Implies
@@ -55,14 +51,10 @@ std::unique_ptr<pred::Predicate> Decode(
         << "Found an Implies predicate without required field antecedent.";
        CHECK(implies_predicate.has_consequent())
         << "Found an Implies predicate without required field consequent.";
-       std::unique_ptr<pred::Predicate> antecedent_predicate =
-           Decode(implies_predicate.antecedent());
-       std::unique_ptr<pred::Predicate> consequent_predicate =
-           Decode(implies_predicate.consequent());
 
        return std::make_unique<pred::Implies>(
-           std::move(antecedent_predicate), std::move(consequent_predicate));
-
+           Decode(implies_predicate.antecedent()),
+           Decode(implies_predicate.consequent()));
     }
     case arcs::InformationFlowLabelProto_Predicate::kNot: {
       const arcs::InformationFlowLabelProto_Predicate_Not &not_predicate =
@@ -78,12 +70,8 @@ std::unique_ptr<pred::Predicate> Decode(
         << "Found an Or predicate without required field disjunct0.";
       CHECK(or_predicate.has_disjunct1())
         << "Found an Or predicate without required field disjunct1.";
-      std::unique_ptr<pred::Predicate> disjunct0_predicate =
-          Decode(or_predicate.disjunct0());
-      std::unique_ptr<pred::Predicate> disjunct1_predicate =
-          Decode(or_predicate.disjunct1());
       return std::make_unique<pred::Or>(
-          std::move(disjunct0_predicate), std::move(disjunct1_predicate));
+          Decode(or_predicate.disjunct0()), Decode(or_predicate.disjunct1()));
     }
     default: {
       LOG(FATAL) << "Unexpected predicate kind.";
