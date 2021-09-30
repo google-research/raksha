@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "src/xform_to_datalog/authorization_logic.h"
+#include "src/common/logging/logging.h"
 
 namespace raksha::xform_to_datalog {
 
@@ -29,21 +30,37 @@ std::optional<AuthorizationLogicDatalogFacts>
 AuthorizationLogicDatalogFacts::create(
   const std::string& program_dir, const std::string& program
 ) {
-  auto output_dir = std::filesystem::temp_directory_path();
+  auto result_dir = std::filesystem::temp_directory_path();
   int res = generate_datalog_facts_from_authorization_logic(
-    program.c_str(), program_dir.c_str(), output_dir.c_str());
-  if (res) return std::nullopt;
-
+    program.c_str(), program_dir.c_str(), result_dir.c_str());
+  if (res) {
+    LOG(ERROR) << "Failure running the authorization logic compiler.\n";
+    return std::nullopt;
+  }
   // Read the file into a string.
-  std::filesystem::path output = output_dir / (program + ".dl");
-  std::ifstream file_stream(output);
-  if (!file_stream) return std::nullopt;
+  std::filesystem::path result = result_dir / (program + ".dl");
+  std::ifstream file_stream(result);
+  if (!file_stream) {
+    LOG(ERROR) << "Unable to read result of authorization logic compiler.\n";
+    return std::nullopt;
+  }
 
-  std::string datalog_program;
+  // Determine file size.
   file_stream.seekg(0, std::ios::end);
-  datalog_program.resize(file_stream.tellg());
+  std::ifstream::pos_type filesize = file_stream.tellg();
+  if (filesize == -1) {
+    LOG(ERROR) << "Unable to determine the size of the result file.\n";
+    return std::nullopt;
+  }
+  // Set size of buffer to avoid reallocations.
+  std::string datalog_program;
+  datalog_program.resize(filesize);
+
+  // Read the contents of the file into string buffer.
   file_stream.seekg(0, std::ios::beg);
-  file_stream.read(&datalog_program[0], datalog_program.size());
+  file_stream.read(datalog_program.data(), datalog_program.size());
+  CHECK(file_stream.gcount() == filesize)
+    << "Failure reading bytes from the result file.\n";
 
   return AuthorizationLogicDatalogFacts(datalog_program);
 }

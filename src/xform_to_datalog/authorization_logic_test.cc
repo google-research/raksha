@@ -21,11 +21,11 @@
 #include <vector>
 
 #include "src/common/testing/gtest.h"
-#include "src/xform_to_datalog/authorization_logic_test.h"
-
-namespace fs = std::filesystem;
+#include "src/xform_to_datalog/authorization_logic_test_utils.h"
 
 namespace raksha::xform_to_datalog {
+
+namespace fs = std::filesystem;
 
 TEST_F(AuthorizationLogicTest, InvokesRustToolAndGeneratesOutput) {
   const fs::path& test_data_dir = GetTestDataDir();

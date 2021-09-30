@@ -13,31 +13,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#include "src/xform_to_datalog/authorization_logic.h"
+#ifndef SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_TEST_UTILS_H_
+#define SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_TEST_UTILS_H_
 
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <vector>
 
+#include "absl/strings/string_view.h"
+#include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"
-
-namespace fs = std::filesystem;
 
 namespace raksha::xform_to_datalog {
 
 class AuthorizationLogicTest : public ::testing::Test {
-public:
-  static fs::path GetTestDataDir() {
-    const char* test_srcdir_env = std::getenv("TEST_SRCDIR");
-    const char* test_workspace_env = std::getenv("TEST_WORKSPACE");
-    EXPECT_NE(test_srcdir_env,  nullptr);
-    EXPECT_NE(test_workspace_env, nullptr);
-    return fs::path(test_srcdir_env) / fs::path(test_workspace_env) /
+protected:
+  static std::filesystem::path GetTestDataDir() {
+    absl::string_view test_srcdir_env = std::getenv("TEST_SRCDIR");
+    absl::string_view test_workspace_env = std::getenv("TEST_WORKSPACE");
+    CHECK(test_srcdir_env != "");
+    CHECK(test_workspace_env != "");
+    return std::filesystem::path(test_srcdir_env) /
+      std::filesystem::path(test_workspace_env) /
       "src" / "xform_to_datalog" / "testdata";
   }
 
-  static std::vector<std::string> ReadFileLines(const fs::path& file) {
+  static std::vector<std::string>
+  ReadFileLines(const std::filesystem::path& file) {
     // Probably not quite efficient, but should serve the purpose for tests.
     std::ifstream file_stream(file);
     EXPECT_TRUE(file_stream) << "Unable to open file " << file;
@@ -52,4 +55,4 @@ public:
 
 }  // namespace raksha::xform_to_datalog
 
-
+#endif  // SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_TEST_UTILS_H_

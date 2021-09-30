@@ -22,7 +22,7 @@
 
 #include "absl/strings/str_split.h"
 #include "src/common/testing/gtest.h"
-#include "src/xform_to_datalog/authorization_logic_test.h"
+#include "src/xform_to_datalog/authorization_logic_test_utils.h"
 
 namespace fs = std::filesystem;
 
@@ -32,7 +32,7 @@ class AuthorizationLogicDatalogFactsTest : public AuthorizationLogicTest {};
 
 TEST_F(AuthorizationLogicDatalogFactsTest, InvokesRustToolAndGeneratesOutput) {
   for (const std::string& program : {"simple_auth_logic", "empty_auth_logic"}) {
-    const fs::path& test_data_dir = GetTestDataDir();
+    fs::path test_data_dir = GetTestDataDir();
     auto auth_facts = AuthorizationLogicDatalogFacts::create(test_data_dir, program);
     ASSERT_TRUE(auth_facts.has_value());
   
