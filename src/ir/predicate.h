@@ -26,7 +26,7 @@
 // because they are small classes and related enough that it improves
 // readability to have them in one place.
 
-namespace raksha::ir::predicates {
+namespace raksha::ir {
 
 // A Predicate is a boolean expression that can occur upon various Raksha IR
 // structures. Currently, all leaf expressions speak of whether a particular
@@ -150,6 +150,6 @@ class TagPresence : public Predicate {
   std::string tag_;
 };
 
-}  // namespace raksha::ir::predicates
+}  // namespace raksha::ir
 
 #endif  // SRC_IR_PREDICATES_PREDICATE_H_

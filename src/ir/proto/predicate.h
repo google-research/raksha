@@ -32,7 +32,7 @@ namespace raksha::ir::proto {
 // the flexibility of doing so; therefore, our TagPresence class holds the
 // AccessPath about which it speaks and we must provide the AccessPath to
 // attach to it here.
-std::unique_ptr<raksha::ir::predicates::Predicate> Decode(
+std::unique_ptr<raksha::ir::Predicate> Decode(
     const arcs::InformationFlowLabelProto_Predicate &predicate_proto);
 
 }  // namespace raksha::ir::proto

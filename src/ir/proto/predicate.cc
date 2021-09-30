@@ -23,16 +23,15 @@
 namespace raksha::ir::proto {
 
 namespace ir = raksha::ir;
-namespace pred = raksha::ir::predicates;
 
-std::unique_ptr<pred::Predicate> Decode(
+std::unique_ptr<ir::Predicate> Decode(
     const arcs::InformationFlowLabelProto_Predicate &predicate_proto) {
   switch (predicate_proto.predicate_case()) {
     case arcs::InformationFlowLabelProto_Predicate::kLabel: {
       const arcs::InformationFlowLabelProto &label = predicate_proto.label();
       CHECK(label.has_semantic_tag())
         << "Found a label without required field tag.";
-      return std::make_unique<pred::TagPresence>(label.semantic_tag());
+      return std::make_unique<ir::TagPresence>(label.semantic_tag());
     }
     case arcs::InformationFlowLabelProto_Predicate::kAnd: {
       const arcs::InformationFlowLabelProto_Predicate_And &and_predicate =
@@ -41,7 +40,7 @@ std::unique_ptr<pred::Predicate> Decode(
         << "Found an And predicate without required field conjunct0.";
       CHECK(and_predicate.has_conjunct1())
         << "Found an And predicate without required field conjunct1.";
-      return std::make_unique<pred::And>(
+      return std::make_unique<ir::And>(
           Decode(and_predicate.conjunct0()), Decode(and_predicate.conjunct1()));
     }
     case arcs::InformationFlowLabelProto_Predicate::kImplies: {
@@ -52,7 +51,7 @@ std::unique_ptr<pred::Predicate> Decode(
        CHECK(implies_predicate.has_consequent())
         << "Found an Implies predicate without required field consequent.";
 
-       return std::make_unique<pred::Implies>(
+       return std::make_unique<ir::Implies>(
            Decode(implies_predicate.antecedent()),
            Decode(implies_predicate.consequent()));
     }
@@ -61,7 +60,7 @@ std::unique_ptr<pred::Predicate> Decode(
           predicate_proto.not_();
       CHECK(not_predicate.has_predicate())
         << "Found a Not predicate without required field predicate.";
-      return std::make_unique<pred::Not>(Decode(not_predicate.predicate()));
+      return std::make_unique<ir::Not>(Decode(not_predicate.predicate()));
     }
     case arcs::InformationFlowLabelProto_Predicate::kOr: {
       const arcs::InformationFlowLabelProto_Predicate_Or &or_predicate =
@@ -70,7 +69,7 @@ std::unique_ptr<pred::Predicate> Decode(
         << "Found an Or predicate without required field disjunct0.";
       CHECK(or_predicate.has_disjunct1())
         << "Found an Or predicate without required field disjunct1.";
-      return std::make_unique<pred::Or>(
+      return std::make_unique<ir::Or>(
           Decode(or_predicate.disjunct0()), Decode(or_predicate.disjunct1()));
     }
     default: {

@@ -24,9 +24,7 @@
 #include "src/ir/proto/predicate.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
-namespace raksha::ir::predicates {
-
-namespace proto = raksha::ir::proto;
+namespace raksha::ir {
 
 class ToDatalogRuleBodyTest :
  public testing::TestWithParam<
@@ -87,4 +85,4 @@ INSTANTIATE_TEST_SUITE_P(ToDatalogRuleBodyTest, ToDatalogRuleBodyTest,
                              predicate_textproto_to_rule_body_format),
                          testing::ValuesIn(sample_access_paths)));
 
-}  // namespace raksha::ir::predicates
+}  // namespace raksha::ir
