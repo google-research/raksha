@@ -14,12 +14,12 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#ifndef SRC_IR_PREDICATES_PREDICATE_TEXTPROTO_TO_RULE_BODY_TESTDATA_H_H_
-#define SRC_IR_PREDICATES_PREDICATE_TEXTPROTO_TO_RULE_BODY_TESTDATA_H_H_
+#ifndef SRC_IR_PREDICATE_TEXTPROTO_TO_RULE_BODY_TESTDATA_H_H_
+#define SRC_IR_PREDICATE_TEXTPROTO_TO_RULE_BODY_TESTDATA_H_H_
 
 #include "absl/strings/substitute.h"
 
-namespace raksha::ir::predicates {
+namespace raksha::ir {
 // Note: StrFormat is careful not to allow dynamically constructed format
 // strings. In the few cases that it does allow format strings to come from
 // dynamic construction, it forces them to have a type indicating the format
@@ -94,6 +94,6 @@ implies: {
   } })",
      R"(!(!(mayHaveTag("$0", "tag1")); ((mayHaveTag("$0", "tag1")), (mayHaveTag("$0", "tag2")))); ((!(mayHaveTag("$0", "tag1")); ((mayHaveTag("$0", "tag1")), (mayHaveTag("$0", "tag2")))), (!(mayHaveTag("$0", "tag3")); ((mayHaveTag("$0", "tag3")), (mayHaveTag("$0", "tag4"))))))" }
 };
-}  // namespace raksha::ir::predicates
+}  // namespace raksha::ir
 
-#endif  // SRC_IR_PREDICATES_PREDICATE_TEXTPROTO_TO_RULE_BODY_TESTDATA_H_H_
+#endif  // SRC_IR_PREDICATE_TEXTPROTO_TO_RULE_BODY_TESTDATA_H_H_

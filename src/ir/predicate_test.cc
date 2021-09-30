@@ -14,13 +14,13 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/ir/predicates/predicate.h"
+#include "src/ir/predicate.h"
 
 #include "absl/strings/str_replace.h"
 #include "absl/strings/substitute.h"
 #include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
-#include "src/ir/predicates/predicate_textproto_to_rule_body_testdata.h"
+#include "src/ir/predicate_textproto_to_rule_body_testdata.h"
 #include "src/ir/proto/predicate.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 

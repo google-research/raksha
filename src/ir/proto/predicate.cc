@@ -18,7 +18,7 @@
 
 #include <memory>
 
-#include "src/ir/predicates/predicate.h"
+#include "src/ir/predicate.h"
 
 namespace raksha::ir::proto {
 

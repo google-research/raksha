@@ -51,7 +51,8 @@ cc_library(
     srcs = ["predicate.cc"],
     hdrs = ["predicate.h"],
     deps = [
-        "//src/ir/predicates",
+        "//src/ir",
+        "//src/ir:access_path",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )

@@ -14,7 +14,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/ir/predicates/predicate_textproto_to_rule_body_testdata.h"
+#include "src/ir/predicate_textproto_to_rule_body_testdata.h"
 
 #include "src/test_utils/dl_string_extractor/datalog_string.h"
 
@@ -26,7 +26,7 @@ namespace raksha::test_utils::dl_string_extractor {
 std::vector<DatalogString> GatherDatalogStrings() {
   std::vector<DatalogString> results;
   for (const auto &[textproto, dl_string] :
-      raksha::ir::predicates::predicate_textproto_to_rule_body_format) {
+      raksha::ir::predicate_textproto_to_rule_body_format) {
     results.push_back(DatalogString(
         kDlRuleBody, absl::Substitute(dl_string, "example_ap")));
   }
