@@ -13,12 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
+#ifndef SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
+#define SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
 
-"ServiceProvider" says downgrades("detection_boxes", 
-    "image_detection_model_tag").
+namespace raksha::xform_to_datalog {
 
-"EndUser" says {
-    downgrades("detection_boxes", "raw_video_tag").
-    downgrades("selected_image_id", "user_selection_tag").
-    downgrades("selected_image_id", "detected_images_tag").
+// Generates datalog facts from the given program.
+extern "C" int generate_datalog_facts_from_authorization_logic(
+  const char* program, const char* program_path, const char* out_dir);
+ 
 }
+
+#endif  // SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
+

@@ -180,3 +180,9 @@ load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
 # TODO(#143): We need this specific repository for authorization logic.
 rust_repositories(version = "nightly", iso_date = "2021-07-01", edition="2018")
+
+#--------------------
+# Cargo Raze Crates
+#--------------------
+load("//third_party/cargo:crates.bzl", "raze_fetch_remote_crates")
+raze_fetch_remote_crates()
