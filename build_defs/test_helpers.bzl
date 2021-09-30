@@ -20,10 +20,10 @@ def extracted_datalog_string_test(
         name,
         dl_string_lib,
         visibility = None):
-    """Given a C++ source file containing tag predicates as Datalog rule
-    bodies in raw strings marked with tag DLPRED, produce a datalog script
-    containing those rule bodies that should be parseable if the rule bodies are
-    parseable.
+    """Given a C++ library containing test data that contains Datalog strings
+    and a function GatherDatalogStrings to collect those into a vector,
+    produce a datalog script containing those rule bodies that should be
+    parseable if the strings are parseable.
 
     Args:
       name: String; Name of the library.
