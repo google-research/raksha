@@ -21,18 +21,49 @@
 // A data flow edge.
 .decl edge(src: AccessPath, tgt: AccessPath)
 
+// Use the previous relations to map an edge to a generated access path
+// representing its midpoint.
+.decl edgeToMidpointAccessPath(src: AccessPath, tgt: AccessPath, midpoint: AccessPath)
+
+// An "resolvedEdge" is an internal concept. When the user requests an edge with an
+// edge fact, we will expand that into resolvedEdges in one of two ways:
+//
+// 1. The edge is not the subject of a claimNotEdge, in which case an
+// resolvedEdge directly corresponding to the edge is created.
+//
+// 2. The edge is the subject of a claimNotEdge, in which case three facts
+// are created: a generated midway point AccessPath, an resolvedEdge going from the
+// src of the original edge to the midway point, and the midway point AccessPath
+// to the tgt. That allows us to effectively eliminate edges that are the
+// subject of a claimNotEdge from the dataflow graph by eliminating all tags
+// from the midway point. Paths are defined in terms of resolvedEdges.
+.decl resolvedEdge(src: AccessPath, tgt: AccessPath)
+
 // A direct or transitive data flow path.
 .decl path(src: AccessPath, tgt: AccessPath)
 
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
-// Transitive paths
-path(from, to) :- edge(from, to).
-path(from, to) :- edge(from, intermediate), path(intermediate, to).
+// Generate a midpoint access path for each edge that is the subject of a
+// claimNotEdge from any principal.
+edgeToMidpointAccessPath(src, tgt, cat("##midpoint_", to_string($))) :-
+  edge(src, tgt), claimNotEdge(_, src, tgt).
 
-// Symbols used in edges are access paths
-isAccessPath(x) :- edge(x, _).
-isAccessPath(y) :- edge(_, y).
+// Generate inner edges to and from that midpoint for each edge with a midpoint.
+resolvedEdge(src, midpoint), resolvedEdge(midpoint, tgt) :-
+  edgeToMidpointAccessPath(src, tgt, midpoint).
+
+// For edges for which a midpoint was not generated, generate an resolvedEdge
+// corresponding to the original edge.
+resolvedEdge(src, tgt) :- edge(src, tgt), !edgeToMidpointAccessPath(src, tgt, _).
+
+// Transitive paths
+path(from, to) :- resolvedEdge(from, to).
+path(from, to) :- resolvedEdge(from, intermediate), path(intermediate, to).
+
+// Symbols used in resolvedEdges are access paths
+isAccessPath(x) :- resolvedEdge(x, _).
+isAccessPath(y) :- resolvedEdge(_, y).
 
 #endif // SRC_ANALYSIS_SOUFFLE_DATAFLOW_GRAPH_DL_

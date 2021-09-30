@@ -1,0 +1,51 @@
+#include "taint.dl"
+#include "fact_test_helper.dl"
+
+// Two input access paths to a particle.
+isAccessPath("R.foo.hc1").
+isAccessPath("R.foo.hc2").
+
+// Two output access paths to a particle.
+isAccessPath("R.foo.hco1").
+isAccessPath("R.foo.hco2").
+
+// By default, all edges connect to all outputs.
+edge("R.foo.hc1", "R.foo.hco1").
+edge("R.foo.hc2", "R.foo.hco1").
+edge("R.foo.hc1", "R.foo.hco2").
+edge("R.foo.hc2", "R.foo.hco2").
+
+// Introduce our principals.
+isPrincipal("Claimer").
+isPrincipal("ParticleX").
+
+ownsTag("Claimer", "tag1").
+ownsTag("Claimer", "tag2").
+
+claimHasTag("Claimer", "R.foo.hc1", "tag1").
+claimHasTag("Claimer", "R.foo.hc2", "tag2").
+
+// ParticleX claims that hc2 does not flow to hco1.
+// TODO(#146) In the case where we expect this claim to be upheld, how does that
+// work without an explicit delegation of tags to ParticleX? Well, we're
+// currently somewhat hackily turning on and off the helper rule that causes
+// all particles to own all tags, and in the case where all particles own all
+// tags, ParticleX is a co-owner of all tags. We should introduce a more
+// principled way to do different test variants at some point.
+claimNotEdge("ParticleX", "R.foo.hc2", "R.foo.hco1").
+
+#ifdef ALL_PRINCIPALS_OWN_ALL_TAGS
+// If we believe it, we should find only tag1 on hco1, but we should still find
+// both tag1 and tag2 on hco2.
+TEST_CASE("hco1_tag1_as_expected") :- mayHaveTag("R.foo.hco1", "tag1").
+TEST_CASE("hco1_tag2_as_expected") :-
+  isTag("tag2"), isAccessPath("R.foo.hco1"), !mayHaveTag("R.foo.hco1", "tag2").
+TEST_CASE("hco2_tag1_as_expected") :- mayHaveTag("R.foo.hco2", "tag1").
+TEST_CASE("hco2_tag2_as_expected") :- mayHaveTag("R.foo.hco2", "tag2").
+#else
+// If we don't believe it, all tags should flow to all outputs
+TEST_CASE("hco1_tag1_as_expected") :- mayHaveTag("R.foo.hco1", "tag1").
+TEST_CASE("hco1_tag2_as_expected") :- mayHaveTag("R.foo.hco1", "tag2").
+TEST_CASE("hco2_tag1_as_expected") :- mayHaveTag("R.foo.hco2", "tag1").
+TEST_CASE("hco2_tag2_as_expected") :- mayHaveTag("R.foo.hco2", "tag2").
+#endif
