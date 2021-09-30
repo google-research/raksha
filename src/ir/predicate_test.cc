@@ -32,13 +32,15 @@ class ToDatalogRuleBodyTest :
  public testing::TestWithParam<
   std::tuple<std::tuple<absl::string_view, absl::string_view>, AccessPath>> {
  public:
-  ToDatalogRuleBodyTest() :
-    textproto_(std::get<0>(std::get<0>(GetParam()))),
-    access_path_(std::get<1>(GetParam())) {
-    absl::string_view rule_body_sub_string =
-        std::get<1>(std::get<0>(GetParam()));
+  explicit ToDatalogRuleBodyTest()
+    : access_path_(std::get<1>(GetParam()))
+  {
+    const auto &[textproto, expected_rule_body_format] =
+        std::get<0>(GetParam());
+
+    textproto_ = textproto;
     expected_rule_body_ =
-        absl::Substitute(rule_body_sub_string, access_path_.ToString());
+        absl::Substitute(expected_rule_body_format, access_path_.ToString());
   }
 
  protected:
