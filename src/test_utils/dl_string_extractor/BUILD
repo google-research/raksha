@@ -19,6 +19,7 @@ package(default_visibility = ["//src:__subpackages__"])
 cc_library(
     name = "datalog_string",
     hdrs = ["datalog_string.h"],
+    deps = ["@absl//absl/strings"],
 )
 
 exports_files([
