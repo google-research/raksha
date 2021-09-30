@@ -102,11 +102,12 @@ impl SouffleEmitter {
     }
 
     fn emit_declarations(&self) -> String {
-        self.decls
+        let mut decls = self.decls
             .iter()
             .map(|x| SouffleEmitter::emit_decl(x))
-            .collect::<Vec<_>>()
-            .join("\n")
+            .collect::<Vec<_>>();
+         decls.sort();
+         decls.join("\n")
     }
 
     fn emit_outputs(&self, p: &DLIRProgram) -> String {
