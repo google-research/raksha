@@ -18,17 +18,19 @@
 
 #include "src/test_utils/dl_string_extractor/datalog_string.h"
 
-// This is not in a namespace nor in the related header for a reason. We are
-// using this to perform linking magic to fill in GatherDatalogStrings in the
-// dl_string_test_file_generator source file.
-std::vector<raksha::test_utils::dl_string_extractor::DatalogString>
-    GatherDatalogStrings() {
-  namespace extract = raksha::test_utils::dl_string_extractor;
-  std::vector<extract::DatalogString> results;
+// This is not in a namespace matching the directory tree nor in the related
+// header for a reason. We are using this to perform linking magic to fill in
+// GatherDatalogStrings in the dl_string_test_file_generator source file.
+namespace raksha::test_utils::dl_string_extractor {
+
+std::vector<DatalogString> GatherDatalogStrings() {
+  std::vector<DatalogString> results;
   for (const auto &[textproto, dl_string] :
-    raksha::ir::predicates::predicate_textproto_to_rule_body_format) {
-    results.push_back(extract::DatalogString(
-        extract::kDlRuleBody, absl::Substitute(dl_string, "example_ap")));
+      raksha::ir::predicates::predicate_textproto_to_rule_body_format) {
+    results.push_back(DatalogString(
+        kDlRuleBody, absl::Substitute(dl_string, "example_ap")));
   }
   return results;
+}
+
 }

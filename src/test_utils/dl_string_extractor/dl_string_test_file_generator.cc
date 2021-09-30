@@ -29,7 +29,9 @@ namespace extract = raksha::test_utils::dl_string_extractor;
 // the test file. We just link against the library containing the Datalog
 // expected outputs and call its version of GatherDatalogStrings. If there
 // are multiple definitions or no definitions, there will be a linker error.
+namespace raksha::test_utils::dl_string_extractor {
 extern std::vector<extract::DatalogString> GatherDatalogStrings();
+}
 
 // A simple test utility for extracting datalog strings and writing them out to
 // a valid datalog file. We then can parse that datalog file to ensure that it
@@ -56,7 +58,8 @@ int main(int argc, char **argv) {
 
   // Get our datalog strings from the linked test and output the rules that
   // will check these snippets.
-  std::vector datalog_strings = GatherDatalogStrings();
+  std::vector datalog_strings =
+      raksha::test_utils::dl_string_extractor::GatherDatalogStrings();
   uint64_t dummy_num = 0;
   for (const extract::DatalogString &dl_string : datalog_strings) {
     // Have only implemented rule bodies at this time.
