@@ -31,8 +31,15 @@ fn main() {
     let filename = &args[1];
     let in_dir = &args[2];
     let out_dir = &args[3];
-    let decl_skip = &args[4].split(',').collect::<Vec<_>>();
-    compilation_top_level::compile(filename, in_dir, out_dir, decl_skip);
+    let decl_skip: Option<Vec<String>> = if(args.len() >3) 
+        { Some(args[4]
+            .split(',')
+            .map(|s| s.to_string())
+            .collect())
+        } else {
+            None
+        };
+    compilation_top_level::compile(filename, in_dir, out_dir, &decl_skip);
     souffle::souffle_interface::run_souffle(&format!("{}/{}.dl", out_dir,
                                                     filename), out_dir);
 }

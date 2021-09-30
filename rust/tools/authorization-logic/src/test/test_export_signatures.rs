@@ -33,6 +33,7 @@ mod test {
             &"exporting".to_string(),
             &"test_inputs".to_string(),
             &"test_outputs".to_string(),
+            &None
         );
 
         let deser_claim =

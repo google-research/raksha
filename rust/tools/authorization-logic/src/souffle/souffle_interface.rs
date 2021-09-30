@@ -32,7 +32,7 @@ pub fn emit_souffle(filename: &str) {
     let source = fs::read_to_string(filename).expect("failed to read input in emit_souffle");
     let prog = astconstructionvisitor::parse_program(&source[..]);
     let dlir_prog = LoweringToDatalogPass::lower(&prog);
-    let souffle_code = SouffleEmitter::emit_program(&dlir_prog, None);
+    let souffle_code = SouffleEmitter::emit_program(&dlir_prog, &None);
     println!("souffle code from {}, \n{}", &filename, souffle_code);
 }
 
@@ -44,7 +44,7 @@ pub fn input_to_souffle_file(filename: &str, in_dir: &str, out_dir: &str) {
         .expect("failed to read input in input_to_souffle_file");
     let prog = astconstructionvisitor::parse_program(&source[..]);
     let dlir_prog = LoweringToDatalogPass::lower(&prog);
-    let souffle_code = SouffleEmitter::emit_program(&dlir_prog, None);
+    let souffle_code = SouffleEmitter::emit_program(&dlir_prog, &None);
     fs::write(&format!("{}/{}.dl", out_dir, filename), souffle_code)
         .expect("failed to write output to file");
 }
@@ -54,9 +54,9 @@ pub fn input_to_souffle_file(filename: &str, in_dir: &str, out_dir: &str) {
 /// passes that work on the highest level IR besides the one used to emit the
 /// main code.
 pub fn ast_to_souffle_file(prog: &AstProgram, filename: &str,
-                           out_dir: &str, decl_skip: &Vec<&str>) {
+                           out_dir: &str, decl_skip: &Option<Vec<String>>) {
     let dlir_prog = LoweringToDatalogPass::lower(&prog);
-    let souffle_code = SouffleEmitter::emit_program(&dlir_prog, Some(&decl_skip));
+    let souffle_code = SouffleEmitter::emit_program(&dlir_prog, decl_skip);
     fs::write(&format!("{}/{}.dl", out_dir, filename), souffle_code)
         .expect("failed to write output to file");
 }

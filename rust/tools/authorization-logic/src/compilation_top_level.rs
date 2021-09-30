@@ -39,7 +39,7 @@ fn source_file_to_ast(filename: &str, in_dir: &str) -> AstProgram {
 }
 
 pub fn compile(filename: &str, in_dir: &str, out_dir: &str,
-            decl_skip: &Vec<&str>) {
+            decl_skip: &Option<Vec<String>>) {
     let prog = source_file_to_ast(filename, in_dir);
     let prog_with_imports = import_assertions::handle_imports(&prog);
     souffle_interface::ast_to_souffle_file(&prog_with_imports, filename,

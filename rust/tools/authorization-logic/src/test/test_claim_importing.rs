@@ -30,6 +30,7 @@ mod test {
             &t.filename.to_string(),
             &"test_inputs".to_string(),
             &"test_outputs".to_string(),
+            &None
         );
         run_souffle(
             &format!("test_outputs/{}.dl", t.filename),
@@ -53,6 +54,7 @@ mod test {
             &"importing_export_half".to_string(),
             &"test_inputs".to_string(),
             &"test_outputs".to_string(),
+            &None
         );
 
         // This code imports statements into test_inputs/importing
