@@ -37,7 +37,7 @@ pub extern "C" fn generate_datalog_facts_from_authorization_logic(
     let filename = unsafe { CStr::from_ptr(c_filename) }.to_str().unwrap();
     let in_dir = unsafe { CStr::from_ptr(c_in_dir) }.to_str().unwrap();
     let out_dir = unsafe { CStr::from_ptr(c_out_dir) }.to_str().unwrap();
-    compilation_top_level::compile(filename, in_dir, out_dir);
+    compilation_top_level::compile(filename, in_dir, out_dir, &None);
   });
   if result.is_err() {
     eprintln!("error: rust panicked");
