@@ -14,21 +14,35 @@
 # limitations under the License.
 #-----------------------------------------------------------------------------
 
-def souffle_cc_library(name, src, all_principals_own_all_tags = False, included_dl_scripts = [], visibility = None):
+def souffle_cc_library(
+        name,
+        src,
+        all_principals_own_all_tags = False,
+        included_dl_scripts = [],
+        testonly = None,
+        visibility = None):
     """Generates a C++ interface for the given datalog file.
 
     Args:
       name: String; Name of the library.
       src: String; The datalog program.
       included_dl_scripts: List; List of labels indicating datalog files included by src.
+      testonly: bool; Whether the generated rules should be testonly.
       visibility: List; List of visibilities.
     """
-    testonly_flag = False
     if all_principals_own_all_tags:
         cc_file = src + "_no_owners.cpp"
-        testonly_flag = True
     else:
         cc_file = src + ".cpp"
+
+    # If testonly was not explicitly set by the caller, set it based upon the
+    # value of all_principals_own_all_tags. If the caller tried to explicitly
+    # set all_principals_own_all_tags and set testonly to False, complain.
+    if testonly == None:
+        testonly = all_principals_own_all_tags
+    elif (testonly == False) and (all_principals_own_all_tags):
+        fail("Cannot set testonly to False and all_principals_own_all_tags to True simultaneously!")
+
     include_str = ""
 
     include_dir_opts = [
@@ -46,7 +60,7 @@ def souffle_cc_library(name, src, all_principals_own_all_tags = False, included_
         name = name + "_cpp",
         srcs = [src] + included_dl_scripts,
         outs = [cc_file],
-        testonly = testonly_flag,
+        testonly = testonly,
         cmd =
             "$(location @souffle//:souffle) {include_str} {tag_ownership} -g $@ $(location {src_rule})".format(include_str = include_opts_str, tag_ownership = tag_ownership_str, src_rule = src),
         tools = ["@souffle//:souffle"],
@@ -55,7 +69,7 @@ def souffle_cc_library(name, src, all_principals_own_all_tags = False, included_
     native.cc_library(
         name = name,
         srcs = [cc_file],
-        testonly = testonly_flag,
+        testonly = testonly,
         copts = [
             "-Iexternal/souffle/src/include/souffle",
             "-std=c++17",
