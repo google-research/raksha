@@ -37,9 +37,9 @@ std::unique_ptr<ir::Predicate> Decode(
       const arcs::InformationFlowLabelProto_Predicate_And &and_predicate =
           predicate_proto.and_();
       CHECK(and_predicate.has_conjunct0())
-        << "Found an And predicate without required field conjunct0.";
+        << "Found an `And` predicate without required field conjunct0.";
       CHECK(and_predicate.has_conjunct1())
-        << "Found an And predicate without required field conjunct1.";
+        << "Found an `And` predicate without required field conjunct1.";
       return std::make_unique<ir::And>(
           Decode(and_predicate.conjunct0()), Decode(and_predicate.conjunct1()));
     }
@@ -47,9 +47,9 @@ std::unique_ptr<ir::Predicate> Decode(
        const arcs::InformationFlowLabelProto_Predicate_Implies
         &implies_predicate = predicate_proto.implies();
        CHECK(implies_predicate.has_antecedent())
-        << "Found an Implies predicate without required field antecedent.";
+        << "Found an `Implies` predicate without required field antecedent.";
        CHECK(implies_predicate.has_consequent())
-        << "Found an Implies predicate without required field consequent.";
+        << "Found an `Implies` predicate without required field consequent.";
 
        return std::make_unique<ir::Implies>(
            Decode(implies_predicate.antecedent()),
@@ -59,16 +59,16 @@ std::unique_ptr<ir::Predicate> Decode(
       const arcs::InformationFlowLabelProto_Predicate_Not &not_predicate =
           predicate_proto.not_();
       CHECK(not_predicate.has_predicate())
-        << "Found a Not predicate without required field predicate.";
+        << "Found a `Not` predicate without required field predicate.";
       return std::make_unique<ir::Not>(Decode(not_predicate.predicate()));
     }
     case arcs::InformationFlowLabelProto_Predicate::kOr: {
       const arcs::InformationFlowLabelProto_Predicate_Or &or_predicate =
           predicate_proto.or_();
       CHECK(or_predicate.has_disjunct0())
-        << "Found an Or predicate without required field disjunct0.";
+        << "Found an `Or` predicate without required field disjunct0.";
       CHECK(or_predicate.has_disjunct1())
-        << "Found an Or predicate without required field disjunct1.";
+        << "Found an `Or` predicate without required field disjunct1.";
       return std::make_unique<ir::Or>(
           Decode(or_predicate.disjunct0()), Decode(or_predicate.disjunct1()));
     }
