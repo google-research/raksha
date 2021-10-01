@@ -20,8 +20,8 @@ namespace raksha::xform_to_datalog {
 
 // Generates datalog facts from the given program.
 extern "C" int generate_datalog_facts_from_authorization_logic(
-  const char* program, const char* program_path, const char* out_dir);
- 
+  const char* program, const char* program_path,
+  const char* out_dir, const char* decl_skip_vec);
 }
 
 #endif  // SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
