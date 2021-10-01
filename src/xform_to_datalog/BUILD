@@ -27,8 +27,47 @@ cc_test(
     data = ["//src/xform_to_datalog/testdata:auth_logic"],
     deps = [
         ":authorization_logic",
+        ":authorization_logic_test_utils",
+        "//src/common/logging",
         "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
+    name = "authorization_logic_test_utils",
+    srcs = ["authorization_logic_test_utils.h"],
+    testonly = True,
+    deps = [
+        "//src/common/logging",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)
+
+
+cc_library(
+    name = "authorization_logic_datalog_facts",
+    srcs = ["authorization_logic_datalog_facts.cc"],
+    hdrs = ["authorization_logic_datalog_facts.h"],
+    linkstatic = True,
+    deps = [
+        ":authorization_logic",
+        "//src/common/logging",
+        "@absl//absl/strings",
     ]
+)
+
+cc_test(
+    name = "authorization_logic_datalog_facts_test",
+    srcs = ["authorization_logic_datalog_facts_test.cc"],
+    data = ["//src/xform_to_datalog/testdata:auth_logic"],
+    deps = [
+        ":authorization_logic_datalog_facts",
+        ":authorization_logic_test_utils",
+        "//src/common/logging",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
 )
 
 cc_library(
