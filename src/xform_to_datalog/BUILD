@@ -53,6 +53,7 @@ cc_library(
     deps = [
         ":authorization_logic",
         "//src/common/logging",
+        "@absl//absl/strings",
     ]
 )
 

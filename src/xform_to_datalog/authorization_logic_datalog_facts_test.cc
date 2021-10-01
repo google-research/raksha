@@ -33,7 +33,7 @@ class AuthorizationLogicDatalogFactsTest : public AuthorizationLogicTest {};
 TEST_F(AuthorizationLogicDatalogFactsTest, InvokesRustToolAndGeneratesOutput) {
   for (const std::string& program : {"simple_auth_logic", "empty_auth_logic"}) {
     fs::path test_data_dir = GetTestDataDir();
-    auto auth_facts = AuthorizationLogicDatalogFacts::create(test_data_dir, program);
+    auto auth_facts = AuthorizationLogicDatalogFacts::create(test_data_dir.c_str(), program);
     ASSERT_TRUE(auth_facts.has_value());
   
     std::vector<std::string> actual_datalog =

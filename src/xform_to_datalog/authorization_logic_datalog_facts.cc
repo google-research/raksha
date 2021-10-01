@@ -21,6 +21,7 @@
 #include <optional>
 #include <vector>
 
+#include "absl/strings/str_cat.h"
 #include "src/xform_to_datalog/authorization_logic.h"
 #include "src/common/logging/logging.h"
 
@@ -28,17 +29,16 @@ namespace raksha::xform_to_datalog {
 
 std::optional<AuthorizationLogicDatalogFacts>
 AuthorizationLogicDatalogFacts::create(
-  const std::string& program_dir, const std::string& program
-) {
+  absl::string_view program_dir, absl::string_view program) {
   auto result_dir = std::filesystem::temp_directory_path();
   int res = generate_datalog_facts_from_authorization_logic(
-    program.c_str(), program_dir.c_str(), result_dir.c_str());
+    program.data(), program_dir.data(), result_dir.c_str());
   if (res) {
     LOG(ERROR) << "Failure running the authorization logic compiler.\n";
     return std::nullopt;
   }
   // Read the file into a string.
-  std::filesystem::path result = result_dir / (program + ".dl");
+  std::filesystem::path result = result_dir / (absl::StrCat(program, ".dl"));
   std::ifstream file_stream(result);
   if (!file_stream) {
     LOG(ERROR) << "Unable to read result of authorization logic compiler.\n";
@@ -52,9 +52,8 @@ AuthorizationLogicDatalogFacts::create(
     LOG(ERROR) << "Unable to determine the size of the result file.\n";
     return std::nullopt;
   }
-  // Set size of buffer to avoid reallocations.
-  std::string datalog_program;
-  datalog_program.resize(filesize);
+  // Initialize and set size of buffer to avoid reallocations.
+  std::string datalog_program(filesize, '\0');
 
   // Read the contents of the file into string buffer.
   file_stream.seekg(0, std::ios::beg);

@@ -19,6 +19,8 @@
 #include <optional>
 #include <string>
 
+#include "absl/strings/string_view.h"
+
 namespace raksha::xform_to_datalog {
 
 class AuthorizationLogicDatalogFacts {
@@ -27,8 +29,8 @@ class AuthorizationLogicDatalogFacts {
   // Returns std::nullopt if there is any error due to processing of the program.
   //
   static std::optional<AuthorizationLogicDatalogFacts> create(
-      const std::string& path,							      
-      const std::string& authorization_logic_filename);
+      absl::string_view path,
+      absl::string_view authorization_logic_filename);
 
   AuthorizationLogicDatalogFacts(std::string datalog_facts):
       datalog_facts_(std::move(datalog_facts)) {}
