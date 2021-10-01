@@ -44,15 +44,58 @@
 // is made by `principal`.
 .decl claimHasTag(principal: Principal, accessPath: AccessPath, tag: Tag)
 
+// Manifests can produce base facts of this form, where usually the principal 
+// is a particle (and this fact is entered by a code reviewer with no knowledge 
+// of the taint analysis).
+.decl claimNotEdge(principal: Principal, src: AccessPath, dst: AccessPath)
+
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
+
+// This rule is meant to support the functionality of removing edges from 
+// manifests:
+//      - that clearly does not introduce an unsafe escape hatch that could
+//      break policies (because it does not introduce downgrades that would not 
+//      otherwise be possible).
+//      - without data owners needing to know anything about the application 
+//      structure
+//      - without app behavior specification writers needing to know anything 
+//      about the taint analysis or the tags that might appear on a handle
+
+
+// claimNotEdge(p, src, tgt) is an _attempt_ to remove an edge from the 
+// analysis (by principal p)
+// saysDowngrades(p, path, tgt) is an _attempt_ to remove just one tag
+// from a path (by principal p).
+//
+// The rule for downgrades(p, t) in authorization_logic.dl describes when 
+// a downgrade is "safe" and the downgrade really happens (by consulting the
+// owners).
+//
+// Because the analysis propagates the tags on source edges to dest edges, it is safe
+// to remove an edge when ALL of the tags on the source edge can be downgraded.
+// However, we do not want to interfere with other edges that may flow from
+// that source path. Instead, we remove all of the tags on the source from the
+// midpoint access path we add in the middle of each edge. This rule populates a
+// request to downgrade each tag on the edge midpoint.
+//      - it is safe because these requests are only accepted if they would 
+//      normally be by the downgrades(_, _) rule
+//      - it does not require the manifest writer to know anything about the 
+//      tags in the analysis
+//      - data owners do not need to know about paths, and they will grant 
+//      permission for edge removal indirectly by granting permission to remove 
+//      tags (abstract representations of their data).
+
+saysDowngrades(principal, midpoint, tag) :-
+  isTag(tag), claimNotEdge(principal, src, tgt), edgeToMidpointAccessPath(src, tgt, midpoint).
+
 hasTag(tgt, tag) :- claimHasTag(principal, tgt, tag), ownsTag(principal, tag).
 
 mayHaveTag(tgt, tag) :- hasTag(tgt, tag).
 
 mayHaveTag(tgt, tag) :-
-    edge(src, tgt), mayHaveTag(src, tag), !downgrades(tgt, tag).
+    resolvedEdge(src, tgt), mayHaveTag(src, tag), !downgrades(tgt, tag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
