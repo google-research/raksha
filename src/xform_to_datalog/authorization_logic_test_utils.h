@@ -28,7 +28,7 @@
 namespace raksha::xform_to_datalog {
 
 class AuthorizationLogicTest : public ::testing::Test {
-protected:
+public:
   static std::filesystem::path GetTestDataDir() {
     absl::string_view test_srcdir_env = std::getenv("TEST_SRCDIR");
     absl::string_view test_workspace_env = std::getenv("TEST_WORKSPACE");
