@@ -125,3 +125,12 @@ cc_binary(
         "@absl//absl/flags:usage",
     ],
 )
+
+sh_test(
+    name = "generate_datalog_program_test",
+    srcs = ["generate_datalog_program_test.sh"],
+    data = [
+        ":generate_datalog_program",
+        "//src/xform_to_datalog/testdata:ok_claim_propagates",
+    ],
+)

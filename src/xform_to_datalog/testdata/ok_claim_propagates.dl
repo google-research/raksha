@@ -1,0 +1,49 @@
+// GENERATED FILE, DO NOT EDIT!
+
+#include "taint.dl"
+
+// Rules for detecting policy failures.
+.decl testFails(check_index: symbol)
+.output testFails
+.decl allTests(check_index: symbol)
+.output allTests
+.decl duplicateTestCaseNames(testAspectName: symbol)
+.output duplicateTestCaseNames
+
+.decl isCheck(check_index: symbol)
+.decl check(check_index: symbol)
+
+allTests(check_index) :- isCheck(check_index).
+testFails(check_index) :-
+  isCheck(check_index), !check(check_index).
+
+// Rules for linking generated relations with the ones in the dl program.
+.decl says_ownsTag(speaker: Principal, owner: Principal, tag: Tag)
+.decl says_hasTag(speaker: Principal, path: AccessPath, t: Tag)
+saysOwnsTag(x, y, z) :- says_ownsTag(x, y, z).
+saysHasTag(x, y, z) :- says_hasTag(x, y, z).
+
+// Manifest
+
+// Claims:
+claimHasTag("P1", "R.P1#0.foo", "userSelection").
+
+// Checks:
+isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("R.P3#2.bar", "userSelection").
+
+// Edges:
+edge("R.P1#0.foo", "R.handle0").
+edge("R.handle0", "R.P2#1.bar").
+edge("R.P2#1.foo", "R.handle1").
+edge("R.P2#1.bar", "R.P2#1.foo").
+edge("R.handle1", "R.P3#2.bar").
+
+// Authorization Logic
+
+.decl grounded_dummy(x0: symbol)
+.decl says_canSay_ownsTag(x0: symbol, x1: symbol, x2: symbol, x3: symbol)
+says_ownsTag("EndUser", "P1", "userSelection") :- says_ownsTag(x___1, "P1", "userSelection"), says_canSay_ownsTag("EndUser", x___1, "P1", "userSelection").
+says_canSay_ownsTag("EndUser", "P1", "P1", "userSelection").
+says_ownsTag("P1", "P1", "userSelection").
+grounded_dummy("dummy_var").
+
