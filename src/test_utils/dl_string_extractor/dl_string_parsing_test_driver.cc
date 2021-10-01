@@ -22,6 +22,8 @@
 
 #include "souffle/SouffleInterface.h"
 
+// TODO(#160): Move this test driver to a common location with other test
+//  drivers or roll all into a single test driver binary.
 int main(int argc, char **argv) {
   // The only command line arg should be the name of the datalog module that
   // should be loaded.
