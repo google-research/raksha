@@ -26,11 +26,7 @@ mod test {
     use crate::signing::tink_interface::*;
 
     fn query_test_with_imports(t: QueryTest) {
-        compile(
-            &t.filename.to_string(),
-            &"test_inputs".to_string(),
-            &"test_outputs".to_string(),
-        );
+        compile(t.filename, "test_inputs", "test_outputs", "");
         run_souffle(
             &format!("test_outputs/{}.dl", t.filename),
             &"test_outputs".to_string(),
@@ -49,11 +45,7 @@ mod test {
         );
 
         // This code generates exported statements from test_inputs/exporting.
-        compile(
-            &"importing_export_half".to_string(),
-            &"test_inputs".to_string(),
-            &"test_outputs".to_string(),
-        );
+        compile("importing_export_half", "test_inputs", "test_outputs", "");
 
         // This code imports statements into test_inputs/importing
         // and checks queries for expected results.

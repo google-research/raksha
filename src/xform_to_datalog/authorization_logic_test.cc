@@ -31,7 +31,7 @@ TEST_F(AuthorizationLogicTest, InvokesRustToolAndGeneratesOutput) {
   const fs::path& test_data_dir = GetTestDataDir();
   fs::path output_dir = fs::temp_directory_path();
   int res = generate_datalog_facts_from_authorization_logic(
-    "simple_auth_logic", test_data_dir.c_str(), output_dir.c_str());
+    "simple_auth_logic", test_data_dir.c_str(), output_dir.c_str(), "");
 
   ASSERT_EQ(res, 0) << "Invoking authorization logic compiler failed.";
 
@@ -48,7 +48,7 @@ TEST_F(AuthorizationLogicTest, InvokesRustToolAndGeneratesOutput) {
 TEST_F(AuthorizationLogicTest, ErrorsInRustToolReturnsNonZeroValue) {
   // Force the tool to return error by specifying non-existent files.
   int res = generate_datalog_facts_from_authorization_logic(
-    "simple_auth_logic", "blah", "blah");
+    "simple_auth_logic", "blah", "blah", "");
   ASSERT_EQ(res, 1);
 }
   
