@@ -1,0 +1,2 @@
+"TheTestPrincipal" says "thisOtherThing" isRelevantFor("JustAUnitTest") :-
+    thisUnitTest("isRunning").
