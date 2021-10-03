@@ -33,7 +33,7 @@ arcs::EntityTypeProto encode(const EntityType& entity_type) {
 
 arcs::TypeProto encodeAsTypeProto(const EntityType& entity_type) {
   arcs::TypeProto type_proto;
-  *type_proto.mutable_entity() = std::move(encode(entity_type));
+  *type_proto.mutable_entity() = encode(entity_type);
   return type_proto;
 }
 
