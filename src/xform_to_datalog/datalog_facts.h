@@ -41,8 +41,8 @@ class DatalogFacts {
 
   // Returns the datalog program with necessary headers.
   std::string ToDatalog() const {
-    return absl::StrCat(
-        kDatalogFilePrefix,
+    return absl::StrFormat(
+        kDatalogFileFormat,
         manifest_datalog_facts_.ToDatalog(),
         auth_logic_datalog_facts_.ToDatalog());
   }
@@ -52,11 +52,16 @@ class DatalogFacts {
   AuthorizationLogicDatalogFacts auth_logic_datalog_facts_;
 
   // The prefix that should be added to the datalog program.
-  static constexpr char kDatalogFilePrefix[] =
+  static constexpr char kDatalogFileFormat[] =
       R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
 .output checkHasTag
+
+// Manifest
+%s
+// Authorization Logic
+%s
 )";
 
 };
