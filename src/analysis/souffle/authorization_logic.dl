@@ -26,9 +26,16 @@
 // A Principal that makes assertions in authorization logic
 .type Principal <: symbol
 
+// These relations need to be populated by the emitted authorization logic 
+// code. Because the emitted authorization logic code appends "says_" to the 
+// beginning of relations, these relations need to break the style 
+// conventions here.
+//
 // Some party asserts the claim that the label of an access path should be
 // downgraded by removing the referenced tag from the set.
-.decl saysDowngrades(speaker: Principal, p: AccessPath, t: Tag)
+.decl says_downgrades(speaker: Principal, p: AccessPath, t: Tag)
+.decl says_ownsTag(speaker: Principal, owner: Principal, tag: Tag)
+.decl says_hasTag(speaker: Principal, path: AccessPath, t: Tag)
 
 .decl isPrincipal(p: Principal)
 
@@ -36,9 +43,6 @@
 // it).
 .decl ownsTag(owner: Principal, tag: Tag)
 
-.decl saysOwnsTag(speaker: Principal, owner: Principal, tag: Tag)
-
-.decl saysHasTag(speaker: Principal, path: AccessPath, t: Tag)
 
 // Some accessPath is actually downgraded (by taking into consideration the
 // privileges of a party trying to downgrade it, and as a result of that party
@@ -50,13 +54,13 @@
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
-downgrades(path, tag) :- ownsTag(owner, tag), saysDowngrades(owner, path, tag).
+downgrades(path, tag) :- ownsTag(owner, tag), says_downgrades(owner, path, tag).
 
 // This rule conservatively says that if _any_ principal claims that a path has
 // a tag, then it has the tag according to the taint analysis. This rule is
 // likely to be adjusted later. For confidentiality tags this should be OK to
 // start with.
-claimHasTag(principal, path, tag) :- saysHasTag(principal, path, tag).
+claimHasTag(principal, path, tag) :- says_hasTag(principal, path, tag).
 
 // This rule says that any principal can say that another principal owns a tag.
 // This rule is just a starting point to allow all aspects of the policy to
@@ -64,7 +68,7 @@ claimHasTag(principal, path, tag) :- saysHasTag(principal, path, tag).
 // ownsTag from something with a speaker. This rule is likely to change. It
 // does not rule out the case that two different principals claim ownership of
 // a tag.
-ownsTag(owner, tag) :- saysOwnsTag(_, owner, tag).
+ownsTag(owner, tag) :- says_ownsTag(_, owner, tag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
