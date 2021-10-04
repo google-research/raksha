@@ -60,8 +60,8 @@ assertion
     | fact ':-' flatFact (',' flatFact )* '.' #hornClauseAssertion
     ;
 
-// The IDs following "Export" are path names where signed policy
-// statements are stored.
+// The IDs following "Export" are path names where JSON files containing
+// private or public keys are stored
 saysAssertion
     : principal SAYS assertion (EXPORT ID)? #saysSingle
     | principal SAYS '{' assertion+ '}' (EXPORT ID)?  #saysMulti
