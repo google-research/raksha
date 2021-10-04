@@ -52,6 +52,7 @@ particle ImageSelector
 
 particle ProductIdOutput
     pio_select_image_id: reads SelectImageId {}
+    pio_remote_service: writes RemoteService {}
 
 recipe VisionPipeline
     DataSource
@@ -69,4 +70,5 @@ recipe VisionPipeline
         is_select_image_id: writes select_image_id
     ProductIdOutput
         pio_select_image_id: reads select_image_id
+        pio_remote_service: writes pio_remote_service
      
