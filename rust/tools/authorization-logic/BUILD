@@ -89,6 +89,7 @@ filegroup(
         "src/test/test_export_signatures.rs",
         "src/test/test_queries.rs",
         "src/test/test_signing.rs",
+        "src/test/test_decl_skip.rs",
     ],
 )
 

@@ -12,17 +12,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//-----------------------------------------------------------------------------
-#ifndef SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
-#define SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
+//----------------------------------------------------------------------------
 
-namespace raksha::xform_to_datalog {
+#ifndef SRC_IR_PROTO_PREDICATE_H_
+#define SRC_IR_PROTO_PREDICATE_H_
 
-// Generates datalog facts from the given program.
-extern "C" int generate_datalog_facts_from_authorization_logic(
-  const char* program, const char* program_path,
-  const char* out_dir, const char* decl_skip_vec);
-}
+#include <memory>
 
-#endif  // SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
+#include "src/ir/access_path.h"
+#include "src/ir/predicate.h"
+#include "third_party/arcs/proto/manifest.pb.h"
 
+namespace raksha::ir::proto {
+
+// Decode the predicate indicated by the given proto.
+std::unique_ptr<raksha::ir::Predicate> Decode(
+    const arcs::InformationFlowLabelProto_Predicate &predicate_proto);
+
+}  // namespace raksha::ir::proto
+
+#endif  // SRC_IR_PROTO_PREDICATE_H_
