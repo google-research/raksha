@@ -21,15 +21,14 @@
 // The "source" and "output" particles exist only because "claims" can
 // appear just on outputs and "checks" can appear only on inputs.
 
-particle VideoDataSource
-    vds_sensor_data_packet: writes SensorDataPacket {
+particle DataSource
+    ds_sensor_data_packet: writes SensorDataPacket {
         camera_feed: Number,
         video_resolution: Number
     }
-    vds_image_detection_model: writes ImageDetectionModel {}
+    ds_image_detection_model: writes ImageDetectionModel {}
         // the label of id_sensor_packet.video_resolution is the empty set (public)
-    claim vds_sensor_data_packet.camera_feed is raw_video_tag
-    claim vds_image_detection_model is image_detection_model_tag
+    claim ds_sensor_data_packet.camera_feed is raw_video_tag
 
 particle ImageDetector
     id_sensor_data_packet: reads SensorDataPacket {
@@ -55,9 +54,9 @@ particle ProductIdOutput
     pio_select_image_id: reads SelectImageId {}
 
 recipe VisionPipeline
-    VideoDataSource
-        vds_sensor_data_packet: writes sensor_data_packet
-        vds_image_detection_model: writes image_detection_model
+    DataSource
+        ds_sensor_data_packet: writes sensor_data_packet
+        ds_image_detection_model: writes image_detection_model
     UserSelectionActionSource
         usas_user_selection_action: writes user_selection_action
     ImageDetector
