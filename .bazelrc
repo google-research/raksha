@@ -1,1 +1,1 @@
-build --cxxopt='-std=c++17' --cxxopt='-Werror' --cxxopt='-Wall'
+build --cxxopt='-std=c++17' --cxxopt='-Werror' --cxxopt='-Wall' --cxxopt='-Wno-deprecated-declarations'
