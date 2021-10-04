@@ -1,0 +1,17 @@
+// Fine to not have quotes in paths
+BindPrivKey "p1_noq" test_keys/p1_noq_priv.json
+BindPubKey "p1_noq" test_keys/p1_noq_pub.json
+
+"p1_noq" says {
+    someProposition("these_args").
+    otherProposition("these_other_args").
+} exportTo test_outputs/p1_noq_statement
+
+// Fine to have quotes in paths
+BindPrivKey "p1q" "test_keys/p1q_priv.json"
+BindPubKey "p1q" "test_keys/p1q_pub.json"
+
+"p1q" says {
+    someProposition("these_args").
+    otherProposition("these_other_args").
+} exportTo "test_outputs/p1q_statement"
