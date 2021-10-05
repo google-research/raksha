@@ -1,0 +1,4 @@
+"TheTestPrincipal" says "names.with.dots.in.them" are("prefectly.cromulent").
+
+"TheTestPrincipal" says "names.with.dots.in.them" areConditionally("cromulent") :-
+    evenIf("dots.are.on.the.rhs").
