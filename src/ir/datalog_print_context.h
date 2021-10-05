@@ -28,7 +28,8 @@ class DatalogPrintContext {
  public:
   DatalogPrintContext() : check_counter_(0) {}
 
-  // DatalogPrintContext is neither copyable nor movable.
+  // DatalogPrintContext is not copyable, as we need a single copy to be the
+  // source of truth on creating unique labels. It is, however, movable.
   DatalogPrintContext(const DatalogPrintContext &) = delete;
   DatalogPrintContext &operator=(const DatalogPrintContext &) = delete;
 
