@@ -24,6 +24,7 @@
 #include "absl/flags/parse.h"
 #include "absl/flags/usage.h"
 #include "src/common/logging/logging.h"
+#include "src/xform_to_datalog/authorization_logic_datalog_facts.h"
 #include "src/xform_to_datalog/datalog_facts.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
 
@@ -35,7 +36,7 @@ ABSL_FLAG(bool, overwrite, false,
 constexpr char kUsageMessage[] =
     "This tool takes a manifest proto and generates a datalog program.";
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   google::InitGoogleLogging("generate_datalog_program");
   absl::SetProgramUsageMessage(kUsageMessage);
   absl::ParseCommandLine(argc, argv);
@@ -71,10 +72,11 @@ int main(int argc, char* argv[]) {
 
   auto datalog_facts = raksha::xform_to_datalog::DatalogFacts(
       raksha::xform_to_datalog::ManifestDatalogFacts::CreateFromManifestProto(
-          manifest_proto));
+          manifest_proto),
+      raksha::xform_to_datalog::AuthorizationLogicDatalogFacts(""));
 
-  std::ofstream datalog_file(
-      datalog_filepath, std::ios::out | std::ios::trunc | std::ios::binary);
+  std::ofstream datalog_file(datalog_filepath, std::ios::out | std::ios::trunc |
+                                                   std::ios::binary);
   if (!datalog_file) {
     LOG(ERROR) << "Error creating " << datalog_filepath << " :"
                << strerror(errno);
