@@ -70,7 +70,15 @@ class TagCheck {
   }
 
  private:
+  // The access path which is the subject of the check.
   AccessPath access_path_;
+  // The predicate being checked upon `access_path`. Note that this is a
+  // non-owning pointer: while it is tempting to make this `Predicate` owned
+  // by this `TagCheck`, this is incompatible with our current method of
+  // having separate copies of a `TagCheck` for the spec and the
+  // implementation. `Predicate`s are currently owned by the `ParticleSpec`
+  // which created the spec version of the `TagCheck` via the
+  // `PredicateDecoder`.
   const Predicate *predicate_;
 };
 
