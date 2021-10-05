@@ -1,0 +1,59 @@
+// Note: This file marks speculative syntax with a SPECULATIVE comment before
+// the speculative syntax.
+
+// Represents an actual microphone within a smart mic listening to audio.
+particle MicIn
+  audio: writes AudioData { }
+// SPECULATIVE: claim a QoS integrity tag.
+//claim audio is userSpeech and is integrity#speechToTextQoS
+  claim audio is userSpeech and is speechToTextQoS
+
+// Represents the CPU within the mic.
+particle MicCompute
+  audioIn: reads AudioData { }
+  asrNeuralNet: reads writes ASRNeuralNet { }
+  asrStorageConn: writes ASRData { }
+  claim asrStorageConn is textTranscript
+//SPECULATIVE: preserve integrity tag
+//claim asrStorageConn preserves speechToTextQoS from audioIn
+
+particle SpeechToTextStorageSink
+  speechToTextIn: reads ASRData { }
+//SPECULATIVE: check integrity tag
+//check speechToTextIn is integrity#speechToTextQoS
+  check speechToTextIn is speechToTextQoS
+
+// A particle indicating that just forwards the contents of an ASR
+// neural net to another storage location.
+particle ForwardAsrNet
+  inNeuralNet: reads ASRNeuralNet { }
+  outNeuralNet: writes ASRNeuralNet { }
+
+recipe DoASR
+  m1AsrNetStorage: create
+  m1AsrStorage: create
+  MicIn
+    audio: writes micAudio
+  MicCompute
+    audioIn: reads micAudio
+    asrNeuralNet: reads writes m1AsrNetStorage
+    asrStorageConn: writes m1AsrStorage
+  SpeechToTextStorageSink
+    speechToTextIn: reads m1AsrStorage
+
+recipe HandOffASRToOtherMic
+  m2AsrNetStorage: create
+  m1AsrNetStorage: map 'm1AsrNetStorage'
+  m1AsrStorage: use 'm1AsrStorage'
+  ForwardAsrNet
+    inNeuralNet: reads m1AsrNetStorage
+    outNeuralNet: writes m2AsrNetStorage
+  MicIn
+    audio: writes m2MicAudio
+
+  MicCompute
+    audioIn: reads m2MicAudio
+    asrNeuralNet: reads writes m2AsrNetStorage
+    // Note: continue to write to m1's storage to continue the transcription.
+    asrStorageConn: writes m1AsrStorage
+
