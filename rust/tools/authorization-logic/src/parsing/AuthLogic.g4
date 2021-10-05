@@ -60,22 +60,25 @@ assertion
     | fact ':-' flatFact (',' flatFact )* '.' #hornClauseAssertion
     ;
 
+// The IDs following "Export" are path names where JSON files containing
+// private or public keys are stored
 saysAssertion
-    : principal SAYS assertion (EXPORT PATH)? #saysSingle
-    | principal SAYS '{' assertion+ '}' (EXPORT PATH)?  #saysMulti
+    : principal SAYS assertion (EXPORT ID)? #saysSingle
+    | principal SAYS '{' assertion+ '}' (EXPORT ID)?  #saysMulti
     ;
 
 keyBind
-    : BINDEX principal PATH #bindpriv
-    | BINDIM principal PATH #bindpub
+    : BINDEX principal ID #bindpriv
+    | BINDIM principal ID #bindpub
     ;
 
 query
     : ID '=' QUERY principal SAYS fact '?'
     ;
 
+// The ID here refers to a filename containing a signed policy statement.
 importAssertion
-    : IMPORT principal SAYS PATH
+    : IMPORT principal SAYS ID
     ;
 
 program
@@ -101,8 +104,7 @@ BINDIM: 'BindPubKey';
 
 // Identifiers wrapped in quotes are constants whereas
 // identifiers without quotes are variables.
-ID : ('"')? [a-zA-Z] [_a-zA-Z0-9]* ('"')?;
-PATH : [_a-zA-Z0-9/.]+;
+ID : ('"')? [a-zA-Z] [_a-zA-Z0-9/.]* ('"')?;
 
 WHITESPACE_IGNORE
     : [ \r\t\n]+ -> skip
