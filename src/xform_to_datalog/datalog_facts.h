@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "absl/strings/str_format.h"
+#include "src/ir/datalog_print_context.h"
 #include "src/ir/edge.h"
 #include "src/ir/tag_check.h"
 #include "src/ir/tag_claim.h"
@@ -40,10 +41,10 @@ class DatalogFacts {
   {}
 
   // Returns the datalog program with necessary headers.
-  std::string ToDatalog() const {
+  std::string ToDatalog(raksha::ir::DatalogPrintContext &ctxt) const {
     return absl::StrFormat(
         kDatalogFileFormat,
-        manifest_datalog_facts_.ToDatalog(),
+        manifest_datalog_facts_.ToDatalog(ctxt),
         auth_logic_datalog_facts_.ToDatalog());
   }
 
@@ -56,7 +57,8 @@ class DatalogFacts {
       R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
-.output checkHasTag
+.output isCheck
+.output check
 
 // Manifest
 %s

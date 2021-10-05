@@ -19,6 +19,7 @@
 #include <google/protobuf/text_format.h>
 
 #include "src/common/testing/gtest.h"
+#include "src/ir/datalog_print_context.h"
 
 namespace raksha::xform_to_datalog {
 
@@ -32,8 +33,11 @@ TEST_P(ManifestDatalogFactsToDatalogTest, ManifestDatalogFactsToDatalogTest) {
   const ManifestDatalogFacts &datalog_facts = std::get<0>(GetParam());
   const std::string &expected_result_string = std::get<1>(GetParam());
 
-  EXPECT_EQ(datalog_facts.ToDatalog(), expected_result_string);
+  ir::DatalogPrintContext ctxt;
+  EXPECT_EQ(datalog_facts.ToDatalog(ctxt), expected_result_string);
 }
+
+static const ir::TagPresence kTag2Presence("tag2");
 
 static const ir::AccessPath kHandleH1AccessPath(
     ir::AccessPathRoot(ir::HandleAccessPathRoot("recipe", "h1")),
@@ -69,8 +73,7 @@ static std::tuple<ManifestDatalogFacts, std::string>
     { ManifestDatalogFacts(
         { ir::TagClaim(
             "particle", kHandleConnectionOutAccessPath, true, "tag") },
-        { ir::TagCheck(ir::TagAnnotationOnAccessPath(
-            kHandleConnectionInAccessPath, "tag2")) },
+        { ir::TagCheck(kHandleConnectionInAccessPath, kTag2Presence) },
         { ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),
           ir::Edge(kHandleConnectionInAccessPath,
                    kHandleConnectionOutAccessPath),
@@ -80,7 +83,7 @@ static std::tuple<ManifestDatalogFacts, std::string>
 claimHasTag("particle", "recipe.particle.out", "tag").
 
 // Checks:
-checkHasTag("recipe.particle.in", "tag2") :- mayHaveTag("recipe.particle.in", "tag2").
+isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("recipe.particle.in", "tag2").
 
 // Edges:
 edge("recipe.h1", "recipe.particle.in").
@@ -256,22 +259,22 @@ static const std::string kManifestTextproto = R"(
                entity: {
                  schema: {
                    fields: [
-                   { key: "field1", value: { primitive: TEXT } } ]}}}}]}]}
-    "])";
+                   { key: "field1", value: { primitive: TEXT } } ]}}}}]}]}]
+)";
 
 class ParseBigManifestTest : public testing::Test {
  public:
-  ParseBigManifestTest() : datalog_facts_(ParseManifestDatalogFacts()) { }
-
- protected:
-  static ManifestDatalogFacts ParseManifestDatalogFacts() {
-     arcs::ManifestProto manifest_proto;
-     google::protobuf::TextFormat::ParseFromString(
-         kManifestTextproto, &manifest_proto);
-
-     return ManifestDatalogFacts::CreateFromManifestProto(manifest_proto);
+  ParseBigManifestTest() {
+    arcs::ManifestProto manifest_proto;
+    google::protobuf::TextFormat::ParseFromString(
+        kManifestTextproto, &manifest_proto);
+    datalog_facts_ = ManifestDatalogFacts::CreateFromManifestProto(
+        manifest_proto, registry_);
   }
 
+ protected:
+  raksha::xform_to_datalog::arcs_manifest_tree::ParticleSpecRegistry registry_;
+  ir::DatalogPrintContext ctxt_;
   ManifestDatalogFacts datalog_facts_;
 };
 
@@ -290,19 +293,19 @@ TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
   // failure than structured datalog facts.
   std::vector<std::string> claim_datalog_strings;
   for (const ir::TagClaim &claim : datalog_facts_.claims()) {
-    claim_datalog_strings.push_back(claim.ToDatalog());
+    claim_datalog_strings.push_back(claim.ToDatalog(ctxt_));
   }
   EXPECT_THAT(claim_datalog_strings,
               testing::UnorderedElementsAreArray(kExpectedClaimStrings));
 }
 
 static std::string kExpectedCheckStrings[] = {
-    R"(checkHasTag("NamedR.PS1#0.in_handle.field1", "tag2") :- mayHaveTag("NamedR.PS1#0.in_handle.field1", "tag2").)",
-    R"(checkHasTag("NamedR.PS1#1.in_handle.field1", "tag2") :- mayHaveTag("NamedR.PS1#1.in_handle.field1", "tag2").)",
-    R"(checkHasTag("NamedR.PS2#2.in_handle.field1", "tag4") :- mayHaveTag("NamedR.PS2#2.in_handle.field1", "tag4").)",
-    R"(checkHasTag("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2").)",
-    R"(checkHasTag("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4").)",
-    R"(checkHasTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4").)",
+    R"(isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("NamedR.PS1#0.in_handle.field1", "tag2").)",
+    R"(isCheck("check_num_1"). check("check_num_1") :- mayHaveTag("NamedR.PS1#1.in_handle.field1", "tag2").)",
+    R"(isCheck("check_num_2"). check("check_num_2") :- mayHaveTag("NamedR.PS2#2.in_handle.field1", "tag4").)",
+    R"(isCheck("check_num_3"). check("check_num_3") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2").)",
+    R"(isCheck("check_num_4"). check("check_num_4") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4").)",
+    R"(isCheck("check_num_5"). check("check_num_5") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4").)",
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {
@@ -311,7 +314,7 @@ TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {
   // failure than structured datalog facts.
   std::vector<std::string> check_datalog_strings;
   for (const ir::TagCheck &check : datalog_facts_.checks()) {
-    check_datalog_strings.push_back(check.ToDatalog());
+    check_datalog_strings.push_back(check.ToDatalog(ctxt_));
   }
   EXPECT_THAT(check_datalog_strings,
               testing::UnorderedElementsAreArray(kExpectedCheckStrings));
@@ -381,7 +384,7 @@ TEST_F(ParseBigManifestTest, ManifestProtoEdgesTest) {
   // failure than structured datalog facts.
   std::vector<std::string> edge_datalog_strings;
   for (const ir::Edge &edge : datalog_facts_.edges()) {
-    edge_datalog_strings.push_back(edge.ToDatalog());
+    edge_datalog_strings.push_back(edge.ToDatalog(ctxt_));
   }
   EXPECT_THAT(edge_datalog_strings,
               testing::UnorderedElementsAreArray(kExpectedEdgeStrings));

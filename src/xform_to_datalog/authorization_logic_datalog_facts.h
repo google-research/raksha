@@ -37,7 +37,9 @@ class AuthorizationLogicDatalogFacts {
       datalog_facts_(std::move(datalog_facts)) {}
   
   // Returns the datalog program with necessary headers.
-  const std::string& ToDatalog() const { return datalog_facts_; }
+  const std::string& ToDatalog() const {
+    return datalog_facts_;
+  }
   
  private:
   std::string datalog_facts_;

@@ -14,6 +14,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
+#include "src/ir/proto/predicate.h"
+#include "src/ir/proto/tag_check.h"
 #include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
 
 namespace raksha::xform_to_datalog::arcs_manifest_tree {
@@ -59,15 +61,17 @@ ParticleSpec ParticleSpec::CreateFromProto(
     }
   }
 
+  raksha::ir::proto::PredicateDecoder predicate_decoder;
   std::vector<ir::TagCheck> checks;
   for (const arcs::CheckProto &check : particle_spec_proto.checks()) {
-    checks.push_back(ir::TagCheck::CreateFromProto(check));
+    checks.push_back(raksha::ir::proto::Decode(check, predicate_decoder));
   }
 
   return ParticleSpec(
       std::move(name), std::move(checks), std::move(tag_claims),
       std::move(derives_from_claims),
-      std::move(handle_connection_specs));
+      std::move(handle_connection_specs),
+      std::move(predicate_decoder));
 }
 
 void ParticleSpec::GenerateEdges() {
