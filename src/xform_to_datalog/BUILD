@@ -75,6 +75,7 @@ cc_library(
     hdrs = ["datalog_facts.h"],
     deps = [
         ":manifest_datalog_facts",
+        ":authorization_logic_datalog_facts",
         "//src/ir",
         "//src/xform_to_datalog/arcs_manifest_tree",
         "//third_party/arcs/proto:manifest_cc_proto",
@@ -84,7 +85,9 @@ cc_library(
 cc_test(
     name = "datalog_facts_test",
     srcs = ["datalog_facts_test.cc"],
+    data = ["//src/xform_to_datalog/testdata:auth_logic"],
     deps = [
+        ":authorization_logic_test_utils",
         ":datalog_facts",
         "//src/common/testing:gtest",
     ],

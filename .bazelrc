@@ -1,1 +1,2 @@
-build --cxxopt='-std=c++17' --cxxopt='-Werror' --cxxopt='-Wall'
+# TODO(#167): Remove `-Wno-deprecated-declarations` when glog is updated.
+build --cxxopt='-std=c++17' --cxxopt='-Werror' --cxxopt='-Wall' --cxxopt='-Wno-deprecated-declarations'
