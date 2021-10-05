@@ -2,3 +2,5 @@
 
 "TheTestPrincipal" says "names.with.dots.in.them" areConditionally("cromulent") :-
     evenIf("dots.are.on.the.rhs").
+
+"TheTest#Principal" says "names#with#hashes" areAlso("perfectly#cromulent").
