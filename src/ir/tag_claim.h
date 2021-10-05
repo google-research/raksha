@@ -20,7 +20,8 @@
 #include "absl/strings/str_format.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/access_path.h"
-#include "src/ir/tag_annotation_on_access_path.h"
+#include "src/ir/datalog_print_context.h"
+#include "src/ir/proto/access_path.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
@@ -84,7 +85,7 @@ class TagClaim {
   }
 
   // Produce a string containing a datalog fact for this TagClaim.
-  std::string ToDatalog() const {
+  std::string ToDatalog(DatalogPrintContext &) const {
     constexpr absl::string_view kClaimTagFormat =
         R"(%s("%s", "%s", "%s").)";
     absl::string_view relation_name =

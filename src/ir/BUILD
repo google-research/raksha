@@ -160,6 +160,8 @@ cc_test(
     deps = [
         ":ir",
         "//src/common/testing:gtest",
+        "//src/ir/proto:predicate",
+        "//src/ir/proto:tag_check",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],

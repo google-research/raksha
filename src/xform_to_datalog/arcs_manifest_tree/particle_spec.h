@@ -1,3 +1,19 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//----------------------------------------------------------------------------
+
 #ifndef SRC_XFORM_TO_DATALOG_ARCS_MANIFEST_TREE_PARTICLE_SPEC_H_
 #define SRC_XFORM_TO_DATALOG_ARCS_MANIFEST_TREE_PARTICLE_SPEC_H_
 
@@ -7,8 +23,10 @@
 #include "src/common/logging/logging.h"
 #include "src/ir/derives_from_claim.h"
 #include "src/ir/edge.h"
+#include "src/ir/predicate.h"
 #include "src/ir/tag_check.h"
 #include "src/ir/tag_claim.h"
+#include "src/ir/proto/predicate.h"
 #include "src/xform_to_datalog/arcs_manifest_tree/handle_connection_spec.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
@@ -29,10 +47,6 @@ struct InstantiatedParticleSpecFacts {
 // are instantiated with a fully-instantiated root.
 class ParticleSpec {
  public:
-
-  // Create the ParticleSpec from a ParticleSpecProto.
-  static ParticleSpec CreateFromProto(
-      const arcs::ParticleSpecProto &particle_spec_proto);
 
   const std::string &name() const { return name_; }
 
@@ -69,16 +83,20 @@ class ParticleSpec {
     return result;
   }
 
+  friend class ParticleSpecRegistry;
+
  private:
   ParticleSpec(
       std::string name,
       std::vector<raksha::ir::TagCheck> checks,
       std::vector<raksha::ir::TagClaim> tag_claims,
       std::vector<raksha::ir::DerivesFromClaim> derives_from_claims,
-      std::vector<HandleConnectionSpec> handle_connection_specs)
+      std::vector<HandleConnectionSpec> handle_connection_specs,
+      raksha::ir::proto::PredicateDecoder predicate_decoder)
       : name_(std::move(name)), checks_(std::move(checks)),
         tag_claims_(std::move(tag_claims)),
-        derives_from_claims_(std::move(derives_from_claims)) {
+        derives_from_claims_(std::move(derives_from_claims)),
+        predicate_decoder_(std::move(predicate_decoder)){
     for (HandleConnectionSpec &handle_connection_spec :
       handle_connection_specs) {
       std::string hcs_name = handle_connection_spec.name();
@@ -89,6 +107,11 @@ class ParticleSpec {
     }
     GenerateEdges();
   }
+
+  // Create the ParticleSpec from a ParticleSpecProto. Private to make all
+  // constructions go through the ParticleSpecRegistry.
+  static ParticleSpec CreateFromProto(
+      const arcs::ParticleSpecProto &particle_spec_proto);
 
   // Generate the edges between HandleConnectionSpecs within this ParticleSpec.
   void GenerateEdges();
@@ -111,6 +134,47 @@ class ParticleSpec {
   // A map of HandleConnectionSpec names to HandleConnectionSpecs.
   absl::flat_hash_map<std::string, HandleConnectionSpec>
     handle_connection_specs_;
+  // The PredicateDecoder object which was used to construct the predicates
+  // on all of the checks on this ParticleSpec. This also owns those
+  // predicates, so holding this field here causes the checks to live as long
+  // as the ParticleSpec.
+  raksha::ir::proto::PredicateDecoder predicate_decoder_;
+};
+
+// A ParticleSpecRegistry owns all ParticleSpecs. It acts as a factory for
+// particle specs and a place to look up ParticleSpecs by name.
+class ParticleSpecRegistry {
+ public:
+
+  // Get a ParticleSpec with a particular name. Errors if there is no
+  // particle spec with that name.
+  const ParticleSpec &GetParticleSpec(absl::string_view particle_spec_name) {
+    auto find_res = particle_specs_.find(particle_spec_name);
+    CHECK(find_res != particle_specs_.end())
+      << "No particle spec with name " << particle_spec_name;
+    return *find_res->second;
+  }
+
+  // Constructs a ParticleSpec from a proto and enters it into the registry.
+  // Errors if there is already a particle spec with that name. Returns a
+  // const reference to the ParticleSpec.
+  const ParticleSpec &CreateParticleSpecFromProto(
+      const arcs::ParticleSpecProto &particle_spec_proto) {
+    std::unique_ptr<ParticleSpec> new_particle_spec(
+        new ParticleSpec(ParticleSpec::CreateFromProto(particle_spec_proto)));
+    std::string particle_spec_name = new_particle_spec->name_;
+    auto ins_res = particle_specs_.insert(
+        { std::move(particle_spec_name), std::move(new_particle_spec) } );
+    const ParticleSpec &canon_particle_spec = *ins_res.first->second;
+    CHECK(ins_res.second)
+      << "Found multiple particle specs with name "
+      << canon_particle_spec.name();
+    return canon_particle_spec;
+  }
+
+ private:
+  absl::flat_hash_map<std::string, std::unique_ptr<ParticleSpec>>
+    particle_specs_;
 };
 
 }  // namespace raksha::xform_to_datalog::arcs_manifest_tree
