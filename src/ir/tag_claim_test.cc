@@ -58,17 +58,19 @@ TEST_P(TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest) {
   for (const TagClaim &unrooted_claim : unrooted_tag_claim_vec) {
     rooted_tag_claim_vec.push_back(unrooted_claim.Instantiate(root));
   }
+  DatalogPrintContext ctxt;
   // Expect the version with the concrete root to match the expected_todatalog
   // when ToDatalog is called upon it.
   ASSERT_EQ(rooted_tag_claim_vec.size(), expected_todatalog_vec.size());
   for (uint64_t i = 0; i < rooted_tag_claim_vec.size(); ++i) {
     EXPECT_EQ(
-        rooted_tag_claim_vec.at(i).ToDatalog(), expected_todatalog_vec.at(i));
+        rooted_tag_claim_vec.at(i).ToDatalog(ctxt),
+        expected_todatalog_vec.at(i));
   }
   // However, the version with the spec root should fail when ToDatalog is
   // called.
   EXPECT_DEATH(
-      unrooted_tag_claim_vec.at(0).ToDatalog(),
+      unrooted_tag_claim_vec.at(0).ToDatalog(ctxt),
       "Attempted to print out an AccessPath before connecting it to a "
       "fully-instantiated root!");
 }

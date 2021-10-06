@@ -25,15 +25,11 @@ mod test {
     #[test]
     fn test_signature_exporting() {
         store_new_keypair_cleartext(
-            &"test_keys/principal1_pub.json".to_string(),
-            &"test_keys/principal1_priv.json".to_string(),
+            "test_keys/principal1_pub.json",
+            "test_keys/principal1_priv.json",
         );
 
-        compile(
-            &"exporting".to_string(),
-            &"test_inputs".to_string(),
-            &"test_outputs".to_string(),
-        );
+        compile("exporting", "test_inputs", "test_outputs", "");
 
         let deser_claim =
             deserialize_from_file(&"test_outputs/prin1_statement1.obj".to_string()).unwrap();

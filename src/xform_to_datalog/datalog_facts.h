@@ -20,9 +20,11 @@
 #include <vector>
 
 #include "absl/strings/str_format.h"
+#include "src/ir/datalog_print_context.h"
 #include "src/ir/edge.h"
 #include "src/ir/tag_check.h"
 #include "src/ir/tag_claim.h"
+#include "src/xform_to_datalog/authorization_logic_datalog_facts.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
@@ -32,24 +34,36 @@ namespace raksha::xform_to_datalog {
 // datalog facts from different sources and adding the necessary headers.
 class DatalogFacts {
  public:
-  DatalogFacts(ManifestDatalogFacts manifest_datalog_facts)
-      : manifest_datalog_facts_(std::move(manifest_datalog_facts)) {}
+  DatalogFacts(ManifestDatalogFacts manifest_datalog_facts,
+               AuthorizationLogicDatalogFacts auth_logic_datalog_facts)
+    : manifest_datalog_facts_(std::move(manifest_datalog_facts)),
+      auth_logic_datalog_facts_(std::move(auth_logic_datalog_facts))
+  {}
 
   // Returns the datalog program with necessary headers.
-  std::string ToDatalog() const {
-    return absl::StrCat(
-        kDatalogFilePrefix, manifest_datalog_facts_.ToDatalog());
+  std::string ToDatalog(raksha::ir::DatalogPrintContext &ctxt) const {
+    return absl::StrFormat(
+        kDatalogFileFormat,
+        manifest_datalog_facts_.ToDatalog(ctxt),
+        auth_logic_datalog_facts_.ToDatalog());
   }
 
  private:
   ManifestDatalogFacts manifest_datalog_facts_;
+  AuthorizationLogicDatalogFacts auth_logic_datalog_facts_;
 
   // The prefix that should be added to the datalog program.
-  static constexpr char kDatalogFilePrefix[] =
+  static constexpr char kDatalogFileFormat[] =
       R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
-.output checkHasTag
+.output isCheck
+.output check
+
+// Manifest
+%s
+// Authorization Logic
+%s
 )";
 
 };

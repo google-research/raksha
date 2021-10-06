@@ -1,0 +1,2 @@
+.decl grounded_dummy(x0: symbol)
+grounded_dummy("dummy_var").

@@ -18,3 +18,5 @@ mod test_claim_importing;
 mod test_export_signatures;
 mod test_queries;
 mod test_signing;
+mod test_decl_skip;
+mod test_dots_and_quotes;

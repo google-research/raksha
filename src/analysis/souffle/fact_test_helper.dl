@@ -37,9 +37,11 @@ duplicateTestCaseNames(testAspectName) :-
 
 testFails(testAspectName) :- allTests(testAspectName), !testPasses(testAspectName).
 
+#ifdef ALL_PRINCIPALS_OWN_ALL_TAGS
 // For the fact tests, consider all principals as owning all tags. This allows us to avoid writing
 // ownership relations, which are not the point of those tests.
 ownsTag(principal, tag) :- isPrincipal(principal), isTag(tag).
+#endif
 
 // TEST_CASE is constructed so that it can take the place of a rule head. It "declares" a test
 // aspect via the allTestsAndCaseNum fact and sets up a testPasses head for the aspect in question.

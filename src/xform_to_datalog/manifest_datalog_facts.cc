@@ -32,7 +32,8 @@ namespace amt = raksha::xform_to_datalog::arcs_manifest_tree;
 //  traversal. This works, but it is hard to read and hard to test. We should
 //  break this up.
 ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
-    const arcs::ManifestProto &manifest_proto) {
+    const arcs::ManifestProto &manifest_proto,
+    amt::ParticleSpecRegistry &particle_spec_registry) {
   // These collections will be used as inputs to the constructor that we
   // return from this function.
   std::vector<ir::TagClaim> result_claims;
@@ -41,15 +42,9 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
 
   // Turn each ParticleSpecProto indicated in the manifest_proto into a
   // ParticleSpec object, which we can use directly.
-  absl::flat_hash_map<std::string, amt::ParticleSpec> particle_specs;
   for (const arcs::ParticleSpecProto &particle_spec_proto :
     manifest_proto.particle_specs()) {
-    amt::ParticleSpec particle_spec =
-        amt::ParticleSpec::CreateFromProto(particle_spec_proto);
-    std::string particle_spec_name = particle_spec.name();
-    auto ins_res = particle_specs.insert({
-      std::move(particle_spec_name), std::move(particle_spec) });
-    CHECK(ins_res.second) << "Name collision on particle spec.";
+    particle_spec_registry.CreateParticleSpecFromProto(particle_spec_proto);
   }
 
   // This loop looks at each recipe in the manifest proto and instantiates
@@ -86,10 +81,8 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
       // Find the ParticleSpec referenced by this Particle. The information
       // contained in the spec will be needed for all facts produced within a
       // Particle.
-      auto find_res = particle_specs.find(particle_spec_name);
-      CHECK(find_res != particle_specs.end())
-        << "Could not find particle spec " << particle_spec_name;
-      const amt::ParticleSpec &particle_spec = find_res->second;
+      const amt::ParticleSpec &particle_spec =
+          particle_spec_registry.GetParticleSpec(particle_spec_name);
 
       // Each ParticleSpec already contains lists of TagClaims, TagChecks,
       // and Edges that shall be generated for each Particle implementing that

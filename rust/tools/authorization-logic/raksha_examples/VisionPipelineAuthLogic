@@ -23,15 +23,6 @@
     // faithfully say when a data transformation from raw camera video to the 
     // name of a product has taken place, but only when the user has selected 
     // an object.
-    //
-    // It might look like this ideally:
-    //
-    // "ThirdPartyPrivacyReviewer" canSay becomes(pathX, "raw_video_tag",
-    //              "product_id_tag") :-
-    //     objectSelected("EndUser", pathX),
-    //     isAccessPath(pathX).
-    //
-    // For now it has to be done like this:
     "ThirdPartyPrivacyReviewer" canSay declassifies(pathX, "raw_video_tag") :-
         hasTag(pathX, "product_id_tag"),   // raw_video_tag is only removed if 
         objectSelected("EndUser", pathX),  // product_id_tag is added
@@ -70,7 +61,7 @@
     // The universe relations probably don't need to be decentralized. We could
     // have rules that populate a "centralized" universe and passes this 
     // to all the principals. (Or there could be other ways to deal with this).
-    isPrincipal("VideoDataSource").
+    isPrincipal("DataSource").
     isPrincipal("ImageDetector").
     isPrincipal("ImageSelector").
     isPrincipal("ProductIdOutput").
@@ -144,7 +135,7 @@
 }
 
 "ThirdPartyPrivacyReviewer" says {
-    "VideoDataSource" canActAs "LocalDevice".
+    "DataSource" canActAs "LocalDevice".
     "ImageDetector" canActAs "LocalDevice".
     "ImageSelector" canActAs "LocalDevice".
     "ProductIdOutput" canActAs "LocalDevice".
@@ -187,16 +178,9 @@
 "ProductIdOutput" says 
     "ProductIdOutput" will("egress_to_shopping_service", "product_id_tag").
 
-// Some queries to test this policy:
-video_is_local = query "EndUser" says   
-    "VideoDataSource" canActAs "LocalDevice"?
-
-local_can_do_computation = query "EndUser" says
-    "LocalDevice" may("do_pure_computation", "raw_video_tag")?
-
 // May / Will check:
-// May describes actions data owners permit with their data.
-// Will describes how data is used.
+// May - used by data owners to describe how data may be used.
+// Will - used by data stewards to describe how they'd like to use data.
 // The taint analysis tracks sensitive data as it moves, and this taint
 // analysis is used to check that all the uses described with `will` are 
 // permitted by the owners (using `may'). Roughly this is:
@@ -212,7 +196,7 @@ local_can_do_computation = query "EndUser" says
 // data. The comments illustrate the taint analysis which is used to figure out
 // what checks need to happen.
 
-// Particle: VideoDataSource
+// Particle: DataSource
 // No read handles
 
 // Particle: Image Detector
@@ -255,11 +239,6 @@ may_selector_do_computation = query "EndUser" says
 //      taint(pio_select_image_id) = { "product_id_tag" }
 // usage:
 //      will("egress_to_shopping_service", "product_id_tag")
-
-// This tests that the declassification is also permitted as expected:
-may_selector_declassify = query "EndUser" says
-    declassifies("is_selected_image_id", "raw_video_tag")?
-
 may_shopping_service_egress = query "EndUser" says
     "ProductIdOutput" may("egress_to_shopping_service", "product_id_tag")?
 
@@ -267,15 +246,3 @@ may_shopping_service_egress = query "EndUser" says
 // expected: false
 may_other_prin_do_computation = query "EndUser" says
     "SomeOtherPrincipal" may("do_pure_computation", "raw_video_tag")?
-
-/// Some language features are just "imagined" at the moment. 
-//
-// Becomes:
-// `becomes(path, oldTag, newTag)` which is the same as 
-// declassify(path, oldTag, newTag) and claimHasTag(path, oldTag, newTag)
-// (Maybe a more general way to implement this is macros in auth logic)
-//
-//
-// Notably "may" is a keyword rather than just another relation itself because it 
-// seems useful to let usages be arbitrary relations (with potentially varying 
-// signatures).

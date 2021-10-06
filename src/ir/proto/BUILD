@@ -46,6 +46,27 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "predicate",
+    srcs = ["predicate.cc"],
+    hdrs = ["predicate.h"],
+    deps = [
+        "//src/ir",
+        "//src/ir:access_path",
+        "//third_party/arcs/proto:manifest_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "tag_check",
+    hdrs = ["tag_check.h"],
+    deps = [
+        "//src/ir",
+        "//src/ir:access_path",
+        "//third_party/arcs/proto:manifest_cc_proto",
+    ],
+)
+
 cc_test(
     name = "access_path_test",
     srcs = ["access_path_test.cc"],

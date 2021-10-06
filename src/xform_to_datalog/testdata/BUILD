@@ -20,6 +20,8 @@ licenses(["notice"])
 filegroup(
     name = "auth_logic",
     srcs = [
+        "empty_auth_logic",
+        "empty_auth_logic.dl",
         "simple_auth_logic",
         "simple_auth_logic.dl",
     ],
