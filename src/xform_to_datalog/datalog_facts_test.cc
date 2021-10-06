@@ -46,8 +46,27 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
-.output isCheck
-.output check
+
+// Rules for detecting policy failures.
+.decl testFails(check_index: symbol)
+.output testFails
+.decl allTests(check_index: symbol)
+.output allTests
+.decl duplicateTestCaseNames(testAspectName: symbol)
+.output duplicateTestCaseNames
+
+.decl isCheck(check_index: symbol)
+.decl check(check_index: symbol)
+
+allTests(check_index) :- isCheck(check_index).
+testFails(check_index) :-
+  isCheck(check_index), !check(check_index).
+
+// Rules for linking generated relations with the ones in the dl program.
+.decl says_ownsTag(speaker: Principal, owner: Principal, tag: Tag)
+.decl says_hasTag(speaker: Principal, path: AccessPath, t: Tag)
+saysOwnsTag(x, y, z) :- says_ownsTag(x, y, z).
+saysHasTag(x, y, z) :- says_hasTag(x, y, z).
 
 // Manifest
 
@@ -81,8 +100,27 @@ grounded_dummy("dummy_var").
             R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
-.output isCheck
-.output check
+
+// Rules for detecting policy failures.
+.decl testFails(check_index: symbol)
+.output testFails
+.decl allTests(check_index: symbol)
+.output allTests
+.decl duplicateTestCaseNames(testAspectName: symbol)
+.output duplicateTestCaseNames
+
+.decl isCheck(check_index: symbol)
+.decl check(check_index: symbol)
+
+allTests(check_index) :- isCheck(check_index).
+testFails(check_index) :-
+  isCheck(check_index), !check(check_index).
+
+// Rules for linking generated relations with the ones in the dl program.
+.decl says_ownsTag(speaker: Principal, owner: Principal, tag: Tag)
+.decl says_hasTag(speaker: Principal, path: AccessPath, t: Tag)
+saysOwnsTag(x, y, z) :- says_ownsTag(x, y, z).
+saysHasTag(x, y, z) :- says_hasTag(x, y, z).
 
 // Manifest
 
