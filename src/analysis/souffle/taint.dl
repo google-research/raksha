@@ -90,7 +90,7 @@
 saysDowngrades(principal, midpoint, tag) :-
   isTag(tag), claimNotEdge(principal, src, tgt), edgeToMidpointAccessPath(src, tgt, midpoint).
 
-hasTag(tgt, tag) :- claimHasTag(principal, tgt, tag), ownsTag(principal, tag).
+hasTag(tgt, tag) :- saysHasTag(principal, tgt, tag), ownsTag(principal, tag).
 
 mayHaveTag(tgt, tag) :- hasTag(tgt, tag).
 
