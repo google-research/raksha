@@ -28,6 +28,14 @@
 
 namespace raksha::ir {
 
+enum PredicateKind {
+  kAnd,
+  kImplies,
+  kNot,
+  kOr,
+  kTagPresence,
+};
+
 // A Predicate is a boolean expression that can occur upon various Raksha IR
 // structures. Currently, all leaf expressions speak of whether a particular
 // tag is present. Inner nodes include the full range of boolean expressions
@@ -38,6 +46,20 @@ class Predicate {
   // Turns this predicate into a rule body that can be used for checking if
   // the given condition holds.
   virtual std::string ToDatalogRuleBody(const AccessPath &ap) const = 0;
+  virtual PredicateKind GetPredicateKind() const = 0;
+  virtual bool operator==(Predicate const &other) const = 0;
+
+  // Implement a dynamic downcast operation for Predicates. Will return a
+  // downcast to the given type if the predicate is that type, nullptr
+  // otherwise.
+  template<class T>
+  static const T *DynCast(const Predicate &pred) {
+    if (pred.GetPredicateKind() == T::GetKind()) {
+      return static_cast<const T *>(&pred);
+    } else {
+      return nullptr;
+    }
+  }
 };
 
 class And : public Predicate {
@@ -52,6 +74,16 @@ class And : public Predicate {
     return absl::StrFormat(
         kFormatString, lhs_->ToDatalogRuleBody(ap),
         rhs_->ToDatalogRuleBody(ap));
+  }
+
+  static PredicateKind GetKind() { return kAnd; }
+
+  PredicateKind GetPredicateKind() const override { return GetKind(); }
+
+  bool operator==(const Predicate &other) const override {
+    const And *other_and = Predicate::DynCast<And>(other);
+    if (other_and == nullptr) return false;
+    return (*lhs_ == *other_and->lhs_) && (*rhs_ == *other_and->rhs_);
   }
 
  private:
@@ -88,6 +120,19 @@ class Implies : public Predicate {
         consequent_->ToDatalogRuleBody(ap));
   }
 
+  static PredicateKind GetKind() {
+    return PredicateKind::kImplies;
+  }
+
+  PredicateKind GetPredicateKind() const override { return GetKind(); }
+
+  bool operator==(const Predicate &other) const override {
+    const Implies *other_implies = Predicate::DynCast<Implies>(other);
+    if (other_implies == nullptr) { return false; }
+    return (*antecedent_ == *other_implies->antecedent_) &&
+      (*consequent_ == *other_implies->consequent_);
+  }
+
  private:
   std::unique_ptr<Predicate> antecedent_;
   std::unique_ptr<Predicate> consequent_;
@@ -107,6 +152,18 @@ class Not : public Predicate {
         kFormatString, negated_predicate_->ToDatalogRuleBody(ap));
   }
 
+  static PredicateKind GetKind() {
+    return PredicateKind::kNot;
+  }
+
+  PredicateKind GetPredicateKind() const override { return GetKind(); }
+
+  bool operator==(const Predicate &other) const override {
+    const Not *other_not = Predicate::DynCast<Not>(other);
+    if (other_not == nullptr) { return false; }
+    return *negated_predicate_ == *other_not->negated_predicate_;
+  }
+
  private:
   std::unique_ptr<Predicate> negated_predicate_;
 };
@@ -123,6 +180,18 @@ class Or : public Predicate {
     constexpr absl::string_view kFormatString = R"(((%s); (%s)))";
     return absl::StrFormat(kFormatString, lhs_->ToDatalogRuleBody(ap),
                            rhs_->ToDatalogRuleBody(ap));
+  }
+
+  static PredicateKind GetKind() {
+    return PredicateKind::kOr;
+  }
+
+  PredicateKind GetPredicateKind() const override { return GetKind(); }
+
+  bool operator==(const Predicate &other) const override {
+    const Or *other_or = Predicate::DynCast<Or>(other);
+    if (other_or == nullptr) return false;
+    return (*lhs_ == *other_or->lhs_) && (*rhs_ == *other_or->rhs_);
   }
 
  private:
@@ -144,6 +213,23 @@ class TagPresence : public Predicate {
   std::string ToDatalogRuleBody(const AccessPath &access_path) const override {
     constexpr absl::string_view kFormatStr = R"(mayHaveTag("%s", "%s"))";
     return absl::StrFormat(kFormatStr, access_path.ToString(), tag_);
+  }
+
+  static PredicateKind GetKind() {
+    return kTagPresence;
+  }
+
+  PredicateKind GetPredicateKind() const override {
+    return GetKind();
+  }
+
+  bool operator==(const Predicate &other) const override {
+    const TagPresence *other_tag_presence =
+        Predicate::DynCast<TagPresence>(other) ;
+    if (other_tag_presence == nullptr) {
+      return false;
+    }
+    return tag_ == other_tag_presence->tag_;
   }
 
  private:

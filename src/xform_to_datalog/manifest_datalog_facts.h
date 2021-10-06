@@ -23,6 +23,8 @@
 #include "src/ir/edge.h"
 #include "src/ir/tag_check.h"
 #include "src/ir/tag_claim.h"
+#include "src/ir/datalog_print_context.h"
+#include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::xform_to_datalog {
@@ -30,7 +32,14 @@ namespace raksha::xform_to_datalog {
 class ManifestDatalogFacts {
  public:
   static ManifestDatalogFacts CreateFromManifestProto(
-      const arcs::ManifestProto &manifest_proto);
+      const arcs::ManifestProto &manifest_proto,
+      xform_to_datalog::arcs_manifest_tree::ParticleSpecRegistry &
+        particle_spec_registry);
+
+  // A default constructor creates a sensible, legal state (no facts) and
+  // allows a bit more flexibility in constructing objects within which
+  // ManifestDatalogFacts are embedded.
+  ManifestDatalogFacts() {}
 
   ManifestDatalogFacts(
       std::vector<raksha::ir::TagClaim> claims,
@@ -42,9 +51,9 @@ class ManifestDatalogFacts {
   // Print out all contained facts as a single datalog string. Note: this
   // does not contain the header files that would be necessary to run this
   // against the datalog scripts; it contains only facts and comments.
-  std::string ToDatalog() const {
-    auto todatalog_formatter = [](std::string *out, const auto &arg) {
-      out->append(arg.ToDatalog()); };
+  std::string ToDatalog(raksha::ir::DatalogPrintContext &ctxt) const {
+    auto todatalog_formatter = [&](std::string *out, const auto &arg) {
+      out->append(arg.ToDatalog(ctxt)); };
     return absl::StrFormat(
         kFactOutputFormat,
         absl::StrJoin(claims_, "\n", todatalog_formatter),

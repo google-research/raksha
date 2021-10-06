@@ -16,6 +16,7 @@
 #include "src/xform_to_datalog/datalog_facts.h"
 
 #include "src/common/testing/gtest.h"
+#include "src/ir/datalog_print_context.h"
 #include "src/xform_to_datalog/authorization_logic_datalog_facts.h"
 #include "src/xform_to_datalog/authorization_logic_test_utils.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
@@ -31,7 +32,8 @@ TEST_P(DatalogFactsTest, IncludesManifestFactsWithCorrectPrefixAndSuffix) {
   const auto &[manifest_datalog_facts, auth_logic_datalog_facts,
                expected_string] = GetParam();
   DatalogFacts datalog_facts(manifest_datalog_facts, auth_logic_datalog_facts);
-  EXPECT_EQ(datalog_facts.ToDatalog(), expected_string);
+  ir::DatalogPrintContext ctxt;
+  EXPECT_EQ(datalog_facts.ToDatalog(ctxt), expected_string);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -44,7 +46,8 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
-.output checkHasTag
+.output isCheck
+.output check
 
 // Manifest
 
@@ -78,7 +81,8 @@ grounded_dummy("dummy_var").
             R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
-.output checkHasTag
+.output isCheck
+.output check
 
 // Manifest
 
