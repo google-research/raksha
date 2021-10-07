@@ -28,7 +28,7 @@
 // Exactly how the policy principal makes the decision is orthogonal and can be
 // application specific. In this case the policy is similar to role-based 
 // access control. The policy principal allows whichever principal occupies
-// specific role to make the final decision.
+// a specific role to make the final decision.
 
 "DataOwner1" says {
     ownsTag("datum1").
