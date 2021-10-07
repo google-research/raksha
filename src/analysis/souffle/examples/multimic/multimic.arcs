@@ -1,12 +1,7 @@
-// Note: This file marks speculative syntax with a SPECULATIVE comment before
-// the speculative syntax.
-
 // Represents an actual microphone within a smart mic listening to audio.
 particle MicIn
   audio: writes AudioData { }
-// SPECULATIVE: claim a QoS integrity tag.
-//claim audio is userSpeech and is integrity#speechToTextQoS
-  claim audio is userSpeech and is speechToTextQoS
+  claim audio is userSpeech
 
 particle StorageCredentialsSource
   credentials: writes StorageCredentials { }
@@ -32,14 +27,10 @@ particle MicCompute
   // Claim that MicCompute downgrades the label from userSpeech to
   // textTranscript.
   claim asrStorageConn is not userSpeech and is textTranscript and derives from audioIn and derives from asrNeuralNet
-//SPECULATIVE: preserve integrity tag
-//claim asrStorageConn preserves speechToTextQoS from audioIn
 
 particle SpeechToTextStorageSink
   speechToTextIn: reads ASRData { }
-//SPECULATIVE: check integrity tag
-//check speechToTextIn is integrity#speechToTextQoS
-  check speechToTextIn is speechToTextQoS
+  check speechToTextIn is speechToTextQoS and is not userSpeech
 
 recipe DoASR
   m1AsrNetStorage: create
