@@ -13,25 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
+
 // This gives an example with a non-unanimous decision about
 // what can be done with data belonging to multiple sources. It may be
 // non-obvious that this is possible in our system because in order
-// for data to be used, we need to prove that the owner of data allows this.
-// To accomplish this:
+// for data to be used, we need to prove that the owner of data allows this 
+// usage. To accomplish this:
 //    - the data owners both delegate to a principal that represents a policy 
-//    to make the decision (using canSay)
+//    to make the decision (using canSay). They are then bound to this 
+//    decision.
 //    - the data owners each express their preference about what they'd like to 
-//    happen (as an attribute of the form "DataOwner" hasPreference())
-//    - The policy makes the decision using these preferences
-// Exactly how the policy makes the decision is orthogonal and can be 
+//    happen (as an attribute of the form "DataOwner" hasPreference()).
+//    - The policy principal makes the decision using these preferences.
+// Exactly how the policy principal makes the decision is orthogonal and can be
 // application specific. In this case the policy is similar to role-based 
-// access control. The policy allows whichever principal occupies a specific 
-// role make the final decision.
+// access control. The policy principal allows whichever principal occupies
+// specific role to make the final decision.
 
 "DataOwner1" says {
-    owns("datum1").
+    ownsTag("datum1").
 
-    // Delegate to a policy to decide whether or not data can be sent.
+    // Delegate to a policy principal to decide whether or not data can be sent.
     // The data owner opts-in to the policy by doing this delegation, even
     // though the decision might not be DataOwner1's preference because
     // opting in might be the only way to use this service.
@@ -47,7 +49,7 @@
 }
 
 "DataOwner2" says {
-    owns("datum2").
+    ownsTag("datum2").
     
     "RoleBasedDecisionPolicy" canSay 
         "ExampleParticle" may("send_remotely", "datum2").
@@ -66,14 +68,15 @@
     "DataOwner2" canActAs "DeviceOwner".
 }
 
-
 // This is a policy that collects the preferences of both data owners
 // on whether or not they are OK with data being sent. However, the 
 // actual decision depends only on the preference of the principal
 // in a specifc role (DeviceOwner).
 
-// This role-based decision policy is one way of resolving the conflict,
-// but the pattern of delegating 
+// This role-based decision policy is one way of resolving the conflict, but 
+// the pattern can be re-used by changing the code in the decision policy
+// principal. For example, voting could also be implemented (if this language
+// were extended with aggregation).
 "RoleBasedDecisionPolicy" says {
     // The "RoleAuthority" is trusted by the policy to decide who occupies
     // the device owner role.
@@ -89,7 +92,8 @@
     // owners will respect the outcome from the policy.
   
     // In this case, the preference of the device owner is the only one
-    // that matters for both pieces of data.
+    // that matters for both pieces of data. (Here, it is assumed that there
+    // is just one device owner in the system).
     "ExampleParticle" may("send_remotely", "datum1") :-
         PrincipalX canActAs "DeviceOwner",
         PrincipalX hasPreference("do_send_remotely").
