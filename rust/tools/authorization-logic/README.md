@@ -77,11 +77,12 @@ claim, and the recipient uses the public key to check the signature.
 To compile a program called FILENAME stored in INPUT_DIR, run:
 
 ```
-cargo run FILENAME INPUT_DIR OUTPUT_DIR
+cargo run -- --in-dir INPUT_DIR --out-dir OUTPUT_DIR FILENAME
 ```
 
-which will result in a Souffle file called FILENAME.dl in OUTPUT_DIR. If Souffle
-is installed, it will be run on the generated code.
+which will result in a Souffle file called FILENAME.dl in OUTPUT_DIR. INPUT_DIR
+and OUTPUT_DIR are optional, and will use the current working directory if
+unspecified. If Souffle is installed, it will be run on the generated code.
 
 ### Language Guide
 
