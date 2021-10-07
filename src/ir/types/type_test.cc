@@ -260,42 +260,41 @@ const std::tuple<std::string, std::vector<std::string>>
     // Entity with no fields.
     {"entity: { schema: { } }", { "" } },
     // Entity with one primitive field, field1.
-    {
-    "entity: { "
-    "  schema: { "
-    "    fields [ { key: \"field1\", value: { primitive: TEXT } } ]"
-    " } }", { ".field1" } },
+    {R"(
+entity: {
+  schema: {
+    fields [ { key: "field1", value: { primitive: TEXT } } ]} })",
+    { ".field1" } },
     // Entity with one primitive field and a named schema
-    {
-    "entity: { "
-    "  schema: { "
-    "    names: [\"my_schema\"] "
-    "    fields: [ { key: \"field1\", value: { primitive: TEXT } } ]"
-    " } }", { ".field1" } },
+    {R"(
+entity: {
+  schema: {
+    names: ["my_schema"]
+      fields: [ { key: "field1", value: { primitive: TEXT } } ] } })",
+     { ".field1" } },
     // Entity with multiple primitive fields.
-    {
-    "entity: { "
-    "  schema: { "
-    "    fields: [ "
-    "      { key: \"field1\", value: { primitive: TEXT } },"
-    "      { key: \"x\", value: { primitive: TEXT } },"
-    "      { key: \"hello\", value: { primitive: TEXT } }"
-    "    ]"
-    " } }", {".field1", ".x", ".hello"} },
+    {R"(
+entity: {
+  schema: {
+    fields: [
+      { key: "field1", value: { primitive: TEXT } },
+      { key: "x", value: { primitive: TEXT } },
+      { key: "hello", value: { primitive: TEXT } } ] } })",
+      {".field1", ".x", ".hello"} },
     // Entity with sub entities and primitive fields.
-    {
-    "entity: { "
-    "  schema: { "
-    "    fields: [ "
-    "      { key: \"field1\", value: { primitive: TEXT }},"
-    "      { key: \"x\", value: { "
-    "        entity: { schema: { names: [\"embedded\"], fields: ["
-    "          { key: \"sub_field1\", value: { primitive: TEXT } },"
-    "          { key: \"sub_field2\", value: { primitive: TEXT } }"
-    "       ]}}}},"
-    "      { key: \"hello\", value: { primitive: TEXT } }"
-    "    ]"
-    " } }", {".field1", ".x.sub_field1", ".x.sub_field2", ".hello"}},
+    {R"(
+entity: {
+  schema: {
+    fields: [
+      { key: "field1", value: { primitive: TEXT } },
+      { key: "x",
+        value: {
+          entity: { schema: { names: ["embedded"], fields: [
+            { key: "sub_field1", value: { primitive: TEXT } },
+            { key: "sub_field2", value: { primitive: TEXT } }
+           ]}}}},
+      { key: "hello", value: { primitive: TEXT } } ] } })",
+      {".field1", ".x.sub_field1", ".x.sub_field2", ".hello"}},
 };
 
 INSTANTIATE_TEST_SUITE_P(

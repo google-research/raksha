@@ -53,6 +53,10 @@ int main(int argc, char **argv) {
   }
 
   // Output headers we may need and declarations for relations.
+  // Note: Most other escaped strings in the file have turned into raw
+  // strings to improve readability. This one has been left because the
+  // amount of newlines in it makes it actually more readable as an escaped
+  // string.
   datalog_test_stream << "#include \"taint.dl\"\n\n"
                       << ".decl dummy(input_num: number)\n\n";
 
