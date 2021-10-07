@@ -12,6 +12,7 @@ tink-signature = "^0.2"
 # bincode and serde are used for signing policy claims
 bincode = "^1.1.4"
 serde = "^1.0"
+structopt = "0.3"
 
 [package.metadata.raze]
 # The path at which to write output files.

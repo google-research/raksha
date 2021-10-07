@@ -32,16 +32,16 @@ pub extern "C" fn generate_datalog_facts_from_authorization_logic(
     c_filename:  *const c_char,
     c_in_dir: *const c_char,
     c_out_dir: *const c_char,
-    c_decl_skip_vec: *const c_char
+    c_decl_skip: *const c_char
 ) -> c_int {
   let result = std::panic::catch_unwind(|| {
     let filename = unsafe { CStr::from_ptr(c_filename) }.to_str().unwrap();
     let in_dir = unsafe { CStr::from_ptr(c_in_dir) }.to_str().unwrap();
     let out_dir = unsafe { CStr::from_ptr(c_out_dir) }.to_str().unwrap();
     let decl_skip_vec = unsafe {
-        CStr::from_ptr(c_decl_skip_vec)
-    }.to_str().unwrap();
-    compilation_top_level::compile(filename, in_dir, out_dir, decl_skip_vec);
+        CStr::from_ptr(c_decl_skip)
+    }.to_str().unwrap().split(',').map(|s| s.to_string()).collect();
+    compilation_top_level::compile(filename, in_dir, out_dir, &decl_skip_vec);
   });
   if result.is_err() {
     eprintln!("error: rust panicked");
