@@ -18,11 +18,14 @@ package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
     name = "arcs_manifest_tree",
-    srcs = glob(
-        ["*.cc"],
-        exclude = ["*_test.cc"],
-    ),
-    hdrs = glob(["*.h"]),
+    srcs = [
+        "handle_connection_spec.cc",
+        "particle_spec.cc",
+    ],
+    hdrs = [
+        "handle_connection_spec.h",
+        "particle_spec.h",
+    ],
     deps = [
         "//src/common/logging",
         "//src/ir",
