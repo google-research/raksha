@@ -1,0 +1,132 @@
+// UserA is the device owner. UserA has a high level of trust in their own
+// device.
+"UserA" says {
+  "UserA" hasVoiceRecordingPreference("AlwaysOK").
+  "DevicePolicyAuthority" canSay downgrades(tagX) :- isTag(tagX).
+
+   "UserA" criticalDeviceServiceOverride("TextToSpeech").
+}
+
+// UserB is a guest user. UserB is somewhat privacy sensitive. They want their
+// voice recorded only as a transcript and will only recognize authorities from
+// companies that they trust.
+"UserB" says {
+  // UserB has a set of sensitive device tags, which it always wants a say in.
+  sensitiveDeviceTag("userSpeech").
+
+  // UserB has a set of trusted companies that they have ongoing relationships
+  // with.
+  trustedCompanies("AWellKnownTechCompany").
+
+  CompanyX canActAs "TrustedCompany" :- trustedCompanies(CompanyX).
+
+  // UserB claims ownership over any tag in the sensitive tag set.
+  ownsTag(tagX) :- sensitiveDeviceTag(tagX).
+
+  // UserB would like to only 
+  "UserB" hasVoiceRecordingPreference("TranscriptOnly").
+
+  // By default, UserB does not allow sensitive device tags to be downgraded.
+  PolicyAuthorityX canSay downgrades(tagX) :-
+    isTag(tagX), !sensitiveDeviceTag(tagX).
+
+  // However, it does allow downgrading sensitive device tags by policy
+  // authorities that are recognized as policy authorities by a company that
+  // they trust.
+  PolicyAuthorityX canSay downgrades(tagX) :-
+    sensitiveDeviceTag(tagX), CompanyX canActAs "TrustedCompany",
+    CompanyX says PolicyAuthorityX recognizedAsAuthority().
+
+  isTag("userSpeech").
+}
+
+// UserC is a very privacy sensitive user. They do not trust anyone to store
+// their voice information, even as a transcript. They recognize policy
+// authorities only to get those policy authorities to not record their voice
+// or to get notifications that their voice may be being recorded so they can
+// leave.
+"UserC" says {
+
+  sensitiveDeviceTag("userSpeech").
+
+  ownsTag(tagX) :- sensitiveDeviceTag(tagX).
+
+  "UserC" hasVoiceRecordingPolicy("Never").
+
+  // This privacy-sensitive user only recognizes the authority of device
+  // authorities if they claim to notify when overriding your policy
+  // preferences.
+  PolciyAuthorityX canSay downgrades(tagX) :-
+    sensitiveDeviceTag(tagX),
+    PolicyAuthorityX says
+      PolicyAuthorityX notifiesOnPreferenceOverride(tagX).
+}
+
+// This is the device policy authority. It recognizes users as
+// "PolicyCollaborators", allowing them to influence the device policy as long
+// as they submit to its authority, which in this case involves allowing it to
+// downgrade the userSpeech tag.
+"DevicePolicyAuthority" says {
+  // "UserA" is the owner of the device.
+  "UserA" canActAs "DeviceOwner".
+
+  // A collaboration tag can be influenced by PolicyCollaborators. The policy
+  // authority has one tag that it wishes to allow collaboration on,
+  // userSpeech. You could imagine this being a list of facts specifying
+  // many collaboration tags.
+  isCollaborationTag("userSpeech").
+
+  // The policy authority claims to own collaboration tags.
+  ownsTag(tagX) :- isCollaborationTag(tagX).
+
+  // This policy authority is promising that it will always notify when it has
+  // to override a user preference.
+  notifiesOnPreferenceOverride(tagX) :- isCollaborationTag(tagX).
+
+  // The DevicePolicyAuthority will only grant permissions to users to
+  // influence collaboration tags if they say it can downgrade those
+  // collaboration tags.
+  UserX recognizesAsAuthority("DevicePolicyAuthority") :-
+    isCollaborationTag(tagX),
+    UserX says "DevicePolicyAuthority" canSay downgrades(tagX).
+
+  // For those that recognize its authority, it grants the role
+  // "PolicyCollaborator", allowing influence over policy decisions.
+  UserX canActAs "PolicyCollaborator" :-
+    UserX recognizesAsAuthority("DevicePolicyAuthority").
+
+  // The DeviceOwner can also act as a policy collaborator.
+  UserX canActAs "PolicyCollaborator" :- UserX canActAs "DeviceOwner".
+
+  // Policy collaborators can influence collaboration tags.
+  "PolicyCollaborator" canInfluenceTag(tagX) :- isCollaborationTag(tagX).
+
+  // Which means that they are recognized in having part ownership if they
+  // claim to have part ownership.
+  UserX canSay ownsTag(tagX) :-
+    UserX canInfuluenceTag(tagX), UserX says ownsTag(tagX).
+
+  collaboratorDisallowsTextToSpeech(UserX) :-
+    UserX canActAs "PolicyCollaborator",
+    !(UserX says UserX hasVoiceRecordingPolicy("Always")),
+    !(UserX says UserX hasVoiceRecordingPolicy("TranscriptOnly")).
+
+  // MicCompute can downgrade user speech if no policy collaborator disallows
+  // it.
+  "MicCompute" canSay downgrades("userSpeech") :-
+    UserX canActAs "PolicyCollaborator",
+    !collaboratorDisallowsTextToSpeech(UserX). 
+
+  // Or if the DeviceOwner has designated TextToSpeech a critical service and
+  // has installed an override.
+  "MicCompute" canSay downgrades("userSpeech") :-
+    UserX canActAs "DeviceOwner",
+    UserX says criticalDeviceServiceOverride("TextToSpeech").
+}
+
+// Why should users trust "DevicePolicyAuthority"? Because is recognized as an
+// authority by "WellKnownTechCompany", with which they probably have a history
+// of some degree of trust (or at least not active distrust).
+"WellKnownTechCompany" says {
+  "DevicePolicyAuthority" recognizedAsAuthority().
+}
