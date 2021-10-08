@@ -29,6 +29,7 @@ mod test {
             query_expects: vec![
                 ("q1", true),
                 ("q2", false),
+                ("q3", false),
             ]
         });
     }
