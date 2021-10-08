@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-mod test_claim_importing;
-mod test_export_signatures;
-mod test_queries;
-mod test_signing;
-mod test_decl_skip;
-mod test_dots_and_quotes;
-mod test_negation;
+#[cfg(test)]
+mod test {
+    use crate::{
+        ast::*, compilation_top_level::*, souffle::souffle_interface::*,
+        test::test_queries::test::*,
+    };
+    use std::fs;
+
+    #[test]
+    fn test_negation() {
+        run_query_test(QueryTest {
+            filename: "negation",
+            query_expects: vec![
+                ("q1", true),
+                ("q2", false),
+            ]
+        });
+    }
+}

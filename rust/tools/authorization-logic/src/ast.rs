@@ -28,6 +28,7 @@ pub struct AstPrincipal {
 /// implemented manually.
 #[derive(Debug, Hash, Clone, Serialize, Deserialize)]
 pub struct AstPredicate {
+    pub sign: bool, // false if negatedm, true otherwise
     pub name: String,
     pub args: Vec<String>,
 }

@@ -1,0 +1,8 @@
+"TestPrin" says foo("x") :- !bar("x").
+"TestPrin" says baz("x") :- bar("x").
+
+// yes
+q1 = query "TestPrin" says foo("x")?
+// no
+q2 = query "TestPrin" says baz("x")?
+

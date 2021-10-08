@@ -44,6 +44,10 @@ fn construct_principal(ctx: &PrincipalContext) -> AstPrincipal {
 }
 
 fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
+    let sign_ = match ctx.NEG() {
+        Some(_) => false,
+        None => true
+    };
     let name_ = ctx.ID(0).unwrap().get_text();
     let mut args_ = Vec::new();
     let mut idx = 1;
@@ -54,6 +58,7 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
         idx += 1;
     }
     AstPredicate {
+        sign: sign_,
         name: name_,
         args: args_,
     }
