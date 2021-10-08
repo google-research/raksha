@@ -30,7 +30,7 @@ mod test {
             f: AstFact::AstFlatFactFact {
                 f: AstFlatFact::AstPredFact {
                     p: AstPredicate {
-                        sign: true,
+                        sign: Sign::Positive,
                         name: "isInLondon".to_string(),
                         args: vec!["Highbury".to_string()],
                     },
@@ -56,7 +56,7 @@ mod test {
             f: AstFact::AstFlatFactFact {
                 f: AstFlatFact::AstPredFact {
                     p: AstPredicate {
-                        sign: true,
+                        sign: Sign::Positive,
                         name: "isInLondon".to_string(),
                         args: vec!["Neptune".to_string()],
                     },
@@ -84,7 +84,7 @@ mod test {
             f: AstFact::AstFlatFactFact {
                 f: AstFlatFact::AstPredFact {
                     p: AstPredicate {
-                        sign: true,
+                        sign: Sign::Positive,
                         name: "isInLondon".to_string(),
                         args: vec!["Highbury".to_string()],
                     },

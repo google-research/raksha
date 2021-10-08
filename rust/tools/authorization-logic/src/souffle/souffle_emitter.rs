@@ -54,7 +54,7 @@ impl SouffleEmitter {
     // from generating two declarations, the sign here is always true.
     fn pred_to_declaration(p: &AstPredicate) -> AstPredicate {
         AstPredicate {
-            sign: true,
+            sign: Sign::Positive,
             name: p.name.clone(),
             args: (0..p.args.len())
                 .map(|i| String::from("x") + &i.to_string())
@@ -65,7 +65,10 @@ impl SouffleEmitter {
     fn emit_pred(&mut self, p: &AstPredicate) -> String {
         let decl = SouffleEmitter::pred_to_declaration(p);
         self.decls.insert(decl);
-        let neg = if p.sign { "" } else { "!" };
+        let neg = match p.sign {
+            Sign::Positive => "",
+            Negative => "!"
+        };
         format!("{}{}({})", neg, &p.name, p.args.join(", "))
     }
 

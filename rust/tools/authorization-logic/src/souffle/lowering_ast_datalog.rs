@@ -155,7 +155,7 @@ impl LoweringToDatalogPass {
                 let mut args_ = Vec::new();
                 args_.push(prin.name.clone());
                 AstPredicate {
-                    sign: true,
+                    sign: Sign::Positive,
                     name: String::from("canActAs"),
                     args: args_,
                 }
@@ -190,7 +190,7 @@ impl LoweringToDatalogPass {
 
                 // This is `speaker says x canActAs p`.
                 let x_as_p = AstPredicate {
-                    sign: true,
+                    sign: Sign::Positive,
                     name: String::from("canActAs"),
                     args: [x.name.clone(), p.name.clone()].to_vec(),
                 };
@@ -302,7 +302,7 @@ impl LoweringToDatalogPass {
     // constructed in consts.
     fn dummy_fact() -> AstPredicate {
         AstPredicate {
-            sign: true,
+            sign: Sign::Positive,
             name: "grounded_dummy".to_string(),
             args: vec!["\"dummy_var\"".to_string()],
         }
@@ -314,7 +314,7 @@ impl LoweringToDatalogPass {
         let (main_fact, _) = self.fact_to_dlir(&query.fact, &query.principal);
         let main_fact = push_prin(String::from("says_"), &query.principal, &main_fact);
         let lhs = AstPredicate {
-            sign: true,
+            sign: Sign::Positive,
             name: query.name.clone(),
             args: vec![String::from("\"dummy_var\"")],
         };

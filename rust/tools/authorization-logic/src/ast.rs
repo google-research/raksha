@@ -23,12 +23,15 @@ pub struct AstPrincipal {
     pub name: String,
 }
 
+#[derive(Copy, Debug, Hash, Clone, Serialize, Deserialize)]
+pub enum Sign { Negated, Positive }
+
 /// Hash and Eq are needed so that AstPred can be used in a HashSet in
 /// SouffleEmitter. The derive strategy for Eq does not work, so it is
 /// implemented manually.
 #[derive(Debug, Hash, Clone, Serialize, Deserialize)]
 pub struct AstPredicate {
-    pub sign: bool, // false if negatedm, true otherwise
+    pub sign: Sign,
     pub name: String,
     pub args: Vec<String>,
 }
