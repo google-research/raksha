@@ -44,13 +44,15 @@ TEST_P(RoundTripHandleConnectionSpecProtoTest,
 // and we are checking that it can be made back into an identical proto, so
 // that suffices for this test.
 static const ProtoStringAndExpectations string_and_expections_array[] = {
-    { .proto_str = "name: \"foo\" direction: READS type: { primitive: TEXT }",
+    { .proto_str =
+        R"(name: "foo" direction: READS type: { primitive: TEXT })",
       .expected_name = "foo", .expected_reads = true, .expected_writes = false},
-    { .proto_str = "name: \"bar\" direction: WRITES type: { primitive: TEXT }",
+    { .proto_str =
+        R"(name: "bar" direction: WRITES type: { primitive: TEXT })",
       .expected_name = "bar", .expected_reads = false,
       .expected_writes = true },
     { .proto_str =
-        "name: \"baz\" direction: READS_WRITES type: { primitive: TEXT }",
+        R"(name: "baz" direction: READS_WRITES type: { primitive: TEXT })",
       .expected_name = "baz", .expected_reads = true, .expected_writes = true}
 };
 
@@ -101,33 +103,25 @@ std::string sample_particle_spec_names[] = {
 };
 
 ProtoStringAndExpectedAccessPathPieces protos_and_access_path_info[] = {
-    { .textproto = "name: \"handle_spec\" direction: READS "
-                   "type: { primitive: TEXT }",
+    { .textproto =
+        R"(name: "handle_spec" direction: READS type: { primitive: TEXT })",
       .handle_connection_name = "handle_spec",
       .access_path_selectors_tostrings = { "" } },
-    { .textproto =
-         "name: \"hs\" direction: READS_WRITES "
-         "type: { entity: { "
-         "      schema: { "
-         "        fields [ { key: \"field1\", value: { primitive: TEXT } } ]"
-         "     } } }",
+    { .textproto = R"(
+name: "hs" direction: READS_WRITES
+type: { entity: { schema: { fields [
+  { key: "field1", value: { primitive: TEXT } } ] } } })",
          .handle_connection_name = "hs",
          .access_path_selectors_tostrings = { ".field1" }},
-    { .textproto =
-      "name: \"spechandle\" direction: WRITES "
-      "type {"
-      "entity: { "
-      "  schema: { "
-      "    fields: [ "
-      "      { key: \"field1\", value: { primitive: TEXT }},"
-      "      { key: \"x\", value: { "
-      "        entity: { schema: { names: [\"embedded\"], fields: ["
-      "          { key: \"sub_field1\", value: { primitive: TEXT } },"
-      "          { key: \"sub_field2\", value: { primitive: TEXT } }"
-      "       ]}}}},"
-      "      { key: \"hello\", value: { primitive: TEXT } }"
-      "    ]"
-      " } } }",
+    { .textproto = R"(
+name: "spechandle" direction: WRITES
+type { entity: { schema: { fields: [
+  { key: "field1", value: { primitive: TEXT } },
+  { key: "x", value: {
+      entity: { schema: { names: ["embedded"], fields: [
+        { key: "sub_field1", value: { primitive: TEXT } },
+        { key: "sub_field2", value: { primitive: TEXT } } ]}}}},
+  { key: "hello", value: { primitive: TEXT } } ] } } })",
       .handle_connection_name = "spechandle",
       .access_path_selectors_tostrings = {
         ".field1", ".x.sub_field1", ".x.sub_field2", ".hello"
