@@ -1,0 +1,140 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+"EndUser" says {
+    // The user owns two tags that reprsent their data:
+    //      - Raw video from the camera
+    //      - Text describing a product that was in frame
+    // The user gives different permissions for how each can be used (more is 
+    // allowed with the text). Because the transformation of data affects what 
+    // can be done with it, it is also controlled by the policy.
+    ownsTag("raw_video_tag").
+    ownsTag("product_id_tag").
+    
+    // Only local, in-memory computation can be done on raw_video_tags, but
+    // product IDs can be sent to remote services. The EndUser trusts the TPPR 
+    // to grant just these permissions to specific relevant pieces of software 
+    // (the variable principal, SoftwareX).
+    "ThirdPartyPrivacyReviewer" canSay SoftwareX
+        may("in_memory_computation","raw_video_tag") :- isPrincipal(SoftwareX).
+    "ThirdPartyPrivacyReviewer" canSay SoftwareX
+        may("egress_to_shopping_service", "product_id_tag") :- isPrincipal(SoftwareX).
+      
+    // These lines say the end user trusts (i.e., delegates to) the TPPR to
+    // faithfully say when a data transformation from raw camera video to the
+    // name of a product has taken place. The TPPR can remove the "raw_video"
+    // tag only when the "product_id_tag" is added.
+    "ThirdPartyPrivacyReviewer" canSay declassifies(pathX, "raw_video_tag") :-
+        hasTag(pathX, "product_id_tag"),  
+        isAccessPath(pathX).
+
+    // The user trusts TPPR to faithfully apply its tags.
+    "ThirdPartyPrivacyReviewer" canSay hasTag(x, y) :- 
+        isAccessPath(x), isTag(y).
+
+    // These are boilerplate that just mention that these principals exist.
+    // Ideally we'll get rid of this in the future.
+    isPrincipal("DataSource").
+    isPrincipal("ImageDetector").
+    isPrincipal("ImageSelector").
+    isPrincipal("ProductIdOutput").
+}
+
+"ThirdPartyPrivacyReviewer" says {
+    // TPPR is aware of the specific software modules in the pipeline,
+    // and grants them the needed permissions.
+    "ImageDetector" may("in_memory_computation", "raw_video_tag").
+    "ImageSelector" may("in_memory_computation", "raw_video_tag").
+    "ProductIdOutput" may("egress_to_shopping_service",
+        "product_id_tag").
+
+    // Remove raw_video_tag and add product_id_tag
+    "ImageSelector" canSay declassifies(pathX, "raw_video_tag") :-
+        hasTag(pathX, "product_id_tag"), 
+        isAccessPath(pathX).
+    "ImageSelector" canSay hasTag(pathX, "product_id_tag") :- 
+        isAccessPath(pathX).
+}
+
+"ImageDetector" says "ImageDetector"
+    will("in_memory_computation", "raw_video_tag").
+"ImageSelector" says {
+    "ImageSelector" will("in_memory_computation", "raw_video_tag").
+    declassifies("is_select_image_id", "raw_video_tag").
+    hasTag("is_select_image_id", "product_id_tag").
+}
+"ProductIdOutput" says 
+    "ProductIdOutput" will("egress_to_shopping_service", "product_id_tag").
+
+// May / Will check:
+// May - used by data owners to describe how data may be used.
+// Will - used by data stewards to describe how they'd like to use data.
+// The taint analysis tracks sensitive data as it moves, and this taint
+// analysis is used to check that all the uses described with `will` are 
+// permitted by the owners (using `may'). Roughly this is:
+//
+// For each particle P, for each tag t in union over tags in read edges of P,
+//      for each statement of the form:
+//          `P says will <RELATION> using <TAG>`
+//      prove
+//          `ownsTag(Q, <TAG>)`
+//          `Q says may <RELATION> using <TAG>`
+
+// These queries mechanically test the "checks" that should happen using the 
+// data. The comments illustrate the taint analysis which is used to figure out
+// what checks need to happen.
+
+// Particle: DataSource
+// No read handles
+
+// Particle: Image Detector
+// taint of read handles: 
+//    taint(id_sensor_packet.camera_feed) = { "raw_video_tag" }
+//    taint(id_sensor_packet.video_resolution) = { }
+//    taint(id_image_detection_model) = { }
+// Usage:
+//    will("in_memory_computation", "raw_video_tag").
+//      Owner("raw_video_tag") = "EndUser"
+may_video_do_computation = query "EndUser" says 
+    "ImageDetector" may("in_memory_computation", "raw_video_tag")?
+
+// Particle: UserSelectionActionSource
+// No read handles
+
+// Particle: ImageSelector
+// taint of read handles:
+//      taint(is_detection_boxes) = { "raw_video_tag" }
+//      taint(is_user_selection_action) = { }
+// usage: 
+//      will("in_memory_computation", "raw_video_tag")
+may_selector_do_computation = query "EndUser" says
+    "ImageSelector" may("in_memory_computation", "raw_video_tag")?
+
+// Particle: ProductIdOutput
+// taint of read handles 
+//   before declassification:
+//      taint(pio_select_image_id) = { "raw_video_tag" }
+//   after declassification:
+//      taint(pio_select_image_id) = { "product_id_tag" }
+// usage:
+//      will("egress_to_shopping_service", "product_id_tag")
+may_shopping_service_egress = query "EndUser" says
+    "ProductIdOutput" may("egress_to_shopping_service", "product_id_tag")?
+
+////// Sanity check for some false thing
+// expected: false
+may_other_prin_do_computation = query "EndUser" says
+    "SomeOtherPrincipal" may("in_memory_computation", "raw_video_tag")?
