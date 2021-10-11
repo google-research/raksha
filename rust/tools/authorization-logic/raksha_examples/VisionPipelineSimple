@@ -79,6 +79,12 @@
 "ProductIdOutput" says 
     "ProductIdOutput" will("egress_to_shopping_service", "product_id_tag").
 
+//----------------------------------------------------------------------------- 
+// END OF POLICY CODE
+//-----------------------------------------------------------------------------
+// Everything below this line is queries and comments that explain how this 
+// ties to the taint analysis and also test this connection.
+
 // May / Will check:
 // May - used by data owners to describe how data may be used.
 // Will - used by data stewards to describe how they'd like to use data.
