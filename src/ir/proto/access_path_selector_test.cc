@@ -67,10 +67,9 @@ TEST_P(AccessPathSelectorsFromProtoTest, AccessPathSelectorsFromProtoTest) {
 static const std::tuple<std::string, std::string>
     access_path_selectors_proto_tostring_pairs[]{
         {"", ""},
-        {"selectors: { field: \"foo\" }", ".foo"},
-        {"selectors: [{ field: \"foo\" }, { field: \"bar\" }]", ".foo.bar"},
-        {"selectors: [{ field: \"foo\" }, { field: \"bar\" }, { field: \"baz\" "
-         "}]",
+        {R"(selectors: { field: "foo" })", ".foo"},
+        {R"(selectors: [{ field: "foo" }, { field: "bar" }])", ".foo.bar"},
+        {R"(selectors: [{ field: "foo" }, { field: "bar" }, { field: "baz" }])",
          ".foo.bar.baz"},
     };
 

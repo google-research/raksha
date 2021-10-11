@@ -36,8 +36,7 @@ static const std::tuple<Edge, std::string> edge_todatalog_pairs[] = {
             AccessPathRoot(HandleConnectionAccessPathRoot(
                 "recipe2", "particle2", "handle2")),
             AccessPathSelectors(Selector(FieldSelector("field2"))))),
-        "edge(\"recipe.particle.handle.field1\", "
-        "\"recipe2.particle2.handle2.field2\")."},
+        R"(edge("recipe.particle.handle.field1", "recipe2.particle2.handle2.field2").)"},
     { Edge(
             AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
                 "r", "p", "h")),
@@ -45,7 +44,7 @@ static const std::tuple<Edge, std::string> edge_todatalog_pairs[] = {
             AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
                 "r", "p", "h2")),
                        x_y_access_path_selectors)),
-      "edge(\"r.p.h.x.y\", \"r.p.h2.x.y\")." },
+      R"(edge("r.p.h.x.y", "r.p.h2.x.y").)" },
     { Edge(
           AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
               "pre", "fix", "1")),
@@ -53,7 +52,7 @@ static const std::tuple<Edge, std::string> edge_todatalog_pairs[] = {
           AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
               "pre", "fix", "2")),
                      AccessPathSelectors())),
-      "edge(\"pre.fix.1\", \"pre.fix.2\")."} };
+      R"(edge("pre.fix.1", "pre.fix.2").)"} };
 
 class EdgeToDatalogTest :
     public testing::TestWithParam<std::tuple<Edge, std::string>> {};
