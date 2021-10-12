@@ -69,15 +69,32 @@
         isAccessPath(pathX).
 }
 
+// The following policy statements describe some aspects of the behavior of 
+// particles. They could also be written as annotations in particle manifests.
+// These are entered by a developer who has inspected the code in these 
+// particles.
+
 "ImageDetector" says "ImageDetector"
-    will("in_memory_computation", "raw_video_tag").
+    will("in_memory_computation", "id_sensor_data_packet.camera_feed").
 "ImageSelector" says {
-    "ImageSelector" will("in_memory_computation", "raw_video_tag").
+    "ImageSelector" will("in_memory_computation", "is_detection_boxes").
     declassifies("is_select_image_id", "raw_video_tag").
     hasTag("is_select_image_id", "product_id_tag").
 }
 "ProductIdOutput" says 
     "ProductIdOutput" will("egress_to_shopping_service", "product_id_tag").
+
+// This illustrates how the annotations for "ImageSelector" can be added to 
+// particle manifests:
+//
+// particle ImageSelector
+//     is_detection_boxes: reads ImageDetectionBoxes {}
+//     is_user_selection_action: reads UserSelectionAction {}
+//     is_select_image_id: writes SelectImageId {}
+//     //---- These are the annotations:
+//     claim is_select_image_id is product_id_tag
+//     claim will "in_memory_computation" with is_detection_boxes
+//     claim declassifies raw_video_tag from is_selected_image_id
 
 //----------------------------------------------------------------------------- 
 // END OF POLICY CODE
