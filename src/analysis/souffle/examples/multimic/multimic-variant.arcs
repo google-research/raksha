@@ -1,0 +1,69 @@
+// To be able to handle this use-case, since we don't have information about 
+// policies or who is even in the room until runtime, we need to evaluate these 
+// checks at runtime. The taint analysis could work similarly to the static one 
+// we have now, but it happens at runtime: reading from handles causes the tags 
+// on that handle to propagate to the write handles. Downgrades still remove 
+// tags.
+
+// Represents an actual microphone within a smart mic listening to audio.
+particle MicIn
+  audio: writes AudioData { }
+  // MicIn says hasTag("audio", unidentified_people::userSpeech)
+  // NOTE: at runtime, this also receives facts that add tags for the 
+  // identified users from "MobileDeviceRuntime" (see also comment in 
+  // multimic.authlogic).
+
+// Storage credentials can be in the form of authorization logic facts
+// and guarded by the may/will check. So I didn't include credentials checking 
+// here.
+
+particle Notifier
+  audioIn: reads AudioData { }
+  networkChannelsToUserDevices: writes Notification { }
+  // (This could be more like "claims { ... } " to keep it more in Arcs style.)
+  // Notifier says {
+  //    will("deliver_privacy_notifications", "audioIn").
+  //
+  // }
+
+// Represents the CPU within the mic.
+particle MicCompute
+  audioIn: reads AudioData { }
+  asrNeuralNet: reads ASRNeuralNet { }
+  asrStorageConn: writes ASRData { }
+  // Need to evaluate this at runtime since information about user's
+  // policies are not known until then.
+  // MicCompute says {
+  //    "MobileDeviceRuntime" canSay isInRoom(UserX)
+  //        :- isUser(UserX). // we would need to figure out how to get rid of 
+  //                          // this isUser part
+  //    will("local_computation", "audioIn"). 
+  //    // Assumes we can figure out tags with namespaces like this:
+  //    downgrades("asrStorageConn", UserX::userSpeech) :- IsInRoom(UserX).
+  //    hasTag("asrStorageConn", UserX::userSpeech) :- isInRoom(UserX).
+  // }
+
+particle SpeechToTextStorageSink
+  speechToTextIn: reads ASRData { }
+  check speechToTextIn is speechToTextQoS and is not userSpeech
+  // SpeechToTextStorageSink says {
+  //    will("store", speechToTextIn).
+  //    
+  // }
+
+// Took out the recipe, but you can probably figure out what it is supposed to 
+// be from the above.
+//
+// /////// Outcome:
+
+// When UserA and UserB are in the room (or some subset), MicCompute and 
+// SpeechToText can run:
+//      - UserA's policy permits MicCompute to run because UserA's policy 
+//      permits any action and any downgrades to happen on A's data.
+//      StorageSink can run because  A permits any action on any of A's data
+//      - UserB's policy permits MicCompute to run because it only does local 
+//      computation on B's data, and it permits the transformation of the 
+//      speech into text via a downgrade. UserB's policy permits StorageSink
+//      to run because it only has UserB's text when it stores.
+// When UserC is in the room only the Notifier particle can run, because 
+// notification delivery on speech is the only action permitted

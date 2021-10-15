@@ -1,0 +1,71 @@
+// When "UserX" enters the TrustedCompany room, a runtime on the user's
+// mobile device sends a packet to the microphone which contains the following
+// facts serialized (and with relevant signatures):
+// "MobileDeviceRuntime" says {
+//     hasTag("MicIn.audio", "UserX::userSpeech").
+//     isInRoom("UserX").
+// }
+// - Also passes along the facts by "UserX" (which are signed with UserX's key).
+//
+// Also we add an axiom in raksha that says all principals own tags in their
+// namespace. Roughly: `PrincipalY says ownsTag("PrincipalX::_")` (forall X, Y).
+// (As a result, there are no more facts of the form 
+//      `PrincipalX says ownsTag(_)`).
+
+// UserA is the device owner. UserA has a high level of trust in their own
+// device.
+
+"UserA" says {
+  // The user allows the userSpeech tag to just be dropped, or for any
+  // action to be done with it.
+  "TrustedCompany" canSay downgrades("UserX::userSpeech").
+  "TrustedCompany" canSay may(anyActionX, anyPathX) :-
+    isAction(anyActionX), isPath(anyPathX).
+}
+
+// UserB is a guest user. UserB is somewhat privacy sensitive. They want their
+// voice recorded only as a transcript and will only recognize authorities from
+// companies that they trust.
+"UserB" says {
+  // UserB has a set of trusted companies that they have ongoing relationships
+  // with.
+  "AWellKnownTechCompany" canActAs "TrustedCompany".
+
+  // UserB would like to only allow transcripts to be stored. Audio can only be 
+  // used on-device and in-memory.
+  // (In practice, PrincipalX is going to be any software module of 
+  // "TrustedCompany"'s choosing).
+  "TrustedCompany" canSay PrincipalX
+    may("local_computation", "UserB::userSpeech") :- isPrincipal(PrincipalX).
+  "TrustedCompany" canSay PrincipalX
+    may("store", "UserB::speechTranscript") :- isPrincipal(PrincipalX).
+  // UserB trusts TrustedCompany to properly transform userSpeech into just 
+  // transcripts.
+  "TrustedCompany" canSay downgrades(pathX, "UserB::userSpeech") :-
+    hasTag(pathX, "UserB::speechTranscript").
+}
+
+// UserC is a very privacy sensitive user. They do not trust anyone to store
+// their voice information, even as a transcript. They recognize policy
+// authorities only to get those policy authorities to not record their voice
+// or to get notifications that their voice may be being recorded so they can
+// leave.
+"UserC" says {
+  "TrustedCompany" canSay PrincipalX
+      may("deliver_privacy_notifications", "UserC::userSpeech")
+
+  // Unlike UserB, UserC does NOT give any additional permissions for data
+  // that has been transformed into a transcript.
+}
+
+// TrustedCompany delegates the needed permissions to the specific particles 
+// after having done review
+"TrustedCompany" says {
+    "Notifier" canSay will("deliver_privacy_notifications", "audioIn").
+    "MicCompute" may("local_computation", "audioIn").
+    "MicCompute" canSay downgrades("asrStorageConn", UserX::userSpeech) :-
+        isInRoom(UserX).
+    "MicCompute" canSay hasTag("asrStorageConn", UserX::userSpeech) :-
+        IsInRoom(UserX).
+    "SpeechToTextStorageSink" may("store", speechToTextIn).
+}
