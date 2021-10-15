@@ -24,7 +24,7 @@ mod test {
 
     #[test]
     fn test_dots_in_ids() {
-        compile("dotsInNames", "test_inputs", "test_outputs", "");
+        compile("dotsInNames", "test_inputs", "test_outputs", &Vec::new());
         // this test is just about not having syntax errors
         assert!(true);
     }
@@ -39,7 +39,7 @@ mod test {
             "test_keys/p1q_pub.json",
             "test_keys/p1q_priv.json"
         );
-        compile("quotesInExports", "test_inputs", "test_outputs", "");
+        compile("quotesInExports", "test_inputs", "test_outputs", &Vec::new());
 
         // this test is just about not having syntax errors
         assert!(true);

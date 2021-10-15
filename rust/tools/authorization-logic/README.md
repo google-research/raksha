@@ -84,6 +84,13 @@ which will result in a Souffle file called FILENAME.dl in OUTPUT_DIR. INPUT_DIR
 and OUTPUT_DIR are optional, and will use the current working directory if
 unspecified. If Souffle is installed, it will be run on the generated code.
 
+To see more details of how to compile a program, including other command-line
+options available, run:
+
+```
+cargon run -- --help
+```
+
 ### Language Guide
 
 #### Statements, variables, and constants
