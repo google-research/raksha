@@ -51,12 +51,20 @@ struct Opt {
     // Can be passed as -s or --skip. Passed as a comma-separated list.
     #[structopt(short = "s", long = "skip")]
     decl_skip: Vec<String>,
+
+    /// Whether to skip running Souffle on the compiled datalog
+    // Can be passed only as --skip-souffle
+    #[structopt(long)]
+    skip_souffle: bool,
 }
 
 fn main() {
     let opt = Opt::from_args();
-    compilation_top_level::compile(&opt.filename, &opt.in_dir, &opt.out_dir,
-        &opt.decl_skip);
-    souffle::souffle_interface::run_souffle(&format!("{}/{}.dl", &opt.out_dir,
-                                                    &opt.filename), &opt.out_dir);
+    compilation_top_level::compile(&opt.filename, &opt.in_dir, &opt.out_dir, &opt.decl_skip);
+    if (!opt.skip_souffle) {
+        souffle::souffle_interface::run_souffle(
+            &format!("{}/{}.dl", &opt.out_dir, &opt.filename),
+            &opt.out_dir,
+        );
+    }
 }
