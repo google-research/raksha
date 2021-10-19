@@ -50,8 +50,11 @@ impl SouffleEmitter {
     // there are no duplicate delcarations (which would otherwise happen
     // whenever a predicate is referenced more than once with different
     // arguments).
+    // To prevent instances of negated and non-negated uses of the predicate 
+    // from generating two declarations, the sign here is always true.
     fn pred_to_declaration(p: &AstPredicate) -> AstPredicate {
         AstPredicate {
+            sign: Sign::Positive,
             name: p.name.clone(),
             args: (0..p.args.len())
                 .map(|i| String::from("x") + &i.to_string())
@@ -62,7 +65,11 @@ impl SouffleEmitter {
     fn emit_pred(&mut self, p: &AstPredicate) -> String {
         let decl = SouffleEmitter::pred_to_declaration(p);
         self.decls.insert(decl);
-        format!("{}({})", &p.name, p.args.join(", "))
+        let neg = match p.sign {
+            Sign::Positive => "",
+            Negative => "!"
+        };
+        format!("{}{}({})", neg, &p.name, p.args.join(", "))
     }
 
     fn emit_assertion(&mut self, a: &DLIRAssertion) -> String {
@@ -103,13 +110,14 @@ impl SouffleEmitter {
     }
 
     fn emit_declarations(&self, decl_skip: &Vec<String>) -> String {
-        self.decls
+        let mut decls = self.decls
             .iter()
             .map(|x| 
                  if decl_skip.contains(&x.name)
                 { "".to_string() } else { SouffleEmitter::emit_decl(x) })
-            .collect::<Vec<_>>()
-            .join("\n")
+            .collect::<Vec<_>>();
+        decls.sort();
+        decls.join("\n")
     }
 
     fn emit_outputs(&self, p: &DLIRProgram) -> String {

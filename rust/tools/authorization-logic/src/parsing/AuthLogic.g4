@@ -33,7 +33,7 @@ principal
     ;
 
 predicate
-    : ID '(' ID (',' ID)* ')'
+    : (NEG)? ID '(' ID (',' ID)* ')'
     ;
 
 verbphrase
@@ -104,7 +104,9 @@ BINDIM: 'BindPubKey';
 
 // Identifiers wrapped in quotes are constants whereas
 // identifiers without quotes are variables.
-ID : ('"')? [a-zA-Z] [_a-zA-Z0-9/.]* ('"')?;
+ID : ('"')? [a-zA-Z] [_a-zA-Z0-9/.#]* ('"')?;
+
+NEG: '!';
 
 WHITESPACE_IGNORE
     : [ \r\t\n]+ -> skip

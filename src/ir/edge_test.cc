@@ -1,7 +1,24 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//----------------------------------------------------------------------------
+
 #include "src/ir/edge.h"
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/access_path_root.h"
+#include "src/ir/datalog_print_context.h"
 
 namespace raksha::ir {
 
@@ -19,8 +36,7 @@ static const std::tuple<Edge, std::string> edge_todatalog_pairs[] = {
             AccessPathRoot(HandleConnectionAccessPathRoot(
                 "recipe2", "particle2", "handle2")),
             AccessPathSelectors(Selector(FieldSelector("field2"))))),
-        "edge(\"recipe.particle.handle.field1\", "
-        "\"recipe2.particle2.handle2.field2\")."},
+        R"(edge("recipe.particle.handle.field1", "recipe2.particle2.handle2.field2").)"},
     { Edge(
             AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
                 "r", "p", "h")),
@@ -28,7 +44,7 @@ static const std::tuple<Edge, std::string> edge_todatalog_pairs[] = {
             AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
                 "r", "p", "h2")),
                        x_y_access_path_selectors)),
-      "edge(\"r.p.h.x.y\", \"r.p.h2.x.y\")." },
+      R"(edge("r.p.h.x.y", "r.p.h2.x.y").)" },
     { Edge(
           AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
               "pre", "fix", "1")),
@@ -36,7 +52,7 @@ static const std::tuple<Edge, std::string> edge_todatalog_pairs[] = {
           AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
               "pre", "fix", "2")),
                      AccessPathSelectors())),
-      "edge(\"pre.fix.1\", \"pre.fix.2\")."} };
+      R"(edge("pre.fix.1", "pre.fix.2").)"} };
 
 class EdgeToDatalogTest :
     public testing::TestWithParam<std::tuple<Edge, std::string>> {};
@@ -45,7 +61,8 @@ TEST_P(EdgeToDatalogTest, EdgeToDatalogTest) {
   const Edge &edge = std::get<0>(GetParam());
   const std::string &expected_to_string = std::get<1>(GetParam());
 
-  EXPECT_EQ(edge.ToDatalog(), expected_to_string);
+  DatalogPrintContext ctxt;
+  EXPECT_EQ(edge.ToDatalog(ctxt), expected_to_string);
 }
 
 INSTANTIATE_TEST_SUITE_P(EdgeToDatalogTest, EdgeToDatalogTest,

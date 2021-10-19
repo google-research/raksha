@@ -19,6 +19,7 @@
 #include <google/protobuf/text_format.h>
 
 #include "src/common/testing/gtest.h"
+#include "src/common/logging/logging.h"
 
 namespace raksha::xform_to_datalog::arcs_manifest_tree {
 
@@ -33,25 +34,39 @@ struct ParticleSpecProtoAndExpectedInfo {
 };
 
 class ParticleSpecFromProtoTest :
-   public testing::TestWithParam<ParticleSpecProtoAndExpectedInfo> {};
+   public testing::TestWithParam<ParticleSpecProtoAndExpectedInfo> {
+ protected:
+  ParticleSpecFromProtoTest()
+    : particle_spec_registry_(),
+      particle_spec_(CreateParticleSpec(particle_spec_registry_)) {}
+
+  static const ParticleSpec &CreateParticleSpec(
+      ParticleSpecRegistry &particle_spec_registry) {
+    arcs::ParticleSpecProto particle_spec_proto;
+    std::string textproto = GetParam().textproto;
+    CHECK(google::protobuf::TextFormat::ParseFromString(
+        textproto, &particle_spec_proto))
+        << "Particle spec textproto did not parse correctly.";
+    return particle_spec_registry.CreateParticleSpecFromProto(
+        particle_spec_proto);
+  }
+
+  ParticleSpecRegistry particle_spec_registry_;
+  const ParticleSpec &particle_spec_;
+};
 
 TEST_P(ParticleSpecFromProtoTest, ParticleSpecFromProtoTest) {
   const ParticleSpecProtoAndExpectedInfo &param = GetParam();
-  arcs::ParticleSpecProto particle_spec_proto;
-  google::protobuf::TextFormat::ParseFromString(
-      param.textproto, &particle_spec_proto);
-  ParticleSpec particle_spec =
-      ParticleSpec::CreateFromProto(particle_spec_proto);
 
-  EXPECT_EQ(particle_spec.name(), param.expected_name);
+  EXPECT_EQ(particle_spec_.name(), param.expected_name);
   EXPECT_THAT(
-      particle_spec.tag_claims(),
+      particle_spec_.tag_claims(),
       testing::UnorderedElementsAreArray(param.expected_claims));
   EXPECT_THAT(
-      particle_spec.checks(),
+      particle_spec_.checks(),
       testing::UnorderedElementsAreArray(param.expected_checks));
   EXPECT_THAT(
-      particle_spec.edges(),
+      particle_spec_.edges(),
       testing::UnorderedElementsAreArray(param.expected_edges));
 }
 
@@ -73,6 +88,12 @@ static ir::AccessPathSelectors MakeSingleFieldSelectors(
   return ir::AccessPathSelectors(ir::Selector(ir::FieldSelector(
       std::move(field_name))));
 }
+
+// Tag presence predicates for constructing checks.
+static const ir::TagPresence kTag1Present("tag1");
+static const ir::TagPresence kTag2Present("tag2");
+static const ir::TagPresence kTag3Present("tag3");
+static const ir::TagPresence kTag4Present("tag4");
 
 static ParticleSpecProtoAndExpectedInfo spec_proto_and_expected_info[] = {
     { .textproto = R"(name: "p_spec")", .expected_name = "p_spec",
@@ -442,18 +463,14 @@ checks: [ {
       .expected_name = "PS2",
       .expected_claims = { },
       .expected_checks = {
-          ir::TagCheck(
-              ir::TagAnnotationOnAccessPath(
-                  ir::AccessPath(
-                      kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
-                      "tag1")
-              ),
-          ir::TagCheck(
-              ir::TagAnnotationOnAccessPath(
-                  ir::AccessPath(
-                      kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
-                      "tag2")
-              )
+         ir::TagCheck(
+             ir::AccessPath(
+                 kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
+             kTag1Present),
+         ir::TagCheck(
+             ir::AccessPath(
+                 kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
+             kTag2Present),
       },
       .expected_edges = { }
     },
@@ -554,11 +571,12 @@ connections: [
           { key: "field3", value: { primitive: TEXT } } ] } } } } ])";
 
 TEST(BulkInstantiateTest, BulkInstantiateTest) {
+  ParticleSpecRegistry particle_spec_registry;
   arcs::ParticleSpecProto particle_spec_proto;
   google::protobuf::TextFormat::ParseFromString(
       kTextprotoWithAllFacts, &particle_spec_proto);
-  ParticleSpec particle_spec =
-      ParticleSpec::CreateFromProto(particle_spec_proto);
+  const ParticleSpec &particle_spec =
+      particle_spec_registry.CreateParticleSpecFromProto(particle_spec_proto);
 
   const ir::AccessPathRoot p1_in_impl(
       ir::HandleConnectionAccessPathRoot("recipe", "P1", "in_impl"));
@@ -592,10 +610,12 @@ TEST(BulkInstantiateTest, BulkInstantiateTest) {
   ASSERT_THAT(
       instantiated_facts.checks,
       testing::UnorderedElementsAreArray({
-        ir::TagCheck(ir::TagAnnotationOnAccessPath(ir::AccessPath(
-            p1_in_impl, MakeSingleFieldSelectors("field1")), "tag3")),
-        ir::TagCheck(ir::TagAnnotationOnAccessPath(ir::AccessPath(
-            p1_in_out_impl, MakeSingleFieldSelectors("field2")), "tag4"))}));
+        ir::TagCheck(
+            ir::AccessPath(p1_in_impl, MakeSingleFieldSelectors("field1")),
+            kTag3Present),
+        ir::TagCheck(
+            ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field2")),
+            kTag4Present)}));
 
   ASSERT_THAT(
       instantiated_facts.edges,

@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-// Try blocks are used in antlr4-rust.
-#![feature(try_blocks)]
+#[cfg(test)]
+mod test {
+    use crate::{
+        ast::*, compilation_top_level::*, souffle::souffle_interface::*,
+        test::test_queries::test::*,
+    };
+    use std::fs;
 
-mod ast;
-mod compilation_top_level;
-mod parsing;
-mod signing;
-mod souffle;
-mod test;
-
-use std::env;
-
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    let filename = &args[1];
-    let in_dir = &args[2];
-    let out_dir = &args[3];
-    let decl_skip = if(args.len() > 4) { &args[4] } else { "" };
-    compilation_top_level::compile(filename, in_dir, out_dir, &decl_skip);
-    souffle::souffle_interface::run_souffle(&format!("{}/{}.dl", out_dir,
-                                                    filename), out_dir);
+    #[test]
+    fn test_negation() {
+        run_query_test(QueryTest {
+            filename: "negation",
+            query_expects: vec![
+                ("q1", true),
+                ("q2", false),
+                ("q3", false),
+            ]
+        });
+    }
 }

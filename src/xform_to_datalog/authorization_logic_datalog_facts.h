@@ -16,6 +16,7 @@
 #ifndef SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_DATALOG_FACTS_H_
 #define SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_DATALOG_FACTS_H_
 
+#include <filesystem>
 #include <optional>
 #include <string>
 
@@ -29,14 +30,16 @@ class AuthorizationLogicDatalogFacts {
   // Returns std::nullopt if there is any error due to processing of the program.
   //
   static std::optional<AuthorizationLogicDatalogFacts> create(
-      absl::string_view path,
+      const std::filesystem::path &path,
       absl::string_view authorization_logic_filename);
 
   AuthorizationLogicDatalogFacts(std::string datalog_facts):
       datalog_facts_(std::move(datalog_facts)) {}
   
   // Returns the datalog program with necessary headers.
-  const std::string& ToDatalog() const { return datalog_facts_; }
+  const std::string& ToDatalog() const {
+    return datalog_facts_;
+  }
   
  private:
   std::string datalog_facts_;

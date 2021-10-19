@@ -44,6 +44,10 @@ fn construct_principal(ctx: &PrincipalContext) -> AstPrincipal {
 }
 
 fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
+    let sign_ = match ctx.NEG() {
+        Some(_) => Sign::Negated,
+        None => Sign::Positive 
+    };
     let name_ = ctx.ID(0).unwrap().get_text();
     let mut args_ = Vec::new();
     let mut idx = 1;
@@ -54,6 +58,7 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
         idx += 1;
     }
     AstPredicate {
+        sign: sign_,
         name: name_,
         args: args_,
     }
@@ -158,7 +163,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
         SaysAssertionContextAll::SaysSingleContext(ctx_prime) => {
             let prin = construct_principal(&ctx_prime.principal().unwrap());
             let assertions = vec![construct_assertion(&ctx_prime.assertion().unwrap())];
-            let export_file = ctx_prime.ID().map(|p| p.get_text());
+            let export_file = ctx_prime.ID().map(|p| p.get_text().replace("\"", ""));
             AstSaysAssertion {
                 prin,
                 assertions,
@@ -172,7 +177,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
                 .iter()
                 .map(|x| construct_assertion(x))
                 .collect();
-            let export_file = ctx_prime.ID().map(|p| p.get_text());
+            let export_file = ctx_prime.ID().map(|p| p.get_text().replace("\"", ""));
             AstSaysAssertion {
                 prin,
                 assertions,
@@ -199,12 +204,12 @@ fn construct_query(ctx: &QueryContext) -> AstQuery {
 fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
     match ctx {
         KeyBindContextAll::BindprivContext(ctx_prime) => AstKeybind {
-            filename: ctx_prime.ID().unwrap().get_text(),
+            filename: ctx_prime.ID().unwrap().get_text().replace("\"", ""),
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: false,
         },
         KeyBindContextAll::BindpubContext(ctx_prime) => AstKeybind {
-            filename: ctx_prime.ID().unwrap().get_text(),
+            filename: ctx_prime.ID().unwrap().get_text().replace("\"", ""),
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: true,
         },
@@ -217,7 +222,7 @@ fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
 fn construct_import(ctx: &ImportAssertionContext) -> AstImport {
     AstImport {
         principal: construct_principal(&ctx.principal().unwrap()),
-        filename: ctx.ID().unwrap().get_text(),
+        filename: ctx.ID().unwrap().get_text().replace("\"", ""),
     }
 }
 
