@@ -1,10 +1,17 @@
 // UserA is the device owner. UserA has a high level of trust in their own
 // device.
+//
+// Note: Currently, these policies are expressed as indicating principals that
+// canSay downgrades. In addition to that, I have added
+// a hasVoiceRecordingPreference annotation that expresses the actual
+// configuration preference of the user. In a more fleshed-out system, we might
+// want to have a check somewhere that imparts the downgrades power to
+// MicCompute only if all principal refinements of userSpeech have preferences
+// allowing storing textToSpeech. Right now, though, user refinement of tags is
+// just an idea, so using downgrades directly.
 "UserA" says {
   "UserA" hasVoiceRecordingPreference("AlwaysOK").
   "DevicePolicyAuthority" canSay downgrades(tagX) :- isTag(tagX).
-
-  criticalDeviceServiceOverride("TextToSpeech").
 }
 
 // UserB is a guest user. UserB is somewhat privacy sensitive. They want their
@@ -29,31 +36,17 @@
   // By default, UserB does not allow sensitive device tags to be downgraded.
   // (NOTE: this is commented out but it should compile once branch is updated 
   // to include the PR that adds `!`
-  // PolicyAuthorityX canSay downgrades(tagX) :-
-  //   isTag(tagX), !sensitiveDeviceTag(tagX).
-
-  // However, it does allow downgrading sensitive device tags by policy
-  // authorities that are recognized as policy authorities by a company that
-  // they trust.
-  // NOTE: "says" can't go on the RHS, so it has to be unfolded into a separate 
-  // canSay.
-  // NOTE: No 0-ary predicates are allowed at the moment
-  "TrustedCompany" canSay recognizedAsAuthority(PolicyAuthorityX) :- 
-      isPrincipal(PolicyAuthorityX).
   PolicyAuthorityX canSay downgrades(tagX) :-
-    sensitiveDeviceTag(tagX), recognizedAsAuthority(PolicyAuthorityX).
-  // This might also be about the same as:
-  // "TrustedCompany" canSay downgrades(tagX) :- sensitiveDeviceTag(tagX).
-  // because "TrustedCompany" can already delegate this to any other principal
+    isTag(tagX), !sensitiveDeviceTag(tagX).
+
+  // However, it does allow "TrustedCompany" to downgrade all of its tags.
+  "TrustedCompany" canSay downgrades(tagX) :- isTag(tagX).
 
   isTag("userSpeech").
 }
 
 // UserC is a very privacy sensitive user. They do not trust anyone to store
-// their voice information, even as a transcript. They recognize policy
-// authorities only to get those policy authorities to not record their voice
-// or to get notifications that their voice may be being recorded so they can
-// leave.
+// their voice information, even as a transcript.
 "UserC" says {
 
   sensitiveDeviceTag("userSpeech").
@@ -61,88 +54,12 @@
   ownsTag(tagX) :- sensitiveDeviceTag(tagX).
 
   "UserC" hasVoiceRecordingPreference("Never").
-
-  // This privacy-sensitive user only recognizes the authority of device
-  // authorities if they claim to notify when overriding your policy
-  // preferences.
-  PolicyAuthorityX canSay downgrades(tagX) :-sensitiveDeviceTag(tagX),
-    PolicyAuthorityX notifiesOnPreferenceOverride(tagX).
-  PolicyAuthorityX canSay PolicyAuthorityX notifiesOnPreferenceOverride(tagX) :-
-    isTag(tagX), isPrincipal(PolicyAuthorityX).
 }
 
-// This is the device policy authority. It recognizes users as
-// "PolicyCollaborators", allowing them to influence the device policy as long
-// as they submit to its authority, which in this case involves allowing it to
-// downgrade the userSpeech tag.
+// This is the device policy authority. It allows "MicCompute" to downgrade
+// "userSpeech".
 "DevicePolicyAuthority" says {
-  // "UserA" is the owner of the device.
-  "UserA" canActAs "DeviceOwner".
-
-  // A collaboration tag can be influenced by PolicyCollaborators. The policy
-  // authority has one tag that it wishes to allow collaboration on,
-  // userSpeech. You could imagine this being a list of facts specifying
-  // many collaboration tags.
-  isCollaborationTag("userSpeech").
-
-  // The policy authority claims to own collaboration tags.
-  ownsTag(tagX) :- isCollaborationTag(tagX).
-
-  // This policy authority is promising that it will always notify when it has
-  // to override a user preference.
-  "DevicePolicyAuthority" notifiesOnPreferenceOverride(tagX) :- 
-    isCollaborationTag(tagX).
-
-  // The DevicePolicyAuthority will only grant permissions to users to
-  // influence collaboration tags if they say it can downgrade those
-  // collaboration tags.
-  // NOTE: since the DevicePolicyAuthority already owns collaboration tags, 
-  // there is no need to get permission to downgrade from the user. By owning 
-  // the tag, DevicePolicyAuthority can already downgrade it. (We also need to 
-  // remove the "says" from the RHS anyway). I think this is close to what you
-  // want:
-  UserX canSay UserX recognizesAsAuthority("DevicePolicyAuthority") :-
-    isPrincipal(UserX). 
-  
-  // For those that recognize its authority, it grants the role
-  // "PolicyCollaborator", allowing influence over policy decisions.
-  UserX canActAs "PolicyCollaborator" :-
-    UserX recognizesAsAuthority("DevicePolicyAuthority"),
-    isPrincipal(UserX).
-
-  // The DeviceOwner can also act as a policy collaborator.
-  UserX canActAs "PolicyCollaborator" :- UserX canActAs "DeviceOwner".
-
-  // Policy collaborators can influence collaboration tags.
-  "PolicyCollaborator" canInfluenceTag(tagX) :- isCollaborationTag(tagX).
-
-  // Which means that they are recognized in having part ownership if they
-  // claim to have part ownership.
-  UserX canSay ownsTag(tagX) :-
-    UserX canInfuluenceTag(tagX).
-
-  //    NOTE: this is just commented out until this commit is merged on top 
-  //    of the one that adds '!'
-  // collaboratorDisallowsTextToSpeech(UserX) :-
-  //   UserX canActAs "PolicyCollaborator",
-  //   !(UserX hasVoiceRecordingPreference("Always")),
-  //   !(UserX hasVoiceRecordingPreference("TranscriptOnly")).
-  UserX canSay UserX hasVoiceRecordingPreference(PreferenceX) :- 
-    isPrincipal(UserX), isVoiceRecordingPreference(PreferenceX).
-
-  // MicCompute can downgrade user speech if no policy collaborator disallows
-  // it.
-  // "MicCompute" canSay downgrades("userSpeech") :-
-  //   UserX canActAs "PolicyCollaborator",
-  //   !collaboratorDisallowsTextToSpeech(UserX). 
-
-  // Or if the DeviceOwner has designated TextToSpeech a critical service and
-  // has installed an override.
-  UserX canSay criticalDeviceServiceOverride("TextToSpeech") :-
-    UserX canActAs "DeviceOwner".
-
-  "MicCompute" canSay downgrades("userSpeech") :-
-    criticalOverride("TextToSpeech").
+  "MicCompute" canSay downgrades("userSpeech").
 }
 
 // Why should users trust "DevicePolicyAuthority"? Because is recognized as an

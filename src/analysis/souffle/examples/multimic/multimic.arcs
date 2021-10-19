@@ -3,6 +3,29 @@ particle MicIn
   audio: writes AudioData { }
   claim audio is userSpeech
 
+// The permissions stubs below are not real devices. To allow guests to
+// influence the policy decisions of the smart mic, the smart mic is
+// representing the data gathered by the micrpohone as if it flowed through the
+// smartphones of users to allow their policies to attach tags to that data.
+//
+// Note: the permissions stubs add tags of the form userSpeechOfUserX. In
+// reality, this would likely be written more like the syntax that @aferr
+// proposed in PR #187, where tags can be refined by the user that introduced
+// them. The point here is that these stubs are adding a variant on the
+// userSpeech family of tags that imposes the policy preferences of the user
+// that they serve.
+particle UserAPermissionsStub
+  audio: reads writes AudioData { }
+  claim audio is userSpeechOfUserA
+
+particle UserBPermissionsStub
+  audio: reads writes AudioData { }
+  claim audio is userSpeechOfUserB
+
+particle UserCPermissionsStub
+  audio: reads writes AudioData { }
+  claim audio is userSpeechOfUserC
+
 particle StorageCredentialsSource
   credentials: writes StorageCredentials { }
   claim credentials is fullStoragePermissions
@@ -26,18 +49,72 @@ particle MicCompute
   asrStoragePermissionsReceiver: reads StorageCredentials { }
   // Claim that MicCompute downgrades the label from userSpeech to
   // textTranscript.
+  // Note: this is intended to downgrade not just the userSpeech from the MicIn
+  // particle, but also the userSpeechOf tags that flow from the user
+  // permission stubs. This assumes that in our new policy language, we allow
+  // downgrading from a tag with a particular user refinement to a different
+  // tag with that same user refinement.
   claim asrStorageConn is not userSpeech and is textTranscript and derives from audioIn and derives from asrNeuralNet
 
 particle SpeechToTextStorageSink
   speechToTextIn: reads ASRData { }
   check speechToTextIn is speechToTextQoS and is not userSpeech
 
-recipe DoASR
+// This recipe represents the mic operating in a room with no guest storage
+// permissions.
+recipe DoASRNoGuests
   m1AsrNetStorage: create
   m1AsrStorage: create
   m1AsrStoragePermissions: create
   MicIn
     audio: writes micAudio
+  MicCompute
+    audioIn: reads micAudio
+    asrNeuralNet: reads m1AsrNetStorage
+    asrStorageConn: writes m1AsrStorage
+    asrStoragePermissionsReceiver: reads m1AsrStoragePermissions
+  SpeechToTextStorageSink
+    speechToTextIn: reads m1AsrStorage
+
+// This recipe represents the mic operating in a room where UserA and UserB are
+// having a conversation.
+recipe DoASRUserAAndUserB
+  m1AsrNetStorage: create
+  m1AsrStorage: create
+  m1AsrStoragePermissions: create
+  MicIn
+    audio: writes micAudio
+  UserAPermissionsStub
+    audio: reads writes micAudio
+  UserBPermissionsStub
+    audio: reads writes micAudio
+  MicCompute
+    audioIn: reads micAudio
+    asrNeuralNet: reads m1AsrNetStorage
+    asrStorageConn: writes m1AsrStorage
+    asrStoragePermissionsReceiver: reads m1AsrStoragePermissions
+  SpeechToTextStorageSink
+    speechToTextIn: reads m1AsrStorage
+
+// This recipe represents UserC entering the room. The policy of UserC does not
+// allow storing information derived from their voice; this means that this
+// recipe must reject the connection from UserC, as the check in
+// SpeechToTextStorageSink will fail otherwise. Alternatively, we could use the
+// policy language to make the check redact information rather than reject the
+// graph, in which case this recipe would be accepted, but speech to text would
+// stop.
+recipe DoASRUserAAndUserBAndUserC
+  m1AsrNetStorage: create
+  m1AsrStorage: create
+  m1AsrStoragePermissions: create
+  MicIn
+    audio: writes micAudio
+  UserAPermissionsStub
+    audio: reads writes micAudio
+  UserBPermissionsStub
+    audio: reads writes micAudio
+  UserCPermissionsStub
+    audio: reads writes micAudio
   MicCompute
     audioIn: reads micAudio
     asrNeuralNet: reads m1AsrNetStorage
