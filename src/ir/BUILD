@@ -21,25 +21,15 @@ load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
 
 cc_library(
     name = "ir",
-    srcs = glob(
-        ["*.cc"],
-        exclude = [
-            "*_test.cc",
-            "predicate_textproto_to_rule_body_testdata.cc",
-        ],
-    ),
-    hdrs = glob(
-        ["*.h"],
-        exclude = [
-            "access_path.h",
-            "access_path_root.h",
-            "access_path_selectors.h",
-            "access_path_selectors_set.h",
-            "field_selector.h",
-            "selector.h",
-            "predicate_textproto_to_rule_body_testdata.h",
-        ],
-    ),
+    srcs = ["tag_claim.cc"],
+    hdrs = [
+        "datalog_print_context.h",
+        "derives_from_claim.h",
+        "edge.h",
+        "predicate.h",
+        "tag_check.h",
+        "tag_claim.h",
+    ],
     deps = [
         ":access_path",
         "//src/common/logging",
