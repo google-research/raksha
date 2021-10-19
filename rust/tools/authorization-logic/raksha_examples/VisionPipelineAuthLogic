@@ -73,15 +73,18 @@
 }
 
 "ImageDetector" says "ImageDetector"
-    will("do_pure_computation", "id_sensor_packet.camera_feed").
+    will("do_pure_computation",
+        "VisionPipeline.id_sensor_packet.camera_feed").
 "ImageSelector" says {
-    "ImageSelector" will("do_pure_computation", "is_detection_boxes").
-    declassifies("is_select_image_id", "raw_video_tag").
-    hasTag("is_select_image_id", "product_id_tag").
-    objectSelected("EndUser", "is_selected_image_id").
+    "ImageSelector" will("do_pure_computation",
+        "VisionPipeline.is_detection_boxes").
+    declassifies("VisionPipeline.is_select_image_id", "raw_video_tag").
+    hasTag("VisionPipeline.is_select_image_id", "product_id_tag").
+    objectSelected("EndUser", "VisionPipeline.is_selected_image_id").
 }
 "ProductIdOutput" says 
-    "ProductIdOutput" will("egress_to_shopping_service", "pio_remote_service").
+    "ProductIdOutput" will("egress_to_shopping_service",
+        "VisionPipeline.pio_remote_service").
 
 // May / Will check:
 // May - used by data owners to describe how data may be used. May refers to 
@@ -111,11 +114,12 @@
 
 // Particle: Image Detector
 // taint of read handles: 
-//    taint(id_sensor_packet.camera_feed) = { "raw_video_tag" }
-//    taint(id_sensor_packet.video_resolution) = { }
-//    taint(id_image_detection_model) = { }
+//    taint(VisionPipeline.id_sensor_packet.camera_feed) = { "raw_video_tag" }
+//    taint(VisionPipeline.id_sensor_packet.video_resolution) = { }
+//    taint(VisionPipeline.id_image_detection_model) = { }
 // Usage:
-//    will("do_pure_computation", "id_sensor_packet.camera_feed").
+//    will("do_pure_computation",
+//          "VisionPipeline.id_sensor_packet.camera_feed").
 //      Owner("raw_video_tag") = "EndUser"
 may_video_do_computation = query "EndUser" says 
     "ImageDetector" may("do_pure_computation", "raw_video_tag")?
@@ -125,10 +129,10 @@ may_video_do_computation = query "EndUser" says
 
 // Particle: ImageSelector
 // taint of read handles:
-//      taint(is_detection_boxes) = { "raw_video_tag" }
-//      taint(is_user_selection_action) = { }
+//      taint(VisionPipeline.is_detection_boxes) = { "raw_video_tag" }
+//      taint(VisionPipeline.is_user_selection_action) = { }
 // usage: 
-//      will("do_pure_computation", "raw_video_tag")
+//      will("do_pure_computation", "VisionPipeline.is_detection_boxes")
 may_selector_do_computation = query "EndUser" says
     "ImageSelector" may("do_pure_computation", "raw_video_tag")?
 
@@ -139,7 +143,8 @@ may_selector_do_computation = query "EndUser" says
 //   after declassification:
 //      taint(pio_select_image_id) = { "product_id_tag" }
 // usage:
-//      will("egress_to_shopping_service", "pio_remote_service")
+//      will("egress_to_shopping_service",
+//          "VisionPipeline.pio_remote_service")
 may_shopping_service_egress = query "EndUser" says
     "ProductIdOutput" may("egress_to_shopping_service", "product_id_tag")?
 
