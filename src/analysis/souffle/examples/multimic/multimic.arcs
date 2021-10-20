@@ -36,9 +36,9 @@ particle DelegateStorePermissions
   // The delegator claims that it downgrades the permissions to use storage
   // from the full permissions to some less powerful delegated permissions.
   claim outPermissions is not fullStoragePermissions and is delegatedPermissions
-  // Note: this is to halt if we are not allowed to downgrade permissions.
-  // We actually aren't allowed to do this in Arcs as it only allows checks on
-  // inputs! We should allow this in our new policy language.
+  // Note: this is to fail stati checking if we are not allowed to downgrade
+  // permissions. We actually aren't allowed to do this in Arcs as it only
+  // allows checks on inputs! We should allow this in our new policy language.
   // check outPermissions is not fullStoragePermissions
 
 // Represents the CPU within the mic.
