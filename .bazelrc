@@ -7,3 +7,5 @@ build --cxxopt=-Wall
 build --host_cxxopt=-Wall
 build --cxxopt=-Wno-deprecated-declarations
 build --host_cxxopt=-Wno-deprecated-declarations
+# Just to debug Kokoro builds.
+build --sandbox_debug
