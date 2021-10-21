@@ -9,7 +9,7 @@ cd "${KOKORO_ARTIFACTS_DIR}/github/raksha"
 pyenv init --path
 
 # Install bazel.
-use_bazel.sh latest --quiet 4.2.1
+use_bazel.sh 4.2.1 --quiet
 command -v bazel
 bazel version
 
