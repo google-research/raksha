@@ -13,7 +13,9 @@ use_bazel.sh 4.2.1 --quiet
 command -v bazel
 bazel version
 
-bazel test //src/...
-bazel build //third_party/arcs/examples:consume third_party/arcs/proto:manifest_cc_proto
-bazel build //src/analysis/souffle/tests/arcs_manifest_tests_todo/...
-bazel build //rust/tools/authorization-logic:authorization_logic
+BAZEL_OPTS=--cxxopt='-std=c++17'--host_cxxopt='-std=c++17' --cxxopt='-Werror' --host_cxxopt='-Werror' --cxxopt='-Wall' --host_cxxopt='-Wall' --cxxopt='-Wno-deprecated-declarations' --host_cxxopt='-Wno-deprecated-declarations'
+
+bazel ${BAZEL_OPTS} test //src/...
+bazel ${BAZEL_OPTS} build //third_party/arcs/examples:consume third_party/arcs/proto:manifest_cc_proto
+bazel ${BAZEL_OPTS} build //src/analysis/souffle/tests/arcs_manifest_tests_todo/...
+bazel ${BAZEL_OPTS} build //rust/tools/authorization-logic:authorization_logic
