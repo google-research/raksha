@@ -19,9 +19,7 @@ testFails(check_index) :-
 
 // Rules for linking generated relations with the ones in the dl program.
 .decl says_ownsTag(speaker: Principal, owner: Principal, tag: Tag)
-.decl says_hasTag(speaker: Principal, path: AccessPath, t: Tag)
 saysOwnsTag(x, y, z) :- says_ownsTag(x, y, z).
-saysHasTag(x, y, z) :- says_hasTag(x, y, z).
 
 // Manifest
 
