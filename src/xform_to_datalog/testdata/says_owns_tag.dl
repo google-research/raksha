@@ -1,0 +1,3 @@
+.decl grounded_dummy(x0: symbol)
+says_ownsTag("prin1", "particle", "foo").
+grounded_dummy("dummy_var").

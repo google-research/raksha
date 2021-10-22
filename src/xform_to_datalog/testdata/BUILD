@@ -24,6 +24,8 @@ filegroup(
         "empty_auth_logic.dl",
         "simple_auth_logic",
         "simple_auth_logic.dl",
+        "says_owns_tag",
+        "says_owns_tag.dl",
     ],
     testonly = True
 )

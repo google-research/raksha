@@ -32,7 +32,7 @@ AuthorizationLogicDatalogFacts::create(
   const std::filesystem::path &program_dir, absl::string_view program) {
   auto result_dir = std::filesystem::temp_directory_path();
   int res = generate_datalog_facts_from_authorization_logic(
-    program.data(), program_dir.c_str(), result_dir.c_str(), "");
+    program.data(), program_dir.c_str(), result_dir.c_str(), "says_ownsTag");
   if (res) {
     LOG(ERROR) << "Failure running the authorization logic compiler.\n";
     return std::nullopt;

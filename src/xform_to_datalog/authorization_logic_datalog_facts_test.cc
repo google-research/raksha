@@ -31,17 +31,20 @@ namespace raksha::xform_to_datalog {
 class AuthorizationLogicDatalogFactsTest : public AuthorizationLogicTest {};
 
 TEST_F(AuthorizationLogicDatalogFactsTest, InvokesRustToolAndGeneratesOutput) {
-  for (const std::string& program : {"simple_auth_logic", "empty_auth_logic"}) {
+  for (const std::string &program :
+       {"simple_auth_logic", "empty_auth_logic", "says_owns_tag"}) {
     fs::path test_data_dir = GetTestDataDir();
-    auto auth_facts = AuthorizationLogicDatalogFacts::create(test_data_dir.c_str(), program);
+    auto auth_facts =
+        AuthorizationLogicDatalogFacts::create(test_data_dir.c_str(), program);
     ASSERT_TRUE(auth_facts.has_value());
-  
+
     std::vector<std::string> actual_datalog =
       absl::StrSplit(auth_facts->ToDatalog(), "\n", absl::SkipEmpty());
     std::vector<std::string> expected_datalog =
-      ReadFileLines(test_data_dir / (program + ".dl"));
+        ReadFileLines(test_data_dir / (program + ".dl"));
 
-    // Need to compare individual lines as the output order is non-deterministic.
+    // Need to compare individual lines as the output order is
+    // non-deterministic.
     ASSERT_THAT(actual_datalog,
                 testing::UnorderedElementsAreArray(expected_datalog));
   }
