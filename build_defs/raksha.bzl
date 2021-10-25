@@ -1,0 +1,93 @@
+#-----------------------------------------------------------------------------
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https:#www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#-----------------------------------------------------------------------------
+load("//build_defs:arcs.bzl", "arcs_manifest_proto")
+load("//build_defs:souffle.bzl", "souffle_cc_library")
+
+def raksha_policy_check(name, src, visibility = None):
+    """ Generates a cc_test rule for verifying policy compliance.
+
+    Args:
+      name: String; Name of the check.
+      src: String; The .raksha manifest file for which to test compliance.
+      visibility: List; List of visibilities.
+    """
+    # Split file into two '.arcs' and '.auth'.
+    arcs_file = src.replace(".raksha", ".arcs")
+    auth_file = src.replace(".raksha", ".auth")
+    splitter_target = "%s_splitter" % name
+    native.genrule(
+        name = splitter_target,
+        srcs = [src],
+        outs = [arcs_file, auth_file],
+        cmd = "pwd; csplit $< '/^//[ \t]*__AUTH_LOGIC__[ \t]*$$/' && " +
+           "cp xx00 $(location %s) && cp xx01 $(location %s)"
+           % (arcs_file, auth_file)
+    )
+    # Parse .arcs into proto
+    proto_target_name = "%s_proto" % name
+    proto_target = ":%s" % proto_target_name
+    arcs_manifest_proto(
+        name = proto_target_name,
+        src = arcs_file,
+        deps = [":%s" % splitter_target],
+    )
+    # Generate datalog
+    datalog_target_name = "%s_datalog" % name
+    datalog_target = ":%s" % datalog_target_name
+    datalog_file = "%s.dl" % name
+    native.genrule(
+        name = datalog_target_name,
+        srcs = [
+           auth_file,
+           proto_target,
+        ],
+        outs = [datalog_file],
+        cmd = "$(location //src/xform_to_datalog:generate_datalog_program) " +
+               " --auth_logic_file=\"$(location %s)\" " % auth_file +
+               " --manifest_proto=\"$(location %s)\" " % proto_target +
+               " --datalog_file=\"$@\" ",
+        tools = ["//src/xform_to_datalog:generate_datalog_program"],
+    )
+    # Generate souffle C++ library
+    souffle_dl_cpp_target_name = "%s_dl_cpp" % name
+    souffle_dl_cpp_target = ":%s" % souffle_dl_cpp_target_name
+    souffle_cc_library(
+        name = souffle_dl_cpp_target_name,
+        src = datalog_target,
+        included_dl_scripts = [
+            "//src/analysis/souffle:access_path.dl",
+            "//src/analysis/souffle:flat_graph_ir.dl",
+            "//src/analysis/souffle:authorization_logic.dl",
+            "//src/analysis/souffle:dataflow_graph.dl",
+            "//src/analysis/souffle:taint.dl",
+            "//src/analysis/souffle:tags.dl",
+        ]
+    )
+    native.cc_test(
+        name = name,
+        srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:fact_test_driver.cc"],
+        args = [
+            datalog_file.replace(".dl", "_datalog"),
+        ],
+        copts = [
+            "-Iexternal/souffle/src/include/souffle",
+        ],
+        linkopts = ["-pthread"],
+        deps = [
+            "@souffle//:souffle_lib",
+            souffle_dl_cpp_target,
+        ],
+    )

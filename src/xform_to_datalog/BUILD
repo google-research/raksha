@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
+package(default_visibility = ["//src:__subpackages__"])
+
 licenses(["notice"])
 
 cc_library(
