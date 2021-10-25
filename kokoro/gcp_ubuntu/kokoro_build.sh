@@ -24,6 +24,7 @@ command -v bazel
 bazel version
 
 export BAZEL_CXXOPTS="-std=c++17"
+export CXX=g++-5
 
 bazel --nosystem_rc --nohome_rc test //src/...
 bazel --nosystem_rc --nohome_rc build //third_party/arcs/examples:consume third_party/arcs/proto:manifest_cc_proto
