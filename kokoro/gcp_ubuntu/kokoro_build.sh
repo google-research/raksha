@@ -3,6 +3,9 @@
 # Fail on any error.
 set -e
 
+# print system info
+uname -a
+
 cd "${KOKORO_ARTIFACTS_DIR}/github/raksha"
 
 # Work around an issue in GCP Ubuntu images.
