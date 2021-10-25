@@ -11,6 +11,8 @@ ALL_DL_TEST_FILES = glob(["*.dl"])
 
 TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES = ["claim_not_edge_two_inputs_two_outputs.dl"]
 
+exports_files(["fact_test_driver.cc"])
+
 [souffle_cc_library(
     name = dl_script.replace(".dl", "_souffle_cc_library"),
     src = dl_script,
