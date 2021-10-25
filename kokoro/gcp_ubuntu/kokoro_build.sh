@@ -23,8 +23,9 @@ use_bazel.sh 4.2.1 --quiet
 command -v bazel
 bazel version
 
+yes | sudo apt-get install g++8
 export BAZEL_CXXOPTS="-std=c++17"
-export CXX=g++-5
+export CXX=g++-8
 
 bazel --nosystem_rc --nohome_rc test //src/...
 bazel --nosystem_rc --nohome_rc build //third_party/arcs/examples:consume third_party/arcs/proto:manifest_cc_proto
