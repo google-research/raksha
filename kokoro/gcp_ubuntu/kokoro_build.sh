@@ -13,6 +13,8 @@ use_bazel.sh 4.2.1 --quiet
 command -v bazel
 bazel version
 
+export BAZEL_CXXOPTS="-std=c++17"
+
 bazel --nosystem_rc --nohome_rc test //src/...
 bazel --nosystem_rc --nohome_rc build //third_party/arcs/examples:consume third_party/arcs/proto:manifest_cc_proto
 bazel --nosystem_rc --nohome_rc build //src/analysis/souffle/tests/arcs_manifest_tests_todo/...
