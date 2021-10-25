@@ -4,7 +4,14 @@
 set -e
 
 # print system info
+echo "uname -a"
 uname -a
+
+echo "gcc --version"
+gcc --version
+
+echo "g++ --version"
+g++ --version
 
 cd "${KOKORO_ARTIFACTS_DIR}/github/raksha"
 
