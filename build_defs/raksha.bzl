@@ -21,7 +21,9 @@ def raksha_policy_check(name, src, visibility = None):
 
     Args:
       name: String; Name of the check.
-      src: String; The .raksha manifest file for which to test compliance.
+      src: String; The `.raksha` file containing the arcs manifest describing
+                   the dataflow graph and the authorization logic facts separated
+                   by `// __AUTH_LOGIC__` line separator.
       visibility: List; List of visibilities.
     """
     # Split file into two '.arcs' and '.auth'.
@@ -32,17 +34,32 @@ def raksha_policy_check(name, src, visibility = None):
         name = splitter_target,
         srcs = [src],
         outs = [arcs_file, auth_file],
-        cmd = "pwd; csplit $< '/^//[ \t]*__AUTH_LOGIC__[ \t]*$$/' && " +
-           "cp xx00 $(location %s) && cp xx01 $(location %s)"
+        cmd = "csplit --prefix=part $< '/^//[ \t]*__AUTH_LOGIC__[ \t]*$$/' " +
+           "&& cp part00 $(location %s) && cp part01 $(location %s)"
            % (arcs_file, auth_file)
     )
+    policy_check(
+        name,
+        dataflow_graph = arcs_file,
+        auth_logic = auth_file,
+        visibility = visibility
+    )
+
+def policy_check(name, dataflow_graph, auth_logic, visibility = None):
+    """ Generates a cc_test rule for verifying policy compliance.
+
+    Args:
+      name: String; Name of the check.
+      dataflow_graph: String; The arcs manifest describing the dataflow graph.
+      auth_logic: String; The file with authorization logic facts.
+      visibility: List; List of visibilities.
+    """
     # Parse .arcs into proto
     proto_target_name = "%s_proto" % name
     proto_target = ":%s" % proto_target_name
     arcs_manifest_proto(
         name = proto_target_name,
-        src = arcs_file,
-        deps = [":%s" % splitter_target],
+        src = dataflow_graph,
     )
     # Generate datalog
     datalog_target_name = "%s_datalog" % name
@@ -51,12 +68,12 @@ def raksha_policy_check(name, src, visibility = None):
     native.genrule(
         name = datalog_target_name,
         srcs = [
-           auth_file,
+           auth_logic,
            proto_target,
         ],
         outs = [datalog_file],
         cmd = "$(location //src/xform_to_datalog:generate_datalog_program) " +
-               " --auth_logic_file=\"$(location %s)\" " % auth_file +
+               " --auth_logic_file=\"$(location %s)\" " % auth_logic +
                " --manifest_proto=\"$(location %s)\" " % proto_target +
                " --datalog_file=\"$@\" ",
         tools = ["//src/xform_to_datalog:generate_datalog_program"],
