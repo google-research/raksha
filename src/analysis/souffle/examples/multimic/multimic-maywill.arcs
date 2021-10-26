@@ -34,13 +34,10 @@ particle MicCompute
   // Need to evaluate this at runtime since information about user's
   // policies are not known until then.
   // MicCompute says {
-  //    "MobileDeviceRuntime" canSay isInRoom(UserX)
-  //        :- isUser(UserX). // we would need to figure out how to get rid of 
-  //                          // this isUser part
   //    will("local_computation", "audioIn"). 
   //    // Assumes we can figure out tags with namespaces like this:
-  //    downgrades("asrStorageConn", UserX::userSpeech) :- IsInRoom(UserX).
-  //    hasTag("asrStorageConn", UserX::userSpeech) :- isInRoom(UserX).
+  //    downgrades("asrStorageConn", UserX_userSpeech) :- isInRoom(UserX).
+  //    hasTag("asrStorageConn", UserX_userTranscript) :- isInRoom(UserX).
   // }
 
 particle SpeechToTextStorageSink
