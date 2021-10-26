@@ -32,9 +32,9 @@
 "UserC" says {
 
   // We want to use canSay hasTag but cannot due to issue #195.
-  "UserCTainter" canSay hasTag(pathX, "userSpeechCannotBeDeclassifiedAsTextTranscript") :- isAccessPath(pathX).
+//  "UserCTainter" canSay hasTag(pathX, "userSpeechCannotBeDeclassifiedAsTextTranscript") :- isAccessPath(pathX).
   // TODO(#195) remove this ownership claim.
-  ownsTag("UserCTainter", "userSpeechCannotBeDeclassifiedAsTextTranscript").
+//  ownsTag("UserCTainter", "userSpeechCannotBeDeclassifiedAsTextTranscript").
 
   "UserC" hasVoiceRecordingPreference("Never").
 }

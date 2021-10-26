@@ -45,7 +45,7 @@ def raksha_policy_check(name, src, visibility = None):
         visibility = visibility
     )
 
-def policy_check(name, dataflow_graph, auth_logic, visibility = None):
+def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visibility = None):
     """ Generates a cc_test rule for verifying policy compliance.
 
     Args:
@@ -61,6 +61,9 @@ def policy_check(name, dataflow_graph, auth_logic, visibility = None):
         name = proto_target_name,
         src = dataflow_graph,
     )
+    invert_arg = ""
+    if expect_failure:
+      invert_arg = "invert"
     # Generate datalog
     datalog_target_name = "%s_datalog" % name
     datalog_target = ":%s" % datalog_target_name
@@ -98,6 +101,7 @@ def policy_check(name, dataflow_graph, auth_logic, visibility = None):
         srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:fact_test_driver.cc"],
         args = [
             datalog_file.replace(".dl", "_datalog"),
+            invert_arg
         ],
         copts = [
             "-Iexternal/souffle/src/include/souffle",

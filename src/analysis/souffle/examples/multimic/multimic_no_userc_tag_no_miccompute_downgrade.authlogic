@@ -32,21 +32,21 @@
 "UserC" says {
 
   // We want to use canSay hasTag but cannot due to issue #195.
-  "UserCTainter" canSay hasTag(pathX, "userSpeechCannotBeDeclassifiedAsTextTranscript") :- isAccessPath(pathX).
+//  "UserCTainter" canSay hasTag(pathX, "userSpeechCannotBeDeclassifiedAsTextTranscript") :- isAccessPath(pathX).
   // TODO(#195) remove this ownership claim.
-  ownsTag("UserCTainter", "userSpeechCannotBeDeclassifiedAsTextTranscript").
+//  ownsTag("UserCTainter", "userSpeechCannotBeDeclassifiedAsTextTranscript").
 
   "UserC" hasVoiceRecordingPreference("Never").
 }
 
 // This is the device policy authority. It allows "MicCompute" to downgrade
 // "userSpeech".
-"DevicePolicyAuthority" says {
+// "DevicePolicyAuthority" says {
   // We want to use canSay downgrades but cannot due to issue #195.
-  "MicCompute" canSay downgrades("userSpeechCanBeDeclassifiedAsTextTranscript").
+//  "MicCompute" canSay downgrades("userSpeechCanBeDeclassifiedAsTextTranscript").
   // TODO(#195) remove this ownership claim.
-  ownsTag("MicCompute", "userSpeechCanBeDeclassifiedAsTextTranscript").
-}
+//  ownsTag("MicCompute", "userSpeechCanBeDeclassifiedAsTextTranscript").
+// }
 
 // Why should users trust "DevicePolicyAuthority"? Because is recognized as an
 // authority by "WellKnownTechCompany", with which they probably have a history

@@ -14,17 +14,17 @@ particle MicIn
 // them. The point here is that these stubs are adding a variant on the
 // userSpeech family of tags that imposes the policy preferences of the user
 // that they serve.
-particle UserAPermissionsStub
+particle UserATainter
   audio: reads writes AudioData { }
-  claim audio is userSpeechOfUserA
+  claim audio is userSpeechCanBeDeclassifiedAsTextTranscript
 
-particle UserBPermissionsStub
+particle UserBTainter
   audio: reads writes AudioData { }
-  claim audio is userSpeechOfUserB
+  claim audio is userSpeechCanBeDeclassifiedAsTextTranscript
 
-particle UserCPermissionsStub
+particle UserCTainter
   audio: reads writes AudioData { }
-  claim audio is userSpeechOfUserC
+  claim audio is userSpeechCannotBeDeclassifiedAsTextTranscript
 
 particle StorageCredentialsSource
   credentials: writes StorageCredentials { }
@@ -54,11 +54,11 @@ particle MicCompute
   // permission stubs. This assumes that in our new policy language, we allow
   // downgrading from a tag with a particular user refinement to a different
   // tag with that same user refinement.
-  claim asrStorageConn is not userSpeech and is textTranscript and derives from audioIn and derives from asrNeuralNet
+  claim asrStorageConn is not userSpeechCanBeDeclassifiedAsTextTranscript and derives from audioIn and derives from asrNeuralNet
 
 particle SpeechToTextStorageSink
   speechToTextIn: reads ASRData { }
-  check speechToTextIn is speechToTextQoS and is not userSpeech
+  check speechToTextIn is not userSpeechCanBeDeclassifiedAsTextTranscript and is not userSpeechCannotBeDeclassifiedAsTextTranscript
 
 // This recipe represents the mic operating in a room with no guest storage
 // permissions.
@@ -79,22 +79,22 @@ recipe DoASRNoGuests
 // This recipe represents the mic operating in a room where UserA and UserB are
 // having a conversation.
 recipe DoASRUserAAndUserB
-  m1AsrNetStorage: create
-  m1AsrStorage: create
-  m1AsrStoragePermissions: create
-  MicIn
-    audio: writes micAudio
-  UserAPermissionsStub
-    audio: reads writes micAudio
-  UserBPermissionsStub
-    audio: reads writes micAudio
-  MicCompute
-    audioIn: reads micAudio
-    asrNeuralNet: reads m1AsrNetStorage
-    asrStorageConn: writes m1AsrStorage
-    asrStoragePermissionsReceiver: reads m1AsrStoragePermissions
-  SpeechToTextStorageSink
-    speechToTextIn: reads m1AsrStorage
+   m1AsrNetStorage: create
+   m1AsrStorage: create
+   m1AsrStoragePermissions: create
+   MicIn
+     audio: writes micAudio
+   UserATainter
+     audio: reads writes micAudio
+   UserBTainter
+     audio: reads writes micAudio
+   MicCompute
+     audioIn: reads micAudio
+     asrNeuralNet: reads m1AsrNetStorage
+     asrStorageConn: writes m1AsrStorage
+     asrStoragePermissionsReceiver: reads m1AsrStoragePermissions
+   SpeechToTextStorageSink
+     speechToTextIn: reads m1AsrStorage
 
 // This recipe represents UserC entering the room. The policy of UserC does not
 // allow storing information derived from their voice; this means that this
@@ -109,11 +109,11 @@ recipe DoASRUserAAndUserBAndUserC
   m1AsrStoragePermissions: create
   MicIn
     audio: writes micAudio
-  UserAPermissionsStub
+  UserATainter
     audio: reads writes micAudio
-  UserBPermissionsStub
+  UserBTainter
     audio: reads writes micAudio
-  UserCPermissionsStub
+  UserCTainter
     audio: reads writes micAudio
   MicCompute
     audioIn: reads micAudio
