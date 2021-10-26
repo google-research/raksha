@@ -1,4 +1,4 @@
-// When "UserX" enters the TrustedCompany room, a runtime on the user's
+// When "UserX" enters the room, a runtime on the user's
 // mobile device sends a packet to the microphone which contains the following
 // facts serialized (and with relevant signatures):
 // "MobileDeviceRuntime" says {
@@ -16,6 +16,7 @@
 
 "UserA" says {
   ownsTag("UserA_userSpeech").
+  ownsTag("UserA_speechTranscript").
 
   // The user allows the userSpeech tag to just be dropped, or for any
   // action to be done with data owned by UserA. UserA grants permission for 
@@ -24,7 +25,7 @@
     isPath(pathX).
   
   // This says any tag, but because of how Raksha works internally, only 
-  // permissions UserA gives about its own tags matters
+  // permissions UserA gives about its own tags matter
   "TrustedCompany" canSay PrincipalX may(anyActionX, userATagX) :-
     isAction(anyActionX), isPrincipal(PrincipalX), isTag(userATagX).
 
@@ -48,6 +49,7 @@
 // companies that they trust.
 "UserB" says {
   ownsTag("UserB_userSpeech").
+  ownsTag("UserB_speechTranscript").
   
   // UserB has a set of trusted companies that they have ongoing relationships
   // with.
@@ -94,6 +96,7 @@
 // leave.
 "UserC" says {
   ownsTag("UserC_userSpeech").
+  ownsTag("UserC_speechTranscript").
   "TrustedCompany" canSay PrincipalX
     may("deliver_privacy_notifications", "UserC_userSpeech") :-
         isPrincipal(PrincipalX).
