@@ -17,10 +17,18 @@
 // The users give two preferences:
 //  - hasPrivacyPreference(<type_of_data>, <preference_of_handling>) which 
 //  describes how this user would like the policy framework to handle its own 
-//  data
-//  - setsPrivacyResolution(<type_of_data>, <resolution_suggestion>) which 
-//  suggests a way to handle disputes among user policies (cases where not 
-//  everyne's preference can be met). 
+//  data. The three preferences are:
+//     "permissive" -- the user permits anything to be done with their data
+//     "only_store_transcript" -- only transcripts can be stored, not audio
+//     "only_notify" -- the only thing that can be done with audio is notify 
+//     there is a microphone
+//  - setsPrivacyResolution(<type_of_data>, <resolution_suggestion>) gives the 
+//  device owner a way to decide how disputes among user policies are handled
+//  (cases where not everyone's preference can be met). The types of
+//  resolution are:
+//     "meet_requests" -- only allow actions everyone has consented to
+//     "stay_on" -- the microphone must stay on even if this goes agaist the 
+//     preferences of some users in the room
 
 "UserA" says {
   ownsTag("UserA", "UserA_userSpeech").
@@ -36,12 +44,12 @@
 
   // User A gives the policy principal the right to decide that any action can 
   // be done with UserA's data and to transform this data in any way.
-  "AmbientPrivacyPolicy" canSay PrincipalX may(anyActionX, userATagX) :-
-    isAction(anyActionX), isPrincipal(PrincipalX), isTag(userATagX).
-  "AmbientPrivacyPolicy" canSay downgrades(pathX, anyTagX) :-
-    isPath(pathX), isTag(anyTagX).
-  "AmbientPrivacyPolicy" canSay hasTag(pathX, anyTagX) :-
-    isPath(pathX), isTag(tagX).
+  "AmbientPrivacyPolicy" canSay PrincipalX may(ActionX, TagX) :-
+    isAction(ActionX), isPrincipal(PrincipalX), isTag(TagX).
+  "AmbientPrivacyPolicy" canSay downgrades(PathX, TagX) :-
+    isPath(PathX), isTag(TagX).
+  "AmbientPrivacyPolicy" canSay hasTag(PathX, TagX) :-
+    isPath(PathX), isTag(TagX).
 
   // This is stuff that needs to be generated behind the scenes
   // (Clearly A's policy should have no knowledge of this)
@@ -75,13 +83,13 @@
 
   // User B gives the policy principal the right to decide that any action can 
   // be done with UserB's data and to transform this data in any way.
-  "AmbientPrivacyPolicy" canSay PrincipalX may(anyActionX, userATagX) :-
-    isAction(anyActionX), isPrincipal(PrincipalX), isTag(userATagX).
-  "AmbientPrivacyPolicy" canSay downgrades(pathX, anyTagX) :-
-    isPath(pathX), isTag(anyTagX).
-  "AmbientPrivacyPolicy" canSay hasTag(pathX, anyTagX) :-
-    isPath(pathX), isTag(tagX).
-  
+  "AmbientPrivacyPolicy" canSay PrincipalX may(ActionX, TagX) :-
+    isAction(ActionX), isPrincipal(PrincipalX), isTag(TagX).
+  "AmbientPrivacyPolicy" canSay downgrades(PathX, TagX) :-
+    isPath(PathX), isTag(TagX).
+  "AmbientPrivacyPolicy" canSay hasTag(PathX, TagX) :-
+    isPath(PathX), isTag(TagX).
+
   // This is stuff that needs to be generated behind the scenes
   // (Clearly B's policy should have no knowledge of this)
   isAction("deliver_privacy_notifications").
@@ -116,13 +124,13 @@
 
   // User C gives the policy principal the right to decide that any action can 
   // be done with UserC's data and to transform this data in any way.
-  "AmbientPrivacyPolicy" canSay PrincipalX may(anyActionX, userATagX) :-
-    isAction(anyActionX), isPrincipal(PrincipalX), isTag(userATagX).
-  "AmbientPrivacyPolicy" canSay downgrades(pathX, anyTagX) :-
-    isPath(pathX), isTag(anyTagX).
-  "AmbientPrivacyPolicy" canSay hasTag(pathX, anyTagX) :-
-    isPath(pathX), isTag(tagX).
-
+  "AmbientPrivacyPolicy" canSay PrincipalX may(ActionX, TagX) :-
+    isAction(ActionX), isPrincipal(PrincipalX), isTag(TagX).
+  "AmbientPrivacyPolicy" canSay downgrades(PathX, TagX) :-
+    isPath(PathX), isTag(TagX).
+  "AmbientPrivacyPolicy" canSay hasTag(PathX, TagX) :-
+    isPath(PathX), isTag(TagX).
+  
   // This is stuff that needs to be generated behind the scenes
   // (Clearly C's policy should have no knowledge of this)
   isAction("deliver_privacy_notifications").
@@ -146,6 +154,8 @@
   "UserA" ownsDevice("this_microphone").
 }
 
+// This is the (presumably open-source) privacy policy "EULA" that users 
+// delegate to.
 "AmbientPrivacyPolicy" says {
 
   // This policy allows end-users to express their own preferences and state 
@@ -168,35 +178,33 @@
   "Notifier" may("deliver_privacy_notifications", UserX_userSpeech) :-
     isUserSpeech(UserX_userSpeech).
 
-  // Local computation using speech and transformation of speech into 
-  // transcripts is allowed on user speech if either:
-  // 1) the user's preference is either permissive or that transcripts can be 
-  // stored.
+  // The pipleine involving transcription and storage of the transcript is 
+  // allowed to run for a particular user if:
+  // 1) the user's preference is either permissive or that just transcripts can
+  // be stored.
   // 2) the device owner's preference implies we should override the 
-  // preferences of others.
+  // preferences of others
+  // The rule "allow_transcription" captures these alternatives:
+  allowTranscription(UserX) :-
+    UserX hasPrivacyPreference("audio", "only_store_transcript").
+  allowTranscription(UserX) :- UserX hasPrivacyPreference("audio", "permissive").
+  allowTranscription(UserX) :- overridePreferences("audio"), isPrincipal(UserX).
+
   "MicCompute" may("local_computation", UserX_userSpeech) :-
     isUserSpeech(UserX_userSpeech), ownsTag(UserX, UserX_userSpeech),
-    (UserX hasPreference("only_store_transcript");
-    UserX hasPreference("permissive");
-    overridePreferrences("audio")).
+    allowTranscription(UserX).
   
   "MicCompute" canSay downgrades("asrStorageConn", UserX_userSpeech) :-
     isUserSpeech(UserX_userSpeech), ownsTag(UserX, UserX_userSpeech),
-    (UserX hasPreference("only_store_transcript");
-    UserX hasPreference("permissive");
-    overridePreferrences("audio")).
+    allowTranscription(UserX).
 
   "MicCompute" canSay hasTag("asrStorageConn", UserX_speechTranscript) :-
-    isUserSpeech(UserX_speechTranscript), ownsTag(UserX, UserX_speechTranscript),
-    (UserX hasPreference("only_store_transcript");
-    UserX hasPreference("permissive");
-    overridePreferrences("audio")).
+    isUserTranscript(UserX_speechTranscript), ownsTag(UserX, UserX_speechTranscript),
+    allowTranscription(UserX).
   
   "SpeechToTextStorageSink" may("store", UserX_speechTranscript) :-
-    isUserSpeech(UserX_speechTranscript), ownsTag(UserX, UserX_speechTranscript),
-    (UserX hasPreference("only_store_transcript");
-    UserX hasPreference("permissive");
-    overridePreferrences("audio")).
+    isUserTranscript(UserX_speechTranscript), ownsTag(UserX, UserX_speechTranscript),
+    allowTranscription(UserX).
 
   // Should be generated behind the scenes:
   isPrincipal("UserA").
@@ -207,6 +215,18 @@
   isPrivacyPreference("only_notify").
   isPrivacyResolution("stay_on").
   isPrivacyResolution("meet_requests").
+  isUserSpeech("UserA_userSpeech").
+  isUserSpeech("UserB_userSpeech").
+  isUserSpeech("UserC_userSpeech").
+  ownsTag("UserA", "UserA_userSpeech").
+  ownsTag("UserB", "UserB_userSpeech").
+  ownsTag("UserC", "UserC_userSpeech").
+  isUserTranscript("UserA_speechTranscript").
+  isUserTranscript("UserB_speechTranscript").
+  isUserTranscript("UserC_speechTranscript").
+  ownsTag("UserA", "UserA_speechTranscript").
+  ownsTag("UserB", "UserB_speechTranscript").
+  ownsTag("UserC", "UserC_speechTranscript").
 }
 
 //-----------------------------------------------------------------------------
@@ -247,14 +267,15 @@
 //-----------------------------------------------------------------------------
 
 // The comments and queries below this line describe what the analysis / checks 
-// should do. These are not part of the policy. There are two cases: 1) just A and 
-// B are in the room and the microphone can run, and 2) C joins the room and 
-// recording audio shuts off.
-
-//------------ Scenario 1: Just UserA and UserB are in room
+// should do. These are not part of the policy. In this scenario, A, B, and C 
+// are all in the room, but because A has resolution "stay_on", all of these 
+// checks are true (transcription and storage stay on), even though C does not 
+// want this. If you change the line that sets "A"'s resolution policy to 
+// "meet_requests", the checks for "C" other than notificaiton are false 
+// (transcription and storage stay off).
 
 // Notifier taint:
-//  audioIn: UserA_userSpeech, UserB_userSpeech
+//  audioIn: UserA_userSpeech, UserB_userSpeech, UserC_userSpeech
 
 // expect: true
 may_notifierA = query "UserA" says
@@ -264,8 +285,12 @@ may_notifierA = query "UserA" says
 may_notifierB = query "UserB" says
   "Notifier" may("deliver_privacy_notifications", "UserB_userSpeech")?
 
+// expect: true
+may_notifierC = query "UserC" says
+  "Notifier" may("deliver_privacy_notifications", "UserC_userSpeech")?
+
 // MicCompute taint:
-// audioIn: UserA_userSpeech, UserB_userSpeech
+// audioIn: UserA_userSpeech, UserB_userSpeech, UserC_userSpeech
 
 // expect: true
 may_micComputeA = query "UserA" says
@@ -274,6 +299,10 @@ may_micComputeA = query "UserA" says
 // expect: true
 may_micComputeB = query "UserB" says
     "MicCompute" may("local_computation", "UserB_userSpeech")?
+
+// expect: false -> MicCompute particle cannot run
+may_micComputeC = query "UserC" says
+    "MicCompute" may("local_computation", "UserC_userSpeech")?
 
 // These are not checks generated by the "wills" but they test 
 // downgrades that need to work for speech to text to have the right tags
@@ -285,8 +314,13 @@ down_micComputeA = query "UserA" says
 down_micComputeB = query "UserB" says
     downgrades("asrStorageConn", "UserB_userSpeech")?
 
+// expect: true
+down_micComputeC = query "UserC" says
+    downgrades("asrStorageConn", "UserC_userSpeech")?
+
 // SpeechToTextStorageSink taint:
-// speechToTextIn: UserA_userTranscript, UserB_userTranscript
+// speechToTextIn: UserA_userTranscript, UserB_userTranscript, 
+//      UserC_userTranscript
 
 // expect: true
 may_speechInA = query "UserA" says
@@ -296,25 +330,6 @@ may_speechInA = query "UserA" says
 may_speechInB = query "UserB" says
     "SpeechToTextStorageSink" may("store", "UserB_speechTranscript")?
 
-
-//------------ Scenario 2: UserC enters the room.
-// If A and/or B are in the room, the above checks also happen in addition to 
-// these ones about C's data. Because the checks on MicCompute and 
-// SpeechToTextStorageSink fail, those particles cannot run when C enters the 
-// room.
-
 // expect: true
-may_notifierC = query "UserC" says
-  "Notifier" may("deliver_privacy_notifications", "UserC_userSpeech")?
-
-// expect: false -> MicCompute particle cannot run
-may_micComputeC = query "UserC" says
-    "MicCompute" may("local_computation", "UserC_userSpeech")?
-
-// expect false -> MicCompute particle cannot run
-down_micComputeC = query "UserC" says
-    downgrades("asrStorageConn", "UserC_userSpeech")?
-
-// expect false -> SpeechToTextStorageSink cannot run
-may_speechToTextStorage = query "UserC" says
+may_speechInC = query "UserC" says
     "SpeechToTextStorageSink" may("store", "UserC_speechTranscript")?
