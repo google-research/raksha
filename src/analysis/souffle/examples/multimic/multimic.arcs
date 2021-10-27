@@ -36,7 +36,6 @@ particle MicCompute
   // permission stubs. This assumes that in our new policy language, we allow
   // downgrading from a tag with a particular user refinement to a different
   // tag with that same user refinement.
-  claim asrStorageConn derives from audioIn and derives from asrNeuralNet
   check audioIn is not asrDisallowed
 
 particle SpeechToTextStorageSink
@@ -77,10 +76,7 @@ recipe DoASRUserAAndUserB
 // This recipe represents UserC entering the room. The policy of UserC does not
 // allow storing information derived from their voice; this means that this
 // recipe must reject the connection from UserC, as the check in
-// SpeechToTextStorageSink will fail otherwise. Alternatively, we could use the
-// policy language to make the check redact information rather than reject the
-// graph, in which case this recipe would be accepted, but speech to text would
-// stop.
+// SpeechToTextStorageSink will fail otherwise.
 recipe DoASRUserAAndUserBAndUserC
   m1AsrNetStorage: create
   m1AsrStorage: create
