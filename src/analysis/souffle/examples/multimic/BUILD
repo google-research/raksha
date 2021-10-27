@@ -12,10 +12,3 @@ policy_check(
     auth_logic = "multimic_no_userc_tag.authlogic",
     dataflow_graph = "multimic.arcs",
 )
-
-policy_check(
-    name = "check_multimic_no_downgrade_fail",
-    auth_logic = "multimic_no_userc_tag_no_miccompute_downgrade.authlogic",
-    dataflow_graph = "multimic.arcs",
-    expect_failure = True,
-)

@@ -16,37 +16,19 @@ particle MicIn
 // that they serve.
 particle UserATainter
   audio: reads writes AudioData { }
-  claim audio is userSpeechCanBeDeclassifiedAsTextTranscript
 
 particle UserBTainter
   audio: reads writes AudioData { }
-  claim audio is userSpeechCanBeDeclassifiedAsTextTranscript
 
 particle UserCTainter
   audio: reads writes AudioData { }
-  claim audio is userSpeechCannotBeDeclassifiedAsTextTranscript
-
-particle StorageCredentialsSource
-  credentials: writes StorageCredentials { }
-  claim credentials is fullStoragePermissions
-
-particle DelegateStorePermissions
-  inPermissions: reads StoragePermissions { }
-  outPermissions: writes StoragePermissions { }
-  // The delegator claims that it downgrades the permissions to use storage
-  // from the full permissions to some less powerful delegated permissions.
-  claim outPermissions is not fullStoragePermissions and is delegatedPermissions
-  // Note: this is to fail stati checking if we are not allowed to downgrade
-  // permissions. We actually aren't allowed to do this in Arcs as it only
-  // allows checks on inputs! We should allow this in our new policy language.
-  // check outPermissions is not fullStoragePermissions
+  claim audio is asrDisallowed
 
 // Represents the CPU within the mic.
 particle MicCompute
   audioIn: reads AudioData { }
   asrNeuralNet: reads ASRNeuralNet { }
   asrStorageConn: writes ASRData { }
-  asrStoragePermissionsReceiver: reads StorageCredentials { }
   // Claim that MicCompute downgrades the label from userSpeech to
   // textTranscript.
   // Note: this is intended to downgrade not just the userSpeech from the MicIn
@@ -54,25 +36,23 @@ particle MicCompute
   // permission stubs. This assumes that in our new policy language, we allow
   // downgrading from a tag with a particular user refinement to a different
   // tag with that same user refinement.
-  claim asrStorageConn is not userSpeechCanBeDeclassifiedAsTextTranscript and derives from audioIn and derives from asrNeuralNet
+  claim asrStorageConn derives from audioIn and derives from asrNeuralNet
+  check audioIn is not asrDisallowed
 
 particle SpeechToTextStorageSink
   speechToTextIn: reads ASRData { }
-  check speechToTextIn is not userSpeechCanBeDeclassifiedAsTextTranscript and is not userSpeechCannotBeDeclassifiedAsTextTranscript
 
 // This recipe represents the mic operating in a room with no guest storage
 // permissions.
 recipe DoASRNoGuests
   m1AsrNetStorage: create
   m1AsrStorage: create
-  m1AsrStoragePermissions: create
   MicIn
     audio: writes micAudio
   MicCompute
     audioIn: reads micAudio
     asrNeuralNet: reads m1AsrNetStorage
     asrStorageConn: writes m1AsrStorage
-    asrStoragePermissionsReceiver: reads m1AsrStoragePermissions
   SpeechToTextStorageSink
     speechToTextIn: reads m1AsrStorage
 
@@ -81,7 +61,6 @@ recipe DoASRNoGuests
 recipe DoASRUserAAndUserB
    m1AsrNetStorage: create
    m1AsrStorage: create
-   m1AsrStoragePermissions: create
    MicIn
      audio: writes micAudio
    UserATainter
@@ -92,7 +71,6 @@ recipe DoASRUserAAndUserB
      audioIn: reads micAudio
      asrNeuralNet: reads m1AsrNetStorage
      asrStorageConn: writes m1AsrStorage
-     asrStoragePermissionsReceiver: reads m1AsrStoragePermissions
    SpeechToTextStorageSink
      speechToTextIn: reads m1AsrStorage
 
@@ -106,7 +84,6 @@ recipe DoASRUserAAndUserB
 recipe DoASRUserAAndUserBAndUserC
   m1AsrNetStorage: create
   m1AsrStorage: create
-  m1AsrStoragePermissions: create
   MicIn
     audio: writes micAudio
   UserATainter
@@ -119,27 +96,5 @@ recipe DoASRUserAAndUserBAndUserC
     audioIn: reads micAudio
     asrNeuralNet: reads m1AsrNetStorage
     asrStorageConn: writes m1AsrStorage
-    asrStoragePermissionsReceiver: reads m1AsrStoragePermissions
   SpeechToTextStorageSink
     speechToTextIn: reads m1AsrStorage
-
-recipe HandOffASRToOtherMic
-  m2AsrNetStorage: create
-  m1AsrStorage: use 'm1AsrStorage'
-  m1AsrStoragePermissions: map 'm1AsrStoragePermissions'
-  delegatedStoragePermissions: create
-
-  DelegateStorePermissions
-    inPermissions: reads m1AsrStoragePermissions
-    outPermissions: writes delegatedStoragePermissions
-
-  MicIn
-    audio: writes m2MicAudio
-
-  MicCompute
-    audioIn: reads m2MicAudio
-    asrNeuralNet: reads m2AsrNetStorage
-    // Note: continue to write to m1's storage to continue the transcription.
-    asrStorageConn: writes m1AsrStorage
-    asrStoragePermissionsReceiver: reads delegatedPermissions
-
