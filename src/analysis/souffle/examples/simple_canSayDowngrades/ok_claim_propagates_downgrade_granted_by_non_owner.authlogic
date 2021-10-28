@@ -1,0 +1,2 @@
+"EndUser" says "P1" canSay hasTag(accessPathX, "userSelection") :- isAccessPath(accessPathX).
+"EndUser" says "P2" canSay downgrades(accessPathX, "userSelection") :- isAccessPath(accessPathX).
