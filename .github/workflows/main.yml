@@ -42,3 +42,7 @@ jobs:
 
       - name: Verify that we can build authorization logic code with bazel
         run: bazel build //rust/tools/authorization-logic:authorization_logic
+
+      # Verifies that Arcs manifest examples build
+      - name: Verify that disabled Arcs manifest tests build.
+        run: bazel build //src/analysis/souffle/examples/...

@@ -1,0 +1,9 @@
+// UserC is a very privacy sensitive user. They do not trust anyone to perform
+// ASR on their voice data.
+"UserC" says {
+
+  // We want to use canSay hasTag but cannot due to issue #195.
+  "UserCTainter" canSay hasTag(pathX, "asrDisallowed") :- isAccessPath(pathX).
+  // TODO(#195) remove this ownership claim.
+  ownsTag("UserCTainter", "asrDisallowed").
+}
