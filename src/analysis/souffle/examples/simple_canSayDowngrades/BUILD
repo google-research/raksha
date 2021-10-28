@@ -29,3 +29,10 @@ policy_check(
     dataflow_graph = "ok_claim_propagates.arcs",
     expect_failure = True,
 )
+
+policy_check(
+    name = "delegation_granted_by_non_owner",
+    auth_logic = "ok_claim_propagates_downgrade_granted_by_non_owner.authlogic",
+    dataflow_graph = "ok_claim_propagates.arcs",
+    expect_failure = True,
+)
