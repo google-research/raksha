@@ -28,9 +28,17 @@
 
 // Some party asserts the claim that the label of an access path should be
 // downgraded by removing the referenced tag from the set.
-.decl saysDowngrades(speaker: Principal, p: AccessPath, t: Tag)
+.decl saysDowngrades(speaker: Principal, path: AccessPath, tag: Tag)
 
-.decl isPrincipal(p: Principal)
+// The `speaker` says that `delegatee` is allowed to indicate that a `path` does
+// not have a `tag`.
+.decl saysCanSayDowngrades(
+  speaker: Principal, delegatee: Principal, path: AccessPath, tag: Tag)
+
+// Indicates that a speaker is allowed to say downgrades.
+.decl canSayDowngrades(speaker: Principal, path: AccessPath, tag: Tag)
+
+.decl isPrincipal(principal: Principal)
 
 // This party is the owner of a taint Tag (they have the privilege to downgrade
 // it).
@@ -38,7 +46,21 @@
 
 .decl saysOwnsTag(speaker: Principal, owner: Principal, tag: Tag)
 
-.decl saysHasTag(speaker: Principal, path: AccessPath, t: Tag)
+// claimHasTag and saysHasTag are synonyms. They indicate that the `speaker`
+// claims that `path` definitely has `tag` taint.
+.decl claimHasTag(speaker: Principal, path: AccessPath, tag: Tag)
+.decl saysHasTag(speaker: Principal, path: AccessPath, tag: Tag)
+
+// The `speaker` says that the `delegatee` can say that `path` has `tag`.
+.decl saysCanSayHasTag(
+  speaker: Principal, delegatee: Principal, path: AccessPath, tag: Tag)
+
+// Indicates that a speaker is allowed to say a path has a particular tag.
+.decl canSayHasTag(speaker: Principal, path: AccessPath, tag: Tag)
+
+// Indicates that a `tag` is definitely present upon a `path` because a speaker
+// delegated to by the owner said so.
+.decl hasTag(path: AccessPath, tag: Tag)
 
 // Some accessPath is actually downgraded (by taking into consideration the
 // privileges of a party trying to downgrade it, and as a result of that party
@@ -50,13 +72,31 @@
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
-downgrades(path, tag) :- ownsTag(owner, tag), saysDowngrades(owner, path, tag).
 
-// This rule conservatively says that if _any_ principal claims that a path has
-// a tag, then it has the tag according to the taint analysis. This rule is
-// likely to be adjusted later. For confidentiality tags this should be OK to
-// start with.
-claimHasTag(principal, path, tag) :- saysHasTag(principal, path, tag).
+// The owner can always say downgrades.
+canSayDowngrades(speaker, path, tag) :-
+    isAccessPath(path), ownsTag(speaker, tag).
+
+// If the owner says a speaker can say downgrades, the speaker can say
+// downgrades.
+canSayDowngrades(speaker, path, tag) :-
+  ownsTag(owner, tag), saysCanSayDowngrades(owner, speaker, path, tag).
+
+downgrades(path, tag) :-
+    canSayDowngrades(speaker, path, tag), saysDowngrades(speaker, path, tag).
+
+saysHasTag(principal, path, tag) :- claimHasTag(principal, path, tag).
+
+// The owner can say the tag is present anywhere.
+canSayHasTag(speaker, path, tag) :- isAccessPath(path), ownsTag(speaker, tag).
+
+// The speaker can also speak about the tag if the owner said so.
+canSayHasTag(speaker, path, tag) :-
+  ownsTag(owner, tag), saysCanSayHasTag(owner, speaker, path, tag).
+
+// The path has a tag if an authorized speaker says it does.
+hasTag(path, tag) :-
+  saysHasTag(speaker, path, tag), canSayHasTag(speaker, path, tag).
 
 // This rule says that any principal can say that another principal owns a tag.
 // This rule is just a starting point to allow all aspects of the policy to

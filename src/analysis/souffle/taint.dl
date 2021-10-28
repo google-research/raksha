@@ -26,11 +26,6 @@
 // Relation Declarations
 //-----------------------------------------------------------------------------
 
-// Indicates that an access path definitely has a tag. Differs from mayHaveTag
-// below in that mayHaveTag indicates only that it is possible that an
-// accessPath has a tag.
-.decl hasTag(accessPath: AccessPath, tag: Tag)
-
 // Declares that `accessPath` may have been tainted with `tag`.
 // If false, `accessPath` *definitely* does not have `tag` taint at runtime.
 // If true, `accessPath` may have the `tag` taint at runtime.
@@ -39,10 +34,6 @@
 // In this formalization, accessPaths also act as IFCLabels (in the sense that
 // they have Tags).
 .decl mayHaveTag(accessPath: AccessPath, tag: Tag)
-
-// There is a claim that `accessPath` definitely has `tag` taint. This claim
-// is made by `principal`.
-.decl claimHasTag(principal: Principal, accessPath: AccessPath, tag: Tag)
 
 // Manifests can produce base facts of this form, where usually the principal 
 // is a particle (and this fact is entered by a code reviewer with no knowledge 
@@ -90,8 +81,6 @@
 saysDowngrades(principal, midpoint, tag) :-
   isTag(tag), claimNotEdge(principal, src, tgt), edgeToMidpointAccessPath(src, tgt, midpoint).
 
-hasTag(tgt, tag) :- claimHasTag(principal, tgt, tag), ownsTag(principal, tag).
-
 mayHaveTag(tgt, tag) :- hasTag(tgt, tag).
 
 mayHaveTag(tgt, tag) :-
@@ -107,8 +96,7 @@ mayHaveTag(tgt, tag) :-
 isPrincipal(principal) :- claimHasTag(principal, _, _).
 
 isAccessPath(path) :- claimHasTag(_, path, _).
-isAccessPath(path) :- hasTag(path, _).
-isAccessPath(path) :- mayHaveTag(path, _).
+isAccessPath(path) :- saysHasTag(_, path, _).
 
 // Symbols used in hasTag or mayHaveTag are tags
 isTag(tag) :- claimHasTag(_, _, tag).
