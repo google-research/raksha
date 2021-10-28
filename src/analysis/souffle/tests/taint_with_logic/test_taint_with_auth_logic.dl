@@ -82,14 +82,14 @@ claimHasTag("ImageSelectionSource", "image_selection", "image_selection_tag").
 claimHasTag(
     "DetectionModelSource", "detection_model", "image_detection_model_tag").
 
-// The label of the access path "image_detection_boxes" is downgraded from
+// The label of the access path "image_detection_boxes" is removed from
 // {raw_video_tag, image_detection_model_tag} to {detected_images_tag}. This
-// happens in two steps -- first the label is downgraded from {raw_video_tag,
+// happens in two steps -- first the label is removed from {raw_video_tag,
 // image_detection_model_tag} to {} (the empty set, which is totally public --
-// can go anywhere). This downgrade happens with
-//      saysDowngrades(Alice, image_detection_boxes, raw_video_tag)
+// can go anywhere). This removal happens with
+//      saysRemoveTag(Alice, image_detection_boxes, raw_video_tag)
 // and
-//      saysDowngrades(ServiceProvider, image_detection_boxes, 
+//      saysRemoveTag(ServiceProvider, image_detection_boxes, 
 //            image_detection_model_tag)
 // Then it is "upgraded" from {} to {detected_image_tag}. (This is an
 // "upgrade" because the label {detected_image_tag} is more constrained.
@@ -98,16 +98,16 @@ claimHasTag(
 //      claimHasTag(
 //        "ImageDetector", "image_detection_boxes", "detected_images_tag").
 
-saysDowngrades("Alice", "image_detection_boxes", "raw_video_tag").
-saysDowngrades("ServiceProvider", "image_detection_boxes", 
+saysRemoveTag("Alice", "image_detection_boxes", "raw_video_tag").
+saysRemoveTag("ServiceProvider", "image_detection_boxes", 
     "image_detection_model_tag").
 claimHasTag("ImageDetector", "image_detection_boxes", "detected_images_tag").
 
 // The output of the image selector is downgraded from 
 // {image_detection_model_tag, detected_images_tag} to
 // {product_id_tag}
-saysDowngrades("Alice", "selected_image_id", "image_selection_tag").
-saysDowngrades("Alice", "selected_image_id", "detected_images_tag").
+saysRemoveTag("Alice", "selected_image_id", "image_selection_tag").
+saysRemoveTag("Alice", "selected_image_id", "detected_images_tag").
 claimHasTag("ImageSelector", "selected_image_id", "product_id_tag").
 
 //----------------------------------------------------------------------------- 
@@ -135,7 +135,7 @@ subsetOrEquals(p1, p2) :-
 
 // The check passes if this is true (i.e., the CSV for test_label_check
 // includes '1').
-// It is supposed to pass. If you comment out any of the "saysDowngrades" lines
+// It is supposed to pass. If you comment out any of the "saysRemoveTag" lines
 // above, it should fail.
 TEST_CASE("egress_should_label_check") :-
     subsetOrEquals("selected_image_id", "output_expected_label").

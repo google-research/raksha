@@ -124,7 +124,7 @@ access_path: {
 predicate: {
 not: { predicate: { label: { semantic_tag: "user_selection"} } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(saysDowngrades("%s", "%s.x.y", "user_selection").)") } },
+          R"(saysRemoveTag("%s", "%s.x.y", "user_selection").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -144,7 +144,7 @@ predicate: { and: {
   conjunct0: { not: { predicate: { label: { semantic_tag: "tag"} } } }
   conjunct1: { label: { semantic_tag: "tag2"} } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(saysDowngrades("%s", "%s.field1", "tag").)"),
+          R"(saysRemoveTag("%s", "%s.field1", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
           R"(claimHasTag("%s", "%s.field1", "tag2").)") } },
     { R"(
@@ -156,7 +156,7 @@ predicate: { and: {
       { absl::ParsedFormat<'s', 's'>(
           R"(claimHasTag("%s", "%s", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysDowngrades("%s", "%s", "tag2").)") } },
+          R"(saysRemoveTag("%s", "%s", "tag2").)") } },
      { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -169,7 +169,7 @@ predicate: { and: {
       { absl::ParsedFormat<'s', 's'>(
           R"(claimHasTag("%s", "%s.field1", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysDowngrades("%s", "%s.field1", "tag2").)"),
+          R"(saysRemoveTag("%s", "%s.field1", "tag2").)"),
         absl::ParsedFormat<'s', 's'>(
           R"(claimHasTag("%s", "%s.field1", "tag3").)") } },
      { R"(
@@ -186,9 +186,9 @@ predicate: { and: {
       { absl::ParsedFormat<'s', 's'>(
           R"(claimHasTag("%s", "%s.field1", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysDowngrades("%s", "%s.field1", "tag2").)"),
+          R"(saysRemoveTag("%s", "%s.field1", "tag2").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysDowngrades("%s", "%s.field1", "tag3").)"),
+          R"(saysRemoveTag("%s", "%s.field1", "tag3").)"),
         absl::ParsedFormat<'s', 's'>(
           R"(claimHasTag("%s", "%s.field1", "tag4").)")
           } },

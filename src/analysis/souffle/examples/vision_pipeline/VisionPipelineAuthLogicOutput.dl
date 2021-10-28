@@ -18,9 +18,9 @@
 // This file is roughly what should be produced by authorization logic as an 
 // output. I think in reality there are gaps (one is that the output from the 
 // authorization logic does not use types, but the code here does). 
-saysDowngrades("ServiceProvider", "detection_boxes", 
+saysRemoveTag("ServiceProvider", "detection_boxes", 
     "image_detection_model_tag").
 
-saysDowngrades("EndUser", "detection_boxes", "raw_video_tag").
-saysDowngrades("EndUser", "selected_image_id", "user_selection_tag").
-saysDowngrades("EndUser", "selected_image_id", "detected_images_tag").
+saysRemoveTag("EndUser", "detection_boxes", "raw_video_tag").
+saysRemoveTag("EndUser", "selected_image_id", "user_selection_tag").
+saysRemoveTag("EndUser", "selected_image_id", "detected_images_tag").
