@@ -105,14 +105,21 @@ use crate::{ast::*, souffle::datalog_ir::*};
 // this is the conveninet way for it to work in the contexts in which it
 // is used.
 fn push_onto_pred(modifier: String, mut args_: Vec<String>, pred: &AstPredicate) -> AstPredicate {
-    let new_name = modifier + &pred.name.clone();
-    for a in &pred.args {
-        args_.push(a.to_string());
-    }
-    AstPredicate {
-        sign: pred.sign,
-        name: new_name,
-        args: args_.to_vec(),
+    let universe_relations = ["isAccessPath", "isTag", "isPrincipal"];
+    if universe_relations.contains(&pred.name.as_str()) {
+        pred.clone()
+    } else {
+        // For the few relations recognized as universe relations, do not qualify in the
+        // predicate.
+        let new_name = modifier + &pred.name;
+        for a in &pred.args {
+            args_.push(a.clone());
+        }
+        AstPredicate {
+            sign: pred.sign,
+            name: new_name.clone(),
+            args: args_.to_vec(),
+        }
     }
 }
 

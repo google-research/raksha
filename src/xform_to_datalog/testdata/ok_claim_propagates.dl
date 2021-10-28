@@ -21,6 +21,23 @@ testFails(check_index) :-
 .decl says_ownsTag(speaker: Principal, owner: Principal, tag: Tag)
 saysOwnsTag(x, y, z) :- says_ownsTag(x, y, z).
 
+.decl says_hasTag(speaker: Principal, path: AccessPath, tag: Tag)
+saysHasTag(x, y, z) :- says_hasTag(x, y, z).
+
+.decl says_canSay_hasTag(
+  speaker: Principal,
+  delegatee: Principal,
+  accessPath: AccessPath,
+  tag: Tag)
+saysCanSayHasTag(w, x, y, z) :- says_canSay_hasTag(w, x, y, z).
+
+.decl says_canSay_downgrades(
+    speaker: Principal, delegatee: Principal, path: AccessPath, tag: Tag)
+saysCanSayDowngrades(w, x, y, z) :- says_canSay_downgrades(w, x, y, z).
+
+.decl says_downgrades(speaker: Principal, path: AccessPath, tag: Tag)
+saysDowngrades(x, y, z) :- says_downgrades(x, y, z).
+
 // Manifest
 
 // Claims:
