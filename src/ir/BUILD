@@ -33,7 +33,6 @@ cc_library(
         ":access_path",
         "//src/common/logging",
         "//src/ir/proto:access_path",
-        "//third_party/arcs/proto:manifest_cc_proto",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/hash",

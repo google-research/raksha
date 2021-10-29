@@ -21,7 +21,6 @@
 #include "src/ir/access_path.h"
 #include "src/ir/datalog_print_context.h"
 #include "src/ir/predicate.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
 
