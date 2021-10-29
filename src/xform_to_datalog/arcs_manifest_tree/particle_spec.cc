@@ -16,6 +16,7 @@
 
 #include "src/ir/proto/predicate.h"
 #include "src/ir/proto/tag_check.h"
+#include "src/ir/proto/tag_claim.h"
 #include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
 
 namespace raksha::xform_to_datalog::arcs_manifest_tree {
@@ -48,7 +49,7 @@ ParticleSpec ParticleSpec::CreateFromProto(
       }
       case arcs::ClaimProto::kAssume: {
         std::vector<ir::TagClaim> current_assume_claims =
-            ir::TagClaim::CreateFromProto(name, claim.assume());
+            ir::proto::Decode(name, claim.assume());
         tag_claims.insert(
             tag_claims.end(),
             std::make_move_iterator(current_assume_claims.begin()),

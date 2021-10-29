@@ -22,6 +22,7 @@
 #include "absl/strings/str_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/access_path_selectors.h"
+#include "src/ir/proto/tag_claim.h"
 
 namespace raksha::ir {
 
@@ -53,7 +54,7 @@ TEST_P(TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest) {
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
       assume_textproto, &assume_proto));
   std::vector<TagClaim> unrooted_tag_claim_vec =
-      TagClaim::CreateFromProto(particle_spec_name, assume_proto);
+      proto::Decode(particle_spec_name, assume_proto);
   std::vector<TagClaim> rooted_tag_claim_vec;
   for (const TagClaim &unrooted_claim : unrooted_tag_claim_vec) {
     rooted_tag_claim_vec.push_back(unrooted_claim.Instantiate(root));

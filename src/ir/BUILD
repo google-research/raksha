@@ -21,7 +21,6 @@ load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
 
 cc_library(
     name = "ir",
-    srcs = ["tag_claim.cc"],
     hdrs = [
         "datalog_print_context.h",
         "derives_from_claim.h",
@@ -139,6 +138,7 @@ cc_test(
     deps = [
         ":ir",
         "//src/common/testing:gtest",
+        "//src/ir/proto:tag_claim",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],

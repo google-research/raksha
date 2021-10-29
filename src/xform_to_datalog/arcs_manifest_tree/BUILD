@@ -31,6 +31,7 @@ cc_library(
         "//src/ir",
         "//src/ir/proto:predicate",
         "//src/ir/proto:tag_check",
+        "//src/ir/proto:tag_claim",
         "//src/ir/proto:types",
         "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",
