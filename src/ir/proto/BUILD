@@ -67,6 +67,16 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "derives_from_claim",
+    hdrs = ["derives_from_claim.h"],
+    deps = [
+        "//src/ir",
+        "//src/ir:access_path",
+        "//third_party/arcs/proto:manifest_cc_proto",
+    ],
+)
+
 cc_test(
     name = "access_path_test",
     srcs = ["access_path_test.cc"],
