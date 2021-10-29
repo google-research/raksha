@@ -173,6 +173,7 @@ cc_test(
     deps = [
         ":ir",
         "//src/common/testing:gtest",
+        "//src/ir/proto:derives_from_claim",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],

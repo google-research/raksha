@@ -14,6 +14,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
+#include "src/ir/proto/derives_from_claim.h"
 #include "src/ir/proto/predicate.h"
 #include "src/ir/proto/tag_check.h"
 #include "src/ir/proto/tag_claim.h"
@@ -43,8 +44,7 @@ ParticleSpec ParticleSpec::CreateFromProto(
         // TODO(#120): Also attach the particle name to these DerivesFrom
         //  claims to allow authorization logic to mediate whether edges are
         //  drawn for these claims or not.
-        derives_from_claims.push_back(
-            ir::DerivesFromClaim::CreateFromProto(claim.derives_from()));
+        derives_from_claims.push_back(ir::proto::Decode(claim.derives_from()));
         continue;
       }
       case arcs::ClaimProto::kAssume: {
