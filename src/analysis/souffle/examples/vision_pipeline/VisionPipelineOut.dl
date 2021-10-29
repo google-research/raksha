@@ -77,7 +77,7 @@ subsetOrEquals(p1, p2) :-
 // Some other code needs to check that the following can be proved
 // to do the "check":
 // This "Check" is only true if the label of selected_image_id from 
-// DFA + downgrades from authorization logic 
+// DFA + removeTag from authorization logic 
 // subsetOrEquals("selected_image_id", "dummy_check_selected_image_id").
 // The following souffle-code is a hacky way to do this:
 

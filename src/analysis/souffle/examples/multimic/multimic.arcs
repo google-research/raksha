@@ -29,9 +29,9 @@ particle MicCompute
   audioIn: reads AudioData { }
   asrNeuralNet: reads ASRNeuralNet { }
   asrStorageConn: writes ASRData { }
-  // Claim that MicCompute downgrades the label from userSpeech to
+  // Claim that MicCompute removes the label from userSpeech to
   // textTranscript.
-  // Note: this is intended to downgrade not just the userSpeech from the MicIn
+  // Note: this is intended to remove not just the userSpeech from the MicIn
   // particle, but also the userSpeechOf tags that flow from the user
   // permission stubs. This assumes that in our new policy language, we allow
   // downgrading from a tag with a particular user refinement to a different
