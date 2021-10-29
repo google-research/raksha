@@ -82,7 +82,7 @@ claimHasTag("ImageSelectionSource", "image_selection", "image_selection_tag").
 claimHasTag(
     "DetectionModelSource", "detection_model", "image_detection_model_tag").
 
-// The label of the access path "image_detection_boxes" is removed from
+// The label of the access path "image_detection_boxes" is downgraded from
 // {raw_video_tag, image_detection_model_tag} to {detected_images_tag}. This
 // happens in two steps -- first the label is removed from {raw_video_tag,
 // image_detection_model_tag} to {} (the empty set, which is totally public --
