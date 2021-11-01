@@ -1,0 +1,28 @@
+FROM ubuntu:focal
+# Install the required packages
+RUN apt-get update && apt-get install -y \
+    autoconf \
+    automake \
+    bison \
+    build-essential\
+    clang \
+    doxygen \
+    flex \
+    g++ \
+    git \
+    libffi-dev \
+    libncurses5-dev \
+    libtool \
+    libsqlite3-dev \
+    make \
+    mcpp \
+    python \
+    sqlite \
+    wget \
+    zlib1g-dev
+
+# Needed for some targets
+RUN apt-get install default-jdk -y --no-install-recommends
+ENV JAVA_HOME /usr/lib/jvm/default-java
+RUN wget https://github.com/bazelbuild/bazelisk/releases/download/v1.10.1/bazelisk-linux-amd64 \
+    -O /usr/local/bin/bazelisk && chmod a+x /usr/local/bin/bazelisk

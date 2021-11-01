@@ -1,0 +1,6 @@
+.vscode
+.git
+bazel-out
+bazel-arcs
+bazel-bin
+
