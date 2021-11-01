@@ -20,7 +20,6 @@
 #include "src/ir/access_path.h"
 #include "src/ir/edge.h"
 #include "src/ir/proto/access_path.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
 
@@ -32,16 +31,6 @@ namespace raksha::ir {
 // which all inputs are connected to all outputs.
 class DerivesFromClaim {
  public:
-  static DerivesFromClaim CreateFromProto(
-      const arcs::ClaimProto_DerivesFrom &derives_from_proto) {
-    CHECK(derives_from_proto.has_source())
-      << "DerivesFrom proto does not have required field source.";
-    CHECK(derives_from_proto.has_target())
-      << "DerivesFrom proto does not have required field target.";
-    return DerivesFromClaim(proto::Decode(derives_from_proto.target()),
-                            proto::Decode(derives_from_proto.source()));
-  }
-
   explicit DerivesFromClaim(AccessPath target, AccessPath source)
     : target_(target), source_(source) {}
 

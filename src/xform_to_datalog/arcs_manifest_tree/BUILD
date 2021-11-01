@@ -29,6 +29,7 @@ cc_library(
     deps = [
         "//src/common/logging",
         "//src/ir",
+        "//src/ir/proto:derives_from_claim",
         "//src/ir/proto:predicate",
         "//src/ir/proto:tag_check",
         "//src/ir/proto:types",
