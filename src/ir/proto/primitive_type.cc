@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
+#include "src/ir/proto/primitive_type.h"
+
 #include "src/ir/types/primitive_type.h"
 
 namespace raksha::ir::types::proto {
