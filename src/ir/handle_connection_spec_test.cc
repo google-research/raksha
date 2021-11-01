@@ -133,4 +133,4 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Combine(testing::ValuesIn(protos_and_access_path_info),
                      testing::ValuesIn(sample_particle_spec_names)));
 
-}  // namespace raksha::xform_to_datalog::arcs_manifest_tree
+}  // namespace raksha::ir

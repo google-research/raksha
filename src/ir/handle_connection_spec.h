@@ -1,5 +1,5 @@
-#ifndef SRC_XFORM_TO_DATALOG_ARCS_MANIFEST_TREE_HANDLE_CONNECTION_SPEC_H_
-#define SRC_XFORM_TO_DATALOG_ARCS_MANIFEST_TREE_HANDLE_CONNECTION_SPEC_H_
+#ifndef SRC_IR_HANDLE_CONNECTION_SPEC_H_
+#define SRC_IR_HANDLE_CONNECTION_SPEC_H_
 
 #include <string>
 
@@ -57,6 +57,6 @@ class HandleConnectionSpec {
   std::unique_ptr<types::Type> type_;
 };
 
-}  // namespace raksha::xform_to_datalog::arcs_manifest_tree
+}  // namespace raksha::ir
 
-#endif  // SRC_XFORM_TO_DATALOG_ARCS_MANIFEST_TREE_HANDLE_CONNECTION_SPEC_H_
+#endif  // SRC_IR_HANDLE_CONNECTION_SPEC_H_
