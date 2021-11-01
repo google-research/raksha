@@ -32,6 +32,7 @@ cc_library(
         "//src/ir/proto:derives_from_claim",
         "//src/ir/proto:predicate",
         "//src/ir/proto:tag_check",
+        "//src/ir/proto:tag_claim",
         "//src/ir/proto:types",
         "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",

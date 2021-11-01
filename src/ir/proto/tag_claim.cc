@@ -1,24 +1,8 @@
-//-----------------------------------------------------------------------------
-// Copyright 2021 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//-----------------------------------------------------------------------------
+#include "src/ir/proto/tag_claim.h"
 
-#include "src/ir/tag_claim.h"
+namespace raksha::ir::proto {
 
-namespace raksha::ir {
-
-std::vector<TagClaim> TagClaim::GetTagClaimsFromPredicate(
+static std::vector<TagClaim> GetTagClaimsFromPredicate(
     std::string claiming_particle_name,
     AccessPath access_path,
     const arcs::InformationFlowLabelProto_Predicate &predicate,
@@ -71,4 +55,25 @@ std::vector<TagClaim> TagClaim::GetTagClaimsFromPredicate(
   }
 }
 
-}  // namespace raksha::ir
+// Create a list of TagClaims from an Assume proto. Each of these will be
+// uninstantiated and thus rooted at the ParticleSpec.
+std::vector<TagClaim> Decode(
+  std::string claiming_particle_name,
+  const arcs::ClaimProto_Assume &assume_proto) {
+  CHECK(assume_proto.has_access_path())
+      << "Expected Assume message to have access_path field.";
+  const arcs::AccessPathProto &access_path_proto = assume_proto.access_path();
+  AccessPath access_path = proto::Decode(access_path_proto);
+  CHECK(assume_proto.has_predicate())
+      << "Expected Assume message to have predicate field.";
+  const arcs::InformationFlowLabelProto_Predicate &predicate =
+      assume_proto.predicate();
+
+  // Now that we have gathered the top-level information from the Assume
+  // proto, descend into the predicate to construct the list of claims.
+  return GetTagClaimsFromPredicate(
+      std::move(claiming_particle_name), std::move(access_path), predicate,
+      /*in_negation=*/false);
+}
+
+}  // namespace raksha::ir::proto
