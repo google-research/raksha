@@ -36,11 +36,8 @@ class HandleConnectionSpec {
       type_(std::move(type)) {}
 
   const std::string &name() const { return name_; }
-
   bool reads() const { return reads_; }
-
   bool writes() const { return writes_; }
-
   const types::Type &type() const { return *type_; }
 
   // Get all of the AccessPaths rooted at the associated ParticleSpec
