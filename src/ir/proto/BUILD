@@ -68,9 +68,8 @@ cc_library(
 )
 
 cc_library(
-    name = "tag_claim",
-    srcs = ["tag_claim.cc"],
-    hdrs = ["tag_claim.h"],
+    name = "derives_from_claim",
+    hdrs = ["derives_from_claim.h"],
     deps = [
         "//src/ir",
         "//src/ir:access_path",
@@ -79,8 +78,9 @@ cc_library(
 )
 
 cc_library(
-    name = "derives_from_claim",
-    hdrs = ["derives_from_claim.h"],
+    name = "tag_claim",
+    srcs = ["tag_claim.cc"],
+    hdrs = ["tag_claim.h"],
     deps = [
         "//src/ir",
         "//src/ir:access_path",
