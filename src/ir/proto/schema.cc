@@ -36,7 +36,7 @@ Schema decode(const arcs::SchemaProto& schema_proto) {
     const std::string &field_name = field_name_type_pair.first;
     const arcs::TypeProto &type_proto = field_name_type_pair.second;
 
-    field_map.insert({field_name, decode(type_proto)});
+    field_map.insert({field_name, Decode(type_proto)});
   }
 
   return Schema(std::move(name), std::move(field_map));
@@ -55,7 +55,7 @@ arcs::SchemaProto encode(const Schema& schema) {
     const Type &field_type = *field_name_type_pair.second;
 
     auto insert_result = fields_map.insert(
-        {field_name, encode(field_type)});
+        {field_name, Encode(field_type)});
     CHECK(insert_result.second)
       << "Found duplicate for field name " << field_name;
   }

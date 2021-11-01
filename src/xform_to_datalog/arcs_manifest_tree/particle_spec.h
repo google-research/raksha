@@ -23,11 +23,12 @@
 #include "src/common/logging/logging.h"
 #include "src/ir/derives_from_claim.h"
 #include "src/ir/edge.h"
+#include "src/ir/handle_connection_spec.h"
 #include "src/ir/predicate.h"
 #include "src/ir/tag_check.h"
 #include "src/ir/tag_claim.h"
 #include "src/ir/proto/predicate.h"
-#include "src/xform_to_datalog/arcs_manifest_tree/handle_connection_spec.h"
+#include "src/ir/handle_connection_spec.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::xform_to_datalog::arcs_manifest_tree {
@@ -58,7 +59,7 @@ class ParticleSpec {
 
   const std::vector<raksha::ir::Edge> &edges() const { return edges_; }
 
-  const HandleConnectionSpec &getHandleConnectionSpec(
+  const raksha::ir::HandleConnectionSpec &getHandleConnectionSpec(
       const absl::string_view hcs_name) const {
     auto find_res = handle_connection_specs_.find(hcs_name);
     CHECK(find_res != handle_connection_specs_.end())
@@ -91,13 +92,13 @@ class ParticleSpec {
       std::vector<raksha::ir::TagCheck> checks,
       std::vector<raksha::ir::TagClaim> tag_claims,
       std::vector<raksha::ir::DerivesFromClaim> derives_from_claims,
-      std::vector<HandleConnectionSpec> handle_connection_specs,
+      std::vector<ir::HandleConnectionSpec> handle_connection_specs,
       raksha::ir::proto::PredicateDecoder predicate_decoder)
       : name_(std::move(name)), checks_(std::move(checks)),
         tag_claims_(std::move(tag_claims)),
         derives_from_claims_(std::move(derives_from_claims)),
         predicate_decoder_(std::move(predicate_decoder)){
-    for (HandleConnectionSpec &handle_connection_spec :
+    for (ir::HandleConnectionSpec &handle_connection_spec :
       handle_connection_specs) {
       std::string hcs_name = handle_connection_spec.name();
       auto ins_res = handle_connection_specs_.insert({
@@ -132,7 +133,7 @@ class ParticleSpec {
   // AccessPaths.
   std::vector<raksha::ir::Edge> edges_;
   // A map of HandleConnectionSpec names to HandleConnectionSpecs.
-  absl::flat_hash_map<std::string, HandleConnectionSpec>
+  absl::flat_hash_map<std::string, raksha::ir::HandleConnectionSpec>
     handle_connection_specs_;
   // The PredicateDecoder object which was used to construct the predicates
   // on all of the checks on this ParticleSpec. This also owns those

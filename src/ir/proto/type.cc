@@ -24,7 +24,7 @@
 
 namespace raksha::ir::types::proto {
 
-std::unique_ptr<Type> decode(const arcs::TypeProto &type_proto) {
+std::unique_ptr<Type> Decode(const arcs::TypeProto &type_proto) {
   // Delegate to the various CreateFromProto implementations on the base types
   // depending upon which specific type is contained within the TypeProto.
   CHECK(!type_proto.optional())
@@ -45,7 +45,7 @@ std::unique_ptr<Type> decode(const arcs::TypeProto &type_proto) {
   CHECK(false) << "Unreachable!";
 }
 
-arcs::TypeProto encode(const Type& type) {
+arcs::TypeProto Encode(const Type& type) {
   switch (type.kind()) {
     case Type::Kind::kPrimitive:
       return encodeAsTypeProto(static_cast<const PrimitiveType&>(type));
