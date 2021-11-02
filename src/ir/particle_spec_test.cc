@@ -14,24 +14,24 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
-#include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
+#include "src/ir/particle_spec.h"
 
 #include <google/protobuf/text_format.h>
 
 #include "src/common/testing/gtest.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/fake_predicate_arena.h"
+#include "src/ir/proto/particle_spec.h"
+#include "src/ir/predicate_arena.h"
 
-namespace raksha::xform_to_datalog::arcs_manifest_tree {
-
-namespace ir = raksha::ir;
+namespace raksha::ir {
 
 struct ParticleSpecProtoAndExpectedInfo {
   std::string textproto;
   std::string expected_name;
-  std::vector<ir::TagClaim> expected_claims;
-  std::vector<ir::TagCheck> expected_checks;
-  std::vector<ir::Edge> expected_edges;
+  std::vector<TagClaim> expected_claims;
+  std::vector<TagCheck> expected_checks;
+  std::vector<Edge> expected_edges;
 };
 
 class ParticleSpecFromProtoTest :
@@ -48,8 +48,9 @@ class ParticleSpecFromProtoTest :
     CHECK(google::protobuf::TextFormat::ParseFromString(
         textproto, &particle_spec_proto))
         << "Particle spec textproto did not parse correctly.";
-    return particle_spec_registry.CreateParticleSpecFromProto(
-        particle_spec_proto);
+    return *proto::Decode(
+        particle_spec_registry, std::make_unique<PredicateArenaImpl>(),
+            particle_spec_proto);
   }
 
   ParticleSpecRegistry particle_spec_registry_;
@@ -72,37 +73,37 @@ TEST_P(ParticleSpecFromProtoTest, ParticleSpecFromProtoTest) {
 }
 
 // Constant to reduce wordiness of test expected output.
-static const ir::AccessPathRoot kPs1InHandleRoot(
-    ir::HandleConnectionSpecAccessPathRoot("PS1", "in_handle"));
-static const ir::AccessPathRoot kPs1OutHandleRoot(
-    ir::HandleConnectionSpecAccessPathRoot("PS1", "out_handle"));
-static const ir::AccessPathRoot kPs1InOutHandleRoot(
-    ir::HandleConnectionSpecAccessPathRoot("PS1", "in_out_handle"));
-static const ir::AccessPathRoot kPs2HcHandleRoot(
-    ir::HandleConnectionSpecAccessPathRoot("PS2", "hc"));
-static const ir::AccessPathRoot kPs2Hc2HandleRoot(
-    ir::HandleConnectionSpecAccessPathRoot("PS2", "hc2"));
+static const AccessPathRoot kPs1InHandleRoot(
+    HandleConnectionSpecAccessPathRoot("PS1", "in_handle"));
+static const AccessPathRoot kPs1OutHandleRoot(
+    HandleConnectionSpecAccessPathRoot("PS1", "out_handle"));
+static const AccessPathRoot kPs1InOutHandleRoot(
+    HandleConnectionSpecAccessPathRoot("PS1", "in_out_handle"));
+static const AccessPathRoot kPs2HcHandleRoot(
+    HandleConnectionSpecAccessPathRoot("PS2", "hc"));
+static const AccessPathRoot kPs2Hc2HandleRoot(
+    HandleConnectionSpecAccessPathRoot("PS2", "hc2"));
 
 // Helper function to cut down on expected output wordiness.
-static ir::AccessPathSelectors MakeSingleFieldSelectors(
+static AccessPathSelectors MakeSingleFieldSelectors(
     std::string field_name) {
-  return ir::AccessPathSelectors(ir::Selector(ir::FieldSelector(
+  return AccessPathSelectors(Selector(FieldSelector(
       std::move(field_name))));
 }
 
 // Not declared const because it pretends to capture the predicates, but has
 // no internal state so effectively const.
-ir::FakePredicateArenaImpl kArena;
+FakePredicateArenaImpl kArena;
 
 // Tag presence predicates for constructing checks.
-static const ir::TagPresence *kTag1Present =
-    ir::TagPresence::Create(kArena, "tag1");
-static const ir::TagPresence *kTag2Present =
-    ir::TagPresence::Create(kArena, "tag2");
-static const ir::TagPresence *kTag3Present =
-    ir::TagPresence::Create(kArena, "tag3");
-static const ir::TagPresence *kTag4Present =
-    ir::TagPresence::Create(kArena, "tag4");
+static const TagPresence *kTag1Present =
+    TagPresence::Create(kArena, "tag1");
+static const TagPresence *kTag2Present =
+    TagPresence::Create(kArena, "tag2");
+static const TagPresence *kTag3Present =
+    TagPresence::Create(kArena, "tag3");
+static const TagPresence *kTag4Present =
+    TagPresence::Create(kArena, "tag4");
 
 static ParticleSpecProtoAndExpectedInfo spec_proto_and_expected_info[] = {
     { .textproto = R"(name: "p_spec")", .expected_name = "p_spec",
@@ -128,35 +129,35 @@ name: "PS1" connections: [
             { key: "world", value: { primitive: TEXT } } ] } } } } ])",
     .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
     .expected_edges = {
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        ir::Edge(
-          ir::AccessPath(
+        Edge(
+          AccessPath(
               kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-          ir::AccessPath(
+          AccessPath(
               kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        ir::Edge(
-          ir::AccessPath(
+        Edge(
+          AccessPath(
               kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-          ir::AccessPath(
+          AccessPath(
               kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
     } },
         { .textproto = R"(
@@ -189,30 +190,30 @@ claims: [
         selectors: { field: "field2" } } } } ])",
     .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
     .expected_edges = {
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        ir::Edge(
-          ir::AccessPath(
+        Edge(
+          AccessPath(
               kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-          ir::AccessPath(
+          AccessPath(
               kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        ir::Edge(
-          ir::AccessPath(
+        Edge(
+          AccessPath(
               kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-          ir::AccessPath(
+          AccessPath(
               kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
     } },
     { .textproto = R"(
@@ -253,25 +254,25 @@ claims: [
  ])",
     .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
     .expected_edges = {
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        ir::Edge(
-          ir::AccessPath(
+        Edge(
+          AccessPath(
               kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-          ir::AccessPath(
+          AccessPath(
               kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        ir::Edge(
-          ir::AccessPath(
+        Edge(
+          AccessPath(
               kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-          ir::AccessPath(
+          AccessPath(
               kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
     } },
     { .textproto = R"(
@@ -319,30 +320,30 @@ claims: [
  ])",
     .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
     .expected_edges = {
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        ir::Edge(
-          ir::AccessPath(
+        Edge(
+          AccessPath(
               kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-          ir::AccessPath(
+          AccessPath(
               kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        ir::Edge(
-          ir::AccessPath(
+        Edge(
+          AccessPath(
               kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-          ir::AccessPath(
+          AccessPath(
               kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
     } },
     { .textproto = R"(
@@ -390,20 +391,20 @@ claims: [
  ])",
     .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
     .expected_edges = {
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        ir::Edge(
-          ir::AccessPath(
+        Edge(
+          AccessPath(
               kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-          ir::AccessPath(
+          AccessPath(
               kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
     } },
     { .textproto = R"(
@@ -431,25 +432,25 @@ name: "PS1" connections: [
               { key: "field3", value: { primitive: TEXT } } ] } } } } ] )",
     .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
     .expected_edges = {
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        ir::Edge(
-            ir::AccessPath(
+        Edge(
+            AccessPath(
                 kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(
+            AccessPath(
                 kPs1InOutHandleRoot, MakeSingleFieldSelectors("field3"))),
-        ir::Edge(
-          ir::AccessPath(
+        Edge(
+          AccessPath(
               kPs1InOutHandleRoot, MakeSingleFieldSelectors("field3")),
-          ir::AccessPath(
+          AccessPath(
               kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        ir::Edge(
-          ir::AccessPath(
+        Edge(
+          AccessPath(
               kPs1InOutHandleRoot, MakeSingleFieldSelectors("field3")),
-          ir::AccessPath(
+          AccessPath(
               kPs1InOutHandleRoot, MakeSingleFieldSelectors("field3"))),
     } },
     {
@@ -472,12 +473,12 @@ checks: [ {
       .expected_name = "PS2",
       .expected_claims = { },
       .expected_checks = {
-          ir::TagCheck(
-             ir::AccessPath(
+          TagCheck(
+             AccessPath(
                  kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
              *kTag1Present),
-         ir::TagCheck(
-             ir::AccessPath(
+         TagCheck(
+             AccessPath(
                  kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
              *kTag2Present),
       },
@@ -502,15 +503,15 @@ claims: [ { assume: {
     predicate: { label: { semantic_tag: "tag2"} } } } ])",
       .expected_name = "PS2",
       .expected_claims = {
-          ir::TagClaim(
+          TagClaim(
               "PS2",
-              ir::AccessPath(
+              AccessPath(
                   kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
               true,
               "tag1"),
-          ir::TagClaim(
+          TagClaim(
               "PS2",
-              ir::AccessPath(
+              AccessPath(
                   kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
               true,
               "tag2")
@@ -584,64 +585,66 @@ TEST(BulkInstantiateTest, BulkInstantiateTest) {
   arcs::ParticleSpecProto particle_spec_proto;
   google::protobuf::TextFormat::ParseFromString(
       kTextprotoWithAllFacts, &particle_spec_proto);
-  const ParticleSpec &particle_spec =
-      particle_spec_registry.CreateParticleSpecFromProto(particle_spec_proto);
+  const ParticleSpec *particle_spec =
+      proto::Decode(
+          particle_spec_registry, std::make_unique<PredicateArenaImpl>(),
+          particle_spec_proto);
 
-  const ir::AccessPathRoot p1_in_impl(
-      ir::HandleConnectionAccessPathRoot("recipe", "P1", "in_impl"));
-  const ir::AccessPathRoot p1_out_impl(
-      ir::HandleConnectionAccessPathRoot("recipe", "P1", "out_impl"));
-  const ir::AccessPathRoot p1_in_out_impl(
-      ir::HandleConnectionAccessPathRoot("recipe", "P1", "in_out_impl"));
+  const AccessPathRoot p1_in_impl(
+      HandleConnectionAccessPathRoot("recipe", "P1", "in_impl"));
+  const AccessPathRoot p1_out_impl(
+      HandleConnectionAccessPathRoot("recipe", "P1", "out_impl"));
+  const AccessPathRoot p1_in_out_impl(
+      HandleConnectionAccessPathRoot("recipe", "P1", "in_out_impl"));
 
-  const absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
+  const absl::flat_hash_map<AccessPathRoot, AccessPathRoot>
       instantiation_map {
     { kPs1InHandleRoot, p1_in_impl }, { kPs1OutHandleRoot, p1_out_impl },
     { kPs1InOutHandleRoot, p1_in_out_impl } };
 
   InstantiatedParticleSpecFacts instantiated_facts =
-      particle_spec.BulkInstantiate(instantiation_map);
+      particle_spec->BulkInstantiate(instantiation_map);
 
   ASSERT_THAT(
       instantiated_facts.tag_claims,
       testing::UnorderedElementsAreArray({
-        ir::TagClaim(
+        TagClaim(
             "PS1",
-            ir::AccessPath(p1_out_impl, MakeSingleFieldSelectors("field1")),
+            AccessPath(p1_out_impl, MakeSingleFieldSelectors("field1")),
             true,
             "tag1"),
-        ir::TagClaim(
+        TagClaim(
             "PS1",
-            ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field2")),
+            AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field2")),
             true,
             "tag2")}));
 
   ASSERT_THAT(
       instantiated_facts.checks,
       testing::UnorderedElementsAreArray({
-        ir::TagCheck(
-            ir::AccessPath(p1_in_impl, MakeSingleFieldSelectors("field1")),
+        TagCheck(
+            AccessPath(p1_in_impl, MakeSingleFieldSelectors("field1")),
             *kTag3Present),
-        ir::TagCheck(
-            ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field2")),
+        TagCheck(
+            AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field2")),
             *kTag4Present)}));
 
   ASSERT_THAT(
       instantiated_facts.edges,
       testing::UnorderedElementsAreArray({
-        ir::Edge(
-            ir::AccessPath(p1_in_impl, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(p1_out_impl, MakeSingleFieldSelectors("field1"))),
-        ir::Edge(
-            ir::AccessPath(p1_in_impl, MakeSingleFieldSelectors("field2")),
-            ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3"))),
-        ir::Edge(
-            ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3")),
-            ir::AccessPath(p1_out_impl, MakeSingleFieldSelectors("field1"))),
-        ir::Edge(
-          ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3")),
-          ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3"))),
+        Edge(
+            AccessPath(p1_in_impl, MakeSingleFieldSelectors("field2")),
+            AccessPath(p1_out_impl, MakeSingleFieldSelectors("field1"))),
+        Edge(
+            AccessPath(p1_in_impl, MakeSingleFieldSelectors("field2")),
+            AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3"))),
+        Edge(
+            AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3")),
+            AccessPath(p1_out_impl, MakeSingleFieldSelectors("field1"))),
+        Edge(
+          AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3")),
+          AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field3"))),
       }));
 }
 
-}  // namespace raksha::xform_to_datalog::arcs_manifest_tree
+}  // namespace raksha::ir

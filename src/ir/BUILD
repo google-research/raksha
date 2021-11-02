@@ -21,12 +21,16 @@ load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
 
 cc_library(
     name = "ir",
-    srcs = ["predicate.cc"],
+    srcs = [
+        "particle_spec.cc",
+        "predicate.cc",
+    ],
     hdrs = [
         "datalog_print_context.h",
         "derives_from_claim.h",
         "edge.h",
         "handle_connection_spec.h",
+        "particle_spec.h",
         "predicate.h",
         "predicate_arena.h",
         "tag_check.h",
@@ -220,6 +224,18 @@ cc_test(
         ":ir",
         "//src/common/testing:gtest",
         "//src/ir/proto:handle_connection_spec",
+    ],
+)
+
+cc_test(
+    name = "particle_spec_test",
+    srcs = ["particle_spec_test.cc"],
+    deps = [
+        ":fake_predicate_arena",
+        ":ir",
+        "//src/common/testing:gtest",
+        "//src/ir/proto:handle_connection_spec",
+        "//src/ir/proto:particle_spec",
     ],
 )
 

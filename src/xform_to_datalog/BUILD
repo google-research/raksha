@@ -78,7 +78,6 @@ cc_library(
         ":authorization_logic_datalog_facts",
         ":manifest_datalog_facts",
         "//src/ir",
-        "//src/xform_to_datalog/arcs_manifest_tree",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
@@ -100,8 +99,8 @@ cc_library(
     hdrs = ["manifest_datalog_facts.h"],
     deps = [
         "//src/ir",
+        "//src/ir/proto:particle_spec",
         "//src/ir/proto:types",
-        "//src/xform_to_datalog/arcs_manifest_tree",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
