@@ -88,6 +88,18 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "handle_connection_spec",
+    srcs = ["handle_connection_spec.cc"],
+    hdrs = ["handle_connection_spec.h"],
+    deps = [
+        "//src/ir",
+        "//src/ir:access_path",
+        "//src/ir/proto:types",
+        "//third_party/arcs/proto:manifest_cc_proto",
+    ],
+)
+
 cc_test(
     name = "access_path_test",
     srcs = ["access_path_test.cc"],

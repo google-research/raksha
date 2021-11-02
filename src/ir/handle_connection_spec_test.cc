@@ -1,11 +1,29 @@
-#include "src/xform_to_datalog/arcs_manifest_tree/handle_connection_spec.h"
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+#include "src/ir/handle_connection_spec.h"
 
 #include <google/protobuf/util/message_differencer.h>
 #include <google/protobuf/text_format.h>
 
 #include "src/common/testing/gtest.h"
+#include "src/ir/proto/handle_connection_spec.h"
+#include "third_party/arcs/proto/manifest.pb.h"
 
-namespace raksha::xform_to_datalog::arcs_manifest_tree {
+namespace raksha::ir {
 
 struct ProtoStringAndExpectations {
   std::string proto_str;
@@ -24,15 +42,14 @@ TEST_P(RoundTripHandleConnectionSpecProtoTest,
   arcs::HandleConnectionSpecProto original_proto;
   google::protobuf::TextFormat::ParseFromString(
       info.proto_str, &original_proto);
-  HandleConnectionSpec handle_connection_spec =
-      HandleConnectionSpec::CreateFromProto(original_proto);
+  HandleConnectionSpec handle_connection_spec = proto::Decode(original_proto);
 
   EXPECT_EQ(handle_connection_spec.name(), info.expected_name);
   EXPECT_EQ(handle_connection_spec.reads(), info.expected_reads);
   EXPECT_EQ(handle_connection_spec.writes(), info.expected_writes);
 
   arcs::HandleConnectionSpecProto result_proto =
-      handle_connection_spec.MakeProto();
+      proto::Encode(handle_connection_spec);
    ASSERT_TRUE(
       google::protobuf::util::MessageDifferencer::Equals(
           original_proto, result_proto));
@@ -76,8 +93,7 @@ TEST_P(GetAccessPathTest, GetAccessPathTest) {
   const std::string &particle_spec_name = std::get<1>(GetParam());
   arcs::HandleConnectionSpecProto hcs_proto;
   google::protobuf::TextFormat::ParseFromString(param.textproto, &hcs_proto);
-  HandleConnectionSpec handle_connection_spec =
-      HandleConnectionSpec::CreateFromProto(hcs_proto);
+  HandleConnectionSpec handle_connection_spec = proto::Decode(hcs_proto);
   std::vector<ir::AccessPath> access_paths =
       handle_connection_spec.GetAccessPaths(particle_spec_name);
   std::vector<std::string> found_access_path_selector_strings;
@@ -133,4 +149,4 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Combine(testing::ValuesIn(protos_and_access_path_info),
                      testing::ValuesIn(sample_particle_spec_names)));
 
-}  // namespace raksha::xform_to_datalog::arcs_manifest_tree
+}  // namespace raksha::ir

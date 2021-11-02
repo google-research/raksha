@@ -25,6 +25,7 @@ cc_library(
         "datalog_print_context.h",
         "derives_from_claim.h",
         "edge.h",
+        "handle_connection_spec.h",
         "predicate.h",
         "tag_check.h",
         "tag_claim.h",
@@ -33,6 +34,7 @@ cc_library(
         ":access_path",
         "//src/common/logging",
         "//src/ir/proto:access_path",
+        "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/hash",
@@ -198,6 +200,16 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/ir/proto:predicate",
         "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "handle_connection_spec_test",
+    srcs = ["handle_connection_spec_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+        "//src/ir/proto:handle_connection_spec",
     ],
 )
 

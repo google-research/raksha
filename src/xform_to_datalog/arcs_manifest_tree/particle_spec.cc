@@ -15,6 +15,7 @@
 //-----------------------------------------------------------------------------
 
 #include "src/ir/proto/derives_from_claim.h"
+#include "src/ir/proto/handle_connection_spec.h"
 #include "src/ir/proto/predicate.h"
 #include "src/ir/proto/tag_check.h"
 #include "src/ir/proto/tag_claim.h"
@@ -29,11 +30,10 @@ ParticleSpec ParticleSpec::CreateFromProto(
   std::string name = particle_spec_proto.name();
   CHECK(!name.empty()) << "Expected particle spec to have a name.";
 
-  std::vector<HandleConnectionSpec> handle_connection_specs;
+  std::vector<ir::HandleConnectionSpec> handle_connection_specs;
   for (const arcs::HandleConnectionSpecProto &hcs_proto :
       particle_spec_proto.connections()) {
-    handle_connection_specs.push_back(
-        HandleConnectionSpec::CreateFromProto(hcs_proto));
+    handle_connection_specs.push_back(ir::proto::Decode(hcs_proto));
   }
 
   std::vector<ir::TagClaim> tag_claims;
@@ -94,7 +94,7 @@ void ParticleSpec::GenerateEdges() {
   std::vector<ir::AccessPath> input_access_paths;
   std::vector<ir::AccessPath> default_derivation_output_access_paths;
   for (const auto &name_hcs_pair : handle_connection_specs_) {
-    const HandleConnectionSpec &connection_spec = name_hcs_pair.second;
+    const ir::HandleConnectionSpec &connection_spec = name_hcs_pair.second;
     std::vector<ir::AccessPath> access_paths =
         connection_spec.GetAccessPaths(name_);
     // While we want to consider all read HandleConnectionSpecs as inputs, we

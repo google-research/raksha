@@ -19,17 +19,16 @@ package(default_visibility = ["//src:__subpackages__"])
 cc_library(
     name = "arcs_manifest_tree",
     srcs = [
-        "handle_connection_spec.cc",
         "particle_spec.cc",
     ],
     hdrs = [
-        "handle_connection_spec.h",
         "particle_spec.h",
     ],
     deps = [
         "//src/common/logging",
         "//src/ir",
         "//src/ir/proto:derives_from_claim",
+        "//src/ir/proto:handle_connection_spec",
         "//src/ir/proto:predicate",
         "//src/ir/proto:tag_check",
         "//src/ir/proto:tag_claim",
@@ -37,15 +36,6 @@ cc_library(
         "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",
         "@absl//absl/container:flat_hash_map",
-    ],
-)
-
-cc_test(
-    name = "handle_connection_spec_test",
-    srcs = ["handle_connection_spec_test.cc"],
-    deps = [
-        ":arcs_manifest_tree",
-        "//src/common/testing:gtest",
     ],
 )
 

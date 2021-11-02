@@ -13,20 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_IR_PROTO_TYPE_H_
-#define SRC_IR_PROTO_TYPE_H_
 
-#include "src/ir/types/type.h"
+#ifndef SRC_IR_PROTO_HANDLE_CONNECTION_SPEC_H_
+#define SRC_IR_PROTO_HANDLE_CONNECTION_SPEC_H_
+
+#include "src/ir/handle_connection_spec.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
-namespace raksha::ir::types::proto {
+namespace raksha::ir::proto {
 
-// Decodes the given `type_proto` and returns Type as a unique_ptr.
-std::unique_ptr<Type> Decode(const arcs::TypeProto &type_proto);
+HandleConnectionSpec Decode(const arcs::HandleConnectionSpecProto &proto);
 
-// Encodes the given `type` in an arcs::TypeProto.
-arcs::TypeProto Encode(const Type& type);
+arcs::HandleConnectionSpecProto Encode(const HandleConnectionSpec &hcs);
 
-}  // namespace raksha::ir::types::proto
+}  // namespace raksha::ir::proto
 
-#endif  // SRC_IR_PROTO_TYPE_H_
+#endif  // SRC_IR_PROTO_HANDLE_CONNECTION_SPEC_H_

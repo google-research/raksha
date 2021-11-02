@@ -16,6 +16,7 @@
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
 
 #include "absl/container/flat_hash_map.h"
+#include "src/ir/handle_connection_spec.h"
 #include "src/ir/proto/type.h"
 #include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
 
@@ -123,13 +124,13 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
         CHECK(connection_proto.has_type())
           << "Handle connection with absent type not allowed.";
         std::unique_ptr<types::Type> connection_type =
-            ir::types::proto::decode(connection_proto.type());
+            ir::types::proto::Decode(connection_proto.type());
         ir::AccessPathSelectorsSet access_path_selectors_set =
             connection_type->GetAccessPathSelectorsSet();
 
         // Look up the HandleConnectionSpec to see if the handle connection
         // will read and/or write.
-        const amt::HandleConnectionSpec &handle_connection_spec =
+        const ir::HandleConnectionSpec &handle_connection_spec =
             particle_spec.getHandleConnectionSpec(handle_spec_name);
         const bool handle_connection_reads = handle_connection_spec.reads();
         const bool handle_connection_writes = handle_connection_spec.writes();

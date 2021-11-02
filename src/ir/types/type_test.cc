@@ -244,7 +244,7 @@ TEST_P(GetAccessPathSelectorsWithProtoTest,
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(type_as_textproto,
                                                           &orig_type_proto))
       << "Failed to parse text proto!";
-  std::unique_ptr<Type> type = proto::decode(orig_type_proto);
+  std::unique_ptr<Type> type = proto::Decode(orig_type_proto);
   std::vector<std::string> access_path_str_vec =
       GetAccessPathStrVecFromAccessPathSelectorsSet(
           type->GetAccessPathSelectorsSet());
