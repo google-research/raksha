@@ -97,7 +97,7 @@ class ParticleSpec {
       : name_(std::move(name)), checks_(std::move(checks)),
         tag_claims_(std::move(tag_claims)),
         derives_from_claims_(std::move(derives_from_claims)),
-        predicate_arena_(std::move(predicate_arena)){
+        predicate_arena_(std::move(predicate_arena)) {
     for (ir::HandleConnectionSpec &handle_connection_spec :
       handle_connection_specs) {
       std::string hcs_name = handle_connection_spec.name();
