@@ -20,6 +20,7 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/common/logging/logging.h"
+#include "src/ir/fake_predicate_arena.h"
 
 namespace raksha::xform_to_datalog::arcs_manifest_tree {
 
@@ -60,14 +61,14 @@ TEST_P(ParticleSpecFromProtoTest, ParticleSpecFromProtoTest) {
 
   EXPECT_EQ(particle_spec_.name(), param.expected_name);
   EXPECT_THAT(
-      particle_spec_.tag_claims(),
-      testing::UnorderedElementsAreArray(param.expected_claims));
+      param.expected_claims,
+      testing::UnorderedElementsAreArray(particle_spec_.tag_claims()));
   EXPECT_THAT(
-      particle_spec_.checks(),
-      testing::UnorderedElementsAreArray(param.expected_checks));
+      param.expected_checks,
+      testing::UnorderedElementsAreArray(particle_spec_.checks()));
   EXPECT_THAT(
-      particle_spec_.edges(),
-      testing::UnorderedElementsAreArray(param.expected_edges));
+      param.expected_edges,
+      testing::UnorderedElementsAreArray(particle_spec_.edges()));
 }
 
 // Constant to reduce wordiness of test expected output.
@@ -89,11 +90,19 @@ static ir::AccessPathSelectors MakeSingleFieldSelectors(
       std::move(field_name))));
 }
 
+// Not declared const because it pretends to capture the predicates, but has
+// no internal state so effectively const.
+ir::FakePredicateArenaImpl kArena;
+
 // Tag presence predicates for constructing checks.
-static const ir::TagPresence kTag1Present("tag1");
-static const ir::TagPresence kTag2Present("tag2");
-static const ir::TagPresence kTag3Present("tag3");
-static const ir::TagPresence kTag4Present("tag4");
+static const ir::TagPresence *kTag1Present =
+    ir::TagPresence::Create(kArena, "tag1");
+static const ir::TagPresence *kTag2Present =
+    ir::TagPresence::Create(kArena, "tag2");
+static const ir::TagPresence *kTag3Present =
+    ir::TagPresence::Create(kArena, "tag3");
+static const ir::TagPresence *kTag4Present =
+    ir::TagPresence::Create(kArena, "tag4");
 
 static ParticleSpecProtoAndExpectedInfo spec_proto_and_expected_info[] = {
     { .textproto = R"(name: "p_spec")", .expected_name = "p_spec",
@@ -463,14 +472,14 @@ checks: [ {
       .expected_name = "PS2",
       .expected_claims = { },
       .expected_checks = {
-         ir::TagCheck(
+          ir::TagCheck(
              ir::AccessPath(
                  kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
-             kTag1Present),
+             *kTag1Present),
          ir::TagCheck(
              ir::AccessPath(
                  kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
-             kTag2Present),
+             *kTag2Present),
       },
       .expected_edges = { }
     },
@@ -612,10 +621,10 @@ TEST(BulkInstantiateTest, BulkInstantiateTest) {
       testing::UnorderedElementsAreArray({
         ir::TagCheck(
             ir::AccessPath(p1_in_impl, MakeSingleFieldSelectors("field1")),
-            kTag3Present),
+            *kTag3Present),
         ir::TagCheck(
             ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field2")),
-            kTag4Present)}));
+            *kTag4Present)}));
 
   ASSERT_THAT(
       instantiated_facts.edges,

@@ -20,6 +20,7 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/datalog_print_context.h"
+#include "src/ir/fake_predicate_arena.h"
 
 namespace raksha::xform_to_datalog {
 
@@ -37,7 +38,12 @@ TEST_P(ManifestDatalogFactsToDatalogTest, ManifestDatalogFactsToDatalogTest) {
   EXPECT_EQ(datalog_facts.ToDatalog(ctxt), expected_result_string);
 }
 
-static const ir::TagPresence kTag2Presence("tag2");
+// Note: This is not declared const so it can pretend to capture the various
+// predicates, but it contains no internal state and is effectively const.
+static raksha::ir::FakePredicateArenaImpl kArena;
+
+static const ir::TagPresence *kTag2Presence =
+    ir::TagPresence::Create(kArena, "tag2");
 
 static const ir::AccessPath kHandleH1AccessPath(
     ir::AccessPathRoot(ir::HandleAccessPathRoot("recipe", "h1")),
@@ -73,7 +79,7 @@ static std::tuple<ManifestDatalogFacts, std::string>
     { ManifestDatalogFacts(
         { ir::TagClaim(
             "particle", kHandleConnectionOutAccessPath, true, "tag") },
-        { ir::TagCheck(kHandleConnectionInAccessPath, kTag2Presence) },
+        { ir::TagCheck(kHandleConnectionInAccessPath, *kTag2Presence) },
         { ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),
           ir::Edge(kHandleConnectionInAccessPath,
                    kHandleConnectionOutAccessPath),

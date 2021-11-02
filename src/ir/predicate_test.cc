@@ -20,18 +20,25 @@
 #include "absl/strings/substitute.h"
 #include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/fake_predicate_arena.h"
 #include "src/ir/predicate_textproto_to_rule_body_testdata.h"
 #include "src/ir/proto/predicate.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
 
+// Create a fake arena for use in constructing test data. We don't declare it
+// const so that it can pretend to capture constructed pointers, but it
+// contains no state, so it is effectively a constant.
+FakePredicateArenaImpl kArena;
+
 class ToDatalogRuleBodyTest :
  public testing::TestWithParam<
   std::tuple<std::tuple<absl::string_view, absl::string_view>, AccessPath>> {
  public:
   explicit ToDatalogRuleBodyTest()
-    : access_path_(std::get<1>(GetParam()))
+    : access_path_(std::get<1>(GetParam())),
+      predicate_decoder_(kArena)
   {
     const auto &[textproto, expected_rule_body_format] =
         std::get<0>(GetParam());
@@ -45,14 +52,14 @@ class ToDatalogRuleBodyTest :
   std::string textproto_;
   std::string expected_rule_body_;
   AccessPath access_path_;
+  proto::PredicateDecoder predicate_decoder_;
 };
 
 TEST_P(ToDatalogRuleBodyTest, ToDatalogRuleBodyTest) {
   arcs::InformationFlowLabelProto_Predicate predicate_proto;
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
       textproto_, &predicate_proto));
-  proto::PredicateDecoder predicate_decoder;
-  const Predicate &predicate = predicate_decoder.Decode(predicate_proto);
+  const Predicate &predicate = *predicate_decoder_.Decode(predicate_proto);
   EXPECT_EQ(
       predicate.ToDatalogRuleBody(access_path_), expected_rule_body_);
 }
@@ -86,73 +93,118 @@ INSTANTIATE_TEST_SUITE_P(ToDatalogRuleBodyTest, ToDatalogRuleBodyTest,
                          testing::ValuesIn(sample_access_paths)));
 
 class PredicateEqTest :
- public testing::TestWithParam<std::tuple<const Predicate *, const Predicate *>>
- { };
+ public testing::TestWithParam<
+     std::tuple<std::pair<const Predicate *, uint64_t>,
+                std::pair<const Predicate *, uint64_t>>> {
+  protected:
+  PredicateEqTest()
+  : pred1_(std::get<0>(GetParam()).first),
+    pred_num1(std::get<0>(GetParam()).second),
+    pred2_(std::get<1>(GetParam()).first),
+    pred_num2(std::get<1>(GetParam()).second) { }
 
-// For this test, we create a number of expected-distinct predicates and try
-// all pairs of them. We then ensure that all of these predicates are equal
-// only when their pointers are equal.
+  const Predicate *pred1_;
+  uint64_t pred_num1;
+  const Predicate *pred2_;
+  uint64_t pred_num2;
+ };
+
+// For this test, we create a number of expected-distinct predicates and
+// number them. We make sure that the predicates compare equal only when they
+// have the same number. We produce duplicates that are structurally the same
+// but at different memory addresses to ensure that equality in the case of
+// pointer equality is handled correctly.
 TEST_P(PredicateEqTest, PredicateEqTest) {
-  const Predicate *pred1 = std::get<0>(GetParam());
-  const Predicate *pred2 = std::get<1>(GetParam());
-
-  EXPECT_EQ(pred1 == pred2, *pred1 == *pred2);
+  EXPECT_EQ(*pred1_ == *pred2_, pred_num1 == pred_num2);
 }
 
-static const TagPresence kTag1Present("tag1");
-static const TagPresence kTag2Present("tag2");
-static const TagPresence kTag3Present("tag3");
+static const Predicate *kTag1Present = TagPresence::Create(kArena, "tag1");
+static const Predicate *kTag2Present = TagPresence::Create(kArena, "tag2");
+static const Predicate *kTag3Present = TagPresence::Create(kArena, "tag3");
 
-static const And kAndTag1Tag2(std::make_unique<TagPresence>(kTag1Present),
-                             std::make_unique<TagPresence>(kTag2Present));
-static const And kAndTag1Tag3(std::make_unique<TagPresence>(kTag1Present),
-                             std::make_unique<TagPresence>(kTag3Present));
-static const And kAndTag2Tag3(std::make_unique<TagPresence>(kTag2Present),
-                             std::make_unique<TagPresence>(kTag3Present));
+static const Predicate *kTag1Present2 = TagPresence::Create(kArena, "tag1");
+static const Predicate *kTag2Present2 = TagPresence::Create(kArena, "tag2");
+static const Predicate *kTag3Present2 = TagPresence::Create(kArena, "tag3");
 
-static const Or kOrTag1Tag2(std::make_unique<TagPresence>(kTag1Present),
-                             std::make_unique<TagPresence>(kTag2Present));
-static const Or kOrTag1Tag3(std::make_unique<TagPresence>(kTag1Present),
-                             std::make_unique<TagPresence>(kTag3Present));
-static const Or kOrTag2Tag3(std::make_unique<TagPresence>(kTag2Present),
-                             std::make_unique<TagPresence>(kTag3Present));
+static const And *kAndTag1Tag2 =
+    And::Create(kArena, kTag1Present, kTag2Present);
+static const And *kAndTag1Tag3 =
+    And::Create(kArena, kTag1Present, kTag3Present);
+static const And *kAndTag2Tag3 =
+    And::Create(kArena, kTag2Present, kTag3Present);
 
-static const Implies kImpliesTag1Tag2(
-    std::make_unique<TagPresence>(kTag1Present),
-    std::make_unique<TagPresence>(kTag2Present));
-static const Implies kImpliesTag1Tag3(
-    std::make_unique<TagPresence>(kTag1Present),
-    std::make_unique<TagPresence>(kTag3Present));
-static const Implies kImpliesTag2Tag3(
-    std::make_unique<TagPresence>(kTag2Present),
-    std::make_unique<TagPresence>(kTag3Present));
+static const And *kAndTag1Tag2_2 =
+    And::Create(kArena, kTag1Present, kTag2Present);
+static const And *kAndTag1Tag3_2 =
+    And::Create(kArena, kTag1Present, kTag3Present);
+static const And *kAndTag2Tag3_2 =
+    And::Create(kArena, kTag2Present, kTag3Present);
 
-static const Not kNotTag1(std::make_unique<TagPresence>(kTag1Present));
-static const Not kNotTag2(std::make_unique<TagPresence>(kTag2Present));
-static const Not kNotTag3(std::make_unique<TagPresence>(kTag3Present));
+static const Or *kOrTag1Tag2 = Or::Create(kArena, kTag1Present, kTag2Present);
+static const Or *kOrTag1Tag3 = Or::Create(kArena, kTag1Present, kTag3Present);
+static const Or *kOrTag2Tag3 = Or::Create(kArena, kTag2Present, kTag3Present);
 
-static const Predicate *example_predicate_pointers[] = {
-    &kTag1Present,
-    &kTag2Present,
-    &kTag3Present,
-    &kAndTag1Tag2,
-    &kAndTag1Tag3,
-    &kAndTag2Tag3,
-    &kOrTag1Tag2,
-    &kOrTag1Tag3,
-    &kOrTag2Tag3,
-    &kImpliesTag1Tag2,
-    &kImpliesTag1Tag3,
-    &kImpliesTag2Tag3,
-    &kNotTag1,
-    &kNotTag2,
-    &kNotTag3,
+static const Or *kOrTag1Tag2_2 = Or::Create(kArena, kTag1Present, kTag2Present);
+static const Or *kOrTag1Tag3_2 = Or::Create(kArena, kTag1Present, kTag3Present);
+static const Or *kOrTag2Tag3_2 = Or::Create(kArena, kTag2Present, kTag3Present);
+
+static const Implies *kImpliesTag1Tag2 =
+    Implies::Create(kArena, kTag1Present, kTag2Present);
+static const Implies *kImpliesTag1Tag2_2 =
+    Implies::Create(kArena, kTag1Present, kTag2Present);
+static const Implies *kImpliesTag1Tag3 =
+    Implies::Create(kArena, kTag1Present, kTag3Present);
+static const Implies *kImpliesTag1Tag3_2 =
+    Implies::Create(kArena, kTag1Present, kTag3Present);
+static const Implies *kImpliesTag2Tag3 =
+    Implies::Create(kArena, kTag2Present, kTag3Present);
+static const Implies *kImpliesTag2Tag3_2 =
+    Implies::Create(kArena, kTag2Present, kTag3Present);
+
+static const Not *kNotTag1 = Not::Create(kArena, kTag1Present);
+static const Not *kNotTag1_2 = Not::Create(kArena, kTag1Present);
+static const Not *kNotTag2 = Not::Create(kArena, kTag2Present);
+static const Not *kNotTag2_2 = Not::Create(kArena, kTag2Present);
+static const Not *kNotTag3 = Not::Create(kArena, kTag3Present);
+static const Not *kNotTag3_2 = Not::Create(kArena, kTag3Present);
+
+static const std::pair<const Predicate *, uint64_t> example_predicates[] = {
+    { kTag1Present, 0},
+    { kTag1Present2, 0},
+    { kTag2Present, 1},
+    { kTag2Present2, 1},
+    { kTag3Present, 2},
+    { kTag3Present2, 2},
+    { kAndTag1Tag2, 3},
+    { kAndTag1Tag2_2, 3},
+    { kAndTag1Tag3, 4},
+    { kAndTag1Tag3_2, 4},
+    { kAndTag2Tag3, 5},
+    { kAndTag2Tag3_2, 5},
+    { kOrTag1Tag2, 6},
+    { kOrTag1Tag2_2, 6},
+    { kOrTag1Tag3, 7},
+    { kOrTag1Tag3_2, 7},
+    { kOrTag2Tag3, 8},
+    { kOrTag2Tag3_2, 8},
+    { kImpliesTag1Tag2, 9},
+    { kImpliesTag1Tag2_2, 9},
+    { kImpliesTag1Tag3, 10},
+    { kImpliesTag1Tag3_2, 10},
+    { kImpliesTag2Tag3, 11},
+    { kImpliesTag2Tag3_2, 11},
+    { kNotTag1, 12},
+    { kNotTag1_2, 12},
+    { kNotTag2, 13},
+    { kNotTag2_2, 13},
+    { kNotTag3, 14},
+    { kNotTag3_2, 14}
 };
 
 INSTANTIATE_TEST_SUITE_P(
     PredicateEqTest, PredicateEqTest,
     testing::Combine(
-        testing::ValuesIn(example_predicate_pointers),
-        testing::ValuesIn(example_predicate_pointers)));
+        testing::ValuesIn(example_predicates),
+        testing::ValuesIn(example_predicates)));
 
 }  // namespace raksha::ir
