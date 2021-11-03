@@ -33,4 +33,5 @@ exports_files([
     "fact_test_helper.dl",
     "flat_graph_ir.dl",
     "tags.dl",
+    "may_will.dl",
 ])
