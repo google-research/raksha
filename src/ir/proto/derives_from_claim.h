@@ -13,14 +13,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#include "../../authorization_logic.dl"
 
-// This file is roughly what should be produced by authorization logic as an 
-// output. I think in reality there are gaps (one is that the output from the 
-// authorization logic does not use types, but the code here does). 
-saysRemoveTag("ServiceProvider", "detection_boxes", 
-    "image_detection_model_tag").
+#ifndef SRC_IR_PROTO_DERIVES_FROM_CLAIM_H_
+#define SRC_IR_PROTO_DERIVES_FROM_CLAIM_H_
 
-saysRemoveTag("EndUser", "detection_boxes", "raw_video_tag").
-saysRemoveTag("EndUser", "selected_image_id", "user_selection_tag").
-saysRemoveTag("EndUser", "selected_image_id", "detected_images_tag").
+#include "src/ir/derives_from_claim.h"
+#include "third_party/arcs/proto/manifest.pb.h"
+
+namespace raksha::ir::proto {
+
+DerivesFromClaim Decode(const arcs::ClaimProto_DerivesFrom &proto) {
+    CHECK(proto.has_source())
+      << "DerivesFrom proto does not have required field source.";
+    CHECK(proto.has_target())
+      << "DerivesFrom proto does not have required field target.";
+    return DerivesFromClaim(proto::Decode(proto.target()),
+                            proto::Decode(proto.source()));
+}
+
+}  // namespace raksha::ir::proto
+
+#endif  // SRC_IR_PROTO_DERIVES_FROM_CLAIM_H_

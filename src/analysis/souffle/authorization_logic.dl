@@ -26,21 +26,21 @@
 // A Principal that makes assertions in authorization logic
 .type Principal <: symbol
 
-// Some party asserts the claim that the label of an access path should be
-// downgraded by removing the referenced tag from the set.
-.decl saysDowngrades(speaker: Principal, path: AccessPath, tag: Tag)
+// Some party asserts the claim that the label of an access path should
+// remove the referenced tag from the set.
+.decl saysRemoveTag(speaker: Principal, path: AccessPath, tag: Tag)
 
 // The `speaker` says that `delegatee` is allowed to indicate that a `path` does
 // not have a `tag`.
-.decl saysCanSayDowngrades(
+.decl saysCanSayRemoveTag(
   speaker: Principal, delegatee: Principal, path: AccessPath, tag: Tag)
 
-// Indicates that a speaker is allowed to say downgrades.
-.decl canSayDowngrades(speaker: Principal, path: AccessPath, tag: Tag)
+// Indicates that a speaker is allowed to say removeTag.
+.decl canSayRemoveTag(speaker: Principal, path: AccessPath, tag: Tag)
 
 .decl isPrincipal(principal: Principal)
 
-// This party is the owner of a taint Tag (they have the privilege to downgrade
+// This party is the owner of a taint Tag (they have the privilege to remove
 // it).
 .decl ownsTag(owner: Principal, tag: Tag)
 
@@ -62,28 +62,28 @@
 // delegated to by the owner said so.
 .decl hasTag(path: AccessPath, tag: Tag)
 
-// Some accessPath is actually downgraded (by taking into consideration the
-// privileges of a party trying to downgrade it, and as a result of that party
-// deciding to downgrade it). Because here IFC labels are sets of tags (ordered
-// by the subset or equals relation), the downgrade works by removing a tag
-// from the set (making it "lower" in the order).
-.decl downgrades(path: AccessPath, tag: Tag)
+// The tag for some accessPath is actually removed (by taking into consideration
+// the privileges of a party trying to remove it, and as a result of that party
+// deciding to remove it). Because here IFC labels are sets of tags (ordered
+// by the subset or equals relation), removing a tag from the set corresponds to
+// a downgrade by making set of tags on the access path "lower" in the order.
+.decl removeTag(path: AccessPath, tag: Tag)
 
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
 
-// The owner can always say downgrades.
-canSayDowngrades(speaker, path, tag) :-
+// The owner can always say removeTag.
+canSayRemoveTag(speaker, path, tag) :-
     isAccessPath(path), ownsTag(speaker, tag).
 
-// If the owner says a speaker can say downgrades, the speaker can say
-// downgrades.
-canSayDowngrades(speaker, path, tag) :-
-  ownsTag(owner, tag), saysCanSayDowngrades(owner, speaker, path, tag).
+// If the owner says a speaker can say removeTag, the speaker can say
+// removeTag.
+canSayRemoveTag(speaker, path, tag) :-
+  ownsTag(owner, tag), saysCanSayRemoveTag(owner, speaker, path, tag).
 
-downgrades(path, tag) :-
-    canSayDowngrades(speaker, path, tag), saysDowngrades(speaker, path, tag).
+removeTag(path, tag) :-
+    canSayRemoveTag(speaker, path, tag), saysRemoveTag(speaker, path, tag).
 
 saysHasTag(principal, path, tag) :- claimHasTag(principal, path, tag).
 

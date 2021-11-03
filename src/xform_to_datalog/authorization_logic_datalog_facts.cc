@@ -42,8 +42,8 @@ AuthorizationLogicDatalogFacts::create(
       "says_ownsTag",
       "says_hasTag",
       "says_canSay_hasTag",
-      "says_downgrades",
-      "says_canSay_downgrades",
+      "says_removeTag",
+      "says_canSay_removeTag",
       "isAccessPath",
       "isTag",
       "isPrincipal"

@@ -20,7 +20,7 @@ licenses(["notice"])
 cc_library(
     name = "authorization_logic",
     hdrs = ["authorization_logic.h"],
-    deps = ["//rust/tools/authorization-logic:authorization_logic_lib"]
+    deps = ["//rust/tools/authorization-logic:authorization_logic_lib"],
 )
 
 cc_test(
@@ -37,15 +37,14 @@ cc_test(
 
 cc_library(
     name = "authorization_logic_test_utils",
-    srcs = ["authorization_logic_test_utils.h"],
     testonly = True,
+    srcs = ["authorization_logic_test_utils.h"],
     deps = [
         "//src/common/logging",
         "//src/common/testing:gtest",
         "@absl//absl/strings",
     ],
 )
-
 
 cc_library(
     name = "authorization_logic_datalog_facts",
@@ -56,7 +55,7 @@ cc_library(
         ":authorization_logic",
         "//src/common/logging",
         "@absl//absl/strings",
-    ]
+    ],
 )
 
 cc_test(
@@ -76,10 +75,9 @@ cc_library(
     name = "datalog_facts",
     hdrs = ["datalog_facts.h"],
     deps = [
-        ":manifest_datalog_facts",
         ":authorization_logic_datalog_facts",
+        ":manifest_datalog_facts",
         "//src/ir",
-        "//src/xform_to_datalog/arcs_manifest_tree",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
@@ -101,8 +99,8 @@ cc_library(
     hdrs = ["manifest_datalog_facts.h"],
     deps = [
         "//src/ir",
+        "//src/ir/proto:particle_spec",
         "//src/ir/proto:types",
-        "//src/xform_to_datalog/arcs_manifest_tree",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
@@ -113,6 +111,7 @@ cc_test(
     deps = [
         ":manifest_datalog_facts",
         "//src/common/testing:gtest",
+        "//src/ir:single_use_arena_and_predicate",
     ],
 )
 

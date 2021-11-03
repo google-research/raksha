@@ -13,14 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#include "../../authorization_logic.dl"
 
-// This file is roughly what should be produced by authorization logic as an 
-// output. I think in reality there are gaps (one is that the output from the 
-// authorization logic does not use types, but the code here does). 
-saysRemoveTag("ServiceProvider", "detection_boxes", 
-    "image_detection_model_tag").
+#ifndef SRC_IR_PROTO_PARTICLE_SPEC_H_
+#define SRC_IR_PROTO_PARTICLE_SPEC_H_
 
-saysRemoveTag("EndUser", "detection_boxes", "raw_video_tag").
-saysRemoveTag("EndUser", "selected_image_id", "user_selection_tag").
-saysRemoveTag("EndUser", "selected_image_id", "detected_images_tag").
+#include "src/ir/particle_spec.h"
+#include "src/ir/predicate_arena.h"
+#include "third_party/arcs/proto/manifest.pb.h"
+
+namespace raksha::ir::proto {
+
+const ParticleSpec *Decode(
+    ParticleSpecRegistry &registry, std::unique_ptr<PredicateArena> arena,
+    const arcs::ParticleSpecProto &proto);
+
+}  // namespace raksha::ir::proto
+
+#endif  // SRC_IR_PROTO_PARTICLE_SPEC_H_

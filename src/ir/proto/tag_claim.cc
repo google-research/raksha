@@ -14,11 +14,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
-#include "src/ir/tag_claim.h"
+#include "src/ir/proto/tag_claim.h"
 
-namespace raksha::ir {
+namespace raksha::ir::proto {
 
-std::vector<TagClaim> TagClaim::GetTagClaimsFromPredicate(
+static std::vector<TagClaim> GetTagClaimsFromPredicate(
     std::string claiming_particle_name,
     AccessPath access_path,
     const arcs::InformationFlowLabelProto_Predicate &predicate,
@@ -71,4 +71,25 @@ std::vector<TagClaim> TagClaim::GetTagClaimsFromPredicate(
   }
 }
 
-}  // namespace raksha::ir
+// Create a list of TagClaims from an Assume proto. Each of these will be
+// uninstantiated and thus rooted at the ParticleSpec.
+std::vector<TagClaim> Decode(
+  std::string claiming_particle_name,
+  const arcs::ClaimProto_Assume &assume_proto) {
+  CHECK(assume_proto.has_access_path())
+      << "Expected Assume message to have access_path field.";
+  const arcs::AccessPathProto &access_path_proto = assume_proto.access_path();
+  AccessPath access_path = proto::Decode(access_path_proto);
+  CHECK(assume_proto.has_predicate())
+      << "Expected Assume message to have predicate field.";
+  const arcs::InformationFlowLabelProto_Predicate &predicate =
+      assume_proto.predicate();
+
+  // Now that we have gathered the top-level information from the Assume
+  // proto, descend into the predicate to construct the list of claims.
+  return GetTagClaimsFromPredicate(
+      std::move(claiming_particle_name), std::move(access_path), predicate,
+      /*in_negation=*/false);
+}
+
+}  // namespace raksha::ir::proto

@@ -49,11 +49,11 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
-.output testFails
+.output testFails(IO=stdout)
 .decl allTests(check_index: symbol)
-.output allTests
+.output allTests(IO=stdout)
 .decl duplicateTestCaseNames(testAspectName: symbol)
-.output duplicateTestCaseNames
+.output duplicateTestCaseNames(IO=stdout)
 
 .decl isCheck(check_index: symbol)
 .decl check(check_index: symbol)
@@ -76,12 +76,12 @@ saysHasTag(x, y, z) :- says_hasTag(x, y, z).
   tag: Tag)
 saysCanSayHasTag(w, x, y, z) :- says_canSay_hasTag(w, x, y, z).
 
-.decl says_canSay_downgrades(
+.decl says_canSay_removeTag(
     speaker: Principal, delegatee: Principal, path: AccessPath, tag: Tag)
-saysCanSayDowngrades(w, x, y, z) :- says_canSay_downgrades(w, x, y, z).
+saysCanSayRemoveTag(w, x, y, z) :- says_canSay_removeTag(w, x, y, z).
 
-.decl says_downgrades(speaker: Principal, path: AccessPath, tag: Tag)
-saysDowngrades(x, y, z) :- says_downgrades(x, y, z).
+.decl says_removeTag(speaker: Principal, path: AccessPath, tag: Tag)
+saysRemoveTag(x, y, z) :- says_removeTag(x, y, z).
 
 // Manifest
 
@@ -118,11 +118,11 @@ grounded_dummy("dummy_var").
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
-.output testFails
+.output testFails(IO=stdout)
 .decl allTests(check_index: symbol)
-.output allTests
+.output allTests(IO=stdout)
 .decl duplicateTestCaseNames(testAspectName: symbol)
-.output duplicateTestCaseNames
+.output duplicateTestCaseNames(IO=stdout)
 
 .decl isCheck(check_index: symbol)
 .decl check(check_index: symbol)
@@ -145,12 +145,12 @@ saysHasTag(x, y, z) :- says_hasTag(x, y, z).
   tag: Tag)
 saysCanSayHasTag(w, x, y, z) :- says_canSay_hasTag(w, x, y, z).
 
-.decl says_canSay_downgrades(
+.decl says_canSay_removeTag(
     speaker: Principal, delegatee: Principal, path: AccessPath, tag: Tag)
-saysCanSayDowngrades(w, x, y, z) :- says_canSay_downgrades(w, x, y, z).
+saysCanSayRemoveTag(w, x, y, z) :- says_canSay_removeTag(w, x, y, z).
 
-.decl says_downgrades(speaker: Principal, path: AccessPath, tag: Tag)
-saysDowngrades(x, y, z) :- says_downgrades(x, y, z).
+.decl says_removeTag(speaker: Principal, path: AccessPath, tag: Tag)
+saysRemoveTag(x, y, z) :- says_removeTag(x, y, z).
 
 // Manifest
 
