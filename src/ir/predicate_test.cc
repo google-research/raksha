@@ -20,17 +20,12 @@
 #include "absl/strings/substitute.h"
 #include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
-#include "src/ir/fake_predicate_arena.h"
+#include "src/ir/single-use-arena-and-predicate.h"
 #include "src/ir/predicate_textproto_to_rule_body_testdata.h"
 #include "src/ir/proto/predicate.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
-
-// Create a fake arena for use in constructing test data. We don't declare it
-// const so that it can pretend to capture constructed pointers, but it
-// contains no state, so it is effectively a constant.
-FakePredicateArenaImpl kArena;
 
 class ToDatalogRuleBodyTest :
  public testing::TestWithParam<
@@ -38,7 +33,7 @@ class ToDatalogRuleBodyTest :
  public:
   explicit ToDatalogRuleBodyTest()
     : access_path_(std::get<1>(GetParam())),
-      predicate_decoder_(kArena)
+      predicate_decoder_(arena_)
   {
     const auto &[textproto, expected_rule_body_format] =
         std::get<0>(GetParam());
@@ -52,6 +47,7 @@ class ToDatalogRuleBodyTest :
   std::string textproto_;
   std::string expected_rule_body_;
   AccessPath access_path_;
+  PredicateArena arena_;
   proto::PredicateDecoder predicate_decoder_;
 };
 
@@ -118,87 +114,93 @@ TEST_P(PredicateEqTest, PredicateEqTest) {
   EXPECT_EQ(*pred1_ == *pred2_, pred_num1 == pred_num2);
 }
 
-static const Predicate *kTag1Present = TagPresence::Create(kArena, "tag1");
-static const Predicate *kTag2Present = TagPresence::Create(kArena, "tag2");
-static const Predicate *kTag3Present = TagPresence::Create(kArena, "tag3");
+static const SingleUseArenaAndTagPresence kTag1Present("tag1");
+static const SingleUseArenaAndTagPresence kTag2Present("tag2");
+static const SingleUseArenaAndTagPresence kTag3Present("tag3");
 
-static const Predicate *kTag1Present2 = TagPresence::Create(kArena, "tag1");
-static const Predicate *kTag2Present2 = TagPresence::Create(kArena, "tag2");
-static const Predicate *kTag3Present2 = TagPresence::Create(kArena, "tag3");
+static const SingleUseArenaAndTagPresence kTag1Present2("tag1");
+static const SingleUseArenaAndTagPresence kTag2Present2("tag2");
+static const SingleUseArenaAndTagPresence kTag3Present2("tag3");
 
-static const And *kAndTag1Tag2 =
-    And::Create(kArena, kTag1Present, kTag2Present);
-static const And *kAndTag1Tag3 =
-    And::Create(kArena, kTag1Present, kTag3Present);
-static const And *kAndTag2Tag3 =
-    And::Create(kArena, kTag2Present, kTag3Present);
+static const SingleUseArenaAndAnd kAndTag1Tag2(
+    kTag1Present.predicate(), kTag2Present.predicate());
+static const SingleUseArenaAndAnd kAndTag1Tag3(
+    kTag1Present.predicate(), kTag3Present.predicate());
+static const SingleUseArenaAndAnd kAndTag2Tag3(
+    kTag2Present.predicate(), kTag3Present.predicate());
 
-static const And *kAndTag1Tag2_2 =
-    And::Create(kArena, kTag1Present, kTag2Present);
-static const And *kAndTag1Tag3_2 =
-    And::Create(kArena, kTag1Present, kTag3Present);
-static const And *kAndTag2Tag3_2 =
-    And::Create(kArena, kTag2Present, kTag3Present);
+static const SingleUseArenaAndAnd kAndTag1Tag2_2(
+    kTag1Present.predicate(), kTag2Present.predicate());
+static const SingleUseArenaAndAnd kAndTag1Tag3_2(
+    kTag1Present.predicate(), kTag3Present.predicate());
+static const SingleUseArenaAndAnd kAndTag2Tag3_2(
+    kTag2Present.predicate(), kTag3Present.predicate());
 
-static const Or *kOrTag1Tag2 = Or::Create(kArena, kTag1Present, kTag2Present);
-static const Or *kOrTag1Tag3 = Or::Create(kArena, kTag1Present, kTag3Present);
-static const Or *kOrTag2Tag3 = Or::Create(kArena, kTag2Present, kTag3Present);
+static const SingleUseArenaAndOr kOrTag1Tag2(
+    kTag1Present.predicate(), kTag2Present.predicate());
+static const SingleUseArenaAndOr kOrTag1Tag3(
+    kTag1Present.predicate(), kTag3Present.predicate());
+static const SingleUseArenaAndOr kOrTag2Tag3(
+    kTag2Present.predicate(), kTag3Present.predicate());
 
-static const Or *kOrTag1Tag2_2 = Or::Create(kArena, kTag1Present, kTag2Present);
-static const Or *kOrTag1Tag3_2 = Or::Create(kArena, kTag1Present, kTag3Present);
-static const Or *kOrTag2Tag3_2 = Or::Create(kArena, kTag2Present, kTag3Present);
+static const SingleUseArenaAndOr kOrTag1Tag2_2(
+    kTag1Present.predicate(), kTag2Present.predicate());
+static const SingleUseArenaAndOr kOrTag1Tag3_2(
+    kTag1Present.predicate(), kTag3Present.predicate());
+static const SingleUseArenaAndOr kOrTag2Tag3_2(
+    kTag2Present.predicate(), kTag3Present.predicate());
 
-static const Implies *kImpliesTag1Tag2 =
-    Implies::Create(kArena, kTag1Present, kTag2Present);
-static const Implies *kImpliesTag1Tag2_2 =
-    Implies::Create(kArena, kTag1Present, kTag2Present);
-static const Implies *kImpliesTag1Tag3 =
-    Implies::Create(kArena, kTag1Present, kTag3Present);
-static const Implies *kImpliesTag1Tag3_2 =
-    Implies::Create(kArena, kTag1Present, kTag3Present);
-static const Implies *kImpliesTag2Tag3 =
-    Implies::Create(kArena, kTag2Present, kTag3Present);
-static const Implies *kImpliesTag2Tag3_2 =
-    Implies::Create(kArena, kTag2Present, kTag3Present);
+static const SingleUseArenaAndImplies kImpliesTag1Tag2(
+    kTag1Present.predicate(), kTag2Present.predicate());
+static const SingleUseArenaAndImplies kImpliesTag1Tag2_2(
+    kTag1Present.predicate(), kTag2Present.predicate());
+static const SingleUseArenaAndImplies kImpliesTag1Tag3(
+    kTag1Present.predicate(), kTag3Present.predicate());
+static const SingleUseArenaAndImplies kImpliesTag1Tag3_2(
+    kTag1Present.predicate(), kTag3Present.predicate());
+static const SingleUseArenaAndImplies kImpliesTag2Tag3(
+    kTag2Present.predicate(), kTag3Present.predicate());
+static const SingleUseArenaAndImplies kImpliesTag2Tag3_2(
+    kTag2Present.predicate(), kTag3Present.predicate());
 
-static const Not *kNotTag1 = Not::Create(kArena, kTag1Present);
-static const Not *kNotTag1_2 = Not::Create(kArena, kTag1Present);
-static const Not *kNotTag2 = Not::Create(kArena, kTag2Present);
-static const Not *kNotTag2_2 = Not::Create(kArena, kTag2Present);
-static const Not *kNotTag3 = Not::Create(kArena, kTag3Present);
-static const Not *kNotTag3_2 = Not::Create(kArena, kTag3Present);
+static const SingleUseArenaAndNot kNotTag1(kTag1Present.predicate());
+static const SingleUseArenaAndNot kNotTag1_2(kTag1Present.predicate());
+static const SingleUseArenaAndNot kNotTag2(kTag2Present.predicate());
+static const SingleUseArenaAndNot kNotTag2_2(kTag2Present.predicate());
+static const SingleUseArenaAndNot kNotTag3(kTag3Present.predicate());
+static const SingleUseArenaAndNot kNotTag3_2(kTag3Present.predicate());
 
 static const std::pair<const Predicate *, uint64_t> example_predicates[] = {
-    { kTag1Present, 0},
-    { kTag1Present2, 0},
-    { kTag2Present, 1},
-    { kTag2Present2, 1},
-    { kTag3Present, 2},
-    { kTag3Present2, 2},
-    { kAndTag1Tag2, 3},
-    { kAndTag1Tag2_2, 3},
-    { kAndTag1Tag3, 4},
-    { kAndTag1Tag3_2, 4},
-    { kAndTag2Tag3, 5},
-    { kAndTag2Tag3_2, 5},
-    { kOrTag1Tag2, 6},
-    { kOrTag1Tag2_2, 6},
-    { kOrTag1Tag3, 7},
-    { kOrTag1Tag3_2, 7},
-    { kOrTag2Tag3, 8},
-    { kOrTag2Tag3_2, 8},
-    { kImpliesTag1Tag2, 9},
-    { kImpliesTag1Tag2_2, 9},
-    { kImpliesTag1Tag3, 10},
-    { kImpliesTag1Tag3_2, 10},
-    { kImpliesTag2Tag3, 11},
-    { kImpliesTag2Tag3_2, 11},
-    { kNotTag1, 12},
-    { kNotTag1_2, 12},
-    { kNotTag2, 13},
-    { kNotTag2_2, 13},
-    { kNotTag3, 14},
-    { kNotTag3_2, 14}
+    { kTag1Present.predicate(), 0},
+    { kTag1Present2.predicate(), 0},
+    { kTag2Present.predicate(), 1},
+    { kTag2Present2.predicate(), 1},
+    { kTag3Present.predicate(), 2},
+    { kTag3Present2.predicate(), 2},
+    { kAndTag1Tag2.predicate(), 3},
+    { kAndTag1Tag2_2.predicate(), 3},
+    { kAndTag1Tag3.predicate(), 4},
+    { kAndTag1Tag3_2.predicate(), 4},
+    { kAndTag2Tag3.predicate(), 5},
+    { kAndTag2Tag3_2.predicate(), 5},
+    { kOrTag1Tag2.predicate(), 6},
+    { kOrTag1Tag2_2.predicate(), 6},
+    { kOrTag1Tag3.predicate(), 7},
+    { kOrTag1Tag3_2.predicate(), 7},
+    { kOrTag2Tag3.predicate(), 8},
+    { kOrTag2Tag3_2.predicate(), 8},
+    { kImpliesTag1Tag2.predicate(), 9},
+    { kImpliesTag1Tag2_2.predicate(), 9},
+    { kImpliesTag1Tag3.predicate(), 10},
+    { kImpliesTag1Tag3_2.predicate(), 10},
+    { kImpliesTag2Tag3.predicate(), 11},
+    { kImpliesTag2Tag3_2.predicate(), 11},
+    { kNotTag1.predicate(), 12},
+    { kNotTag1_2.predicate(), 12},
+    { kNotTag2.predicate(), 13},
+    { kNotTag2_2.predicate(), 13},
+    { kNotTag3.predicate(), 14},
+    { kNotTag3_2.predicate(), 14}
 };
 
 INSTANTIATE_TEST_SUITE_P(

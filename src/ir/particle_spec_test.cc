@@ -20,9 +20,9 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/common/logging/logging.h"
-#include "src/ir/fake_predicate_arena.h"
 #include "src/ir/proto/particle_spec.h"
 #include "src/ir/predicate_arena.h"
+#include "src/ir/single-use-arena-and-predicate.h"
 
 namespace raksha::ir {
 
@@ -49,7 +49,7 @@ class ParticleSpecFromProtoTest :
         textproto, &particle_spec_proto))
         << "Particle spec textproto did not parse correctly.";
     return *proto::Decode(
-        particle_spec_registry, std::make_unique<PredicateArenaImpl>(),
+        particle_spec_registry, std::make_unique<PredicateArena>(),
             particle_spec_proto);
   }
 
@@ -91,19 +91,11 @@ static AccessPathSelectors MakeSingleFieldSelectors(
       std::move(field_name))));
 }
 
-// Not declared const because it pretends to capture the predicates, but has
-// no internal state so effectively const.
-FakePredicateArenaImpl kArena;
-
 // Tag presence predicates for constructing checks.
-static const TagPresence *kTag1Present =
-    TagPresence::Create(kArena, "tag1");
-static const TagPresence *kTag2Present =
-    TagPresence::Create(kArena, "tag2");
-static const TagPresence *kTag3Present =
-    TagPresence::Create(kArena, "tag3");
-static const TagPresence *kTag4Present =
-    TagPresence::Create(kArena, "tag4");
+static const ir::SingleUseArenaAndTagPresence kTag1Present("tag1");
+static const ir::SingleUseArenaAndTagPresence kTag2Present("tag2");
+static const ir::SingleUseArenaAndTagPresence kTag3Present("tag3");
+static const ir::SingleUseArenaAndTagPresence kTag4Present("tag4");
 
 static ParticleSpecProtoAndExpectedInfo spec_proto_and_expected_info[] = {
     { .textproto = R"(name: "p_spec")", .expected_name = "p_spec",
@@ -473,14 +465,14 @@ checks: [ {
       .expected_name = "PS2",
       .expected_claims = { },
       .expected_checks = {
-          TagCheck(
-             AccessPath(
+          ir::TagCheck(
+             ir::AccessPath(
                  kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
-             *kTag1Present),
-         TagCheck(
-             AccessPath(
+             *kTag1Present.predicate()),
+         ir::TagCheck(
+             ir::AccessPath(
                  kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
-             *kTag2Present),
+             *kTag2Present.predicate()),
       },
       .expected_edges = { }
     },
@@ -587,7 +579,7 @@ TEST(BulkInstantiateTest, BulkInstantiateTest) {
       kTextprotoWithAllFacts, &particle_spec_proto);
   const ParticleSpec *particle_spec =
       proto::Decode(
-          particle_spec_registry, std::make_unique<PredicateArenaImpl>(),
+          particle_spec_registry, std::make_unique<PredicateArena>(),
           particle_spec_proto);
 
   const AccessPathRoot p1_in_impl(
@@ -622,12 +614,12 @@ TEST(BulkInstantiateTest, BulkInstantiateTest) {
   ASSERT_THAT(
       instantiated_facts.checks,
       testing::UnorderedElementsAreArray({
-        TagCheck(
-            AccessPath(p1_in_impl, MakeSingleFieldSelectors("field1")),
-            *kTag3Present),
-        TagCheck(
-            AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field2")),
-            *kTag4Present)}));
+        ir::TagCheck(
+            ir::AccessPath(p1_in_impl, MakeSingleFieldSelectors("field1")),
+            *kTag3Present.predicate()),
+        ir::TagCheck(
+            ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field2")),
+            *kTag4Present.predicate())}));
 
   ASSERT_THAT(
       instantiated_facts.edges,

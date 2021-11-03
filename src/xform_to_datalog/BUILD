@@ -111,7 +111,7 @@ cc_test(
     deps = [
         ":manifest_datalog_facts",
         "//src/common/testing:gtest",
-        "//src/ir:fake_predicate_arena",
+        "//src/ir:single_use_arena_and_predicate",
     ],
 )
 

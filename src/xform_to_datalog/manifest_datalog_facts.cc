@@ -45,8 +45,8 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
   // ParticleSpec object, which we can use directly.
   for (const arcs::ParticleSpecProto &particle_spec_proto :
     manifest_proto.particle_specs()) {
-    std::unique_ptr<ir::PredicateArenaImpl> arena =
-        std::make_unique<ir::PredicateArenaImpl>();
+    std::unique_ptr<ir::PredicateArena> arena =
+        std::make_unique<ir::PredicateArena>();
     ir::proto::Decode(
         particle_spec_registry, std::move(arena), particle_spec_proto);
   }

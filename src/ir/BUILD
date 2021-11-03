@@ -69,9 +69,9 @@ cc_library(
 )
 
 cc_library(
-    name = "fake_predicate_arena",
+    name = "single_use_arena_and_predicate",
     testonly = True,
-    hdrs = ["fake_predicate_arena.h"],
+    hdrs = ["single-use-arena-and-predicate.h"],
     deps = [":ir"],
 )
 
@@ -208,9 +208,9 @@ cc_test(
     name = "predicate_test",
     srcs = ["predicate_test.cc"],
     deps = [
-        ":fake_predicate_arena",
         ":ir",
         ":predicate_textproto_to_rule_body_testdata",
+        ":single_use_arena_and_predicate",
         "//src/common/testing:gtest",
         "//src/ir/proto:predicate",
         "@absl//absl/strings",
@@ -231,8 +231,8 @@ cc_test(
     name = "particle_spec_test",
     srcs = ["particle_spec_test.cc"],
     deps = [
-        ":fake_predicate_arena",
         ":ir",
+        ":single_use_arena_and_predicate",
         "//src/common/testing:gtest",
         "//src/ir/proto:handle_connection_spec",
         "//src/ir/proto:particle_spec",
