@@ -30,13 +30,16 @@ class PredicateArena {
 
   // CapturePredicate takes in an owning pointer for some predicate base
   // class, takes ownership of it, and returns a pointer to that same
-  // predicate base class. This
+  // predicate base class. The actual CapturePredicate method basically just
+  // downcasts to the appropriate Predicate child class after delegating to
+  // the actual implementation in CapturePredicate.
   template<class T>
   const T *CapturePredicate(std::unique_ptr<T> pred) {
     return static_cast<const T *>(CapturePredicateBase(std::move(pred)));
   }
 
  protected:
+  // Delegate to the base class to actually capture the predicate provided.
   virtual const Predicate *CapturePredicateBase(
       std::unique_ptr<Predicate> pred) = 0;
 };
@@ -50,6 +53,8 @@ class PredicateArenaImpl : public PredicateArena {
   virtual ~PredicateArenaImpl() {}
 
  protected:
+  // Capture the predicate by placing it in the owned_predicates_ vector and
+  // return a non-owning pointer to that predicate.
   const Predicate *CapturePredicateBase(
       std::unique_ptr<Predicate> pred) override {
     owned_predicates_.push_back(std::move(pred));
