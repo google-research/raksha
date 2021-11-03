@@ -20,7 +20,7 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/common/logging/logging.h"
-#include "src/ir/fake_predicate_arena.h"
+#include "src/ir/single-use-arena-and-predicate.h"
 
 namespace raksha::xform_to_datalog::arcs_manifest_tree {
 
@@ -90,19 +90,11 @@ static ir::AccessPathSelectors MakeSingleFieldSelectors(
       std::move(field_name))));
 }
 
-// Not declared const because it pretends to capture the predicates, but has
-// no internal state so effectively const.
-ir::FakePredicateArenaImpl kArena;
-
 // Tag presence predicates for constructing checks.
-static const ir::TagPresence *kTag1Present =
-    ir::TagPresence::Create(kArena, "tag1");
-static const ir::TagPresence *kTag2Present =
-    ir::TagPresence::Create(kArena, "tag2");
-static const ir::TagPresence *kTag3Present =
-    ir::TagPresence::Create(kArena, "tag3");
-static const ir::TagPresence *kTag4Present =
-    ir::TagPresence::Create(kArena, "tag4");
+static const ir::SingleUseArenaAndTagPresence kTag1Present("tag1");
+static const ir::SingleUseArenaAndTagPresence kTag2Present("tag2");
+static const ir::SingleUseArenaAndTagPresence kTag3Present("tag3");
+static const ir::SingleUseArenaAndTagPresence kTag4Present("tag4");
 
 static ParticleSpecProtoAndExpectedInfo spec_proto_and_expected_info[] = {
     { .textproto = R"(name: "p_spec")", .expected_name = "p_spec",
@@ -475,11 +467,11 @@ checks: [ {
           ir::TagCheck(
              ir::AccessPath(
                  kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
-             *kTag1Present),
+             *kTag1Present.predicate()),
          ir::TagCheck(
              ir::AccessPath(
                  kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
-             *kTag2Present),
+             *kTag2Present.predicate()),
       },
       .expected_edges = { }
     },
@@ -621,10 +613,10 @@ TEST(BulkInstantiateTest, BulkInstantiateTest) {
       testing::UnorderedElementsAreArray({
         ir::TagCheck(
             ir::AccessPath(p1_in_impl, MakeSingleFieldSelectors("field1")),
-            *kTag3Present),
+            *kTag3Present.predicate()),
         ir::TagCheck(
             ir::AccessPath(p1_in_out_impl, MakeSingleFieldSelectors("field2")),
-            *kTag4Present)}));
+            *kTag4Present.predicate())}));
 
   ASSERT_THAT(
       instantiated_facts.edges,

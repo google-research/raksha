@@ -63,7 +63,7 @@ ParticleSpec ParticleSpec::CreateFromProto(
   }
 
   std::unique_ptr<raksha::ir::PredicateArena> predicate_arena =
-      std::make_unique<raksha::ir::PredicateArenaImpl>();
+      std::make_unique<raksha::ir::PredicateArena>();
   raksha::ir::proto::PredicateDecoder predicate_decoder(*predicate_arena.get());
   std::vector<ir::TagCheck> checks;
   for (const arcs::CheckProto &check : particle_spec_proto.checks()) {

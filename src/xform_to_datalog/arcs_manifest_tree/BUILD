@@ -46,6 +46,6 @@ cc_test(
         ":arcs_manifest_tree",
         "//src/common/testing:gtest",
         "//src/ir",
-        "//src/ir:fake_predicate_arena",
+        "//src/ir:single_use_arena_and_predicate",
     ],
 )

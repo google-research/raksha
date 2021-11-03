@@ -26,8 +26,6 @@ namespace raksha::ir {
 
 class PredicateArena {
   public:
-  virtual ~PredicateArena() {}
-
   // CapturePredicate takes in an owning pointer for some predicate base
   // class, takes ownership of it, and returns a pointer to that same
   // predicate base class. The actual CapturePredicate method basically just
@@ -38,31 +36,17 @@ class PredicateArena {
     return static_cast<const T *>(CapturePredicateBase(std::move(pred)));
   }
 
- protected:
-  // Delegate to the base class to actually capture the predicate provided.
-  virtual const Predicate *CapturePredicateBase(
-      std::unique_ptr<Predicate> pred) = 0;
-};
-
-// An arena that constructs and holds predicate objects. This is used to
-// ensure that all predicates live long enough to be printed out to Datalog.
-// This is the one version of the PredicateArena that we expect to use in
-// non-testing code.
-class PredicateArenaImpl : public PredicateArena {
- public:
-  virtual ~PredicateArenaImpl() {}
-
- protected:
-  // Capture the predicate by placing it in the owned_predicates_ vector and
-  // return a non-owning pointer to that predicate.
-  const Predicate *CapturePredicateBase(
-      std::unique_ptr<Predicate> pred) override {
+ private:
+  // Actually captures the predicate and places it in the vector of owned
+  // predicates.
+  const Predicate *CapturePredicateBase(std::unique_ptr<Predicate> pred) {
     owned_predicates_.push_back(std::move(pred));
     return owned_predicates_.back().get();
   }
- private:
-  std::vector<std::unique_ptr<Predicate>> owned_predicates_;
 
+  // The vector of owned predicates. They are held here so they are
+  // destructed only when the PredicateArena is destructed.
+  std::vector<std::unique_ptr<Predicate>> owned_predicates_;
 };
 
 }  // namespace raksha::ir
