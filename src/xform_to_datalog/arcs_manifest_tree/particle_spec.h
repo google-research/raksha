@@ -93,11 +93,11 @@ class ParticleSpec {
       std::vector<raksha::ir::TagClaim> tag_claims,
       std::vector<raksha::ir::DerivesFromClaim> derives_from_claims,
       std::vector<ir::HandleConnectionSpec> handle_connection_specs,
-      raksha::ir::proto::PredicateDecoder predicate_decoder)
+      std::unique_ptr<raksha::ir::PredicateArena> predicate_arena)
       : name_(std::move(name)), checks_(std::move(checks)),
         tag_claims_(std::move(tag_claims)),
         derives_from_claims_(std::move(derives_from_claims)),
-        predicate_decoder_(std::move(predicate_decoder)){
+        predicate_arena_(std::move(predicate_arena)) {
     for (ir::HandleConnectionSpec &handle_connection_spec :
       handle_connection_specs) {
       std::string hcs_name = handle_connection_spec.name();
@@ -135,11 +135,11 @@ class ParticleSpec {
   // A map of HandleConnectionSpec names to HandleConnectionSpecs.
   absl::flat_hash_map<std::string, raksha::ir::HandleConnectionSpec>
     handle_connection_specs_;
-  // The PredicateDecoder object which was used to construct the predicates
+  // The PredicateArena object which was used to construct the predicates
   // on all of the checks on this ParticleSpec. This also owns those
   // predicates, so holding this field here causes the checks to live as long
   // as the ParticleSpec.
-  raksha::ir::proto::PredicateDecoder predicate_decoder_;
+  std::unique_ptr<raksha::ir::PredicateArena> predicate_arena_;
 };
 
 // A ParticleSpecRegistry owns all ParticleSpecs. It acts as a factory for

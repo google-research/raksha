@@ -21,12 +21,14 @@ load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
 
 cc_library(
     name = "ir",
+    srcs = ["predicate.cc"],
     hdrs = [
         "datalog_print_context.h",
         "derives_from_claim.h",
         "edge.h",
         "handle_connection_spec.h",
         "predicate.h",
+        "predicate_arena.h",
         "tag_check.h",
         "tag_claim.h",
     ],
@@ -60,6 +62,13 @@ cc_library(
         "@absl//absl/hash",
         "@absl//absl/strings",
     ],
+)
+
+cc_library(
+    name = "single_use_arena_and_predicate",
+    testonly = True,
+    hdrs = ["single-use-arena-and-predicate.h"],
+    deps = [":ir"],
 )
 
 cc_test(
@@ -197,6 +206,7 @@ cc_test(
     deps = [
         ":ir",
         ":predicate_textproto_to_rule_body_testdata",
+        ":single_use_arena_and_predicate",
         "//src/common/testing:gtest",
         "//src/ir/proto:predicate",
         "@absl//absl/strings",

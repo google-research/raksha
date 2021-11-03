@@ -62,7 +62,9 @@ ParticleSpec ParticleSpec::CreateFromProto(
     }
   }
 
-  raksha::ir::proto::PredicateDecoder predicate_decoder;
+  std::unique_ptr<raksha::ir::PredicateArena> predicate_arena =
+      std::make_unique<raksha::ir::PredicateArena>();
+  raksha::ir::proto::PredicateDecoder predicate_decoder(*predicate_arena.get());
   std::vector<ir::TagCheck> checks;
   for (const arcs::CheckProto &check : particle_spec_proto.checks()) {
     checks.push_back(raksha::ir::proto::Decode(check, predicate_decoder));
@@ -72,7 +74,7 @@ ParticleSpec ParticleSpec::CreateFromProto(
       std::move(name), std::move(checks), std::move(tag_claims),
       std::move(derives_from_claims),
       std::move(handle_connection_specs),
-      std::move(predicate_decoder));
+      std::move(predicate_arena));
 }
 
 void ParticleSpec::GenerateEdges() {

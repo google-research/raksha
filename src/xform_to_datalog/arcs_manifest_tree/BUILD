@@ -45,5 +45,7 @@ cc_test(
     deps = [
         ":arcs_manifest_tree",
         "//src/common/testing:gtest",
+        "//src/ir",
+        "//src/ir:single_use_arena_and_predicate",
     ],
 )

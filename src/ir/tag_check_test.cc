@@ -30,7 +30,8 @@ TEST_P(TagCheckToDatalogWithRootTest, TagCheckToDatalogWithRootTest) {
       expected_todatalog_format_string, root_string);
   arcs::CheckProto check_proto;
   google::protobuf::TextFormat::ParseFromString(check_textproto, &check_proto);
-  proto::PredicateDecoder predicate_decoder;
+  PredicateArena predicate_arena;
+  proto::PredicateDecoder predicate_decoder(predicate_arena);
   TagCheck unrooted_tag_check = proto::Decode(check_proto, predicate_decoder);
   TagCheck tag_check = unrooted_tag_check.Instantiate(root);
 
