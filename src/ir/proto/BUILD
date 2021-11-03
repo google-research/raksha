@@ -63,6 +63,7 @@ cc_library(
     deps = [
         "//src/ir",
         "//src/ir:access_path",
+        "//src/ir/proto:predicate",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
@@ -93,6 +94,22 @@ cc_library(
     srcs = ["handle_connection_spec.cc"],
     hdrs = ["handle_connection_spec.h"],
     deps = [
+        "//src/ir",
+        "//src/ir:access_path",
+        "//src/ir/proto:types",
+        "//third_party/arcs/proto:manifest_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "particle_spec",
+    srcs = ["particle_spec.cc"],
+    hdrs = ["particle_spec.h"],
+    deps = [
+        ":derives_from_claim",
+        ":handle_connection_spec",
+        ":tag_check",
+        ":tag_claim",
         "//src/ir",
         "//src/ir:access_path",
         "//src/ir/proto:types",

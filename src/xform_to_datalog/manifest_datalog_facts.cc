@@ -17,14 +17,14 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "src/ir/handle_connection_spec.h"
+#include "src/ir/particle_spec.h"
 #include "src/ir/proto/type.h"
-#include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
+#include "src/ir/proto/particle_spec.h"
 
 namespace raksha::xform_to_datalog {
 
 namespace ir = raksha::ir;
 namespace types = raksha::ir::types;
-namespace amt = raksha::xform_to_datalog::arcs_manifest_tree;
 
 // Traverse the substructures of the manifest proto to create datalog fact
 // objects.
@@ -34,7 +34,7 @@ namespace amt = raksha::xform_to_datalog::arcs_manifest_tree;
 //  break this up.
 ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
     const arcs::ManifestProto &manifest_proto,
-    amt::ParticleSpecRegistry &particle_spec_registry) {
+    ir::ParticleSpecRegistry &particle_spec_registry) {
   // These collections will be used as inputs to the constructor that we
   // return from this function.
   std::vector<ir::TagClaim> result_claims;
@@ -45,7 +45,10 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
   // ParticleSpec object, which we can use directly.
   for (const arcs::ParticleSpecProto &particle_spec_proto :
     manifest_proto.particle_specs()) {
-    particle_spec_registry.CreateParticleSpecFromProto(particle_spec_proto);
+    std::unique_ptr<ir::PredicateArena> arena =
+        std::make_unique<ir::PredicateArena>();
+    ir::proto::Decode(
+        particle_spec_registry, std::move(arena), particle_spec_proto);
   }
 
   // This loop looks at each recipe in the manifest proto and instantiates
@@ -82,7 +85,7 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
       // Find the ParticleSpec referenced by this Particle. The information
       // contained in the spec will be needed for all facts produced within a
       // Particle.
-      const amt::ParticleSpec &particle_spec =
+      const ir::ParticleSpec &particle_spec =
           particle_spec_registry.GetParticleSpec(particle_spec_name);
 
       // Each ParticleSpec already contains lists of TagClaims, TagChecks,
@@ -159,7 +162,7 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
         }
       }
 
-      amt::InstantiatedParticleSpecFacts particle_spec_facts =
+      ir::InstantiatedParticleSpecFacts particle_spec_facts =
           particle_spec.BulkInstantiate(instantiation_map);
       result_claims.insert(
           result_claims.end(),

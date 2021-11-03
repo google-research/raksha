@@ -275,7 +275,7 @@ class ParseBigManifestTest : public testing::Test {
   }
 
  protected:
-  raksha::xform_to_datalog::arcs_manifest_tree::ParticleSpecRegistry registry_;
+  ir::ParticleSpecRegistry registry_;
   ir::DatalogPrintContext ctxt_;
   ManifestDatalogFacts datalog_facts_;
 };
