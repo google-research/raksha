@@ -18,11 +18,14 @@ RUN apt-get update && apt-get install -y \
     mcpp \
     python \
     sqlite \
+    uuid-runtime \
     wget \
     zlib1g-dev
 
-# Needed for some targets
+# Java is needed for some targets
 RUN apt-get install default-jdk -y --no-install-recommends
 ENV JAVA_HOME /usr/lib/jvm/default-java
+
+# Set up baselisk.
 RUN wget https://github.com/bazelbuild/bazelisk/releases/download/v1.10.1/bazelisk-linux-amd64 \
     -O /usr/local/bin/bazelisk && chmod a+x /usr/local/bin/bazelisk

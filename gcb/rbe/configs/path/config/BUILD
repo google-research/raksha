@@ -42,7 +42,7 @@ platform(
         "@bazel_tools//tools/cpp:clang",
     ],
     exec_properties = {
-        "container-image": "docker://us-central1-docker.pkg.dev/google.com/raksha-ci/gcb-docker-images/gcb@sha256:467c683cb520c53c713ead375508a19efcac4f52635c875be2c35a69422f0486",
+        "container-image": "docker://us-central1-docker.pkg.dev/google.com/raksha-ci/gcb-docker-images/gcb@sha256:69208a81970d0b259154c39711eb2df85548c52cd811419cb04e4e2ad311c773",
         "OSFamily": "Linux",
     },
 )

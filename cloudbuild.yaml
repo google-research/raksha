@@ -17,21 +17,21 @@ steps:
     '.',
   ]
 
+# Push updated Docker image to Container Registry.
+- id: 'push-image'
+  waitFor: ['build-image']
+  name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'push',
+    '${_DOCKER_IMAGE}',
+  ]
+
 # Run presubmit tests.
 - id: 'presubmit'
   waitFor: ['build-image']
   name: '${_DOCKER_IMAGE}'
   entrypoint: 'bash'
   args: ['./gcb/presubmit.sh']
-
-# Push updated Docker image to Container Registry.
-- id: 'push-image'
-  waitFor: ['presubmit']
-  name: 'gcr.io/cloud-builders/docker'
-  args: [
-    'push',
-    '${_DOCKER_IMAGE}',
-  ]
 
 timeout: 3600s # 60 mins, just in case.
 
