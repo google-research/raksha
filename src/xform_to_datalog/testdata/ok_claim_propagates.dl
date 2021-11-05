@@ -11,7 +11,7 @@
 .decl duplicateTestCaseNames(testAspectName: symbol)
 .output duplicateTestCaseNames(IO=stdout)
 
-.output disallowedUsage
+.output disallowedUsage(IO=stdout)
 
 .decl isCheck(check_index: symbol)
 .decl check(check_index: symbol)
