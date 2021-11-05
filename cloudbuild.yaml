@@ -28,12 +28,21 @@ steps:
 
 # Run presubmit tests.
 - id: 'presubmit'
+  secretEnv: ['GITHUB_COMMIT_STATUS_TOKEN']
   waitFor: ['build-image']
   name: '${_DOCKER_IMAGE}'
   entrypoint: 'bash'
   args: ['./gcb/presubmit.sh']
+  env:
+    - 'REPO_NAME=${REPO_NAME}'
+    - 'COMMIT_SHA=${COMMIT_SHA}'
 
 timeout: 3600s # 60 mins, just in case.
 
 substitutions:
   _DOCKER_IMAGE: us-central1-docker.pkg.dev/google.com/raksha-ci/gcb-docker-images/gcb:latest
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/353460796050/secrets/raksha-ci-commit-status-token/versions/latest
+      env: 'GITHUB_COMMIT_STATUS_TOKEN'
