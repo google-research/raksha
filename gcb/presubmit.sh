@@ -15,11 +15,30 @@ post_commit_status() {
   STATUS_CONTEXT=$1
   STATE=$2
   INVOCATION_ID=$3
+  case "${STATE}" in
+    "success")
+      DESCRIPTION="Finished successfully!"
+      ;;
+    "failure")
+      DESCRIPTION="Finished with errors!"
+      ;;
+    "pending")
+      DESCRIPTION="Started..."
+      ;;
+    *)
+      DESCRIPTION=""
+      ;;
+  esac
   TARGET_URL=https://source.cloud.google.com/results/invocations/${INVOCATION_ID}
   curl --user "${GITHUB_COMMIT_STATUS_TOKEN}" -X POST \
     -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/repos/google-research/${REPO_NAME}/statuses/${COMMIT_SHA} \
-    -d "{\"state\": \"${STATE}\", \"target_url\":\"${TARGET_URL}\", \"context\": \"${STATUS_CONTEXT}\"}"
+    -d "{ \
+    \"state\": \"${STATE}\", \
+    \"target_url\":\"${TARGET_URL}\", \
+    \"description\":\"${DESCRIPTION}\", \
+    \"context\": \"${STATUS_CONTEXT}\" \
+    }"
 }
 
 # Run bazel. Post status commit messages before and after.
@@ -43,9 +62,12 @@ bazel_run() {
 #  - Arcs parser and proto works.
 #  - Arcs manifest tests that we do not yet handle parse correctly.
 #  - Arcs manifest examples.
-bazel_run build //third_party/arcs/examples:consume third_party/arcs/proto:manifest_cc_proto \
+bazel_run build \
+  //third_party/arcs/examples:consume \
+  //third_party/arcs/proto:manifest_cc_proto \
   //src/analysis/souffle/tests/arcs_manifest_tests_todo/... \
   //src/analysis/souffle/examples/...
 
 # Run all the tests.
-bazel_run test //src/... ;
+bazel_run test //src/...
+
