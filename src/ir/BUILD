@@ -21,11 +21,18 @@ load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
 
 cc_library(
     name = "ir",
+    srcs = [
+        "particle_spec.cc",
+        "predicate.cc",
+    ],
     hdrs = [
         "datalog_print_context.h",
         "derives_from_claim.h",
         "edge.h",
+        "handle_connection_spec.h",
+        "particle_spec.h",
         "predicate.h",
+        "predicate_arena.h",
         "tag_check.h",
         "tag_claim.h",
     ],
@@ -33,6 +40,7 @@ cc_library(
         ":access_path",
         "//src/common/logging",
         "//src/ir/proto:access_path",
+        "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/hash",
@@ -58,6 +66,13 @@ cc_library(
         "@absl//absl/hash",
         "@absl//absl/strings",
     ],
+)
+
+cc_library(
+    name = "single_use_arena_and_predicate",
+    testonly = True,
+    hdrs = ["single-use-arena-and-predicate.h"],
+    deps = [":ir"],
 )
 
 cc_test(
@@ -195,9 +210,32 @@ cc_test(
     deps = [
         ":ir",
         ":predicate_textproto_to_rule_body_testdata",
+        ":single_use_arena_and_predicate",
         "//src/common/testing:gtest",
         "//src/ir/proto:predicate",
         "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "handle_connection_spec_test",
+    srcs = ["handle_connection_spec_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+        "//src/ir/proto:handle_connection_spec",
+    ],
+)
+
+cc_test(
+    name = "particle_spec_test",
+    srcs = ["particle_spec_test.cc"],
+    deps = [
+        ":ir",
+        ":single_use_arena_and_predicate",
+        "//src/common/testing:gtest",
+        "//src/ir/proto:handle_connection_spec",
+        "//src/ir/proto:particle_spec",
     ],
 )
 

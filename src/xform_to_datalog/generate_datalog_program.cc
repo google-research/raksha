@@ -25,7 +25,7 @@
 #include "absl/flags/usage.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/datalog_print_context.h"
-#include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
+#include "src/ir/particle_spec.h"
 #include "src/xform_to_datalog/authorization_logic_datalog_facts.h"
 #include "src/xform_to_datalog/datalog_facts.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
@@ -86,8 +86,7 @@ int main(int argc, char *argv[]) {
     LOG(ERROR) << "Error parsing the manifest proto " << manifest_filepath;
   }
 
-  raksha::xform_to_datalog::arcs_manifest_tree::ParticleSpecRegistry
-      particle_spec_registry;
+  raksha::ir::ParticleSpecRegistry particle_spec_registry;
   auto manifest_datalog_facts = ManifestDatalogFacts::CreateFromManifestProto(
       manifest_proto, particle_spec_registry);
 

@@ -13,20 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_IR_PROTO_TYPE_H_
-#define SRC_IR_PROTO_TYPE_H_
 
-#include "src/ir/types/type.h"
+#ifndef SRC_IR_PROTO_PARTICLE_SPEC_H_
+#define SRC_IR_PROTO_PARTICLE_SPEC_H_
+
+#include "src/ir/particle_spec.h"
+#include "src/ir/predicate_arena.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
-namespace raksha::ir::types::proto {
+namespace raksha::ir::proto {
 
-// Decodes the given `type_proto` and returns Type as a unique_ptr.
-std::unique_ptr<Type> Decode(const arcs::TypeProto &type_proto);
+const ParticleSpec *Decode(
+    ParticleSpecRegistry &registry, std::unique_ptr<PredicateArena> arena,
+    const arcs::ParticleSpecProto &proto);
 
-// Encodes the given `type` in an arcs::TypeProto.
-arcs::TypeProto Encode(const Type& type);
+}  // namespace raksha::ir::proto
 
-}  // namespace raksha::ir::types::proto
-
-#endif  // SRC_IR_PROTO_TYPE_H_
+#endif  // SRC_IR_PROTO_PARTICLE_SPEC_H_

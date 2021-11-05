@@ -50,11 +50,11 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
-.output testFails
+.output testFails(IO=stdout)
 .decl allTests(check_index: symbol)
-.output allTests
+.output allTests(IO=stdout)
 .decl duplicateTestCaseNames(testAspectName: symbol)
-.output duplicateTestCaseNames
+.output duplicateTestCaseNames(IO=stdout)
 
 .output disallowedUsage(IO=stdout)
 
@@ -129,11 +129,11 @@ grounded_dummy("dummy_var").
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
-.output testFails
+.output testFails(IO=stdout)
 .decl allTests(check_index: symbol)
-.output allTests
+.output allTests(IO=stdout)
 .decl duplicateTestCaseNames(testAspectName: symbol)
-.output duplicateTestCaseNames
+.output duplicateTestCaseNames(IO=stdout)
 
 .output disallowedUsage(IO=stdout)
 
