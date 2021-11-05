@@ -6,10 +6,8 @@ REMOTE_INSTANCE_NAME="projects/google.com:raksha-ci/instances/raksha_rbe_instanc
 RESULT_UI="--bes_backend=buildeventservice.googleapis.com --bes_timeout=60s \
            --bes_results_url=https://source.cloud.google.com/results/invocations/ \
            --project_id=google.com:raksha-ci"
-BAZELISK="bazelisk"
 BAZEL_CONFIG="--config=remote --remote_instance_name=${REMOTE_INSTANCE_NAME} ${RESULT_UI}"
-BAZEL_TEST="bazelisk test --config=remote --remote_instance_name=${REMOTE_INSTANCE_NAME} ${RESULT_UI}"
-BAZEL_BUILD="bazelisk build --config=remote --remote_instance_name=${REMOTE_INSTANCE_NAME} ${RESULT_UI}"
+BAZELISK="bazelisk"
 
 post_commit_status() {
   STATUS_CONTEXT=$1
@@ -70,4 +68,3 @@ bazel_run build \
 
 # Run all the tests.
 bazel_run test //src/...
-
