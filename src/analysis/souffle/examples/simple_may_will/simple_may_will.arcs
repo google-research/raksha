@@ -1,10 +1,10 @@
 particle P1
  foo: writes Foo {}
- claim foo is userSelection
+ claim foo is rawVideo 
 particle P2
  bar: reads Foo {}
  foo: writes Foo {}
- check bar is userSelection
+ check bar is rawVideo 
 particle P3
  bar: reads Foo {}
 recipe R

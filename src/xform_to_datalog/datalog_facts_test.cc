@@ -56,7 +56,7 @@ INSTANTIATE_TEST_SUITE_P(
 .decl duplicateTestCaseNames(testAspectName: symbol)
 .output duplicateTestCaseNames
 
-.output disallowedUsage
+.output disallowedUsage(IO=stdout)
 
 .decl isCheck(check_index: symbol)
 .decl check(check_index: symbol)
@@ -135,7 +135,7 @@ grounded_dummy("dummy_var").
 .decl duplicateTestCaseNames(testAspectName: symbol)
 .output duplicateTestCaseNames
 
-.output disallowedUsage
+.output disallowedUsage(IO=stdout)
 
 .decl isCheck(check_index: symbol)
 .decl check(check_index: symbol)

@@ -16,9 +16,9 @@
 //-------------------------------------------------------------------------------
 
 "EndUser" says {
-    ownsTag("EndUser", "userSelection").
-    "P1" canSay hasTag(PathX, "userSelection") :- isAccessPath(PathX).
-    may("P2", "doLocalComputation", "userSelection").
+    ownsTag("EndUser", "rawVideo").
+    "P1" canSay hasTag(PathX, "rawVideo") :- isAccessPath(PathX).
+    may("P2", "doLocalComputation", "rawVideo").
 }
 
 // It would be better if we had control over the manifest syntax and could just 

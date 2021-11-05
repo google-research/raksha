@@ -3,8 +3,6 @@
 
 #include "taint.dl"
 
-// .decl hasInputPath(particle: Principal, path: AccessPath)
-
 // this means `speaker` grants `actor` permission to do `usage` with `tag` 
 // (where `tag` is owned by `speaker`)
 .decl saysMay(speaker: Principal, actor: Principal, usage: symbol, tag: Tag)
@@ -21,17 +19,16 @@
 //          `ownsTag(Q, <TAG>)`
 //          `Q says P may <RELATION> using <TAG>`
 
-.decl permittedUsage(actor: Principal, tag: Tag, usage: symbol)
+.decl permittedUsage(actor: Principal, usage: symbol, tag: Tag)
 
-permittedUsage(consumer, tag, usage) :- ownsTag(owner, tag),
+permittedUsage(consumer, usage, tag) :- ownsTag(owner, tag),
     saysMay(owner, consumer, usage, tag).
 
 .decl disallowedUsage(dataConsumer: Principal, usage: symbol, tag: Tag)
 
 disallowedUsage(dataConsumer, usage, tag) :-
     saysWill(dataConsumer, usage, path), mayHaveTag(path, tag),
-    !permittedUsage(dataConsumer, tag, usage),
-    isPrincipal(dataOwner).
+    !permittedUsage(dataConsumer, usage, tag).
 
 // This is a 0-ary relation that says all data usages are allowed. 
 // Because souffle does not have 0-ary relations, it uses one dummy variable.

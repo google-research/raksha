@@ -67,7 +67,7 @@ class DatalogFacts {
 .decl duplicateTestCaseNames(testAspectName: symbol)
 .output duplicateTestCaseNames
 
-.output disallowedUsage
+.output disallowedUsage(IO=stdout)
 
 .decl isCheck(check_index: symbol)
 .decl check(check_index: symbol)
