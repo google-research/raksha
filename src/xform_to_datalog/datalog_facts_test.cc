@@ -155,7 +155,7 @@ saysRemoveTag(x, y, z) :- says_removeTag(x, y, z).
 // Manifest
 
 // Claims:
-claimHasTag("particle", "recipe.particle.out", "tag").
+saysHasTag("particle", "recipe.particle.out", "tag").
 
 // Checks:
 

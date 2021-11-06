@@ -82,7 +82,7 @@ static std::tuple<ManifestDatalogFacts, std::string>
            ir::Edge(kHandleConnectionOutAccessPath, kHandleH2AccessPath)}),
       R"(
 // Claims:
-claimHasTag("particle", "recipe.particle.out", "tag").
+saysHasTag("particle", "recipe.particle.out", "tag").
 
 // Checks:
 isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("recipe.particle.in", "tag2").
@@ -281,12 +281,12 @@ class ParseBigManifestTest : public testing::Test {
 };
 
 static const std::string kExpectedClaimStrings[] = {
-    R"(claimHasTag("PS1", "NamedR.PS1#0.out_handle.field1", "tag1").)",
-    R"(claimHasTag("PS1", "NamedR.PS1#1.out_handle.field1", "tag1").)",
-    R"(claimHasTag("PS2", "NamedR.PS2#2.out_handle.field1", "tag3").)",
-    R"(claimHasTag("PS1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", "tag1").)",
-    R"(claimHasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "tag3").)",
-    R"(claimHasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "tag3").)",
+    R"(saysHasTag("PS1", "NamedR.PS1#0.out_handle.field1", "tag1").)",
+    R"(saysHasTag("PS1", "NamedR.PS1#1.out_handle.field1", "tag1").)",
+    R"(saysHasTag("PS2", "NamedR.PS2#2.out_handle.field1", "tag3").)",
+    R"(saysHasTag("PS1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", "tag1").)",
+    R"(saysHasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "tag3").)",
+    R"(saysHasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "tag3").)",
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {

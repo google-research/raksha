@@ -92,13 +92,12 @@ mayHaveTag(tgt, tag) :-
 // `isObject(..)`) whenever they are mentioned in other rules.
 
 // Any Principal used in a claim is in the universe of isPrincipal.
-isPrincipal(principal) :- claimHasTag(principal, _, _).
+isPrincipal(principal) :- saysHasTag(principal, _, _).
 
-isAccessPath(path) :- claimHasTag(_, path, _).
 isAccessPath(path) :- saysHasTag(_, path, _).
 
 // Symbols used in hasTag or mayHaveTag are tags
-isTag(tag) :- claimHasTag(_, _, tag).
+isTag(tag) :- saysHasTag(_, _, tag).
 
 // A pair of (base, member) is in this set if the base access path is a non-trivial subpath of the
 // member access path.
