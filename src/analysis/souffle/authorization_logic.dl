@@ -32,13 +32,19 @@
 
 // The `speaker` says that `delegatee` is allowed to indicate that a `path` does
 // not have a `tag`.
-// .decl says_canSay_removeTag(
-//   speaker: Principal, delegatee: Principal, path: AccessPath, tag: Tag)
+.decl says_canSay_removeTag(
+  speaker: Principal, delegatee: Principal, path: AccessPath, owner:Principal, tag: Tag)
 
 // Indicates that a speaker is allowed to say removeTag.
-.decl canSayRemoveTag(speaker: Principal, path: AccessPath, tag: Tag)
+.decl canSayRemoveTag(speaker: Principal, path: AccessPath, owner: Principal, tag: Tag)
 
 .decl isPrincipal(principal: Principal)
+
+// This party is the owner of a taint Tag (they have the privilege to remove
+// it).
+.decl ownsAccessPath(owner: Principal, path: AccessPath)
+
+.decl saysOwnsAccessPath(speaker: Principal, owner: Principal, path: AccessPath)
 
 // This party is the owner of a taint Tag (they have the privilege to remove
 // it).
@@ -51,10 +57,13 @@
 
 // The `speaker` says that the `delegatee` can say that `path` has `tag`.
 // .decl says_canSay_hasTag(
-//   speaker: Principal, delegatee: Principal, path: AccessPath, tag: Tag)
+//   speaker: Principal, delegatee: Principal, path: AccessPath, owner: Principal, tag: Tag)
 
-// // Indicates that a speaker is allowed to say a path has a particular tag.
-// .decl canSayHasTag(speaker: Principal, path: AccessPath, tag: Tag)
+// Indicates that a speaker is allowed to say a path has a particular tag.
+.decl canSayHasTag(speaker: Principal, path: AccessPath, owner: Principal, tag: Tag)
+
+// Rules for linking generated relations with the ones in the dl program.
+.decl says_ownsAccessPath(speaker: Principal, owner: Principal, path: AccessPath)
 
 // // Indicates that a `tag` is definitely present upon a `path` because a speaker
 // // delegated to by the owner said so.

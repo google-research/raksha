@@ -218,7 +218,8 @@ class TagPresence : public Predicate {
   // The tag presence just turns into a check for the tag on the access_path
   // in the mayHaveTag relation.
   std::string ToDatalogRuleBody(const AccessPath &access_path) const override {
-    constexpr absl::string_view kFormatStr = R"(mayHaveTag("%s", "%s"))";
+    // TODO(bgogul): Check needs to be mapped with a tag owner.
+    constexpr absl::string_view kFormatStr = R"(mayHaveTag("%s", _, "%s"))";
     return absl::StrFormat(kFormatStr, access_path.ToString(), tag_);
   }
 

@@ -90,6 +90,11 @@
 //      permission for edge removal indirectly by granting permission to remove
 //      tags (abstract representations of their data).
 
+
+ownsAccessPath(principal, path) :- says_ownsAccessPath(principal, principal, path).
+ownsAccessPath(principal, tgt) :-
+  resolvedEdge(src, tgt), ownsAccessPath(principal, src).
+
 says_removeTag(principal, midpoint, principal, tag) :-
   isTag(tag), claimNotEdge(principal, src, tgt), edgeToMidpointAccessPath(src, tgt, midpoint).
 
