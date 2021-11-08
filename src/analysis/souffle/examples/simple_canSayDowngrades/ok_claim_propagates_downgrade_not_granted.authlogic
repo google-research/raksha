@@ -1,2 +1,2 @@
 "EndUser" says ownsTag("EndUser", "userSelection").
-"EndUser" says "P1" canSay hasTag(accessPathX, "userSelection") :- isAccessPath(accessPathX).
+"EndUser" says "P1" canSay hasTag(accessPathX, "EndUser", "userSelection") :- isAccessPath(accessPathX).
