@@ -93,10 +93,10 @@
 
 ownsAccessPath(principal, path) :- says_ownsAccessPath(principal, principal, path).
 ownsAccessPath(principal, tgt) :-
-  resolvedEdge(src, tgt), ownsAccessPath(principal, src).
+  resolvedEdge(principal, src, tgt), ownsAccessPath(principal, src).
 
-says_removeTag(principal, midpoint, principal, tag) :-
-  isTag(tag), claimNotEdge(principal, src, tgt), edgeToMidpointAccessPath(src, tgt, midpoint).
+// says_removeTag(principal, midpoint, principal, tag) :-
+//   isTag(tag), claimNotEdge(principal, src, tgt), edgeToMidpointAccessPath(src, tgt, midpoint).
 
 removeTag(path, owner, tag) :-
    saysRemoveTag(owner, path, owner, tag).
@@ -106,7 +106,7 @@ hasTag(path, owner, tag) :- saysHasTag(owner, path, owner, tag).
 mayHaveTag(tgt, owner, tag) :- hasTag(tgt, owner, tag).
 
 mayHaveTag(tgt, owner, tag) :-
-    resolvedEdge(src, tgt), mayHaveTag(src, owner, tag), !removeTag(tgt, owner, tag).
+    resolvedEdge(owner, src, tgt), mayHaveTag(src, owner, tag), !removeTag(tgt, owner, tag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules

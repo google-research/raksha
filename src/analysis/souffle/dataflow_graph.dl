@@ -52,7 +52,7 @@
 // to the tgt. That allows us to effectively eliminate edges that are the
 // subject of a claimNotEdge from the dataflow graph by eliminating all tags
 // from the midway point. Paths are defined in terms of resolvedEdges.
-.decl resolvedEdge(src: AccessPath, tgt: AccessPath)
+.decl resolvedEdge(for: Principal, src: AccessPath, tgt: AccessPath)
 
 // A direct or transitive data flow path.
 .decl path(src: AccessPath, tgt: AccessPath)
@@ -62,23 +62,28 @@
 //-----------------------------------------------------------------------------
 // Generate a midpoint access path for each edge that is the subject of a
 // claimNotEdge from any principal.
-edgeToMidpointAccessPath(src, tgt, cat("##midpoint_", to_string($))) :-
-  edge(src, tgt), claimNotEdge(_, src, tgt).
+// edgeToMidpointAccessPath(src, tgt, cat("##midpoint_", to_string($))) :-
+//   edge(src, tgt), claimNotEdge(_, src, tgt).
 
-// Generate inner edges to and from that midpoint for each edge with a midpoint.
-resolvedEdge(src, midpoint), resolvedEdge(midpoint, tgt) :-
-  edgeToMidpointAccessPath(src, tgt, midpoint).
+// // Generate inner edges to and from that midpoint for each edge with a midpoint.
+// resolvedEdge(src, midpoint), resolvedEdge(midpoint, tgt) :-
+//   edgeToMidpointAccessPath(src, tgt, midpoint).
 
-// For edges for which a midpoint was not generated, generate an resolvedEdge
-// corresponding to the original edge.
-resolvedEdge(src, tgt) :- edge(src, tgt), !edgeToMidpointAccessPath(src, tgt, _).
+// // For edges for which a midpoint was not generated, generate an resolvedEdge
+// // corresponding to the original edge.
+// resolvedEdge(src, tgt) :- edge(src, tgt), !edgeToMidpointAccessPath(src, tgt, _).
+resolvedEdge(principal, src, tgt) :-
+   isPrincipal(principal),
+   edge(src, tgt),
+   !claimNotEdge(principal, src, tgt).
 
 // Transitive paths
-path(from, to) :- resolvedEdge(from, to).
-path(from, to) :- resolvedEdge(from, intermediate), path(intermediate, to).
+//TODO(bgogul): We don't use these at all.
+path(from, to) :- resolvedEdge(_, from, to).
+path(from, to) :- resolvedEdge(_, from, intermediate), path(intermediate, to).
 
 // Symbols used in resolvedEdges are access paths
-isAccessPath(x) :- resolvedEdge(x, _).
-isAccessPath(y) :- resolvedEdge(_, y).
+isAccessPath(x) :- resolvedEdge(_, x, _).
+isAccessPath(y) :- resolvedEdge(_, _, y).
 
 #endif // SRC_ANALYSIS_SOUFFLE_DATAFLOW_GRAPH_DL_
