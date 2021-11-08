@@ -34,32 +34,32 @@ predicate_textproto_to_rule_body_format[] = {
 
     // ap is tag1
     { R"(label: { semantic_tag: "tag1"})",
-      R"(mayHaveTag("$0", "tag1"))" },
+      R"(mayHaveTag("$0", _, "tag1"))" },
 
     // ap is tag1 and is tag2
     { R"(
 and: {
   conjunct0: { label: { semantic_tag: "tag1"} }
   conjunct1: { label: { semantic_tag: "tag2"} } })",
-  R"(((mayHaveTag("$0", "tag1")), (mayHaveTag("$0", "tag2"))))"},
+  R"(((mayHaveTag("$0", _, "tag1")), (mayHaveTag("$0", _, "tag2"))))"},
 
   // ap is tag1 or is tag2
   { R"(
 or: {
   disjunct0: { label: { semantic_tag: "tag1"} }
   disjunct1: { label: { semantic_tag: "tag2"} } })",
-  R"(((mayHaveTag("$0", "tag1")); (mayHaveTag("$0", "tag2"))))"},
+  R"(((mayHaveTag("$0", _, "tag1")); (mayHaveTag("$0", _, "tag2"))))"},
 
   // ap is not tag1
   { R"(not: { predicate: { label: { semantic_tag: "tag1"} } })",
-    R"(!(mayHaveTag("$0", "tag1")))"},
+    R"(!(mayHaveTag("$0", _, "tag1")))"},
 
   // ap is tag1 implies is tag2
   { R"(
 implies: {
   antecedent: { label: { semantic_tag: "tag1"} }
   consequent: { label: { semantic_tag: "tag2"} } })",
-     R"(!(mayHaveTag("$0", "tag1")); ((mayHaveTag("$0", "tag1")), (mayHaveTag("$0", "tag2"))))"
+     R"(!(mayHaveTag("$0", _, "tag1")); ((mayHaveTag("$0", _, "tag1")), (mayHaveTag("$0", _, "tag2"))))"
   },
 
   // ap is tag1 and (is tag2 or is tag3)
@@ -69,7 +69,7 @@ and: {
   conjunct1: {  or: {
     disjunct0: { label: { semantic_tag: "tag2"} }
     disjunct1: { label: { semantic_tag: "tag3"} } } } })",
-  R"(((mayHaveTag("$0", "tag1")), (((mayHaveTag("$0", "tag2")); (mayHaveTag("$0", "tag3"))))))"},
+  R"(((mayHaveTag("$0", _, "tag1")), (((mayHaveTag("$0", _, "tag2")); (mayHaveTag("$0", _, "tag3"))))))"},
 
   // ap (is tag1 or tag2) and is tag3
   { R"(
@@ -79,7 +79,7 @@ and: {
     disjunct1: { label: { semantic_tag: "tag2"} } } }
   conjunct1: { label: { semantic_tag: "tag3"} } }
 )",
-  R"(((((mayHaveTag("$0", "tag1")); (mayHaveTag("$0", "tag2")))), (mayHaveTag("$0", "tag3"))))"},
+  R"(((((mayHaveTag("$0", _, "tag1")); (mayHaveTag("$0", _, "tag2")))), (mayHaveTag("$0", _, "tag3"))))"},
 
   // ap is tag1 or (is tag2 and is tag3)
   { R"(
@@ -88,7 +88,7 @@ or: {
   disjunct1: {  and: {
     conjunct0: { label: { semantic_tag: "tag2"} }
     conjunct1: { label: { semantic_tag: "tag3"} } } } })",
-  R"(((mayHaveTag("$0", "tag1")); (((mayHaveTag("$0", "tag2")), (mayHaveTag("$0", "tag3"))))))"},
+  R"(((mayHaveTag("$0", _, "tag1")); (((mayHaveTag("$0", _, "tag2")), (mayHaveTag("$0", _, "tag3"))))))"},
 
   // ap (is tag1 or tag2) and is tag3.
   { R"(
@@ -98,7 +98,7 @@ or: {
     conjunct1: { label: { semantic_tag: "tag2"} } } }
   disjunct1: { label: { semantic_tag: "tag3"} } }
 )",
-  R"(((((mayHaveTag("$0", "tag1")), (mayHaveTag("$0", "tag2")))); (mayHaveTag("$0", "tag3"))))"},
+  R"(((((mayHaveTag("$0", _, "tag1")), (mayHaveTag("$0", _, "tag2")))); (mayHaveTag("$0", _, "tag3"))))"},
 
   // ap (is tag1 implies is tag2) implies (is tag3 implies is tag4)
   { R"(
@@ -115,7 +115,7 @@ implies: {
       consequent: { label: { semantic_tag: "tag4"} }
     }
   } })",
-     R"(!(!(mayHaveTag("$0", "tag1")); ((mayHaveTag("$0", "tag1")), (mayHaveTag("$0", "tag2")))); ((!(mayHaveTag("$0", "tag1")); ((mayHaveTag("$0", "tag1")), (mayHaveTag("$0", "tag2")))), (!(mayHaveTag("$0", "tag3")); ((mayHaveTag("$0", "tag3")), (mayHaveTag("$0", "tag4"))))))" }
+     R"(!(!(mayHaveTag("$0", _, "tag1")); ((mayHaveTag("$0", _, "tag1")), (mayHaveTag("$0", _, "tag2")))); ((!(mayHaveTag("$0", _, "tag1")); ((mayHaveTag("$0", _, "tag1")), (mayHaveTag("$0", _, "tag2")))), (!(mayHaveTag("$0", _, "tag3")); ((mayHaveTag("$0", _, "tag3")), (mayHaveTag("$0", _, "tag4"))))))" }
 };
 }  // namespace raksha::ir
 
