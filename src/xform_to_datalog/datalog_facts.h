@@ -99,8 +99,8 @@ saysCanSayRemoveTag(w, x, y, z) :- says_canSay_removeTag(w, x, y, z).
 .decl says_removeTag(speaker: Principal, path: AccessPath, tag: Tag)
 saysRemoveTag(x, y, z) :- says_removeTag(x, y, z).
 
-.decl says_may(speaker: Principal, actor: Principal, usage: symbol, tag: Tag)
-.decl says_will(speaker: Principal, usage: symbol, path: AccessPath)
+.decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
+.decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
 saysMay(w, x, y, z) :- says_may(w, x, y, z).
 saysWill(w, x, y) :- says_will(w, x, y).
 
