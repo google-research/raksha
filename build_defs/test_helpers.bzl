@@ -58,8 +58,6 @@ def extracted_datalog_string_test(
         src = name + "_dl",
         testonly = True,
         included_dl_scripts = [
-            "//src/analysis/souffle:access_path.dl",
-            "//src/analysis/souffle:flat_graph_ir.dl",
             "//src/analysis/souffle:authorization_logic.dl",
             "//src/analysis/souffle:dataflow_graph.dl",
             "//src/analysis/souffle:taint.dl",
