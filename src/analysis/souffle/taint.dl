@@ -17,7 +17,6 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_TAINT_DL_
 #define SRC_ANALYSIS_SOUFFLE_TAINT_DL_
 
-#include "access_path.dl"
 #include "authorization_logic.dl"
 #include "dataflow_graph.dl"
 #include "tags.dl"

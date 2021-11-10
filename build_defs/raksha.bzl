@@ -88,8 +88,6 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
         name = souffle_dl_cpp_target_name,
         src = datalog_target,
         included_dl_scripts = [
-            "//src/analysis/souffle:access_path.dl",
-            "//src/analysis/souffle:flat_graph_ir.dl",
             "//src/analysis/souffle:authorization_logic.dl",
             "//src/analysis/souffle:dataflow_graph.dl",
             "//src/analysis/souffle:taint.dl",
