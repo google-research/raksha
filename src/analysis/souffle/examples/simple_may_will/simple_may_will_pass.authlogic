@@ -23,9 +23,11 @@
 
 // It would be better if we had control over the manifest syntax and could just 
 // extend it so we could include:
-//
-// particle P2
-//  
+// ```
+// particle P2:
+//      will ("doLocalComputation") foo
+// ```
+// or similar, but the equivalent auth logic (for the once instance) is:
 "P2" says {
     will("doLocalComputation", "R.P2#1.foo").
 }
