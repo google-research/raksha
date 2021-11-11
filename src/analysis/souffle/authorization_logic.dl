@@ -46,9 +46,7 @@
 
 .decl saysOwnsTag(speaker: Principal, owner: Principal, tag: Tag)
 
-// claimHasTag and saysHasTag are synonyms. They indicate that the `speaker`
-// claims that `path` definitely has `tag` taint.
-.decl claimHasTag(speaker: Principal, path: AccessPath, tag: Tag)
+// The `speaker` says that `path` definitely has `tag` taint.
 .decl saysHasTag(speaker: Principal, path: AccessPath, tag: Tag)
 
 // The `speaker` says that the `delegatee` can say that `path` has `tag`.
@@ -84,8 +82,6 @@ canSayRemoveTag(speaker, path, tag) :-
 
 removeTag(path, tag) :-
     canSayRemoveTag(speaker, path, tag), saysRemoveTag(speaker, path, tag).
-
-saysHasTag(principal, path, tag) :- claimHasTag(principal, path, tag).
 
 // The owner can say the tag is present anywhere.
 canSayHasTag(speaker, path, tag) :- isAccessPath(path), ownsTag(speaker, tag).
