@@ -25,6 +25,11 @@
 // Relation Declarations
 //-----------------------------------------------------------------------------
 
+// Indicates that an access path definitely has a tag. Differs from mayHaveTag
+// below in that mayHaveTag indicates only that it is possible that an
+// accessPath has a tag.
+.decl hasTag(accessPath: AccessPath, owner: Principal, tag: Tag)
+
 // Declares that `accessPath` may have been tainted with `tag`.
 // If false, `accessPath` *definitely* does not have `tag` taint at runtime.
 // If true, `accessPath` may have the `tag` taint at runtime.
@@ -32,7 +37,15 @@
 // indirection in which accessPaths have IFCLabels and just IFCLabels have Tags.
 // In this formalization, accessPaths also act as IFCLabels (in the sense that
 // they have Tags).
-.decl mayHaveTag(accessPath: AccessPath, tag: Tag)
+.decl mayHaveTag(accessPath: AccessPath, owner: Principal, tag: Tag)
+
+// The tag for some accessPath is actually removed (by taking into consideration
+// the privileges of a party trying to remove it, and as a result of that party
+// deciding to remove it). Because here IFC labels are sets of tags (ordered
+// by the subset or equals relation), removing a tag from the set corresponds to
+// a downgrade by making set of tags on the access path "lower" in the order.
+.decl removeTag(path: AccessPath, owner: Principal, tag: Tag)
+
 
 // Manifests can produce base facts of this form, where usually the principal
 // is a particle (and this fact is entered by a code reviewer with no knowledge
@@ -77,13 +90,18 @@
 //      permission for edge removal indirectly by granting permission to remove
 //      tags (abstract representations of their data).
 
-says_removeTag(principal, midpoint, tag) :-
+says_removeTag(principal, midpoint, principal, tag) :-
   isTag(tag), claimNotEdge(principal, src, tgt), edgeToMidpointAccessPath(src, tgt, midpoint).
 
-mayHaveTag(tgt, tag) :- hasTag(tgt, tag).
+removeTag(path, owner, tag) :-
+   saysRemoveTag(owner, path, owner, tag).
 
-mayHaveTag(tgt, tag) :-
-    resolvedEdge(src, tgt), mayHaveTag(src, tag), !removeTag(tgt, tag).
+hasTag(path, owner, tag) :- saysHasTag(owner, path, owner, tag).
+
+mayHaveTag(tgt, owner, tag) :- hasTag(tgt, owner, tag).
+
+mayHaveTag(tgt, owner, tag) :-
+    resolvedEdge(src, tgt), mayHaveTag(src, owner, tag), !removeTag(tgt, owner, tag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
@@ -92,12 +110,12 @@ mayHaveTag(tgt, tag) :-
 // `isObject(..)`) whenever they are mentioned in other rules.
 
 // Any Principal used in a claim is in the universe of isPrincipal.
-isPrincipal(principal) :- says_hasTag(principal, _, _).
+isPrincipal(principal) :- says_hasTag(principal, _, _, _).
 
-isAccessPath(path) :- says_hasTag(_, path, _).
+isAccessPath(path) :- says_hasTag(_, path, _, _).
 
 // Symbols used in hasTag or mayHaveTag are tags
-isTag(tag) :- says_hasTag(_, _, tag).
+isTag(tag) :- says_hasTag(_, _, _, tag).
 
 // A pair of (base, member) is in this set if the base access path is a non-trivial subpath of the
 // member access path.
@@ -113,10 +131,10 @@ isMemberOf(base, member) :-
 // An access path may have a tag if some subpath to a member field has that tag. This allows
 // checking for some inner node in the access path whether any leaf node of that node might have
 // a particular tag.
-mayHaveTag(base, tag) :-
+mayHaveTag(base, owner, tag) :-
   isAccessPath(base),
   isAccessPath(member),
-  mayHaveTag(member, tag),
+  mayHaveTag(member,owner, tag),
   isMemberOf(base, member).
 
 #endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_
