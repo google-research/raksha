@@ -79,7 +79,7 @@
   "UserB" hasPrivacyPreference("audio", "only_store_transcript").
   // UserB says that disputes should be handled by meeting the requests of all 
   // people in the room.
-  "UserA" setsPrivacyResolution("audio", "meet_requests").
+  "UserB" setsPrivacyResolution("audio", "meet_requests").
 
   // User B gives the policy principal the right to decide that any action can 
   // be done with UserB's data and to transform this data in any way.
