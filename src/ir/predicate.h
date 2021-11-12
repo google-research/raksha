@@ -17,6 +17,8 @@
 #ifndef SRC_IR_PREDICATES_PREDICATE_H_
 #define SRC_IR_PREDICATES_PREDICATE_H_
 
+#include <optional>
+
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "src/ir/access_path.h"
@@ -49,6 +51,8 @@ class Predicate {
   // Turns this predicate into a rule body that can be used for checking if
   // the given condition holds.
   virtual std::string ToDatalogRuleBody(const AccessPath &ap) const = 0;
+  virtual std::optional<std::string> ToGroundingRules(
+      const AccessPath &ap) const = 0;
   virtual PredicateKind GetPredicateKind() const = 0;
   virtual bool operator==(Predicate const &other) const = 0;
 
@@ -81,6 +85,16 @@ class And : public Predicate {
   static PredicateKind GetKind() { return kAnd; }
 
   PredicateKind GetPredicateKind() const override { return GetKind(); }
+
+  std::optional<std::string> ToGroundingRules(
+      const AccessPath &ap) const override {
+    auto lhs_rules = lhs_->ToGroundingRules(ap);
+    auto rhs_rules = rhs_->ToGroundingRules(ap);
+    std::vector<absl::string_view> rules;
+    if (lhs_rules) { rules.push_back(*lhs_rules); }
+    if (rhs_rules) { rules.push_back(*rhs_rules); }
+    return absl::StrJoin(rules, ",");
+  }
 
   bool operator==(const Predicate &other) const override {
     const And *other_and = Predicate::DynCast<And>(other);
@@ -123,6 +137,16 @@ class Implies : public Predicate {
         consequent_->ToDatalogRuleBody(ap));
   }
 
+  std::optional<std::string> ToGroundingRules(
+      const AccessPath &ap) const override {
+    auto antecedent_rules = antecedent_->ToGroundingRules(ap);
+    auto consequent_rules = consequent_->ToGroundingRules(ap);
+    std::vector<absl::string_view> rules;
+    if (antecedent_rules) { rules.push_back(*antecedent_rules); }
+    if (consequent_rules) { rules.push_back(*consequent_rules); }
+    return absl::StrJoin(rules, ",");
+  }
+
   static PredicateKind GetKind() {
     return PredicateKind::kImplies;
   }
@@ -152,9 +176,22 @@ class Not : public Predicate {
   virtual ~Not() { }
 
   std::string ToDatalogRuleBody(const AccessPath &ap) const override {
-    constexpr absl::string_view kFormatString = R"(!(%s))";
-    return absl::StrFormat(
-        kFormatString, negated_predicate_->ToDatalogRuleBody(ap));
+    std::optional<std::string> grounding_rules =
+        negated_predicate_->ToGroundingRules(ap);
+    if (grounding_rules == std::nullopt) {
+      constexpr absl::string_view kFormatString = R"(!(%s))";
+      return absl::StrFormat(
+          kFormatString, negated_predicate_->ToDatalogRuleBody(ap));
+    } else {
+      constexpr absl::string_view kFormatString = R"(%s, !(%s))";
+      return absl::StrFormat(kFormatString, *grounding_rules,
+                             negated_predicate_->ToDatalogRuleBody(ap));
+    }
+  }
+
+  std::optional<std::string> ToGroundingRules(
+      const AccessPath &ap) const override {
+    return std::nullopt;
   }
 
   static PredicateKind GetKind() {
@@ -186,6 +223,16 @@ class Or : public Predicate {
     constexpr absl::string_view kFormatString = R"(((%s); (%s)))";
     return absl::StrFormat(kFormatString, lhs_->ToDatalogRuleBody(ap),
                            rhs_->ToDatalogRuleBody(ap));
+  }
+
+  std::optional<std::string> ToGroundingRules(
+      const AccessPath &ap) const override {
+    auto lhs_rules = lhs_->ToGroundingRules(ap);
+    auto rhs_rules = rhs_->ToGroundingRules(ap);
+    std::vector<absl::string_view> rules;
+    if (lhs_rules) { rules.push_back(*lhs_rules); }
+    if (rhs_rules) { rules.push_back(*rhs_rules); }
+    return absl::StrJoin(rules, ",");
   }
 
   static PredicateKind GetKind() {
@@ -221,6 +268,11 @@ class TagPresence : public Predicate {
     // TODO(bgogul): Check needs to be mapped with a tag owner.
     constexpr absl::string_view kFormatStr = R"(mayHaveTag("%s", _, "%s"))";
     return absl::StrFormat(kFormatStr, access_path.ToString(), tag_);
+  }
+
+  std::optional<std::string> ToGroundingRules(
+      const AccessPath &ap) const override {
+    return "isPrincipal(owner)";
   }
 
   static PredicateKind GetKind() {
