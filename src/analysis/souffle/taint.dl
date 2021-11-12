@@ -56,47 +56,9 @@
 // Rules
 //-----------------------------------------------------------------------------
 
-// This rule is meant to support the functionality of removing edges from
-// manifests:
-//      - that clearly does not introduce an unsafe escape hatch that could
-//      break policies (because it does not introduce removeTag that would not
-//      otherwise be possible).
-//      - without data owners needing to know anything about the application
-//      structure
-//      - without app behavior specification writers needing to know anything
-//      about the taint analysis or the tags that might appear on a handle
-
-
-// claimNotEdge(p, src, tgt) is an _attempt_ to remove an edge from the
-// analysis (by principal p)
-// says_removeTag(p, path, tgt) is an _attempt_ to remove just one tag
-// from a path (by principal p).
-//
-// The rule for removeTag(p, t) in authorization_logic.dl describes when
-// removing a tag is "safe" and the removal really happens (by consulting the
-// owners).
-//
-// Because the analysis propagates the tags on source edges to dest edges, it is safe
-// to remove an edge when ALL of the tags on the source edge can be removed.
-// However, we do not want to interfere with other edges that may flow from
-// that source path. Instead, we remove all of the tags on the source from the
-// midpoint access path we add in the middle of each edge. This rule populates a
-// request to remove a tag on the edge midpoint.
-//      - it is safe because these requests are only accepted if they would
-//      normally be by the removeTag(_, _) rule
-//      - it does not require the manifest writer to know anything about the
-//      tags in the analysis
-//      - data owners do not need to know about paths, and they will grant
-//      permission for edge removal indirectly by granting permission to remove
-//      tags (abstract representations of their data).
-
-
 ownsAccessPath(principal, path) :- says_ownsAccessPath(principal, principal, path).
 ownsAccessPath(principal, tgt) :-
   resolvedEdge(principal, src, tgt), ownsAccessPath(principal, src).
-
-// says_removeTag(principal, midpoint, principal, tag) :-
-//   isTag(tag), claimNotEdge(principal, src, tgt), edgeToMidpointAccessPath(src, tgt, midpoint).
 
 removeTag(path, owner, tag) :-
    says_removeTag(owner, path, owner, tag).

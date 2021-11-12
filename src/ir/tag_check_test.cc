@@ -14,20 +14,20 @@ namespace raksha::ir {
 class TagCheckToDatalogWithRootTest :
     public testing::TestWithParam<
       std::tuple<
-        std::tuple<std::string, absl::ParsedFormat<'s'>>, AccessPathRoot>>
+        std::tuple<std::string, absl::ParsedFormat<'s', 's'>>, AccessPathRoot>>
       {};
 
 TEST_P(TagCheckToDatalogWithRootTest, TagCheckToDatalogWithRootTest) {
-  const std::tuple<std::string, absl::ParsedFormat<'s'>>
+  const std::tuple<std::string, absl::ParsedFormat<'s', 's'>>
       &textproto_format_string_pair = std::get<0>(GetParam());
   const std::string &check_textproto =
       std::get<0>(textproto_format_string_pair);
-  const absl::ParsedFormat<'s'> expected_todatalog_format_string =
+  const absl::ParsedFormat<'s', 's'> expected_todatalog_format_string =
     std::get<1>(textproto_format_string_pair);
   const AccessPathRoot &root = std::get<1>(GetParam());
   std::string root_string = root.ToString();
   const std::string &expected_todatalog = absl::StrFormat(
-      expected_todatalog_format_string, root_string);
+      expected_todatalog_format_string, root_string, root_string);
   arcs::CheckProto check_proto;
   google::protobuf::TextFormat::ParseFromString(check_textproto, &check_proto);
   PredicateArena predicate_arena;
@@ -61,26 +61,26 @@ static AccessPathRoot instantiated_roots[] = {
 // expected ToDatalog output when the root string is substituted for the %s.
 // This allows us to test the result of combining each of the
 // TagChecks derived from the textprotos with each of the root strings.
-static std::tuple<std::string, absl::ParsedFormat<'s'>>
+static std::tuple<std::string, absl::ParsedFormat<'s', 's'>>
     textproto_to_expected_format_string[] = {
     { R"(access_path: {
       handle: { particle_spec: "ps", handle_connection: "hc" }
       selectors: { field: "field1" } },
       predicate: { label: { semantic_tag: "tag"} })",
-      absl::ParsedFormat<'s'>(
-          R"(isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("%s.field1", _, "tag").)") },
+      absl::ParsedFormat<'s', 's'>(
+          R"(isCheck("check_num_0"). check("check_num_0") :- isPrincipal(owner), !ownsAccessPath(owner, "%s.field1"); mayHaveTag("%s.field1", owner, "tag").)") },
     { R"(access_path: {
       handle: { particle_spec: "ps", handle_connection: "hc" } },
       predicate: { label: { semantic_tag: "tag2"} })",
-      absl::ParsedFormat<'s'>(
-          R"(isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("%s", _, "tag2").)")
+      absl::ParsedFormat<'s', 's'>(
+          R"(isCheck("check_num_0"). check("check_num_0") :- isPrincipal(owner), !ownsAccessPath(owner, "%s"); mayHaveTag("%s", owner, "tag2").)")
     },
     { R"(access_path: {
       handle: { particle_spec: "ps", handle_connection: "hc" },
       selectors: [{ field: "x" }, { field: "y" }] },
       predicate: { label: { semantic_tag: "user_selection"} })",
-      absl::ParsedFormat<'s'>(
-          R"(isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("%s.x.y", _, "user_selection").)") }
+      absl::ParsedFormat<'s', 's'>(
+          R"(isCheck("check_num_0"). check("check_num_0") :- isPrincipal(owner), !ownsAccessPath(owner, "%s.x.y"); mayHaveTag("%s.x.y", owner, "user_selection").)") }
 };
 
 INSTANTIATE_TEST_SUITE_P(

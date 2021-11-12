@@ -60,18 +60,6 @@
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
-// Generate a midpoint access path for each edge that is the subject of a
-// claimNotEdge from any principal.
-// edgeToMidpointAccessPath(src, tgt, cat("##midpoint_", to_string($))) :-
-//   edge(src, tgt), claimNotEdge(_, src, tgt).
-
-// // Generate inner edges to and from that midpoint for each edge with a midpoint.
-// resolvedEdge(src, midpoint), resolvedEdge(midpoint, tgt) :-
-//   edgeToMidpointAccessPath(src, tgt, midpoint).
-
-// // For edges for which a midpoint was not generated, generate an resolvedEdge
-// // corresponding to the original edge.
-// resolvedEdge(src, tgt) :- edge(src, tgt), !edgeToMidpointAccessPath(src, tgt, _).
 resolvedEdge(principal, src, tgt) :-
    isPrincipal(principal),
    edge(src, tgt),
