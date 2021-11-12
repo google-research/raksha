@@ -73,27 +73,6 @@ allTests(check_index) :- isCheck(check_index).
 testFails(check_index) :-
   isCheck(check_index), !check(check_index).
 
-// Rules for linking generated relations with the ones in the dl program.
-.decl says_ownsTag(speaker: Principal, owner: Principal, tag: Tag)
-saysOwnsTag(x, y, z) :- says_ownsTag(x, y, z).
-
-.decl says_hasTag(speaker: Principal, path: AccessPath, tag: Tag)
-saysHasTag(x, y, z) :- says_hasTag(x, y, z).
-
-.decl says_canSay_hasTag(
-  speaker: Principal,
-  delegatee: Principal,
-  accessPath: AccessPath,
-  tag: Tag)
-saysCanSayHasTag(w, x, y, z) :- says_canSay_hasTag(w, x, y, z).
-
-.decl says_canSay_removeTag(
-    speaker: Principal, delegatee: Principal, path: AccessPath, tag: Tag)
-saysCanSayRemoveTag(w, x, y, z) :- says_canSay_removeTag(w, x, y, z).
-
-.decl says_removeTag(speaker: Principal, path: AccessPath, tag: Tag)
-saysRemoveTag(x, y, z) :- says_removeTag(x, y, z).
-
 // Manifest
 %s
 // Authorization Logic
