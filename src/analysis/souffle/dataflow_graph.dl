@@ -16,7 +16,22 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_DATAFLOW_GRAPH_DL_
 #define SRC_ANALYSIS_SOUFFLE_DATAFLOW_GRAPH_DL_
 
-#include "access_path.dl"
+// We will use the access path abtraction to refer to data during analysis.
+// Consider the following data schema (not a valid syntax):
+//  schema A {
+//    a: Integer
+//    b: schema B {
+//      bf: String
+//    }
+//  }
+//
+// Suppose that data with schema A is stored in a database that is accessible
+// through a handle `h`. `h.a`, `h.b`, and `h.b.bf` are all examples of access
+// paths. For the time being, we will use a `symbol` to represent access paths.
+// However, in the long term, it would make sense to define an ADT for this.
+//
+.type AccessPath <: symbol
+.decl isAccessPath(path: AccessPath)
 
 // A data flow edge.
 .decl edge(src: AccessPath, tgt: AccessPath)

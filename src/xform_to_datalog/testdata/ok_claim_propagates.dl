@@ -51,7 +51,7 @@ saysWill(w, x, y) :- says_will(w, x, y).
 // Manifest
 
 // Claims:
-claimHasTag("P1", "R.P1#0.foo", "userSelection").
+saysHasTag("P1", "R.P1#0.foo", "userSelection").
 
 // Checks:
 isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("R.P3#2.bar", "userSelection").

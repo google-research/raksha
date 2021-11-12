@@ -175,7 +175,7 @@ saysWill(w, x, y) :- says_will(w, x, y).
 // Manifest
 
 // Claims:
-claimHasTag("particle", "recipe.particle.out", "tag").
+saysHasTag("particle", "recipe.particle.out", "tag").
 
 // Checks:
 

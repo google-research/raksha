@@ -18,8 +18,6 @@ exports_files(["fact_test_driver.cc"])
     src = dl_script,
     all_principals_own_all_tags = True,
     included_dl_scripts = [
-        "//src/analysis/souffle:access_path.dl",
-        "//src/analysis/souffle:flat_graph_ir.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
         "//src/analysis/souffle:taint.dl",
@@ -50,8 +48,6 @@ exports_files(["fact_test_driver.cc"])
     src = dl_script,
     all_principals_own_all_tags = False,
     included_dl_scripts = [
-        "//src/analysis/souffle:access_path.dl",
-        "//src/analysis/souffle:flat_graph_ir.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
         "//src/analysis/souffle:taint.dl",

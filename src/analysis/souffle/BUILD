@@ -25,7 +25,6 @@ souffle_cc_library(
     name = "taint_dl",
     src = "taint.dl",
     included_dl_scripts = [
-        "access_path.dl",
         "authorization_logic.dl",
         "dataflow_graph.dl",
         "tags.dl",
@@ -33,11 +32,9 @@ souffle_cc_library(
 )
 
 exports_files([
-    "access_path.dl",
     "authorization_logic.dl",
     "dataflow_graph.dl",
     "fact_test_helper.dl",
-    "flat_graph_ir.dl",
     "tags.dl",
     "may_will.dl",
 ])
