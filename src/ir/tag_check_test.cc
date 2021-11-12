@@ -68,19 +68,19 @@ static std::tuple<std::string, absl::ParsedFormat<'s'>>
       selectors: { field: "field1" } },
       predicate: { label: { semantic_tag: "tag"} })",
       absl::ParsedFormat<'s'>(
-          R"(isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("%s.field1", "tag").)") },
+          R"(isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("%s.field1", _, "tag").)") },
     { R"(access_path: {
       handle: { particle_spec: "ps", handle_connection: "hc" } },
       predicate: { label: { semantic_tag: "tag2"} })",
       absl::ParsedFormat<'s'>(
-          R"(isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("%s", "tag2").)")
+          R"(isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("%s", _, "tag2").)")
     },
     { R"(access_path: {
       handle: { particle_spec: "ps", handle_connection: "hc" },
       selectors: [{ field: "x" }, { field: "y" }] },
       predicate: { label: { semantic_tag: "user_selection"} })",
       absl::ParsedFormat<'s'>(
-          R"(isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("%s.x.y", "user_selection").)") }
+          R"(isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("%s.x.y", _, "user_selection").)") }
 };
 
 INSTANTIATE_TEST_SUITE_P(

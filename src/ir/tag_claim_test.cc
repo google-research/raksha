@@ -30,17 +30,17 @@ class TagClaimToDatalogWithRootTest :
     public testing::TestWithParam<
       std::tuple<
         std::string,
-        std::tuple<std::string, std::vector<absl::ParsedFormat<'s', 's'>>>,
+        std::tuple<std::string, std::vector<absl::ParsedFormat<'s', 's', 's'>>>,
         AccessPathRoot>>
       {};
 
 TEST_P(TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest) {
   const std::string particle_spec_name = std::get<0>(GetParam());
-  const std::tuple<std::string, std::vector<absl::ParsedFormat<'s', 's'>>>
+  const std::tuple<std::string, std::vector<absl::ParsedFormat<'s', 's', 's'>>>
       &textproto_format_string_pair = std::get<1>(GetParam());
   const std::string &assume_textproto =
       std::get<0>(textproto_format_string_pair);
-  const std::vector<absl::ParsedFormat<'s', 's'>>
+  const std::vector<absl::ParsedFormat<'s', 's', 's'>>
       expected_todatalog_format_string_vec =
           std::get<1>(textproto_format_string_pair);
   const AccessPathRoot &root = std::get<2>(GetParam());
@@ -48,7 +48,8 @@ TEST_P(TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest) {
   std::vector<std::string> expected_todatalog_vec;
   for (auto &format_str : expected_todatalog_format_string_vec) {
     expected_todatalog_vec.push_back(
-        absl::StrFormat(format_str, particle_spec_name, root.ToString()));
+        absl::StrFormat(format_str, particle_spec_name,
+                        root.ToString(), root.ToString()));
   }
   arcs::ClaimProto_Assume assume_proto;
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
@@ -97,35 +98,35 @@ static AccessPathRoot instantiated_roots[] = {
 // expected ToDatalog output when the root string is substituted for the %s.
 // This allows us to test the result of combining each of the
 // TagClaims derived from the textprotos with each of the root strings.
-static std::tuple<std::string, std::vector<absl::ParsedFormat<'s', 's'>>>
+static std::tuple<std::string, std::vector<absl::ParsedFormat<'s', 's', 's'>>>
     textproto_to_expected_format_string[] = {
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
   selectors: { field: "field1" } },
 predicate: { label: { semantic_tag: "tag"} })",
-      { absl::ParsedFormat<'s', 's'>(
-          R"(says_hasTag("%s", "%s.field1", "tag").)") } },
+      { absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_hasTag("%s", "%s.field1", owner, "tag") :- ownsAccessPath(owner, "%s.field1").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" } },
 predicate: { label: { semantic_tag: "tag2"} })",
-      { absl::ParsedFormat<'s', 's'>(R"(says_hasTag("%s", "%s", "tag2").)") } },
+      { absl::ParsedFormat<'s', 's', 's'>(R"(says_hasTag("%s", "%s", owner, "tag2") :- ownsAccessPath(owner, "%s").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" },
   selectors: [{ field: "x" }, { field: "y" }] },
 predicate: { label: { semantic_tag: "user_selection"} })",
-      { absl::ParsedFormat<'s', 's'>(
-          R"(says_hasTag("%s", "%s.x.y", "user_selection").)") } },
+      { absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_hasTag("%s", "%s.x.y", owner, "user_selection") :- ownsAccessPath(owner, "%s.x.y").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" },
   selectors: [{ field: "x" }, { field: "y" }] },
 predicate: {
 not: { predicate: { label: { semantic_tag: "user_selection"} } } })",
-      { absl::ParsedFormat<'s', 's'>(
-          R"(says_removeTag("%s", "%s.x.y", "user_selection").)") } },
+      { absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_removeTag("%s", "%s.x.y", owner, "user_selection") :- ownsAccessPath(owner, "%s.x.y").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -133,10 +134,10 @@ access_path: {
 predicate: { and: {
   conjunct0: { label: { semantic_tag: "tag"} }
   conjunct1: { label: { semantic_tag: "tag2"} } } })",
-      { absl::ParsedFormat<'s', 's'>(
-          R"(says_hasTag("%s", "%s.field1", "tag").)"),
-        absl::ParsedFormat<'s', 's'>(
-          R"(says_hasTag("%s", "%s.field1", "tag2").)") } },
+      { absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_hasTag("%s", "%s.field1", owner, "tag") :- ownsAccessPath(owner, "%s.field1").)"),
+        absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_hasTag("%s", "%s.field1", owner, "tag2") :- ownsAccessPath(owner, "%s.field1").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -144,20 +145,20 @@ access_path: {
 predicate: { and: {
   conjunct0: { not: { predicate: { label: { semantic_tag: "tag"} } } }
   conjunct1: { label: { semantic_tag: "tag2"} } } })",
-      { absl::ParsedFormat<'s', 's'>(
-          R"(says_removeTag("%s", "%s.field1", "tag").)"),
-        absl::ParsedFormat<'s', 's'>(
-          R"(says_hasTag("%s", "%s.field1", "tag2").)") } },
+      { absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_removeTag("%s", "%s.field1", owner, "tag") :- ownsAccessPath(owner, "%s.field1").)"),
+        absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_hasTag("%s", "%s.field1", owner, "tag2") :- ownsAccessPath(owner, "%s.field1").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" } },
 predicate: { and: {
   conjunct0: { label: { semantic_tag: "tag"} }
   conjunct1: { not: { predicate: { label: { semantic_tag: "tag2"} } } } } })",
-      { absl::ParsedFormat<'s', 's'>(
-          R"(says_hasTag("%s", "%s", "tag").)"),
-        absl::ParsedFormat<'s', 's'>(
-          R"(says_removeTag("%s", "%s", "tag2").)") } },
+      { absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_hasTag("%s", "%s", owner, "tag") :- ownsAccessPath(owner, "%s").)"),
+        absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_removeTag("%s", "%s", owner, "tag2") :- ownsAccessPath(owner, "%s").)") } },
      { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -167,12 +168,12 @@ predicate: { and: {
     conjunct0: { label: { semantic_tag: "tag"} }
     conjunct1: { not: { predicate: { label: { semantic_tag: "tag2"} } } } } }
   conjunct1: { label: { semantic_tag: "tag3"} } } })",
-      { absl::ParsedFormat<'s', 's'>(
-          R"(says_hasTag("%s", "%s.field1", "tag").)"),
-        absl::ParsedFormat<'s', 's'>(
-          R"(says_removeTag("%s", "%s.field1", "tag2").)"),
-        absl::ParsedFormat<'s', 's'>(
-          R"(says_hasTag("%s", "%s.field1", "tag3").)") } },
+      { absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_hasTag("%s", "%s.field1", owner, "tag") :- ownsAccessPath(owner, "%s.field1").)"),
+        absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_removeTag("%s", "%s.field1", owner, "tag2") :- ownsAccessPath(owner, "%s.field1").)"),
+        absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_hasTag("%s", "%s.field1", owner, "tag3") :- ownsAccessPath(owner, "%s.field1").)") } },
      { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -184,14 +185,14 @@ predicate: { and: {
   conjunct1: { and: {
     conjunct0: { not: { predicate: { label: { semantic_tag: "tag3"} } } }
     conjunct1: { label: { semantic_tag: "tag4" } } } } } })",
-      { absl::ParsedFormat<'s', 's'>(
-          R"(says_hasTag("%s", "%s.field1", "tag").)"),
-        absl::ParsedFormat<'s', 's'>(
-          R"(says_removeTag("%s", "%s.field1", "tag2").)"),
-        absl::ParsedFormat<'s', 's'>(
-          R"(says_removeTag("%s", "%s.field1", "tag3").)"),
-        absl::ParsedFormat<'s', 's'>(
-          R"(says_hasTag("%s", "%s.field1", "tag4").)")
+      { absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_hasTag("%s", "%s.field1", owner, "tag") :- ownsAccessPath(owner, "%s.field1").)"),
+        absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_removeTag("%s", "%s.field1", owner, "tag2") :- ownsAccessPath(owner, "%s.field1").)"),
+        absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_removeTag("%s", "%s.field1", owner, "tag3") :- ownsAccessPath(owner, "%s.field1").)"),
+        absl::ParsedFormat<'s', 's', 's'>(
+          R"(says_hasTag("%s", "%s.field1", owner, "tag4") :- ownsAccessPath(owner, "%s.field1").)")
           } },
 };
 

@@ -133,7 +133,7 @@ saysWill(w, x, y) :- says_will(w, x, y).
 // Manifest
 
 // Claims:
-says_hasTag("particle", "recipe.particle.out", "tag").
+says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(owner, "recipe.particle.out").
 
 // Checks:
 

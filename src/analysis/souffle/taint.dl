@@ -99,9 +99,9 @@ ownsAccessPath(principal, tgt) :-
 //   isTag(tag), claimNotEdge(principal, src, tgt), edgeToMidpointAccessPath(src, tgt, midpoint).
 
 removeTag(path, owner, tag) :-
-   saysRemoveTag(owner, path, owner, tag).
+   says_removeTag(owner, path, owner, tag).
 
-hasTag(path, owner, tag) :- saysHasTag(owner, path, owner, tag).
+hasTag(path, owner, tag) :- says_hasTag(owner, path, owner, tag).
 
 mayHaveTag(tgt, owner, tag) :- hasTag(tgt, owner, tag).
 

@@ -30,10 +30,10 @@ saysWill(w, x, y) :- says_will(w, x, y).
 // Manifest
 
 // Claims:
-says_hasTag("P1", "R.P1#0.foo", "userSelection").
+says_hasTag("P1", "R.P1#0.foo", owner, "userSelection") :- ownsAccessPath(owner, "R.P1#0.foo").
 
 // Checks:
-isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("R.P3#2.bar", "userSelection").
+isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("R.P3#2.bar", _, "userSelection").
 
 // Edges:
 edge("R.P1#0.foo", "R.handle0").

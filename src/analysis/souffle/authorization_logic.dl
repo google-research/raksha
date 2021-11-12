@@ -28,7 +28,7 @@
 
 // Some party asserts the claim that the label of an access path should
 // remove the referenced tag from the set.
-.decl says_removeTag(speaker: Principal, path: AccessPath, tag: Tag)
+.decl says_removeTag(speaker: Principal, path: AccessPath, owner: Principal, tag: Tag)
 
 // The `speaker` says that `delegatee` is allowed to indicate that a `path` does
 // not have a `tag`.
@@ -53,11 +53,11 @@
 .decl says_ownsTag(speaker: Principal, owner: Principal, tag: Tag)
 
 // The `speaker` says that `path` definitely has `tag` taint.
-.decl says_hasTag(speaker: Principal, path: AccessPath, tag: Tag)
+.decl says_hasTag(speaker: Principal, path: AccessPath, owner: Principal, tag: Tag)
 
 // The `speaker` says that the `delegatee` can say that `path` has `tag`.
-// .decl says_canSay_hasTag(
-//   speaker: Principal, delegatee: Principal, path: AccessPath, owner: Principal, tag: Tag)
+.decl says_canSay_hasTag(
+  speaker: Principal, delegatee: Principal, path: AccessPath, owner: Principal, tag: Tag)
 
 // Indicates that a speaker is allowed to say a path has a particular tag.
 .decl canSayHasTag(speaker: Principal, path: AccessPath, owner: Principal, tag: Tag)
