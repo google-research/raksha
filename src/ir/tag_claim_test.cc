@@ -105,19 +105,19 @@ access_path: {
   selectors: { field: "field1" } },
 predicate: { label: { semantic_tag: "tag"} })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(saysHasTag("%s", "%s.field1", "tag").)") } },
+          R"(says_hasTag("%s", "%s.field1", "tag").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" } },
 predicate: { label: { semantic_tag: "tag2"} })",
-      { absl::ParsedFormat<'s', 's'>(R"(saysHasTag("%s", "%s", "tag2").)") } },
+      { absl::ParsedFormat<'s', 's'>(R"(says_hasTag("%s", "%s", "tag2").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" },
   selectors: [{ field: "x" }, { field: "y" }] },
 predicate: { label: { semantic_tag: "user_selection"} })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(saysHasTag("%s", "%s.x.y", "user_selection").)") } },
+          R"(says_hasTag("%s", "%s.x.y", "user_selection").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" },
@@ -125,7 +125,7 @@ access_path: {
 predicate: {
 not: { predicate: { label: { semantic_tag: "user_selection"} } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(saysRemoveTag("%s", "%s.x.y", "user_selection").)") } },
+          R"(says_removeTag("%s", "%s.x.y", "user_selection").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -134,9 +134,9 @@ predicate: { and: {
   conjunct0: { label: { semantic_tag: "tag"} }
   conjunct1: { label: { semantic_tag: "tag2"} } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(saysHasTag("%s", "%s.field1", "tag").)"),
+          R"(says_hasTag("%s", "%s.field1", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysHasTag("%s", "%s.field1", "tag2").)") } },
+          R"(says_hasTag("%s", "%s.field1", "tag2").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -145,9 +145,9 @@ predicate: { and: {
   conjunct0: { not: { predicate: { label: { semantic_tag: "tag"} } } }
   conjunct1: { label: { semantic_tag: "tag2"} } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(saysRemoveTag("%s", "%s.field1", "tag").)"),
+          R"(says_removeTag("%s", "%s.field1", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysHasTag("%s", "%s.field1", "tag2").)") } },
+          R"(says_hasTag("%s", "%s.field1", "tag2").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" } },
@@ -155,9 +155,9 @@ predicate: { and: {
   conjunct0: { label: { semantic_tag: "tag"} }
   conjunct1: { not: { predicate: { label: { semantic_tag: "tag2"} } } } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(saysHasTag("%s", "%s", "tag").)"),
+          R"(says_hasTag("%s", "%s", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysRemoveTag("%s", "%s", "tag2").)") } },
+          R"(says_removeTag("%s", "%s", "tag2").)") } },
      { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -168,11 +168,11 @@ predicate: { and: {
     conjunct1: { not: { predicate: { label: { semantic_tag: "tag2"} } } } } }
   conjunct1: { label: { semantic_tag: "tag3"} } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(saysHasTag("%s", "%s.field1", "tag").)"),
+          R"(says_hasTag("%s", "%s.field1", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysRemoveTag("%s", "%s.field1", "tag2").)"),
+          R"(says_removeTag("%s", "%s.field1", "tag2").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysHasTag("%s", "%s.field1", "tag3").)") } },
+          R"(says_hasTag("%s", "%s.field1", "tag3").)") } },
      { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -185,13 +185,13 @@ predicate: { and: {
     conjunct0: { not: { predicate: { label: { semantic_tag: "tag3"} } } }
     conjunct1: { label: { semantic_tag: "tag4" } } } } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(saysHasTag("%s", "%s.field1", "tag").)"),
+          R"(says_hasTag("%s", "%s.field1", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysRemoveTag("%s", "%s.field1", "tag2").)"),
+          R"(says_removeTag("%s", "%s.field1", "tag2").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysRemoveTag("%s", "%s.field1", "tag3").)"),
+          R"(says_removeTag("%s", "%s.field1", "tag3").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysHasTag("%s", "%s.field1", "tag4").)")
+          R"(says_hasTag("%s", "%s.field1", "tag4").)")
           } },
 };
 

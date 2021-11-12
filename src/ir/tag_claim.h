@@ -67,7 +67,7 @@ class TagClaim {
     constexpr absl::string_view kClaimTagFormat =
         R"(%s("%s", "%s", "%s").)";
     absl::string_view relation_name =
-        (claim_tag_is_present_) ? "saysHasTag" : "saysRemoveTag";
+        (claim_tag_is_present_) ? "says_hasTag" : "says_removeTag";
     return absl::StrFormat(
         kClaimTagFormat, relation_name, claiming_particle_name_,
         access_path_.ToString(), tag_);
