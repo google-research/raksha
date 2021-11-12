@@ -68,19 +68,19 @@ static std::tuple<std::string, absl::ParsedFormat<'s', 's'>>
       selectors: { field: "field1" } },
       predicate: { label: { semantic_tag: "tag"} })",
       absl::ParsedFormat<'s', 's'>(
-          R"(isCheck("check_num_0"). check("check_num_0") :- isPrincipal(owner), !ownsAccessPath(owner, "%s.field1"); mayHaveTag("%s.field1", owner, "tag").)") },
+          R"(isCheck("check_num_0"). check("check_num_0") :- ownsAccessPath(owner, "%s.field1"), mayHaveTag("%s.field1", owner, "tag").)") },
     { R"(access_path: {
       handle: { particle_spec: "ps", handle_connection: "hc" } },
       predicate: { label: { semantic_tag: "tag2"} })",
       absl::ParsedFormat<'s', 's'>(
-          R"(isCheck("check_num_0"). check("check_num_0") :- isPrincipal(owner), !ownsAccessPath(owner, "%s"); mayHaveTag("%s", owner, "tag2").)")
+          R"(isCheck("check_num_0"). check("check_num_0") :- ownsAccessPath(owner, "%s"), mayHaveTag("%s", owner, "tag2").)")
     },
     { R"(access_path: {
       handle: { particle_spec: "ps", handle_connection: "hc" },
       selectors: [{ field: "x" }, { field: "y" }] },
       predicate: { label: { semantic_tag: "user_selection"} })",
       absl::ParsedFormat<'s', 's'>(
-          R"(isCheck("check_num_0"). check("check_num_0") :- isPrincipal(owner), !ownsAccessPath(owner, "%s.x.y"); mayHaveTag("%s.x.y", owner, "user_selection").)") }
+          R"(isCheck("check_num_0"). check("check_num_0") :- ownsAccessPath(owner, "%s.x.y"), mayHaveTag("%s.x.y", owner, "user_selection").)") }
 };
 
 INSTANTIATE_TEST_SUITE_P(

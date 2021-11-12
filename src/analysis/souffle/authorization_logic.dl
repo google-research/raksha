@@ -93,5 +93,6 @@ ownsTag(owner, tag) :- says_ownsTag(_, owner, tag).
 // isTag(tag) :- ownsTag(_, tag).
 
 isPrincipal(owner) :- ownsTag(owner, _).
+isPrincipal(owner) :- ownsAccessPath(owner, _).
 
 #endif // SRC_ANALYSIS_SOUFFLE_AUTHORIZATION_LOGIC_DL_

@@ -40,7 +40,7 @@ class ToDatalogRuleBodyTest :
 
     textproto_ = textproto;
     std::string may_have_subst = absl::StrFormat(
-        R"(isPrincipal(owner), !ownsAccessPath(owner, "%s"); mayHaveTag("%s", owner)",
+        R"(ownsAccessPath(owner, "%s"), mayHaveTag("%s", owner)",
         access_path_.ToString(), access_path_.ToString());
     expected_rule_body_ =
         absl::Substitute(expected_rule_body_format, may_have_subst);

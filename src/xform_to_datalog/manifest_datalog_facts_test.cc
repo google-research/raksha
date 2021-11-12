@@ -85,7 +85,7 @@ static std::tuple<ManifestDatalogFacts, std::string>
 says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(owner, "recipe.particle.out").
 
 // Checks:
-isCheck("check_num_0"). check("check_num_0") :- isPrincipal(owner), !ownsAccessPath(owner, "recipe.particle.in"); mayHaveTag("recipe.particle.in", owner, "tag2").
+isCheck("check_num_0"). check("check_num_0") :- ownsAccessPath(owner, "recipe.particle.in"), mayHaveTag("recipe.particle.in", owner, "tag2").
 
 // Edges:
 edge("recipe.h1", "recipe.particle.in").
@@ -302,12 +302,12 @@ TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
 }
 
 static std::string kExpectedCheckStrings[] = {
-    R"(isCheck("check_num_0"). check("check_num_0") :- isPrincipal(owner), !ownsAccessPath(owner, "NamedR.PS1#0.in_handle.field1"); mayHaveTag("NamedR.PS1#0.in_handle.field1", owner, "tag2").)",
-    R"(isCheck("check_num_1"). check("check_num_1") :- isPrincipal(owner), !ownsAccessPath(owner, "NamedR.PS1#1.in_handle.field1"); mayHaveTag("NamedR.PS1#1.in_handle.field1", owner, "tag2").)",
-    R"(isCheck("check_num_2"). check("check_num_2") :- isPrincipal(owner), !ownsAccessPath(owner, "NamedR.PS2#2.in_handle.field1"); mayHaveTag("NamedR.PS2#2.in_handle.field1", owner, "tag4").)",
-    R"(isCheck("check_num_3"). check("check_num_3") :- isPrincipal(owner), !ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1"); mayHaveTag("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", owner, "tag2").)",
-    R"(isCheck("check_num_4"). check("check_num_4") :- isPrincipal(owner), !ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1"); mayHaveTag("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", owner, "tag4").)",
-    R"(isCheck("check_num_5"). check("check_num_5") :- isPrincipal(owner), !ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1"); mayHaveTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", owner, "tag4").)",
+    R"(isCheck("check_num_0"). check("check_num_0") :- ownsAccessPath(owner, "NamedR.PS1#0.in_handle.field1"), mayHaveTag("NamedR.PS1#0.in_handle.field1", owner, "tag2").)",
+    R"(isCheck("check_num_1"). check("check_num_1") :- ownsAccessPath(owner, "NamedR.PS1#1.in_handle.field1"), mayHaveTag("NamedR.PS1#1.in_handle.field1", owner, "tag2").)",
+    R"(isCheck("check_num_2"). check("check_num_2") :- ownsAccessPath(owner, "NamedR.PS2#2.in_handle.field1"), mayHaveTag("NamedR.PS2#2.in_handle.field1", owner, "tag4").)",
+    R"(isCheck("check_num_3"). check("check_num_3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1"), mayHaveTag("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", owner, "tag2").)",
+    R"(isCheck("check_num_4"). check("check_num_4") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1"), mayHaveTag("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", owner, "tag4").)",
+    R"(isCheck("check_num_5"). check("check_num_5") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1"), mayHaveTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", owner, "tag4").)",
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {
