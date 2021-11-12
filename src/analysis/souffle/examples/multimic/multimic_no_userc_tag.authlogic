@@ -1,0 +1,8 @@
+
+"UserA" says ownsAccessPath("UserA", "DoASRUserAAndUserB.MicIn#1.audio").
+"UserB" says ownsAccessPath("UserB", "DoASRUserAAndUserB.MicIn#1.audio").
+"UserA" says ownsAccessPath("UserA", "DoASRUserAAndUserBAndUserC.MicIn#1.audio").
+"UserB" says ownsAccessPath("UserB", "DoASRUserAAndUserBAndUserC.MicIn#1.audio").
+
+
+

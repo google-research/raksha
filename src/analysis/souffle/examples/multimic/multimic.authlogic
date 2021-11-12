@@ -8,3 +8,14 @@
   // TODO(#195) remove this ownership claim.
   ownsTag("UserCTainter", "asrDisallowed").
 }
+
+"UserA" says ownsAccessPath("UserA", "DoASRNoGuests.MicCompute#0.audioIn").
+"UserB" says ownsAccessPath("UserB", "DoASRNoGuests.MicCompute#0.audioIn").
+"UserC" says ownsAccessPath("UserC", "DoASRNoGuests.MicCompute#0.audioIn").
+"UserA" says ownsAccessPath("UserA", "DoASRUserAAndUserB.MicCompute#0.audioIn").
+"UserB" says ownsAccessPath("UserB", "DoASRUserAAndUserB.MicCompute#0.audioIn").
+"UserC" says ownsAccessPath("UserC", "DoASRUserAAndUserB.MicCompute#0.audioIn").
+"UserA" says ownsAccessPath("UserA", "DoASRUserAAndUserBAndUserC.MicCompute#0.audioIn").
+"UserB" says ownsAccessPath("UserB", "DoASRUserAAndUserBAndUserC.MicCompute#0.audioIn").
+"UserC" says ownsAccessPath("UserC", "DoASRUserAAndUserBAndUserC.MicCompute#0.audioIn").
+
