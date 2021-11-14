@@ -17,8 +17,6 @@
 #ifndef SRC_IR_PREDICATES_PREDICATE_H_
 #define SRC_IR_PREDICATES_PREDICATE_H_
 
-#include <optional>
-
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "src/ir/access_path.h"

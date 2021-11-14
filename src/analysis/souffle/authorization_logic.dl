@@ -33,15 +33,15 @@
 // The `speaker` says that `delegatee` is allowed to indicate that a `path` does
 // not have a `tag`.
 .decl says_canSay_removeTag(
-  speaker: Principal, delegatee: Principal, path: AccessPath, owner:Principal, tag: Tag)
+  speaker: Principal, delegatee: Principal, path: AccessPath, owner: Principal, tag: Tag)
 
 .decl isPrincipal(principal: Principal)
 
-// This party is the owner of a taint Tag (they have the privilege to remove
-// it).
+// This party is the owner of an access path.
 .decl ownsAccessPath(owner: Principal, path: AccessPath)
 
-.decl saysOwnsAccessPath(speaker: Principal, owner: Principal, path: AccessPath)
+// The `speaker` says this party is the owner of an access path.
+.decl says_ownsAccessPath(speaker: Principal, owner: Principal, path: AccessPath)
 
 // This party is the owner of a taint Tag (they have the privilege to remove
 // it).
@@ -55,20 +55,6 @@
 // The `speaker` says that the `delegatee` can say that `path` has `tag`.
 .decl says_canSay_hasTag(
   speaker: Principal, delegatee: Principal, path: AccessPath, owner: Principal, tag: Tag)
-
-// Rules for linking generated relations with the ones in the dl program.
-.decl says_ownsAccessPath(speaker: Principal, owner: Principal, path: AccessPath)
-
-// // Indicates that a `tag` is definitely present upon a `path` because a speaker
-// // delegated to by the owner said so.
-// .decl hasTag(path: AccessPath, tag: Tag)
-
-// The tag for some accessPath is actually removed (by taking into consideration
-// the privileges of a party trying to remove it, and as a result of that party
-// deciding to remove it). Because here IFC labels are sets of tags (ordered
-// by the subset or equals relation), removing a tag from the set corresponds to
-// a downgrade by making set of tags on the access path "lower" in the order.
-// .decl removeTag(path: AccessPath, owner: Principal, tag: Tag)
 
 //-----------------------------------------------------------------------------
 // Rules
