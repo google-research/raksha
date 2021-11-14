@@ -1,8 +1,9 @@
+"UserA" says {
+  ownsAccessPath("UserA", "DoASRUserAAndUserB.UserATainter#3.audioIn").
+  ownsAccessPath("UserA", "DoASRUserAAndUserBAndUserC.UserATainter#3.audioIn").
+}
 
-"UserA" says ownsAccessPath("UserA", "DoASRUserAAndUserB.MicIn#1.audio").
-"UserB" says ownsAccessPath("UserB", "DoASRUserAAndUserB.MicIn#1.audio").
-"UserA" says ownsAccessPath("UserA", "DoASRUserAAndUserBAndUserC.MicIn#1.audio").
-"UserB" says ownsAccessPath("UserB", "DoASRUserAAndUserBAndUserC.MicIn#1.audio").
-
-
-
+"UserB" says {
+  ownsAccessPath("UserB", "DoASRUserAAndUserB.UserBTainter#4.audioIn").
+  ownsAccessPath("UserB", "DoASRUserAAndUserBAndUserC.UserBTainter#4.audioIn").
+}

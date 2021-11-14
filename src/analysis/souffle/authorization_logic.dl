@@ -43,6 +43,10 @@
 // The `speaker` says this party is the owner of an access path.
 .decl says_ownsAccessPath(speaker: Principal, owner: Principal, path: AccessPath)
 
+// The `speaker` says this party is the owner of an access path.
+.decl says_canSay_ownsAccessPath(speaker: Principal, delegatee: Principal,
+                                 owner: Principal, path: AccessPath)
+
 // This party is the owner of a taint Tag (they have the privilege to remove
 // it).
 .decl ownsTag(owner: Principal, tag: Tag)

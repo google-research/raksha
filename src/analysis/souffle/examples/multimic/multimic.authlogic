@@ -1,3 +1,13 @@
+"UserA" says {
+  ownsAccessPath("UserA", "DoASRUserAAndUserB.UserATainter#3.audioIn").
+  ownsAccessPath("UserA", "DoASRUserAAndUserBAndUserC.UserATainter#3.audioIn").
+}
+
+"UserB" says {
+  ownsAccessPath("UserB", "DoASRUserAAndUserB.UserBTainter#4.audioIn").
+  ownsAccessPath("UserB", "DoASRUserAAndUserBAndUserC.UserBTainter#4.audioIn").
+}
+
 // UserC is a very privacy sensitive user. They do not trust anyone to perform
 // ASR on their voice data.
 "UserC" says {
@@ -8,14 +18,3 @@
   // TODO(#195) remove this ownership claim.
   ownsTag("UserCTainter", "asrDisallowed").
 }
-
-"UserA" says ownsAccessPath("UserA", "DoASRNoGuests.MicCompute#0.audioIn").
-"UserB" says ownsAccessPath("UserB", "DoASRNoGuests.MicCompute#0.audioIn").
-"UserC" says ownsAccessPath("UserC", "DoASRNoGuests.MicCompute#0.audioIn").
-"UserA" says ownsAccessPath("UserA", "DoASRUserAAndUserB.MicCompute#0.audioIn").
-"UserB" says ownsAccessPath("UserB", "DoASRUserAAndUserB.MicCompute#0.audioIn").
-"UserC" says ownsAccessPath("UserC", "DoASRUserAAndUserB.MicCompute#0.audioIn").
-"UserA" says ownsAccessPath("UserA", "DoASRUserAAndUserBAndUserC.MicCompute#0.audioIn").
-"UserB" says ownsAccessPath("UserB", "DoASRUserAAndUserBAndUserC.MicCompute#0.audioIn").
-"UserC" says ownsAccessPath("UserC", "DoASRUserAAndUserBAndUserC.MicCompute#0.audioIn").
-
