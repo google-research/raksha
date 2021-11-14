@@ -51,8 +51,6 @@ class Predicate {
   // Turns this predicate into a rule body that can be used for checking if
   // the given condition holds.
   virtual std::string ToDatalogRuleBody(const AccessPath &ap) const = 0;
-  virtual std::optional<std::string> ToGroundingRules(
-      const AccessPath &ap) const = 0;
   virtual PredicateKind GetPredicateKind() const = 0;
   virtual bool operator==(Predicate const &other) const = 0;
 
@@ -85,16 +83,6 @@ class And : public Predicate {
   static PredicateKind GetKind() { return kAnd; }
 
   PredicateKind GetPredicateKind() const override { return GetKind(); }
-
-  std::optional<std::string> ToGroundingRules(
-      const AccessPath &ap) const override {
-    auto lhs_rules = lhs_->ToGroundingRules(ap);
-    auto rhs_rules = rhs_->ToGroundingRules(ap);
-    std::vector<absl::string_view> rules;
-    if (lhs_rules) { rules.push_back(*lhs_rules); }
-    if (rhs_rules) { rules.push_back(*rhs_rules); }
-    return absl::StrJoin(rules, ",");
-  }
 
   bool operator==(const Predicate &other) const override {
     const And *other_and = Predicate::DynCast<And>(other);
@@ -137,16 +125,6 @@ class Implies : public Predicate {
         consequent_->ToDatalogRuleBody(ap));
   }
 
-  std::optional<std::string> ToGroundingRules(
-      const AccessPath &ap) const override {
-    auto antecedent_rules = antecedent_->ToGroundingRules(ap);
-    auto consequent_rules = consequent_->ToGroundingRules(ap);
-    std::vector<absl::string_view> rules;
-    if (antecedent_rules) { rules.push_back(*antecedent_rules); }
-    if (consequent_rules) { rules.push_back(*consequent_rules); }
-    return absl::StrJoin(rules, ",");
-  }
-
   static PredicateKind GetKind() {
     return PredicateKind::kImplies;
   }
@@ -176,22 +154,9 @@ class Not : public Predicate {
   virtual ~Not() { }
 
   std::string ToDatalogRuleBody(const AccessPath &ap) const override {
-    std::optional<std::string> grounding_rules =
-        negated_predicate_->ToGroundingRules(ap);
-    if (grounding_rules == std::nullopt) {
-      constexpr absl::string_view kFormatString = R"(!(%s))";
-      return absl::StrFormat(
-          kFormatString, negated_predicate_->ToDatalogRuleBody(ap));
-    } else {
-      constexpr absl::string_view kFormatString = R"(%s, !(%s))";
-      return absl::StrFormat(kFormatString, *grounding_rules,
-                             negated_predicate_->ToDatalogRuleBody(ap));
-    }
-  }
-
-  std::optional<std::string> ToGroundingRules(
-      const AccessPath &ap) const override {
-    return std::nullopt;
+    constexpr absl::string_view kFormatString = R"(isPrincipal(owner), !(%s))";
+    return absl::StrFormat(kFormatString,
+                           negated_predicate_->ToDatalogRuleBody(ap));
   }
 
   static PredicateKind GetKind() {
@@ -225,16 +190,6 @@ class Or : public Predicate {
                            rhs_->ToDatalogRuleBody(ap));
   }
 
-  std::optional<std::string> ToGroundingRules(
-      const AccessPath &ap) const override {
-    auto lhs_rules = lhs_->ToGroundingRules(ap);
-    auto rhs_rules = rhs_->ToGroundingRules(ap);
-    std::vector<absl::string_view> rules;
-    if (lhs_rules) { rules.push_back(*lhs_rules); }
-    if (rhs_rules) { rules.push_back(*rhs_rules); }
-    return absl::StrJoin(rules, ",");
-  }
-
   static PredicateKind GetKind() {
     return PredicateKind::kOr;
   }
@@ -265,18 +220,8 @@ class TagPresence : public Predicate {
   // The tag presence just turns into a check for the tag on the access_path
   // in the mayHaveTag relation.
   std::string ToDatalogRuleBody(const AccessPath &access_path) const override {
-    constexpr absl::string_view kFormatStr =
-        R"(mayHaveTag("%s", owner, "%s"))";
+    constexpr absl::string_view kFormatStr = R"(mayHaveTag("%s", owner, "%s"))";
     return absl::StrFormat(kFormatStr, access_path.ToString(), tag_);
-    // ownsAccessPath(owner, "%s"),
-  }
-
-  std::optional<std::string> ToGroundingRules(
-      const AccessPath &ap) const override {
-    constexpr absl::string_view kFormatStr =
-        R"(isPrincipal(owner))";
-    // , ownsAccessPath(owner, "%s")
-    return absl::StrFormat(kFormatStr, ap.ToString());
   }
 
   static PredicateKind GetKind() {
