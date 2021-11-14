@@ -18,6 +18,7 @@
 
 #include <google/protobuf/text_format.h>
 
+#include "absl/strings/substitute.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/datalog_print_context.h"
 #include "src/ir/single-use-arena-and-predicate.h"
@@ -85,7 +86,8 @@ static std::tuple<ManifestDatalogFacts, std::string>
 says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(owner, "recipe.particle.out").
 
 // Checks:
-isCheck("check_num_0"). check("check_num_0") :- ownsAccessPath(owner, "recipe.particle.in"), mayHaveTag("recipe.particle.in", owner, "tag2").
+isCheck("check_num_0", "recipe.particle.in"). check("check_num_0", owner, "recipe.particle.in") :-
+  ownsAccessPath(owner, "recipe.particle.in"), mayHaveTag("recipe.particle.in", owner, "tag2").
 
 // Edges:
 edge("recipe.h1", "recipe.particle.in").
@@ -301,13 +303,23 @@ TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
               testing::UnorderedElementsAreArray(kExpectedClaimStrings));
 }
 
+static constexpr absl::string_view kPattern =
+    R"(isCheck("$0", "$1"). check("$0", owner, "$1") :-
+  ownsAccessPath(owner, "$1"), mayHaveTag("$1", owner, "$2").)";
+
 static std::string kExpectedCheckStrings[] = {
-    R"(isCheck("check_num_0"). check("check_num_0") :- ownsAccessPath(owner, "NamedR.PS1#0.in_handle.field1"), mayHaveTag("NamedR.PS1#0.in_handle.field1", owner, "tag2").)",
-    R"(isCheck("check_num_1"). check("check_num_1") :- ownsAccessPath(owner, "NamedR.PS1#1.in_handle.field1"), mayHaveTag("NamedR.PS1#1.in_handle.field1", owner, "tag2").)",
-    R"(isCheck("check_num_2"). check("check_num_2") :- ownsAccessPath(owner, "NamedR.PS2#2.in_handle.field1"), mayHaveTag("NamedR.PS2#2.in_handle.field1", owner, "tag4").)",
-    R"(isCheck("check_num_3"). check("check_num_3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1"), mayHaveTag("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", owner, "tag2").)",
-    R"(isCheck("check_num_4"). check("check_num_4") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1"), mayHaveTag("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", owner, "tag4").)",
-    R"(isCheck("check_num_5"). check("check_num_5") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1"), mayHaveTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", owner, "tag4").)",
+    absl::Substitute(kPattern, "check_num_0", "NamedR.PS1#0.in_handle.field1",
+                     "tag2"),
+    absl::Substitute(kPattern, "check_num_1", "NamedR.PS1#1.in_handle.field1",
+                     "tag2"),
+    absl::Substitute(kPattern, "check_num_2", "NamedR.PS2#2.in_handle.field1",
+                     "tag4"),
+    absl::Substitute(kPattern, "check_num_3",
+                     "GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2"),
+    absl::Substitute(kPattern, "check_num_4",
+                     "GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4"),
+    absl::Substitute(kPattern, "check_num_5",
+                     "GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4"),
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {

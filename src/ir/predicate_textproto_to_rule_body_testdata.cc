@@ -29,7 +29,7 @@ std::vector<DatalogString> GatherDatalogStrings() {
       raksha::ir::predicate_textproto_to_rule_body_format) {
     results.push_back(DatalogString(
         kDlRuleBody,
-        absl::Substitute(dl_string, "mayHaveTag(\"example_ap\", _")));
+        absl::Substitute(dl_string, "example_ap", "_")));
   }
   return results;
 }

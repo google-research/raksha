@@ -13,12 +13,13 @@
 
 .output disallowedUsage(IO=stdout)
 
-.decl isCheck(check_index: symbol)
-.decl check(check_index: symbol)
+.decl isCheck(check_index: symbol, path: AccessPath)
+.decl check(check_index: symbol, owner: Principal, path: AccessPath)
 
-allTests(check_index) :- isCheck(check_index).
-testFails(check_index) :-
-  isCheck(check_index), !check(check_index).
+allTests(check_index) :- isCheck(check_index, _).
+testFails(cat(check_index, "-", owner, "-", path)) :-
+  isCheck(check_index, path), ownsAccessPath(owner, path),
+  !check(check_index, owner, path).
 
 testFails("may_will") :- disallowedUsage(_, _, _). 
 
@@ -33,7 +34,8 @@ saysWill(w, x, y) :- says_will(w, x, y).
 says_hasTag("P1", "R.P1#0.foo", owner, "userSelection") :- ownsAccessPath(owner, "R.P1#0.foo").
 
 // Checks:
-isCheck("check_num_0"). check("check_num_0") :- ownsAccessPath(owner, "R.P3#2.bar"), mayHaveTag("R.P3#2.bar", owner, "userSelection").
+isCheck("check_num_0", "R.P3#2.bar"). check("check_num_0", owner, "R.P3#2.bar") :-
+  ownsAccessPath(owner, "R.P3#2.bar"), mayHaveTag("R.P3#2.bar", owner, "userSelection").
 
 // Edges:
 edge("R.P1#0.foo", "R.handle0").
