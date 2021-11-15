@@ -78,27 +78,6 @@ testFails(check_index) :-
 
 testFails("may_will") :- disallowedUsage(_, _, _). 
 
-// Rules for linking generated relations with the ones in the dl program.
-.decl says_ownsTag(speaker: Principal, owner: Principal, tag: Tag)
-saysOwnsTag(x, y, z) :- says_ownsTag(x, y, z).
-
-.decl says_hasTag(speaker: Principal, path: AccessPath, tag: Tag)
-saysHasTag(x, y, z) :- says_hasTag(x, y, z).
-
-.decl says_canSay_hasTag(
-  speaker: Principal,
-  delegatee: Principal,
-  accessPath: AccessPath,
-  tag: Tag)
-saysCanSayHasTag(w, x, y, z) :- says_canSay_hasTag(w, x, y, z).
-
-.decl says_canSay_removeTag(
-    speaker: Principal, delegatee: Principal, path: AccessPath, tag: Tag)
-saysCanSayRemoveTag(w, x, y, z) :- says_canSay_removeTag(w, x, y, z).
-
-.decl says_removeTag(speaker: Principal, path: AccessPath, tag: Tag)
-saysRemoveTag(x, y, z) :- says_removeTag(x, y, z).
-
 .decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
 .decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
 saysMay(w, x, y, z) :- says_may(w, x, y, z).
