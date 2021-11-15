@@ -105,13 +105,21 @@ use crate::{ast::*, souffle::datalog_ir::*};
 // this is the conveninet way for it to work in the contexts in which it
 // is used.
 fn push_onto_pred(modifier: String, mut args_: Vec<String>, pred: &AstPredicate) -> AstPredicate {
-    let new_name = modifier + &pred.name.clone();
-    for a in &pred.args {
-        args_.push(a.to_string());
-    }
-    AstPredicate {
-        name: new_name,
-        args: args_.to_vec(),
+    let universe_relations = ["isAccessPath", "isTag", "isPrincipal"];
+    // For the few relations recognized as universe relations, do not alter the predicate.
+    if universe_relations.contains(&pred.name.as_str()) {
+        pred.clone()
+    } else {
+
+        let new_name = modifier + &pred.name;
+        for a in &pred.args {
+            args_.push(a.clone());
+        }
+        AstPredicate {
+            sign: pred.sign,
+            name: new_name.clone(),
+            args: args_.to_vec(),
+        }
     }
 }
 
@@ -154,6 +162,7 @@ impl LoweringToDatalogPass {
                 let mut args_ = Vec::new();
                 args_.push(prin.name.clone());
                 AstPredicate {
+                    sign: Sign::Positive,
                     name: String::from("canActAs"),
                     args: args_,
                 }
@@ -188,6 +197,7 @@ impl LoweringToDatalogPass {
 
                 // This is `speaker says x canActAs p`.
                 let x_as_p = AstPredicate {
+                    sign: Sign::Positive,
                     name: String::from("canActAs"),
                     args: [x.name.clone(), p.name.clone()].to_vec(),
                 };
@@ -299,6 +309,7 @@ impl LoweringToDatalogPass {
     // constructed in consts.
     fn dummy_fact() -> AstPredicate {
         AstPredicate {
+            sign: Sign::Positive,
             name: "grounded_dummy".to_string(),
             args: vec!["\"dummy_var\"".to_string()],
         }
@@ -310,6 +321,7 @@ impl LoweringToDatalogPass {
         let (main_fact, _) = self.fact_to_dlir(&query.fact, &query.principal);
         let main_fact = push_prin(String::from("says_"), &query.principal, &main_fact);
         let lhs = AstPredicate {
+            sign: Sign::Positive,
             name: query.name.clone(),
             args: vec![String::from("\"dummy_var\"")],
         };

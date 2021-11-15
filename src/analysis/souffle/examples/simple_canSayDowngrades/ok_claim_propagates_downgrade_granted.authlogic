@@ -1,0 +1,3 @@
+"EndUser" says ownsTag("EndUser", "userSelection").
+"EndUser" says "P1" canSay hasTag(accessPathX, "userSelection") :- isAccessPath(accessPathX).
+"EndUser" says "P2" canSay removeTag(accessPathX, "userSelection") :- isAccessPath(accessPathX).

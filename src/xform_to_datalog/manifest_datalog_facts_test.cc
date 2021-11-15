@@ -20,6 +20,7 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/datalog_print_context.h"
+#include "src/ir/single-use-arena-and-predicate.h"
 
 namespace raksha::xform_to_datalog {
 
@@ -37,7 +38,7 @@ TEST_P(ManifestDatalogFactsToDatalogTest, ManifestDatalogFactsToDatalogTest) {
   EXPECT_EQ(datalog_facts.ToDatalog(ctxt), expected_result_string);
 }
 
-static const ir::TagPresence kTag2Presence("tag2");
+static const ir::SingleUseArenaAndTagPresence kTag2Presence("tag2");
 
 static const ir::AccessPath kHandleH1AccessPath(
     ir::AccessPathRoot(ir::HandleAccessPathRoot("recipe", "h1")),
@@ -73,14 +74,15 @@ static std::tuple<ManifestDatalogFacts, std::string>
     { ManifestDatalogFacts(
         { ir::TagClaim(
             "particle", kHandleConnectionOutAccessPath, true, "tag") },
-        { ir::TagCheck(kHandleConnectionInAccessPath, kTag2Presence) },
+        { ir::TagCheck(
+            kHandleConnectionInAccessPath, *kTag2Presence.predicate()) },
         { ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),
           ir::Edge(kHandleConnectionInAccessPath,
                    kHandleConnectionOutAccessPath),
            ir::Edge(kHandleConnectionOutAccessPath, kHandleH2AccessPath)}),
       R"(
 // Claims:
-claimHasTag("particle", "recipe.particle.out", "tag").
+says_hasTag("particle", "recipe.particle.out", "tag").
 
 // Checks:
 isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("recipe.particle.in", "tag2").
@@ -273,18 +275,18 @@ class ParseBigManifestTest : public testing::Test {
   }
 
  protected:
-  raksha::xform_to_datalog::arcs_manifest_tree::ParticleSpecRegistry registry_;
+  ir::ParticleSpecRegistry registry_;
   ir::DatalogPrintContext ctxt_;
   ManifestDatalogFacts datalog_facts_;
 };
 
 static const std::string kExpectedClaimStrings[] = {
-    R"(claimHasTag("PS1", "NamedR.PS1#0.out_handle.field1", "tag1").)",
-    R"(claimHasTag("PS1", "NamedR.PS1#1.out_handle.field1", "tag1").)",
-    R"(claimHasTag("PS2", "NamedR.PS2#2.out_handle.field1", "tag3").)",
-    R"(claimHasTag("PS1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", "tag1").)",
-    R"(claimHasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "tag3").)",
-    R"(claimHasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "tag3").)",
+    R"(says_hasTag("PS1", "NamedR.PS1#0.out_handle.field1", "tag1").)",
+    R"(says_hasTag("PS1", "NamedR.PS1#1.out_handle.field1", "tag1").)",
+    R"(says_hasTag("PS2", "NamedR.PS2#2.out_handle.field1", "tag3").)",
+    R"(says_hasTag("PS1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", "tag1").)",
+    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "tag3").)",
+    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "tag3").)",
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {

@@ -22,7 +22,6 @@
 #include "src/ir/access_path.h"
 #include "src/ir/datalog_print_context.h"
 #include "src/ir/proto/access_path.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
 
@@ -30,27 +29,6 @@ namespace raksha::ir {
 // access path.
 class TagClaim {
  public:
-  // Create a list of TagClaims from an Assume proto. Each of these will be
-  // uninstantiated and thus rooted at the ParticleSpec.
-  static std::vector<TagClaim> CreateFromProto(
-    std::string claiming_particle_name,
-    const arcs::ClaimProto_Assume &assume_proto) {
-    CHECK(assume_proto.has_access_path())
-      << "Expected Assume message to have access_path field.";
-    const arcs::AccessPathProto &access_path_proto = assume_proto.access_path();
-    AccessPath access_path = proto::Decode(access_path_proto);
-    CHECK(assume_proto.has_predicate())
-      << "Expected Assume message to have predicate field.";
-    const arcs::InformationFlowLabelProto_Predicate &predicate =
-        assume_proto.predicate();
-
-    // Now that we have gathered the top-level information from the Assume
-    // proto, descend into the predicate to construct the list of claims.
-    return GetTagClaimsFromPredicate(
-        std::move(claiming_particle_name), std::move(access_path), predicate,
-        /*in_negation=*/false);
-  }
-
   explicit TagClaim(
       std::string claiming_particle_name,
       AccessPath access_path,
@@ -89,7 +67,7 @@ class TagClaim {
     constexpr absl::string_view kClaimTagFormat =
         R"(%s("%s", "%s", "%s").)";
     absl::string_view relation_name =
-        (claim_tag_is_present_) ? "claimHasTag" : "saysDowngrades";
+        (claim_tag_is_present_) ? "says_hasTag" : "says_removeTag";
     return absl::StrFormat(
         kClaimTagFormat, relation_name, claiming_particle_name_,
         access_path_.ToString(), tag_);
@@ -104,14 +82,6 @@ class TagClaim {
   }
 
  private:
-  // Helper function for CreateFromProto that descends recursively into
-  // predicate to gather all TagClaims contained within it.
-  static std::vector<TagClaim> GetTagClaimsFromPredicate(
-    std::string claiming_particle_name,
-    AccessPath access_path,
-    const arcs::InformationFlowLabelProto_Predicate &predicate,
-    const bool in_negation);
-
   // The name of the particle performing this claim. Important for connecting
   // the claim to a principal for authorization logic purposes.
   std::string claiming_particle_name_;

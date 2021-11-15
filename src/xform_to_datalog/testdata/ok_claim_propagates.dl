@@ -1,0 +1,53 @@
+// GENERATED FILE, DO NOT EDIT!
+
+#include "taint.dl"
+#include "may_will.dl"
+
+// Rules for detecting policy failures.
+.decl testFails(check_index: symbol)
+.output testFails(IO=stdout)
+.decl allTests(check_index: symbol)
+.output allTests(IO=stdout)
+.decl duplicateTestCaseNames(testAspectName: symbol)
+.output duplicateTestCaseNames(IO=stdout)
+
+.output disallowedUsage(IO=stdout)
+
+.decl isCheck(check_index: symbol)
+.decl check(check_index: symbol)
+
+allTests(check_index) :- isCheck(check_index).
+testFails(check_index) :-
+  isCheck(check_index), !check(check_index).
+
+testFails("may_will") :- disallowedUsage(_, _, _). 
+
+.decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
+.decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
+saysMay(w, x, y, z) :- says_may(w, x, y, z).
+saysWill(w, x, y) :- says_will(w, x, y).
+
+// Manifest
+
+// Claims:
+says_hasTag("P1", "R.P1#0.foo", "userSelection").
+
+// Checks:
+isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("R.P3#2.bar", "userSelection").
+
+// Edges:
+edge("R.P1#0.foo", "R.handle0").
+edge("R.handle0", "R.P2#1.bar").
+edge("R.P2#1.foo", "R.handle1").
+edge("R.P2#1.bar", "R.P2#1.foo").
+edge("R.handle1", "R.P3#2.bar").
+
+// Authorization Logic
+
+.decl grounded_dummy(x0: symbol)
+.decl says_canSay_ownsTag(x0: symbol, x1: symbol, x2: symbol, x3: symbol)
+says_ownsTag("EndUser", "P1", "userSelection") :- says_ownsTag(x___1, "P1", "userSelection"), says_canSay_ownsTag("EndUser", x___1, "P1", "userSelection").
+says_canSay_ownsTag("EndUser", "P1", "P1", "userSelection").
+says_ownsTag("P1", "P1", "userSelection").
+grounded_dummy("dummy_var").
+

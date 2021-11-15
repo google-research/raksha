@@ -1,0 +1,48 @@
+steps:
+# Pull most recent Docker image.
+- id: 'pull-image'
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['pull', '${_DOCKER_IMAGE}']
+  waitFor: ['-']
+
+# Build the new Docker image (caching from the pre-built one)
+- id: 'build-image'
+  waitFor: ['pull-image']
+  name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'build',
+    '--network=cloudbuild',
+    '--cache-from=${_DOCKER_IMAGE}',
+    '--tag=${_DOCKER_IMAGE}',
+    '.',
+  ]
+
+# Push updated Docker image to Container Registry.
+- id: 'push-image'
+  waitFor: ['build-image']
+  name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'push',
+    '${_DOCKER_IMAGE}',
+  ]
+
+# Run presubmit tests.
+- id: 'presubmit'
+  secretEnv: ['GITHUB_COMMIT_STATUS_TOKEN']
+  waitFor: ['build-image']
+  name: '${_DOCKER_IMAGE}'
+  entrypoint: 'bash'
+  args: ['./gcb/presubmit.sh']
+  env:
+    - 'REPO_NAME=${REPO_NAME}'
+    - 'COMMIT_SHA=${COMMIT_SHA}'
+
+timeout: 3600s # 60 mins, just in case.
+
+substitutions:
+  _DOCKER_IMAGE: us-central1-docker.pkg.dev/google.com/raksha-ci/gcb-docker-images/gcb:latest
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/353460796050/secrets/raksha-ci-commit-status-token/versions/latest
+      env: 'GITHUB_COMMIT_STATUS_TOKEN'

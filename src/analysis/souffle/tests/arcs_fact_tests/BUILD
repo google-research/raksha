@@ -11,13 +11,13 @@ ALL_DL_TEST_FILES = glob(["*.dl"])
 
 TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES = ["claim_not_edge_two_inputs_two_outputs.dl"]
 
+exports_files(["fact_test_driver.cc"])
+
 [souffle_cc_library(
     name = dl_script.replace(".dl", "_souffle_cc_library"),
     src = dl_script,
-    all_principals_own_all_tags=True,
+    all_principals_own_all_tags = True,
     included_dl_scripts = [
-        "//src/analysis/souffle:access_path.dl",
-        "//src/analysis/souffle:flat_graph_ir.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
         "//src/analysis/souffle:taint.dl",
@@ -46,10 +46,8 @@ TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES = ["claim_not_edge_two_inputs_two_outputs
 [souffle_cc_library(
     name = dl_script.replace(".dl", "_no_owners_souffle_cc_library"),
     src = dl_script,
-    all_principals_own_all_tags=False,
+    all_principals_own_all_tags = False,
     included_dl_scripts = [
-        "//src/analysis/souffle:access_path.dl",
-        "//src/analysis/souffle:flat_graph_ir.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
         "//src/analysis/souffle:taint.dl",

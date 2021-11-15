@@ -46,8 +46,31 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
-.output isCheck
-.output check
+#include "may_will.dl"
+
+// Rules for detecting policy failures.
+.decl testFails(check_index: symbol)
+.output testFails(IO=stdout)
+.decl allTests(check_index: symbol)
+.output allTests(IO=stdout)
+.decl duplicateTestCaseNames(testAspectName: symbol)
+.output duplicateTestCaseNames(IO=stdout)
+
+.output disallowedUsage(IO=stdout)
+
+.decl isCheck(check_index: symbol)
+.decl check(check_index: symbol)
+
+allTests(check_index) :- isCheck(check_index).
+testFails(check_index) :-
+  isCheck(check_index), !check(check_index).
+
+testFails("may_will") :- disallowedUsage(_, _, _). 
+
+.decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
+.decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
+saysMay(w, x, y, z) :- says_may(w, x, y, z).
+saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
 
@@ -81,13 +104,36 @@ grounded_dummy("dummy_var").
             R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
-.output isCheck
-.output check
+#include "may_will.dl"
+
+// Rules for detecting policy failures.
+.decl testFails(check_index: symbol)
+.output testFails(IO=stdout)
+.decl allTests(check_index: symbol)
+.output allTests(IO=stdout)
+.decl duplicateTestCaseNames(testAspectName: symbol)
+.output duplicateTestCaseNames(IO=stdout)
+
+.output disallowedUsage(IO=stdout)
+
+.decl isCheck(check_index: symbol)
+.decl check(check_index: symbol)
+
+allTests(check_index) :- isCheck(check_index).
+testFails(check_index) :-
+  isCheck(check_index), !check(check_index).
+
+testFails("may_will") :- disallowedUsage(_, _, _). 
+
+.decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
+.decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
+saysMay(w, x, y, z) :- says_may(w, x, y, z).
+saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
 
 // Claims:
-claimHasTag("particle", "recipe.particle.out", "tag").
+says_hasTag("particle", "recipe.particle.out", "tag").
 
 // Checks:
 

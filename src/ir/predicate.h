@@ -36,6 +36,9 @@ enum PredicateKind {
   kTagPresence,
 };
 
+// Forward declaration to break inclusion cycle.
+class PredicateArena;
+
 // A Predicate is a boolean expression that can occur upon various Raksha IR
 // structures. Currently, all leaf expressions speak of whether a particular
 // tag is present. Inner nodes include the full range of boolean expressions
@@ -64,9 +67,8 @@ class Predicate {
 
 class And : public Predicate {
  public:
-  explicit And(std::unique_ptr<Predicate> lhs, std::unique_ptr<Predicate> rhs)
-    : lhs_(std::move(lhs)), rhs_(std::move(rhs)) { }
-
+  static const And *Create(
+      PredicateArena &pred, const Predicate *lhs, const Predicate *rhs);
   virtual ~And() { }
 
   std::string ToDatalogRuleBody(const AccessPath &ap) const override {
@@ -85,10 +87,12 @@ class And : public Predicate {
     if (other_and == nullptr) return false;
     return (*lhs_ == *other_and->lhs_) && (*rhs_ == *other_and->rhs_);
   }
-
  private:
-  std::unique_ptr<Predicate> lhs_;
-  std::unique_ptr<Predicate> rhs_;
+  explicit And(const Predicate *lhs, const Predicate *rhs)
+    : lhs_(lhs), rhs_(rhs) { }
+
+  const Predicate *lhs_;
+  const Predicate *rhs_;
 };
 
 // An implies statement, usually written:
@@ -101,10 +105,9 @@ class And : public Predicate {
 // if the antecedent is false.
 class Implies : public Predicate {
  public:
-  explicit Implies(
-      std::unique_ptr<Predicate> antecedent,
-      std::unique_ptr<Predicate> consequent) :
-      antecedent_(std::move(antecedent)), consequent_(std::move(consequent)) { }
+  static const Implies *Create(
+      PredicateArena &arena,
+      const Predicate *antecedent, const Predicate *consequent);
 
   virtual ~Implies() { }
 
@@ -132,18 +135,20 @@ class Implies : public Predicate {
     return (*antecedent_ == *other_implies->antecedent_) &&
       (*consequent_ == *other_implies->consequent_);
   }
-
  private:
-  std::unique_ptr<Predicate> antecedent_;
-  std::unique_ptr<Predicate> consequent_;
+  explicit Implies(
+    const Predicate *antecedent,
+    const Predicate *consequent) :
+    antecedent_(antecedent), consequent_(consequent) { }
+
+  const Predicate *antecedent_;
+  const Predicate *consequent_;
 };
 
 // A Not boolean expression in a predicate. Just negates the inner predicate.
 class Not : public Predicate {
  public:
-  explicit Not(std::unique_ptr<Predicate> negated_predicate)
-    : negated_predicate_(std::move(negated_predicate)) { }
-
+  static const Not *Create(PredicateArena &arena, const Predicate *negated);
   virtual ~Not() { }
 
   std::string ToDatalogRuleBody(const AccessPath &ap) const override {
@@ -163,17 +168,18 @@ class Not : public Predicate {
     if (other_not == nullptr) { return false; }
     return *negated_predicate_ == *other_not->negated_predicate_;
   }
-
  private:
-  std::unique_ptr<Predicate> negated_predicate_;
+  explicit Not(const Predicate *negated_predicate)
+    : negated_predicate_(negated_predicate) { }
+
+  const Predicate *negated_predicate_;
 };
 
 // A boolean or expression on two predicates.
 class Or : public Predicate {
  public:
-  explicit Or(std::unique_ptr<Predicate> lhs, std::unique_ptr<Predicate> rhs)
-    : lhs_(std::move(lhs)), rhs_(std::move(rhs)) { }
-
+  static const Or *Create(
+      PredicateArena &arena, const Predicate *lhs, const Predicate *rhs);
   virtual ~Or() { }
 
   std::string ToDatalogRuleBody(const AccessPath &ap) const override {
@@ -193,10 +199,12 @@ class Or : public Predicate {
     if (other_or == nullptr) return false;
     return (*lhs_ == *other_or->lhs_) && (*rhs_ == *other_or->rhs_);
   }
-
  private:
-  std::unique_ptr<Predicate> lhs_;
-  std::unique_ptr<Predicate> rhs_;
+  explicit Or(const Predicate *lhs, const Predicate *rhs)
+    : lhs_(lhs), rhs_(rhs) { }
+
+  const Predicate *lhs_;
+  const Predicate *rhs_;
 };
 
 // A boolean expression that is true if a tag is possibly present on an
@@ -204,8 +212,7 @@ class Or : public Predicate {
 // predicate tree.
 class TagPresence : public Predicate {
  public:
-  explicit TagPresence(std::string tag) : tag_(std::move(tag)) { }
-
+  static const TagPresence *Create(PredicateArena &arena, std::string tag);
   virtual ~TagPresence() {}
 
   // The tag presence just turns into a check for the tag on the access_path
@@ -231,8 +238,9 @@ class TagPresence : public Predicate {
     }
     return tag_ == other_tag_presence->tag_;
   }
-
  private:
+  explicit TagPresence(std::string tag) : tag_(std::move(tag)) { }
+
   std::string tag_;
 };
 

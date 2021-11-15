@@ -2,14 +2,16 @@ package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
     name = "types",
-    srcs = glob(
-        ["*.cc"],
-        exclude = ["*_test.cc"],
-    ),
-    hdrs = glob(["*.h"]),
+    srcs = ["schema.cc"],
+    hdrs = [
+        "entity_type.h",
+        "primitive_type.h",
+        "schema.h",
+        "type.h",
+    ],
     deps = [
         "//src/common/logging",
-        "//src/ir",
+        "//src/ir:access_path",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/strings",

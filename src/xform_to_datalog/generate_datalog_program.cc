@@ -25,18 +25,24 @@
 #include "absl/flags/usage.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/datalog_print_context.h"
+#include "src/ir/particle_spec.h"
 #include "src/xform_to_datalog/authorization_logic_datalog_facts.h"
-#include "src/xform_to_datalog/arcs_manifest_tree/particle_spec.h"
 #include "src/xform_to_datalog/datalog_facts.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
 
 ABSL_FLAG(std::string, datalog_file, "", "output file for the datalog facts");
 ABSL_FLAG(std::string, manifest_proto, "", "The manifest proto file.");
+ABSL_FLAG(std::string, auth_logic_file, "",
+          "The file with authorization logic facts.");
 ABSL_FLAG(bool, overwrite, false,
           "Should we overwrite the output file if it exists.");
 
 constexpr char kUsageMessage[] =
     "This tool takes a manifest proto and generates a datalog program.";
+
+using ManifestDatalogFacts = raksha::xform_to_datalog::ManifestDatalogFacts;
+using AuthorizationLogicDatalogFacts =
+    raksha::xform_to_datalog::AuthorizationLogicDatalogFacts;
 
 int main(int argc, char *argv[]) {
   google::InitGoogleLogging("generate_datalog_program");
@@ -47,6 +53,14 @@ int main(int argc, char *argv[]) {
   std::filesystem::path manifest_filepath(absl::GetFlag(FLAGS_manifest_proto));
   if (!std::filesystem::exists(manifest_filepath)) {
     LOG(ERROR) << "Manifest proto file " << manifest_filepath
+               << " does not exist!";
+    return 1;
+  }
+
+  std::filesystem::path auth_logic_filepath(
+      absl::GetFlag(FLAGS_auth_logic_file));
+  if (!std::filesystem::exists(auth_logic_filepath)) {
+    LOG(ERROR) << "Authorization logic file " << auth_logic_filepath
                << " does not exist!";
     return 1;
   }
@@ -72,12 +86,23 @@ int main(int argc, char *argv[]) {
     LOG(ERROR) << "Error parsing the manifest proto " << manifest_filepath;
   }
 
-  raksha::xform_to_datalog::arcs_manifest_tree::ParticleSpecRegistry
-    particle_spec_registry;
+  raksha::ir::ParticleSpecRegistry particle_spec_registry;
+  auto manifest_datalog_facts = ManifestDatalogFacts::CreateFromManifestProto(
+      manifest_proto, particle_spec_registry);
+
+  std::filesystem::path auth_logic_filename = auth_logic_filepath.filename();
+  auth_logic_filepath.remove_filename();
+  std::optional<AuthorizationLogicDatalogFacts> auth_logic_datalog_facts =
+      AuthorizationLogicDatalogFacts::create(auth_logic_filepath.c_str(),
+                                             auth_logic_filename.c_str());
+
+  if (!auth_logic_datalog_facts.has_value()) {
+    LOG(ERROR) << "Unable to parse authorization logic file.\n";
+    return 1;
+  }
+
   auto datalog_facts = raksha::xform_to_datalog::DatalogFacts(
-      raksha::xform_to_datalog::ManifestDatalogFacts::CreateFromManifestProto(
-          manifest_proto, particle_spec_registry),
-        raksha::xform_to_datalog::AuthorizationLogicDatalogFacts(""));
+      manifest_datalog_facts, *auth_logic_datalog_facts);
 
   std::ofstream datalog_file(datalog_filepath, std::ios::out | std::ios::trunc |
                                                    std::ios::binary);

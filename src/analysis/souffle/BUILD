@@ -24,13 +24,17 @@ cc_test(
 souffle_cc_library(
     name = "taint_dl",
     src = "taint.dl",
+    included_dl_scripts = [
+        "authorization_logic.dl",
+        "dataflow_graph.dl",
+        "tags.dl",
+    ],
 )
 
 exports_files([
-    "access_path.dl",
     "authorization_logic.dl",
     "dataflow_graph.dl",
     "fact_test_helper.dl",
-    "flat_graph_ir.dl",
     "tags.dl",
+    "may_will.dl",
 ])

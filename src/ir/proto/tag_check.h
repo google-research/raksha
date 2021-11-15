@@ -16,9 +16,9 @@ TagCheck Decode(
   AccessPath access_path = Decode(check_proto.access_path());
   CHECK(check_proto.has_predicate())
     << "`Check` proto missing required field predicate!";
-  const Predicate &predicate =
-      predicate_decoder.Decode(check_proto.predicate());
-  return TagCheck(std::move(access_path), predicate);
+  return TagCheck(
+      std::move(access_path),
+      *predicate_decoder.Decode(check_proto.predicate()));
 }
 
 }  // namespace raksha::ir::proto

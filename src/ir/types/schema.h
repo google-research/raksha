@@ -7,7 +7,6 @@
 #include "absl/container/flat_hash_set.h"
 #include "src/ir/access_path_selectors_set.h"
 #include "src/ir/types/type.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types {
 

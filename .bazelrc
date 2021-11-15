@@ -1,2 +1,10 @@
+try-import %workspace%/gcb/rbe/remote.bazelrc
+
 # TODO(#167): Remove `-Wno-deprecated-declarations` when glog is updated.
-build --cxxopt='-std=c++17' --cxxopt='-Werror' --cxxopt='-Wall' --cxxopt='-Wno-deprecated-declarations'
+
+build --cxxopt='-std=c++17'
+build --cxxopt='-Werror' --cxxopt='-Wall'
+build --cxxopt='-Wno-deprecated-declarations'
+build --host_cxxopt='-std=c++17'
+build --host_cxxopt='-Werror' --host_cxxopt='-Wall'
+build --host_cxxopt='-Wno-deprecated-declarations'
