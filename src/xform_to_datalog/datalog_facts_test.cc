@@ -46,6 +46,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
+#include "may_will.dl"
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
@@ -55,12 +56,21 @@ INSTANTIATE_TEST_SUITE_P(
 .decl duplicateTestCaseNames(testAspectName: symbol)
 .output duplicateTestCaseNames(IO=stdout)
 
+.output disallowedUsage(IO=stdout)
+
 .decl isCheck(check_index: symbol)
 .decl check(check_index: symbol)
 
 allTests(check_index) :- isCheck(check_index).
 testFails(check_index) :-
   isCheck(check_index), !check(check_index).
+
+testFails("may_will") :- disallowedUsage(_, _, _). 
+
+.decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
+.decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
+saysMay(w, x, y, z) :- says_may(w, x, y, z).
+saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
 
@@ -94,6 +104,7 @@ grounded_dummy("dummy_var").
             R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
+#include "may_will.dl"
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
@@ -103,12 +114,21 @@ grounded_dummy("dummy_var").
 .decl duplicateTestCaseNames(testAspectName: symbol)
 .output duplicateTestCaseNames(IO=stdout)
 
+.output disallowedUsage(IO=stdout)
+
 .decl isCheck(check_index: symbol)
 .decl check(check_index: symbol)
 
 allTests(check_index) :- isCheck(check_index).
 testFails(check_index) :-
   isCheck(check_index), !check(check_index).
+
+testFails("may_will") :- disallowedUsage(_, _, _). 
+
+.decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
+.decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
+saysMay(w, x, y, z) :- says_may(w, x, y, z).
+saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
 

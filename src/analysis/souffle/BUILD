@@ -36,4 +36,5 @@ exports_files([
     "dataflow_graph.dl",
     "fact_test_helper.dl",
     "tags.dl",
+    "may_will.dl",
 ])
