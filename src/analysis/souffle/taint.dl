@@ -56,7 +56,7 @@
 
 // claimNotEdge(p, src, tgt) is an _attempt_ to remove an edge from the
 // analysis (by principal p)
-// saysRemoveTag(p, path, tgt) is an _attempt_ to remove just one tag
+// says_removeTag(p, path, tgt) is an _attempt_ to remove just one tag
 // from a path (by principal p).
 //
 // The rule for removeTag(p, t) in authorization_logic.dl describes when
@@ -77,7 +77,7 @@
 //      permission for edge removal indirectly by granting permission to remove
 //      tags (abstract representations of their data).
 
-saysRemoveTag(principal, midpoint, tag) :-
+says_removeTag(principal, midpoint, tag) :-
   isTag(tag), claimNotEdge(principal, src, tgt), edgeToMidpointAccessPath(src, tgt, midpoint).
 
 mayHaveTag(tgt, tag) :- hasTag(tgt, tag).
@@ -92,12 +92,12 @@ mayHaveTag(tgt, tag) :-
 // `isObject(..)`) whenever they are mentioned in other rules.
 
 // Any Principal used in a claim is in the universe of isPrincipal.
-isPrincipal(principal) :- saysHasTag(principal, _, _).
+isPrincipal(principal) :- says_hasTag(principal, _, _).
 
-isAccessPath(path) :- saysHasTag(_, path, _).
+isAccessPath(path) :- says_hasTag(_, path, _).
 
 // Symbols used in hasTag or mayHaveTag are tags
-isTag(tag) :- saysHasTag(_, _, tag).
+isTag(tag) :- says_hasTag(_, _, tag).
 
 // A pair of (base, member) is in this set if the base access path is a non-trivial subpath of the
 // member access path.
