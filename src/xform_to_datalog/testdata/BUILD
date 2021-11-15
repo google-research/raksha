@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
+load("//build_defs:arcs.bzl", "arcs_manifest_proto")
+
 package(default_visibility = ["//src:__subpackages__"])
 
 licenses(["notice"])
@@ -24,6 +26,24 @@ filegroup(
         "empty_auth_logic.dl",
         "simple_auth_logic",
         "simple_auth_logic.dl",
+        "says_owns_tag",
+        "says_owns_tag.dl",
     ],
     testonly = True
+)
+
+arcs_manifest_proto(
+    name = "ok_claim_propagates_proto",
+    src = "ok_claim_propagates.arcs",
+    deps = [],
+)
+
+filegroup(
+    name = "ok_claim_propagates",
+    srcs = [
+        "ok_claim_propagates.arcs",
+        "ok_claim_propagates.auth",
+        "ok_claim_propagates.dl",
+        ":ok_claim_propagates_proto",
+    ]
 )

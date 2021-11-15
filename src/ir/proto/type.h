@@ -22,10 +22,10 @@
 namespace raksha::ir::types::proto {
 
 // Decodes the given `type_proto` and returns Type as a unique_ptr.
-std::unique_ptr<Type> decode(const arcs::TypeProto &type_proto);
+std::unique_ptr<Type> Decode(const arcs::TypeProto &type_proto);
 
 // Encodes the given `type` in an arcs::TypeProto.
-arcs::TypeProto encode(const Type& type);
+arcs::TypeProto Encode(const Type& type);
 
 }  // namespace raksha::ir::types::proto
 

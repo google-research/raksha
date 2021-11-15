@@ -1,8 +1,14 @@
-load("//build_defs:arcs.bzl", "arcs_manifest_proto")
+load("//build_defs:raksha.bzl", "policy_check")
 
-BUILDING_ARCS_MANIFESTS = glob(["*.arcs"])
+policy_check(
+    name = "check_multimic_userc_tag_fail",
+    auth_logic = "multimic.authlogic",
+    dataflow_graph = "multimic.arcs",
+    expect_failure = True,
+)
 
-[arcs_manifest_proto(
-    name = manifest.replace(".arcs", "_proto"),
-    src = manifest,
-) for manifest in BUILDING_ARCS_MANIFESTS]
+policy_check(
+    name = "check_multimic_pass",
+    auth_logic = "multimic_no_userc_tag.authlogic",
+    dataflow_graph = "multimic.arcs",
+)

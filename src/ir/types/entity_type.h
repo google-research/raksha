@@ -6,7 +6,6 @@
 #include "src/ir/types/type.h"
 #include "src/ir/access_path_selectors.h"
 #include "src/ir/access_path_selectors_set.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types {
 

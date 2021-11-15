@@ -1,0 +1,44 @@
+#ifndef MAY_WILL_DL_
+#define MAY_WILL_DL_
+
+#include "taint.dl"
+
+.type Usage <: symbol
+
+// this means `speaker` grants `actor` permission to do `usage` with `tag` 
+// (where `tag` is owned by `speaker`)
+.decl saysMay(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
+// this means `speaker` would like to do `usage` with the data on `path`
+.decl saysWill(speaker: Principal, usage: Usage, path: AccessPath)
+// NOTE: for saysWill the speaker and actor could be separated, but it is 
+// "safe" to always check for permissions when a usage request is made rather 
+// than occasionally disbelieve that a request is being made.
+
+// For each particle P, for each tag t in union over tags in read edges of P,
+//      for each statement of the form:
+//          `P says will <RELATION> using <HANDLE>`
+//      prove
+//          `ownsTag(Q, <TAG>)`
+//          `Q says P may <RELATION> using <TAG>`
+
+.decl permittedUsage(actor: Principal, usage: Usage, tag: Tag)
+
+permittedUsage(consumer, usage, tag) :- ownsTag(owner, tag),
+    saysMay(owner, consumer, usage, tag).
+
+.decl disallowedUsage(dataConsumer: Principal, usage: Usage, tag: Tag)
+
+disallowedUsage(dataConsumer, usage, tag) :-
+    saysWill(dataConsumer, usage, path), mayHaveTag(path, tag),
+    !permittedUsage(dataConsumer, usage, tag).
+
+// This is a 0-ary relation that says all data usages are allowed. 
+// Because souffle does not have 0-ary relations, it uses one dummy variable.
+.decl allUsagesAllowed(dummy_var: symbol)
+
+.decl isUsage(usage: Usage)
+
+allUsagesAllowed("dummy_var") :- !disallowedUsage(dataConsumer, usage, tag),
+    isPrincipal(dataConsumer), isUsage(usage), isTag(tag).
+
+#endif // MAY_WILL_DL_

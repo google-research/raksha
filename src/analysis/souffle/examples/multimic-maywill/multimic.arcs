@@ -1,0 +1,68 @@
+// Represents an actual microphone within a smart mic listening to audio.
+particle MicIn
+  audio: writes AudioData { }
+  claim audio is userSpeech
+
+particle StorageCredentialsSource
+  credentials: writes StorageCredentials { }
+  claim credentials is fullStoragePermissions
+
+particle DelegateStorePermissions
+  inPermissions: reads StoragePermissions { }
+  outPermissions: writes StoragePermissions { }
+  // The delegator claims that it downgrades the permissions to use storage
+  // from the full permissions to some less powerful delegated permissions.
+  claim outPermissions is not fullStoragePermissions and is delegatedPermissions
+  // Note: this is to halt if we are not allowed to downgrade permissions.
+  // We actually aren't allowed to do this in Arcs as it only allows checks on
+  // inputs! We should allow this in our new policy language.
+  // check outPermissions is not fullStoragePermissions
+
+// Represents the CPU within the mic.
+particle MicCompute
+  audioIn: reads AudioData { }
+  asrNeuralNet: reads ASRNeuralNet { }
+  asrStorageConn: writes ASRData { }
+  asrStoragePermissionsReceiver: reads StorageCredentials { }
+  // Claim that MicCompute downgrades the label from userSpeech to
+  // textTranscript.
+  claim asrStorageConn is not userSpeech and is textTranscript and derives from audioIn and derives from asrNeuralNet
+
+particle SpeechToTextStorageSink
+  speechToTextIn: reads ASRData { }
+  check speechToTextIn is speechToTextQoS and is not userSpeech
+
+recipe DoASR
+  m1AsrNetStorage: create
+  m1AsrStorage: create
+  m1AsrStoragePermissions: create
+  MicIn
+    audio: writes micAudio
+  MicCompute
+    audioIn: reads micAudio
+    asrNeuralNet: reads m1AsrNetStorage
+    asrStorageConn: writes m1AsrStorage
+    asrStoragePermissionsReceiver: reads m1AsrStoragePermissions
+  SpeechToTextStorageSink
+    speechToTextIn: reads m1AsrStorage
+
+recipe HandOffASRToOtherMic
+  m2AsrNetStorage: create
+  m1AsrStorage: use 'm1AsrStorage'
+  m1AsrStoragePermissions: map 'm1AsrStoragePermissions'
+  delegatedStoragePermissions: create
+
+  DelegateStorePermissions
+    inPermissions: reads m1AsrStoragePermissions
+    outPermissions: writes delegatedStoragePermissions
+
+  MicIn
+    audio: writes m2MicAudio
+
+  MicCompute
+    audioIn: reads m2MicAudio
+    asrNeuralNet: reads m2AsrNetStorage
+    // Note: continue to write to m1's storage to continue the transcription.
+    asrStorageConn: writes m1AsrStorage
+    asrStoragePermissionsReceiver: reads delegatedPermissions
+

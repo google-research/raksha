@@ -22,6 +22,7 @@
 #include "absl/strings/str_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/access_path_selectors.h"
+#include "src/ir/proto/tag_claim.h"
 
 namespace raksha::ir {
 
@@ -53,7 +54,7 @@ TEST_P(TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest) {
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
       assume_textproto, &assume_proto));
   std::vector<TagClaim> unrooted_tag_claim_vec =
-      TagClaim::CreateFromProto(particle_spec_name, assume_proto);
+      proto::Decode(particle_spec_name, assume_proto);
   std::vector<TagClaim> rooted_tag_claim_vec;
   for (const TagClaim &unrooted_claim : unrooted_tag_claim_vec) {
     rooted_tag_claim_vec.push_back(unrooted_claim.Instantiate(root));
@@ -104,19 +105,19 @@ access_path: {
   selectors: { field: "field1" } },
 predicate: { label: { semantic_tag: "tag"} })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s.field1", "tag").)") } },
+          R"(says_hasTag("%s", "%s.field1", "tag").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" } },
 predicate: { label: { semantic_tag: "tag2"} })",
-      { absl::ParsedFormat<'s', 's'>(R"(claimHasTag("%s", "%s", "tag2").)") } },
+      { absl::ParsedFormat<'s', 's'>(R"(says_hasTag("%s", "%s", "tag2").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" },
   selectors: [{ field: "x" }, { field: "y" }] },
 predicate: { label: { semantic_tag: "user_selection"} })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s.x.y", "user_selection").)") } },
+          R"(says_hasTag("%s", "%s.x.y", "user_selection").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" },
@@ -124,7 +125,7 @@ access_path: {
 predicate: {
 not: { predicate: { label: { semantic_tag: "user_selection"} } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(saysDowngrades("%s", "%s.x.y", "user_selection").)") } },
+          R"(says_removeTag("%s", "%s.x.y", "user_selection").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -133,9 +134,9 @@ predicate: { and: {
   conjunct0: { label: { semantic_tag: "tag"} }
   conjunct1: { label: { semantic_tag: "tag2"} } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s.field1", "tag").)"),
+          R"(says_hasTag("%s", "%s.field1", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s.field1", "tag2").)") } },
+          R"(says_hasTag("%s", "%s.field1", "tag2").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -144,9 +145,9 @@ predicate: { and: {
   conjunct0: { not: { predicate: { label: { semantic_tag: "tag"} } } }
   conjunct1: { label: { semantic_tag: "tag2"} } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(saysDowngrades("%s", "%s.field1", "tag").)"),
+          R"(says_removeTag("%s", "%s.field1", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s.field1", "tag2").)") } },
+          R"(says_hasTag("%s", "%s.field1", "tag2").)") } },
     { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" } },
@@ -154,9 +155,9 @@ predicate: { and: {
   conjunct0: { label: { semantic_tag: "tag"} }
   conjunct1: { not: { predicate: { label: { semantic_tag: "tag2"} } } } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s", "tag").)"),
+          R"(says_hasTag("%s", "%s", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysDowngrades("%s", "%s", "tag2").)") } },
+          R"(says_removeTag("%s", "%s", "tag2").)") } },
      { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -167,11 +168,11 @@ predicate: { and: {
     conjunct1: { not: { predicate: { label: { semantic_tag: "tag2"} } } } } }
   conjunct1: { label: { semantic_tag: "tag3"} } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s.field1", "tag").)"),
+          R"(says_hasTag("%s", "%s.field1", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysDowngrades("%s", "%s.field1", "tag2").)"),
+          R"(says_removeTag("%s", "%s.field1", "tag2").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s.field1", "tag3").)") } },
+          R"(says_hasTag("%s", "%s.field1", "tag3").)") } },
      { R"(
 access_path: {
   handle: { particle_spec: "ps", handle_connection: "hc" }
@@ -184,13 +185,13 @@ predicate: { and: {
     conjunct0: { not: { predicate: { label: { semantic_tag: "tag3"} } } }
     conjunct1: { label: { semantic_tag: "tag4" } } } } } })",
       { absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s.field1", "tag").)"),
+          R"(says_hasTag("%s", "%s.field1", "tag").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysDowngrades("%s", "%s.field1", "tag2").)"),
+          R"(says_removeTag("%s", "%s.field1", "tag2").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(saysDowngrades("%s", "%s.field1", "tag3").)"),
+          R"(says_removeTag("%s", "%s.field1", "tag3").)"),
         absl::ParsedFormat<'s', 's'>(
-          R"(claimHasTag("%s", "%s.field1", "tag4").)")
+          R"(says_hasTag("%s", "%s.field1", "tag4").)")
           } },
 };
 
