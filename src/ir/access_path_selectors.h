@@ -7,6 +7,7 @@
 
 #include "absl/hash/hash.h"
 #include "absl/strings/str_join.h"
+#include "src/ir/access_path_selector_tree.h"
 
 namespace raksha::ir {
 
@@ -85,7 +86,7 @@ class AccessPathSelectors {
   // Storing it as a vector in reverse order allows us to continually push
   // the components onto the end of the vector in a single AccessPathSelectors
   // that is moved from callee towards caller.
-  std::vector<Selector> reverse_selectors_;
+  const AccessPathSelectorTree *leaf_access_path_node_;
 };
 
 }  // namespace raksha::ir

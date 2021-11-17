@@ -51,9 +51,11 @@ cc_library(
 
 cc_library(
     name = "access_path",
+    srcs = ["access_path_selector_tree.cc"],
     hdrs = [
         "access_path.h",
         "access_path_root.h",
+        "access_path_selector_tree.h",
         "access_path_selectors.h",
         "access_path_selectors_set.h",
         "field_selector.h",

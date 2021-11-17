@@ -39,6 +39,9 @@ class Selector {
   bool operator==(const Selector &other) const {
     return specific_selector_ == other.specific_selector_;
   }
+  bool operator!=(const Selector &other) const {
+    return !(*this == other);
+  }
 
   template<typename H>
   friend H AbslHashValue(H h, const Selector &selector) {
