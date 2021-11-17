@@ -66,7 +66,6 @@ resolvedEdge(principal, src, tgt) :-
    !claimNotEdge(principal, src, tgt).
 
 // Transitive paths
-//TODO(bgogul): We don't use these at all.
 path(from, to) :- resolvedEdge(_, from, to).
 path(from, to) :- resolvedEdge(_, from, intermediate), path(intermediate, to).
 

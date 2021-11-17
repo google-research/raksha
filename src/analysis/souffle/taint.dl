@@ -60,6 +60,7 @@ ownsAccessPath(principal, path) :- says_ownsAccessPath(principal, principal, pat
 ownsAccessPath(principal, tgt) :-
   resolvedEdge(principal, src, tgt), ownsAccessPath(principal, src).
 
+// This rule says that a tag may be removed only if the owner of the tag says so.
 removeTag(path, owner, tag) :-
    says_removeTag(owner, path, owner, tag).
 

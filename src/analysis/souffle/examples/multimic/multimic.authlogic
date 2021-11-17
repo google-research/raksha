@@ -11,7 +11,7 @@
 // UserC is a very privacy sensitive user. They do not trust anyone to perform
 // ASR on their voice data.
 "UserC" says {
-  // TODO(bgogul): we should claim ownership at the level of handles rather recipe access paths.
+  // TODO(#220): we should claim ownership at the level of handles rather recipe access paths.
   ownsAccessPath("UserC", "DoASRUserAAndUserBAndUserC.UserCTainter#5.audio").
   // We want to use canSay hasTag but cannot due to issue #195.
   "UserCTainter" canSay hasTag(pathX, "UserC", "asrDisallowed") :- isAccessPath(pathX).
