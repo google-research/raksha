@@ -1,0 +1,27 @@
+#include "taint.dl"
+
+hasTag("People.SSN", "conf_null").
+hasTag("People.SSN", "integ_SocialSecurityNumber").
+hasTag("BirthRecords.SSN, "conf_null").
+hasTag("BirthRecords.SSN, "integ_SocialSecurityNumber").
+hasTag("BirthRecords.birthTimestamp, "conf_null").
+hasTag("BirthRecords.birthTimestamp, "integ_TimestampMillis").
+.decl sql_dlRule0Pattern0Matches(ap: AccessPath)
+sql_dlRule0Pattern0Matches(access_path_0) :- doesXform(access_path_0, "EQUALS"),isAccessPath(access_path_a),hasIntegTag(access_path_a, "integ_SocialSecurityNumber"),edge(access_path_a, access_path_0),isAccessPath(access_path_b),hasIntegTag(access_path_b, "integ_SocialSecurityNumber"),edge(access_path_b, access_path_0).
+.decl sql_dlRule0Pattern1Matches(ap: AccessPath)
+sql_dlRule0Pattern1Matches(access_path_0) :- doesXform(access_path_0, "NOT_EQUALS"),isAccessPath(access_path_a),hasIntegTag(access_path_a, "integ_SocialSecurityNumber"),edge(access_path_a, access_path_0),isAccessPath(access_path_b),hasIntegTag(access_path_b, "integ_SocialSecurityNumber"),edge(access_path_b, access_path_0).
+.decl sql_dlRule0Pattern2Matches(ap: AccessPath)
+sql_dlRule0Pattern2Matches(access_path_0) :- doesXform(access_path_0, "IN"),isAccessPath(access_path_a),hasIntegTag(access_path_a, "integ_SocialSecurityNumber"),edge(access_path_a, access_path_0),isAccessPath(access_path_b),hasIntegTag(access_path_b, "integ_SocialSecurityNumber"),edge(access_path_b, access_path_0).
+.decl sql_dlRule0Pattern3Matches(ap: AccessPath)
+sql_dlRule0Pattern3Matches(access_path_0) :- doesXform(access_path_0, "NOT_IN"),isAccessPath(access_path_a),hasIntegTag(access_path_a, "integ_SocialSecurityNumber"),edge(access_path_a, access_path_0),isAccessPath(access_path_b),hasIntegTag(access_path_b, "integ_SocialSecurityNumber"),edge(access_path_b, access_path_0).
+.decl sql_dlRule0Matches(ap: AccessPath)
+sql_dlRule0Matches(ap) :- sql_dlRule0Pattern0Matches(ap);sql_dlRule0Pattern1Matches(ap);sql_dlRule0Pattern2Matches(ap);sql_dlRule0Pattern3Matches(ap).
+removeTag(ap, "conf_null") :- sql_dlRule0Matches(ap).
+.decl sql_dlRule1Pattern0Matches(ap: AccessPath)
+sql_dlRule1Pattern0Matches(access_path_0) :- doesXform(access_path_0, "MULTIPLY"),doesXform(access_path_1, "DIVIDE"),isAccessPath(access_path_),hasIntegTag(access_path_, "integ_TimestampMillis"),edge(access_path_, access_path_1),hasValue(access_path_2, "##num_3600000"),edge(access_path_2, access_path_1),edge(access_path_1, access_path_0),hasValue(access_path_3, "##num_3600000"),edge(access_path_3, access_path_0).
+.decl sql_dlRule1Matches(ap: AccessPath)
+sql_dlRule1Matches(ap) :- sql_dlRule1Pattern0Matches(ap).
+removeTag(ap, "conf_null") :- sql_dlRule1Matches(ap).
+isTag("integ_TimestampMillis").
+isTag("conf_null").
+isTag("integ_SocialSecurityNumber").

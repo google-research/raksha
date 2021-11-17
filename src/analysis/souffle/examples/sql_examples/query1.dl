@@ -1,0 +1,11 @@
+#include "taint.dl"
+#include "sql_aux.dl"
+#include "policy.dl"
+
+isAccessPath("top.exprResult").
+edge("top.select_source.gender", "top.exprResult").
+isAccessPath("top.select_source.gender").
+edge("top.select_source.select_core.gender", "top.select_source.gender").
+isAccessPath("top.select_source.select_core.gender").
+edge("People.gender", "top.select_source.select_core.gender").
+isAccessPath("People.gender").
