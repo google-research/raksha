@@ -66,7 +66,6 @@ class DatalogFacts {
 .output allTests(IO=stdout)
 .decl duplicateTestCaseNames(testAspectName: symbol)
 .output duplicateTestCaseNames(IO=stdout)
-
 .output disallowedUsage(IO=stdout)
 
 .decl isCheck(check_index: symbol, path: AccessPath)
@@ -77,7 +76,7 @@ testFails(cat(check_index, "-", owner, "-", path)) :-
   isCheck(check_index, path), ownsAccessPath(owner, path),
   !check(check_index, owner, path).
 
-testFails("may_will") :- disallowedUsage(_, _, _).
+testFails("may_will") :- disallowedUsage(_, _, _, _).
 
 .decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
 .decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
