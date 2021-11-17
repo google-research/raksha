@@ -19,7 +19,7 @@
 #include "src/ir/handle_connection_spec.h"
 #include "src/ir/particle_spec.h"
 #include "src/ir/proto/type.h"
-#include "src/ir/proto/particle_spec.h"
+#include "src/ir/proto/system_spec.h"
 
 namespace raksha::xform_to_datalog {
 
@@ -33,23 +33,13 @@ namespace types = raksha::ir::types;
 //  traversal. This works, but it is hard to read and hard to test. We should
 //  break this up.
 ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
-    const arcs::ManifestProto &manifest_proto,
-    ir::ParticleSpecRegistry &particle_spec_registry) {
+    const ir::SystemSpec* system_spec,
+    const arcs::ManifestProto &manifest_proto) {
   // These collections will be used as inputs to the constructor that we
   // return from this function.
   std::vector<ir::TagClaim> result_claims;
   std::vector<ir::TagCheck> result_checks;
   std::vector<ir::Edge> result_edges;
-
-  // Turn each ParticleSpecProto indicated in the manifest_proto into a
-  // ParticleSpec object, which we can use directly.
-  for (const arcs::ParticleSpecProto &particle_spec_proto :
-    manifest_proto.particle_specs()) {
-    std::unique_ptr<ir::PredicateArena> arena =
-        std::make_unique<ir::PredicateArena>();
-    ir::proto::Decode(
-        particle_spec_registry, std::move(arena), particle_spec_proto);
-  }
 
   // This loop looks at each recipe in the manifest proto and instantiates
   // the ParticleSpecs indicated by the ParticleProtos in that recipe. It
@@ -86,7 +76,7 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
       // contained in the spec will be needed for all facts produced within a
       // Particle.
       const ir::ParticleSpec &particle_spec =
-          particle_spec_registry.GetParticleSpec(particle_spec_name);
+          system_spec->GetParticleSpec(particle_spec_name);
 
       // Each ParticleSpec already contains lists of TagClaims, TagChecks,
       // and Edges that shall be generated for each Particle implementing that

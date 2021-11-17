@@ -25,8 +25,7 @@
 
 namespace raksha::ir::proto {
 
-const ParticleSpec *Decode(
-    ParticleSpecRegistry &particle_spec_registry,
+std::unique_ptr<ParticleSpec> Decode(
     std::unique_ptr<PredicateArena> arena,
     const arcs::ParticleSpecProto &particle_spec_proto) {
   std::string name = particle_spec_proto.name();
@@ -71,9 +70,9 @@ const ParticleSpec *Decode(
   }
 
   return ParticleSpec::Create(
-      particle_spec_registry, std::move(name), std::move(checks),
-      std::move(tag_claims), std::move(derives_from_claims),
-      std::move(handle_connection_specs), std::move(arena));
+      std::move(name), std::move(checks), std::move(tag_claims),
+      std::move(derives_from_claims), std::move(handle_connection_specs),
+      std::move(arena));
 }
 
 }  // namespace raksha::ir::proto

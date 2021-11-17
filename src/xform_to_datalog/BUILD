@@ -100,6 +100,7 @@ cc_library(
     deps = [
         "//src/ir",
         "//src/ir/proto:particle_spec",
+        "//src/ir/proto:system_spec",
         "//src/ir/proto:types",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
@@ -120,6 +121,7 @@ cc_binary(
     srcs = ["generate_datalog_program.cc"],
     deps = [
         ":datalog_facts",
+        "//src/ir/proto:system_spec",
         "//src/common/logging",
         "@absl//absl/flags:flag",
         "@absl//absl/flags:parse",
