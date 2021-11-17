@@ -2,10 +2,10 @@
 
 hasTag("People.SSN", "conf_null").
 hasTag("People.SSN", "integ_SocialSecurityNumber").
-hasTag("BirthRecords.SSN, "conf_null").
-hasTag("BirthRecords.SSN, "integ_SocialSecurityNumber").
-hasTag("BirthRecords.birthTimestamp, "conf_null").
-hasTag("BirthRecords.birthTimestamp, "integ_TimestampMillis").
+hasTag("BirthRecords.SSN", "conf_null").
+hasTag("BirthRecords.SSN", "integ_SocialSecurityNumber").
+hasTag("BirthRecords.birthTimestamp", "conf_null").
+hasTag("BirthRecords.birthTimestamp", "integ_TimestampMillis").
 .decl sql_dlRule0Pattern0Matches(ap: AccessPath)
 sql_dlRule0Pattern0Matches(access_path_0) :- doesXform(access_path_0, "EQUALS"),isAccessPath(access_path_a),hasIntegTag(access_path_a, "integ_SocialSecurityNumber"),edge(access_path_a, access_path_0),isAccessPath(access_path_b),hasIntegTag(access_path_b, "integ_SocialSecurityNumber"),edge(access_path_b, access_path_0).
 .decl sql_dlRule0Pattern1Matches(ap: AccessPath)

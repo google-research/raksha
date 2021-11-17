@@ -5,8 +5,8 @@ load(
 
 licenses(["notice"])
 
-SUCCESS_QUERIES = ["query1.dl"]
-FAILURE_QUERIES = ["query3.dl"]
+SUCCESS_QUERIES = ["query1.dl", "query5.dl"]
+FAILURE_QUERIES = ["query3.dl", "query6.dl"]
 
 ALL_QUERIES = SUCCESS_QUERIES + FAILURE_QUERIES
 

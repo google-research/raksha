@@ -13,4 +13,4 @@ testPasses(cat("topQueryNotConfidential_", tag)) :- confidentialTag(tag), (!mayH
 .decl isIntegTag(tag: Tag)
 isIntegTag(tag) :- isTag(tag), substr(tag, 0, strlen("integ_")) = "integ_".
 hasIntegTag(ap, tag) :- hasTag(ap, tag), isIntegTag(tag).
-hasIntegTag(tgt, tag) :- isIntegTag(tag), resolvedEdge(src, tgt), hasIntegTag(src, tag), !doesXform(src, _).
+hasIntegTag(tgt, tag) :- isIntegTag(tag), resolvedEdge(src, tgt), hasIntegTag(src, tag), !doesXform(tgt, _).

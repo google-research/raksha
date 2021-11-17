@@ -1,0 +1,29 @@
+#include "taint.dl"
+#include "sql_aux.dl"
+#include "policy.dl"
+
+isAccessPath("top.exprResult").
+edge("top.select_source.exprResult", "top.exprResult").
+isAccessPath("top.select_source.exprResult").
+edge("top.select_source.select_core.MULTIPLY.exprResult", "top.select_source.exprResult").
+isAccessPath("top.select_source.select_core.MULTIPLY.exprResult").
+edge("top.select_source.select_core.MULTIPLY.DIVIDE.exprResult", "top.select_source.select_core.MULTIPLY.exprResult").
+edge("literal_numeric_3600000", "top.select_source.select_core.MULTIPLY.exprResult").
+doesXform("top.select_source.select_core.MULTIPLY.exprResult", "MULTIPLY").
+isAccessPath("top.select_source.select_core.MULTIPLY.DIVIDE.exprResult").
+edge("top.select_source.select_core.MULTIPLY.DIVIDE.MULTIPLY.exprResult", "top.select_source.select_core.MULTIPLY.DIVIDE.exprResult").
+edge("literal_numeric_3600000", "top.select_source.select_core.MULTIPLY.DIVIDE.exprResult").
+doesXform("top.select_source.select_core.MULTIPLY.DIVIDE.exprResult", "DIVIDE").
+isAccessPath("top.select_source.select_core.MULTIPLY.DIVIDE.MULTIPLY.exprResult").
+edge("top.select_source.select_core.MULTIPLY.DIVIDE.MULTIPLY.birthTimestamp", "top.select_source.select_core.MULTIPLY.DIVIDE.MULTIPLY.exprResult").
+edge("literal_numeric_1000", "top.select_source.select_core.MULTIPLY.DIVIDE.MULTIPLY.exprResult").
+doesXform("top.select_source.select_core.MULTIPLY.DIVIDE.MULTIPLY.exprResult", "MULTIPLY").
+isAccessPath("top.select_source.select_core.MULTIPLY.DIVIDE.MULTIPLY.birthTimestamp").
+edge("BirthRecords.birthTimestamp", "top.select_source.select_core.MULTIPLY.DIVIDE.MULTIPLY.birthTimestamp").
+isAccessPath("BirthRecords.birthTimestamp").
+isAccessPath("literal_numeric_1000").
+hasValue("literal_numeric_1000", "##num_1000").
+isAccessPath("literal_numeric_3600000").
+hasValue("literal_numeric_3600000", "##num_3600000").
+isAccessPath("literal_numeric_3600000").
+hasValue("literal_numeric_3600000", "##num_3600000").
