@@ -22,8 +22,8 @@ isPrincipal("ParticleX").
 ownsTag("Claimer", "tag1").
 ownsTag("Claimer", "tag2").
 
-says_hasTag("Claimer", "R.foo.hc1", "tag1").
-says_hasTag("Claimer", "R.foo.hc2", "tag2").
+saysHasTag("Claimer", "R.foo.hc1", "tag1").
+saysHasTag("Claimer", "R.foo.hc2", "tag2").
 
 // ParticleX claims that hc2 does not flow to hco1.
 // TODO(#146) In the case where we expect this claim to be upheld, how does that
