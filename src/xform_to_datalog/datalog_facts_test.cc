@@ -47,6 +47,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 #include "taint.dl"
 #include "may_will.dl"
+#include "auth_logic_type_interface.dl"
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
@@ -66,11 +67,6 @@ testFails(check_index) :-
   isCheck(check_index), !check(check_index).
 
 testFails("may_will") :- disallowedUsage(_, _, _). 
-
-.decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
-.decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
-saysMay(w, x, y, z) :- says_may(w, x, y, z).
-saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
 
@@ -105,6 +101,7 @@ grounded_dummy("dummy_var").
 
 #include "taint.dl"
 #include "may_will.dl"
+#include "auth_logic_type_interface.dl"
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
@@ -124,11 +121,6 @@ testFails(check_index) :-
   isCheck(check_index), !check(check_index).
 
 testFails("may_will") :- disallowedUsage(_, _, _). 
-
-.decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
-.decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
-saysMay(w, x, y, z) :- says_may(w, x, y, z).
-saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
 
