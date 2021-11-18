@@ -13,4 +13,15 @@ testPasses(cat("topQueryNotConfidential_", tag)) :- confidentialTag(tag), (!mayH
 .decl isIntegTag(tag: Tag)
 isIntegTag(tag) :- isTag(tag), substr(tag, 0, strlen("integ_")) = "integ_".
 hasIntegTag(ap, tag) :- hasTag(ap, tag), isIntegTag(tag).
-hasIntegTag(tgt, tag) :- isIntegTag(tag), resolvedEdge(src, tgt), hasIntegTag(src, tag), !doesXform(tgt, _).
+
+// A target access path `tgt` has an integrity tag `tag` if
+// 1. `tag` is an integrity tag and there exists at least one edge from an access
+//    path having the integrity tag to `tgt` AND
+// 2. `tgt` does not correspond to a transform operation that may corrupt the
+//    integrity of `tag` AND
+// 3. All sources going into `tgt` have `tag` (written as "there does not exist a
+//    `src2` connected with an edge to `tgt` that does not have `tag`).
+hasIntegTag(tgt, tag) :-
+  isIntegTag(tag), resolvedEdge(src, tgt), hasIntegTag(src, tag),
+  !doesXform(tgt, _),
+  isAccessPath(src2), !(resolvedEdge(src2, tgt), !hasIntegTag(src2, tag)).
