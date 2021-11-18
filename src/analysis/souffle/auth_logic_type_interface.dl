@@ -1,0 +1,49 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+// This file provides an interface that applies types to the untyped relations 
+// from authorization logic.
+
+
+#ifndef SRC_ANALYSIS_SOUFFLE_AUTHORIZATION_LOGIC_TYPE_INTERFACE_DL_
+#define SRC_ANALYSIS_SOUFFLE_AUTHORIZATION_LOGIC_TYPE_INTERFACE_DL_
+
+#include "dataflow_graph.dl"
+#include "authorization_logic.dl"
+#include "tags.dl"
+
+.decl says_removeTag(speaker: symbol, path: symbol, tag: symbol)
+.decl says_ownsTag(speaker: symbol, path: symbol, tag: symbol)
+.decl says_hasTag(speaker: symbol, path: symbol, tag: symbol)
+.decl says_may(speaker: symbol, actor: symbol, usage: symbol, tag: symbol)
+.decl says_will(speaker: symbol, usage: symbol, path: symbol)
+
+saysRemoveTag(as(speaker, Principal), as(path, AccessPath), as(tag, Tag)) :-
+    says_removeTag(speaker, path, tag).
+
+saysOwnsTag(as(speaker, Principal), as(owner, Principal), as(tag, Tag)) :-
+    says_ownsTag(speaker, owner, tag).
+
+saysHasTag(as(speaker, Principal), as(path, AccessPath), as(tag, Tag)) :-
+    says_hasTag(speaker, path, tag).
+
+saysMay(as(speaker, Principal), as(actor, Principal), as(usage, Usage),
+    as(tag, Tag)) :- says_may(speaker, actor, usage, tag).
+
+saysWill(as(speaker, Principal), as(usage, Usage), as(path, AccessPath)) :-
+    says_will(speaker, usage, path).
+
+#endif //SRC_ANALYSIS_SOUFFLE_AUTHORIZATION_LOGIC_TYPE_INTERFACE_DL_
