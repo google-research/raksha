@@ -18,7 +18,7 @@
 
 namespace raksha::utils {
 
-// See overloaded_test.cc for an example usage.   
+// See overloaded_test.cc for an example usage.
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 
 // Allows using in-place lambas for the different types of a variant when
