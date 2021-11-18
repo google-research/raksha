@@ -15,8 +15,8 @@
 // device.
 
 "UserA" says {
-  ownsTag("UserA_userSpeech").
-  ownsTag("UserA_speechTranscript").
+  ownsTag("UserA", "UserA_userSpeech").
+  ownsTag("UserA", "UserA_speechTranscript").
 
   // The user allows the userSpeech tag to just be dropped, or for any
   // action to be done with data owned by UserA. UserA grants permission for 
@@ -26,7 +26,7 @@
   
   // This says any tag, but because of how Raksha works internally, only 
   // permissions UserA gives about its own tags matter
-  "TrustedCompany" canSay PrincipalX may(anyActionX, userATagX) :-
+  "TrustedCompany" canSay may(PrincipalX, anyActionX, userATagX) :-
     isAction(anyActionX), isPrincipal(PrincipalX), isTag(userATagX).
 
   // This is stuff that needs to be generated behind the scenes
@@ -48,8 +48,8 @@
 // voice recorded only as a transcript and will only recognize authorities from
 // companies that they trust.
 "UserB" says {
-  ownsTag("UserB_userSpeech").
-  ownsTag("UserB_speechTranscript").
+  ownsTag("UserB", "UserB_userSpeech").
+  ownsTag("UserB", "UserB_speechTranscript").
   
   // UserB has a set of trusted companies that they have ongoing relationships
   // with.
@@ -59,10 +59,10 @@
   // used on-device and in-memory ("local_computation").
   // (In practice, PrincipalX is going to be any software module of 
   // "TrustedCompany"'s choosing).
-  "TrustedCompany" canSay PrincipalX
-    may("local_computation", "UserB_userSpeech") :- isPrincipal(PrincipalX).
-  "TrustedCompany" canSay PrincipalX
-    may("store", "UserB_speechTranscript") :- isPrincipal(PrincipalX).
+  "TrustedCompany" canSay
+    may(PrincipalX, "local_computation", "UserB_userSpeech") :- isPrincipal(PrincipalX).
+  "TrustedCompany" canSay
+    may(PrincipalX, "store", "UserB_speechTranscript") :- isPrincipal(PrincipalX).
   // UserB trusts TrustedCompany to properly transform userSpeech into just 
   // transcripts.
   "TrustedCompany" canSay downgrades(pathX, "UserB_userSpeech") :-
@@ -72,8 +72,8 @@
 
   // Audio can also be used to deliver notifications about the fact that there is a 
   // microphone in the room
-  "TrustedCompany" canSay PrincipalX
-    may("deliver_privacy_notifications", "UserB_userSpeech") :- 
+  "TrustedCompany" canSay
+    may(PrincipalX, "deliver_privacy_notifications", "UserB_userSpeech") :- 
         isPrincipal(PrincipalX).
   
   // This is stuff that needs to be generated behind the scenes
@@ -95,10 +95,10 @@
 // or to get notifications that their voice may be being recorded so they can
 // leave.
 "UserC" says {
-  ownsTag("UserC_userSpeech").
-  ownsTag("UserC_speechTranscript").
-  "TrustedCompany" canSay PrincipalX
-    may("deliver_privacy_notifications", "UserC_userSpeech") :-
+  ownsTag("UserC", "UserC_userSpeech").
+  ownsTag("UserC", "UserC_speechTranscript").
+  "TrustedCompany" canSay
+    may(PrincipalX, "deliver_privacy_notifications", "UserC_userSpeech") :-
         isPrincipal(PrincipalX).
 
   // Unlike UserB, UserC does NOT give any additional permissions for data
@@ -108,18 +108,18 @@
 // TrustedCompany delegates the needed permissions to the specific particles 
 // after having done review of the code in those particles.
 "TrustedCompany" says {
-  "Notifier" may("deliver_privacy_notifications", UserX_userSpeech) :-
+  may("Notifier", "deliver_privacy_notifications", UserX_userSpeech) :-
     // ideally, the "UserX_" Prefix would be a feature that allows us to just 
     // refer to the second part of the name and the "isUserSpeech" predicate would 
     // not be needed
     isUserSpeech(UserX_userSpeech).
-  "MicCompute" may("local_computation", UserX_userSpeech) :-
+  may("MicCompute", "local_computation", UserX_userSpeech) :-
     isUserSpeech(UserX_userSpeech).
   "MicCompute" canSay downgrades("asrStorageConn", UserX_userSpeech) :-
     isUserSpeech(UserX_userSpeech).
   "MicCompute" canSay hasTag("asrStorageConn", UserX_speechTranscript) :-
     isSpeechTranscript(UserX_speechTranscript).
-  "SpeechToTextStorageSink" may("store", UserX_speechTranscript) :-
+  may("SpeechToTextStorageSink", "store", UserX_speechTranscript) :-
     isSpeechTranscript(UserX_speechTranscript).
 
   // something like this needs to be generated "behind the scenes" for this to 
@@ -181,22 +181,22 @@
 
 // expect: true
 may_notifierA = query "UserA" says
-  "Notifier" may("deliver_privacy_notifications", "UserA_userSpeech")?
+  may("Notifier", "deliver_privacy_notifications", "UserA_userSpeech")?
 
 // expect: true
 may_notifierB = query "UserB" says
-  "Notifier" may("deliver_privacy_notifications", "UserB_userSpeech")?
+  may("Notifier", "deliver_privacy_notifications", "UserB_userSpeech")?
 
 // MicCompute taint:
 // audioIn: UserA_userSpeech, UserB_userSpeech
 
 // expect: true
 may_micComputeA = query "UserA" says
-    "MicCompute" may("local_computation", "UserA_userSpeech")?
+    may("MicCompute", "local_computation", "UserA_userSpeech")?
 
 // expect: true
 may_micComputeB = query "UserB" says
-    "MicCompute" may("local_computation", "UserB_userSpeech")?
+    may("MicCompute", "local_computation", "UserB_userSpeech")?
 
 // These are not checks generated by the "wills" but they test 
 // downgrades that need to work for speech to text to have the right tags
@@ -213,11 +213,11 @@ down_micComputeB = query "UserB" says
 
 // expect: true
 may_speechInA = query "UserA" says
-    "SpeechToTextStorageSink" may("store", "UserA_speechTranscript")?
+    may("SpeechToTextStorageSink", "store", "UserA_speechTranscript")?
 
 // expect: true
 may_speechInB = query "UserB" says
-    "SpeechToTextStorageSink" may("store", "UserB_speechTranscript")?
+    may("SpeechToTextStorageSink", "store", "UserB_speechTranscript")?
 
 
 //------------ Scenario 2: UserC enters the room.
@@ -228,11 +228,11 @@ may_speechInB = query "UserB" says
 
 // expect: true
 may_notifierC = query "UserC" says
-  "Notifier" may("deliver_privacy_notifications", "UserC_userSpeech")?
+  may("Notifier", "deliver_privacy_notifications", "UserC_userSpeech")?
 
 // expect: false -> MicCompute particle cannot run
 may_micComputeC = query "UserC" says
-    "MicCompute" may("local_computation", "UserC_userSpeech")?
+    may("MicCompute", "local_computation", "UserC_userSpeech")?
 
 // expect false -> MicCompute particle cannot run
 down_micComputeC = query "UserC" says
@@ -240,4 +240,4 @@ down_micComputeC = query "UserC" says
 
 // expect false -> SpeechToTextStorageSink cannot run
 may_speechToTextStorage = query "UserC" says
-    "SpeechToTextStorageSink" may("store", "UserC_speechTranscript")?
+    may("SpeechToTextStorageSink", "store", "UserC_speechTranscript")?
