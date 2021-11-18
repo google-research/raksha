@@ -21,16 +21,16 @@
 //          `ownsTag(Q, <TAG>)`
 //          `Q says P may <RELATION> using <TAG>`
 
-.decl permittedUsage(actor: Principal, usage: Usage, tag: Tag)
+.decl permittedUsage(actor: Principal, usage: Usage, owner: Principal, tag: Tag)
 
-permittedUsage(consumer, usage, tag) :- ownsTag(owner, tag),
+permittedUsage(consumer, usage, owner, tag) :- ownsTag(owner, tag),
     saysMay(owner, consumer, usage, tag).
 
-.decl disallowedUsage(dataConsumer: Principal, usage: Usage, tag: Tag)
+.decl disallowedUsage(dataConsumer: Principal, usage: Usage, owner: Principal, tag: Tag)
 
-disallowedUsage(dataConsumer, usage, tag) :-
-    saysWill(dataConsumer, usage, path), mayHaveTag(path, tag),
-    !permittedUsage(dataConsumer, usage, tag).
+disallowedUsage(dataConsumer, usage, owner, tag) :-
+    saysWill(dataConsumer, usage, path), mayHaveTag(path, owner, tag),
+    !permittedUsage(dataConsumer, usage, owner, tag).
 
 // This is a 0-ary relation that says all data usages are allowed. 
 // Because souffle does not have 0-ary relations, it uses one dummy variable.
@@ -38,7 +38,7 @@ disallowedUsage(dataConsumer, usage, tag) :-
 
 .decl isUsage(usage: Usage)
 
-allUsagesAllowed("dummy_var") :- !disallowedUsage(dataConsumer, usage, tag),
-    isPrincipal(dataConsumer), isUsage(usage), isTag(tag).
+allUsagesAllowed("dummy_var") :- !disallowedUsage(dataConsumer, usage, owner, tag),
+    isPrincipal(dataConsumer), isUsage(usage), isTag(tag), ownsTag(owner, tag).
 
 #endif // MAY_WILL_DL_

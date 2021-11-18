@@ -28,7 +28,8 @@ std::vector<DatalogString> GatherDatalogStrings() {
   for (const auto &[textproto, dl_string] :
       raksha::ir::predicate_textproto_to_rule_body_format) {
     results.push_back(DatalogString(
-        kDlRuleBody, absl::Substitute(dl_string, "example_ap")));
+        kDlRuleBody,
+        absl::Substitute(dl_string, "example_ap", "_")));
   }
   return results;
 }
