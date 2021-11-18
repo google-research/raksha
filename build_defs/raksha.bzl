@@ -92,7 +92,8 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
             "//src/analysis/souffle:dataflow_graph.dl",
             "//src/analysis/souffle:taint.dl",
             "//src/analysis/souffle:tags.dl",
-            "//src/analysis/souffle:may_will.dl"
+            "//src/analysis/souffle:may_will.dl",
+            "//src/analysis/souffle:auth_logic_type_interface.dl"
         ]
     )
     native.cc_test(

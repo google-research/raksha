@@ -41,9 +41,7 @@ AuthorizationLogicDatalogFacts::create(
   constexpr absl::string_view kRelationsToNotDeclare[] = {
       "says_ownsTag",
       "says_hasTag",
-      "says_canSay_hasTag",
       "says_removeTag",
-      "says_canSay_removeTag",
       "says_may",
       "says_will",
       "isAccessPath",

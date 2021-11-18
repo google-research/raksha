@@ -28,34 +28,17 @@
 
 // Some party asserts the claim that the label of an access path should
 // remove the referenced tag from the set.
-.decl says_removeTag(speaker: Principal, path: AccessPath, tag: Tag)
-
-// The `speaker` says that `delegatee` is allowed to indicate that a `path` does
-// not have a `tag`.
-.decl says_canSay_removeTag(
-  speaker: Principal, delegatee: Principal, path: AccessPath, tag: Tag)
-
-// Indicates that a speaker is allowed to say removeTag.
-.decl canSayRemoveTag(speaker: Principal, path: AccessPath, tag: Tag)
+.decl saysRemoveTag(speaker: Principal, path: AccessPath, tag: Tag)
 
 .decl isPrincipal(principal: Principal)
 
 // This party is the owner of a taint Tag (they have the privilege to remove
 // it).
 .decl ownsTag(owner: Principal, tag: Tag)
-
-.decl says_ownsTag(speaker: Principal, owner: Principal, tag: Tag)
+.decl saysOwnsTag(speaker: Principal, owner: Principal, tag: Tag)
 
 // The `speaker` says that `path` definitely has `tag` taint.
-.decl says_hasTag(speaker: Principal, path: AccessPath, tag: Tag)
-
-// The `speaker` says that the `delegatee` can say that `path` has `tag`.
-.decl says_canSay_hasTag(
-  speaker: Principal, delegatee: Principal, path: AccessPath, tag: Tag)
-
-// Indicates that a speaker is allowed to say a path has a particular tag.
-.decl canSayHasTag(speaker: Principal, path: AccessPath, tag: Tag)
-
+.decl saysHasTag(speaker: Principal, path: AccessPath, tag: Tag)
 // Indicates that a `tag` is definitely present upon a `path` because a speaker
 // delegated to by the owner said so.
 .decl hasTag(path: AccessPath, tag: Tag)
@@ -66,41 +49,23 @@
 // by the subset or equals relation), removing a tag from the set corresponds to
 // a downgrade by making set of tags on the access path "lower" in the order.
 .decl removeTag(path: AccessPath, tag: Tag)
+removeTag(path, tag) :- ownsTag(speaker, tag),
+    saysRemoveTag(speaker, path, tag).
 
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
 
-// The owner can always say removeTag.
-canSayRemoveTag(speaker, path, tag) :-
-    isAccessPath(path), ownsTag(speaker, tag).
-
-// If the owner says a speaker can say removeTag, the speaker can say
-// removeTag.
-canSayRemoveTag(speaker, path, tag) :-
-  ownsTag(owner, tag), says_canSay_removeTag(owner, speaker, path, tag).
-
-removeTag(path, tag) :-
-    canSayRemoveTag(speaker, path, tag), says_removeTag(speaker, path, tag).
-
-// The owner can say the tag is present anywhere.
-canSayHasTag(speaker, path, tag) :- isAccessPath(path), ownsTag(speaker, tag).
-
-// The speaker can also speak about the tag if the owner said so.
-canSayHasTag(speaker, path, tag) :-
-  ownsTag(owner, tag), says_canSay_hasTag(owner, speaker, path, tag).
-
 // The path has a tag if an authorized speaker says it does.
 hasTag(path, tag) :-
-  says_hasTag(speaker, path, tag), canSayHasTag(speaker, path, tag).
-
+  saysHasTag(speaker, path, tag), ownsTag(speaker, tag).
 // This rule says that any principal can say that another principal owns a tag.
 // This rule is just a starting point to allow all aspects of the policy to
 // come from authorization logic -- it is just a simple way to generate
 // ownsTag from something with a speaker. This rule is likely to change. It
 // does not rule out the case that two different principals claim ownership of
 // a tag.
-ownsTag(owner, tag) :- says_ownsTag(_, owner, tag).
+ownsTag(owner, tag) :- saysOwnsTag(_, owner, tag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
