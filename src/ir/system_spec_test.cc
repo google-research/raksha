@@ -47,18 +47,16 @@ TEST(GetParticleSpec, ReturnsStoredParticleSpec) {
   SystemSpec spec;
   spec.AddParticleSpec(
       ParticleSpec::Create("MyParticle", {}, {}, {}, {}, nullptr));
-  const ParticleSpec& stored_spec = spec.GetParticleSpec("MyParticle");
-  EXPECT_EQ(stored_spec.name(), "MyParticle");
+  const ParticleSpec* stored_spec = spec.GetParticleSpec("MyParticle");
+  EXPECT_EQ(stored_spec->name(), "MyParticle");
 }
 
 TEST(GetParticleSpec, FailsIfParticleSpecNotFound) {
   SystemSpec spec;
   spec.AddParticleSpec(
       ParticleSpec::Create("MyParticle", {}, {}, {}, {}, nullptr));
-  EXPECT_DEATH(spec.GetParticleSpec("MyPart"),
-               "No particle spec with name MyPart");
+  const ParticleSpec* stored_spec = spec.GetParticleSpec("MyPart");
+  EXPECT_EQ(stored_spec, nullptr);
 }
-
-
 
 }  // namespace raksha::ir

@@ -75,8 +75,8 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
       // Find the ParticleSpec referenced by this Particle. The information
       // contained in the spec will be needed for all facts produced within a
       // Particle.
-      const ir::ParticleSpec &particle_spec =
-          system_spec->GetParticleSpec(particle_spec_name);
+      const ir::ParticleSpec *particle_spec =
+          CHECK_NOTNULL(system_spec->GetParticleSpec(particle_spec_name));
 
       // Each ParticleSpec already contains lists of TagClaims, TagChecks,
       // and Edges that shall be generated for each Particle implementing that
@@ -124,7 +124,7 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
         // Look up the HandleConnectionSpec to see if the handle connection
         // will read and/or write.
         const ir::HandleConnectionSpec &handle_connection_spec =
-            particle_spec.getHandleConnectionSpec(handle_spec_name);
+            particle_spec->getHandleConnectionSpec(handle_spec_name);
         const bool handle_connection_reads = handle_connection_spec.reads();
         const bool handle_connection_writes = handle_connection_spec.writes();
 
@@ -153,7 +153,7 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
       }
 
       ir::InstantiatedParticleSpecFacts particle_spec_facts =
-          particle_spec.BulkInstantiate(instantiation_map);
+          particle_spec->BulkInstantiate(instantiation_map);
       result_claims.insert(
           result_claims.end(),
           std::move_iterator(particle_spec_facts.tag_claims.begin()),
