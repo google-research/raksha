@@ -32,10 +32,6 @@ class TagCheck {
   TagCheck(AccessPath access_path, const Predicate &predicate)
     : access_path_(std::move(access_path)), predicate_(&predicate) {}
 
-  TagCheck Instantiate(AccessPathRoot access_path_root) const {
-    return TagCheck(access_path_.Instantiate(access_path_root), *predicate_);
-  }
-
   // Print out the tag check as datalog facts. Note that this emits two
   // facts: an isCheck fact and a check fact. We produce a unique label for
   // each check using the DatalogPrintContext. We unconditionally add that
@@ -61,6 +57,8 @@ class TagCheck {
         ((predicate_ == other.predicate_) ||
          (*predicate_ == *other.predicate_));
   }
+
+  const AccessPath& access_path() const { return access_path_; }
 
  private:
   // The access path which is the subject of the check.
