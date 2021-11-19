@@ -31,6 +31,7 @@ cc_library(
         "edge.h",
         "handle_connection_spec.h",
         "particle_spec.h",
+        "system_spec.h",
         "predicate.h",
         "predicate_arena.h",
         "tag_check.h",
@@ -144,6 +145,15 @@ cc_test(
         ":ir",
         "//src/common/testing:gtest",
     ],
+)
+
+cc_test(
+    name = "system_spec_test",
+    srcs = ["system_spec_test.cc"],
+    deps = [
+        ":ir",
+        "//src/common/testing:gtest",
+    ]
 )
 
 cc_test(

@@ -13,21 +13,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
+#ifndef SRC_IR_PROTO_SYSTEM_SPEC_H_
+#define SRC_IR_PROTO_SYSTEM_SPEC_H_
 
-#ifndef SRC_IR_PROTO_PARTICLE_SPEC_H_
-#define SRC_IR_PROTO_PARTICLE_SPEC_H_
+#include "src/ir/proto/system_spec.h"
 
 #include <memory>
 
-#include "src/ir/particle_spec.h"
-#include "src/ir/predicate_arena.h"
-#include "third_party/arcs/proto/manifest.pb.h"
+#include "src/ir/proto/particle_spec.h"
+#include "src/ir/system_spec.h"
 
 namespace raksha::ir::proto {
 
-std::unique_ptr<ParticleSpec> Decode(std::unique_ptr<PredicateArena> arena,
-                                     const arcs::ParticleSpecProto &proto);
+std::unique_ptr<SystemSpec> Decode(const arcs::ManifestProto &manifest_proto) {
+  // Turn each ParticleSpecProto indicated in the manifest_proto into a
+  // ParticleSpec object, which we can use directly.
+  auto system_spec = std::make_unique<SystemSpec>();
+  for (const arcs::ParticleSpecProto &particle_spec_proto :
+       manifest_proto.particle_specs()) {
+    std::unique_ptr<ir::PredicateArena> arena =
+        std::make_unique<ir::PredicateArena>();
+    system_spec->AddParticleSpec(
+        ir::proto::Decode(std::move(arena), particle_spec_proto));
+  }
+  return system_spec;
+}
 
 }  // namespace raksha::ir::proto
 
-#endif  // SRC_IR_PROTO_PARTICLE_SPEC_H_
+#endif  // SRC_IR_PROTO_SYSTEM_SPEC_H_

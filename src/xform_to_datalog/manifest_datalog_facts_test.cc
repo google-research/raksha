@@ -21,6 +21,7 @@
 #include "absl/strings/substitute.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/datalog_print_context.h"
+#include "src/ir/proto/system_spec.h"
 #include "src/ir/single-use-arena-and-predicate.h"
 
 namespace raksha::xform_to_datalog {
@@ -272,12 +273,14 @@ class ParseBigManifestTest : public testing::Test {
     arcs::ManifestProto manifest_proto;
     google::protobuf::TextFormat::ParseFromString(
         kManifestTextproto, &manifest_proto);
+    system_spec_ = ir::proto::Decode(manifest_proto);
+    CHECK(system_spec_ != nullptr);
     datalog_facts_ = ManifestDatalogFacts::CreateFromManifestProto(
-        manifest_proto, registry_);
+        *system_spec_, manifest_proto);
   }
 
  protected:
-  ir::ParticleSpecRegistry registry_;
+  std::unique_ptr<ir::SystemSpec> system_spec_;
   ir::DatalogPrintContext ctxt_;
   ManifestDatalogFacts datalog_facts_;
 };

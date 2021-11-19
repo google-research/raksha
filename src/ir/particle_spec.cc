@@ -18,17 +18,16 @@
 
 namespace raksha::ir {
 
-const ParticleSpec *ParticleSpec::Create(
-      ParticleSpecRegistry &registry, std::string name,
-      std::vector<TagCheck> checks, std::vector<TagClaim> tag_claims,
-      std::vector<DerivesFromClaim> derives_from_claims,
-      std::vector<HandleConnectionSpec> handle_connection_specs,
-      std::unique_ptr<PredicateArena> predicate_arena) {
-  return registry.CaptureParticleSpec(std::unique_ptr<ParticleSpec>(
-      new ParticleSpec(
-          std::move(name), std::move(checks), std::move(tag_claims),
-          std::move(derives_from_claims), std::move(handle_connection_specs),
-          std::move(predicate_arena))));
+std::unique_ptr<ParticleSpec> ParticleSpec::Create(
+    std::string name, std::vector<TagCheck> checks,
+    std::vector<TagClaim> tag_claims,
+    std::vector<DerivesFromClaim> derives_from_claims,
+    std::vector<HandleConnectionSpec> handle_connection_specs,
+    std::unique_ptr<PredicateArena> predicate_arena) {
+  return std::unique_ptr<ParticleSpec>(new ParticleSpec(
+      std::move(name), std::move(checks), std::move(tag_claims),
+      std::move(derives_from_claims), std::move(handle_connection_specs),
+      std::move(predicate_arena)));
 }
 
 void ParticleSpec::GenerateEdges() {
