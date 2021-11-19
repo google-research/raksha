@@ -31,14 +31,6 @@
 
 namespace raksha::ir {
 
-// This struct is used to return the members of a ParticleSpec after being
-// instantiated.
-struct InstantiatedParticleSpecFacts {
-  std::vector<TagClaim> tag_claims;
-  std::vector<TagCheck> checks;
-  std::vector<Edge> edges;
-};
-
 // A class representing a ParticleSpec. This contains the relevant
 // information for the dataflow graph: checks, claims, and edges within the
 // ParticleSpec. All such information uses this ParticleSpec as the root.
@@ -67,22 +59,6 @@ class ParticleSpec {
       << "Could not find a HandleConnectionSpec with name " << hcs_name
       << " in ParticleSpec " << name_ << ".";
     return find_res->second;
-  }
-
-  InstantiatedParticleSpecFacts BulkInstantiate(
-      const absl::flat_hash_map<AccessPathRoot, AccessPathRoot>
-          &instantiation_map) const {
-    InstantiatedParticleSpecFacts result;
-    for (const TagCheck &check : checks_) {
-      result.checks.push_back(check.BulkInstantiate(instantiation_map));
-    }
-    for (const TagClaim &claim : tag_claims_) {
-      result.tag_claims.push_back(claim.BulkInstantiate(instantiation_map));
-    }
-    for (const Edge &edge : edges_) {
-      result.edges.push_back(edge.BulkInstantiate(instantiation_map));
-    }
-    return result;
   }
 
  private:
