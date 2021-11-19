@@ -58,8 +58,8 @@ class TagCheck {
   ownsAccessPath(owner, "$1"), $2.)";
     std::string check_label = ctxt.GetUniqueCheckLabel();
     return absl::Substitute(kCheckHasTagFormat, check_label,
-                            access_path_.ToString(),
-                            predicate_->ToDatalogRuleBody(access_path_));
+                            access_path_.ToDatalog(ctxt),
+                            predicate_->ToDatalogRuleBody(access_path_, ctxt));
   }
 
   bool operator==(const TagCheck &other) const {

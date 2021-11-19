@@ -36,10 +36,24 @@ TEST_P(DatalogFactsTest, IncludesManifestFactsWithCorrectPrefixAndSuffix) {
   EXPECT_EQ(datalog_facts.ToDatalog(ctxt), expected_string);
 }
 
+static std::unique_ptr<ir::ParticleSpec> particle_spec(ir::ParticleSpec::Create(
+    "particle",
+    /*checks=*/{},
+    /*tag_claims=*/
+    {ir::TagClaim(
+        "particle",
+        ir::AccessPath(ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
+                           "recipe", "particle", "out")),
+                       ir::AccessPathSelectors()),
+        true, "tag")},
+    /*derives_from_claims=*/{},
+    /*edges=*/{},
+    /*predicate_arena=*/nullptr));
+
 INSTANTIATE_TEST_SUITE_P(
     DatalogFactsTest, DatalogFactsTest,
     testing::Values(
-        std::make_tuple(ManifestDatalogFacts({}, {}, {}),
+        std::make_tuple(ManifestDatalogFacts({}, {}, {}, {}),
                         *(AuthorizationLogicDatalogFacts::create(
                             AuthorizationLogicTest::GetTestDataDir(),
                             "empty_auth_logic")),
@@ -73,12 +87,9 @@ saysMay(w, x, y, z) :- says_may(w, x, y, z).
 saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
-
 // Claims:
 
-
 // Checks:
-
 
 // Edges:
 
@@ -90,6 +101,7 @@ grounded_dummy("dummy_var").
 )"),
         std::make_tuple(
             ManifestDatalogFacts(
+                {ManifestDatalogFacts::Particle(particle_spec.get(), {}, {})},
                 {ir::TagClaim(
                     "particle",
                     ir::AccessPath(
@@ -99,8 +111,7 @@ grounded_dummy("dummy_var").
                     true, "tag")},
                 {}, {}),
             *(AuthorizationLogicDatalogFacts::create(
-                AuthorizationLogicTest::GetTestDataDir(),
-                "simple_auth_logic")),
+                AuthorizationLogicTest::GetTestDataDir(), "simple_auth_logic")),
             R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
@@ -131,12 +142,10 @@ saysMay(w, x, y, z) :- says_may(w, x, y, z).
 saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
-
 // Claims:
 says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(owner, "recipe.particle.out").
 
 // Checks:
-
 
 // Edges:
 

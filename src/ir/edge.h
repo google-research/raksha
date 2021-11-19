@@ -32,9 +32,10 @@ class Edge {
     : from_(std::move(from)), to_(std::move(to)) {}
 
   // Print the edge as a string containing a Datalog fact.
-  std::string ToDatalog(DatalogPrintContext &) const {
+  std::string ToDatalog(DatalogPrintContext &ctxt) const {
     constexpr absl::string_view kEdgeFormat = R"(edge("%s", "%s").)";
-    return absl::StrFormat(kEdgeFormat, from_.ToString(), to_.ToString());
+    return absl::StrFormat(kEdgeFormat, from_.ToDatalog(ctxt),
+                           to_.ToDatalog(ctxt));
   }
 
   bool operator==(const Edge &other) const {
