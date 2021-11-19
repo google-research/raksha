@@ -39,8 +39,8 @@ class ToDatalogRuleBodyTest :
         std::get<0>(GetParam());
 
     textproto_ = textproto;
-    expected_rule_body_ =
-        absl::Substitute(expected_rule_body_format, access_path_.ToString());
+    expected_rule_body_ = absl::Substitute(expected_rule_body_format,
+                                           access_path_.ToString(), "owner");
   }
 
  protected:

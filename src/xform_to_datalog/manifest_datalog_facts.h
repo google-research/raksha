@@ -24,7 +24,7 @@
 #include "src/ir/tag_check.h"
 #include "src/ir/tag_claim.h"
 #include "src/ir/datalog_print_context.h"
-#include "src/ir/particle_spec.h"
+#include "src/ir/system_spec.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::xform_to_datalog {
@@ -32,8 +32,8 @@ namespace raksha::xform_to_datalog {
 class ManifestDatalogFacts {
  public:
   static ManifestDatalogFacts CreateFromManifestProto(
-      const arcs::ManifestProto &manifest_proto,
-      ir::ParticleSpecRegistry &particle_spec_registry);
+      const ir::SystemSpec& system_spec,
+      const arcs::ManifestProto &manifest_proto);
 
   // A default constructor creates a sensible, legal state (no facts) and
   // allows a bit more flexibility in constructing objects within which

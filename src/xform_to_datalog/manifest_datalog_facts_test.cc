@@ -18,8 +18,10 @@
 
 #include <google/protobuf/text_format.h>
 
+#include "absl/strings/substitute.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/datalog_print_context.h"
+#include "src/ir/proto/system_spec.h"
 #include "src/ir/single-use-arena-and-predicate.h"
 
 namespace raksha::xform_to_datalog {
@@ -82,10 +84,11 @@ static std::tuple<ManifestDatalogFacts, std::string>
            ir::Edge(kHandleConnectionOutAccessPath, kHandleH2AccessPath)}),
       R"(
 // Claims:
-says_hasTag("particle", "recipe.particle.out", "tag").
+says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(owner, "recipe.particle.out").
 
 // Checks:
-isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("recipe.particle.in", "tag2").
+isCheck("check_num_0", "recipe.particle.in"). check("check_num_0", owner, "recipe.particle.in") :-
+  ownsAccessPath(owner, "recipe.particle.in"), mayHaveTag("recipe.particle.in", owner, "tag2").
 
 // Edges:
 edge("recipe.h1", "recipe.particle.in").
@@ -270,23 +273,25 @@ class ParseBigManifestTest : public testing::Test {
     arcs::ManifestProto manifest_proto;
     google::protobuf::TextFormat::ParseFromString(
         kManifestTextproto, &manifest_proto);
+    system_spec_ = ir::proto::Decode(manifest_proto);
+    CHECK(system_spec_ != nullptr);
     datalog_facts_ = ManifestDatalogFacts::CreateFromManifestProto(
-        manifest_proto, registry_);
+        *system_spec_, manifest_proto);
   }
 
  protected:
-  ir::ParticleSpecRegistry registry_;
+  std::unique_ptr<ir::SystemSpec> system_spec_;
   ir::DatalogPrintContext ctxt_;
   ManifestDatalogFacts datalog_facts_;
 };
 
 static const std::string kExpectedClaimStrings[] = {
-    R"(says_hasTag("PS1", "NamedR.PS1#0.out_handle.field1", "tag1").)",
-    R"(says_hasTag("PS1", "NamedR.PS1#1.out_handle.field1", "tag1").)",
-    R"(says_hasTag("PS2", "NamedR.PS2#2.out_handle.field1", "tag3").)",
-    R"(says_hasTag("PS1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", "tag1").)",
-    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "tag3").)",
-    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "tag3").)",
+    R"(says_hasTag("PS1", "NamedR.PS1#0.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "NamedR.PS1#0.out_handle.field1").)",
+    R"(says_hasTag("PS1", "NamedR.PS1#1.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "NamedR.PS1#1.out_handle.field1").)",
+    R"(says_hasTag("PS2", "NamedR.PS2#2.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "NamedR.PS2#2.out_handle.field1").)",
+    R"(says_hasTag("PS1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1").)",
+    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1").)",
+    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1").)",
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
@@ -301,13 +306,23 @@ TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
               testing::UnorderedElementsAreArray(kExpectedClaimStrings));
 }
 
+static constexpr absl::string_view kPattern =
+    R"(isCheck("$0", "$1"). check("$0", owner, "$1") :-
+  ownsAccessPath(owner, "$1"), mayHaveTag("$1", owner, "$2").)";
+
 static std::string kExpectedCheckStrings[] = {
-    R"(isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("NamedR.PS1#0.in_handle.field1", "tag2").)",
-    R"(isCheck("check_num_1"). check("check_num_1") :- mayHaveTag("NamedR.PS1#1.in_handle.field1", "tag2").)",
-    R"(isCheck("check_num_2"). check("check_num_2") :- mayHaveTag("NamedR.PS2#2.in_handle.field1", "tag4").)",
-    R"(isCheck("check_num_3"). check("check_num_3") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2").)",
-    R"(isCheck("check_num_4"). check("check_num_4") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4").)",
-    R"(isCheck("check_num_5"). check("check_num_5") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4").)",
+    absl::Substitute(kPattern, "check_num_0", "NamedR.PS1#0.in_handle.field1",
+                     "tag2"),
+    absl::Substitute(kPattern, "check_num_1", "NamedR.PS1#1.in_handle.field1",
+                     "tag2"),
+    absl::Substitute(kPattern, "check_num_2", "NamedR.PS2#2.in_handle.field1",
+                     "tag4"),
+    absl::Substitute(kPattern, "check_num_3",
+                     "GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2"),
+    absl::Substitute(kPattern, "check_num_4",
+                     "GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4"),
+    absl::Substitute(kPattern, "check_num_5",
+                     "GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4"),
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {

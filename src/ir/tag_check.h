@@ -53,9 +53,13 @@ class TagCheck {
   // passed. If it is not, at least one check failed.
   std::string ToDatalog(DatalogPrintContext &ctxt) const {
     constexpr absl::string_view kCheckHasTagFormat =
-        R"(isCheck("%s"). check("%s") :- %s.)";
+        R"(isCheck("%s", "%s"). check("%s", owner, "%s") :-
+  ownsAccessPath(owner, "%s"), %s.)";
     std::string check_label = ctxt.GetUniqueCheckLabel();
-    return absl::StrFormat(kCheckHasTagFormat, check_label, check_label,
+    return absl::StrFormat(kCheckHasTagFormat,
+                           check_label, access_path_.ToString(),
+                           check_label, access_path_.ToString(),
+                           access_path_.ToString(),
                            predicate_->ToDatalogRuleBody(access_path_));
   }
 

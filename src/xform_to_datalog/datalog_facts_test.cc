@@ -55,17 +55,17 @@ INSTANTIATE_TEST_SUITE_P(
 .output allTests(IO=stdout)
 .decl duplicateTestCaseNames(testAspectName: symbol)
 .output duplicateTestCaseNames(IO=stdout)
-
 .output disallowedUsage(IO=stdout)
 
-.decl isCheck(check_index: symbol)
-.decl check(check_index: symbol)
+.decl isCheck(check_index: symbol, path: AccessPath)
+.decl check(check_index: symbol, owner: Principal, path: AccessPath)
 
-allTests(check_index) :- isCheck(check_index).
-testFails(check_index) :-
-  isCheck(check_index), !check(check_index).
+allTests(check_index) :- isCheck(check_index, _).
+testFails(cat(check_index, "-", owner, "-", path)) :-
+  isCheck(check_index, path), ownsAccessPath(owner, path),
+  !check(check_index, owner, path).
 
-testFails("may_will") :- disallowedUsage(_, _, _). 
+testFails("may_will") :- disallowedUsage(_, _, _, _).
 
 .decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
 .decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
@@ -113,17 +113,17 @@ grounded_dummy("dummy_var").
 .output allTests(IO=stdout)
 .decl duplicateTestCaseNames(testAspectName: symbol)
 .output duplicateTestCaseNames(IO=stdout)
-
 .output disallowedUsage(IO=stdout)
 
-.decl isCheck(check_index: symbol)
-.decl check(check_index: symbol)
+.decl isCheck(check_index: symbol, path: AccessPath)
+.decl check(check_index: symbol, owner: Principal, path: AccessPath)
 
-allTests(check_index) :- isCheck(check_index).
-testFails(check_index) :-
-  isCheck(check_index), !check(check_index).
+allTests(check_index) :- isCheck(check_index, _).
+testFails(cat(check_index, "-", owner, "-", path)) :-
+  isCheck(check_index, path), ownsAccessPath(owner, path),
+  !check(check_index, owner, path).
 
-testFails("may_will") :- disallowedUsage(_, _, _). 
+testFails("may_will") :- disallowedUsage(_, _, _, _).
 
 .decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
 .decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
@@ -133,7 +133,7 @@ saysWill(w, x, y) :- says_will(w, x, y).
 // Manifest
 
 // Claims:
-says_hasTag("particle", "recipe.particle.out", "tag").
+says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(owner, "recipe.particle.out").
 
 // Checks:
 

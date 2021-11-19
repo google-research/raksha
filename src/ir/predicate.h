@@ -152,9 +152,9 @@ class Not : public Predicate {
   virtual ~Not() { }
 
   std::string ToDatalogRuleBody(const AccessPath &ap) const override {
-    constexpr absl::string_view kFormatString = R"(!(%s))";
-    return absl::StrFormat(
-        kFormatString, negated_predicate_->ToDatalogRuleBody(ap));
+    constexpr absl::string_view kFormatString = R"(isPrincipal(owner), !(%s))";
+    return absl::StrFormat(kFormatString,
+                           negated_predicate_->ToDatalogRuleBody(ap));
   }
 
   static PredicateKind GetKind() {
@@ -218,7 +218,7 @@ class TagPresence : public Predicate {
   // The tag presence just turns into a check for the tag on the access_path
   // in the mayHaveTag relation.
   std::string ToDatalogRuleBody(const AccessPath &access_path) const override {
-    constexpr absl::string_view kFormatStr = R"(mayHaveTag("%s", "%s"))";
+    constexpr absl::string_view kFormatStr = R"(mayHaveTag("%s", owner, "%s"))";
     return absl::StrFormat(kFormatStr, access_path.ToString(), tag_);
   }
 
