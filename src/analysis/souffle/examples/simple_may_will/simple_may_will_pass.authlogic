@@ -17,7 +17,7 @@
 
 "EndUser" says {
     ownsTag("EndUser", "rawVideo").
-    "P1" canSay hasTag(PathX, "rawVideo") :- isAccessPath(PathX).
+    "P1" canSay hasTag(PathX, "EndUser", "rawVideo") :- isAccessPath(PathX).
     may("P2", "doLocalComputation", "rawVideo").
 }
 

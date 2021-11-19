@@ -1,3 +1,6 @@
 "EndUser" says ownsTag("EndUser", "userSelection").
-"EndUser" says "P1" canSay hasTag(accessPathX, "userSelection") :- isAccessPath(accessPathX).
-"EndUser" says "P2" canSay removeTag(accessPathX, "userSelection") :- isAccessPath(accessPathX).
+//TODO(#220): This should be at the level of handles which correspond to stores,
+// where ownership makes more sense.
+"EndUser" says ownsAccessPath("EndUser", "R.P1#0.foo").
+"EndUser" says "P1" canSay hasTag(accessPathX, "EndUser", "userSelection") :- isAccessPath(accessPathX).
+"EndUser" says "P2" canSay removeTag(accessPathX, "EndUser", "userSelection") :- isAccessPath(accessPathX).

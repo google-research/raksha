@@ -17,7 +17,8 @@
 
 "EndUser" says {
     ownsTag("EndUser", "rawVideo").
-    "P1" canSay hasTag(PathX, "rawVideo") :- isAccessPath(PathX).
+    ownsAccessPath("EndUser", "R.P1#0.foo").
+    "P1" canSay hasTag(PathX, "EndUser", "rawVideo") :- isAccessPath(PathX).
 }
 
 // It would be better if we could change the manifest frontend and write it 

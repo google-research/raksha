@@ -40,6 +40,7 @@ AuthorizationLogicDatalogFacts::create(
   // prevent typos changing the interpretation of the list.
   constexpr absl::string_view kRelationsToNotDeclare[] = {
       "says_ownsTag",
+      "says_ownsAccessPath",
       "says_hasTag",
       "says_canSay_hasTag",
       "says_removeTag",

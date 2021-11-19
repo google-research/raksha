@@ -25,7 +25,8 @@
 #include "absl/flags/usage.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/datalog_print_context.h"
-#include "src/ir/particle_spec.h"
+#include "src/ir/proto/system_spec.h"
+#include "src/ir/system_spec.h"
 #include "src/xform_to_datalog/authorization_logic_datalog_facts.h"
 #include "src/xform_to_datalog/datalog_facts.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
@@ -86,9 +87,13 @@ int main(int argc, char *argv[]) {
     LOG(ERROR) << "Error parsing the manifest proto " << manifest_filepath;
   }
 
-  raksha::ir::ParticleSpecRegistry particle_spec_registry;
+  // Turn each ParticleSpecProto indicated in the manifest_proto into a
+  // ParticleSpec object, which we can use directly.
+  std::unique_ptr<raksha::ir::SystemSpec> system_spec =
+      raksha::ir::proto::Decode(manifest_proto);
+  CHECK(system_spec != nullptr);
   auto manifest_datalog_facts = ManifestDatalogFacts::CreateFromManifestProto(
-      manifest_proto, particle_spec_registry);
+      *system_spec, manifest_proto);
 
   std::filesystem::path auth_logic_filename = auth_logic_filepath.filename();
   auth_logic_filepath.remove_filename();
