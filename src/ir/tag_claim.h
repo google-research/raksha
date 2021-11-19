@@ -50,18 +50,6 @@ class TagClaim {
         tag_);
   }
 
-  // Allow this TagClaim to participate in a bulk instantiation of multiple
-  // uninstantiated AccessPaths.
-  TagClaim BulkInstantiate(
-      const absl::flat_hash_map<AccessPathRoot, AccessPathRoot>
-          &instantiation_map) const {
-    return TagClaim(
-        claiming_particle_name_,
-        access_path_.BulkInstantiate(instantiation_map),
-        claim_tag_is_present_,
-        tag_);
-  }
-
   // Produce a string containing a datalog fact for this TagClaim.
   std::string ToDatalog(DatalogPrintContext &ctxt) const {
     constexpr absl::string_view kClaimTagFormat =
