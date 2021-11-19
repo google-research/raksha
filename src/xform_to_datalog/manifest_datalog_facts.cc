@@ -37,9 +37,7 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
     const arcs::ManifestProto &manifest_proto) {
   // These collections will be used as inputs to the constructor that we
   // return from this function.
-  std::vector<ir::TagClaim> result_claims;
-  std::vector<ir::TagCheck> result_checks;
-  std::vector<ir::Edge> result_edges;
+  std::vector<Particle> particle_instances;
 
   // This loop looks at each recipe in the manifest proto and instantiates
   // the ParticleSpecs indicated by the ParticleProtos in that recipe. It
@@ -90,6 +88,7 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
       // that pair to the instantiation_map.
       absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
           instantiation_map;
+      std::vector<ir::Edge> particle_edges;
       for (const arcs::HandleConnectionProto &connection_proto :
         particle_proto.connections()) {
         const std::string &handle_spec_name = connection_proto.name();
@@ -139,39 +138,26 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
           // If the handle connection reads, draw a dataflow edge from the
           // handle to the handle connection.
           if (handle_connection_reads) {
-            result_edges.push_back(
+            particle_edges.push_back(
                 ir::Edge(handle_access_path, handle_connection_access_path));
           }
 
           // If the handle connection writes, draw a dataflow edge from the
           // handle connection to the handle.
           if (handle_connection_writes) {
-            result_edges.push_back(
+            particle_edges.push_back(
                 ir::Edge(handle_connection_access_path, handle_access_path));
           }
         }
       }
 
-      ir::InstantiatedParticleSpecFacts particle_spec_facts =
-          particle_spec.BulkInstantiate(instantiation_map);
-      result_claims.insert(
-          result_claims.end(),
-          std::move_iterator(particle_spec_facts.tag_claims.begin()),
-          std::move_iterator(particle_spec_facts.tag_claims.end()));
-      result_checks.insert(
-        result_checks.end(),
-        std::move_iterator(particle_spec_facts.checks.begin()),
-        std::move_iterator(particle_spec_facts.checks.end()));
-      result_edges.insert(
-        result_edges.end(),
-        std::move_iterator(particle_spec_facts.edges.begin()),
-        std::move_iterator(particle_spec_facts.edges.end()));
+      particle_instances.push_back(Particle(&particle_spec,
+                                            std::move(instantiation_map),
+                                            std::move(particle_edges)));
     }
   }
 
-  return ManifestDatalogFacts(std::move(result_claims),
-                              std::move(result_checks),
-                              std::move(result_edges));
+  return ManifestDatalogFacts(std::move(particle_instances));
 }
 
 }  // namespace raksha::xform_to_datalog

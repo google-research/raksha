@@ -28,7 +28,6 @@ saysMay(w, x, y, z) :- says_may(w, x, y, z).
 saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
-
 // Claims:
 says_hasTag("P1", "R.P1#0.foo", owner, "userSelection") :- ownsAccessPath(owner, "R.P1#0.foo").
 
@@ -42,6 +41,7 @@ edge("R.handle0", "R.P2#1.bar").
 edge("R.P2#1.foo", "R.handle1").
 edge("R.P2#1.bar", "R.P2#1.foo").
 edge("R.handle1", "R.P3#2.bar").
+
 
 // Authorization Logic
 
