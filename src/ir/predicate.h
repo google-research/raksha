@@ -112,9 +112,6 @@ class Implies : public Predicate {
   virtual ~Implies() { }
 
   std::string ToDatalogRuleBody(const AccessPath &ap) const override {
-    // To make it so that Souffle has first class information that our
-    // antecedent is the same in both places it is used, we assign it to a
-    // variable within the rule.
     std::string antecedent_str = antecedent_->ToDatalogRuleBody(ap);
     constexpr absl::string_view kFormatString =
         R"(!(%s); ((%s), (%s)))";
