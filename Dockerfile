@@ -35,7 +35,7 @@ RUN wget https://github.com/bazelbuild/bazelisk/releases/download/v1.10.1/bazeli
 ARG rustup_dir=/usr/local/cargo
 ENV RUSTUP_HOME ${rustup_dir}
 ENV CARGO_HOME ${rustup_dir}
-ENV PATH "${rustup_dir}/bin:${PATH}"
+ENV PATH "${PATH}:${rustup_dir}/bin"
 RUN curl --location https://sh.rustup.rs > /tmp/rustup \
   && sh /tmp/rustup -y --default-toolchain=none \
   && chmod a+rwx ${rustup_dir} \
