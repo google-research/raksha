@@ -91,8 +91,9 @@ int main(int argc, char *argv[]) {
   // ParticleSpec object, which we can use directly.
   std::unique_ptr<raksha::ir::SystemSpec> system_spec =
       raksha::ir::proto::Decode(manifest_proto);
+  CHECK(system_spec != nullptr);
   auto manifest_datalog_facts = ManifestDatalogFacts::CreateFromManifestProto(
-      system_spec.get(), manifest_proto);
+      *system_spec, manifest_proto);
 
   std::filesystem::path auth_logic_filename = auth_logic_filepath.filename();
   auth_logic_filepath.remove_filename();

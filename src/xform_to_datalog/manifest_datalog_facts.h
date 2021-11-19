@@ -32,7 +32,7 @@ namespace raksha::xform_to_datalog {
 class ManifestDatalogFacts {
  public:
   static ManifestDatalogFacts CreateFromManifestProto(
-      const ir::SystemSpec* system_spec,
+      const ir::SystemSpec& system_spec,
       const arcs::ManifestProto &manifest_proto);
 
   // A default constructor creates a sensible, legal state (no facts) and

@@ -274,8 +274,9 @@ class ParseBigManifestTest : public testing::Test {
     google::protobuf::TextFormat::ParseFromString(
         kManifestTextproto, &manifest_proto);
     system_spec_ = ir::proto::Decode(manifest_proto);
+    CHECK(system_spec_ != nullptr);
     datalog_facts_ = ManifestDatalogFacts::CreateFromManifestProto(
-        system_spec_.get(), manifest_proto);
+        *system_spec_, manifest_proto);
   }
 
  protected:
