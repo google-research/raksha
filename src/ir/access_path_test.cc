@@ -41,25 +41,6 @@ INSTANTIATE_TEST_SUITE_P(
     AccessPathToStringTest, AccessPathToStringTest,
     testing::ValuesIn(access_path_and_expected_tostring_pairs));
 
-TEST(InstantiateAccessPathTest, InstantiateAccessPathTest) {
-  AccessPath spec_access_path(
-      AccessPathRoot(
-          HandleConnectionSpecAccessPathRoot(
-              "particle_spec", "handle_connection")),
-      AccessPathSelectors(Selector(FieldSelector("x"))));
-  AccessPath access_path =
-      spec_access_path.Instantiate(
-          AccessPathRoot(
-              HandleConnectionAccessPathRoot("recipe", "particle", "handle")));
-  ASSERT_EQ(access_path.ToString(), "recipe.particle.handle.x");
-  ASSERT_DEATH(
-      access_path.Instantiate(
-          AccessPathRoot(
-              HandleConnectionAccessPathRoot(
-                  "recipe2", "particle2", "handle2"))),
-      "Attempt to instantiate an AccessPath that is already instantiated.");
-}
-
 class AccessPathEqualsTest :
  public testing::TestWithParam<
   std::tuple<

@@ -35,9 +35,6 @@ TEST_P(AccessPathFromProtoTest, AccessPathFromProtoTest) {
 
   AccessPathRoot root(
       HandleConnectionAccessPathRoot("recipe", "particle", "handle"));
-  ASSERT_EQ(
-      access_path.Instantiate(root).ToString(),
-      "recipe.particle.handle" + expected_tostring_suffix);
   ASSERT_DEATH(
       access_path.ToString(),
       "Attempted to print out an AccessPath before connecting it to a "

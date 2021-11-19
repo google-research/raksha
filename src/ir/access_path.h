@@ -31,17 +31,6 @@ class AccessPath {
                         access_path_selectors_.ToString());
   }
 
-  // Return a new AccessPath, identical to *this, except with the AccessPath
-  // root replaced with the indicated instantiated root. Note that this expects
-  // the current access path to not already be instantiated.
-  AccessPath Instantiate(AccessPathRoot new_root) const {
-    CHECK(!root_.IsInstantiated())
-      << "Attempt to instantiate an AccessPath that is already instantiated.";
-    CHECK(new_root.IsInstantiated())
-      << "Attempt to instantiate an AccessPath with an uninstantiated root.";
-    return AccessPath(std::move(new_root), access_path_selectors_);
-  }
-
   const AccessPathRoot &root() const { return root_; }
 
   const AccessPathSelectors &selectors() const {
