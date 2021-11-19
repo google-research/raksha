@@ -22,8 +22,6 @@ mod test {
     };
     use std::fs;
 
-    // TODO re-enable this. flakey in cloudbuild at the moment
-    // #[test]
     fn test_negation() {
         run_query_test(QueryTest {
             filename: "negation",

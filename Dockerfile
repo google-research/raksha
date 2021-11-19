@@ -49,7 +49,3 @@ RUN rustup toolchain install ${RUST_VERSION} \
 # Souffle is needed to run the tests in authorization logic
 RUN curl -s https://packagecloud.io/install/repositories/souffle-lang/souffle/script.deb.sh | bash
 RUN apt-get update && apt-get install -y souffle
-
-## TODO / WIP delete these. Used for local debugging with docker
-ADD rust rust
-ADD gcb gcb
