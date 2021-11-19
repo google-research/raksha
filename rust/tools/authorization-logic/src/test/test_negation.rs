@@ -22,6 +22,7 @@ mod test {
     };
     use std::fs;
 
+    #[test]
     fn test_negation() {
         run_query_test(QueryTest {
             filename: "negation",
