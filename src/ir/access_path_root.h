@@ -51,11 +51,6 @@ class HandleConnectionSpecAccessPathRoot {
     return "";
   }
 
-  // A HandleConnectionSpecAccessPathRoot has not been fully instantiated.
-  bool IsInstantiated() const {
-    return false;
-  }
-
   const std::string &particle_spec_name() const {
     return particle_spec_name_;
   }
@@ -101,11 +96,6 @@ class HandleConnectionAccessPathRoot {
       recipe_name_, particle_name_, handle_connection_name_ }, ".");
   }
 
-  // A HandleConnectionAccessPathRoot is instantiated.
-  bool IsInstantiated() const {
-    return true;
-  }
-
   bool operator==(const HandleConnectionAccessPathRoot &other) const {
     return (recipe_name_ == other.recipe_name_) &&
       (particle_name_ == other.particle_name_) &&
@@ -139,11 +129,6 @@ class HandleAccessPathRoot {
   // recipe_name_.handle_name_
   std::string ToString() const {
     return absl::StrJoin({recipe_name_, handle_name_}, ".");
-  }
-
-  // A HandleAccessPathRoot is instantiated.
-  bool IsInstantiated() const {
-    return true;
   }
 
   bool operator==(const HandleAccessPathRoot &other) const {
@@ -185,13 +170,6 @@ class AccessPathRoot {
   }
 
   std::string ToDatalog(const DatalogPrintContext &ctxt) const;
-
-  // Dispatch IsInstantiated to the specific kind of AccessPathRoot.
-  bool IsInstantiated() const {
-     return std::visit(
-        [](const auto &variant){ return variant.IsInstantiated(); },
-        specific_root_);
-  }
 
   bool operator==(const AccessPathRoot &other) const {
     return specific_root_ == other.specific_root_;
