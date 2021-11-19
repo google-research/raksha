@@ -53,7 +53,7 @@ static std::unique_ptr<ir::ParticleSpec> particle_spec(ir::ParticleSpec::Create(
 INSTANTIATE_TEST_SUITE_P(
     DatalogFactsTest, DatalogFactsTest,
     testing::Values(
-        std::make_tuple(ManifestDatalogFacts({}, {}, {}, {}),
+        std::make_tuple(ManifestDatalogFacts(),
                         *(AuthorizationLogicDatalogFacts::create(
                             AuthorizationLogicTest::GetTestDataDir(),
                             "empty_auth_logic")),
@@ -99,20 +99,12 @@ saysWill(w, x, y) :- says_will(w, x, y).
 grounded_dummy("dummy_var").
 
 )"),
-        std::make_tuple(
-            ManifestDatalogFacts(
-                {ManifestDatalogFacts::Particle(particle_spec.get(), {}, {})},
-                {ir::TagClaim(
-                    "particle",
-                    ir::AccessPath(
-                        ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
-                            "recipe", "particle", "out")),
-                        ir::AccessPathSelectors()),
-                    true, "tag")},
-                {}, {}),
-            *(AuthorizationLogicDatalogFacts::create(
-                AuthorizationLogicTest::GetTestDataDir(), "simple_auth_logic")),
-            R"(// GENERATED FILE, DO NOT EDIT!
+        std::make_tuple(ManifestDatalogFacts({ManifestDatalogFacts::Particle(
+                            particle_spec.get(), {}, {})}),
+                        *(AuthorizationLogicDatalogFacts::create(
+                            AuthorizationLogicTest::GetTestDataDir(),
+                            "simple_auth_logic")),
+                        R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
 #include "may_will.dl"

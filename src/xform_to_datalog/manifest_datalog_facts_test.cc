@@ -85,7 +85,7 @@ static std::unique_ptr<ir::ParticleSpec> particle_spec(ir::ParticleSpec::Create(
 
 static std::tuple<ManifestDatalogFacts, std::string>
     datalog_facts_and_output_strings[] = {
-        {ManifestDatalogFacts({}, {}, {}, {}),
+        {ManifestDatalogFacts(),
          R"(// Claims:
 
 // Checks:
@@ -93,36 +93,26 @@ static std::tuple<ManifestDatalogFacts, std::string>
 // Edges:
 
 )"},
-        {ManifestDatalogFacts(
-             {ManifestDatalogFacts::Particle(
-                 particle_spec.get(),
-                 /*instantiation_map*/
-                 {
-                     {ir::AccessPathRoot(ir::HandleConnectionSpecAccessPathRoot(
-                          "particle", "in")),
-                      ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
-                          "recipe", "particle", "in"))
+        {ManifestDatalogFacts({ManifestDatalogFacts::Particle(
+             particle_spec.get(),
+             /*instantiation_map*/
+             {
+                 {ir::AccessPathRoot(
+                      ir::HandleConnectionSpecAccessPathRoot("particle", "in")),
+                  ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
+                      "recipe", "particle", "in"))
 
-                     },
-                     {ir::AccessPathRoot(ir::HandleConnectionSpecAccessPathRoot(
-                          "particle", "out")),
-                      ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
-                          "recipe", "particle", "out"))
-
-                     },
                  },
-                 /*edges*/
-                 {ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),
-                  ir::Edge(kHandleConnectionOutAccessPath,
-                           kHandleH2AccessPath)})},
-             {ir::TagClaim("particle", kHandleConnectionOutAccessPath, true,
-                           "tag")},
-             {ir::TagCheck(kHandleConnectionInAccessPath,
-                           *kTag2Presence.predicate())},
+                 {ir::AccessPathRoot(ir::HandleConnectionSpecAccessPathRoot(
+                      "particle", "out")),
+                  ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
+                      "recipe", "particle", "out"))
+
+                 },
+             },
+             /*edges*/
              {ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),
-              ir::Edge(kHandleConnectionInAccessPath,
-                       kHandleConnectionOutAccessPath),
-              ir::Edge(kHandleConnectionOutAccessPath, kHandleH2AccessPath)}),
+              ir::Edge(kHandleConnectionOutAccessPath, kHandleH2AccessPath)})}),
          R"(// Claims:
 says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(owner, "recipe.particle.out").
 

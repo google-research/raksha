@@ -69,14 +69,8 @@ class ManifestDatalogFacts {
   // ManifestDatalogFacts are embedded.
   ManifestDatalogFacts() {}
 
-  ManifestDatalogFacts(std::vector<Particle> particle_instances,
-                       std::vector<raksha::ir::TagClaim> claims,
-                       std::vector<raksha::ir::TagCheck> checks,
-                       std::vector<raksha::ir::Edge> edges)
-      : particle_instances_(std::move(particle_instances)),
-        claims_(std::move(claims)),
-        checks_(std::move(checks)),
-        edges_(std::move(edges)) {}
+  ManifestDatalogFacts(std::vector<Particle> particle_instances)
+      : particle_instances_(std::move(particle_instances)) {}
 
   // Print out all contained facts as a single datalog string. Note: this
   // does not contain the header files that would be necessary to run this
@@ -115,12 +109,6 @@ class ManifestDatalogFacts {
     return result;
   }
 
-  const std::vector<raksha::ir::TagClaim> &claims() const { return claims_; }
-
-  const std::vector<raksha::ir::TagCheck> &checks() const { return checks_; }
-
-  const std::vector<raksha::ir::Edge> &edges() const { return edges_; }
-
  private:
   // Appends the list of elements as newline separated strings to target.
   template <typename T, typename U>
@@ -134,9 +122,6 @@ class ManifestDatalogFacts {
   }
 
   std::vector<Particle> particle_instances_;
-  std::vector<raksha::ir::TagClaim> claims_;
-  std::vector<raksha::ir::TagCheck> checks_;
-  std::vector<raksha::ir::Edge> edges_;
 };
 
 }  // namespace raksha::xform_to_datalog
