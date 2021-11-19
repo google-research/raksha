@@ -100,15 +100,11 @@ static std::tuple<ManifestDatalogFacts, std::string>
                  {ir::AccessPathRoot(
                       ir::HandleConnectionSpecAccessPathRoot("particle", "in")),
                   ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
-                      "recipe", "particle", "in"))
-
-                 },
+                      "recipe", "particle", "in"))},
                  {ir::AccessPathRoot(ir::HandleConnectionSpecAccessPathRoot(
                       "particle", "out")),
                   ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
-                      "recipe", "particle", "out"))
-
-                 },
+                      "recipe", "particle", "out"))},
              },
              /*edges*/
              {ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),

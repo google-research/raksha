@@ -24,7 +24,7 @@ class AccessPath {
     return absl::StrCat(root_.ToString(), access_path_selectors_.ToString());
   }
 
-  // Express the AccessPath as a string. This is accomplished by
+  // Express the AccessPath as a datalog string. This is accomplished by
   // concatenating the root string and the selectors string.
   std::string ToDatalog(const DatalogPrintContext &ctxt) const {
     return absl::StrCat(root_.ToDatalog(ctxt),

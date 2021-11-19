@@ -77,44 +77,40 @@ class ManifestDatalogFacts {
   // against the datalog scripts; it contains only facts and comments.
   std::string ToDatalog(raksha::ir::DatalogPrintContext &ctxt,
                         std::string separator = "\n") const {
-    auto todatalog_formatter = [&](std::string *out, const auto &arg) {
-      out->append(arg.ToDatalog(ctxt));
-    };
-    std::string claims_string;
-    std::string checks_string;
-    std::string edges_string;
+    std::string claims;
+    std::string checks;
+    std::string edges;
     for (const auto &particle : particle_instances_) {
       ctxt.set_instantiation_map(&particle.instantiation_map());
-      AppendElements(&claims_string, particle.spec()->tag_claims(), separator,
-                     todatalog_formatter);
-      AppendElements(&checks_string, particle.spec()->checks(), separator,
-                     todatalog_formatter);
-      AppendElements(&edges_string, particle.edges(), separator,
-                     todatalog_formatter);
-      AppendElements(&edges_string, particle.spec()->edges(), separator,
-                     todatalog_formatter);
+      AppendElements(&claims, ctxt, particle.spec()->tag_claims(), separator);
+      AppendElements(&checks, ctxt, particle.spec()->checks(), separator);
+      AppendElements(&edges, ctxt, particle.edges(), separator);
+      AppendElements(&edges, ctxt, particle.spec()->edges(), separator);
     }
 
     // Assemble the output and return the result.
     std::string result;
     absl::StrAppend(&result, absl::StrFormat("// Claims:%s", separator));
-    absl::StrAppend(&result, claims_string);
+    absl::StrAppend(&result, claims);
     absl::StrAppend(&result, separator);
     absl::StrAppend(&result, absl::StrFormat("// Checks:%s", separator));
-    absl::StrAppend(&result, checks_string);
+    absl::StrAppend(&result, checks);
     absl::StrAppend(&result, separator);
     absl::StrAppend(&result, absl::StrFormat("// Edges:%s", separator));
-    absl::StrAppend(&result, edges_string);
+    absl::StrAppend(&result, edges);
     absl::StrAppend(&result, separator);
     return result;
   }
 
  private:
   // Appends the list of elements as newline separated strings to target.
-  template <typename T, typename U>
-  static void AppendElements(std::string *target, const T &elements,
-                             const std::string& separator,
-                             const U &formatter) {
+  template <typename T>
+  static void AppendElements(std::string *target,
+                             raksha::ir::DatalogPrintContext &ctxt,
+                             const T &elements, const std::string &separator) {
+    auto formatter = [&ctxt](std::string *out, const auto &arg) {
+      out->append(arg.ToDatalog(ctxt));
+    };
     absl::StrAppend(target, absl::StrJoin(elements, separator, formatter));
     if (!elements.empty()) {
       absl::StrAppend(target, separator);
