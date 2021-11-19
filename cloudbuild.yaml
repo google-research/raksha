@@ -37,6 +37,17 @@ steps:
     - 'REPO_NAME=${REPO_NAME}'
     - 'COMMIT_SHA=${COMMIT_SHA}'
 
+# Run authorization logic tests 
+- id: 'auth_logic_tests'
+  waitFor: ['build-image']
+  name: '${_DOCKER_IMAGE}'
+  entrypoint: 'bash'
+  args: [
+    'cd rust/tools/authorization-logic &&',
+    'cargo', 'test'
+  ]
+
+
 timeout: 3600s # 60 mins, just in case.
 
 substitutions:

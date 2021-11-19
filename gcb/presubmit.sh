@@ -68,16 +68,3 @@ bazel_run build \
 
 # Run all the bazel tests (not cargo).
 bazel_run test //src/...
-
-# Run all the tests for authorization logic with `cargo test`
-AUTH_LOGIC_DIR="rust/tools/authorization-logic"
-INVOCATION_ID=`uuidgen`
-STATUS_MESSAGE="Required auth-logic tests"
-post_commit_status "${STATUS_MESSAGE}" "pending" ${INVOCATION_ID}
-cd ${AUTH_LOGIC_DIR}
-if cargo test
-then
-    post_commit_status "${STATUS_MESSAGE}" "success" ${INVOCATION_ID}
-else
-    post_commit_status "${STATUS_MESSAGE}" "failure" ${INVOCATION_ID}
-fi
