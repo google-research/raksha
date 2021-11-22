@@ -20,9 +20,10 @@
 #include "absl/strings/substitute.h"
 #include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
-#include "src/ir/single-use-arena-and-predicate.h"
+#include "src/ir/datalog_print_context.h"
 #include "src/ir/predicate_textproto_to_rule_body_testdata.h"
 #include "src/ir/proto/predicate.h"
+#include "src/ir/single-use-arena-and-predicate.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
@@ -52,12 +53,13 @@ class ToDatalogRuleBodyTest :
 };
 
 TEST_P(ToDatalogRuleBodyTest, ToDatalogRuleBodyTest) {
+  DatalogPrintContext ctxt;
   arcs::InformationFlowLabelProto_Predicate predicate_proto;
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
       textproto_, &predicate_proto));
   const Predicate &predicate = *predicate_decoder_.Decode(predicate_proto);
   EXPECT_EQ(
-      predicate.ToDatalogRuleBody(access_path_), expected_rule_body_);
+      predicate.ToDatalogRuleBody(access_path_, ctxt), expected_rule_body_);
 }
 
 // Helper for making AccessPaths.

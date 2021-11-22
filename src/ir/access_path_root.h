@@ -27,6 +27,8 @@
 // ParticleSpec and a Handle in a Particle, respectively.
 namespace raksha::ir {
 
+class DatalogPrintContext;
+
 // A HandleConnectionSpecAccessPathRoot describes the root as a
 // HandleConnectionSpec in a ParticleSpec. We consider this uninstantiated as
 // ParticleSpecs are abstract Particles which may be instantiated in multiple
@@ -181,6 +183,8 @@ class AccessPathRoot {
     return std::visit(
         [](const auto &variant){ return variant.ToString(); }, specific_root_);
   }
+
+  std::string ToDatalog(const DatalogPrintContext &ctxt) const;
 
   // Dispatch IsInstantiated to the specific kind of AccessPathRoot.
   bool IsInstantiated() const {

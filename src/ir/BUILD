@@ -22,6 +22,7 @@ load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
 cc_library(
     name = "ir",
     srcs = [
+        "access_path_root.cc",
         "particle_spec.cc",
         "predicate.cc",
     ],
@@ -31,9 +32,9 @@ cc_library(
         "edge.h",
         "handle_connection_spec.h",
         "particle_spec.h",
-        "system_spec.h",
         "predicate.h",
         "predicate_arena.h",
+        "system_spec.h",
         "tag_check.h",
         "tag_claim.h",
     ],
@@ -153,7 +154,7 @@ cc_test(
     deps = [
         ":ir",
         "//src/common/testing:gtest",
-    ]
+    ],
 )
 
 cc_test(
