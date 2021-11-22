@@ -52,6 +52,30 @@
 // of the taint analysis).
 .decl claimNotEdge(principal: Principal, src: AccessPath, dst: AccessPath)
 
+// Indicates that an AccessPath is given an integrity tag directly. This rule
+// should only be populated with base facts with no derivation to prevent us
+// from getting tangled up in stratification issues. Propagation will happen
+// via the mayHaveInvIntegTag rule.
+.decl directHasIntegTag(accessPath: AccessPath, integTag: IntegTag)
+
+// Integrity tag universe.
+.decl isIntegTag(integTag: IntegTag)
+
+// Removes an integrity tag from some path. Effectively adds an InvIntegTag.
+.decl removeIntegTag(accessPath: AccessPath, integTag: IntegTag)
+
+// Indicates that a particular tag may have an inverse integrity tag, which
+// indicates that it should not have an integrity tag.
+.decl mayHaveInvIntegTag(accessPath: AccessPath, invIntegTag: InvIntegTag)
+
+// Used to test whether a particular path has a particular integrity tag.
+// Should be used as close to top-level checks as possible, and not for
+// propagation, to prevent stratification issues.
+.decl mustHaveIntegTag(accessPath: AccessPath, integTag: IntegTag)
+
+// Maps between integrity tags and inverse integrity tags.
+.decl integTagToInv(integTag: IntegTag, invIntegTag: InvIntegTag)
+
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
@@ -70,6 +94,37 @@ mayHaveTag(tgt, owner, tag) :- hasTag(tgt, owner, tag).
 
 mayHaveTag(tgt, owner, tag) :-
     resolvedEdge(owner, src, tgt), mayHaveTag(src, owner, tag), !removeTag(tgt, owner, tag).
+
+// Integrity tag rules.
+
+isIntegTag(integTag) :- directHasIntegTag(_, integTag).
+
+// The inverse integrity tag is the same text as the integrity tag except with
+// a '!' in front of it.
+integTagToInv(integTag, cat("!", integTag)) :- isIntegTag(integTag).
+
+// Introduce an inverse integrity tag at any access point that has no incoming
+// edges and is not directly given the corresponding integrity tag.
+mayHaveInvIntegTag(ap, invIntegTag) :-
+  isAccessPath(ap), integTagToInv(integTag, invIntegTag), !edge(_, ap),
+  !directHasIntegTag(ap, integTag).
+
+// Introduce inverse integrity tag wherever a corresponding integrity tag is
+// removed.
+mayHaveInvIntegTag(ap, invIntegTag) :-
+  isAccessPath(ap), integTagToInv(integTag, invIntegTag),
+  removeIntegTag(ap, integTag).
+
+// Propagate inverse integrity tags along edges to any destination that did not
+// have an integrity tag directly added.
+mayHaveInvIntegTag(dst, invIntegTag) :-
+  isAccessPath(src), isAccessPath(dst), edge(src, dst), mayHaveInvIntegTag(src, invIntegTag),
+  integTagToInv(integTag, invIntegTag), !directHasIntegTag(dst, integTag).
+
+// An access path must have an integrity tag if it may not have the
+// corresponding inverse integrity tag.
+mustHaveIntegTag(ap, integTag) :-
+  isAccessPath(ap), integTagToInv(integTag, invIntegTag), !mayHaveInvIntegTag(ap, invIntegTag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
