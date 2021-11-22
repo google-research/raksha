@@ -40,23 +40,22 @@ class ManifestDatalogFacts {
   // where the instance of a particle will be clear from the visit context.
   class Particle {
    public:
-    Particle(const raksha::ir::ParticleSpec *spec,
-             absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
+    Particle(const ir::ParticleSpec *spec,
+             ir::DatalogPrintContext::AccessPathInstantiationMap
                  &&instantiation_map,
              std::vector<ir::Edge> &&edges)
-        : spec_(spec),
-          instantiation_map_(instantiation_map),
-          edges_(edges) {}
+        : spec_(spec), instantiation_map_(instantiation_map), edges_(edges) {}
 
-    const raksha::ir::ParticleSpec *spec() const { return spec_; }
-    const absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>&
-        instantiation_map() const { return instantiation_map_; }
+    const ir::ParticleSpec *spec() const { return spec_; }
+    const ir::DatalogPrintContext::AccessPathInstantiationMap &
+    instantiation_map() const {
+      return instantiation_map_;
+    }
     const std::vector<ir::Edge> &edges() const { return edges_; }
 
    private:
-    const raksha::ir::ParticleSpec *spec_;
-    absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
-        instantiation_map_;
+    const ir::ParticleSpec *spec_;
+    ir::DatalogPrintContext::AccessPathInstantiationMap instantiation_map_;
     std::vector<ir::Edge> edges_;
   };
 

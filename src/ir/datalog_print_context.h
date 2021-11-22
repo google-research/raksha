@@ -28,6 +28,9 @@ namespace raksha::ir {
 // unique labels.
 class DatalogPrintContext {
  public:
+  using AccessPathInstantiationMap =
+      absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>;
+
   DatalogPrintContext() : check_counter_(0), instantiation_map_(nullptr) {}
 
   // DatalogPrintContext is not copyable, as we need a single copy to be the
@@ -41,20 +44,17 @@ class DatalogPrintContext {
   }
 
   void set_instantiation_map(
-      const absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
-          *instantiation_map) {
+      const AccessPathInstantiationMap *instantiation_map) {
     instantiation_map_ = instantiation_map;
   }
 
-  const absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
-      *instantiation_map() const {
+  const AccessPathInstantiationMap *instantiation_map() const {
     return instantiation_map_;
   }
 
  private:
   uint64_t check_counter_;
-  const absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
-      *instantiation_map_;
+  const AccessPathInstantiationMap *instantiation_map_;
 };
 
 }  // namespace raksha::ir

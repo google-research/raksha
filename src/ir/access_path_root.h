@@ -17,8 +17,8 @@
 #ifndef SRC_IR_ACCESS_PATH_ROOT_H_
 #define SRC_IR_ACCESS_PATH_ROOT_H_
 
-#include "absl/types/variant.h"
 #include "absl/strings/str_join.h"
+#include "absl/types/variant.h"
 #include "src/common/logging/logging.h"
 
 // The classes in this file describe the root of an AccessPath. At the moment,
