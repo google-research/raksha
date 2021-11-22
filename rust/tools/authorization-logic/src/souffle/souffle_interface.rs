@@ -40,6 +40,7 @@ pub fn emit_souffle(filename: &str) {
 /// translates it to datalogIR, and emits souffle code to a new file with the
 /// same name as the input but with the .dl extension in the out_dir
 pub fn input_to_souffle_file(filename: &str, in_dir: &str, out_dir: &str) {
+    println!("{}", &format!("indir: {}/{}", in_dir, filename));
     let source = fs::read_to_string(&format!("{}/{}", in_dir, filename))
         .expect("failed to read input in input_to_souffle_file");
     let prog = astconstructionvisitor::parse_program(&source[..]);

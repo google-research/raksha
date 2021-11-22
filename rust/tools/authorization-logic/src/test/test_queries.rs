@@ -24,21 +24,36 @@ pub mod test {
     /// to the boolean values they should have.
     pub struct QueryTest<'a> {
         pub filename: &'a str,
-        pub query_expects: Vec<(&'a str, bool)>, /* Query_expects is a vec not a HashMap because
-                                                  * there is no hashmap! macro for constructing
-                                                  * HashMap literals. There are crates providing
-                                                  * this macro, but limiting dependencies is
-                                                  * better for security/verification */
+        pub input_dir: &'a str,
+        pub output_dir: &'a str,
+        pub query_expects: Vec<(&'a str, bool)>,
+        /* Query_expects is a vec not a HashMap because
+         * there is no hashmap! macro for constructing
+         * HashMap literals. There are crates providing
+         * this macro, but limiting dependencies is
+         * better for security/verification
+        */
+    }
+
+    impl Default for QueryTest<'_> {
+        fn default() -> Self {
+            QueryTest {
+                filename: "",
+                input_dir: "test_inputs",
+                output_dir: "test_outputs",
+                query_expects: Vec::new(),
+            }
+        }
     }
 
     pub fn run_query_test(t: QueryTest) {
         input_to_souffle_file(
             &t.filename.to_string(),
-            &"test_inputs".to_string(),
-            &"test_outputs".to_string(),
+            &t.input_dir.to_string(),
+            &t.output_dir.to_string(),
         );
         run_souffle(
-            &format!("test_outputs/{}.dl", t.filename),
+            &format!("{}/{}.dl", t.output_dir, t.filename),
             &"test_outputs".to_string(),
         );
         for (qname, intended_result) in t.query_expects {
@@ -66,6 +81,7 @@ pub mod test {
                 ("q_prin1_fact2", false),
                 ("q_prin2_fact1", false),
             ],
+            ..Default::default()
         });
     }
 
@@ -81,6 +97,7 @@ pub mod test {
                 ("q_undel1_t", true),
                 ("q_undel2_f", false),
             ],
+            ..Default::default()
         });
     }
 
@@ -89,6 +106,7 @@ pub mod test {
         run_query_test(QueryTest {
             filename: "canActAs",
             query_expects: vec![("q_chicken", true), ("q_ketchup", false)],
+            ..Default::default()
         });
     }
 }
