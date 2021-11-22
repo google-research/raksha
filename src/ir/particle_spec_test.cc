@@ -30,7 +30,7 @@ struct ParticleSpecProtoAndExpectedInfo {
   std::string textproto;
   std::string expected_name;
   std::vector<TagClaim> expected_claims;
-  std::vector<TagCheck> expected_checks;
+  std::vector<const TagCheck*> expected_checks;
   std::vector<Edge> expected_edges;
 };
 
@@ -86,19 +86,28 @@ static AccessPathSelectors MakeSingleFieldSelectors(
       std::move(field_name))));
 }
 
-// Tag presence predicates for constructing checks.
-static const ir::SingleUseArenaAndTagPresence kTag1Present("tag1");
-static const ir::SingleUseArenaAndTagPresence kTag2Present("tag2");
+// Tags for constructing checks.
+static constexpr absl::string_view kTag1 = "tag1";
+static constexpr absl::string_view kTag2 = "tag2";
+static const std::unique_ptr<TagCheck> kTag1Check = std::make_unique<TagCheck>(
+    ir::AccessPath(kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
+    std::make_unique<TagPresence>("tag1"));
+static const std::unique_ptr<TagCheck> kTag2Check = std::make_unique<TagCheck>(
+    ir::AccessPath(kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
+    std::make_unique<TagPresence>("tag2"));
 
 static ParticleSpecProtoAndExpectedInfo spec_proto_and_expected_info[] = {
-    { .textproto = R"(name: "p_spec")", .expected_name = "p_spec",
-      .expected_claims = { }, .expected_checks = { },  .expected_edges = { } },
-    { .textproto = R"(
+    {.textproto = R"(name: "p_spec")",
+     .expected_name = "p_spec",
+     .expected_claims = {},
+     .expected_checks = {},
+     .expected_edges = {}},
+    {.textproto = R"(
 name: "PS1" connections: [
   {
     name: "out_handle" direction: WRITES
     type: {
-      entity: {
+[21~      entity: {
         schema: {
           fields: [
             { key: "field1", value: { primitive: TEXT } },
@@ -112,40 +121,37 @@ name: "PS1" connections: [
           fields: [
             { key: "field2", value: { primitive: TEXT } },
             { key: "world", value: { primitive: TEXT } } ] } } } } ])",
-    .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
-    .expected_edges = {
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        Edge(
-          AccessPath(
-              kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-          AccessPath(
-              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        Edge(
-          AccessPath(
-              kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-          AccessPath(
-              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-    } },
-        { .textproto = R"(
+     .expected_name = "PS1",
+     .expected_claims = {},
+     .expected_checks = {},
+     .expected_edges =
+         {
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field1"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field2"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field3"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("world")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field1"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("world")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field2"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("world")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field3"))),
+         }},
+    {.textproto = R"(
 name: "PS1"
 connections: [
   {
@@ -173,35 +179,33 @@ claims: [
       source: {
         handle: { particle_spec: "PS1" handle_connection: "in_handle" }
         selectors: { field: "field2" } } } } ])",
-    .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
-    .expected_edges = {
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        Edge(
-          AccessPath(
-              kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-          AccessPath(
-              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        Edge(
-          AccessPath(
-              kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-          AccessPath(
-              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-    } },
-    { .textproto = R"(
+     .expected_name = "PS1",
+     .expected_claims = {},
+     .expected_checks = {},
+     .expected_edges =
+         {
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field1"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field2"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field3"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("world")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field1"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("world")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field3"))),
+         }},
+    {.textproto = R"(
 name: "PS1"
 connections: [
   {
@@ -237,30 +241,29 @@ claims: [
         handle: { particle_spec: "PS1" handle_connection: "in_handle" }
         selectors: { field: "world" } } } }
  ])",
-    .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
-    .expected_edges = {
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        Edge(
-          AccessPath(
-              kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-          AccessPath(
-              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        Edge(
-          AccessPath(
-              kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-          AccessPath(
-              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-    } },
-    { .textproto = R"(
+     .expected_name = "PS1",
+     .expected_claims = {},
+     .expected_checks = {},
+     .expected_edges =
+         {
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field2"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field3"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("world")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field1"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("world")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field3"))),
+         }},
+    {.textproto = R"(
 name: "PS1"
 connections: [
   {
@@ -303,35 +306,33 @@ claims: [
         handle: { particle_spec: "PS1" handle_connection: "in_handle" }
         selectors: { field: "world" } } } }
  ])",
-    .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
-    .expected_edges = {
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        Edge(
-          AccessPath(
-              kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-          AccessPath(
-              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        Edge(
-          AccessPath(
-              kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-          AccessPath(
-              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-    } },
-    { .textproto = R"(
+     .expected_name = "PS1",
+     .expected_claims = {},
+     .expected_checks = {},
+     .expected_edges =
+         {
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field2"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("world")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field2"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field3"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("world")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field1"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("world")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field3"))),
+         }},
+    {.textproto = R"(
 name: "PS1"
 connections: [
   {
@@ -374,25 +375,25 @@ claims: [
         handle: { particle_spec: "PS1" handle_connection: "in_handle" }
         selectors: { field: "field2" } } } }
  ])",
-    .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
-    .expected_edges = {
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field2"))),
-        Edge(
-          AccessPath(
-              kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-          AccessPath(
-              kPs1OutHandleRoot, MakeSingleFieldSelectors("field3"))),
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("world")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-    } },
-    { .textproto = R"(
+     .expected_name = "PS1",
+     .expected_claims = {},
+     .expected_checks = {},
+     .expected_edges =
+         {
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field2"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field3"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("world")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field1"))),
+         }},
+    {.textproto = R"(
 name: "PS1" connections: [
   {
     name: "out_handle" direction: WRITES
@@ -415,31 +416,29 @@ name: "PS1" connections: [
           schema: {
             fields: [
               { key: "field3", value: { primitive: TEXT } } ] } } } } ] )",
-    .expected_name = "PS1", .expected_claims = { }, .expected_checks = { },
-    .expected_edges = {
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            AccessPath(
-                kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        Edge(
-            AccessPath(
-                kPs1InHandleRoot, MakeSingleFieldSelectors("field2")),
-            AccessPath(
-                kPs1InOutHandleRoot, MakeSingleFieldSelectors("field3"))),
-        Edge(
-          AccessPath(
-              kPs1InOutHandleRoot, MakeSingleFieldSelectors("field3")),
-          AccessPath(
-              kPs1OutHandleRoot, MakeSingleFieldSelectors("field1"))),
-        Edge(
-          AccessPath(
-              kPs1InOutHandleRoot, MakeSingleFieldSelectors("field3")),
-          AccessPath(
-              kPs1InOutHandleRoot, MakeSingleFieldSelectors("field3"))),
-    } },
-    {
-      .textproto = R"(
+     .expected_name = "PS1",
+     .expected_claims = {},
+     .expected_checks = {},
+     .expected_edges =
+         {
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field1"))),
+             Edge(AccessPath(kPs1InHandleRoot,
+                             MakeSingleFieldSelectors("field2")),
+                  AccessPath(kPs1InOutHandleRoot,
+                             MakeSingleFieldSelectors("field3"))),
+             Edge(AccessPath(kPs1InOutHandleRoot,
+                             MakeSingleFieldSelectors("field3")),
+                  AccessPath(kPs1OutHandleRoot,
+                             MakeSingleFieldSelectors("field1"))),
+             Edge(AccessPath(kPs1InOutHandleRoot,
+                             MakeSingleFieldSelectors("field3")),
+                  AccessPath(kPs1InOutHandleRoot,
+                             MakeSingleFieldSelectors("field3"))),
+         }},
+    {.textproto = R"(
 name: "PS2"
 checks: [ {
   access_path: {
@@ -455,22 +454,19 @@ checks: [ {
        handle_connection: "hc2" },
      selectors: { field: "field2" } },
    predicate: { label: { semantic_tag: "tag2"} } } ])",
-      .expected_name = "PS2",
-      .expected_claims = { },
-      .expected_checks = {
-          ir::TagCheck(
-             ir::AccessPath(
-                 kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
-             *kTag1Present.predicate()),
-         ir::TagCheck(
-             ir::AccessPath(
-                 kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
-             *kTag2Present.predicate()),
-      },
-      .expected_edges = { }
-    },
-    {
-      .textproto = R"(
+     .expected_name = "PS2",
+     .expected_claims = {},
+     .expected_checks = { kTag1Check.get(), kTag2Check.get() },
+         // {
+         //     ir::TagCheck(ir::AccessPath(kPs2HcHandleRoot,
+         //                                 MakeSingleFieldSelectors("field1")),
+         //                  std::make_unique<TagPresence>("tag1")),
+         //     ir::TagCheck(ir::AccessPath(kPs2Hc2HandleRoot,
+         //                                 MakeSingleFieldSelectors("field2")),
+         //                  std::make_unique<TagPresence>("tag2")),
+         // },
+     .expected_edges = {}},
+    {.textproto = R"(
 name: "PS2"
 claims: [ { assume: {
   access_path: {
@@ -486,25 +482,18 @@ claims: [ { assume: {
         handle_connection: "hc2" },
       selectors: { field: "field2" } },
     predicate: { label: { semantic_tag: "tag2"} } } } ])",
-      .expected_name = "PS2",
-      .expected_claims = {
+     .expected_name = "PS2",
+     .expected_claims =
+         {TagClaim(
+              "PS2",
+              AccessPath(kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
+              true, "tag1"),
           TagClaim(
               "PS2",
-              AccessPath(
-                  kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
-              true,
-              "tag1"),
-          TagClaim(
-              "PS2",
-              AccessPath(
-                  kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
-              true,
-              "tag2")
-      },
-      .expected_checks = { },
-      .expected_edges = { }
-    }
-};
+              AccessPath(kPs2Hc2HandleRoot, MakeSingleFieldSelectors("field2")),
+              true, "tag2")},
+     .expected_checks = {},
+     .expected_edges = {}}};
 
 INSTANTIATE_TEST_SUITE_P(
     ParticleSpecFromProtoTest, ParticleSpecFromProtoTest,

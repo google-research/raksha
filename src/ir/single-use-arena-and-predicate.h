@@ -25,28 +25,32 @@ namespace raksha::ir {
 // without introducing mutable global state. It constructs an arena, uses it
 // to construct a single predicate, and holds both the constructed arena and
 // the predicate. This should only be used for tests.
-template<class T, class ...CtorArgs>
-class SingleUseArenaAndPredicate {
- public:
-  SingleUseArenaAndPredicate(CtorArgs... args)
-    : arena_(), predicate_(T::Create(arena_, args...)) { }
+// template<class T, class ...CtorArgs>
+// class SingleUseArenaAndPredicate {
+//  public:
+//   SingleUseArenaAndPredicate(CtorArgs... args)
+//     : arena_(), predicate_(T::Create(args...)) { }
 
-  const T *predicate() const { return predicate_; }
+//   const T *predicate() const { return predicate_.get(); }
 
- private:
-  PredicateArena arena_;
-  const T *predicate_;
-};
+//  private:
+//   PredicateArena arena_;
+//   std::unique_ptr<T> predicate_;
+// };
 
-using SingleUseArenaAndTagPresence =
-    SingleUseArenaAndPredicate<TagPresence, std::string>;
-using SingleUseArenaAndAnd =
-    SingleUseArenaAndPredicate<And, const Predicate *, const Predicate *>;
-using SingleUseArenaAndImplies =
-    SingleUseArenaAndPredicate<Implies, const Predicate *, const Predicate *>;
-using SingleUseArenaAndNot = SingleUseArenaAndPredicate<Not, const Predicate *>;
-using SingleUseArenaAndOr =
-    SingleUseArenaAndPredicate<Or, const Predicate *, const Predicate *>;
+// using SingleUseArenaAndTagPresence =
+//     SingleUseArenaAndPredicate<TagPresence, std::string>;
+// using SingleUseArenaAndAnd =
+//     SingleUseArenaAndPredicate<And, std::unique_ptr<Predicate>,
+//                                std::unique_ptr<Predicate>>;
+// using SingleUseArenaAndImplies =
+//     SingleUseArenaAndPredicate<Implies, std::unique_ptr<Predicate>,
+//                                std::unique_ptr<Predicate>>;
+// using SingleUseArenaAndNot =
+//     SingleUseArenaAndPredicate<Not, std::unique_ptr<Predicate>>;
+// using SingleUseArenaAndOr =
+//     SingleUseArenaAndPredicate<Or, std::unique_ptr<Predicate>,
+//                                std::unique_ptr<Predicate>>;
 
 }  // namespace raksha::ir
 

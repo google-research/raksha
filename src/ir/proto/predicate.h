@@ -39,8 +39,9 @@ class PredicateDecoder {
     // Decode the predicate indicated by the given proto. Only a reference
     // will be returned; the owned pointer will be held and owned by this
     // object.
-  const Predicate *Decode(
+  std::unique_ptr<Predicate> Decode(
       const arcs::InformationFlowLabelProto_Predicate &predicate_proto);
+
  private:
   // The owned pointers are collected here, where they can be gathered by the
   // ParticleSpec later.

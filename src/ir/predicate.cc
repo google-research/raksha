@@ -15,35 +15,32 @@
 //----------------------------------------------------------------------------
 
 #include "src/ir/predicate.h"
-#include "src/ir/predicate_arena.h"
 
 namespace raksha::ir {
 
-const And *And::Create(
-    PredicateArena &arena, const Predicate *lhs, const Predicate *rhs) {
-  return arena.CapturePredicate(std::unique_ptr<And>(new And(lhs, rhs)));
+std::unique_ptr<And> And::Create(std::unique_ptr<Predicate> lhs,
+                                 std::unique_ptr<Predicate> rhs) {
+  return std::unique_ptr<And>(new And(std::move(lhs), std::move(rhs)));
 }
 
-const Implies *Implies::Create(
-    PredicateArena &arena,
-    const Predicate *antecedent,
-    const Predicate *consequent) {
-  return arena.CapturePredicate(std::unique_ptr<Implies>(
-      new Implies(antecedent, consequent)));
+std::unique_ptr<Implies> Implies::Create(
+    std::unique_ptr<Predicate> antecedent,
+    std::unique_ptr<Predicate> consequent) {
+  return std::unique_ptr<Implies>(
+      new Implies(std::move(antecedent), std::move(consequent)));
 }
 
-const Not *Not::Create(PredicateArena &arena, const Predicate *negated) {
-  return arena.CapturePredicate(std::unique_ptr<Not>(new Not(negated)));
+std::unique_ptr<Not> Not::Create(std::unique_ptr<Predicate> negated) {
+  return std::unique_ptr<Not>(new Not(std::move(negated)));
 }
 
-const Or *Or::Create(PredicateArena &arena,
-    const Predicate *lhs, const Predicate *rhs) {
-  return arena.CapturePredicate(std::unique_ptr<Or>(new Or(lhs, rhs)));
+std::unique_ptr<Or> Or::Create(std::unique_ptr<Predicate> lhs,
+                               std::unique_ptr<Predicate> rhs) {
+  return std::unique_ptr<Or>(new Or(std::move(lhs), std::move(rhs)));
 }
 
-const TagPresence *TagPresence::Create(PredicateArena &arena, std::string tag) {
-  return arena.CapturePredicate(std::unique_ptr<TagPresence>(
-      new TagPresence(std::move(tag))));
+std::unique_ptr<TagPresence> TagPresence::Create(std::string tag) {
+  return std::unique_ptr<TagPresence>(new TagPresence(std::move(tag)));
 }
 
 }  // namespace raksha::ir

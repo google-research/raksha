@@ -17,6 +17,8 @@
 #ifndef SRC_IR_PREDICATES_PREDICATE_H_
 #define SRC_IR_PREDICATES_PREDICATE_H_
 
+#include <memory>
+
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "src/ir/access_path.h"
@@ -36,9 +38,6 @@ enum PredicateKind {
   kTagPresence,
 };
 
-// Forward declaration to break inclusion cycle.
-class PredicateArena;
-
 // A Predicate is a boolean expression that can occur upon various Raksha IR
 // structures. Currently, all leaf expressions speak of whether a particular
 // tag is present. Inner nodes include the full range of boolean expressions
@@ -56,7 +55,7 @@ class Predicate {
   // Implement a dynamic downcast operation for Predicates. Will return a
   // downcast to the given type if the predicate is that type, nullptr
   // otherwise.
-  template<class T>
+  template <class T>
   static const T *DynCast(const Predicate &pred) {
     if (pred.GetPredicateKind() == T::GetKind()) {
       return static_cast<const T *>(&pred);
@@ -68,16 +67,15 @@ class Predicate {
 
 class And : public Predicate {
  public:
-  static const And *Create(
-      PredicateArena &pred, const Predicate *lhs, const Predicate *rhs);
-  virtual ~And() { }
+  static std::unique_ptr<And> Create(std::unique_ptr<Predicate> lhs,
+                                     std::unique_ptr<Predicate> rhs);
+  virtual ~And() {}
 
   std::string ToDatalogRuleBody(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const override {
     constexpr absl::string_view kFormatString = R"(((%s), (%s)))";
-    return absl::StrFormat(
-        kFormatString, lhs_->ToDatalogRuleBody(ap, ctxt),
-        rhs_->ToDatalogRuleBody(ap, ctxt));
+    return absl::StrFormat(kFormatString, lhs_->ToDatalogRuleBody(ap, ctxt),
+                           rhs_->ToDatalogRuleBody(ap, ctxt));
   }
 
   static PredicateKind GetKind() { return kAnd; }
@@ -89,12 +87,13 @@ class And : public Predicate {
     if (other_and == nullptr) return false;
     return (*lhs_ == *other_and->lhs_) && (*rhs_ == *other_and->rhs_);
   }
- private:
-  explicit And(const Predicate *lhs, const Predicate *rhs)
-    : lhs_(lhs), rhs_(rhs) { }
 
-  const Predicate *lhs_;
-  const Predicate *rhs_;
+  explicit And(std::unique_ptr<Predicate> lhs, std::unique_ptr<Predicate> rhs)
+      : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+
+ private:
+  std::unique_ptr<Predicate> lhs_;
+  std::unique_ptr<Predicate> rhs_;
 };
 
 // An implies statement, usually written:
@@ -107,49 +106,47 @@ class And : public Predicate {
 // if the antecedent is false.
 class Implies : public Predicate {
  public:
-  static const Implies *Create(
-      PredicateArena &arena,
-      const Predicate *antecedent, const Predicate *consequent);
+  static std::unique_ptr<Implies> Create(std::unique_ptr<Predicate> antecedent,
+                                         std::unique_ptr<Predicate> consequent);
 
-  virtual ~Implies() { }
+  virtual ~Implies() {}
 
   std::string ToDatalogRuleBody(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const override {
     std::string antecedent_str = antecedent_->ToDatalogRuleBody(ap, ctxt);
-    constexpr absl::string_view kFormatString =
-        R"(!(%s); ((%s), (%s)))";
-    return absl::StrFormat(
-        kFormatString, antecedent_str, antecedent_str,
-        consequent_->ToDatalogRuleBody(ap, ctxt));
+    constexpr absl::string_view kFormatString = R"(!(%s); ((%s), (%s)))";
+    return absl::StrFormat(kFormatString, antecedent_str, antecedent_str,
+                           consequent_->ToDatalogRuleBody(ap, ctxt));
   }
 
-  static PredicateKind GetKind() {
-    return PredicateKind::kImplies;
-  }
+  static PredicateKind GetKind() { return PredicateKind::kImplies; }
 
   PredicateKind GetPredicateKind() const override { return GetKind(); }
 
   bool operator==(const Predicate &other) const override {
     const Implies *other_implies = Predicate::DynCast<Implies>(other);
-    if (other_implies == nullptr) { return false; }
+    if (other_implies == nullptr) {
+      return false;
+    }
     return (*antecedent_ == *other_implies->antecedent_) &&
-      (*consequent_ == *other_implies->consequent_);
+           (*consequent_ == *other_implies->consequent_);
   }
- private:
-  explicit Implies(
-    const Predicate *antecedent,
-    const Predicate *consequent) :
-    antecedent_(antecedent), consequent_(consequent) { }
 
-  const Predicate *antecedent_;
-  const Predicate *consequent_;
+  explicit Implies(std::unique_ptr<Predicate> antecedent,
+                   std::unique_ptr<Predicate> consequent)
+      : antecedent_(std::move(antecedent)),
+        consequent_(std::move(consequent)) {}
+
+ private:
+  std::unique_ptr<Predicate> antecedent_;
+  std::unique_ptr<Predicate> consequent_;
 };
 
 // A Not boolean expression in a predicate. Just negates the inner predicate.
 class Not : public Predicate {
  public:
-  static const Not *Create(PredicateArena &arena, const Predicate *negated);
-  virtual ~Not() { }
+  static std::unique_ptr<Not> Create(std::unique_ptr<Predicate> negated);
+  virtual ~Not() {}
 
   std::string ToDatalogRuleBody(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const override {
@@ -158,30 +155,31 @@ class Not : public Predicate {
                            negated_predicate_->ToDatalogRuleBody(ap, ctxt));
   }
 
-  static PredicateKind GetKind() {
-    return PredicateKind::kNot;
-  }
+  static PredicateKind GetKind() { return PredicateKind::kNot; }
 
   PredicateKind GetPredicateKind() const override { return GetKind(); }
 
   bool operator==(const Predicate &other) const override {
     const Not *other_not = Predicate::DynCast<Not>(other);
-    if (other_not == nullptr) { return false; }
+    if (other_not == nullptr) {
+      return false;
+    }
     return *negated_predicate_ == *other_not->negated_predicate_;
   }
- private:
-  explicit Not(const Predicate *negated_predicate)
-    : negated_predicate_(negated_predicate) { }
 
-  const Predicate *negated_predicate_;
+  explicit Not(std::unique_ptr<Predicate> negated_predicate)
+      : negated_predicate_(std::move(negated_predicate)) {}
+
+ private:
+  std::unique_ptr<Predicate> negated_predicate_;
 };
 
 // A boolean or expression on two predicates.
 class Or : public Predicate {
  public:
-  static const Or *Create(
-      PredicateArena &arena, const Predicate *lhs, const Predicate *rhs);
-  virtual ~Or() { }
+  static std::unique_ptr<Or> Create(std::unique_ptr<Predicate> lhs,
+                                    std::unique_ptr<Predicate> rhs);
+  virtual ~Or() {}
 
   std::string ToDatalogRuleBody(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const override {
@@ -190,9 +188,7 @@ class Or : public Predicate {
                            rhs_->ToDatalogRuleBody(ap, ctxt));
   }
 
-  static PredicateKind GetKind() {
-    return PredicateKind::kOr;
-  }
+  static PredicateKind GetKind() { return PredicateKind::kOr; }
 
   PredicateKind GetPredicateKind() const override { return GetKind(); }
 
@@ -201,12 +197,13 @@ class Or : public Predicate {
     if (other_or == nullptr) return false;
     return (*lhs_ == *other_or->lhs_) && (*rhs_ == *other_or->rhs_);
   }
- private:
-  explicit Or(const Predicate *lhs, const Predicate *rhs)
-    : lhs_(lhs), rhs_(rhs) { }
 
-  const Predicate *lhs_;
-  const Predicate *rhs_;
+  explicit Or(std::unique_ptr<Predicate> lhs, std::unique_ptr<Predicate> rhs)
+      : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+
+ private:
+  std::unique_ptr<Predicate> lhs_;
+  std::unique_ptr<Predicate> rhs_;
 };
 
 // A boolean expression that is true if a tag is possibly present on an
@@ -214,7 +211,7 @@ class Or : public Predicate {
 // predicate tree.
 class TagPresence : public Predicate {
  public:
-  static const TagPresence *Create(PredicateArena &arena, std::string tag);
+  static std::unique_ptr<TagPresence> Create(std::string tag);
   virtual ~TagPresence() {}
 
   // The tag presence just turns into a check for the tag on the access_path
@@ -226,25 +223,22 @@ class TagPresence : public Predicate {
     return absl::StrFormat(kFormatStr, access_path.ToDatalog(ctxt), tag_);
   }
 
-  static PredicateKind GetKind() {
-    return kTagPresence;
-  }
+  static PredicateKind GetKind() { return kTagPresence; }
 
-  PredicateKind GetPredicateKind() const override {
-    return GetKind();
-  }
+  PredicateKind GetPredicateKind() const override { return GetKind(); }
 
   bool operator==(const Predicate &other) const override {
     const TagPresence *other_tag_presence =
-        Predicate::DynCast<TagPresence>(other) ;
+        Predicate::DynCast<TagPresence>(other);
     if (other_tag_presence == nullptr) {
       return false;
     }
     return tag_ == other_tag_presence->tag_;
   }
- private:
-  explicit TagPresence(std::string tag) : tag_(std::move(tag)) { }
 
+  explicit TagPresence(std::string tag) : tag_(std::move(tag)) {}
+
+ private:
   std::string tag_;
 };
 
