@@ -86,8 +86,7 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
       // populated by iterating over all HandleConnectionProtos and, for each
       // HandleConnectionSpec and HandleConnection pair indicated, adding
       // that pair to the instantiation_map.
-      absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
-          instantiation_map;
+      ir::DatalogPrintContext::AccessPathInstantiationMap instantiation_map;
       std::vector<ir::Edge> particle_edges;
       for (const arcs::HandleConnectionProto &connection_proto :
         particle_proto.connections()) {
