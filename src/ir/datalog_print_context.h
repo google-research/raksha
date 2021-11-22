@@ -17,7 +17,9 @@
 #ifndef SRC_IR_DATALOG_PRINT_CONTEXT_H_
 #define SRC_IR_DATALOG_PRINT_CONTEXT_H_
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_cat.h"
+#include "src/ir/access_path_root.h"
 
 namespace raksha::ir {
 
@@ -26,7 +28,7 @@ namespace raksha::ir {
 // unique labels.
 class DatalogPrintContext {
  public:
-  DatalogPrintContext() : check_counter_(0) {}
+  DatalogPrintContext() : check_counter_(0), instantiation_map_(nullptr) {}
 
   // DatalogPrintContext is not copyable, as we need a single copy to be the
   // source of truth on creating unique labels. It is, however, movable.
@@ -37,8 +39,22 @@ class DatalogPrintContext {
   std::string GetUniqueCheckLabel() {
     return absl::StrCat("check_num_", check_counter_++);
   }
+
+  void set_instantiation_map(
+      const absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
+          *instantiation_map) {
+    instantiation_map_ = instantiation_map;
+  }
+
+  const absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
+      *instantiation_map() const {
+    return instantiation_map_;
+  }
+
  private:
   uint64_t check_counter_;
+  const absl::flat_hash_map<ir::AccessPathRoot, ir::AccessPathRoot>
+      *instantiation_map_;
 };
 
 }  // namespace raksha::ir

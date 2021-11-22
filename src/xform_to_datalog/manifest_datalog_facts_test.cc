@@ -18,9 +18,13 @@
 
 #include <google/protobuf/text_format.h>
 
+#include "absl/strings/substitute.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/datalog_print_context.h"
+#include "src/ir/particle_spec.h"
+#include "src/ir/proto/system_spec.h"
 #include "src/ir/single-use-arena-and-predicate.h"
+#include "src/ir/types/primitive_type.h"
 
 namespace raksha::xform_to_datalog {
 
@@ -58,42 +62,66 @@ static const ir::AccessPath kHandleConnectionOutAccessPath(
         "recipe", "particle", "out")),
     ir::AccessPathSelectors());
 
-static std::tuple<ManifestDatalogFacts, std::string>
-  datalog_facts_and_output_strings[] = {
-    { ManifestDatalogFacts({}, {}, {}),
-      R"(
-// Claims:
+std::vector<ir::HandleConnectionSpec> GetHandleConnectionSpecs() {
+  std::vector<ir::HandleConnectionSpec> result;
+  result.push_back(ir::HandleConnectionSpec(
+      "in", /*reads=*/true, /*writes=*/false,
+      /*type=*/std::make_unique<ir::types::PrimitiveType>()));
+  result.push_back(ir::HandleConnectionSpec(
+      "out", /*reads=*/false, /*writes=*/true,
+      /*type=*/std::make_unique<ir::types::PrimitiveType>()));
+  return result;
+}
 
+static std::unique_ptr<ir::ParticleSpec> particle_spec(ir::ParticleSpec::Create(
+    "particle",
+    /*checks=*/
+    {ir::TagCheck(kHandleConnectionInAccessPath, *kTag2Presence.predicate())},
+    /*tag_claims=*/
+    {ir::TagClaim("particle", kHandleConnectionOutAccessPath, true, "tag")},
+    /*derives_from_claims=*/{},
+    /*handle_connection_specs=*/GetHandleConnectionSpecs(),
+    /*predicate_arena=*/nullptr));
+
+static std::tuple<ManifestDatalogFacts, std::string>
+    datalog_facts_and_output_strings[] = {
+        {ManifestDatalogFacts(),
+         R"(// Claims:
 
 // Checks:
-
 
 // Edges:
 
-)" },
-    { ManifestDatalogFacts(
-        { ir::TagClaim(
-            "particle", kHandleConnectionOutAccessPath, true, "tag") },
-        { ir::TagCheck(
-            kHandleConnectionInAccessPath, *kTag2Presence.predicate()) },
-        { ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),
-          ir::Edge(kHandleConnectionInAccessPath,
-                   kHandleConnectionOutAccessPath),
-           ir::Edge(kHandleConnectionOutAccessPath, kHandleH2AccessPath)}),
-      R"(
-// Claims:
-says_hasTag("particle", "recipe.particle.out", "tag").
+)"},
+        {ManifestDatalogFacts({ManifestDatalogFacts::Particle(
+             particle_spec.get(),
+             /*instantiation_map*/
+             {
+                 {ir::AccessPathRoot(
+                      ir::HandleConnectionSpecAccessPathRoot("particle", "in")),
+                  ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
+                      "recipe", "particle", "in"))},
+                 {ir::AccessPathRoot(ir::HandleConnectionSpecAccessPathRoot(
+                      "particle", "out")),
+                  ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
+                      "recipe", "particle", "out"))},
+             },
+             /*edges*/
+             {ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),
+              ir::Edge(kHandleConnectionOutAccessPath, kHandleH2AccessPath)})}),
+         R"(// Claims:
+says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(owner, "recipe.particle.out").
 
 // Checks:
-isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("recipe.particle.in", "tag2").
+isCheck("check_num_0", "recipe.particle.in"). check("check_num_0", owner, "recipe.particle.in") :-
+  ownsAccessPath(owner, "recipe.particle.in"), mayHaveTag("recipe.particle.in", owner, "tag2").
 
 // Edges:
 edge("recipe.h1", "recipe.particle.in").
-edge("recipe.particle.in", "recipe.particle.out").
 edge("recipe.particle.out", "recipe.h2").
-)"
-    }
-};
+edge("recipe.particle.in", "recipe.particle.out").
+
+)"}};
 
 INSTANTIATE_TEST_SUITE_P(
     ManifestDatalogFactsToDatalogTest, ManifestDatalogFactsToDatalogTest,
@@ -270,66 +298,101 @@ class ParseBigManifestTest : public testing::Test {
     arcs::ManifestProto manifest_proto;
     google::protobuf::TextFormat::ParseFromString(
         kManifestTextproto, &manifest_proto);
+    system_spec_ = ir::proto::Decode(manifest_proto);
+    CHECK(system_spec_ != nullptr);
     datalog_facts_ = ManifestDatalogFacts::CreateFromManifestProto(
-        manifest_proto, registry_);
+        *system_spec_, manifest_proto);
+
+    std::string datalog = datalog_facts_.ToDatalog(ctxt_, "~");
+    datalog_strings_ = absl::StrSplit(datalog, "~", absl::SkipEmpty());
   }
 
  protected:
-  ir::ParticleSpecRegistry registry_;
+  std::unique_ptr<ir::SystemSpec> system_spec_;
   ir::DatalogPrintContext ctxt_;
   ManifestDatalogFacts datalog_facts_;
+  std::vector<std::string> datalog_strings_;
 };
 
 static const std::string kExpectedClaimStrings[] = {
-    R"(says_hasTag("PS1", "NamedR.PS1#0.out_handle.field1", "tag1").)",
-    R"(says_hasTag("PS1", "NamedR.PS1#1.out_handle.field1", "tag1").)",
-    R"(says_hasTag("PS2", "NamedR.PS2#2.out_handle.field1", "tag3").)",
-    R"(says_hasTag("PS1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", "tag1").)",
-    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "tag3").)",
-    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "tag3").)",
+    R"(// Claims:)",
+    R"(says_hasTag("PS1", "NamedR.PS1#0.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "NamedR.PS1#0.out_handle.field1").)",
+    R"(says_hasTag("PS1", "NamedR.PS1#1.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "NamedR.PS1#1.out_handle.field1").)",
+    R"(says_hasTag("PS2", "NamedR.PS2#2.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "NamedR.PS2#2.out_handle.field1").)",
+    R"(says_hasTag("PS1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1").)",
+    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1").)",
+    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1").)",
 };
 
+// TODO(bgogul): Move this to a common/utils.
+template <typename I>
+class iterator_range {
+ public:
+  using const_iterator = I;
+  using value_type = typename std::iterator_traits<I>::value_type;
+
+  iterator_range() = default;
+  iterator_range(I begin, I end): begin_(begin), end_(end) {}
+
+  I begin() const { return begin_; }
+  I end() const { return end_; }
+  bool empty() const { return begin() == end(); }
+
+ private:
+  I begin_;
+  I end_;
+};
+
+template <typename I>
+inline iterator_range<I> make_range(I begin, I end) {
+  return iterator_range<I>(begin, end);
+}
+
 TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
-  // Go through all of the facts, convert them to strings, and compare them
-  // against our expected strings. Strings are much easier to read on a test
-  // failure than structured datalog facts.
-  std::vector<std::string> claim_datalog_strings;
-  for (const ir::TagClaim &claim : datalog_facts_.claims()) {
-    claim_datalog_strings.push_back(claim.ToDatalog(ctxt_));
-  }
-  EXPECT_THAT(claim_datalog_strings,
+  EXPECT_THAT(make_range(std::find(datalog_strings_.begin(),
+                                   datalog_strings_.end(), "// Claims:"),
+                         std::find(datalog_strings_.begin(),
+                                   datalog_strings_.end(), "// Checks:")),
               testing::UnorderedElementsAreArray(kExpectedClaimStrings));
 }
 
+static constexpr absl::string_view kPattern =
+    R"(isCheck("$0", "$1"). check("$0", owner, "$1") :-
+  ownsAccessPath(owner, "$1"), mayHaveTag("$1", owner, "$2").)";
+
 static std::string kExpectedCheckStrings[] = {
-    R"(isCheck("check_num_0"). check("check_num_0") :- mayHaveTag("NamedR.PS1#0.in_handle.field1", "tag2").)",
-    R"(isCheck("check_num_1"). check("check_num_1") :- mayHaveTag("NamedR.PS1#1.in_handle.field1", "tag2").)",
-    R"(isCheck("check_num_2"). check("check_num_2") :- mayHaveTag("NamedR.PS2#2.in_handle.field1", "tag4").)",
-    R"(isCheck("check_num_3"). check("check_num_3") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2").)",
-    R"(isCheck("check_num_4"). check("check_num_4") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4").)",
-    R"(isCheck("check_num_5"). check("check_num_5") :- mayHaveTag("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4").)",
+    R"(// Checks:)",
+    absl::Substitute(kPattern, "check_num_0", "NamedR.PS1#0.in_handle.field1",
+                     "tag2"),
+    absl::Substitute(kPattern, "check_num_1", "NamedR.PS1#1.in_handle.field1",
+                     "tag2"),
+    absl::Substitute(kPattern, "check_num_2", "NamedR.PS2#2.in_handle.field1",
+                     "tag4"),
+    absl::Substitute(kPattern, "check_num_3",
+                     "GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2"),
+    absl::Substitute(kPattern, "check_num_4",
+                     "GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4"),
+    absl::Substitute(kPattern, "check_num_5",
+                     "GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4"),
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {
-  // Go through all of the facts, convert them to strings, and compare them
-  // against our expected strings. Strings are much easier to read on a test
-  // failure than structured datalog facts.
-  std::vector<std::string> check_datalog_strings;
-  for (const ir::TagCheck &check : datalog_facts_.checks()) {
-    check_datalog_strings.push_back(check.ToDatalog(ctxt_));
-  }
-  EXPECT_THAT(check_datalog_strings,
+  EXPECT_THAT(make_range(std::find(datalog_strings_.begin(),
+                                   datalog_strings_.end(), "// Checks:"),
+                         std::find(datalog_strings_.begin(),
+                                   datalog_strings_.end(), "// Edges:")),
               testing::UnorderedElementsAreArray(kExpectedCheckStrings));
 }
 
 static const std::string kExpectedEdgeStrings[] = {
     // Named recipe edges:
     // Edges connecting h1 to NamedR.PS1#0 for fields {field1, field2}.
+    R"(// Edges:)",
     R"(edge("NamedR.h1.field1", "NamedR.PS1#0.in_handle.field1").)",
     R"(edge("NamedR.h1.field2", "NamedR.PS1#0.in_handle.field2").)",
 
     // Edges connecting h2 to NamedR.PS1#0 for field1
-     R"(edge("NamedR.PS1#0.out_handle.field1", "NamedR.h2.field1").)",
+    R"(edge("NamedR.PS1#0.out_handle.field1", "NamedR.h2.field1").)",
 
     // Intra-particle connection
     R"(edge("NamedR.PS1#0.in_handle.field1", "NamedR.PS1#0.out_handle.field1").)",
@@ -377,18 +440,12 @@ static const std::string kExpectedEdgeStrings[] = {
     R"(edge("GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "GENERATED_RECIPE_NAME0.h4.field1").)",
 
     // Intra-particle connection
-    R"(edge("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1").)"
-};
+    R"(edge("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1").)"};
 
 TEST_F(ParseBigManifestTest, ManifestProtoEdgesTest) {
-  // Go through all of the facts, convert them to strings, and compare them
-  // against our expected strings. Strings are much easier to read on a test
-  // failure than structured datalog facts.
-  std::vector<std::string> edge_datalog_strings;
-  for (const ir::Edge &edge : datalog_facts_.edges()) {
-    edge_datalog_strings.push_back(edge.ToDatalog(ctxt_));
-  }
-  EXPECT_THAT(edge_datalog_strings,
+  EXPECT_THAT(make_range(std::find(datalog_strings_.begin(),
+                                   datalog_strings_.end(), "// Edges:"),
+                         datalog_strings_.end()),
               testing::UnorderedElementsAreArray(kExpectedEdgeStrings));
 }
 

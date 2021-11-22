@@ -117,6 +117,19 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "system_spec",
+    srcs = ["system_spec.cc"],
+    hdrs = ["system_spec.h"],
+    deps = [
+        ":particle_spec",
+        "//src/ir",
+        "//src/ir:access_path",
+        "//src/ir/proto:types",
+        "//third_party/arcs/proto:manifest_cc_proto",
+    ],
+)
+
 cc_test(
     name = "access_path_test",
     srcs = ["access_path_test.cc"],

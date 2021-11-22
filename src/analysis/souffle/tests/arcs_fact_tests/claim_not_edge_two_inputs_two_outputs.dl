@@ -22,30 +22,34 @@ isPrincipal("ParticleX").
 ownsTag("Claimer", "tag1").
 ownsTag("Claimer", "tag2").
 
-says_hasTag("Claimer", "R.foo.hc1", "tag1").
-says_hasTag("Claimer", "R.foo.hc2", "tag2").
+says_hasTag("Claimer", "R.foo.hc1", "Claimer", "tag1").
+says_hasTag("Claimer", "R.foo.hc2", "Claimer", "tag2").
 
-// ParticleX claims that hc2 does not flow to hco1.
+
+#ifdef ALL_PRINCIPALS_OWN_ALL_TAGS
+
+// Claimer claims that hc2 does not flow to hco1.
 // TODO(#146) In the case where we expect this claim to be upheld, how does that
 // work without an explicit delegation of tags to ParticleX? Well, we're
 // currently somewhat hackily turning on and off the helper rule that causes
 // all particles to own all tags, and in the case where all particles own all
 // tags, ParticleX is a co-owner of all tags. We should introduce a more
 // principled way to do different test variants at some point.
-claimNotEdge("ParticleX", "R.foo.hc2", "R.foo.hco1").
+// The edge will not be removed only if "Claimer" says that the edge is removed.
+// Otherwise, the removal of the edge will not be considered at all. 
+claimNotEdge("Claimer", "R.foo.hc2", "R.foo.hco1").
 
-#ifdef ALL_PRINCIPALS_OWN_ALL_TAGS
 // If we believe it, we should find only tag1 on hco1, but we should still find
 // both tag1 and tag2 on hco2.
-TEST_CASE("hco1_tag1_as_expected") :- mayHaveTag("R.foo.hco1", "tag1").
+TEST_CASE("hco1_tag1_as_expected") :- mayHaveTag("R.foo.hco1", "Claimer", "tag1").
 TEST_CASE("hco1_tag2_as_expected") :-
-  isTag("tag2"), isAccessPath("R.foo.hco1"), !mayHaveTag("R.foo.hco1", "tag2").
-TEST_CASE("hco2_tag1_as_expected") :- mayHaveTag("R.foo.hco2", "tag1").
-TEST_CASE("hco2_tag2_as_expected") :- mayHaveTag("R.foo.hco2", "tag2").
+  isTag("tag2"), isAccessPath("R.foo.hco1"), !mayHaveTag("R.foo.hco1", "Claimer", "tag2").
+TEST_CASE("hco2_tag1_as_expected") :- mayHaveTag("R.foo.hco2", "Claimer", "tag1").
+TEST_CASE("hco2_tag2_as_expected") :- mayHaveTag("R.foo.hco2", "Claimer", "tag2").
 #else
 // If we don't believe it, all tags should flow to all outputs
-TEST_CASE("hco1_tag1_as_expected") :- mayHaveTag("R.foo.hco1", "tag1").
-TEST_CASE("hco1_tag2_as_expected") :- mayHaveTag("R.foo.hco1", "tag2").
-TEST_CASE("hco2_tag1_as_expected") :- mayHaveTag("R.foo.hco2", "tag1").
-TEST_CASE("hco2_tag2_as_expected") :- mayHaveTag("R.foo.hco2", "tag2").
+TEST_CASE("hco1_tag1_as_expected") :- mayHaveTag("R.foo.hco1", "Claimer", "tag1").
+TEST_CASE("hco1_tag2_as_expected") :- mayHaveTag("R.foo.hco1", "Claimer", "tag2").
+TEST_CASE("hco2_tag1_as_expected") :- mayHaveTag("R.foo.hco2", "Claimer", "tag1").
+TEST_CASE("hco2_tag2_as_expected") :- mayHaveTag("R.foo.hco2", "Claimer", "tag2").
 #endif

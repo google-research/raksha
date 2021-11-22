@@ -36,10 +36,24 @@ TEST_P(DatalogFactsTest, IncludesManifestFactsWithCorrectPrefixAndSuffix) {
   EXPECT_EQ(datalog_facts.ToDatalog(ctxt), expected_string);
 }
 
+static std::unique_ptr<ir::ParticleSpec> particle_spec(ir::ParticleSpec::Create(
+    "particle",
+    /*checks=*/{},
+    /*tag_claims=*/
+    {ir::TagClaim(
+        "particle",
+        ir::AccessPath(ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
+                           "recipe", "particle", "out")),
+                       ir::AccessPathSelectors()),
+        true, "tag")},
+    /*derives_from_claims=*/{},
+    /*edges=*/{},
+    /*predicate_arena=*/nullptr));
+
 INSTANTIATE_TEST_SUITE_P(
     DatalogFactsTest, DatalogFactsTest,
     testing::Values(
-        std::make_tuple(ManifestDatalogFacts({}, {}, {}),
+        std::make_tuple(ManifestDatalogFacts(),
                         *(AuthorizationLogicDatalogFacts::create(
                             AuthorizationLogicTest::GetTestDataDir(),
                             "empty_auth_logic")),
@@ -55,17 +69,17 @@ INSTANTIATE_TEST_SUITE_P(
 .output allTests(IO=stdout)
 .decl duplicateTestCaseNames(testAspectName: symbol)
 .output duplicateTestCaseNames(IO=stdout)
-
 .output disallowedUsage(IO=stdout)
 
-.decl isCheck(check_index: symbol)
-.decl check(check_index: symbol)
+.decl isCheck(check_index: symbol, path: AccessPath)
+.decl check(check_index: symbol, owner: Principal, path: AccessPath)
 
-allTests(check_index) :- isCheck(check_index).
-testFails(check_index) :-
-  isCheck(check_index), !check(check_index).
+allTests(check_index) :- isCheck(check_index, _).
+testFails(cat(check_index, "-", owner, "-", path)) :-
+  isCheck(check_index, path), ownsAccessPath(owner, path),
+  !check(check_index, owner, path).
 
-testFails("may_will") :- disallowedUsage(_, _, _). 
+testFails("may_will") :- disallowedUsage(_, _, _, _).
 
 .decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
 .decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
@@ -73,12 +87,9 @@ saysMay(w, x, y, z) :- says_may(w, x, y, z).
 saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
-
 // Claims:
 
-
 // Checks:
-
 
 // Edges:
 
@@ -88,20 +99,12 @@ saysWill(w, x, y) :- says_will(w, x, y).
 grounded_dummy("dummy_var").
 
 )"),
-        std::make_tuple(
-            ManifestDatalogFacts(
-                {ir::TagClaim(
-                    "particle",
-                    ir::AccessPath(
-                        ir::AccessPathRoot(ir::HandleConnectionAccessPathRoot(
-                            "recipe", "particle", "out")),
-                        ir::AccessPathSelectors()),
-                    true, "tag")},
-                {}, {}),
-            *(AuthorizationLogicDatalogFacts::create(
-                AuthorizationLogicTest::GetTestDataDir(),
-                "simple_auth_logic")),
-            R"(// GENERATED FILE, DO NOT EDIT!
+        std::make_tuple(ManifestDatalogFacts({ManifestDatalogFacts::Particle(
+                            particle_spec.get(), {}, {})}),
+                        *(AuthorizationLogicDatalogFacts::create(
+                            AuthorizationLogicTest::GetTestDataDir(),
+                            "simple_auth_logic")),
+                        R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "taint.dl"
 #include "may_will.dl"
@@ -113,17 +116,17 @@ grounded_dummy("dummy_var").
 .output allTests(IO=stdout)
 .decl duplicateTestCaseNames(testAspectName: symbol)
 .output duplicateTestCaseNames(IO=stdout)
-
 .output disallowedUsage(IO=stdout)
 
-.decl isCheck(check_index: symbol)
-.decl check(check_index: symbol)
+.decl isCheck(check_index: symbol, path: AccessPath)
+.decl check(check_index: symbol, owner: Principal, path: AccessPath)
 
-allTests(check_index) :- isCheck(check_index).
-testFails(check_index) :-
-  isCheck(check_index), !check(check_index).
+allTests(check_index) :- isCheck(check_index, _).
+testFails(cat(check_index, "-", owner, "-", path)) :-
+  isCheck(check_index, path), ownsAccessPath(owner, path),
+  !check(check_index, owner, path).
 
-testFails("may_will") :- disallowedUsage(_, _, _). 
+testFails("may_will") :- disallowedUsage(_, _, _, _).
 
 .decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
 .decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
@@ -131,12 +134,10 @@ saysMay(w, x, y, z) :- says_may(w, x, y, z).
 saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
-
 // Claims:
-says_hasTag("particle", "recipe.particle.out", "tag").
+says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(owner, "recipe.particle.out").
 
 // Checks:
-
 
 // Edges:
 
