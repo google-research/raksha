@@ -37,39 +37,34 @@ struct ParticleSpecProtoAndExpectedInfo {
 class ParticleSpecFromProtoTest :
    public testing::TestWithParam<ParticleSpecProtoAndExpectedInfo> {
  protected:
-  ParticleSpecFromProtoTest()
-    : particle_spec_registry_(),
-      particle_spec_(CreateParticleSpec(particle_spec_registry_)) {}
+  ParticleSpecFromProtoTest() : particle_spec_(CreateParticleSpec()) {}
 
-  static const ParticleSpec &CreateParticleSpec(
-      ParticleSpecRegistry &particle_spec_registry) {
+  static std::unique_ptr<ParticleSpec> CreateParticleSpec() {
     arcs::ParticleSpecProto particle_spec_proto;
     std::string textproto = GetParam().textproto;
     CHECK(google::protobuf::TextFormat::ParseFromString(
         textproto, &particle_spec_proto))
         << "Particle spec textproto did not parse correctly.";
-    return *proto::Decode(
-        particle_spec_registry, std::make_unique<PredicateArena>(),
-            particle_spec_proto);
+    return proto::Decode(std::make_unique<PredicateArena>(),
+                         particle_spec_proto);
   }
 
-  ParticleSpecRegistry particle_spec_registry_;
-  const ParticleSpec &particle_spec_;
+  std::unique_ptr<ParticleSpec> particle_spec_;
 };
 
 TEST_P(ParticleSpecFromProtoTest, ParticleSpecFromProtoTest) {
   const ParticleSpecProtoAndExpectedInfo &param = GetParam();
 
-  EXPECT_EQ(particle_spec_.name(), param.expected_name);
+  EXPECT_EQ(particle_spec_->name(), param.expected_name);
   EXPECT_THAT(
       param.expected_claims,
-      testing::UnorderedElementsAreArray(particle_spec_.tag_claims()));
+      testing::UnorderedElementsAreArray(particle_spec_->tag_claims()));
   EXPECT_THAT(
       param.expected_checks,
-      testing::UnorderedElementsAreArray(particle_spec_.checks()));
+      testing::UnorderedElementsAreArray(particle_spec_->checks()));
   EXPECT_THAT(
       param.expected_edges,
-      testing::UnorderedElementsAreArray(particle_spec_.edges()));
+      testing::UnorderedElementsAreArray(particle_spec_->edges()));
 }
 
 // Constant to reduce wordiness of test expected output.
@@ -573,14 +568,11 @@ connections: [
           { key: "field3", value: { primitive: TEXT } } ] } } } } ])";
 
 TEST(BulkInstantiateTest, BulkInstantiateTest) {
-  ParticleSpecRegistry particle_spec_registry;
   arcs::ParticleSpecProto particle_spec_proto;
   google::protobuf::TextFormat::ParseFromString(
       kTextprotoWithAllFacts, &particle_spec_proto);
-  const ParticleSpec *particle_spec =
-      proto::Decode(
-          particle_spec_registry, std::make_unique<PredicateArena>(),
-          particle_spec_proto);
+  std::unique_ptr<ParticleSpec> particle_spec =
+      proto::Decode(std::make_unique<PredicateArena>(), particle_spec_proto);
 
   const AccessPathRoot p1_in_impl(
       HandleConnectionAccessPathRoot("recipe", "P1", "in_impl"));

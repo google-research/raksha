@@ -39,10 +39,6 @@ struct InstantiatedParticleSpecFacts {
   std::vector<Edge> edges;
 };
 
-// Forward declaration for ParticleSpecRegistry, full declaration later in
-// this file.
-class ParticleSpecRegistry;
-
 // A class representing a ParticleSpec. This contains the relevant
 // information for the dataflow graph: checks, claims, and edges within the
 // ParticleSpec. All such information uses this ParticleSpec as the root.
@@ -50,9 +46,9 @@ class ParticleSpecRegistry;
 // are instantiated with a fully-instantiated root.
 class ParticleSpec {
  public:
-  static const ParticleSpec *Create(
-      ParticleSpecRegistry &registry, std::string name,
-      std::vector<TagCheck> checks, std::vector<TagClaim> tag_claims,
+  static std::unique_ptr<ParticleSpec> Create(
+      std::string name, std::vector<TagCheck> checks,
+      std::vector<TagClaim> tag_claims,
       std::vector<DerivesFromClaim> derives_from_claims,
       std::vector<HandleConnectionSpec> handle_connection_specs,
       std::unique_ptr<PredicateArena> predicate_arena);
@@ -88,8 +84,6 @@ class ParticleSpec {
     }
     return result;
   }
-
-  friend class ParticleSpecRegistry;
 
  private:
   ParticleSpec(
@@ -140,33 +134,6 @@ class ParticleSpec {
   // predicates, so holding this field here causes the checks to live as long
   // as the ParticleSpec.
   std::unique_ptr<PredicateArena> predicate_arena_;
-};
-
-// A ParticleSpecRegistry owns all ParticleSpecs. It acts as a factory for
-// particle specs and a place to look up ParticleSpecs by name.
-class ParticleSpecRegistry {
- public:
-  const ParticleSpec *CaptureParticleSpec(
-      std::unique_ptr<ParticleSpec> particle_spec) {
-    auto ins_res =
-        particle_specs_.insert(
-            {particle_spec->name(), std::move(particle_spec)});
-    CHECK(ins_res.second) << "Tried to insert second particle spec with name "
-                          << ins_res.first->first;
-    return ins_res.first->second.get();
-  }
-
-  // Get a ParticleSpec with a particular name. Errors if there is no
-  // particle spec with that name.
-  const ParticleSpec &GetParticleSpec(absl::string_view particle_spec_name) {
-    auto find_res = particle_specs_.find(particle_spec_name);
-    CHECK(find_res != particle_specs_.end())
-      << "No particle spec with name " << particle_spec_name;
-    return *find_res->second;
-  }
- private:
-  absl::flat_hash_map<std::string, std::unique_ptr<ParticleSpec>>
-    particle_specs_;
 };
 
 }  // namespace raksha::ir

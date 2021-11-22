@@ -18,6 +18,7 @@
 #define SRC_IR_TAG_CHECK_H_
 
 #include "absl/strings/str_format.h"
+#include "absl/strings/substitute.h"
 #include "src/ir/access_path.h"
 #include "src/ir/datalog_print_context.h"
 #include "src/ir/predicate.h"
@@ -53,10 +54,12 @@ class TagCheck {
   // passed. If it is not, at least one check failed.
   std::string ToDatalog(DatalogPrintContext &ctxt) const {
     constexpr absl::string_view kCheckHasTagFormat =
-        R"(isCheck("%s"). check("%s") :- %s.)";
+        R"(isCheck("$0", "$1"). check("$0", owner, "$1") :-
+  ownsAccessPath(owner, "$1"), $2.)";
     std::string check_label = ctxt.GetUniqueCheckLabel();
-    return absl::StrFormat(kCheckHasTagFormat, check_label, check_label,
-                           predicate_->ToDatalogRuleBody(access_path_));
+    return absl::Substitute(kCheckHasTagFormat, check_label,
+                            access_path_.ToDatalog(ctxt),
+                            predicate_->ToDatalogRuleBody(access_path_, ctxt));
   }
 
   bool operator==(const TagCheck &other) const {
