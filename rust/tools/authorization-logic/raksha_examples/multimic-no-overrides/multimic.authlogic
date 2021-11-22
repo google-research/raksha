@@ -1,0 +1,243 @@
+// When "UserX" enters the room, a runtime on the user's
+// mobile device sends a packet to the microphone which contains the following
+// facts serialized (and with relevant signatures):
+// "MobileDeviceRuntime" says {
+//     hasTag("MicIn.audio", "UserX_userSpeech").
+// }
+// - Also passes along the facts by "UserX" (which are signed with UserX's key).
+//
+// Also we add an axiom in raksha that says all principals own tags in their
+// namespace. Roughly: `PrincipalY says ownsTag("PrincipalX::_")` (forall X, Y).
+// (As a result, there are no more facts of the form 
+//      `PrincipalX says ownsTag(_)`).
+
+// UserA is the device owner. UserA has a high level of trust in their own
+// device.
+
+"UserA" says {
+  ownsTag("UserA", "UserA_userSpeech").
+  ownsTag("UserA", "UserA_speechTranscript").
+
+  // The user allows the userSpeech tag to just be dropped, or for any
+  // action to be done with data owned by UserA. UserA grants permission for 
+  // TrustedCompany to give any particle (PrincipalX) these permissions.
+  "TrustedCompany" canSay downgrades(pathX, "UserA_userSpeech") :-
+    isPath(pathX).
+  
+  // This says any tag, but because of how Raksha works internally, only 
+  // permissions UserA gives about its own tags matter
+  "TrustedCompany" canSay may(PrincipalX, anyActionX, userATagX) :-
+    isAction(anyActionX), isPrincipal(PrincipalX), isTag(userATagX).
+
+  // This is stuff that needs to be generated behind the scenes
+  // (Clearly A's policy should have no knowledge of this)
+  isAction("deliver_privacy_notifications").
+  isAction("local_computation").
+  isAction("store").
+  isPrincipal("Notifier").
+  isPrincipal("MicCompute").
+  isPrincipal("SpeechToTextStorageSink").
+  isPath("audioIn").
+  isPath("asrStorageConn").
+  isPath("speechToTextIn").
+  isTag("UserA_userSpeech").
+  isTag("UserA_speechTranscript").
+}
+
+// UserB is a guest user. UserB is somewhat privacy sensitive. They want their
+// voice recorded only as a transcript and will only recognize authorities from
+// companies that they trust.
+"UserB" says {
+  ownsTag("UserB", "UserB_userSpeech").
+  ownsTag("UserB", "UserB_speechTranscript").
+  
+  // UserB has a set of trusted companies that they have ongoing relationships
+  // with.
+  "AWellKnownTechCompany" canActAs "TrustedCompany".
+
+  // UserB would like to only allow transcripts to be stored. Audio can only be 
+  // used on-device and in-memory ("local_computation").
+  // (In practice, PrincipalX is going to be any software module of 
+  // "TrustedCompany"'s choosing).
+  "TrustedCompany" canSay
+    may(PrincipalX, "local_computation", "UserB_userSpeech") :- isPrincipal(PrincipalX).
+  "TrustedCompany" canSay
+    may(PrincipalX, "store", "UserB_speechTranscript") :- isPrincipal(PrincipalX).
+  // UserB trusts TrustedCompany to properly transform userSpeech into just 
+  // transcripts.
+  "TrustedCompany" canSay downgrades(pathX, "UserB_userSpeech") :-
+    hasTag(pathX, "UserB_speechTranscript").
+  "TrustedCompany" canSay hasTag(PathX, "UserB_speechTranscript") :-
+    isPath(PathX).
+
+  // Audio can also be used to deliver notifications about the fact that there is a 
+  // microphone in the room
+  "TrustedCompany" canSay
+    may(PrincipalX, "deliver_privacy_notifications", "UserB_userSpeech") :- 
+        isPrincipal(PrincipalX).
+  
+  // This is stuff that needs to be generated behind the scenes
+  // (Clearly B's policy should have no knowledge of this)
+  isAction("deliver_privacy_notifications").
+  isAction("local_computation").
+  isAction("store").
+  isPrincipal("Notifier").
+  isPrincipal("MicCompute").
+  isPrincipal("SpeechToTextStorageSink").
+  isPath("audioIn").
+  isPath("asrStorageConn").
+  isPath("speechToTextIn").
+}
+
+// UserC is a very privacy sensitive user. They do not trust anyone to store
+// their voice information, even as a transcript. They recognize policy
+// authorities only to get those policy authorities to not record their voice
+// or to get notifications that their voice may be being recorded so they can
+// leave.
+"UserC" says {
+  ownsTag("UserC", "UserC_userSpeech").
+  ownsTag("UserC", "UserC_speechTranscript").
+  "TrustedCompany" canSay
+    may(PrincipalX, "deliver_privacy_notifications", "UserC_userSpeech") :-
+        isPrincipal(PrincipalX).
+
+  // Unlike UserB, UserC does NOT give any additional permissions for data
+  // that has been transformed into a transcript.
+}
+
+// TrustedCompany delegates the needed permissions to the specific particles 
+// after having done review of the code in those particles.
+"TrustedCompany" says {
+  may("Notifier", "deliver_privacy_notifications", UserX_userSpeech) :-
+    // ideally, the "UserX_" Prefix would be a feature that allows us to just 
+    // refer to the second part of the name and the "isUserSpeech" predicate would 
+    // not be needed
+    isUserSpeech(UserX_userSpeech).
+  may("MicCompute", "local_computation", UserX_userSpeech) :-
+    isUserSpeech(UserX_userSpeech).
+  "MicCompute" canSay downgrades("asrStorageConn", UserX_userSpeech) :-
+    isUserSpeech(UserX_userSpeech).
+  "MicCompute" canSay hasTag("asrStorageConn", UserX_speechTranscript) :-
+    isSpeechTranscript(UserX_speechTranscript).
+  may("SpeechToTextStorageSink", "store", UserX_speechTranscript) :-
+    isSpeechTranscript(UserX_speechTranscript).
+
+  // something like this needs to be generated "behind the scenes" for this to 
+  // work
+  isUserSpeech("UserA_userSpeech").
+  isUserSpeech("UserB_userSpeech").
+  isUserSpeech("UserC_userSpeech").
+  isSpeechTranscript("UserA_speechTranscript").
+  isSpeechTranscript("UserB_speechTranscript").
+  isSpeechTranscript("UserC_speechTranscript").
+}
+
+//-----------------------------------------------------------------------------
+// "Will" Expressions (that go near particles)
+//-----------------------------------------------------------------------------
+// These statements are also kept near the particles, but in order to actually 
+// run this they are repeated here. These are used to generate the checks 
+// against the permissions granted with "may"
+"Notifier" says {
+    will("deliver_privacy_notifications", "audioIn").
+}
+
+"MicCompute" says {
+    will("local_computation", "audioIn"). 
+    // Assumes we can figure out tags with namespaces like this:
+    downgrades("asrStorageConn", UserX_userSpeech) :- 
+      // ideally this predicate would be added behind the scenes:
+      isUserSpeech(UserX_userSpeech).
+    hasTag("asrStorageConn", UserX_userTranscript) :- 
+      // should be added behind the scenes    
+      isSpeechTranscript(UserX_userTranscript).
+
+    // should be added behind the scenes:
+    isUserSpeech("UserA_userSpeech").
+    isUserSpeech("UserB_userSpeech").
+    isUserSpeech("UserC_userSpeech").
+    isSpeechTranscript("UserA_speechTranscript").
+    isSpeechTranscript("UserB_speechTranscript").
+    isSpeechTranscript("UserA_speechTranscript").
+}
+    
+"SpeechToTextStorageSink" says {
+   will("store", "speechToTextIn").
+}
+
+//-----------------------------------------------------------------------------
+// Checks / Analysis
+//-----------------------------------------------------------------------------
+
+// The comments and queries below this line describe what the analysis / checks 
+// should do. These are not part of the policy. There are two cases: 1) just A and 
+// B are in the room and the microphone can run, and 2) C joins the room and 
+// recording audio shuts off.
+
+//------------ Scenario 1: Just UserA and UserB are in room
+
+// Notifier taint:
+//  audioIn: UserA_userSpeech, UserB_userSpeech
+
+// expect: true
+may_notifierA = query "UserA" says
+  may("Notifier", "deliver_privacy_notifications", "UserA_userSpeech")?
+
+// expect: true
+may_notifierB = query "UserB" says
+  may("Notifier", "deliver_privacy_notifications", "UserB_userSpeech")?
+
+// MicCompute taint:
+// audioIn: UserA_userSpeech, UserB_userSpeech
+
+// expect: true
+may_micComputeA = query "UserA" says
+    may("MicCompute", "local_computation", "UserA_userSpeech")?
+
+// expect: true
+may_micComputeB = query "UserB" says
+    may("MicCompute", "local_computation", "UserB_userSpeech")?
+
+// These are not checks generated by the "wills" but they test 
+// downgrades that need to work for speech to text to have the right tags
+// expect: true
+down_micComputeA = query "UserA" says
+    downgrades("asrStorageConn", "UserA_userSpeech")?
+
+// expect: true
+down_micComputeB = query "UserB" says
+    downgrades("asrStorageConn", "UserB_userSpeech")?
+
+// SpeechToTextStorageSink taint:
+// speechToTextIn: UserA_userTranscript, UserB_userTranscript
+
+// expect: true
+may_speechInA = query "UserA" says
+    may("SpeechToTextStorageSink", "store", "UserA_speechTranscript")?
+
+// expect: true
+may_speechInB = query "UserB" says
+    may("SpeechToTextStorageSink", "store", "UserB_speechTranscript")?
+
+
+//------------ Scenario 2: UserC enters the room.
+// If A and/or B are in the room, the above checks also happen in addition to 
+// these ones about C's data. Because the checks on MicCompute and 
+// SpeechToTextStorageSink fail, those particles cannot run when C enters the 
+// room.
+
+// expect: true
+may_notifierC = query "UserC" says
+  may("Notifier", "deliver_privacy_notifications", "UserC_userSpeech")?
+
+// expect: false -> MicCompute particle cannot run
+may_micComputeC = query "UserC" says
+    may("MicCompute", "local_computation", "UserC_userSpeech")?
+
+// expect false -> MicCompute particle cannot run
+down_micComputeC = query "UserC" says
+    downgrades("asrStorageConn", "UserC_userSpeech")?
+
+// expect false -> SpeechToTextStorageSink cannot run
+may_speechToTextStorage = query "UserC" says
+    may("SpeechToTextStorageSink", "store", "UserC_speechTranscript")?
