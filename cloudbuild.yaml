@@ -43,7 +43,7 @@ steps:
   name: '${_DOCKER_IMAGE}'
   entrypoint: 'bash'
   args: [
-    '-l', '-c', 'cargo', 'test', '--manifest-path=/rust/tools/authorization-logic/'
+    '-l', '-c', 'cargo', 'test', '--manifest-path=rust/tools/authorization-logic/Cargo.toml'
   ]
 
 
