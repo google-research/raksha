@@ -55,9 +55,15 @@ fact
     | principal CANSAY fact #canSayFact
     ;
 
+disjunction
+    : conjunction (';' conjunction )*
+
+conjunction
+    : (flatFact | '(' disjunction ')' ) (',' (flatFact | '(' disjunction ')' ) )*
+
 assertion
     : fact '.' #factAssertion
-    | fact ':-' flatFact (',' flatFact )* '.' #hornClauseAssertion
+    | fact ':-' disjunction '.' #hornClauseAssertion
     ;
 
 // The IDs following "Export" are path names where JSON files containing
