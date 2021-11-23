@@ -10,9 +10,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # buildifier: disable=load
 load(
-    "@rules_rust//rust:rust.bzl",
+    "@rules_rust//rust:defs.bzl",
     "rust_binary",
     "rust_library",
+    "rust_proc_macro",
     "rust_test",
 )
 
@@ -43,14 +44,11 @@ licenses([
 rust_library(
     name = "uuid",
     srcs = glob(["**/*.rs"]),
-    aliases = {
-    },
     crate_features = [
         "default",
         "std",
     ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
     data = [],
     edition = "2018",
     rustc_flags = [
@@ -63,12 +61,5 @@ rust_library(
     version = "0.8.2",
     # buildifier: leave-alone
     deps = [
-    ] + selects.with_or({
-        # cfg(windows)
-        (
-            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
-        ): [
-        ],
-        "//conditions:default": [],
-    }),
+    ],
 )
