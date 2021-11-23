@@ -25,6 +25,7 @@
 #include "src/ir/proto/system_spec.h"
 #include "src/ir/single-use-arena-and-predicate.h"
 #include "src/ir/types/primitive_type.h"
+#include "src/utils/ranges.h"
 
 namespace raksha::xform_to_datalog {
 
@@ -324,36 +325,13 @@ static const std::string kExpectedClaimStrings[] = {
     R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1").)",
 };
 
-// TODO(bgogul): Move this to a common/utils.
-template <typename I>
-class iterator_range {
- public:
-  using const_iterator = I;
-  using value_type = typename std::iterator_traits<I>::value_type;
-
-  iterator_range() = default;
-  iterator_range(I begin, I end): begin_(begin), end_(end) {}
-
-  I begin() const { return begin_; }
-  I end() const { return end_; }
-  bool empty() const { return begin() == end(); }
-
- private:
-  I begin_;
-  I end_;
-};
-
-template <typename I>
-inline iterator_range<I> make_range(I begin, I end) {
-  return iterator_range<I>(begin, end);
-}
-
 TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
-  EXPECT_THAT(make_range(std::find(datalog_strings_.begin(),
-                                   datalog_strings_.end(), "// Claims:"),
-                         std::find(datalog_strings_.begin(),
-                                   datalog_strings_.end(), "// Checks:")),
-              testing::UnorderedElementsAreArray(kExpectedClaimStrings));
+  EXPECT_THAT(
+      utils::make_range(std::find(datalog_strings_.begin(),
+                                  datalog_strings_.end(), "// Claims:"),
+                        std::find(datalog_strings_.begin(),
+                                  datalog_strings_.end(), "// Checks:")),
+      testing::UnorderedElementsAreArray(kExpectedClaimStrings));
 }
 
 static constexpr absl::string_view kPattern =
@@ -377,10 +355,10 @@ static std::string kExpectedCheckStrings[] = {
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {
-  EXPECT_THAT(make_range(std::find(datalog_strings_.begin(),
-                                   datalog_strings_.end(), "// Checks:"),
-                         std::find(datalog_strings_.begin(),
-                                   datalog_strings_.end(), "// Edges:")),
+  EXPECT_THAT(utils::make_range(std::find(datalog_strings_.begin(),
+                                          datalog_strings_.end(), "// Checks:"),
+                                std::find(datalog_strings_.begin(),
+                                          datalog_strings_.end(), "// Edges:")),
               testing::UnorderedElementsAreArray(kExpectedCheckStrings));
 }
 
@@ -443,9 +421,9 @@ static const std::string kExpectedEdgeStrings[] = {
     R"(edge("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1").)"};
 
 TEST_F(ParseBigManifestTest, ManifestProtoEdgesTest) {
-  EXPECT_THAT(make_range(std::find(datalog_strings_.begin(),
-                                   datalog_strings_.end(), "// Edges:"),
-                         datalog_strings_.end()),
+  EXPECT_THAT(utils::make_range(std::find(datalog_strings_.begin(),
+                                          datalog_strings_.end(), "// Edges:"),
+                                datalog_strings_.end()),
               testing::UnorderedElementsAreArray(kExpectedEdgeStrings));
 }
 
