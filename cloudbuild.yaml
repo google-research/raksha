@@ -42,10 +42,7 @@ steps:
   waitFor: ['build-image']
   name: '${_DOCKER_IMAGE}'
   entrypoint: 'bash'
-  args: [
-    '-l', '-c', 'cargo', 'test', '--manifest-path=rust/tools/authorization-logic/Cargo.toml'
-  ]
-
+  args: ['./gcb/auth_logic.sh']
 
 timeout: 3600s # 60 mins, just in case.
 
