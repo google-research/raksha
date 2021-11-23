@@ -42,14 +42,6 @@ class Edge {
     return (from_ == other.from_) && (to_ == other.to_);
   }
 
-  Edge BulkInstantiate(
-      const absl::flat_hash_map<AccessPathRoot, AccessPathRoot>
-          &instantiation_map) const {
-    return Edge(
-        from_.BulkInstantiate(instantiation_map),
-        to_.BulkInstantiate(instantiation_map));
-  }
-
  private:
   // The AccessPath we are drawing the edge from.
   AccessPath from_;
