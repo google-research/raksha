@@ -40,28 +40,6 @@ class TagClaim {
       tag_(std::move(tag))
     {}
 
-  // Return a TagClaim that is the same as *this, but with the root new_root.
-  // Note that this expects the current root to be uninstantiated.
-  TagClaim Instantiate(AccessPathRoot new_root) const {
-    return TagClaim(
-        claiming_particle_name_,
-        access_path_.Instantiate(new_root),
-        claim_tag_is_present_,
-        tag_);
-  }
-
-  // Allow this TagClaim to participate in a bulk instantiation of multiple
-  // uninstantiated AccessPaths.
-  TagClaim BulkInstantiate(
-      const absl::flat_hash_map<AccessPathRoot, AccessPathRoot>
-          &instantiation_map) const {
-    return TagClaim(
-        claiming_particle_name_,
-        access_path_.BulkInstantiate(instantiation_map),
-        claim_tag_is_present_,
-        tag_);
-  }
-
   // Produce a string containing a datalog fact for this TagClaim.
   std::string ToDatalog(DatalogPrintContext &ctxt) const {
     constexpr absl::string_view kClaimTagFormat =
@@ -80,6 +58,8 @@ class TagClaim {
           (claim_tag_is_present_ == other.claim_tag_is_present_) &&
           (tag_ == other.tag_);
   }
+
+  const AccessPath &access_path() const { return access_path_; }
 
  private:
   // The name of the particle performing this claim. Important for connecting
