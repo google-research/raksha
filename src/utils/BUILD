@@ -30,3 +30,18 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
+
+cc_library(
+    name = "ranges",
+    hdrs = ["ranges.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "ranges_test",
+    srcs = ["ranges_test.cc"],
+    deps = [
+        ":ranges",
+        "//src/common/testing:gtest",
+    ],
+)

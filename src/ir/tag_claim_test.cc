@@ -56,21 +56,23 @@ TEST_P(TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest) {
       assume_textproto, &assume_proto));
   std::vector<TagClaim> unrooted_tag_claim_vec =
       proto::Decode(particle_spec_name, assume_proto);
-  std::vector<TagClaim> rooted_tag_claim_vec;
+  DatalogPrintContext::AccessPathInstantiationMap instantiation_map;
   for (const TagClaim &unrooted_claim : unrooted_tag_claim_vec) {
-    rooted_tag_claim_vec.push_back(unrooted_claim.Instantiate(root));
+    instantiation_map.insert({unrooted_claim.access_path().root(), root});
   }
   DatalogPrintContext ctxt;
   // Expect the version with the concrete root to match the expected_todatalog
   // when ToDatalog is called upon it.
-  ASSERT_EQ(rooted_tag_claim_vec.size(), expected_todatalog_vec.size());
-  for (uint64_t i = 0; i < rooted_tag_claim_vec.size(); ++i) {
+  ctxt.set_instantiation_map(&instantiation_map);
+  ASSERT_EQ(unrooted_tag_claim_vec.size(), expected_todatalog_vec.size());
+  for (uint64_t i = 0; i < unrooted_tag_claim_vec.size(); ++i) {
     EXPECT_EQ(
-        rooted_tag_claim_vec.at(i).ToDatalog(ctxt),
+        unrooted_tag_claim_vec.at(i).ToDatalog(ctxt),
         expected_todatalog_vec.at(i));
   }
   // However, the version with the spec root should fail when ToDatalog is
   // called.
+  ctxt.set_instantiation_map(nullptr);
   EXPECT_DEATH(
       unrooted_tag_claim_vec.at(0).ToDatalog(ctxt),
       "Attempted to print out an AccessPath before connecting it to a "

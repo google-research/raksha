@@ -113,6 +113,7 @@ cc_test(
         ":manifest_datalog_facts",
         "//src/common/testing:gtest",
         "//src/ir:single_use_arena_and_predicate",
+        "//src/utils:ranges",
     ],
 )
 

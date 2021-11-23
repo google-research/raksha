@@ -26,7 +26,7 @@ mod test {
     use crate::signing::tink_interface::*;
 
     fn query_test_with_imports(t: QueryTest) {
-        compile(t.filename, "test_inputs", "test_outputs", "");
+        compile(t.filename, t.input_dir, t.output_dir, "");
         run_souffle(
             &format!("test_outputs/{}.dl", t.filename),
             &"test_outputs".to_string(),
@@ -52,6 +52,7 @@ mod test {
         query_test_with_imports(QueryTest {
             filename: "importing",
             query_expects: vec![("q1", true), ("q2", false), ("q3", true), ("q4", false)],
+            ..Default::default()
         })
     }
 }
