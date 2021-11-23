@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 #[cfg(test)]
 mod test {
@@ -22,16 +22,31 @@ mod test {
     };
     use std::fs;
 
+    // This dependency is used for generating keypairs.
+    use crate::signing::tink_interface::*;
+
     #[test]
-    fn test_negation() {
+    fn test_multimic_overrides() {
         run_query_test(QueryTest {
-            filename: "negation",
+            filename: "multimic-preferences.authlogic",
+            input_dir: "raksha_examples/multimic-overrides",
+            output_dir: "raksha_examples/multimic-overrides",
             query_expects: vec![
-                ("q1", true),
-                ("q2", false),
-                ("q3", false),
+                ("may_notifierA", true),
+                ("may_notifierB", true),
+                ("may_notifierC", true),
+                ("may_micComputeA", true),
+                ("may_micComputeB", true),
+                ("may_micComputeC", true),
+                ("down_micComputeA", true),
+                ("down_micComputeB", true),
+                ("down_micComputeC", true),
+                ("may_speechInA", true),
+                ("may_speechInB", true),
+                ("may_speechInC", true),
             ],
-            ..Default::default()
         });
     }
+
+
 }
