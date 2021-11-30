@@ -51,8 +51,10 @@ bazel_run() {
     ${TARGETS};
   then
     post_commit_status "${STATUS_MESSAGE}" "success" ${INVOCATION_ID}
+    return 0
   else
     post_commit_status "${STATUS_MESSAGE}" "failure" ${INVOCATION_ID}
+    return 1
   fi
 }
 
