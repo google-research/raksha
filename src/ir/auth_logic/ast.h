@@ -43,6 +43,7 @@ class AstPredicate {
         AstSign sign)
       : name_(std::move(name)),
         args_(std::move(args)),
+        // TODO this surpresses an unused private field error about sign_
         sign_(std::move(sign)) {}
   private:
     std::string name_;
@@ -60,16 +61,20 @@ class AstPredicate {
 //    - uses std::visit to do operations on the actual state
 class AstVerbPhrase {
   public:
-    std::unique_ptr<AstVerbPhrase>
-      CreateVerbPhrase(AstPredicate pred);
-    std::unique_ptr<AstVerbPhrase>
-      CreateVerbPhrase(AstPrincipal right_prin);
+    static std::unique_ptr<AstVerbPhrase> 
+    CreateVerbPhrase(AstPredicate pred) {
+      return std::unique_ptr<AstVerbPhrase>(new AstVerbPhrase(std::move(pred)));
+    }
+    static std::unique_ptr<AstVerbPhrase>
+    CreateVerbPhrase(AstPrincipal right_prin) {
+      return std::unique_ptr<AstVerbPhrase>(new AstVerbPhrase(
+            std::move(right_prin)));
+    }
   private:
     // The principal variant of the internal form means this represents
     // "canActAs principal".
-    using InternalFormType = std::variant<AstPredicate, AstPrincipal>;
-    InternalFormType internal_form_;
-    AstVerbPhrase(InternalFormType internal_form)
+    std::variant<AstPredicate, AstPrincipal> internal_form_;
+    AstVerbPhrase(std::variant<AstPredicate, AstPrincipal> internal_form)
       : internal_form_(std::move(internal_form)) {}
 };
 
@@ -80,10 +85,15 @@ class AstVerbPhrase {
 // inner struct is used for the first form (principal applied to verb_phrase).
 class AstFlatFact {
   public:
-    std::unique_ptr<AstFlatFact>
-      CreateFlatFact(AstPrincipal prin, AstVerbPhrase verb_phrase);
-    std::unique_ptr<AstFlatFact>
-      CreateFlatFact(AstPredicate prin);
+    static std::unique_ptr<AstFlatFact>
+    CreateFlatFact(AstPrincipal prin, AstVerbPhrase verb_phrase) {
+      return std::unique_ptr<AstFlatFact>(new AstFlatFact(
+            VerbPhraseFlatFact(prin, verb_phrase)));
+    }
+    static std::unique_ptr<AstFlatFact>
+    CreateFlatFact(AstPredicate prin) {
+      return std::unique_ptr<AstFlatFact>(new AstFlatFact(std::move(prin)));
+    }
   private:
     typedef struct VerbPhraseFlatFact {
       AstPrincipal prin;
@@ -92,9 +102,8 @@ class AstFlatFact {
         : prin(std::move(prin)),
           verb_phrase(std::move(verb_phrase)) {}
     } VerbPhraseFlatFact;
-    using InternalFormType = std::variant<VerbPhraseFlatFact, AstPredicate>;
-    InternalFormType internal_form_;
-    AstFlatFact(InternalFormType internal_form)
+    std::variant<VerbPhraseFlatFact, AstPredicate> internal_form_;
+    AstFlatFact(std::variant<VerbPhraseFlatFact, AstPredicate> internal_form)
         : internal_form_(std::move(internal_form)) {}
 };
 
@@ -103,8 +112,15 @@ class AstFlatFact {
 //  - <principal> canSay <flat_fact>
 class AstFact {
   public:
-    std::unique_ptr<AstFact> CreateFact(AstFlatFact flat_fact);
-    std::unique_ptr<AstFact> CreateFact(AstPrincipal prin, AstFact* fact);
+    static std::unique_ptr<AstFact>
+    CreateFact(AstFlatFact flat_fact) {
+      return std::unique_ptr<AstFact>(new AstFact(std::move(flat_fact)));
+    }
+    static std::unique_ptr<AstFact>
+    CreateFact(AstPrincipal prin, AstFact* fact) {
+      return std::unique_ptr<AstFact>(new AstFact(CanSayFact(std::move(prin),
+            std::move(fact))));
+    }
   private:
     typedef struct CanSayFact {
       AstPrincipal prin;
@@ -113,9 +129,8 @@ class AstFact {
         : prin(std::move(prin)),
           fact(fact) {}
     } CanSayFact;
-    using InternalFormType = std::variant<AstFlatFact, CanSayFact>;
-    InternalFormType internal_form_;
-    AstFact(InternalFormType internal_form)
+    std::variant<AstFlatFact, CanSayFact> internal_form_;
+    AstFact(std::variant<AstFlatFact, CanSayFact> internal_form)
       : internal_form_(std::move(internal_form)) {};
 };
 
@@ -125,9 +140,16 @@ class AstFact {
 //  - <fact> :- <flat_fact_1> ... <flat_fact_n>   (conditional)
 class AstAssertion {
   public:
-    std::unique_ptr<AstAssertion> CreateAssertion(AstFact fact);
-    std::unique_ptr<AstAssertion> CreateAssertion(AstFact lhs,
-        std::vector<AstFlatFact> rhs);
+    static std::unique_ptr<AstAssertion>
+    CreateAssertion(AstFact fact) {
+      return std::unique_ptr<AstAssertion>(new AstAssertion(std::move(fact)));
+    }
+    static std::unique_ptr<AstAssertion>
+    CreateAssertion(AstFact lhs,
+        std::vector<AstFlatFact> rhs) {
+      return std::unique_ptr<AstAssertion>(new AstAssertion(
+            CondAssertion(std::move(lhs), std::move(rhs))));
+    }
   private:
     typedef struct CondAssertion {
       AstFact lhs;
@@ -135,9 +157,8 @@ class AstAssertion {
       CondAssertion(AstFact lhs, std::vector<AstFlatFact> rhs)
         : lhs(std::move(lhs)), rhs(std::move(rhs)) {}
     } CondAssertion;
-    using InternalFormType = std::variant<AstFact, CondAssertion>;
-    InternalFormType internal_form_;
-    AstAssertion(InternalFormType internal_form)
+    std::variant<AstFact, CondAssertion> internal_form_;
+    AstAssertion(std::variant<AstFact, CondAssertion> internal_form)
       : internal_form_(std::move(internal_form)) {};
 };
 

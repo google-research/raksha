@@ -18,44 +18,6 @@
 
 namespace raksha::ir::auth_logic {
 
-  // AstVerbPhrase
-  std::unique_ptr<AstVerbPhrase>
-  AstVerbPhrase::CreateVerbPhrase(AstPredicate pred) {
-    return std::unique_ptr<AstVerbPhrase>(new AstVerbPhrase(std::move(pred)));
-  }
-
-  std::unique_ptr<AstVerbPhrase>
-  AstVerbPhrase::CreateVerbPhrase(AstPrincipal prin) {
-    return std::unique_ptr<AstVerbPhrase>(new AstVerbPhrase(std::move(prin)));
-  }
-
-  // AstFlatFact
-  std::unique_ptr<AstFlatFact>
-  AstFlatFact::CreateFlatFact(AstPrincipal prin,
-      AstVerbPhrase verb_phrase) {
-    VerbPhraseFlatFact* verb_phrase_flat_fact = new VerbPhraseFlatFact(
-        prin, verb_phrase);
-    return std::unique_ptr<AstFlatFact>(new AstFlatFact(
-      std::move(*verb_phrase_flat_fact)));
-  }
-
-  std::unique_ptr<AstFlatFact>
-  AstFlatFact::CreateFlatFact(AstPredicate pred) {
-    return std::unique_ptr<AstFlatFact>(new AstFlatFact(std::move(pred)));
-  }
-
-  // AstFact
-  std::unique_ptr<AstFact>
-  AstFact::CreateFact(AstFlatFact flat_fact) {
-    return std::unique_ptr<AstFact>(new AstFact(std::move(flat_fact)));
-  }
-  
-  std::unique_ptr<AstFact>
-  AstFact::CreateFact(AstPrincipal prin, AstFact* fact) {
-    CanSayFact* can_say_fact = new CanSayFact(std::move(prin), std::move(fact));
-    return std::unique_ptr<AstFact>(new AstFact(std::move(*can_say_fact)));
-  }
-
   // AstAssertion
   std::unique_ptr<AstAssertion>
   AstAssertion::CreateAssertion(AstFact fact) {
@@ -64,10 +26,8 @@ namespace raksha::ir::auth_logic {
 
   std::unique_ptr<AstAssertion>
   AstAssertion::CreateAssertion(AstFact lhs, std::vector<AstFlatFact> rhs) {
-    CondAssertion* cond_assertion = new CondAssertion(std::move(lhs),
-        std::move(rhs));
     return std::unique_ptr<AstAssertion>(new AstAssertion(
-        std::move(*cond_assertion)));
+          CondAssertion(std::move(lhs), std::move(rhs)));
   }
 
 }

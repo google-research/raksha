@@ -21,7 +21,6 @@ cc_library(
     name = "ast",
     srcs = [
         "ast.h",
-        "ast.cc"
     ]
 )
 
