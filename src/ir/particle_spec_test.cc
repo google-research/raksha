@@ -57,14 +57,14 @@ TEST_P(ParticleSpecFromProtoTest, ParticleSpecFromProtoTest) {
 
   EXPECT_EQ(particle_spec_->name(), param.expected_name);
   EXPECT_THAT(
-      param.expected_claims,
-      testing::UnorderedElementsAreArray(particle_spec_->tag_claims()));
+      particle_spec_->tag_claims(),
+      testing::UnorderedElementsAreArray(param.expected_claims));
   EXPECT_THAT(
-      param.expected_checks,
-      testing::UnorderedElementsAreArray(particle_spec_->checks()));
+      particle_spec_->checks(),
+      testing::UnorderedElementsAreArray(param.expected_checks));
   EXPECT_THAT(
-      param.expected_edges,
-      testing::UnorderedElementsAreArray(particle_spec_->edges()));
+      particle_spec_->edges(),
+      testing::UnorderedElementsAreArray(param.expected_edges));
 }
 
 // Constant to reduce wordiness of test expected output.
