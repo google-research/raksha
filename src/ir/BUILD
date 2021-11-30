@@ -24,7 +24,6 @@ cc_library(
     srcs = [
         "access_path_root.cc",
         "particle_spec.cc",
-        "predicate.cc",
     ],
     hdrs = [
         "datalog_print_context.h",

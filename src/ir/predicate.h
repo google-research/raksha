@@ -67,8 +67,9 @@ class Predicate {
 
 class And : public Predicate {
  public:
-  static std::unique_ptr<And> Create(std::unique_ptr<Predicate> lhs,
-                                     std::unique_ptr<Predicate> rhs);
+  explicit And(std::unique_ptr<Predicate> lhs, std::unique_ptr<Predicate> rhs)
+      : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+
   virtual ~And() {}
 
   std::string ToDatalogRuleBody(
@@ -88,9 +89,6 @@ class And : public Predicate {
     return (*lhs_ == *other_and->lhs_) && (*rhs_ == *other_and->rhs_);
   }
 
-  explicit And(std::unique_ptr<Predicate> lhs, std::unique_ptr<Predicate> rhs)
-      : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
-
  private:
   std::unique_ptr<Predicate> lhs_;
   std::unique_ptr<Predicate> rhs_;
@@ -106,8 +104,10 @@ class And : public Predicate {
 // if the antecedent is false.
 class Implies : public Predicate {
  public:
-  static std::unique_ptr<Implies> Create(std::unique_ptr<Predicate> antecedent,
-                                         std::unique_ptr<Predicate> consequent);
+  explicit Implies(std::unique_ptr<Predicate> antecedent,
+                   std::unique_ptr<Predicate> consequent)
+      : antecedent_(std::move(antecedent)),
+        consequent_(std::move(consequent)) {}
 
   virtual ~Implies() {}
 
@@ -132,11 +132,6 @@ class Implies : public Predicate {
            (*consequent_ == *other_implies->consequent_);
   }
 
-  explicit Implies(std::unique_ptr<Predicate> antecedent,
-                   std::unique_ptr<Predicate> consequent)
-      : antecedent_(std::move(antecedent)),
-        consequent_(std::move(consequent)) {}
-
  private:
   std::unique_ptr<Predicate> antecedent_;
   std::unique_ptr<Predicate> consequent_;
@@ -145,7 +140,9 @@ class Implies : public Predicate {
 // A Not boolean expression in a predicate. Just negates the inner predicate.
 class Not : public Predicate {
  public:
-  static std::unique_ptr<Not> Create(std::unique_ptr<Predicate> negated);
+  explicit Not(std::unique_ptr<Predicate> negated_predicate)
+      : negated_predicate_(std::move(negated_predicate)) {}
+
   virtual ~Not() {}
 
   std::string ToDatalogRuleBody(
@@ -167,9 +164,6 @@ class Not : public Predicate {
     return *negated_predicate_ == *other_not->negated_predicate_;
   }
 
-  explicit Not(std::unique_ptr<Predicate> negated_predicate)
-      : negated_predicate_(std::move(negated_predicate)) {}
-
  private:
   std::unique_ptr<Predicate> negated_predicate_;
 };
@@ -177,8 +171,9 @@ class Not : public Predicate {
 // A boolean or expression on two predicates.
 class Or : public Predicate {
  public:
-  static std::unique_ptr<Or> Create(std::unique_ptr<Predicate> lhs,
-                                    std::unique_ptr<Predicate> rhs);
+  explicit Or(std::unique_ptr<Predicate> lhs, std::unique_ptr<Predicate> rhs)
+      : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+
   virtual ~Or() {}
 
   std::string ToDatalogRuleBody(
@@ -198,9 +193,6 @@ class Or : public Predicate {
     return (*lhs_ == *other_or->lhs_) && (*rhs_ == *other_or->rhs_);
   }
 
-  explicit Or(std::unique_ptr<Predicate> lhs, std::unique_ptr<Predicate> rhs)
-      : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
-
  private:
   std::unique_ptr<Predicate> lhs_;
   std::unique_ptr<Predicate> rhs_;
@@ -211,7 +203,7 @@ class Or : public Predicate {
 // predicate tree.
 class TagPresence : public Predicate {
  public:
-  static std::unique_ptr<TagPresence> Create(std::string tag);
+  explicit TagPresence(std::string tag) : tag_(std::move(tag)) {}
   virtual ~TagPresence() {}
 
   // The tag presence just turns into a check for the tag on the access_path
@@ -235,8 +227,6 @@ class TagPresence : public Predicate {
     }
     return tag_ == other_tag_presence->tag_;
   }
-
-  explicit TagPresence(std::string tag) : tag_(std::move(tag)) {}
 
  private:
   std::string tag_;
