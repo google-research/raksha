@@ -10,7 +10,6 @@ TEST(HandleConnectionSpecAccessPathRootBehaviorTest,
   HandleConnectionSpecAccessPathRoot spec_access_path_root
     ("particle_spec_name", "handle_access_path_spec_name");
   AccessPathRoot test_access_path_root(spec_access_path_root);
-  EXPECT_FALSE(test_access_path_root.IsInstantiated());
   EXPECT_DEATH(test_access_path_root.ToString(),
                "Attempted to print out an AccessPath before connecting it "
                   "to a fully-instantiated root!");
@@ -20,14 +19,12 @@ TEST(HandleConnectionAccessPathRootTest, HandleConnectionAccessPathRootTest) {
   HandleConnectionAccessPathRoot handle_connection_access_path_root(
       "recipe", "particle", "handle");
   AccessPathRoot test_access_path_root(handle_connection_access_path_root);
-  EXPECT_TRUE(test_access_path_root.IsInstantiated());
   EXPECT_EQ(test_access_path_root.ToString(), "recipe.particle.handle");
 }
 
 TEST(HandleAccessPathRootTest, HandleAccessPathRootTest) {
   HandleAccessPathRoot handle_connection_access_path_root("recipe", "handle");
   AccessPathRoot test_access_path_root(handle_connection_access_path_root);
-  EXPECT_TRUE(test_access_path_root.IsInstantiated());
   EXPECT_EQ(test_access_path_root.ToString(), "recipe.handle");
 }
 
