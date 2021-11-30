@@ -91,8 +91,6 @@ static AccessPathSelectors MakeSingleFieldSelectors(
 }
 
 // Tags for constructing checks.
-static constexpr absl::string_view kTag1 = "tag1";
-static constexpr absl::string_view kTag2 = "tag2";
 static const std::unique_ptr<TagCheck> kTag1Check = std::make_unique<TagCheck>(
     ir::AccessPath(kPs2HcHandleRoot, MakeSingleFieldSelectors("field1")),
     std::make_unique<TagPresence>("tag1"));
