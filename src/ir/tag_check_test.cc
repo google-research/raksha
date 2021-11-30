@@ -31,9 +31,7 @@ TEST_P(TagCheckToDatalogWithRootTest, TagCheckToDatalogWithRootTest) {
       expected_todatalog_format_string, "check_num_0", root_string);
   arcs::CheckProto check_proto;
   google::protobuf::TextFormat::ParseFromString(check_textproto, &check_proto);
-  PredicateArena predicate_arena;
-  proto::PredicateDecoder predicate_decoder(predicate_arena);
-  TagCheck unrooted_tag_check = proto::Decode(check_proto, predicate_decoder);
+  TagCheck unrooted_tag_check = proto::Decode(check_proto);
 
   DatalogPrintContext ctxt;
   DatalogPrintContext::AccessPathInstantiationMap instantiation_map(

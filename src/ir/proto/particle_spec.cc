@@ -26,7 +26,6 @@
 namespace raksha::ir::proto {
 
 std::unique_ptr<ParticleSpec> Decode(
-    std::unique_ptr<PredicateArena> arena,
     const arcs::ParticleSpecProto &particle_spec_proto) {
   std::string name = particle_spec_proto.name();
   CHECK(!name.empty()) << "Expected particle spec to have a name.";
@@ -63,16 +62,14 @@ std::unique_ptr<ParticleSpec> Decode(
     }
   }
 
-  proto::PredicateDecoder predicate_decoder(*arena.get());
   std::vector<TagCheck> checks;
   for (const arcs::CheckProto &check : particle_spec_proto.checks()) {
-    checks.push_back(proto::Decode(check, predicate_decoder));
+    checks.push_back(proto::Decode(check));
   }
 
   return ParticleSpec::Create(
       std::move(name), std::move(checks), std::move(tag_claims),
-      std::move(derives_from_claims), std::move(handle_connection_specs),
-      std::move(arena));
+      std::move(derives_from_claims), std::move(handle_connection_specs));
 }
 
 }  // namespace raksha::ir::proto

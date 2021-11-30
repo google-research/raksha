@@ -23,7 +23,6 @@
 #include "src/ir/datalog_print_context.h"
 #include "src/ir/particle_spec.h"
 #include "src/ir/proto/system_spec.h"
-#include "src/ir/single-use-arena-and-predicate.h"
 #include "src/ir/types/primitive_type.h"
 #include "src/utils/ranges.h"
 
@@ -42,8 +41,6 @@ TEST_P(ManifestDatalogFactsToDatalogTest, ManifestDatalogFactsToDatalogTest) {
   ir::DatalogPrintContext ctxt;
   EXPECT_EQ(datalog_facts.ToDatalog(ctxt), expected_result_string);
 }
-
-static const ir::SingleUseArenaAndTagPresence kTag2Presence("tag2");
 
 static const ir::AccessPath kHandleH1AccessPath(
     ir::AccessPathRoot(ir::HandleAccessPathRoot("recipe", "h1")),
@@ -74,15 +71,20 @@ std::vector<ir::HandleConnectionSpec> GetHandleConnectionSpecs() {
   return result;
 }
 
+std::vector<ir::TagCheck> GetTagChecks() {
+  std::vector<ir::TagCheck> result;
+  result.push_back(ir::TagCheck(kHandleConnectionInAccessPath,
+                                std::make_unique<ir::TagPresence>("tag2")));
+  return result;
+}
+
 static std::unique_ptr<ir::ParticleSpec> particle_spec(ir::ParticleSpec::Create(
     "particle",
-    /*checks=*/
-    {ir::TagCheck(kHandleConnectionInAccessPath, *kTag2Presence.predicate())},
+    /*checks=*/GetTagChecks(),
     /*tag_claims=*/
     {ir::TagClaim("particle", kHandleConnectionOutAccessPath, true, "tag")},
     /*derives_from_claims=*/{},
-    /*handle_connection_specs=*/GetHandleConnectionSpecs(),
-    /*predicate_arena=*/nullptr));
+    /*handle_connection_specs=*/GetHandleConnectionSpecs()));
 
 static std::tuple<ManifestDatalogFacts, std::string>
     datalog_facts_and_output_strings[] = {

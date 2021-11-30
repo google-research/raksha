@@ -31,10 +31,7 @@ std::unique_ptr<SystemSpec> Decode(const arcs::ManifestProto &manifest_proto) {
   auto system_spec = std::make_unique<SystemSpec>();
   for (const arcs::ParticleSpecProto &particle_spec_proto :
        manifest_proto.particle_specs()) {
-    std::unique_ptr<ir::PredicateArena> arena =
-        std::make_unique<ir::PredicateArena>();
-    system_spec->AddParticleSpec(
-        ir::proto::Decode(std::move(arena), particle_spec_proto));
+    system_spec->AddParticleSpec(ir::proto::Decode(particle_spec_proto));
   }
   return system_spec;
 }

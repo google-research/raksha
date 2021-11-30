@@ -25,7 +25,7 @@ namespace raksha::ir {
 TEST(AddParticleSpec, StoresAndReturnsParticleSpec) {
   SystemSpec spec;
   std::unique_ptr<ParticleSpec> particle_spec =
-      ParticleSpec::Create("MyParticle", {}, {}, {}, {}, nullptr);
+      ParticleSpec::Create("MyParticle", {}, {}, {}, {});
   const ParticleSpec* created_spec = particle_spec.get();
   const ParticleSpec* stored_spec =
       spec.AddParticleSpec(std::move(particle_spec));
@@ -36,25 +36,24 @@ TEST(AddParticleSpec, StoresAndReturnsParticleSpec) {
 TEST(AddParticleSpec, FailsWhenDuplicateSpecsAreStored) {
   SystemSpec spec;
   const ParticleSpec* particle_spec = spec.AddParticleSpec(
-      ParticleSpec::Create("MyParticle", {}, {}, {}, {}, nullptr));
+      ParticleSpec::Create("MyParticle", {}, {}, {}, {}));
   EXPECT_EQ(particle_spec->name(), "MyParticle");
   EXPECT_DEATH( spec.AddParticleSpec(
-      ParticleSpec::Create("MyParticle", {}, {}, {}, {}, nullptr)),
+      ParticleSpec::Create("MyParticle", {}, {}, {}, {})),
                 "Tried to insert second particle spec with name MyParticle");
 }
 
 TEST(GetParticleSpec, ReturnsStoredParticleSpec) {
   SystemSpec spec;
   spec.AddParticleSpec(
-      ParticleSpec::Create("MyParticle", {}, {}, {}, {}, nullptr));
+      ParticleSpec::Create("MyParticle", {}, {}, {}, {}));
   const ParticleSpec* stored_spec = spec.GetParticleSpec("MyParticle");
   EXPECT_EQ(stored_spec->name(), "MyParticle");
 }
 
 TEST(GetParticleSpec, FailsIfParticleSpecNotFound) {
   SystemSpec spec;
-  spec.AddParticleSpec(
-      ParticleSpec::Create("MyParticle", {}, {}, {}, {}, nullptr));
+  spec.AddParticleSpec(ParticleSpec::Create("MyParticle", {}, {}, {}, {}));
   const ParticleSpec* stored_spec = spec.GetParticleSpec("MyPart");
   EXPECT_EQ(stored_spec, nullptr);
 }
