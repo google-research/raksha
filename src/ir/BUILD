@@ -70,13 +70,6 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "single_use_arena_and_predicate",
-    testonly = True,
-    hdrs = ["single-use-arena-and-predicate.h"],
-    deps = [":ir"],
-)
-
 cc_test(
     name = "access_path_selectors_test",
     srcs = ["access_path_selectors_test.cc"],
@@ -221,7 +214,6 @@ cc_test(
     deps = [
         ":ir",
         ":predicate_textproto_to_rule_body_testdata",
-        ":single_use_arena_and_predicate",
         "//src/common/testing:gtest",
         "//src/ir/proto:predicate",
         "@absl//absl/strings",
@@ -243,7 +235,6 @@ cc_test(
     srcs = ["particle_spec_test.cc"],
     deps = [
         ":ir",
-        ":single_use_arena_and_predicate",
         "//src/common/testing:gtest",
         "//src/ir/proto:handle_connection_spec",
         "//src/ir/proto:particle_spec",

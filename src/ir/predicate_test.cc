@@ -23,7 +23,6 @@
 #include "src/ir/datalog_print_context.h"
 #include "src/ir/predicate_textproto_to_rule_body_testdata.h"
 #include "src/ir/proto/predicate.h"
-#include "src/ir/single-use-arena-and-predicate.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {

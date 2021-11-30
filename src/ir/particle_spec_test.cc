@@ -22,7 +22,6 @@
 #include "src/common/logging/logging.h"
 #include "src/ir/proto/particle_spec.h"
 #include "src/ir/predicate_arena.h"
-#include "src/ir/single-use-arena-and-predicate.h"
 
 namespace raksha::ir {
 
