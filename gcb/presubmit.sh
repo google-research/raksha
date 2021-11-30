@@ -66,5 +66,5 @@ bazel_run build \
   //src/analysis/souffle/tests/arcs_manifest_tests_todo/... \
   //src/analysis/souffle/examples/...
 
-# Run all the tests.
+# Run all the bazel tests (not cargo).
 bazel_run test //src/...

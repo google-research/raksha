@@ -30,3 +30,22 @@ ENV JAVA_HOME /usr/lib/jvm/default-java
 # Set up baselisk.
 RUN wget https://github.com/bazelbuild/bazelisk/releases/download/v1.10.1/bazelisk-linux-amd64 \
     -O /usr/local/bin/bazelisk && chmod a+x /usr/local/bin/bazelisk
+
+# Rust is needed for authorization logic
+ARG rustup_dir=/usr/local/cargo
+ENV RUSTUP_HOME ${rustup_dir}
+ENV CARGO_HOME ${rustup_dir}
+ENV PATH "${PATH}:${rustup_dir}/bin"
+RUN curl --location https://sh.rustup.rs > /tmp/rustup \
+  && sh /tmp/rustup -y --default-toolchain=none \
+  && chmod a+rwx ${rustup_dir} \
+  && rustup --version
+
+## Set the right version of rust
+ARG RUST_VERSION=nightly-2021-06-30
+RUN rustup toolchain install ${RUST_VERSION} \
+    && rustup default ${RUST_VERSION}
+
+# Souffle is needed to run the tests in authorization logic
+RUN curl -s https://packagecloud.io/install/repositories/souffle-lang/souffle/script.deb.sh | bash
+RUN apt-get update && apt-get install -y souffle
