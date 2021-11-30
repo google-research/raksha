@@ -33,7 +33,7 @@ class Principal {
 };
 
 // Used to represent whether a predicate is negated or not
-enum Sign { negated, positive };
+enum Sign { kNegated, kPositive };
 
 class Predicate {
   public:
@@ -43,7 +43,8 @@ class Predicate {
         Sign sign)
       : name_(std::move(name)),
         args_(std::move(args)),
-        // TODO this surpresses an unused private field error about sign_
+        // TODO move surpresses an unused private field error about sign_
+        // for now, get rid of this eventually
         sign_(std::move(sign)) {}
   private:
     std::string name_;
