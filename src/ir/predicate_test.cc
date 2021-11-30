@@ -57,9 +57,10 @@ TEST_P(ToDatalogRuleBodyTest, ToDatalogRuleBodyTest) {
   arcs::InformationFlowLabelProto_Predicate predicate_proto;
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
       textproto_, &predicate_proto));
-  const Predicate &predicate = *predicate_decoder_.Decode(predicate_proto);
+  std::unique_ptr<Predicate> predicate =
+      predicate_decoder_.Decode(predicate_proto);
   EXPECT_EQ(
-      predicate.ToDatalogRuleBody(access_path_, ctxt), expected_rule_body_);
+      predicate->ToDatalogRuleBody(access_path_, ctxt), expected_rule_body_);
 }
 
 // Helper for making AccessPaths.
@@ -139,52 +140,52 @@ static const TagPresence kTag2Present2("tag2");
 static const TagPresence kTag3Present2("tag3");
 
 static const And kAndTag1Tag2(
-    std::make_unique<TagPresence>(kTag1Present), std::make_unique<TagPresence>(kTag2Present));
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag2"));
 static const And kAndTag1Tag3(
-    std::make_unique<TagPresence>(kTag1Present), std::make_unique<TagPresence>(kTag3Present));
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag3"));
 static const And kAndTag2Tag3(
-    std::make_unique<TagPresence>(kTag2Present), std::make_unique<TagPresence>(kTag3Present));
+    std::make_unique<TagPresence>("tag2"), std::make_unique<TagPresence>("tag3"));
 
 static const And kAndTag1Tag2_2(
-    std::make_unique<TagPresence>(kTag1Present), std::make_unique<TagPresence>(kTag2Present));
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag2"));
 static const And kAndTag1Tag3_2(
-    std::make_unique<TagPresence>(kTag1Present), std::make_unique<TagPresence>(kTag3Present));
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag3"));
 static const And kAndTag2Tag3_2(
-    std::make_unique<TagPresence>(kTag2Present), std::make_unique<TagPresence>(kTag3Present));
+    std::make_unique<TagPresence>("tag2"), std::make_unique<TagPresence>("tag3"));
 
 static const Or kOrTag1Tag2(
-    std::make_unique<TagPresence>(kTag1Present), std::make_unique<TagPresence>(kTag2Present));
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag2"));
 static const Or kOrTag1Tag3(
-    std::make_unique<TagPresence>(kTag1Present), std::make_unique<TagPresence>(kTag3Present));
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag3"));
 static const Or kOrTag2Tag3(
-    std::make_unique<TagPresence>(kTag2Present), std::make_unique<TagPresence>(kTag3Present));
+    std::make_unique<TagPresence>("tag2"), std::make_unique<TagPresence>("tag3"));
 
 static const Or kOrTag1Tag2_2(
-    std::make_unique<TagPresence>(kTag1Present), std::make_unique<TagPresence>(kTag2Present));
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag2"));
 static const Or kOrTag1Tag3_2(
-    std::make_unique<TagPresence>(kTag1Present), std::make_unique<TagPresence>(kTag3Present));
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag3"));
 static const Or kOrTag2Tag3_2(
-    std::make_unique<TagPresence>(kTag2Present), std::make_unique<TagPresence>(kTag3Present));
+    std::make_unique<TagPresence>("tag2"), std::make_unique<TagPresence>("tag3"));
 
 static const Implies kImpliesTag1Tag2(
-    std::make_unique<TagPresence>(kTag1Present), std::make_unique<TagPresence>(kTag2Present));
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag2"));
 static const Implies kImpliesTag1Tag2_2(
-    std::make_unique<TagPresence>(kTag1Present), std::make_unique<TagPresence>(kTag2Present));
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag2"));
 static const Implies kImpliesTag1Tag3(
-    std::make_unique<TagPresence>(kTag1Present), std::make_unique<TagPresence>(kTag3Present));
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag3"));
 static const Implies kImpliesTag1Tag3_2(
-    std::make_unique<TagPresence>(kTag1Present), std::make_unique<TagPresence>(kTag3Present));
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag3"));
 static const Implies kImpliesTag2Tag3(
-    std::make_unique<TagPresence>(kTag2Present), std::make_unique<TagPresence>(kTag3Present));
+    std::make_unique<TagPresence>("tag2"), std::make_unique<TagPresence>("tag3"));
 static const Implies kImpliesTag2Tag3_2(
-    std::make_unique<TagPresence>(kTag2Present), std::make_unique<TagPresence>(kTag3Present));
+    std::make_unique<TagPresence>("tag2"), std::make_unique<TagPresence>("tag3"));
 
-static const Not kNotTag1(std::make_unique<TagPresence>(kTag1Present));
-static const Not kNotTag1_2(std::make_unique<TagPresence>(kTag1Present));
-static const Not kNotTag2(std::make_unique<TagPresence>(kTag2Present));
-static const Not kNotTag2_2(std::make_unique<TagPresence>(kTag2Present));
-static const Not kNotTag3(std::make_unique<TagPresence>(kTag3Present));
-static const Not kNotTag3_2(std::make_unique<TagPresence>(kTag3Present));
+static const Not kNotTag1(std::make_unique<TagPresence>("tag1"));
+static const Not kNotTag1_2(std::make_unique<TagPresence>("tag1"));
+static const Not kNotTag2(std::make_unique<TagPresence>("tag2"));
+static const Not kNotTag2_2(std::make_unique<TagPresence>("tag2"));
+static const Not kNotTag3(std::make_unique<TagPresence>("tag3"));
+static const Not kNotTag3_2(std::make_unique<TagPresence>("tag3"));
 
 static const Predicate * example_predicate_pointers[] = {
   &kTag1Present,

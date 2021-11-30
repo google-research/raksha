@@ -52,6 +52,13 @@ class ParticleSpecFromProtoTest :
   std::unique_ptr<ParticleSpec> particle_spec_;
 };
 
+// Locally defined operator== for use in test below.
+bool operator ==(const ir::TagCheck& check1,
+                 const ir::TagCheck* check2) {
+  if (check2 == nullptr) return false;
+  return check1 == *check2;
+}
+
 TEST_P(ParticleSpecFromProtoTest, ParticleSpecFromProtoTest) {
   const ParticleSpecProtoAndExpectedInfo &param = GetParam();
 
@@ -107,7 +114,7 @@ name: "PS1" connections: [
   {
     name: "out_handle" direction: WRITES
     type: {
-[21~      entity: {
+      entity: {
         schema: {
           fields: [
             { key: "field1", value: { primitive: TEXT } },
@@ -457,14 +464,6 @@ checks: [ {
      .expected_name = "PS2",
      .expected_claims = {},
      .expected_checks = { kTag1Check.get(), kTag2Check.get() },
-         // {
-         //     ir::TagCheck(ir::AccessPath(kPs2HcHandleRoot,
-         //                                 MakeSingleFieldSelectors("field1")),
-         //                  std::make_unique<TagPresence>("tag1")),
-         //     ir::TagCheck(ir::AccessPath(kPs2Hc2HandleRoot,
-         //                                 MakeSingleFieldSelectors("field2")),
-         //                  std::make_unique<TagPresence>("tag2")),
-         // },
      .expected_edges = {}},
     {.textproto = R"(
 name: "PS2"
