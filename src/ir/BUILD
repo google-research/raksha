@@ -32,7 +32,6 @@ cc_library(
         "handle_connection_spec.h",
         "particle_spec.h",
         "predicate.h",
-        "predicate_arena.h",
         "system_spec.h",
         "tag_check.h",
         "tag_claim.h",

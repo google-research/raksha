@@ -20,13 +20,11 @@
 #include <memory>
 
 #include "src/ir/particle_spec.h"
-#include "src/ir/predicate_arena.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::proto {
 
-std::unique_ptr<ParticleSpec> Decode(std::unique_ptr<PredicateArena> arena,
-                                     const arcs::ParticleSpecProto &proto);
+std::unique_ptr<ParticleSpec> Decode(const arcs::ParticleSpecProto &proto);
 
 }  // namespace raksha::ir::proto
 

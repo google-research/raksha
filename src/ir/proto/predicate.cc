@@ -22,7 +22,7 @@
 
 namespace raksha::ir::proto {
 
-std::unique_ptr<Predicate> PredicateDecoder::Decode(
+std::unique_ptr<Predicate> Decode(
     const arcs::InformationFlowLabelProto_Predicate &predicate_proto) {
   switch (predicate_proto.predicate_case()) {
     case arcs::InformationFlowLabelProto_Predicate::kLabel: {

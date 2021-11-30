@@ -84,8 +84,7 @@ static std::unique_ptr<ir::ParticleSpec> particle_spec(ir::ParticleSpec::Create(
     /*tag_claims=*/
     {ir::TagClaim("particle", kHandleConnectionOutAccessPath, true, "tag")},
     /*derives_from_claims=*/{},
-    /*handle_connection_specs=*/GetHandleConnectionSpecs(),
-    /*predicate_arena=*/nullptr));
+    /*handle_connection_specs=*/GetHandleConnectionSpecs()));
 
 static std::tuple<ManifestDatalogFacts, std::string>
     datalog_facts_and_output_strings[] = {

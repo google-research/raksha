@@ -8,16 +8,14 @@
 
 namespace raksha::ir::proto {
 
-TagCheck Decode(
-    const arcs::CheckProto &check_proto,
-    PredicateDecoder &predicate_decoder) {
+TagCheck Decode(const arcs::CheckProto &check_proto) {
   CHECK(check_proto.has_access_path())
     << "`Check` proto missing required field access_path!";
   AccessPath access_path = Decode(check_proto.access_path());
   CHECK(check_proto.has_predicate())
     << "`Check` proto missing required field predicate!";
   return TagCheck(std::move(access_path),
-                  std::move(predicate_decoder.Decode(check_proto.predicate())));
+                  std::move(Decode(check_proto.predicate())));
 }
 
 }  // namespace raksha::ir::proto

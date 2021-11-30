@@ -21,7 +21,6 @@
 #include "src/common/testing/gtest.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/proto/particle_spec.h"
-#include "src/ir/predicate_arena.h"
 
 namespace raksha::ir {
 
@@ -44,8 +43,7 @@ class ParticleSpecFromProtoTest :
     CHECK(google::protobuf::TextFormat::ParseFromString(
         textproto, &particle_spec_proto))
         << "Particle spec textproto did not parse correctly.";
-    return proto::Decode(std::make_unique<PredicateArena>(),
-                         particle_spec_proto);
+    return proto::Decode(particle_spec_proto);
   }
 
   std::unique_ptr<ParticleSpec> particle_spec_;

@@ -31,10 +31,7 @@ class ToDatalogRuleBodyTest :
  public testing::TestWithParam<
   std::tuple<std::tuple<absl::string_view, absl::string_view>, AccessPath>> {
  public:
-  explicit ToDatalogRuleBodyTest()
-    : access_path_(std::get<1>(GetParam())),
-      predicate_decoder_(arena_)
-  {
+  explicit ToDatalogRuleBodyTest() : access_path_(std::get<1>(GetParam())) {
     const auto &[textproto, expected_rule_body_format] =
         std::get<0>(GetParam());
 
@@ -47,8 +44,6 @@ class ToDatalogRuleBodyTest :
   std::string textproto_;
   std::string expected_rule_body_;
   AccessPath access_path_;
-  PredicateArena arena_;
-  proto::PredicateDecoder predicate_decoder_;
 };
 
 TEST_P(ToDatalogRuleBodyTest, ToDatalogRuleBodyTest) {
@@ -56,8 +51,7 @@ TEST_P(ToDatalogRuleBodyTest, ToDatalogRuleBodyTest) {
   arcs::InformationFlowLabelProto_Predicate predicate_proto;
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
       textproto_, &predicate_proto));
-  std::unique_ptr<Predicate> predicate =
-      predicate_decoder_.Decode(predicate_proto);
+  std::unique_ptr<Predicate> predicate = proto::Decode(predicate_proto);
   EXPECT_EQ(
       predicate->ToDatalogRuleBody(access_path_, ctxt), expected_rule_body_);
 }

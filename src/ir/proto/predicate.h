@@ -21,32 +21,13 @@
 
 #include "src/ir/access_path.h"
 #include "src/ir/predicate.h"
-#include "src/ir/predicate_arena.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::proto {
 
-// This class exists entirely to control access to the owning pointer for a
-// Predicate. Predicates are owned by ParticleSpecs and should live as long
-// as those ParticleSpecs. Therefore, individual Predicate unique_ptrs should
-// not be handed out to the objects that wish to point to them; instead, they
-// should be collected together in the decoder, which can then be kept alive
-// as long as the ParticleSpec to which these predicates belong.
-class PredicateDecoder {
- public:
-  PredicateDecoder(PredicateArena &predicate_arena)
-    : predicate_arena_(&predicate_arena) {}
-    // Decode the predicate indicated by the given proto. Only a reference
-    // will be returned; the owned pointer will be held and owned by this
-    // object.
-  std::unique_ptr<Predicate> Decode(
-      const arcs::InformationFlowLabelProto_Predicate &predicate_proto);
-
- private:
-  // The owned pointers are collected here, where they can be gathered by the
-  // ParticleSpec later.
-  PredicateArena *predicate_arena_;
-};
+// Decodes the predicate indicated by the given proto.
+std::unique_ptr<Predicate> Decode(
+    const arcs::InformationFlowLabelProto_Predicate &predicate_proto);
 
 }  // namespace raksha::ir::proto
 
