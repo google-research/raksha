@@ -61,8 +61,9 @@ class Predicate {
 //    - uses std::visit to do operations on the actual state
 class VerbPhrase {
  public:
-  explicit VerbPhrase(Predicate pred): internal_form_(std::move(pred)) {}
-  explicit VerbPhrase(Principal right_prin): internal_form_(std::move(right_prin)) {}
+  explicit VerbPhrase(Predicate pred) : internal_form_(std::move(pred)) {}
+  explicit VerbPhrase(Principal right_prin)
+      : internal_form_(std::move(right_prin)) {}
 
  private:
   // The principal variant of the internal form means this represents
@@ -77,9 +78,9 @@ class VerbPhrase {
 // inner struct is used for the first form (principal applied to verb_phrase).
 class FlatFact {
  public:
-  explicit FlatFact(Principal prin, VerbPhrase verb_phrase) 
-    : internal_form_(VerbPhraseFlatFact(std::move(prin),
-          std::move(verb_phrase))) {}
+  explicit FlatFact(Principal prin, VerbPhrase verb_phrase)
+      : internal_form_(
+            VerbPhraseFlatFact(std::move(prin), std::move(verb_phrase))) {}
   explicit FlatFact(Predicate pred) : internal_form_(std::move(pred)) {}
 
  private:
@@ -99,7 +100,7 @@ class Fact {
  public:
   explicit Fact(FlatFact flat_fact) : internal_form_(std::move(flat_fact)) {}
   explicit Fact(Principal prin, Fact* fact)
-    : internal_form_(CanSayFact(std::move(prin), fact)) {}
+      : internal_form_(CanSayFact(std::move(prin), fact)) {}
 
  private:
   struct CanSayFact {
@@ -119,7 +120,7 @@ class Assertion {
  public:
   explicit Assertion(Fact fact) : internal_form_(std::move(fact)) {}
   explicit Assertion(Fact lhs, std::vector<FlatFact> rhs)
-    : internal_form_(CondAssertion(std::move(lhs), std::move(rhs))) {}
+      : internal_form_(CondAssertion(std::move(lhs), std::move(rhs))) {}
 
  private:
   struct CondAssertion {
@@ -161,7 +162,7 @@ class Query {
 class Program {
  public:
   explicit Program(std::vector<SaysAssertion> says_assertions,
-          std::vector<Query> queries)
+                   std::vector<Query> queries)
       : says_assertions_(std::move(says_assertions)),
         queries_(std::move(queries)){};
 
@@ -170,6 +171,6 @@ class Program {
   std::vector<Query> queries_;
 };
 
-} // namespace raksha::ir::auth_logic
+}  // namespace raksha::ir::auth_logic
 
 #endif  // SRC_IR_AUTH_LOGIC_AST_H_
