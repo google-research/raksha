@@ -23,7 +23,6 @@
 #include "src/ir/datalog_print_context.h"
 #include "src/ir/predicate_textproto_to_rule_body_testdata.h"
 #include "src/ir/proto/predicate.h"
-#include "src/ir/single-use-arena-and-predicate.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
@@ -32,10 +31,7 @@ class ToDatalogRuleBodyTest :
  public testing::TestWithParam<
   std::tuple<std::tuple<absl::string_view, absl::string_view>, AccessPath>> {
  public:
-  explicit ToDatalogRuleBodyTest()
-    : access_path_(std::get<1>(GetParam())),
-      predicate_decoder_(arena_)
-  {
+  explicit ToDatalogRuleBodyTest() : access_path_(std::get<1>(GetParam())) {
     const auto &[textproto, expected_rule_body_format] =
         std::get<0>(GetParam());
 
@@ -48,8 +44,6 @@ class ToDatalogRuleBodyTest :
   std::string textproto_;
   std::string expected_rule_body_;
   AccessPath access_path_;
-  PredicateArena arena_;
-  proto::PredicateDecoder predicate_decoder_;
 };
 
 TEST_P(ToDatalogRuleBodyTest, ToDatalogRuleBodyTest) {
@@ -57,9 +51,9 @@ TEST_P(ToDatalogRuleBodyTest, ToDatalogRuleBodyTest) {
   arcs::InformationFlowLabelProto_Predicate predicate_proto;
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
       textproto_, &predicate_proto));
-  const Predicate &predicate = *predicate_decoder_.Decode(predicate_proto);
+  std::unique_ptr<Predicate> predicate = proto::Decode(predicate_proto);
   EXPECT_EQ(
-      predicate.ToDatalogRuleBody(access_path_, ctxt), expected_rule_body_);
+      predicate->ToDatalogRuleBody(access_path_, ctxt), expected_rule_body_);
 }
 
 // Helper for making AccessPaths.
@@ -116,94 +110,78 @@ TEST_P(PredicateEqTest, PredicateEqTest) {
   EXPECT_EQ(*pred1_ == *pred2_, pred_num1 == pred_num2);
 }
 
-static const SingleUseArenaAndTagPresence kTag1Present("tag1");
-static const SingleUseArenaAndTagPresence kTag2Present("tag2");
-static const SingleUseArenaAndTagPresence kTag3Present("tag3");
+static const TagPresence kTag1Present("tag1");
+static const TagPresence kTag2Present("tag2");
+static const TagPresence kTag3Present("tag3");
 
-static const SingleUseArenaAndTagPresence kTag1Present2("tag1");
-static const SingleUseArenaAndTagPresence kTag2Present2("tag2");
-static const SingleUseArenaAndTagPresence kTag3Present2("tag3");
+static const TagPresence kTag1Present2("tag1");
+static const TagPresence kTag2Present2("tag2");
+static const TagPresence kTag3Present2("tag3");
 
-static const SingleUseArenaAndAnd kAndTag1Tag2(
-    kTag1Present.predicate(), kTag2Present.predicate());
-static const SingleUseArenaAndAnd kAndTag1Tag3(
-    kTag1Present.predicate(), kTag3Present.predicate());
-static const SingleUseArenaAndAnd kAndTag2Tag3(
-    kTag2Present.predicate(), kTag3Present.predicate());
+static const And kAndTag1Tag2(
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag2"));
+static const And kAndTag1Tag3(
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag3"));
+static const And kAndTag2Tag3(
+    std::make_unique<TagPresence>("tag2"), std::make_unique<TagPresence>("tag3"));
 
-static const SingleUseArenaAndAnd kAndTag1Tag2_2(
-    kTag1Present.predicate(), kTag2Present.predicate());
-static const SingleUseArenaAndAnd kAndTag1Tag3_2(
-    kTag1Present.predicate(), kTag3Present.predicate());
-static const SingleUseArenaAndAnd kAndTag2Tag3_2(
-    kTag2Present.predicate(), kTag3Present.predicate());
+static const And kAndTag1Tag2_2(
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag2"));
+static const And kAndTag1Tag3_2(
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag3"));
+static const And kAndTag2Tag3_2(
+    std::make_unique<TagPresence>("tag2"), std::make_unique<TagPresence>("tag3"));
 
-static const SingleUseArenaAndOr kOrTag1Tag2(
-    kTag1Present.predicate(), kTag2Present.predicate());
-static const SingleUseArenaAndOr kOrTag1Tag3(
-    kTag1Present.predicate(), kTag3Present.predicate());
-static const SingleUseArenaAndOr kOrTag2Tag3(
-    kTag2Present.predicate(), kTag3Present.predicate());
+static const Or kOrTag1Tag2(
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag2"));
+static const Or kOrTag1Tag3(
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag3"));
+static const Or kOrTag2Tag3(
+    std::make_unique<TagPresence>("tag2"), std::make_unique<TagPresence>("tag3"));
 
-static const SingleUseArenaAndOr kOrTag1Tag2_2(
-    kTag1Present.predicate(), kTag2Present.predicate());
-static const SingleUseArenaAndOr kOrTag1Tag3_2(
-    kTag1Present.predicate(), kTag3Present.predicate());
-static const SingleUseArenaAndOr kOrTag2Tag3_2(
-    kTag2Present.predicate(), kTag3Present.predicate());
+static const Or kOrTag1Tag2_2(
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag2"));
+static const Or kOrTag1Tag3_2(
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag3"));
+static const Or kOrTag2Tag3_2(
+    std::make_unique<TagPresence>("tag2"), std::make_unique<TagPresence>("tag3"));
 
-static const SingleUseArenaAndImplies kImpliesTag1Tag2(
-    kTag1Present.predicate(), kTag2Present.predicate());
-static const SingleUseArenaAndImplies kImpliesTag1Tag2_2(
-    kTag1Present.predicate(), kTag2Present.predicate());
-static const SingleUseArenaAndImplies kImpliesTag1Tag3(
-    kTag1Present.predicate(), kTag3Present.predicate());
-static const SingleUseArenaAndImplies kImpliesTag1Tag3_2(
-    kTag1Present.predicate(), kTag3Present.predicate());
-static const SingleUseArenaAndImplies kImpliesTag2Tag3(
-    kTag2Present.predicate(), kTag3Present.predicate());
-static const SingleUseArenaAndImplies kImpliesTag2Tag3_2(
-    kTag2Present.predicate(), kTag3Present.predicate());
+static const Implies kImpliesTag1Tag2(
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag2"));
+static const Implies kImpliesTag1Tag2_2(
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag2"));
+static const Implies kImpliesTag1Tag3(
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag3"));
+static const Implies kImpliesTag1Tag3_2(
+    std::make_unique<TagPresence>("tag1"), std::make_unique<TagPresence>("tag3"));
+static const Implies kImpliesTag2Tag3(
+    std::make_unique<TagPresence>("tag2"), std::make_unique<TagPresence>("tag3"));
+static const Implies kImpliesTag2Tag3_2(
+    std::make_unique<TagPresence>("tag2"), std::make_unique<TagPresence>("tag3"));
 
-static const SingleUseArenaAndNot kNotTag1(kTag1Present.predicate());
-static const SingleUseArenaAndNot kNotTag1_2(kTag1Present.predicate());
-static const SingleUseArenaAndNot kNotTag2(kTag2Present.predicate());
-static const SingleUseArenaAndNot kNotTag2_2(kTag2Present.predicate());
-static const SingleUseArenaAndNot kNotTag3(kTag3Present.predicate());
-static const SingleUseArenaAndNot kNotTag3_2(kTag3Present.predicate());
+static const Not kNotTag1(std::make_unique<TagPresence>("tag1"));
+static const Not kNotTag1_2(std::make_unique<TagPresence>("tag1"));
+static const Not kNotTag2(std::make_unique<TagPresence>("tag2"));
+static const Not kNotTag2_2(std::make_unique<TagPresence>("tag2"));
+static const Not kNotTag3(std::make_unique<TagPresence>("tag3"));
+static const Not kNotTag3_2(std::make_unique<TagPresence>("tag3"));
 
 static const std::pair<const Predicate *, uint64_t> example_predicates[] = {
-    { kTag1Present.predicate(), 0},
-    { kTag1Present2.predicate(), 0},
-    { kTag2Present.predicate(), 1},
-    { kTag2Present2.predicate(), 1},
-    { kTag3Present.predicate(), 2},
-    { kTag3Present2.predicate(), 2},
-    { kAndTag1Tag2.predicate(), 3},
-    { kAndTag1Tag2_2.predicate(), 3},
-    { kAndTag1Tag3.predicate(), 4},
-    { kAndTag1Tag3_2.predicate(), 4},
-    { kAndTag2Tag3.predicate(), 5},
-    { kAndTag2Tag3_2.predicate(), 5},
-    { kOrTag1Tag2.predicate(), 6},
-    { kOrTag1Tag2_2.predicate(), 6},
-    { kOrTag1Tag3.predicate(), 7},
-    { kOrTag1Tag3_2.predicate(), 7},
-    { kOrTag2Tag3.predicate(), 8},
-    { kOrTag2Tag3_2.predicate(), 8},
-    { kImpliesTag1Tag2.predicate(), 9},
-    { kImpliesTag1Tag2_2.predicate(), 9},
-    { kImpliesTag1Tag3.predicate(), 10},
-    { kImpliesTag1Tag3_2.predicate(), 10},
-    { kImpliesTag2Tag3.predicate(), 11},
-    { kImpliesTag2Tag3_2.predicate(), 11},
-    { kNotTag1.predicate(), 12},
-    { kNotTag1_2.predicate(), 12},
-    { kNotTag2.predicate(), 13},
-    { kNotTag2_2.predicate(), 13},
-    { kNotTag3.predicate(), 14},
-    { kNotTag3_2.predicate(), 14}
-};
+    {&kTag1Present, 0},      {&kTag1Present2, 0},
+    {&kTag2Present, 1},      {&kTag2Present2, 1},
+    {&kTag3Present, 2},      {&kTag3Present2, 2},
+    {&kAndTag1Tag2, 3},      {&kAndTag1Tag2_2, 3},
+    {&kAndTag1Tag3, 4},      {&kAndTag1Tag3_2, 4},
+    {&kAndTag2Tag3, 5},      {&kAndTag2Tag3_2, 5},
+    {&kOrTag1Tag2, 6},       {&kOrTag1Tag2_2, 6},
+    {&kOrTag1Tag3, 7},       {&kOrTag1Tag3_2, 7},
+    {&kOrTag2Tag3, 8},       {&kOrTag2Tag3_2, 8},
+    {&kImpliesTag1Tag2, 9},  {&kImpliesTag1Tag2_2, 9},
+    {&kImpliesTag1Tag3, 10}, {&kImpliesTag1Tag3_2, 10},
+    {&kImpliesTag2Tag3, 11}, {&kImpliesTag2Tag3_2, 11},
+    {&kNotTag1, 12},         {&kNotTag1_2, 12},
+    {&kNotTag2, 13},         {&kNotTag2_2, 13},
+    {&kNotTag3, 14},         {&kNotTag3_2, 14}};
 
 INSTANTIATE_TEST_SUITE_P(
     PredicateEqTest, PredicateEqTest,

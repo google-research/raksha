@@ -51,8 +51,10 @@ bazel_run() {
     ${TARGETS};
   then
     post_commit_status "${STATUS_MESSAGE}" "success" ${INVOCATION_ID}
+    return 0
   else
     post_commit_status "${STATUS_MESSAGE}" "failure" ${INVOCATION_ID}
+    return 1
   fi
 }
 
@@ -66,5 +68,5 @@ bazel_run build \
   //src/analysis/souffle/tests/arcs_manifest_tests_todo/... \
   //src/analysis/souffle/examples/...
 
-# Run all the tests.
+# Run all the bazel tests (not cargo).
 bazel_run test //src/...

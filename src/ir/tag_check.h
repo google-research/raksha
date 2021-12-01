@@ -29,8 +29,9 @@ namespace raksha::ir {
 // particular AccessPath.
 class TagCheck {
  public:
-  TagCheck(AccessPath access_path, const Predicate &predicate)
-    : access_path_(std::move(access_path)), predicate_(&predicate) {}
+  TagCheck(AccessPath access_path, std::unique_ptr<Predicate> predicate)
+      : access_path_(std::move(access_path)),
+        predicate_(std::move(predicate)) {}
 
   // Print out the tag check as datalog facts. Note that this emits two
   // facts: an isCheck fact and a check fact. We produce a unique label for
@@ -70,7 +71,7 @@ class TagCheck {
   // implementation. `Predicate`s are currently owned by the `ParticleSpec`
   // which created the spec version of the `TagCheck` via the
   // `PredicateDecoder`.
-  const Predicate *predicate_;
+  std::unique_ptr<Predicate> predicate_;
 };
 
 }  // namespace raksha::ir
