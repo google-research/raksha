@@ -22,12 +22,22 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include "absl/strings/str_join.h"
+#include "absl/strings/str_format.h"
 
 namespace raksha::ir::auth_logic {
 
-class Principal {
+class AstNode {
+ public:
+   virtual std::string ToString() = 0;
+};
+
+class Principal : public AstNode {
  public:
   Principal(std::string name) : name_(std::move(name)) {}
+  std::string ToString() override {
+    return name_;
+  }
 
  private:
   std::string name_;
@@ -36,7 +46,7 @@ class Principal {
 // Used to represent whether a predicate is negated or not
 enum Sign { kNegated, kPositive };
 
-class Predicate {
+class Predicate : public AstNode {
  public:
   Predicate(std::string name, std::vector<std::string> args, Sign sign)
       : name_(std::move(name)),
@@ -45,10 +55,24 @@ class Predicate {
         // for now, get rid of this eventually
         sign_(std::move(sign)) {}
 
+  std::string ToString() override {
+    return absl::StrFormat("%s%s(%s)", 
+        SignToString(sign_),
+        name_,
+        absl::StrJoin(args_, ", "));
+  }
+
  private:
   std::string name_;
   std::vector<std::string> args_;
   Sign sign_;
+
+  static std::string SignToString(Sign sign) {
+    switch (sign) {
+      case kNegated: return "!";
+      case kPositive: return "";
+    }
+  }
 };
 
 // This represents an expression that applies either a predicate or a

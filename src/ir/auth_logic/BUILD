@@ -21,6 +21,10 @@ cc_library(
     name = "ast",
     srcs = [
         "ast.h",
+    ],
+    deps = [
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
     ]
 )
 
