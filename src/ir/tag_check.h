@@ -29,21 +29,9 @@ namespace raksha::ir {
 // particular AccessPath.
 class TagCheck {
  public:
-  TagCheck(AccessPath access_path, const Predicate &predicate)
-    : access_path_(std::move(access_path)), predicate_(&predicate) {}
-
-  TagCheck Instantiate(AccessPathRoot access_path_root) const {
-    return TagCheck(access_path_.Instantiate(access_path_root), *predicate_);
-  }
-
-  // Allow this TagCheck to participate in a bulk instantiation of multiple
-  // uninstantiated AccessPaths.
-  TagCheck BulkInstantiate(
-      const absl::flat_hash_map<AccessPathRoot, AccessPathRoot>
-          &instantiation_map) const {
-    return TagCheck(access_path_.BulkInstantiate(instantiation_map),
-                    *predicate_);
-  }
+  TagCheck(AccessPath access_path, std::unique_ptr<Predicate> predicate)
+      : access_path_(std::move(access_path)),
+        predicate_(std::move(predicate)) {}
 
   // Print out the tag check as datalog facts. Note that this emits two
   // facts: an isCheck fact and a check fact. We produce a unique label for
@@ -71,6 +59,8 @@ class TagCheck {
          (*predicate_ == *other.predicate_));
   }
 
+  const AccessPath& access_path() const { return access_path_; }
+
  private:
   // The access path which is the subject of the check.
   AccessPath access_path_;
@@ -81,7 +71,7 @@ class TagCheck {
   // implementation. `Predicate`s are currently owned by the `ParticleSpec`
   // which created the spec version of the `TagCheck` via the
   // `PredicateDecoder`.
-  const Predicate *predicate_;
+  std::unique_ptr<Predicate> predicate_;
 };
 
 }  // namespace raksha::ir

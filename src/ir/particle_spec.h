@@ -25,19 +25,10 @@
 #include "src/ir/edge.h"
 #include "src/ir/handle_connection_spec.h"
 #include "src/ir/predicate.h"
-#include "src/ir/predicate_arena.h"
 #include "src/ir/tag_check.h"
 #include "src/ir/tag_claim.h"
 
 namespace raksha::ir {
-
-// This struct is used to return the members of a ParticleSpec after being
-// instantiated.
-struct InstantiatedParticleSpecFacts {
-  std::vector<TagClaim> tag_claims;
-  std::vector<TagCheck> checks;
-  std::vector<Edge> edges;
-};
 
 // A class representing a ParticleSpec. This contains the relevant
 // information for the dataflow graph: checks, claims, and edges within the
@@ -50,8 +41,7 @@ class ParticleSpec {
       std::string name, std::vector<TagCheck> checks,
       std::vector<TagClaim> tag_claims,
       std::vector<DerivesFromClaim> derives_from_claims,
-      std::vector<HandleConnectionSpec> handle_connection_specs,
-      std::unique_ptr<PredicateArena> predicate_arena);
+      std::vector<HandleConnectionSpec> handle_connection_specs);
 
   const std::string &name() const { return name_; }
   const std::vector<TagCheck> &checks() const { return checks_; }
@@ -69,34 +59,15 @@ class ParticleSpec {
     return find_res->second;
   }
 
-  InstantiatedParticleSpecFacts BulkInstantiate(
-      const absl::flat_hash_map<AccessPathRoot, AccessPathRoot>
-          &instantiation_map) const {
-    InstantiatedParticleSpecFacts result;
-    for (const TagCheck &check : checks_) {
-      result.checks.push_back(check.BulkInstantiate(instantiation_map));
-    }
-    for (const TagClaim &claim : tag_claims_) {
-      result.tag_claims.push_back(claim.BulkInstantiate(instantiation_map));
-    }
-    for (const Edge &edge : edges_) {
-      result.edges.push_back(edge.BulkInstantiate(instantiation_map));
-    }
-    return result;
-  }
-
  private:
-  ParticleSpec(
-      std::string name,
-      std::vector<TagCheck> checks,
-      std::vector<TagClaim> tag_claims,
-      std::vector<DerivesFromClaim> derives_from_claims,
-      std::vector<HandleConnectionSpec> handle_connection_specs,
-      std::unique_ptr<PredicateArena> predicate_arena)
-      : name_(std::move(name)), checks_(std::move(checks)),
+  ParticleSpec(std::string name, std::vector<TagCheck> checks,
+               std::vector<TagClaim> tag_claims,
+               std::vector<DerivesFromClaim> derives_from_claims,
+               std::vector<HandleConnectionSpec> handle_connection_specs)
+      : name_(std::move(name)),
+        checks_(std::move(checks)),
         tag_claims_(std::move(tag_claims)),
-        derives_from_claims_(std::move(derives_from_claims)),
-        predicate_arena_(std::move(predicate_arena)) {
+        derives_from_claims_(std::move(derives_from_claims)) {
     for (HandleConnectionSpec &handle_connection_spec :
       handle_connection_specs) {
       std::string hcs_name = handle_connection_spec.name();
@@ -129,11 +100,6 @@ class ParticleSpec {
   // A map of HandleConnectionSpec names to HandleConnectionSpecs.
   absl::flat_hash_map<std::string, HandleConnectionSpec>
     handle_connection_specs_;
-  // The PredicateArena object which was used to construct the predicates
-  // on all of the checks on this ParticleSpec. This also owns those
-  // predicates, so holding this field here causes the checks to live as long
-  // as the ParticleSpec.
-  std::unique_ptr<PredicateArena> predicate_arena_;
 };
 
 }  // namespace raksha::ir

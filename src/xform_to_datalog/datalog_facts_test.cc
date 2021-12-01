@@ -47,8 +47,7 @@ static std::unique_ptr<ir::ParticleSpec> particle_spec(ir::ParticleSpec::Create(
                        ir::AccessPathSelectors()),
         true, "tag")},
     /*derives_from_claims=*/{},
-    /*edges=*/{},
-    /*predicate_arena=*/nullptr));
+    /*edges=*/{}));
 
 INSTANTIATE_TEST_SUITE_P(
     DatalogFactsTest, DatalogFactsTest,

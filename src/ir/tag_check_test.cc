@@ -31,17 +31,18 @@ TEST_P(TagCheckToDatalogWithRootTest, TagCheckToDatalogWithRootTest) {
       expected_todatalog_format_string, "check_num_0", root_string);
   arcs::CheckProto check_proto;
   google::protobuf::TextFormat::ParseFromString(check_textproto, &check_proto);
-  PredicateArena predicate_arena;
-  proto::PredicateDecoder predicate_decoder(predicate_arena);
-  TagCheck unrooted_tag_check = proto::Decode(check_proto, predicate_decoder);
-  TagCheck tag_check = unrooted_tag_check.Instantiate(root);
+  TagCheck unrooted_tag_check = proto::Decode(check_proto);
 
   DatalogPrintContext ctxt;
+  DatalogPrintContext::AccessPathInstantiationMap instantiation_map(
+      {{unrooted_tag_check.access_path().root(), root}});
+  ctxt.set_instantiation_map(&instantiation_map);
   // Expect the version with the concrete root to match the expected_todatalog
   // when ToDatalog is called upon it.
-  ASSERT_EQ(tag_check.ToDatalog(ctxt), expected_todatalog);
+  ASSERT_EQ(unrooted_tag_check.ToDatalog(ctxt), expected_todatalog);
   // However, the version with the spec root should fail when ToDatalog is
   // called.
+  ctxt.set_instantiation_map(nullptr);
   EXPECT_DEATH(
       unrooted_tag_check.ToDatalog(ctxt),
       "Attempted to print out an AccessPath before connecting it to a "

@@ -23,8 +23,8 @@
 #include "src/ir/datalog_print_context.h"
 #include "src/ir/particle_spec.h"
 #include "src/ir/proto/system_spec.h"
-#include "src/ir/single-use-arena-and-predicate.h"
 #include "src/ir/types/primitive_type.h"
+#include "src/utils/ranges.h"
 
 namespace raksha::xform_to_datalog {
 
@@ -41,8 +41,6 @@ TEST_P(ManifestDatalogFactsToDatalogTest, ManifestDatalogFactsToDatalogTest) {
   ir::DatalogPrintContext ctxt;
   EXPECT_EQ(datalog_facts.ToDatalog(ctxt), expected_result_string);
 }
-
-static const ir::SingleUseArenaAndTagPresence kTag2Presence("tag2");
 
 static const ir::AccessPath kHandleH1AccessPath(
     ir::AccessPathRoot(ir::HandleAccessPathRoot("recipe", "h1")),
@@ -73,15 +71,20 @@ std::vector<ir::HandleConnectionSpec> GetHandleConnectionSpecs() {
   return result;
 }
 
+std::vector<ir::TagCheck> GetTagChecks() {
+  std::vector<ir::TagCheck> result;
+  result.push_back(ir::TagCheck(kHandleConnectionInAccessPath,
+                                std::make_unique<ir::TagPresence>("tag2")));
+  return result;
+}
+
 static std::unique_ptr<ir::ParticleSpec> particle_spec(ir::ParticleSpec::Create(
     "particle",
-    /*checks=*/
-    {ir::TagCheck(kHandleConnectionInAccessPath, *kTag2Presence.predicate())},
+    /*checks=*/GetTagChecks(),
     /*tag_claims=*/
     {ir::TagClaim("particle", kHandleConnectionOutAccessPath, true, "tag")},
     /*derives_from_claims=*/{},
-    /*handle_connection_specs=*/GetHandleConnectionSpecs(),
-    /*predicate_arena=*/nullptr));
+    /*handle_connection_specs=*/GetHandleConnectionSpecs()));
 
 static std::tuple<ManifestDatalogFacts, std::string>
     datalog_facts_and_output_strings[] = {
@@ -324,36 +327,13 @@ static const std::string kExpectedClaimStrings[] = {
     R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1").)",
 };
 
-// TODO(bgogul): Move this to a common/utils.
-template <typename I>
-class iterator_range {
- public:
-  using const_iterator = I;
-  using value_type = typename std::iterator_traits<I>::value_type;
-
-  iterator_range() = default;
-  iterator_range(I begin, I end): begin_(begin), end_(end) {}
-
-  I begin() const { return begin_; }
-  I end() const { return end_; }
-  bool empty() const { return begin() == end(); }
-
- private:
-  I begin_;
-  I end_;
-};
-
-template <typename I>
-inline iterator_range<I> make_range(I begin, I end) {
-  return iterator_range<I>(begin, end);
-}
-
 TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
-  EXPECT_THAT(make_range(std::find(datalog_strings_.begin(),
-                                   datalog_strings_.end(), "// Claims:"),
-                         std::find(datalog_strings_.begin(),
-                                   datalog_strings_.end(), "// Checks:")),
-              testing::UnorderedElementsAreArray(kExpectedClaimStrings));
+  EXPECT_THAT(
+      utils::make_range(std::find(datalog_strings_.begin(),
+                                  datalog_strings_.end(), "// Claims:"),
+                        std::find(datalog_strings_.begin(),
+                                  datalog_strings_.end(), "// Checks:")),
+      testing::UnorderedElementsAreArray(kExpectedClaimStrings));
 }
 
 static constexpr absl::string_view kPattern =
@@ -377,10 +357,10 @@ static std::string kExpectedCheckStrings[] = {
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {
-  EXPECT_THAT(make_range(std::find(datalog_strings_.begin(),
-                                   datalog_strings_.end(), "// Checks:"),
-                         std::find(datalog_strings_.begin(),
-                                   datalog_strings_.end(), "// Edges:")),
+  EXPECT_THAT(utils::make_range(std::find(datalog_strings_.begin(),
+                                          datalog_strings_.end(), "// Checks:"),
+                                std::find(datalog_strings_.begin(),
+                                          datalog_strings_.end(), "// Edges:")),
               testing::UnorderedElementsAreArray(kExpectedCheckStrings));
 }
 
@@ -443,9 +423,9 @@ static const std::string kExpectedEdgeStrings[] = {
     R"(edge("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1").)"};
 
 TEST_F(ParseBigManifestTest, ManifestProtoEdgesTest) {
-  EXPECT_THAT(make_range(std::find(datalog_strings_.begin(),
-                                   datalog_strings_.end(), "// Edges:"),
-                         datalog_strings_.end()),
+  EXPECT_THAT(utils::make_range(std::find(datalog_strings_.begin(),
+                                          datalog_strings_.end(), "// Edges:"),
+                                datalog_strings_.end()),
               testing::UnorderedElementsAreArray(kExpectedEdgeStrings));
 }
 
