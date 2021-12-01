@@ -100,12 +100,12 @@ class Fact {
  public:
   explicit Fact(FlatFact flat_fact) : internal_form_(std::move(flat_fact)) {}
   explicit Fact(Principal prin, Fact* fact)
-      : internal_form_(CanSayFact(std::move(prin), fact)) {}
+      : internal_form_(CanSayFact(std::move(prin), std::move(fact))) {}
 
  private:
   struct CanSayFact {
     Principal prin;
-    Fact* fact;
+    std::unique_ptr<Fact> fact;
     CanSayFact(Principal prin, Fact* fact)
         : prin(std::move(prin)), fact(fact) {}
   };
