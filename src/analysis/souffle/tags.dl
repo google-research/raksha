@@ -32,17 +32,7 @@
 // indicates that some property must be true of the data at the given
 // AccessPath. The conservative over-approximation for propagating an integrity
 // tag is that a node has an integrity tag only if all of its predecessors have
-// that integrity tag. Checking this property requires an intersection, which
-// unfortunately cannot be directly expressed in datalog.
-.type IntegTag <: symbol
-
-// To deal with that, we instead propagate the opposite of the integrity tag:
-// the absence of an integrity tag, which we call an inverse integrity tag, or
-// an InvIntegTag. An inverse integrity tag is introduced any node with no
-// predecessor edges and without an integrity tag added. It is also introduced
-// at any point where an integrity tag is removed. It is removed at any point
-// where an integrity tag is added. Textually, an InvIntegTag symbol is just the
-// associated IntegTag with a '!' prepended.
-.type InvIntegTag <: symbol
+// that integrity tag.
+.type IntegrityTag <: symbol
 
 #endif // SRC_ANALYSIS_SOUFFLE_TAGS_DL_

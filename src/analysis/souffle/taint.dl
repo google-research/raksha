@@ -55,26 +55,23 @@
 // Indicates that an AccessPath is given an integrity tag directly. This rule
 // should only be populated with base facts with no derivation to prevent us
 // from getting tangled up in stratification issues. Propagation will happen
-// via the mayHaveInvIntegTag rule.
-.decl directHasIntegTag(accessPath: AccessPath, integTag: IntegTag)
+// via the lacksIntegrityTag rule.
+.decl directHasIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
 
 // Integrity tag universe.
-.decl isIntegTag(integTag: IntegTag)
+.decl isIntegrityTag(integTag: IntegrityTag)
 
-// Removes an integrity tag from some path. Effectively adds an InvIntegTag.
-.decl removeIntegTag(accessPath: AccessPath, integTag: IntegTag)
+// Removes an integrity tag from some path.
+.decl removeIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
 
-// Indicates that a particular tag may have an inverse integrity tag, which
+// Indicates that a particular tag may lack an integrity tag, which
 // indicates that it should not have an integrity tag.
-.decl mayHaveInvIntegTag(accessPath: AccessPath, invIntegTag: InvIntegTag)
+.decl lacksIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
 
 // Used to test whether a particular path has a particular integrity tag.
 // Should be used as close to top-level checks as possible, and not for
 // propagation, to prevent stratification issues.
-.decl mustHaveIntegTag(accessPath: AccessPath, integTag: IntegTag)
-
-// Maps between integrity tags and inverse integrity tags.
-.decl integTagToInv(integTag: IntegTag, invIntegTag: InvIntegTag)
+.decl mustHaveIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
 
 //-----------------------------------------------------------------------------
 // Rules
@@ -96,35 +93,30 @@ mayHaveTag(tgt, owner, tag) :-
     resolvedEdge(owner, src, tgt), mayHaveTag(src, owner, tag), !removeTag(tgt, owner, tag).
 
 // Integrity tag rules.
+isIntegrityTag(integTag) :- directHasIntegrityTag(_, _, integTag).
+isPrincipal(principal) :- directHasIntegrityTag(_, principal, _).
 
-isIntegTag(integTag) :- directHasIntegTag(_, integTag).
+// Any access point that has no incoming edges and is not directly given an
+// integrity tag lacks that integrity tag, as there is no way for it to
+// propagate to that AccessPath.
+lacksIntegrityTag(ap, owner, integTag) :-
+  isAccessPath(ap), isPrincipal(owner), isIntegrityTag(integTag),
+  !edge(_, ap), !directHasIntegrityTag(ap, owner, integTag).
 
-// The inverse integrity tag is the same text as the integrity tag except with
-// a '!' in front of it.
-integTagToInv(integTag, cat("!", integTag)) :- isIntegTag(integTag).
+// Any point where an integrity tag is removed lacks an integrity tag.
+lacksIntegrityTag(ap, owner, integTag) :- isAccessPath(ap), removeIntegrityTag(ap, owner, integTag).
 
-// Introduce an inverse integrity tag at any access point that has no incoming
-// edges and is not directly given the corresponding integrity tag.
-mayHaveInvIntegTag(ap, invIntegTag) :-
-  isAccessPath(ap), integTagToInv(integTag, invIntegTag), !edge(_, ap),
-  !directHasIntegTag(ap, integTag).
-
-// Introduce inverse integrity tag wherever a corresponding integrity tag is
-// removed.
-mayHaveInvIntegTag(ap, invIntegTag) :-
-  isAccessPath(ap), integTagToInv(integTag, invIntegTag),
-  removeIntegTag(ap, integTag).
-
-// Propagate inverse integrity tags along edges to any destination that did not
+// Propagate lack of integrity tag along edges to any destination that did not
 // have an integrity tag directly added.
-mayHaveInvIntegTag(dst, invIntegTag) :-
-  isAccessPath(src), isAccessPath(dst), edge(src, dst), mayHaveInvIntegTag(src, invIntegTag),
-  integTagToInv(integTag, invIntegTag), !directHasIntegTag(dst, integTag).
+lacksIntegrityTag(dst, owner, integTag) :-
+  isAccessPath(src), isAccessPath(dst),
+  edge(src, dst), lacksIntegrityTag(src, owner, integTag),
+  !directHasIntegrityTag(dst, owner, integTag).
 
-// An access path must have an integrity tag if it may not have the
-// corresponding inverse integrity tag.
-mustHaveIntegTag(ap, integTag) :-
-  isAccessPath(ap), integTagToInv(integTag, invIntegTag), !mayHaveInvIntegTag(ap, invIntegTag).
+// An access path must have an integrity tag if it does not lack the integrity tag.
+mustHaveIntegrityTag(ap, owner, integTag) :-
+  isAccessPath(ap), isIntegrityTag(integTag), isPrincipal(owner),
+  !lacksIntegrityTag(ap, owner, integTag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
