@@ -27,7 +27,8 @@ namespace raksha::ir::auth_logic {
 
 class Principal {
  public:
-  Principal(std::string name) : name_(std::move(name)) {}
+  explicit Principal(std::string name) : name_(std::move(name)) {}
+  std::string name() { return name_; }
 
  private:
   std::string name_;
@@ -36,6 +37,8 @@ class Principal {
 // Used to represent whether a predicate is negated or not
 enum Sign { kNegated, kPositive };
 
+// Predicate corresponds to a predicate in of the form 
+// <pred_name>(arg_1, ..., arg_n), and it may or may not be negated
 class Predicate {
  public:
   Predicate(std::string name, std::vector<std::string> args, Sign sign)
@@ -45,102 +48,134 @@ class Predicate {
         // for now, get rid of this eventually
         sign_(std::move(sign)) {}
 
+  std::string name() { return name_; }
+  std::vector<std::string> args() { return args_; }
+  Sign sign() { return sign_; }
+
  private:
   std::string name_;
   std::vector<std::string> args_;
   Sign sign_;
 };
 
-// This represents an expression that applies either a predicate or a
-// "canActAs" to a principal, and it is a sub-term of FlatFact
-//    - pred_name(arg_1, ..., arg_n)           (a predicate)
-//    - principal_1 canActAs principal_2       (a canActAs)
-// To encapsulate which form this takes, it:
-//    - uses factory methods to make either form
-//    - uses a private std::variant member that takes either of these two forms
-//    - uses std::visit to do operations on the actual state
-class VerbPhrase {
+// Attribute corresponds to an attribute of a principal with the form
+// <Principal> <pred_name>(arg_1, ..., arg_n)
+class Attribute {
  public:
-  explicit VerbPhrase(Predicate pred) : internal_form_(std::move(pred)) {}
-  explicit VerbPhrase(Principal right_prin)
-      : internal_form_(std::move(right_prin)) {}
-
+  explicit Attribute(Principal principal, Predicate predicate)
+    : principal_(principal), predicate_(predicate) {}
+  Principal principal() { return principal_; }
+  Predicate predicate() { return predicate_; }
  private:
-  // The principal variant of the internal form means this represents
-  // "canActAs principal".
-  std::variant<Predicate, Principal> internal_form_;
+  Principal principal_;
+  Predicate predicate_;
 };
 
-// This the AST Node for FlatFact which takes on one of two forms:
-//   - <principal> <verb_phrase>  (* a principal applied to a verbphrase *)
-//   - <predicate>                (* just a predicate *)
-// A similar variant-based pattern is used for this as for VerbPhrase. Here an
-// inner struct is used for the first form (principal applied to verb_phrase).
-class FlatFact {
+// CanActAs corresponds to a canActAs expression of the form
+// <principal_1> canActAs <principal_2>
+class CanActAs {
  public:
-  explicit FlatFact(Principal prin, VerbPhrase verb_phrase)
-      : internal_form_(
-            VerbPhraseFlatFact(std::move(prin), std::move(verb_phrase))) {}
-  explicit FlatFact(Predicate pred) : internal_form_(std::move(pred)) {}
+  explicit CanActAs(Principal left_principal, Principal right_principal)
+    : left_principal_(left_principal),
+      right_principal_(right_principal) {}
+  Principal left_principal() { return left_principal_; }
+  Principal right_principal() { return right_principal_; }
 
  private:
-  struct VerbPhraseFlatFact {
-    Principal prin;
-    VerbPhrase verb_phrase;
-    VerbPhraseFlatFact(Principal prin, VerbPhrase verb_phrase)
-        : prin(std::move(prin)), verb_phrase(std::move(verb_phrase)) {}
-  };
-  std::variant<VerbPhraseFlatFact, Predicate> internal_form_;
+   Principal left_principal_;
+   Principal right_principal_;
 };
 
-// This is the AST node for facts which have two forms:
-//  - <flat_fact>
-//  - <principal> canSay <flat_fact>
+// BaseFact corresponds to a base-case fact that cannot recursively include other 
+// facts through "canSay". "Fact" includes the recursive case. It is necessary 
+// that BaseFact is a separate class from Fact because the RHS of conditional 
+// assertions can only contain BaseFacts.
+// Base facts have three forms:
+//  - A predicate
+//  - An attribute
+//  - A canActAs expression
+// The particular choice of form is represented with a variant which is 
+// encapsulated.
+class BaseFact {
+ public:
+  explicit BaseFact(Predicate predicate) : value_(std::move(predicate)) {};
+  explicit BaseFact(Attribute attribute) : value_(std::move(attribute)) {};
+  explicit BaseFact(CanActAs canActAs) : value_(std::move(canActAs)) {};
+  std::variant<Predicate, Attribute, CanActAs> value() { return value_; }
+
+ private:
+  std::variant<Predicate, Attribute, CanActAs> value_;
+};
+
+// CanSay and Fact are forward-declared because they are mutually recursive.
+class CanSay;
+class Fact;
+
+// CanSay corresponds to an expression of the form <principal> canSay Fact
+class CanSay {
+  public:
+    explicit CanSay(Principal principal, std::shared_ptr<Fact>& fact)
+      : principal_(principal), fact_(std::move(fact)) {}
+    Principal principal() { return principal_; }
+    std::shared_ptr<Fact> fact() { return fact_; }
+  private:
+    Principal principal_;
+    std::shared_ptr<Fact> fact_;
+};
+
+// Fact corresponds to either a base fact or a an expression of the form 
+// <principal> canSay 
 class Fact {
  public:
-  explicit Fact(FlatFact flat_fact) : internal_form_(std::move(flat_fact)) {}
-  explicit Fact(Principal prin, Fact* fact)
-      : internal_form_(CanSayFact(std::move(prin), std::move(fact))) {}
+  explicit Fact(BaseFact base_fact) : value_(std::move(base_fact)) {}
+  explicit Fact(std::shared_ptr<CanSay>& can_say)
+    : value_(std::move(can_say)) {}
+  std::variant<BaseFact, std::shared_ptr<CanSay>> value() { return value_; }
 
  private:
-  struct CanSayFact {
-    Principal prin;
-    std::unique_ptr<Fact> fact;
-    CanSayFact(Principal prin, Fact* fact)
-        : prin(std::move(prin)), fact(fact) {}
-  };
-  std::variant<FlatFact, CanSayFact> internal_form_;
+  std::variant<BaseFact, std::shared_ptr<CanSay>> value_;
 };
 
-// AST Node for Assertion (this is a sub-expression of SaysAssertion)
-// which has two forms:
-//  - <fact>                                      (unconditional)
-//  - <fact> :- <flat_fact_1> ... <flat_fact_n>   (conditional)
+// ConditionalAssertion the particular form of assertion that can have 
+// conditions which is:
+// <fact> :- <flat_fact_1> ... <flat_fact_n>
+class ConditionalAssertion {
+  public:
+    explicit ConditionalAssertion(Fact lhs, std::vector<BaseFact> rhs)
+      : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+    Fact lhs() { return lhs_; }
+    std::vector<BaseFact> rhs() { return rhs_; }
+  private:
+    Fact lhs_;
+    std::vector<BaseFact> rhs_;
+};
+
+// Assertions can have two forms:
+//  - Facts
+//  - Conditional assertions
 class Assertion {
  public:
-  explicit Assertion(Fact fact) : internal_form_(std::move(fact)) {}
-  explicit Assertion(Fact lhs, std::vector<FlatFact> rhs)
-      : internal_form_(CondAssertion(std::move(lhs), std::move(rhs))) {}
+  explicit Assertion(Fact fact) : value_(std::move(fact)) {}
+  explicit Assertion(ConditionalAssertion conditional_assertion)
+    : value_(std::move(conditional_assertion)) {}
+
+  std::variant<Fact, ConditionalAssertion> value() { return value_; }
 
  private:
-  struct CondAssertion {
-    Fact lhs;
-    std::vector<FlatFact> rhs;
-    CondAssertion(Fact lhs, std::vector<FlatFact> rhs)
-        : lhs(std::move(lhs)), rhs(std::move(rhs)) {}
-  };
-  std::variant<Fact, CondAssertion> internal_form_;
+  std::variant<Fact, ConditionalAssertion> value_;
 };
 
-// AST node for saysAssertion, which prepends an assertion with:
-// "<principal> says"
+// SaysAssertion prepends an assertion with <principal> says"
 class SaysAssertion {
  public:
-  explicit SaysAssertion(Principal prin, std::vector<Assertion> assertions)
-      : prin_(std::move(prin)), assertions_(std::move(assertions)){};
+  explicit SaysAssertion(Principal principal, std::vector<Assertion> assertions)
+      : principal_(std::move(principal)),
+        assertions_(std::move(assertions)) {};
+  Principal principal() { return principal_; }
+  std::vector<Assertion> assertions() { return assertions_; }
 
  private:
-  Principal prin_;
+  Principal principal_;
   std::vector<Assertion> assertions_;
 };
 
@@ -148,14 +183,17 @@ class SaysAssertion {
 // given the rules and base facts.
 class Query {
  public:
-  explicit Query(std::string name, Principal prin, Fact fact)
+  explicit Query(std::string name, Principal principal, Fact fact)
       : name_(std::move(name)),
-        prin_(std::move(prin)),
+        principal_(std::move(principal)),
         fact_(std::move(fact)) {}
+  std::string name() { return name_; }
+  Principal principal() { return principal_; }
+  Fact fact() { return fact_; }
 
  private:
   std::string name_;
-  Principal prin_;
+  Principal principal_;
   Fact fact_;
 };
 
@@ -164,7 +202,9 @@ class Program {
   explicit Program(std::vector<SaysAssertion> says_assertions,
                    std::vector<Query> queries)
       : says_assertions_(std::move(says_assertions)),
-        queries_(std::move(queries)){};
+        queries_(std::move(queries)) {};
+  std::vector<SaysAssertion> says_assertions() { return says_assertions_; }
+  std::vector<Query> queries() { return queries_; }
 
  private:
   std::vector<SaysAssertion> says_assertions_;
