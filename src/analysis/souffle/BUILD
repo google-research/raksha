@@ -26,6 +26,7 @@ souffle_cc_library(
     src = "taint.dl",
     included_dl_scripts = [
         "authorization_logic.dl",
+        "operations.dl",
         "dataflow_graph.dl",
         "tags.dl",
     ],
