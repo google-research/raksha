@@ -48,8 +48,8 @@ class Predicate {
         // for now, get rid of this eventually
         sign_(std::move(sign)) {}
 
-  std::string name() { return name_; }
-  std::vector<std::string> args() { return args_; }
+  const std::string name() const { return name_; }
+  const std::vector<std::string> args() const { return args_; }
   Sign sign() { return sign_; }
 
  private:
@@ -64,8 +64,8 @@ class Attribute {
  public:
   explicit Attribute(Principal principal, Predicate predicate)
     : principal_(principal), predicate_(predicate) {}
-  Principal principal() { return principal_; }
-  Predicate predicate() { return predicate_; }
+  const Principal principal() const { return principal_; }
+  const Predicate predicate() const { return predicate_; }
  private:
   Principal principal_;
   Predicate predicate_;
@@ -78,8 +78,8 @@ class CanActAs {
   explicit CanActAs(Principal left_principal, Principal right_principal)
     : left_principal_(left_principal),
       right_principal_(right_principal) {}
-  Principal left_principal() { return left_principal_; }
-  Principal right_principal() { return right_principal_; }
+  const Principal left_principal() const { return left_principal_; }
+  const Principal right_principal() const { return right_principal_; }
 
  private:
    Principal left_principal_;
@@ -101,7 +101,9 @@ class BaseFact {
   explicit BaseFact(Predicate predicate) : value_(std::move(predicate)) {};
   explicit BaseFact(Attribute attribute) : value_(std::move(attribute)) {};
   explicit BaseFact(CanActAs canActAs) : value_(std::move(canActAs)) {};
-  std::variant<Predicate, Attribute, CanActAs> value() { return value_; }
+  const std::variant<Predicate, Attribute, CanActAs> value() const {
+    return value_;
+  }
 
  private:
   std::variant<Predicate, Attribute, CanActAs> value_;
@@ -116,8 +118,8 @@ class CanSay {
   public:
     explicit CanSay(Principal principal, std::shared_ptr<Fact>& fact)
       : principal_(principal), fact_(std::move(fact)) {}
-    Principal principal() { return principal_; }
-    std::shared_ptr<Fact> fact() { return fact_; }
+    const Principal principal() const { return principal_; }
+    const std::shared_ptr<Fact> fact() const { return fact_; }
   private:
     Principal principal_;
     std::shared_ptr<Fact> fact_;
@@ -130,7 +132,9 @@ class Fact {
   explicit Fact(BaseFact base_fact) : value_(std::move(base_fact)) {}
   explicit Fact(std::shared_ptr<CanSay>& can_say)
     : value_(std::move(can_say)) {}
-  std::variant<BaseFact, std::shared_ptr<CanSay>> value() { return value_; }
+  const std::variant<BaseFact, std::shared_ptr<CanSay>> value() const {
+    return value_;
+  }
 
  private:
   std::variant<BaseFact, std::shared_ptr<CanSay>> value_;
@@ -143,8 +147,8 @@ class ConditionalAssertion {
   public:
     explicit ConditionalAssertion(Fact lhs, std::vector<BaseFact> rhs)
       : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
-    Fact lhs() { return lhs_; }
-    std::vector<BaseFact> rhs() { return rhs_; }
+    const Fact lhs() const { return lhs_; }
+    const std::vector<BaseFact> rhs() const { return rhs_; }
   private:
     Fact lhs_;
     std::vector<BaseFact> rhs_;
@@ -159,7 +163,9 @@ class Assertion {
   explicit Assertion(ConditionalAssertion conditional_assertion)
     : value_(std::move(conditional_assertion)) {}
 
-  std::variant<Fact, ConditionalAssertion> value() { return value_; }
+  const std::variant<Fact, ConditionalAssertion> value() const {
+    return value_;
+  }
 
  private:
   std::variant<Fact, ConditionalAssertion> value_;
@@ -171,8 +177,8 @@ class SaysAssertion {
   explicit SaysAssertion(Principal principal, std::vector<Assertion> assertions)
       : principal_(std::move(principal)),
         assertions_(std::move(assertions)) {};
-  Principal principal() { return principal_; }
-  std::vector<Assertion> assertions() { return assertions_; }
+  const Principal principal() const { return principal_; }
+  const std::vector<Assertion> assertions() const { return assertions_; }
 
  private:
   Principal principal_;
@@ -187,9 +193,9 @@ class Query {
       : name_(std::move(name)),
         principal_(std::move(principal)),
         fact_(std::move(fact)) {}
-  std::string name() { return name_; }
-  Principal principal() { return principal_; }
-  Fact fact() { return fact_; }
+  const std::string name() const { return name_; }
+  const Principal principal() const { return principal_; }
+  const Fact fact() const { return fact_; }
 
  private:
   std::string name_;
@@ -197,12 +203,13 @@ class Query {
   Fact fact_;
 };
 
+// This is a top-level program which can contain 
 class Program {
  public:
   explicit Program(std::vector<SaysAssertion> says_assertions,
                    std::vector<Query> queries)
       : says_assertions_(std::move(says_assertions)),
-        queries_(std::move(queries)) {};
+        queries_(std::move(queries)) {}
   std::vector<SaysAssertion> says_assertions() { return says_assertions_; }
   std::vector<Query> queries() { return queries_; }
 
