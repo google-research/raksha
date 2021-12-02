@@ -104,7 +104,7 @@ lacksIntegrityTag(ap, owner, integTag) :-
   !edge(_, ap), !directHasIntegrityTag(ap, owner, integTag).
 
 // Any point where an integrity tag is removed lacks an integrity tag.
-lacksIntegrityTag(ap, owner, integTag) :- isAccessPath(ap), removeIntegrityTag(ap, owner, integTag).
+lacksIntegrityTag(ap, owner, integTag) :- removeIntegrityTag(ap, owner, integTag).
 
 // Propagate lack of integrity tag along edges to any destination that did not
 // have an integrity tag directly added.
