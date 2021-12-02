@@ -76,8 +76,8 @@ class Attribute {
 class CanActAs {
  public:
   explicit CanActAs(Principal left_principal, Principal right_principal)
-    : left_principal_(left_principal),
-      right_principal_(right_principal) {}
+    : left_principal_(std::move(left_principal)),
+      right_principal_(std::move(right_principal)) {}
   const Principal& left_principal() const { return left_principal_; }
   const Principal& right_principal() const { return right_principal_; }
 
@@ -127,11 +127,11 @@ class CanSay {
 class Fact {
  public:
   explicit Fact(BaseFact base_fact) : value_(std::move(base_fact)) {}
-  explicit Fact(const CanSay* can_say)
+  explicit Fact(std::unique_ptr<CanSay> can_say)
     : value_(std::move(can_say)) {}
 
  private:
-  std::variant<BaseFact, const CanSay*> value_;
+  std::variant<BaseFact, std::unique_ptr<CanSay>> value_;
 };
 
 // ConditionalAssertion the particular form of assertion that can have 
