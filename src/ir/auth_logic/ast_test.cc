@@ -17,6 +17,7 @@
 #include "src/ir/auth_logic/ast.h"
 #include "src/common/testing/gtest.h"
 #include <iostream>
+#include <memory>
 
 namespace raksha::ir::auth_logic {
 
