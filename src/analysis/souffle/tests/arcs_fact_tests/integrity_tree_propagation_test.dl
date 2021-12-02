@@ -1,0 +1,56 @@
+#include "taint.dl"
+#include "fact_test_helper.dl"
+#include "integrity_tag_prop_helper.dl"
+
+isAccessPath("a").
+isAccessPath("b").
+isAccessPath("c").
+isAccessPath("d").
+isAccessPath("e").
+
+// Make "c" the target of edges from "a" and "b".
+edge("a", "c").
+edge("b", "c").
+
+// Make "e" the target of edges from "c" and "d".
+edge("c", "e").
+edge("d", "e").
+
+// If we apply "integ1" and "integ2" to "a" and "b", they should also appear on
+// "c".
+directHasIntegrityTag("a", "defaultOwner", "integ1").
+directHasIntegrityTag("b", "defaultOwner", "integ1").
+
+directHasIntegrityTag("a", "defaultOwner", "integ2").
+directHasIntegrityTag("b", "defaultOwner", "integ2").
+
+expectHasIntegrityTag("a", "defaultOwner", "integ1").
+expectHasIntegrityTag("b", "defaultOwner", "integ1").
+expectHasIntegrityTag("c", "defaultOwner", "integ1").
+
+expectHasIntegrityTag("a", "defaultOwner", "integ2").
+expectHasIntegrityTag("b", "defaultOwner", "integ2").
+expectHasIntegrityTag("c", "defaultOwner", "integ2").
+
+// If we apply "integ1" to d, it should also appear on e.
+directHasIntegrityTag("d", "defaultOwner", "integ1").
+
+expectHasIntegrityTag("d", "defaultOwner", "integ1").
+expectHasIntegrityTag("e", "defaultOwner", "integ1").
+
+// If we apply "integ3" to "a" and not "b", however, it should not appear on
+// "c".
+directHasIntegrityTag("a", "defaultOwner", "integ3").
+expectHasIntegrityTag("a", "defaultOwner", "integ3").
+
+// Similarly if we apply "integ4" only to "b".
+directHasIntegrityTag("b", "defaultOwner", "integ4").
+expectHasIntegrityTag("b", "defaultOwner", "integ4").
+
+// If we apply "integ5" to "c" and "d" directly, it should appear on "e".
+directHasIntegrityTag("c", "defaultOwner", "integ5").
+directHasIntegrityTag("d", "defaultOwner", "integ5").
+
+expectHasIntegrityTag("c", "defaultOwner", "integ5").
+expectHasIntegrityTag("d", "defaultOwner", "integ5").
+expectHasIntegrityTag("e", "defaultOwner", "integ5").

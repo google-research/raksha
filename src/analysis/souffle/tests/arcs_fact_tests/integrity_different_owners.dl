@@ -1,0 +1,26 @@
+#include "taint.dl"
+#include "fact_test_helper.dl"
+#include "integrity_tag_prop_helper.dl"
+
+// Show that integrity tags with different owners are treated as two different
+// integrity tags.
+edge("a", "r").
+edge("b", "r").
+
+directHasIntegrityTag("a", "owner1", "integ1").
+directHasIntegrityTag("b", "owner2", "integ1").
+
+expectHasIntegrityTag("a", "owner1", "integ1").
+expectHasIntegrityTag("b", "owner2", "integ1").
+
+// Show that removing an integrity tag with a different owner does not block
+// its propagation.
+edge("c", "d").
+edge("d", "e").
+
+directHasIntegrityTag("c", "owner1", "integ2").
+removeIntegrityTag("d", "owner2", "integ2").
+
+expectHasIntegrityTag("c", "owner1", "integ2").
+expectHasIntegrityTag("d", "owner1", "integ2").
+expectHasIntegrityTag("e", "owner1", "integ2").
