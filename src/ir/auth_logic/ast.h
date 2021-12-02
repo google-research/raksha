@@ -101,9 +101,6 @@ class BaseFact {
   explicit BaseFact(Predicate predicate) : value_(std::move(predicate)) {};
   explicit BaseFact(Attribute attribute) : value_(std::move(attribute)) {};
   explicit BaseFact(CanActAs canActAs) : value_(std::move(canActAs)) {};
-  const std::variant<Predicate, Attribute, CanActAs>& value() const {
-    return value_;
-  }
 
  private:
   std::variant<Predicate, Attribute, CanActAs> value_;
@@ -132,9 +129,6 @@ class Fact {
   explicit Fact(BaseFact base_fact) : value_(std::move(base_fact)) {}
   explicit Fact(const CanSay* can_say)
     : value_(std::move(can_say)) {}
-  const std::variant<BaseFact, const CanSay*>& value() const {
-    return value_;
-  }
 
  private:
   std::variant<BaseFact, const CanSay*> value_;
@@ -162,10 +156,6 @@ class Assertion {
   explicit Assertion(Fact fact) : value_(std::move(fact)) {}
   explicit Assertion(ConditionalAssertion conditional_assertion)
     : value_(std::move(conditional_assertion)) {}
-
-  const std::variant<Fact, ConditionalAssertion>& value() const {
-    return value_;
-  }
 
  private:
   std::variant<Fact, ConditionalAssertion> value_;
