@@ -35,6 +35,7 @@ exports_files([
     "authorization_logic.dl",
     "dataflow_graph.dl",
     "fact_test_helper.dl",
+    "operations.dl",
     "tags.dl",
     "may_will.dl",
 ])

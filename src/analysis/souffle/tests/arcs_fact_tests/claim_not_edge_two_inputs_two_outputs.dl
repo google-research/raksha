@@ -10,10 +10,8 @@ isAccessPath("R.foo.hco1").
 isAccessPath("R.foo.hco2").
 
 // By default, all edges connect to all outputs.
-edge("R.foo.hc1", "R.foo.hco1").
-edge("R.foo.hc2", "R.foo.hco1").
-edge("R.foo.hc1", "R.foo.hco2").
-edge("R.foo.hc2", "R.foo.hco2").
+phi("R.foo.hco1", "R.foo.hc1", "R.foo.hc2").
+phi("R.foo.hco2", "R.foo.hc1", "R.foo.hc2").
 
 // Introduce our principals.
 isPrincipal("Claimer").

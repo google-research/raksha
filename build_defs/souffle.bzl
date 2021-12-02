@@ -18,6 +18,7 @@ def souffle_cc_library(
         name,
         src,
         all_principals_own_all_tags = False,
+        require_access_paths_set_by_one_op = False,
         included_dl_scripts = [],
         testonly = None,
         visibility = None):
@@ -43,7 +44,6 @@ def souffle_cc_library(
     elif (testonly == False) and (all_principals_own_all_tags):
         fail("Cannot set testonly to False and all_principals_own_all_tags to True simultaneously!")
 
-    include_str = ""
 
     include_dir_opts = [
         "--include-dir=`dirname $(location {})`".format(include_file)
@@ -52,9 +52,26 @@ def souffle_cc_library(
 
     include_opts_str = " ".join(include_dir_opts)
 
-    tag_ownership_str = ""
+    macros_to_set_list = []
     if all_principals_own_all_tags:
-        tag_ownership_str = "--macro='ALL_PRINCIPALS_OWN_ALL_TAGS=1'"
+      macros_to_set_list += ["ALL_PRINCIPALS_OWN_ALL_TAGS"]
+
+    if require_access_paths_set_by_one_op:
+      macros_to_set_list += ["REQUIRE_ACCESS_PATH_SET_BY_SINGLE_OP"]
+
+    first = True
+    macro_str = ""
+    for macro in macros_to_set_list:
+      if first:
+        macro_str = "--macro='"
+      else:
+        macro_str += " "
+      first = False
+      macro_str += "{macro_name}".format(macro_name = macro)
+
+    # If there was at least one macro, terminate the macro arg string.
+    if not first:
+      macro_str += "'"
 
     native.genrule(
         name = name + "_cpp",
@@ -62,7 +79,7 @@ def souffle_cc_library(
         outs = [cc_file],
         testonly = testonly,
         cmd =
-            "$(location @souffle//:souffle) {include_str} {tag_ownership} -g $@ $(location {src_rule})".format(include_str = include_opts_str, tag_ownership = tag_ownership_str, src_rule = src),
+            "$(location @souffle//:souffle) {include_str} {macros} -g $@ $(location {src_rule})".format(include_str = include_opts_str, macros = macro_str, src_rule = src),
         tools = ["@souffle//:souffle"],
         visibility = visibility,
     )

@@ -20,6 +20,7 @@
 #include "authorization_logic.dl"
 #include "dataflow_graph.dl"
 #include "tags.dl"
+#include "operations.dl"
 
 //-----------------------------------------------------------------------------
 // Relation Declarations
@@ -64,10 +65,6 @@
 // Removes an integrity tag from some path.
 .decl removeIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
 
-// Indicates that a particular tag may lack an integrity tag, which
-// indicates that it should not have an integrity tag.
-.decl lacksIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
-
 // Used to test whether a particular path has a particular integrity tag.
 // Should be used as close to top-level checks as possible, and not for
 // propagation, to prevent stratification issues.
@@ -92,31 +89,34 @@ mayHaveTag(tgt, owner, tag) :- hasTag(tgt, owner, tag).
 mayHaveTag(tgt, owner, tag) :-
     resolvedEdge(owner, src, tgt), mayHaveTag(src, owner, tag), !removeTag(tgt, owner, tag).
 
+// If an access path is the target of a phi operation, it may have a particular
+// confidentiality tag if either of the inputs of the phi have that
+// confidentiality tag.
+mayHaveTag(tgt, owner, tag) :-
+  isAccessPath(tgt), isPrincipal(owner), isTag(tag),
+  operation_2("phi", tgt, src1, src2), (mayHaveTag(src1, owner, tag); mayHaveTag(src2, owner, tag)).
+
+// A target
+
 // Integrity tag rules.
 isIntegrityTag(integTag) :- directHasIntegrityTag(_, _, integTag).
 isPrincipal(principal) :- directHasIntegrityTag(_, principal, _).
 
-// Any access point that has no incoming edges and is not directly given an
-// integrity tag lacks that integrity tag, as there is no way for it to
-// propagate to that AccessPath.
-lacksIntegrityTag(ap, owner, integTag) :-
-  isAccessPath(ap), isPrincipal(owner), isIntegrityTag(integTag),
-  !edge(_, ap), !directHasIntegrityTag(ap, owner, integTag).
+// An access path that directly has an integrity tag must have an integrity
+// tag.
+mustHaveIntegrityTag(ap, owner, integTag) :- directHasIntegrityTag(ap, owner, integTag).
 
-// Any point where an integrity tag is removed lacks an integrity tag.
-lacksIntegrityTag(ap, owner, integTag) :- isAccessPath(ap), removeIntegrityTag(ap, owner, integTag).
-
-// Propagate lack of integrity tag along edges to any destination that did not
-// have an integrity tag directly added.
-lacksIntegrityTag(dst, owner, integTag) :-
-  isAccessPath(src), isAccessPath(dst),
-  edge(src, dst), lacksIntegrityTag(src, owner, integTag),
-  !directHasIntegrityTag(dst, owner, integTag).
-
-// An access path must have an integrity tag if it does not lack the integrity tag.
+// An access path must have an integrity tag if the one edge targeting it has
+// an integrity tag and if the integrity tag was not explicitly removed.
 mustHaveIntegrityTag(ap, owner, integTag) :-
-  isAccessPath(ap), isIntegrityTag(integTag), isPrincipal(owner),
-  !lacksIntegrityTag(ap, owner, integTag).
+  resolvedEdge(owner, src, ap),
+  mustHaveIntegrityTag(src, owner, integTag), !removeIntegrityTag(ap, owner, integTag).
+
+// An access path must have an integrity tag if it is the target of a phi
+// operation where both inputs have the integrity tag.
+mustHaveIntegrityTag(tgt, owner, integTag) :-
+  operation_2("phi", tgt, src1, src2),
+  mustHaveIntegrityTag(src1, owner, integTag), mustHaveIntegrityTag(src2, owner, integTag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules

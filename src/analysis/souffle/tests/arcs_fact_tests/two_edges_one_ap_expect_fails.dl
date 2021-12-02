@@ -1,0 +1,11 @@
+#include "taint.dl"
+#include "fact_test_helper.dl"
+
+isAccessPath("a").
+isAccessPath("b").
+isAccessPath("c").
+
+edge("a", "c").
+edge("b", "c").
+
+TEST_CASE("dummy") :- 1 = 1.

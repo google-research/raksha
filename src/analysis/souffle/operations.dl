@@ -1,0 +1,82 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+// This file declares relations and rules relating to operations. While
+// AccessPaths are where tags reside, operations are where tags are propagated
+// or combined. All AccessPaths may have only one incoming edge to prevent
+// state from merging on the AccessPath. In circumstances where it might feel
+// natural to draw two edges pointing at a single AccessPath, we instead use
+// the "phi" operation, which ANDs the state of integrity tags and ORs the
+// state of confidentiality tags.
+
+#ifndef SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_
+#define SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_
+
+#include "dataflow_graph.dl"
+
+.type Operator <: symbol
+.type Arity <: number
+
+.decl operatorToArity(op: Operator, arity: Arity)
+
+// The assign operator has an arity of 1.
+operatorToArity("=", 1).
+
+// We make the phi operator have an arity of 2. If more than 2 edges meet at
+// a point, this can be handled by chaining phis.
+operatorToArity("phi", 2).
+
+// The universe of operators.
+.decl isOperator(op: Operator)
+isOperator(op) :- operatorToArity(op, _).
+
+// A unary operator. We use operation_2 because it is more concise than
+// "unaryOperator". In addition, if we end up having to handle operators with
+// 3, 4, 5, etc inputs, we don't want to have to look up the specific n-ary word
+// for those numbers.
+.decl operation_1(op: Operator, result: AccessPath, input1: AccessPath)
+
+// An edge is just an assignment operation.
+operation_1("=", result, input1) :- edge(input1, result).
+
+// A binary operator.
+.decl operation_2(op: Operator, result: AccessPath, input1: AccessPath, input2: AccessPath)
+
+// A convenience function for stating phi facts.
+.decl phi(result: AccessPath, input1: AccessPath, input2: AccessPath)
+operation_2("phi", result, input1, input2) :- phi(result, input1, input2).
+
+.type InputList = [ headInput: AccessPath, next: InputList ]
+.decl operationWithInputList(op: Operator, result: AccessPath, inputList: InputList)
+operationWithInputList(op, result, [input1, nil]) :- operation_1(op, result, input1).
+operationWithInputList(op, result, [input1, [input2, nil]]) :-
+  operation_2(op, result, input1, input2).
+
+.output operationWithInputList(IO=stdout, delimiter=",")
+
+// An AccessPath can be the target of at most one operation. This rule is used
+// to enforce this property.
+.decl accessPathsSetByMultipleOps(ap: AccessPath)
+.output accessPathsSetByMultipleOps(IO=stdout, delimiter=",")
+
+// Turn this rule off by default, as we have not updated the C++ side of Raksha
+// to handle this constraint.
+#ifdef REQUIRE_ACCESS_PATH_SET_BY_SINGLE_OP
+accessPathsSetByMultipleOps(ap) :-
+  isAccessPath(ap), count : { operationWithInputList(_, ap, _) } > 1.
+#endif
+
+#endif // SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_

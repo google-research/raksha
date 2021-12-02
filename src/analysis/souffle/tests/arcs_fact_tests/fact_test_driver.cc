@@ -38,18 +38,29 @@ int run_test(std::string const &test_name) {
   souffle::Relation *all_tests = prog->getRelation("allTests");
   souffle::Relation *duplicate_test_case_names =
     prog->getRelation("duplicateTestCaseNames");
+  souffle::Relation *multiple_set_ap =
+    prog->getRelation("accessPathsSetByMultipleOps");
 
   assert(test_failures != nullptr);
 
   bool const test_is_trivial = all_tests->size() == 0;
   bool const test_has_failures = test_failures->size() > 0;
   bool const test_has_duplicate_names = duplicate_test_case_names->size() > 0;
+  bool const test_has_access_path_set_by_multiple_ops =
+    multiple_set_ap->size() > 0;
 
   if (test_is_trivial) {
     std::cout
       << "Test "
       << test_name
       << " does not have any test conditions."
+      << std::endl;
+  } else if (test_has_access_path_set_by_multiple_ops) {
+    std::cout
+      << "Test "
+      << test_name
+      << " has a malformed dataflow graph in which some AccessPath(s) are the "
+      << "result of multiple different operations."
       << std::endl;
   } else if (test_has_duplicate_names) {
     std::cout

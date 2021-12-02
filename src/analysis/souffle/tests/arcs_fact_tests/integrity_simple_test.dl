@@ -26,13 +26,11 @@ isAccessPath("s").
 isAccessPath("t").
 isAccessPath("u").
 
-// Make "c" the target of edges from "a" and "b".
-edge("a", "c").
-edge("b", "c").
+// Make "c" the target of a phi from "a" and "b".
+phi("c", "a", "b").
 
-// Make "e" the target of edges from "c" and "d".
-edge("c", "e").
-edge("d", "e").
+// Make "e" the target of a phi from "c" and "d".
+phi("e", "c", "d").
 
 // If we apply "integ1" and "integ2" to "a" and "b", they should also appear on
 // "c".
@@ -89,9 +87,8 @@ directHasIntegrityTag("g", "defaultOwner", "integ7").
 expectHasIntegrityTag("g", "defaultOwner", "integ7").
 
 // "k" has 3 children, "h", "i", and "j"
-edge("h", "k").
-edge("i", "k").
-edge("j", "k").
+phi("phi_temp1", "h", "i").
+phi("k", "j", "phi_temp1").
 
 directHasIntegrityTag("h", "defaultOwner", "integ8").
 directHasIntegrityTag("i", "defaultOwner", "integ8").
@@ -101,11 +98,13 @@ expectHasIntegrityTag("h", "defaultOwner", "integ8").
 expectHasIntegrityTag("i", "defaultOwner", "integ8").
 expectHasIntegrityTag("j", "defaultOwner", "integ8").
 expectHasIntegrityTag("k", "defaultOwner", "integ8").
+expectHasIntegrityTag("phi_temp1", "defaultOwner", "integ8").
 
 directHasIntegrityTag("h", "defaultOwner", "integ9").
 directHasIntegrityTag("i", "defaultOwner", "integ9").
 expectHasIntegrityTag("h", "defaultOwner", "integ9").
 expectHasIntegrityTag("i", "defaultOwner", "integ9").
+expectHasIntegrityTag("phi_temp1", "defaultOwner", "integ9").
 
 directHasIntegrityTag("h", "defaultOwner", "integ10").
 directHasIntegrityTag("j", "defaultOwner", "integ10").
@@ -131,8 +130,7 @@ expectHasIntegrityTag("m", "defaultOwner", "integ13").
 
 // Show that integrity tags with different owners are treated as two different
 // integrity tags.
-edge("p", "r").
-edge("q", "r").
+phi("r", "p", "q").
 
 directHasIntegrityTag("p", "owner1", "integ14").
 directHasIntegrityTag("q", "owner2", "integ14").
