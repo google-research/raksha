@@ -19,16 +19,17 @@ package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
     name = "ast",
-    srcs = [
+    hdrs = [
         "ast.h",
-    ]
+    ],
+    visibility = ["//test:__pkg__"]
 )
 
 cc_test(
     name = "ast_test",
     srcs = ["ast_test.cc"],
     deps = [
-        "ast",
+        ":ast",
         "//src/common/testing:gtest",
     ]
 )

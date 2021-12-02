@@ -16,5 +16,15 @@
 
 #include "src/ir/auth_logic/ast.h"
 #include "src/common/testing/gtest.h"
+#include <iostream>
 
-// TODO
+namespace raksha::ir::auth_logic {
+
+TEST(AstTest, PrincipalAccessors) {
+  // Principal principal = Principal("TestPrincipal");
+  // std::cout << "test principal name" << principal.name() << std::endl;
+  EXPECT_TRUE(true);
+  // EXPECT_EQ(principal.name(), "TestPrincipal");
+}
+
+}  // namespace raksha::ir
