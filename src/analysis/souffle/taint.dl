@@ -96,8 +96,6 @@ mayHaveTag(tgt, owner, tag) :-
   isAccessPath(tgt), isPrincipal(owner), isTag(tag),
   operation_2("phi", tgt, src1, src2), (mayHaveTag(src1, owner, tag); mayHaveTag(src2, owner, tag)).
 
-// A target
-
 // Integrity tag rules.
 isIntegrityTag(integTag) :- hasAppliedIntegrityTag(_, _, integTag).
 isPrincipal(principal) :- hasAppliedIntegrityTag(_, principal, _).
