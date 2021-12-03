@@ -28,4 +28,11 @@
 .type Tag <: symbol
 .decl isTag(tag: Tag)
 
+// An access path marked with an integrity tag (shortened here to IntegTag)
+// indicates that some property must be true of the data at the given
+// AccessPath. The conservative over-approximation for propagating an integrity
+// tag is that a node has an integrity tag only if all of its predecessors have
+// that integrity tag.
+.type IntegrityTag <: symbol
+
 #endif // SRC_ANALYSIS_SOUFFLE_TAGS_DL_

@@ -52,6 +52,27 @@
 // of the taint analysis).
 .decl claimNotEdge(principal: Principal, src: AccessPath, dst: AccessPath)
 
+// Indicates that an integrity tag is directly applied to an AccessPath. This
+// rule should only be populated with base facts with no derivation to prevent
+// us from getting tangled up in stratification issues. Propagation will happen
+// via the lacksIntegrityTag rule.
+.decl hasAppliedIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
+
+// Integrity tag universe.
+.decl isIntegrityTag(integTag: IntegrityTag)
+
+// Removes an integrity tag from some path.
+.decl removeIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
+
+// Indicates that a particular tag may lack an integrity tag, which
+// indicates that it should not have an integrity tag.
+.decl lacksIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
+
+// Used to test whether a particular path has a particular integrity tag.
+// Should be used as close to top-level checks as possible, and not for
+// propagation, to prevent stratification issues.
+.decl mustHaveIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
+
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
@@ -70,6 +91,32 @@ mayHaveTag(tgt, owner, tag) :- hasTag(tgt, owner, tag).
 
 mayHaveTag(tgt, owner, tag) :-
     resolvedEdge(owner, src, tgt), mayHaveTag(src, owner, tag), !removeTag(tgt, owner, tag).
+
+// Integrity tag rules.
+isIntegrityTag(integTag) :- hasAppliedIntegrityTag(_, _, integTag).
+isPrincipal(principal) :- hasAppliedIntegrityTag(_, principal, _).
+
+// Any access point that has no incoming edges and is not directly given an
+// integrity tag lacks that integrity tag, as there is no way for it to
+// propagate to that AccessPath.
+lacksIntegrityTag(ap, owner, integTag) :-
+  isAccessPath(ap), isPrincipal(owner), isIntegrityTag(integTag),
+  !edge(_, ap), !hasAppliedIntegrityTag(ap, owner, integTag).
+
+// Any point where an integrity tag is removed lacks an integrity tag.
+lacksIntegrityTag(ap, owner, integTag) :- removeIntegrityTag(ap, owner, integTag).
+
+// Propagate lack of integrity tag along edges to any destination that did not
+// have an integrity tag directly added.
+lacksIntegrityTag(dst, owner, integTag) :-
+  isAccessPath(src), isAccessPath(dst),
+  edge(src, dst), lacksIntegrityTag(src, owner, integTag),
+  !hasAppliedIntegrityTag(dst, owner, integTag).
+
+// An access path must have an integrity tag if it does not lack the integrity tag.
+mustHaveIntegrityTag(ap, owner, integTag) :-
+  isAccessPath(ap), isIntegrityTag(integTag), isPrincipal(owner),
+  !lacksIntegrityTag(ap, owner, integTag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules

@@ -7,7 +7,7 @@ licenses(["notice"])
 
 FAILURE_DL_TEST_FILES = glob(["*_expect_fails.dl"])
 
-ALL_DL_TEST_FILES = glob(["*.dl"])
+ALL_DL_TEST_FILES = glob(["*.dl"], exclude = ["*_helper.dl"])
 
 TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES = ["claim_not_edge_two_inputs_two_outputs.dl"]
 
@@ -18,6 +18,7 @@ exports_files(["fact_test_driver.cc"])
     src = dl_script,
     all_principals_own_all_tags = True,
     included_dl_scripts = [
+        ":integrity_tag_prop_helper.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
         "//src/analysis/souffle:taint.dl",
@@ -48,6 +49,7 @@ exports_files(["fact_test_driver.cc"])
     src = dl_script,
     all_principals_own_all_tags = False,
     included_dl_scripts = [
+        ":integrity_tag_prop_helper.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
         "//src/analysis/souffle:taint.dl",
