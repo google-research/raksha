@@ -1,0 +1,12 @@
+#include "taint.dl"
+#include "fact_test_helper.dl"
+#include "integrity_tag_prop_helper.dl"
+
+// Show that clearing an integrity tag on "b" causes it to not propagate to "c".
+edge("a", "b").
+edge("b", "c").
+
+directHasIntegrityTag("a", "defaultOwner", "integ").
+removeIntegrityTag("b", "defaultOwner", "integ").
+
+expectHasIntegrityTag("a", "defaultOwner", "integ").

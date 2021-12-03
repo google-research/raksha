@@ -9,7 +9,7 @@ FAILURE_DL_TEST_FILES = glob(["*_expect_fails.dl"])
 
 # TODO: claim_not_edge_two_inputs_two_outputs.dl is not easily portable to the
 # phi solution. Figure out how to fix it in phi-land.
-ALL_DL_TEST_FILES = glob(["*.dl"], exclude = ["*claim_not_edge_two_inputs_two_outputs.dl"])
+ALL_DL_TEST_FILES = glob(["*.dl"], exclude = ["*_helper.dl", "*claim_not_edge_two_inputs_two_outputs.dl"])
 
 TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES = [
     # TODO: This test is not easily portable to the phi solution. Figure out
@@ -25,6 +25,7 @@ exports_files(["fact_test_driver.cc"])
     all_principals_own_all_tags = True,
     require_access_paths_set_by_one_op = True,
     included_dl_scripts = [
+        ":integrity_tag_prop_helper.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
         "//src/analysis/souffle:operations.dl",
@@ -57,6 +58,7 @@ exports_files(["fact_test_driver.cc"])
     all_principals_own_all_tags = False,
     require_access_paths_set_by_one_op = True,
     included_dl_scripts = [
+        ":integrity_tag_prop_helper.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
         "//src/analysis/souffle:operations.dl",

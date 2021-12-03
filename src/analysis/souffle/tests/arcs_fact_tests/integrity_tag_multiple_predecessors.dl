@@ -1,0 +1,36 @@
+#include "taint.dl"
+#include "fact_test_helper.dl"
+#include "integrity_tag_prop_helper.dl"
+
+// "d" has 3 children, "a", "b", and "c"
+phi("phi_temp", "a", "b").
+phi("d", "phi_temp", "c").
+
+directHasIntegrityTag("a", "defaultOwner", "integ1").
+directHasIntegrityTag("b", "defaultOwner", "integ1").
+directHasIntegrityTag("c", "defaultOwner", "integ1").
+
+expectHasIntegrityTag("a", "defaultOwner", "integ1").
+expectHasIntegrityTag("b", "defaultOwner", "integ1").
+expectHasIntegrityTag("phi_temp", "defaultOwner", "integ1").
+expectHasIntegrityTag("c", "defaultOwner", "integ1").
+expectHasIntegrityTag("d", "defaultOwner", "integ1").
+
+directHasIntegrityTag("a", "defaultOwner", "integ2").
+directHasIntegrityTag("b", "defaultOwner", "integ2").
+expectHasIntegrityTag("a", "defaultOwner", "integ2").
+expectHasIntegrityTag("b", "defaultOwner", "integ2").
+expectHasIntegrityTag("phi_temp", "defaultOwner", "integ2").
+
+directHasIntegrityTag("a", "defaultOwner", "integ3").
+directHasIntegrityTag("c", "defaultOwner", "integ3").
+expectHasIntegrityTag("a", "defaultOwner", "integ3").
+expectHasIntegrityTag("c", "defaultOwner", "integ3").
+
+directHasIntegrityTag("b", "defaultOwner", "integ4").
+directHasIntegrityTag("c", "defaultOwner", "integ4").
+expectHasIntegrityTag("b", "defaultOwner", "integ4").
+expectHasIntegrityTag("c", "defaultOwner", "integ4").
+
+directHasIntegrityTag("d", "defaultOwner", "integ5").
+expectHasIntegrityTag("d", "defaultOwner", "integ5").
