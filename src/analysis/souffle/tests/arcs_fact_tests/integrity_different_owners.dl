@@ -7,8 +7,8 @@
 edge("a", "r").
 edge("b", "r").
 
-directHasIntegrityTag("a", "owner1", "integ1").
-directHasIntegrityTag("b", "owner2", "integ1").
+hasAppliedIntegrityTag("a", "owner1", "integ1").
+hasAppliedIntegrityTag("b", "owner2", "integ1").
 
 expectHasIntegrityTag("a", "owner1", "integ1").
 expectHasIntegrityTag("b", "owner2", "integ1").
@@ -18,7 +18,7 @@ expectHasIntegrityTag("b", "owner2", "integ1").
 edge("c", "d").
 edge("d", "e").
 
-directHasIntegrityTag("c", "owner1", "integ2").
+hasAppliedIntegrityTag("c", "owner1", "integ2").
 removeIntegrityTag("d", "owner2", "integ2").
 
 expectHasIntegrityTag("c", "owner1", "integ2").
