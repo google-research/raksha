@@ -6,7 +6,7 @@
 edge("a", "b").
 edge("b", "c").
 
-directHasIntegrityTag("a", "defaultOwner", "integ").
+hasAppliedIntegrityTag("a", "defaultOwner", "integ").
 removeIntegrityTag("b", "defaultOwner", "integ").
 
 expectHasIntegrityTag("a", "defaultOwner", "integ").

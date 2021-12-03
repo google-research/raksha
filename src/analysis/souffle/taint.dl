@@ -53,11 +53,11 @@
 // of the taint analysis).
 .decl claimNotEdge(principal: Principal, src: AccessPath, dst: AccessPath)
 
-// Indicates that an AccessPath is given an integrity tag directly. This rule
-// should only be populated with base facts with no derivation to prevent us
-// from getting tangled up in stratification issues. Propagation will happen
+// Indicates that an integrity tag is directly applied to an AccessPath. This
+// rule should only be populated with base facts with no derivation to prevent
+// us from getting tangled up in stratification issues. Propagation will happen
 // via the lacksIntegrityTag rule.
-.decl directHasIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
+.decl hasAppliedIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
 
 // Integrity tag universe.
 .decl isIntegrityTag(integTag: IntegrityTag)
@@ -99,12 +99,12 @@ mayHaveTag(tgt, owner, tag) :-
 // A target
 
 // Integrity tag rules.
-isIntegrityTag(integTag) :- directHasIntegrityTag(_, _, integTag).
-isPrincipal(principal) :- directHasIntegrityTag(_, principal, _).
+isIntegrityTag(integTag) :- hasAppliedIntegrityTag(_, _, integTag).
+isPrincipal(principal) :- hasAppliedIntegrityTag(_, principal, _).
 
 // An access path that directly has an integrity tag must have an integrity
 // tag.
-mustHaveIntegrityTag(ap, owner, integTag) :- directHasIntegrityTag(ap, owner, integTag).
+mustHaveIntegrityTag(ap, owner, integTag) :- hasAppliedIntegrityTag(ap, owner, integTag).
 
 // An access path must have an integrity tag if the one edge targeting it has
 // an integrity tag and if the integrity tag was not explicitly removed.
