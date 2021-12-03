@@ -45,7 +45,7 @@ ownsTag(principal, tag) :- isPrincipal(principal), isTag(tag).
 
 // TEST_CASE is constructed so that it can take the place of a rule head. It "declares" a test
 // aspect via the allTestsAndCaseNum fact and sets up a testPasses head for the aspect in question.
-// The $ functor used in the argument to allTestsAndCaseNum allows assigning each test case
+// The autoinc functor used in the argument to allTestsAndCaseNum allows assigning each test case
 // a unique number, useful for catching if the user accidentally used the same name for two
 // different test cases.
 // Example usage:
@@ -55,7 +55,7 @@ ownsTag(principal, tag) :- isPrincipal(principal), isTag(tag).
 // All recipes with a TEST_CASE head shall be seen as a condition that must be met for the test to
 // pass.
 #define TEST_CASE(test_aspect_name) \
-  allTestsAndCaseNum(test_aspect_name, $) :- 1 = 1. \
+  allTestsAndCaseNum(test_aspect_name, autoinc()) :- 1 = 1. \
   testPasses(test_aspect_name)
 
 #define CHECK_TAG_PRESENT(access_path, owner, tag) \
