@@ -73,9 +73,20 @@ pub enum AstFact {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub enum AstConjunctiveTerm {
+    AstBaseTerm { f: AstFlatFact },
+    AstDisjunction { d: Vec<AstConjunction> },
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct AstConjunction {
+    pub terms: Vec<AstConjunctiveTerm>
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum AstAssertion {
     AstFactAssertion { f: AstFact },
-    AstCondAssertion { lhs: AstFact, rhs: Vec<AstFlatFact> },
+    AstCondAssertion { lhs: AstFact, rhs: Vec<AstConjunction> },
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
