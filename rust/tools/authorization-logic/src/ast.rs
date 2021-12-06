@@ -54,58 +54,58 @@ impl PartialEq for AstPredicate {
 // See https://doc.rust-lang.org/std/cmp/trait.Eq.html
 impl Eq for AstPredicate {}
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum AstVerbPhrase {
     AstPredPhrase { p: AstPredicate },
     AstCanActPhrase { p: AstPrincipal },
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum AstFlatFact {
     AstPrinFact { p: AstPrincipal, v: AstVerbPhrase },
     AstPredFact { p: AstPredicate },
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum AstFact {
     AstFlatFactFact { f: AstFlatFact },
     AstCanSayFact { p: AstPrincipal, f: Box<AstFact> },
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum AstAssertion {
     AstFactAssertion { f: AstFact },
     AstCondAssertion { lhs: AstFact, rhs: Vec<AstFlatFact> },
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct AstSaysAssertion {
     pub prin: AstPrincipal,
     pub assertions: Vec<AstAssertion>,
     pub export_file: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct AstQuery {
     pub name: String,
     pub principal: AstPrincipal,
     pub fact: AstFact,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct AstKeybind {
     pub filename: String,
     pub principal: AstPrincipal,
     pub is_pub: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct AstImport {
     pub filename: String,
     pub principal: AstPrincipal,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct AstProgram {
     pub assertions: Vec<AstSaysAssertion>,
     pub queries: Vec<AstQuery>,
