@@ -64,9 +64,12 @@
 // Removes an integrity tag from some path.
 .decl removeIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
 
-// Indicates that a particular tag may lack an integrity tag, which
+// Indicates that a particular AccessPath may lack an integrity tag, which
 // indicates that it should not have an integrity tag.
 .decl lacksIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
+
+// Indicates that a particular AccessPath may have an integrity tag.
+.decl mayHaveIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
 
 // Used to test whether a particular path has a particular integrity tag.
 // Should be used as close to top-level checks as possible, and not for
@@ -113,10 +116,21 @@ lacksIntegrityTag(dst, owner, integTag) :-
   edge(src, dst), lacksIntegrityTag(src, owner, integTag),
   !hasAppliedIntegrityTag(dst, owner, integTag).
 
-// An access path must have an integrity tag if it does not lack the integrity tag.
+// Any AccessPath that has an IntegrityTag directly applied to it may (really,
+// stronger than may, must) have that IntegrityTag.
+mayHaveIntegrityTag(ap, owner, integTag) :- hasAppliedIntegrityTag(ap, owner, integTag).
+
+// Any AccessPath that has an incoming resolvedEdge where the source of that
+// edge may have an IntegrityTag may also have that IntegrityTag.
+mayHaveIntegrityTag(src, owner, integTag) :-
+  resolvedEdge(owner, src, dst), mayHaveIntegrityTag(src, owner, integTag),
+  !removeIntegrityTag(dst, owner, integTag).
+
+// An access path must have an integrity tag if it may have the IntegrityTag
+// and does not lack the IntegrityTag
 mustHaveIntegrityTag(ap, owner, integTag) :-
   isAccessPath(ap), isIntegrityTag(integTag), isPrincipal(owner),
-  !lacksIntegrityTag(ap, owner, integTag).
+  mayHaveIntegrityTag(ap, owner, integTag), !lacksIntegrityTag(ap, owner, integTag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules

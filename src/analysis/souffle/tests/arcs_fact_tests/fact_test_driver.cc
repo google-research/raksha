@@ -40,6 +40,8 @@ int run_test(std::string const &test_name) {
     prog->getRelation("duplicateTestCaseNames");
 
   assert(test_failures != nullptr);
+  assert(all_tests != nullptr);
+  assert(duplicate_test_case_names != nullptr);
 
   bool const test_is_trivial = all_tests->size() == 0;
   bool const test_has_failures = test_failures->size() > 0;
