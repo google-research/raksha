@@ -151,11 +151,29 @@ fn construct_fact_assertion(ctx: &FactAssertionContext) -> AstAssertion {
 
 fn construct_hornclause(ctx: &HornClauseAssertionContext) -> AstAssertion {
     let lhs = construct_fact(&ctx.fact().unwrap());
-    let mut rhs = Vec::new();
-    for flat_fact_ctx in ctx.flatFact_all() {
-        rhs.push(construct_flat_fact(&flat_fact_ctx));
-    }
+    let rhs = construct_disjunction(&ctx.disjunction().unwrap());
     AstAssertion::AstCondAssertion { lhs, rhs }
+}
+
+fn construct_disjunction(ctx: &DisjunctionContext) -> AstDisjunction {
+    let mut terms = Vec::new();
+    for conjunction_ctx in ctx.conjunction_all() {
+        terms.push(construct_conjunction(&conjunction_ctx));
+    }
+    AstDisjunction { terms }
+}
+
+fn construct_conjunction(ctx: &ConjunctionContext) -> AstConjunction {
+    let mut terms = Vec::new();
+    for flat_fact_ctx in ctx.flatFact_all() {
+        let f = construct_flat_fact(&flat_fact_ctx);
+        terms.push(AstConjunctiveTerm::AstBaseTerm { f });
+    }
+    for disjunction_ctx in ctx.disjunction_all() {
+        let d = construct_disjunction(&disjunction_ctx);
+        terms.push(AstConjunctiveTerm::AstDisjunctionTerm { d });
+    }
+    AstConjunction { terms }
 }
 
 fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {

@@ -57,9 +57,11 @@ fact
 
 disjunction
     : conjunction (';' conjunction )*
+    ;
 
 conjunction
     : (flatFact | '(' disjunction ')' ) (',' (flatFact | '(' disjunction ')' ) )*
+    ;
 
 assertion
     : fact '.' #factAssertion
