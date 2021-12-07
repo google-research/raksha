@@ -36,6 +36,7 @@ hasAppliedIntegrityTag("b", "defaultOwner", "Constant_1000").
 hasAppliedIntegrityTag("d", "defaultOwner", "Constant_1000").
 
 // This is the first policy rule.
+isIntegrityTag("TimestampSeconds").
 mayHaveIntegrityTag(ap, owner, "TimestampSeconds") :-
   div_op(ap, operand1, operand2),
   mayHaveIntegrityTag(operand1, owner, "TimestampMillis"),
@@ -49,6 +50,7 @@ mayHaveIntegrityTag(ap, owner, "TimestampSeconds") :-
 //   lacksIntegrityTag(operand2, owner, "Constant_1000")).
 
 // This is the second policy rule.
+isIntegrityTag("TimestampMillisRedacted").
 mayHaveIntegrityTag(ap, owner, "TimestampMillisRedacted") :-
   mult_op(ap, operand1, operand2),
   mayHaveIntegrityTag(operand1, owner, "TimestampSeconds"),
