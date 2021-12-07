@@ -122,7 +122,7 @@ mayHaveIntegrityTag(ap, owner, integTag) :- hasAppliedIntegrityTag(ap, owner, in
 
 // Any AccessPath that has an incoming resolvedEdge where the source of that
 // edge may have an IntegrityTag may also have that IntegrityTag.
-mayHaveIntegrityTag(src, owner, integTag) :-
+mayHaveIntegrityTag(dst, owner, integTag) :-
   resolvedEdge(owner, src, dst), mayHaveIntegrityTag(src, owner, integTag),
   !removeIntegrityTag(dst, owner, integTag).
 
