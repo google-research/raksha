@@ -16,48 +16,100 @@
 // access paths are the result of operation expressions with the isOperatorExpr
 // relation.
 
-.decl mult_op(result: AccessPath, operand1: AccessPath, operand2: AccessPath)
-.decl div_op(result: AccessPath, dividend: AccessPath, divisor: AccessPath)
+// .decl mult_op(result: AccessPath, operand1: AccessPath, operand2: AccessPath)
+// .decl div_op(result: AccessPath, dividend: AccessPath, divisor: AccessPath)
 
-edge(op1, result), edge(op2, result) :- mult_op(result, op1, op2).
-edge(dividend, result), edge(divisor, result) :- div_op(result, dividend, divisor).
-
+// We should not add these edges because the mayHaveIntegrityTag and lacksIntegrityTag
+// rules captures the propagation semantics more precisely. In particular, we should
+// not be using the default propagation rules for `mult_op` and `div_op`.
+//
+// edge(op1, result), edge(op2, result) :- mult_op(result, op1, op2).
+// edge(dividend, result), edge(divisor, result) :- div_op(result, dividend, divisor).
 isAccessPath("a").
 isAccessPath("b").
 isAccessPath("c").
 isAccessPath("d").
 isAccessPath("e").
 
-mult_op("c", "a", "b").
-div_op("e", "c", "d").
+// c = a / b
+// e = c * d
+div_op("c", "a", "b").
+mult_op("e", "c", "d").
 
+// Commenting any of these will cause the expecations to fail.
 hasAppliedIntegrityTag("a", "defaultOwner", "TimestampMillis").
 hasAppliedIntegrityTag("b", "defaultOwner", "Constant_1000").
 hasAppliedIntegrityTag("d", "defaultOwner", "Constant_1000").
 
-// This is the first policy rule.
+// Propagation rules for div_op
 mayHaveIntegrityTag(ap, owner, "TimestampSeconds") :-
   div_op(ap, operand1, operand2),
   mayHaveIntegrityTag(operand1, owner, "TimestampMillis"),
   mayHaveIntegrityTag(operand2, owner, "Constant_1000").
 
+// Default propagation rules.
+mayHaveIntegrityTag(ap, owner, tag) :-
+  div_op(ap, operand1, _),
+  mayHaveIntegrityTag(operand1, owner, tag),
+  tag != "TimestampMillis".
+
+mayHaveIntegrityTag(ap, owner, tag) :-
+  div_op(ap, _, operand2),
+  mayHaveIntegrityTag(operand2, owner, tag),
+  tag != "Constant_1000".
+
 // These rules propagating lacks of integrity tags across rules can only remove
 // integrity tags. Remove them for now to illustrate issue.
-// lacksIntegrityTag(ap, owner, "TimestampSeconds") :-
-//  div_op(ap, operand1, operand2),
-//  (lacksIntegrityTag(operand1, owner, "TimestampMillis");
-//   lacksIntegrityTag(operand2, owner, "Constant_1000")).
+lacksIntegrityTag(ap, owner, "TimestampSeconds") :-
+   div_op(ap, operand1, operand2),
+   (lacksIntegrityTag(operand1, owner, "TimestampMillis");
+    lacksIntegrityTag(operand2, owner, "Constant_1000")).
 
+// Default propagation rules.
+lacksIntegrityTag(ap, owner, tag) :-
+  div_op(ap, operand1, _),
+  lacksIntegrityTag(operand1, owner, tag),
+  tag != "TimestampMillis".
+
+lacksIntegrityTag(ap, owner, tag) :-
+  div_op(ap, _, operand2),
+  lacksIntegrityTag(operand2, owner, tag),
+  tag != "Constant_1000".
+
+//----------------------------------------
 // This is the second policy rule.
+// Propagation rules for mult_op.
 mayHaveIntegrityTag(ap, owner, "TimestampMillisRedacted") :-
   mult_op(ap, operand1, operand2),
   mayHaveIntegrityTag(operand1, owner, "TimestampSeconds"),
-  mayHaveIntegrityTag(operand1, owner, "Constant_1000").
+  mayHaveIntegrityTag(operand2, owner, "Constant_1000").
 
-// lacksIntegrityTag(ap, owner, "TimestampMillisRedacted") :-
-//  mult_op(ap, operand1, operand2),
-//  (lacksIntegrityTag(operand1, owner, "TimestampSeconds");
-//   lacksIntegrityTag(operand2, owner, "Constant_1000")).
+// Default propagation rules.
+mayHaveIntegrityTag(ap, owner, tag) :-
+  mult_op(ap, operand1, _),
+  mayHaveIntegrityTag(operand1, owner, tag),
+  tag != "TimestampSeconds".
+
+mayHaveIntegrityTag(ap, owner, tag) :-
+  mult_op(ap, _, operand2),
+  mayHaveIntegrityTag(operand2, owner, tag),
+  tag != "Constant_1000".
+
+lacksIntegrityTag(ap, owner, "TimestampMillisRedacted") :-
+ mult_op(ap, operand1, operand2),
+ (lacksIntegrityTag(operand1, owner, "TimestampSeconds");
+  lacksIntegrityTag(operand2, owner, "Constant_1000")).
+
+// Default propagation rules.
+lacksIntegrityTag(ap, owner, tag) :-
+  mult_op(ap, operand1, _),
+  lacksIntegrityTag(operand1, owner, tag),
+  tag != "TimestampSeconds".
+
+lacksIntegrityTag(ap, owner, tag) :-
+  mult_op(ap, _, operand2),
+  lacksIntegrityTag(operand2, owner, tag),
+  tag != "Constant_1000".
 
 expectHasIntegrityTag("a", "defaultOwner", "TimestampMillis").
 expectHasIntegrityTag("b", "defaultOwner", "Constant_1000").
@@ -69,3 +121,23 @@ expectHasIntegrityTag("d", "defaultOwner", "Constant_1000").
 // "d" onto "e".
 expectHasIntegrityTag("c", "defaultOwner", "TimestampSeconds").
 expectHasIntegrityTag("e", "defaultOwner", "TimestampMillisRedacted").
+
+// Another expression to show default propagation rules.
+isAccessPath("v").
+isAccessPath("w").
+isAccessPath("x").
+isAccessPath("y").
+isAccessPath("z").
+// x = y / z
+// v = x * w
+div_op("x", "y", "z").
+mult_op("v", "x", "w").
+hasAppliedIntegrityTag("w", "defaultOwner", "ScreenText").
+hasAppliedIntegrityTag("y", "defaultOwner", "ScreenText").
+hasAppliedIntegrityTag("z", "defaultOwner", "ScreenText").
+// Commenting out any of the above will make this false.
+expectHasIntegrityTag("v", "defaultOwner", "ScreenText").
+expectHasIntegrityTag("w", "defaultOwner", "ScreenText").
+expectHasIntegrityTag("x", "defaultOwner", "ScreenText").
+expectHasIntegrityTag("y", "defaultOwner", "ScreenText").
+expectHasIntegrityTag("z", "defaultOwner", "ScreenText").

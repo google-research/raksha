@@ -18,6 +18,10 @@ unexpectedTagPresent(ap, owner, tag) :-
 // These help with debugging if the test fails.
 .output hasAppliedIntegrityTag(IO=stdout, delimiter=",")
 .output mustHaveIntegrityTag(IO=stdout, delimiter=",")
+.output lacksIntegrityTag(IO=stdout, delimiter=",")
+.output mayHaveIntegrityTag(IO=stdout, delimiter=",")
+.output isPrincipal(IO=stdout, delimiter=",")
+.output isIntegrityTag(IO=stdout, delimiter=",")
 
 TEST_CASE("expected_tag_not_present_is_empty") :- count : { expectedTagNotPresent(_, _, _) } = 0.
 TEST_CASE("unexpected_tag_present_is_empty") :- count : { unexpectedTagPresent(_, _, _) } = 0.

@@ -99,12 +99,18 @@ mayHaveTag(tgt, owner, tag) :-
 isIntegrityTag(integTag) :- hasAppliedIntegrityTag(_, _, integTag).
 isPrincipal(principal) :- hasAppliedIntegrityTag(_, principal, _).
 
+.decl mult_op(result: AccessPath, operand1: AccessPath, operand2: AccessPath)
+.decl div_op(result: AccessPath, dividend: AccessPath, divisor: AccessPath)
+
 // Any access point that has no incoming edges and is not directly given an
 // integrity tag lacks that integrity tag, as there is no way for it to
 // propagate to that AccessPath.
 lacksIntegrityTag(ap, owner, integTag) :-
   isAccessPath(ap), isPrincipal(owner), isIntegrityTag(integTag),
-  !edge(_, ap), !hasAppliedIntegrityTag(ap, owner, integTag).
+  // We will need to capture the fact that some propagation happens because of
+  // operators.
+  !edge(_, ap), !mult_op(ap, _, _), !div_op(ap, _, _),
+  !hasAppliedIntegrityTag(ap, owner, integTag).
 
 // Any point where an integrity tag is removed lacks an integrity tag.
 lacksIntegrityTag(ap, owner, integTag) :- removeIntegrityTag(ap, owner, integTag).
@@ -129,7 +135,10 @@ mayHaveIntegrityTag(dst, owner, integTag) :-
 // An access path must have an integrity tag if it may have the IntegrityTag
 // and does not lack the IntegrityTag
 mustHaveIntegrityTag(ap, owner, integTag) :-
-  isAccessPath(ap), isIntegrityTag(integTag), isPrincipal(owner),
+   // isIntegrityTag is only true when `hasAppliedIntegrityTag` is true. Therefore, it
+   // is not true for tags propagated for expressions. Moreover, we don't need the three
+   // checks as they are already covered by `mayHaveIntegrityTag`.
+   // isAccessPath(ap), isIntegrityTag(integTag), isPrincipal(owner),
   mayHaveIntegrityTag(ap, owner, integTag), !lacksIntegrityTag(ap, owner, integTag).
 
 //-----------------------------------------------------------------------------
