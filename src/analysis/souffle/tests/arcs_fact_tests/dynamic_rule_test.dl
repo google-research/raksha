@@ -28,8 +28,8 @@ isAccessPath("c").
 isAccessPath("d").
 isAccessPath("e").
 
-mult_op("c", "a", "b").
-div_op("e", "c", "d").
+div_op("c", "a", "b").
+mult_op("e", "c", "d").
 
 hasAppliedIntegrityTag("a", "defaultOwner", "TimestampMillis").
 hasAppliedIntegrityTag("b", "defaultOwner", "Constant_1000").
@@ -52,7 +52,7 @@ mayHaveIntegrityTag(ap, owner, "TimestampSeconds") :-
 mayHaveIntegrityTag(ap, owner, "TimestampMillisRedacted") :-
   mult_op(ap, operand1, operand2),
   mayHaveIntegrityTag(operand1, owner, "TimestampSeconds"),
-  mayHaveIntegrityTag(operand1, owner, "Constant_1000").
+  mayHaveIntegrityTag(operand2, owner, "Constant_1000").
 
 // lacksIntegrityTag(ap, owner, "TimestampMillisRedacted") :-
 //  mult_op(ap, operand1, operand2),
