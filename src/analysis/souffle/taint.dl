@@ -65,14 +65,12 @@
 .decl removeIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
 
 // Given how predecessors are ordered in orderedPredecessors, indicate whether
-// a predcessor with a given order num and all predecessors with lower order
-// nums have a particular integrity tag.
+// a predecessor with a given orderNum and all predecessors with lower
+// orderNums have a particular IntegrityTag.
 .decl predecessorsUpToOrderNumHaveIntegrityTag(
   accessPath: AccessPath, owner: Principal, integTag: IntegrityTag, orderNum: number)
 
 // Used to test whether a particular path has a particular integrity tag.
-// Should be used as close to top-level checks as possible, and not for
-// propagation, to prevent stratification issues.
 .decl mustHaveIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
 
 //-----------------------------------------------------------------------------
@@ -112,8 +110,8 @@ predecessorsUpToOrderNumHaveIntegrityTag(ap, owner, integTag, ordNum + 1) :-
 mustHaveIntegrityTag(ap, owner, integTag) :- hasAppliedIntegrityTag(ap, owner, integTag).
 
 // If all predecessors up to the one with an order number one less than the
-// number of predecessors have the integrity tag and the integrity tag is not
-// removed, then this AccessPath has the IntegrityTag.
+// number of predecessors (ie, all predecessors) have the integrity tag and the
+// integrity tag is not removed, then this AccessPath has the IntegrityTag.
 mustHaveIntegrityTag(ap, owner, integTag) :-
   isAccessPath(ap), isIntegrityTag(integTag), isPrincipal(owner),
   numPredecessors(ap, owner, numPreds),
