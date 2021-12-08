@@ -21,6 +21,8 @@
 #include <vector>
 
 #include "absl/strings/str_split.h"
+#include "absl/strings/string_view.h"
+#include "absl/strings/str_cat.h"
 #include "src/common/testing/gtest.h"
 #include "src/xform_to_datalog/authorization_logic_test_utils.h"
 
@@ -31,7 +33,7 @@ namespace raksha::xform_to_datalog {
 class AuthorizationLogicDatalogFactsTest : public AuthorizationLogicTest {};
 
 TEST_F(AuthorizationLogicDatalogFactsTest, InvokesRustToolAndGeneratesOutput) {
-  for (const std::string &program :
+  for (absl::string_view program :
        {"simple_auth_logic", "empty_auth_logic", "says_owns_tag"}) {
     fs::path test_data_dir = GetTestDataDir();
     auto auth_facts =
@@ -41,7 +43,7 @@ TEST_F(AuthorizationLogicDatalogFactsTest, InvokesRustToolAndGeneratesOutput) {
     std::vector<std::string> actual_datalog =
       absl::StrSplit(auth_facts->ToDatalog(), "\n", absl::SkipEmpty());
     std::vector<std::string> expected_datalog =
-        ReadFileLines(test_data_dir / (program + ".dl"));
+        ReadFileLines(test_data_dir / absl::StrCat(program, ".dl"));
 
     // Need to compare individual lines as the output order is
     // non-deterministic.
