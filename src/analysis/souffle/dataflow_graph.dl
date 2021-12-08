@@ -57,9 +57,25 @@
 // A direct or transitive data flow path.
 .decl path(src: AccessPath, tgt: AccessPath)
 
+// A common way to do "forall" in Datalog is to use !exists. Unfortunately,
+// this imposes a stratification requirement. To allow IntegrityTags to
+// propagate when all predecessors have a particular IntegrityTag, instead give
+// each predecessor an arbitrary predecessor number between 0 and N, where N is
+// the number of predecessors a particular AccessPath has. Track the number of
+// predecessors an AccessPath has in numPredecssors. This allows us to
+// calculate whether all predecessors up to a particular order number have an
+// integrity tag, with the base case of 0 being just "does that particular
+// AccessPath have the IntegrityTag" and the inductive case being "does the nth
+// predecessor have the IntegrityTag and all predecessors up to N-1 have the
+// IntegrityTag". We can then ask if all predecessors up to numPredecessors
+// - 1 have the integrity tag to accomplish forall.
+.decl orderedPredecessors(ap: AccessPath, for: Principal, src: AccessPath, orderNum: number)
+.decl numPredecessors(ap: AccessPath, for: Principal, num: number)
+
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
+
 resolvedEdge(principal, src, tgt) :-
    isPrincipal(principal),
    edge(src, tgt),
@@ -72,5 +88,22 @@ path(from, to) :- resolvedEdge(_, from, intermediate), path(intermediate, to).
 // Symbols used in resolvedEdges are access paths
 isAccessPath(x) :- resolvedEdge(_, x, _).
 isAccessPath(y) :- resolvedEdge(_, _, y).
+
+// The 0th predecessor shall be the predecessor with the smallest src ordinal
+// number.
+orderedPredecessors(ap, for, src, 0) :-
+  resolvedEdge(for, src, ap),
+  ord(src) = min ord(candidate) : { resolvedEdge(for, candidate, ap) }.
+
+// The Nth precessor shall be the precessor with the smallest src ordinal
+// number larger than the N-1th ordinal number.
+orderedPredecessors(ap, for, src, prevOrd + 1) :-
+  orderedPredecessors(ap, for, prevSrc, prevOrd),
+  resolvedEdge(for, src, ap),
+  ord(src) = min ord(candidate) : { resolvedEdge(for, candidate, ap), ord(candidate) > ord(prevSrc) }.
+
+numPredecessors(ap, for, maxOrd + 1) :-
+  orderedPredecessors(ap, for, _, maxOrd),
+  maxOrd = max ordNum : { orderedPredecessors(ap, for, _, ordNum) }.
 
 #endif // SRC_ANALYSIS_SOUFFLE_DATAFLOW_GRAPH_DL_
