@@ -1,0 +1,17 @@
+#include "taint.dl"
+#include "fact_test_helper.dl"
+#include "integrity_tag_prop_helper.dl"
+
+// Create a simple cycle and watch the integrity tag flow along it.
+isAccessPath("a").
+isAccessPath("b").
+isAccessPath("c").
+
+edge("a", "b").
+edge("b", "c").
+edge("c", "a").
+
+hasAppliedIntegrityTag("a", "defaultOwner", "integ1").
+expectHasIntegrityTag("a", "defaultOwner", "integ1").
+expectHasIntegrityTag("b", "defaultOwner", "integ1").
+expectHasIntegrityTag("c", "defaultOwner", "integ1").

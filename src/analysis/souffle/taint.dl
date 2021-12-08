@@ -64,13 +64,13 @@
 // Removes an integrity tag from some path.
 .decl removeIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
 
-// Indicates that a particular tag may lack an integrity tag, which
-// indicates that it should not have an integrity tag.
-.decl lacksIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
+// Given how predecessors are ordered in orderedPredecessors, indicate whether
+// a predecessor with a given orderNum and all predecessors with lower
+// orderNums have a particular IntegrityTag.
+.decl predecessorsUpToOrderNumHaveIntegrityTag(
+  accessPath: AccessPath, owner: Principal, integTag: IntegrityTag, orderNum: number)
 
 // Used to test whether a particular path has a particular integrity tag.
-// Should be used as close to top-level checks as possible, and not for
-// propagation, to prevent stratification issues.
 .decl mustHaveIntegrityTag(accessPath: AccessPath, owner: Principal, integTag: IntegrityTag)
 
 //-----------------------------------------------------------------------------
@@ -96,27 +96,28 @@ mayHaveTag(tgt, owner, tag) :-
 isIntegrityTag(integTag) :- hasAppliedIntegrityTag(_, _, integTag).
 isPrincipal(principal) :- hasAppliedIntegrityTag(_, principal, _).
 
-// Any access point that has no incoming edges and is not directly given an
-// integrity tag lacks that integrity tag, as there is no way for it to
-// propagate to that AccessPath.
-lacksIntegrityTag(ap, owner, integTag) :-
-  isAccessPath(ap), isPrincipal(owner), isIntegrityTag(integTag),
-  !edge(_, ap), !hasAppliedIntegrityTag(ap, owner, integTag).
+predecessorsUpToOrderNumHaveIntegrityTag(ap, owner, integTag, 0) :-
+  orderedPredecessors(ap, owner, pred, 0),
+  mustHaveIntegrityTag(pred, owner, integTag).
 
-// Any point where an integrity tag is removed lacks an integrity tag.
-lacksIntegrityTag(ap, owner, integTag) :- removeIntegrityTag(ap, owner, integTag).
+predecessorsUpToOrderNumHaveIntegrityTag(ap, owner, integTag, ordNum + 1) :-
+  predecessorsUpToOrderNumHaveIntegrityTag(ap, owner, integTag, ordNum),
+  orderedPredecessors(ap, owner, pred, ordNum + 1),
+  mustHaveIntegrityTag(pred, owner, integTag).
 
-// Propagate lack of integrity tag along edges to any destination that did not
-// have an integrity tag directly added.
-lacksIntegrityTag(dst, owner, integTag) :-
-  isAccessPath(src), isAccessPath(dst),
-  edge(src, dst), lacksIntegrityTag(src, owner, integTag),
-  !hasAppliedIntegrityTag(dst, owner, integTag).
+// Any access path that has an IntegrityTag directly applied must have the
+// integrity tag.
+mustHaveIntegrityTag(ap, owner, integTag) :- hasAppliedIntegrityTag(ap, owner, integTag).
 
-// An access path must have an integrity tag if it does not lack the integrity tag.
+// If all predecessors up to the one with an order number one less than the
+// number of predecessors (ie, all predecessors) have the integrity tag and the
+// integrity tag is not removed, then this AccessPath has the IntegrityTag.
 mustHaveIntegrityTag(ap, owner, integTag) :-
   isAccessPath(ap), isIntegrityTag(integTag), isPrincipal(owner),
-  !lacksIntegrityTag(ap, owner, integTag).
+  numPredecessors(ap, owner, numPreds),
+  numPreds > 0,
+  predecessorsUpToOrderNumHaveIntegrityTag(ap, owner, integTag, numPreds - 1),
+  !removeIntegrityTag(ap, owner, integTag).
 
 //-----------------------------------------------------------------------------
 // Universe Populating Rules
