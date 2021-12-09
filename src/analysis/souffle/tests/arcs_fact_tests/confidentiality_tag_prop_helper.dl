@@ -1,0 +1,29 @@
+#include "taint.dl"
+#include "fact_test_helper.dl"
+
+.decl expectMayHaveTag(ap: AccessPath, owner: Principal, tag: Tag)
+
+// Ensure that the expected and actual integrity tag relations are equivalent.
+.decl expectedConfTagNotPresent(ap: AccessPath, owner: Principal, tag: Tag)
+expectedConfTagNotPresent(ap, owner, tag) :-
+  expectMayHaveTag(ap, owner, tag), !mayHaveTag(ap, owner, tag).
+
+.decl unexpectedConfTagPresent(ap: AccessPath, owner: Principal, tag: Tag)
+unexpectedConfTagPresent(ap, owner, tag) :-
+  mayHaveTag(ap, owner, tag), !expectMayHaveTag(ap, owner, tag).
+
+.output expectedConfTagNotPresent(IO=stdout, delimiter=",")
+.output unexpectedConfTagPresent(IO=stdout, delimiter=",")
+
+// These help with debugging if the test fails.
+.output hasTag(IO=stdout, delimiter=",")
+.output mayHaveTag(IO=stdout, delimiter=",")
+
+TEST_CASE("expected_conf_tag_not_present_is_empty") :- count : { expectedConfTagNotPresent(_, _, _) } = 0.
+TEST_CASE("unexpected_conf_tag_present_is_empty") :- count : { unexpectedConfTagPresent(_, _, _) } = 0.
+TEST_CASE("num_expected_conf_matches_num_actual_and_not_zero") :-
+  count_expected = count : { expectMayHaveTag(_, _, _) },
+  count_actual = count : { mayHaveTag(_, _, _) },
+  count_expected != 0,
+  count_actual != 0,
+  count_expected = count_actual.

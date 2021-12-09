@@ -20,10 +20,18 @@
 #include "authorization_logic.dl"
 #include "dataflow_graph.dl"
 #include "tags.dl"
+#include "operations.dl"
 
 //-----------------------------------------------------------------------------
 // Relation Declarations
 //-----------------------------------------------------------------------------
+
+// This fact indicates that, in some unspecified way, accessPath is influenced
+// by influencer. Unlike `resolvedEdge`, which specifically represents an exact
+// assignment, this can represent any dataflow from any operation. Should not
+// be populated directly, is populated indirectly by edges and other
+// operations.
+.decl influencedBy(owner: Principal, accessPath: AccessPath, influencer: AccessPath)
 
 // Indicates that an access path definitely has a tag. Differs from mayHaveTag
 // below in that mayHaveTag indicates only that it is possible that an
@@ -77,6 +85,10 @@
 // Rules
 //-----------------------------------------------------------------------------
 
+// A `tgt` is influenced by any `src` that is an operand to an operation where
+// the result is placed in `tgt`.
+influencedBy(owner, tgt, src) :- operationToOperands(owner, _, tgt, _, src).
+
 ownsAccessPath(principal, path) :- says_ownsAccessPath(principal, principal, path).
 ownsAccessPath(principal, tgt) :-
   resolvedEdge(principal, src, tgt), ownsAccessPath(principal, src).
@@ -90,7 +102,7 @@ hasTag(path, owner, tag) :- says_hasTag(owner, path, owner, tag).
 mayHaveTag(tgt, owner, tag) :- hasTag(tgt, owner, tag).
 
 mayHaveTag(tgt, owner, tag) :-
-    resolvedEdge(owner, src, tgt), mayHaveTag(src, owner, tag), !removeTag(tgt, owner, tag).
+    influencedBy(owner, tgt, src), mayHaveTag(src, owner, tag), !removeTag(tgt, owner, tag).
 
 // Integrity tag rules.
 isIntegrityTag(integTag) :- hasAppliedIntegrityTag(_, _, integTag).

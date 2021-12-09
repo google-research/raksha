@@ -1,0 +1,67 @@
+#include "taint.dl"
+#include "fact_test_helper.dl"
+#include "integrity_tag_prop_helper.dl"
+#include "confidentiality_tag_prop_helper.dl"
+
+// Show that we can handle a simple SQL policy example in which a millisecond
+// timestamp is redacted to a second timestamp by dividing by 1000 and then put
+// into millisecond form by multiplying by 1000.
+
+isAccessPath("a").
+isAccessPath("b").
+isAccessPath("div_result").
+isAccessPath("c").
+isAccessPath("final_result").
+
+operation_2("owner", "/", "div_result", "a", "b").
+operation_2("owner", "*", "final_result", "div_result", "c").
+
+// "a" contains a millsecond-granularity timestamp.
+hasAppliedIntegrityTag("a", "owner", "TimestampMilliseconds").
+// Millisecond granularity timestamps are considered sensitive.
+says_hasTag("owner", "a", "owner", "SensitiveTimestamp").
+// A different confidentiality tag.
+says_hasTag("owner", "a", "owner", "OtherConfTag").
+// Say that "a" has some unrelated confidentiality property.
+// Access path "b" and "c" are both the constant expression 1000.
+hasAppliedIntegrityTag("b", "owner", "Constant_1000").
+hasAppliedIntegrityTag("c", "owner", "Constant_1000").
+
+// An AST-matching policy that says that "TimestampMilliseconds" divided by
+// 1000 are "TimestampSeconds". Also, that this is sufficient for removing the
+// "TimestampMilliseconds" confidentiality tag.
+mustHaveIntegrityTag(result, owner, "TimestampSeconds"),
+removeTag(result, owner, "SensitiveTimestamp") :-
+  operation_2(owner, "/", result, op1, op2),
+  mustHaveIntegrityTag(op1, owner, "TimestampMilliseconds"),
+  mustHaveIntegrityTag(op2, owner, "Constant_1000").
+
+// An AST matching policy that says that "TimestampSeconds", multiplied by
+// 1000, is now a "TimestampMillisecondsRedacted".
+mustHaveIntegrityTag(result, owner, "TimestampMillisecondsRedacted") :-
+  operation_2(owner, "*", result, op1, op2),
+  mustHaveIntegrityTag(op1, owner, "TimestampSeconds"),
+  mustHaveIntegrityTag(op2, owner, "Constant_1000").
+
+// Only "a" should have "SensitiveTimestamp", as the first policy rule should
+// remove it.
+expectMayHaveTag("a", "owner", "SensitiveTimestamp").
+
+// "OtherConfTag", on the other hand, is not removed and should propagate to
+// all operation results.
+expectMayHaveTag("a", "owner", "OtherConfTag").
+expectMayHaveTag("div_result", "owner", "OtherConfTag").
+expectMayHaveTag("final_result", "owner", "OtherConfTag").
+
+// "a" has "TimestampMilliseconds" because it was directly added there.
+expectHasIntegrityTag("a", "owner", "TimestampMilliseconds").
+
+// Similar to "b" and "c" with "Constant_1000".
+expectHasIntegrityTag("b", "owner", "Constant_1000").
+expectHasIntegrityTag("c", "owner", "Constant_1000").
+
+// The first policy rule should apply "TimestampSeconds" to "div_result".
+expectHasIntegrityTag("div_result", "owner", "TimestampSeconds").
+// The second policy rule should apply "TimestampMillisecondsRedacted" to
+// "final_result".
+expectHasIntegrityTag("final_result", "owner", "TimestampMillisecondsRedacted").
