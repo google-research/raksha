@@ -90,17 +90,18 @@ isAccessPath(x) :- resolvedEdge(_, x, _).
 isAccessPath(y) :- resolvedEdge(_, _, y).
 
 // The 0th predecessor shall be the predecessor with the smallest src ordinal
-// number.
-orderedPredecessors(ap, owner, src, 0) :-
-  resolvedEdge(owner, src, ap),
-  ord(src) = min ord(candidate) : { resolvedEdge(owner, candidate, ap) }.
+// number. We get the ordinal number using Souffle's `ord` primitive (see
+// https://souffle-lang.github.io/types#symbol-type ).
+orderedPredecessors(dst, owner, src, 0) :-
+  resolvedEdge(owner, src, dst),
+  ord(src) = min ord(candidate) : { resolvedEdge(owner, candidate, dst) }.
 
 // The Nth precessor shall be the precessor with the smallest src ordinal
 // number larger than the N-1th ordinal number.
-orderedPredecessors(ap, owner, src, prevOrd + 1) :-
-  orderedPredecessors(ap, owner, prevSrc, prevOrd),
+orderedPredecessors(dst, owner, src, prevOrd + 1) :-
+  orderedPredecessors(dst, owner, prevSrc, prevOrd),
   resolvedEdge(owner, src, ap),
-  ord(src) = min ord(candidate) : { resolvedEdge(owner, candidate, ap), ord(candidate) > ord(prevSrc) }.
+  ord(src) = min ord(candidate) : { resolvedEdge(owner, candidate, dst), ord(candidate) > ord(prevSrc) }.
 
 numPredecessors(ap, owner, maxOrd + 1) :-
   orderedPredecessors(ap, owner, _, maxOrd),
