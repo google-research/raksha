@@ -67,6 +67,7 @@ additional_flags = [
 ]
 
 [package.metadata.raze.crates.proc-macro2.'1.0.26']
+gen_buildrs = true
 additional_flags = [
     "--cfg=use_proc_macro",
 ]
