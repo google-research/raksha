@@ -62,11 +62,11 @@ RUN apt-get update && apt-get install -y souffle
 RUN cargo install cargo-chef
 
 # Copy just the auth logic files (so we can build the deps)
-ARG AUTH_LOGIC_DIR=/rust/tools/authorization-logic
-COPY .${AUTH_LOGIC_DIR} ${AUTH_LOGIC_DIR}
+ARG AUTH_LOGIC_DIR=rust/tools/authorization-logic
+COPY ./${AUTH_LOGIC_DIR} /chef_tmp/${AUTH_LOGIC_DIR}
 
 # Use chef to build the recipe of dependencies
-WORKDIR ${AUTH_LOGIC_DIR}
+WORKDIR /chef_tmp/${AUTH_LOGIC_DIR}
 RUN cargo chef prepare --recipe-path recipe.json
 
 # Build just the dependencies for the project
