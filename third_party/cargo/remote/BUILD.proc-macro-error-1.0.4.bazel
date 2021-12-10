@@ -33,26 +33,20 @@ licenses([
 # Unsupported target "build-script-build" with type "custom-build" omitted
 
 rust_library(
-    name = "winapi",
+    name = "proc_macro_error",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "consoleapi",
-        "errhandlingapi",
-        "fileapi",
-        "handleapi",
-        "minwinbase",
-        "minwindef",
-        "ntstatus",
-        "processenv",
-        "std",
-        "winbase",
-        "winerror",
-        "winnt",
+        "default",
+        "syn",
+        "syn-error",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
     data = [],
-    edition = "2015",
+    edition = "2018",
+    proc_macro_deps = [
+        "@raze__proc_macro_error_attr__1_0_4//:proc_macro_error_attr",
+    ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -60,8 +54,17 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.9",
+    version = "1.0.4",
     # buildifier: leave-alone
     deps = [
+        "@raze__proc_macro2__1_0_26//:proc_macro2",
+        "@raze__quote__1_0_9//:quote",
+        "@raze__syn__1_0_69//:syn",
     ],
 )
+
+# Unsupported target "macro-errors" with type "test" omitted
+
+# Unsupported target "ok" with type "test" omitted
+
+# Unsupported target "runtime-errors" with type "test" omitted
