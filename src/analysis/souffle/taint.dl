@@ -26,13 +26,6 @@
 // Relation Declarations
 //-----------------------------------------------------------------------------
 
-// This fact indicates that, in some unspecified way, accessPath is influenced
-// by influencer. Unlike `resolvedEdge`, which specifically represents an exact
-// assignment, this can represent any dataflow from any operation. Should not
-// be populated directly, is populated indirectly by edges and other
-// operations.
-.decl influencedBy(owner: Principal, accessPath: AccessPath, influencer: AccessPath)
-
 // Indicates that an access path definitely has a tag. Differs from mayHaveTag
 // below in that mayHaveTag indicates only that it is possible that an
 // accessPath has a tag.
@@ -85,9 +78,15 @@
 // Rules
 //-----------------------------------------------------------------------------
 
-// A `tgt` is influenced by any `src` that is an operand to an operation where
-// the result is placed in `tgt`.
-influencedBy(owner, tgt, src) :- operationToOperands(owner, _, tgt, _, src).
+// Draw an edge from any operation's operand to its result.
+resolvedEdge(owner, src, tgt) :- operationToOperands(owner, _, tgt, _, src).
+
+// For all operations other than `=`, draw an edge from the special
+// "ArbitraryComputation" `AccessPath` to the result. This prevents default
+// propagation of `IntegrityTag`s through the operation.
+isAccessPath("ArbitraryComputation").
+resolvedEdge(owner, "ArbitraryComputation", tgt) :-
+  operationToOperands(owner, operand, tgt, _, _), operand != "=".
 
 ownsAccessPath(principal, path) :- says_ownsAccessPath(principal, principal, path).
 ownsAccessPath(principal, tgt) :-
@@ -102,7 +101,7 @@ hasTag(path, owner, tag) :- says_hasTag(owner, path, owner, tag).
 mayHaveTag(tgt, owner, tag) :- hasTag(tgt, owner, tag).
 
 mayHaveTag(tgt, owner, tag) :-
-    influencedBy(owner, tgt, src), mayHaveTag(src, owner, tag), !removeTag(tgt, owner, tag).
+    resolvedEdge(owner, src, tgt), mayHaveTag(src, owner, tag), !removeTag(tgt, owner, tag).
 
 // Integrity tag rules.
 isIntegrityTag(integTag) :- hasAppliedIntegrityTag(_, _, integTag).
