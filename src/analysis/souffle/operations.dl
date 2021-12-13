@@ -30,28 +30,28 @@
 // Operations of any arity go in this relation.
 .decl operation(owner: Principal, operator: Operator, result: AccessPath, operandList: OperandList)
 
-// operation_1 and operation_2 are convenience relations for the
+// unaryOperation and binaryOperation are convenience relations for the
 // very-common-cases of unary and binary operators.
-.decl operation_1(owner: Principal, operator: Operator, result: AccessPath, input1: AccessPath)
-.decl operation_2(
+.decl unaryOperation(owner: Principal, operator: Operator, result: AccessPath, input1: AccessPath)
+.decl binaryOperation(
   owner: Principal, operator: Operator, result: AccessPath, input1: AccessPath, input2: AccessPath)
 
-// Assign is syntactic sugar for operation_1(owner, "=", ...).
+// Assign is syntactic sugar for unaryOperation(owner, "=", ...).
 .decl assign(owner: Principal, result: AccessPath, input1: AccessPath)
 
-// Cross-populate operation_1 and operation.
-operation(owner, operator, result, [input1, nil]) :- operation_1(owner, operator, result, input1).
-operation_1(owner, operator, result, input1) :- operation(owner, operator, result, [input1, nil]).
+// Cross-populate unaryOperation and operation.
+operation(owner, operator, result, [input1, nil]) :- unaryOperation(owner, operator, result, input1).
+unaryOperation(owner, operator, result, input1) :- operation(owner, operator, result, [input1, nil]).
 
-// Cross-populate operation_2 and operation.
+// Cross-populate binaryOperation and operation.
 operation(owner, operator, result, [input1, [input2, nil]]) :-
-  operation_2(owner, operator, result, input1, input2).
-operation_2(owner, operator, result, input1, input2) :-
+  binaryOperation(owner, operator, result, input1, input2).
+binaryOperation(owner, operator, result, input1, input2) :-
   operation(owner, operator, result, [input1, [input2, nil]]).
 
 // assign is a '=' operation with a single operand.
-operation_1(owner, "=", result, input1) :- assign(owner, result, input1).
-assign(owner, result, input1) :- operation_1(owner, "=", result, input1).
+unaryOperation(owner, "=", result, input1) :- assign(owner, result, input1).
+assign(owner, result, input1) :- unaryOperation(owner, "=", result, input1).
 
 // resolvedEdges are the same thing as assignments. Cross populate them to each
 // other.

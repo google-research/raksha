@@ -77,25 +77,6 @@
 // Rules
 //-----------------------------------------------------------------------------
 
-// Cross-populate operation_1 and operation.
-operation(owner, operator, result, [input1, nil]) :- operation_1(owner, operator, result, input1).
-operation_1(owner, operator, result, input1) :- operation(owner, operator, result, [input1, nil]).
-
-// Cross-populate operation_2 and operation.
-operation(owner, operator, result, [input1, [input2, nil]]) :-
-  operation_2(owner, operator, result, input1, input2). 
-operation_2(owner, operator, result, input1, input2) :-
-  operation(owner, operator, result, [input1, [input2, nil]]).
-
-// assign is a '=' operation with a single operand.
-operation_1(owner, "=", result, input1) :- assign(owner, result, input1).
-assign(owner, result, input1) :- operation_1(owner, "=", result, input1).
-
-// resolvedEdges are the same thing as assignments. Cross populate them to each
-// other.
-assign(owner, result, input1) :- resolvedEdge(owner, input1, result).
-resolvedEdge(owner, src, dst) :- assign(owner, dst, src).
-
 resolvedEdge(principal, src, tgt) :-
    isPrincipal(principal),
    edge(src, tgt),
