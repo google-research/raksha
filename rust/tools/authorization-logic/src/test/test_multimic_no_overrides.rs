@@ -32,7 +32,7 @@ mod test {
             input_dir: "raksha_examples/multimic-no-overrides",
             output_dir: "raksha_examples/multimic-no-overrides",
             query_expects: vec![
-                ("may_notifierA", true),
+                ("may_notifierA", false),
                 ("may_notifierB", true),
                 ("may_micComputeA", true),
                 ("may_micComputeB", true),

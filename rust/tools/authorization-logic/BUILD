@@ -16,7 +16,8 @@
 #-------------------------------------------------------------------------------
 package(default_visibility = ["//visibility:public"])
 
-load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_library")
+#load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_static_library", "rust_test")
+load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_library", "rust_test")
 
 licenses(["notice"])
 
@@ -102,8 +103,32 @@ filegroup(
 
 rust_library(
     name = "authorization_logic_lib",
-    srcs = [":lib_sources"],
+    srcs = [
+        ":lib_sources",
+        ":test_sources",
+    ],
     crate_type = "staticlib",
+    rustc_flags = [
+        "--cfg=feature=\"bazel_build\"",
+    ],
+    deps = [
+        ":antlr_gen",
+        "//rust/tools/authorization-logic/cargo:antlr_rust",
+        "//rust/tools/authorization-logic/cargo:bincode",
+        "//rust/tools/authorization-logic/cargo:serde",
+        "//rust/tools/authorization-logic/cargo:tink_core",
+        "//rust/tools/authorization-logic/cargo:tink_signature",
+    ],
+)
+
+rust_test(
+    name = "authorization_logic_test",
+    srcs = [
+        "src/main.rs",
+        ":lib_sources",
+        ":test_sources",
+    ],
+    # crate = ":authorization_logic_lib",
     rustc_flags = [
         "--cfg=feature=\"bazel_build\"",
     ],
