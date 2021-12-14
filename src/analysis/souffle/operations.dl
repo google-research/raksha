@@ -54,22 +54,20 @@ unaryOperation(owner, "=", result, input1) :- assign(owner, result, input1).
 assign(owner, result, input1) :- unaryOperation(owner, "=", result, input1).
 
 // Explode the operand lists so that we can extract the heads of each sublist
-// to get a mapping from full operations to their operands.
+// to get a mapping from operations to their operands.
 .decl operationToPartialOperandLists(
-  owner: Principal, operator: Operator, result: AccessPath, operandList: OperandList,
-  partialList: OperandList)
+  owner: Principal, operator: Operator, result: AccessPath, partialList: OperandList)
 
-operationToPartialOperandLists(owner, operator, result, operandList, operandList) :-
+operationToPartialOperandLists(owner, operator, result, operandList) :-
   operation(owner, operator, result, operandList).
-operationToPartialOperandLists(owner, operator, result, operandList, tail) :-
-  operationToPartialOperandLists(owner, operator, result, operandList, [_, tail]).
+operationToPartialOperandLists(owner, operator, result, tail) :-
+  operationToPartialOperandLists(owner, operator, result, [_, tail]).
 
 // Map full operations to operands.
 .decl operationToOperands(
-  owner: Principal, operator: Operator, result: AccessPath,
-  operandList: OperandList, operand: AccessPath)
+  owner: Principal, operator: Operator, result: AccessPath, operand: AccessPath)
 
-operationToOperands(owner, operator, result, operandList, operand) :-
-  operationToPartialOperandLists(owner, operator, result, operandList, [operand, _]).
+operationToOperands(owner, operator, result, operand) :-
+  operationToPartialOperandLists(owner, operator, result, [operand, _]).
 
 #endif // SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_
