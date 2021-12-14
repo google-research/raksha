@@ -53,11 +53,6 @@ binaryOperation(owner, operator, result, input1, input2) :-
 unaryOperation(owner, "=", result, input1) :- assign(owner, result, input1).
 assign(owner, result, input1) :- unaryOperation(owner, "=", result, input1).
 
-// resolvedEdges are the same thing as assignments. Cross populate them to each
-// other.
-assign(owner, result, input1) :- resolvedEdge(owner, input1, result).
-resolvedEdge(owner, src, dst) :- assign(owner, dst, src).
-
 // Explode the operand lists so that we can extract the heads of each sublist
 // to get a mapping from full operations to their operands.
 .decl operationToPartialOperandLists(
