@@ -27,6 +27,7 @@ souffle_cc_library(
     included_dl_scripts = [
         "authorization_logic.dl",
         "dataflow_graph.dl",
+        "operations.dl",
         "tags.dl",
     ],
 )
@@ -35,6 +36,7 @@ exports_files([
     "authorization_logic.dl",
     "dataflow_graph.dl",
     "fact_test_helper.dl",
+    "operations.dl",
     "tags.dl",
     "may_will.dl",
 ])
