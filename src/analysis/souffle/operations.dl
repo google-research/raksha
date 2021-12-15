@@ -1,0 +1,73 @@
+//-----------------------------------------------------------------------------
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+#ifndef SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_
+#define SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_
+
+#include "dataflow_graph.dl"
+
+// The symbol representing the operator. For operations commonly represented by
+// a single character operator (such as +, =, /, *, etc), the operator will be
+// the tsring containing that character.
+.type Operator <: symbol
+
+// A list of operands, used for gathering all operators in a single relation
+// regardless of arity. Useful for rules that apply to any operation.
+.type OperandList = [ operand: AccessPath, next: OperandList ]
+
+// Operations of any arity go in this relation.
+.decl operation(owner: Principal, operator: Operator, result: AccessPath, operandList: OperandList)
+
+// unaryOperation and binaryOperation are convenience relations for the
+// very-common-cases of unary and binary operators.
+.decl unaryOperation(owner: Principal, operator: Operator, result: AccessPath, input1: AccessPath)
+.decl binaryOperation(
+  owner: Principal, operator: Operator, result: AccessPath, input1: AccessPath, input2: AccessPath)
+
+// Assign is syntactic sugar for unaryOperation(owner, "=", ...).
+.decl assign(owner: Principal, result: AccessPath, input1: AccessPath)
+
+// Cross-populate unaryOperation and operation.
+operation(owner, operator, result, [input1, nil]) :- unaryOperation(owner, operator, result, input1).
+unaryOperation(owner, operator, result, input1) :- operation(owner, operator, result, [input1, nil]).
+
+// Cross-populate binaryOperation and operation.
+operation(owner, operator, result, [input1, [input2, nil]]) :-
+  binaryOperation(owner, operator, result, input1, input2).
+binaryOperation(owner, operator, result, input1, input2) :-
+  operation(owner, operator, result, [input1, [input2, nil]]).
+
+// assign is a '=' operation with a single operand.
+unaryOperation(owner, "=", result, input1) :- assign(owner, result, input1).
+assign(owner, result, input1) :- unaryOperation(owner, "=", result, input1).
+
+// Explode the operand lists so that we can extract the heads of each sublist
+// to get a mapping from operations to their operands.
+.decl operationToPartialOperandLists(
+  owner: Principal, operator: Operator, result: AccessPath, partialList: OperandList)
+
+operationToPartialOperandLists(owner, operator, result, operandList) :-
+  operation(owner, operator, result, operandList).
+operationToPartialOperandLists(owner, operator, result, tail) :-
+  operationToPartialOperandLists(owner, operator, result, [_, tail]).
+
+// Map full operations to operands.
+.decl operationToOperands(
+  owner: Principal, operator: Operator, result: AccessPath, operand: AccessPath)
+
+operationToOperands(owner, operator, result, operand) :-
+  operationToPartialOperandLists(owner, operator, result, [operand, _]).
+
+#endif // SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_

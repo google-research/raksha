@@ -19,8 +19,10 @@ exports_files(["fact_test_driver.cc"])
     all_principals_own_all_tags = True,
     included_dl_scripts = [
         ":integrity_tag_prop_helper.dl",
+        ":confidentiality_tag_prop_helper.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
+        "//src/analysis/souffle:operations.dl",
         "//src/analysis/souffle:taint.dl",
         "//src/analysis/souffle:tags.dl",
         "//src/analysis/souffle:fact_test_helper.dl",
@@ -52,6 +54,7 @@ exports_files(["fact_test_driver.cc"])
         ":integrity_tag_prop_helper.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
+        "//src/analysis/souffle:operations.dl",
         "//src/analysis/souffle:taint.dl",
         "//src/analysis/souffle:tags.dl",
         "//src/analysis/souffle:fact_test_helper.dl",
