@@ -12,6 +12,7 @@ tink-signature = "^0.2"
 # bincode and serde are used for signing policy claims
 bincode = "^1.1.4"
 serde = "^1.0"
+structopt = "0.3"
 
 [package.metadata.raze]
 # The path at which to write output files.
@@ -43,6 +44,9 @@ genmode = "Remote"
 [package.metadata.raze.crates.serde.'1.0.26']
 gen_buildrs = true
 
+[package.metadata.raze.crates.structopt.'0.3']
+gen_buildrs = true
+
 [package.metadata.raze.crates.tink-proto.'0.2.0']
 gen_buildrs = true
 build_data_dependencies = ["@com_google_protobuf//:protoc"]
@@ -63,6 +67,7 @@ additional_flags = [
 ]
 
 [package.metadata.raze.crates.proc-macro2.'1.0.26']
+gen_buildrs = true
 additional_flags = [
     "--cfg=use_proc_macro",
 ]
