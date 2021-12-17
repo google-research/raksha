@@ -108,7 +108,7 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
         ],
         linkopts = ["-pthread"],
         deps = [
-            "@souffle//:souffle_lib",
+            "@souffle//:souffle_include_lib",
             souffle_dl_cpp_target,
         ],
     )

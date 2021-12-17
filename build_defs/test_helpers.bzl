@@ -79,6 +79,6 @@ def extracted_datalog_string_test(
         linkopts = ["-pthread"],
         deps = [
             name + "_souffle_lib",
-            "@souffle//:souffle_lib",
+            "@souffle//:souffle_include_lib",
         ],
     )

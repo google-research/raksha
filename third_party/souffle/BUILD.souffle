@@ -93,6 +93,21 @@ cc_library(
     ],
 )
 
+cc_library(
+  name = "souffle_include_lib",
+  hdrs = glob(["src/**/*.h"]) + [":parser_gen"],
+  copts = [
+      "-std=c++17",
+      # We don't want warnings in 3rd party packages to obscure issues in our
+      # own code that we are more likely to need to fix.
+      "-w",
+  ],
+  includes = [
+      "src",
+      "src/include",
+  ],
+)
+
 cc_binary(
     name = "souffle",
     srcs = ["src/main.cpp"],
