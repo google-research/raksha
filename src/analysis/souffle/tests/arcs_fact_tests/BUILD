@@ -41,7 +41,7 @@ exports_files(["fact_test_driver.cc"])
     ],
     linkopts = ["-pthread"],
     deps = [
-        "@souffle//:souffle_lib",
+        "@souffle//:souffle_include_lib",
         dl_script.replace(".dl", "_souffle_cc_library"),
     ],
 ) for dl_script in ALL_DL_TEST_FILES]
@@ -74,7 +74,7 @@ exports_files(["fact_test_driver.cc"])
     ],
     linkopts = ["-pthread"],
     deps = [
-        "@souffle//:souffle_lib",
+        "@souffle//:souffle_include_lib",
         dl_script.replace(".dl", "_no_owners_souffle_cc_library"),
     ],
 ) for dl_script in TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES]

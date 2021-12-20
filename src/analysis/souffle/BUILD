@@ -17,7 +17,7 @@ cc_test(
     deps = [
         ":taint_dl",
         "//src/common/testing:gtest",
-        "@souffle//:souffle_lib",
+        "@souffle//:souffle_include_lib",
     ],
 )
 
