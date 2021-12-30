@@ -17,7 +17,7 @@ cc_test(
     deps = [
         ":taint_dl",
         "//src/common/testing:gtest",
-        "@souffle//:souffle_lib",
+        "@souffle//:souffle_include_lib",
     ],
 )
 
@@ -27,6 +27,7 @@ souffle_cc_library(
     included_dl_scripts = [
         "authorization_logic.dl",
         "dataflow_graph.dl",
+        "operations.dl",
         "tags.dl",
     ],
 )
@@ -35,6 +36,7 @@ exports_files([
     "authorization_logic.dl",
     "dataflow_graph.dl",
     "fact_test_helper.dl",
+    "operations.dl",
     "tags.dl",
     "may_will.dl",
 ])

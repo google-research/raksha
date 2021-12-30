@@ -33,26 +33,14 @@ licenses([
 # Unsupported target "build-script-build" with type "custom-build" omitted
 
 rust_library(
-    name = "winapi",
+    name = "proc_macro_error_attr",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "consoleapi",
-        "errhandlingapi",
-        "fileapi",
-        "handleapi",
-        "minwinbase",
-        "minwindef",
-        "ntstatus",
-        "processenv",
-        "std",
-        "winbase",
-        "winerror",
-        "winnt",
     ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
+    crate_type = "proc-macro",
     data = [],
-    edition = "2015",
+    edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -60,8 +48,10 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.9",
+    version = "1.0.4",
     # buildifier: leave-alone
     deps = [
+        "@raze__proc_macro2__1_0_26//:proc_macro2",
+        "@raze__quote__1_0_9//:quote",
     ],
 )

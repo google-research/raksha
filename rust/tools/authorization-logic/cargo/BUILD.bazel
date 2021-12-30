@@ -40,6 +40,15 @@ alias(
 )
 
 alias(
+    name = "structopt",
+    actual = "@raze__structopt__0_3_25//:structopt",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "tink_core",
     actual = "@raze__tink_core__0_2_0//:tink_core",
     tags = [

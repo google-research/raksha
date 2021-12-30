@@ -90,6 +90,7 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
         included_dl_scripts = [
             "//src/analysis/souffle:authorization_logic.dl",
             "//src/analysis/souffle:dataflow_graph.dl",
+            "//src/analysis/souffle:operations.dl",
             "//src/analysis/souffle:taint.dl",
             "//src/analysis/souffle:tags.dl",
             "//src/analysis/souffle:may_will.dl"
@@ -107,7 +108,7 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
         ],
         linkopts = ["-pthread"],
         deps = [
-            "@souffle//:souffle_lib",
+            "@souffle//:souffle_include_lib",
             souffle_dl_cpp_target,
         ],
     )
