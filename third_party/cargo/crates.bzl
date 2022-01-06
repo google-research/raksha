@@ -13,12 +13,11 @@ def raze_fetch_remote_crates():
     """This function defines a collection of repos and should be called in a WORKSPACE file"""
     maybe(
         http_archive,
-        name = "raze__ansi_term__0_11_0",
-        url = "https://crates.io/api/v1/crates/ansi_term/0.11.0/download",
+        name = "raze__ansi_term__0_12_1",
+        url = "https://crates.io/api/v1/crates/ansi_term/0.12.1/download",
         type = "tar.gz",
-        sha256 = "ee49baf6cb617b853aa8d93bf420db2383fab46d314482ca2803b40d5fde979b",
-        strip_prefix = "ansi_term-0.11.0",
-        build_file = Label("//third_party/cargo/remote:BUILD.ansi_term-0.11.0.bazel"),
+        strip_prefix = "ansi_term-0.12.1",
+        build_file = Label("//third_party/cargo/remote:BUILD.ansi_term-0.12.1.bazel"),
     )
 
     maybe(
@@ -183,12 +182,11 @@ def raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "raze__clap__2_33_3",
-        url = "https://crates.io/api/v1/crates/clap/2.33.3/download",
+        name = "raze__clap__2_34_0",
+        url = "https://crates.io/api/v1/crates/clap/2.34.0/download",
         type = "tar.gz",
-        sha256 = "37e58ac78573c40708d45522f0d80fa2f01cc4f9b4e2bf749807255454312002",
-        strip_prefix = "clap-2.33.3",
-        build_file = Label("//third_party/cargo/remote:BUILD.clap-2.33.3.bazel"),
+        strip_prefix = "clap-2.34.0",
+        build_file = Label("//third_party/cargo/remote:BUILD.clap-2.34.0.bazel"),
     )
 
     maybe(
@@ -903,22 +901,20 @@ def raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "raze__structopt__0_3_23",
-        url = "https://crates.io/api/v1/crates/structopt/0.3.23/download",
+        name = "raze__structopt__0_3_25",
+        url = "https://crates.io/api/v1/crates/structopt/0.3.25/download",
         type = "tar.gz",
-        sha256 = "bf9d950ef167e25e0bdb073cf1d68e9ad2795ac826f2f3f59647817cf23c0bfa",
-        strip_prefix = "structopt-0.3.23",
-        build_file = Label("//third_party/cargo/remote:BUILD.structopt-0.3.23.bazel"),
+        strip_prefix = "structopt-0.3.25",
+        build_file = Label("//third_party/cargo/remote:BUILD.structopt-0.3.25.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "raze__structopt_derive__0_4_16",
-        url = "https://crates.io/api/v1/crates/structopt-derive/0.4.16/download",
+        name = "raze__structopt_derive__0_4_18",
+        url = "https://crates.io/api/v1/crates/structopt-derive/0.4.18/download",
         type = "tar.gz",
-        sha256 = "134d838a2c9943ac3125cf6df165eda53493451b719f3255b2a26b85f772d0ba",
-        strip_prefix = "structopt-derive-0.4.16",
-        build_file = Label("//third_party/cargo/remote:BUILD.structopt-derive-0.4.16.bazel"),
+        strip_prefix = "structopt-derive-0.4.18",
+        build_file = Label("//third_party/cargo/remote:BUILD.structopt-derive-0.4.18.bazel"),
     )
 
     maybe(

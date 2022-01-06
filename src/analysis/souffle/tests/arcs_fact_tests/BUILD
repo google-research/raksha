@@ -19,8 +19,10 @@ exports_files(["fact_test_driver.cc"])
     all_principals_own_all_tags = True,
     included_dl_scripts = [
         ":integrity_tag_prop_helper.dl",
+        ":confidentiality_tag_prop_helper.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
+        "//src/analysis/souffle:operations.dl",
         "//src/analysis/souffle:taint.dl",
         "//src/analysis/souffle:tags.dl",
         "//src/analysis/souffle:fact_test_helper.dl",
@@ -39,7 +41,7 @@ exports_files(["fact_test_driver.cc"])
     ],
     linkopts = ["-pthread"],
     deps = [
-        "@souffle//:souffle_lib",
+        "@souffle//:souffle_include_lib",
         dl_script.replace(".dl", "_souffle_cc_library"),
     ],
 ) for dl_script in ALL_DL_TEST_FILES]
@@ -52,6 +54,7 @@ exports_files(["fact_test_driver.cc"])
         ":integrity_tag_prop_helper.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
+        "//src/analysis/souffle:operations.dl",
         "//src/analysis/souffle:taint.dl",
         "//src/analysis/souffle:tags.dl",
         "//src/analysis/souffle:fact_test_helper.dl",
@@ -71,7 +74,7 @@ exports_files(["fact_test_driver.cc"])
     ],
     linkopts = ["-pthread"],
     deps = [
-        "@souffle//:souffle_lib",
+        "@souffle//:souffle_include_lib",
         dl_script.replace(".dl", "_no_owners_souffle_cc_library"),
     ],
 ) for dl_script in TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES]

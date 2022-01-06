@@ -20,6 +20,7 @@
 #include "authorization_logic.dl"
 #include "dataflow_graph.dl"
 #include "tags.dl"
+#include "operations.dl"
 
 //-----------------------------------------------------------------------------
 // Relation Declarations
@@ -76,6 +77,16 @@
 //-----------------------------------------------------------------------------
 // Rules
 //-----------------------------------------------------------------------------
+
+// Draw an edge from any operation's operand to its result.
+resolvedEdge(owner, src, tgt) :- operationToOperands(owner, _, tgt, src).
+
+// For all operations other than `=`, draw an edge from the special
+// "ArbitraryComputation" `AccessPath` to the result. This prevents default
+// propagation of `IntegrityTag`s through the operation.
+isAccessPath("ArbitraryComputation").
+resolvedEdge(owner, "ArbitraryComputation", tgt) :-
+  operationToOperands(owner, operand, tgt, _), operand != "=".
 
 ownsAccessPath(principal, path) :- says_ownsAccessPath(principal, principal, path).
 ownsAccessPath(principal, tgt) :-

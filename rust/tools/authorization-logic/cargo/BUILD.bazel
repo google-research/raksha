@@ -41,7 +41,7 @@ alias(
 
 alias(
     name = "structopt",
-    actual = "@raze__structopt__0_3_23//:structopt",
+    actual = "@raze__structopt__0_3_25//:structopt",
     tags = [
         "cargo-raze",
         "manual",

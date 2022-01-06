@@ -80,7 +80,7 @@ def souffle_cc_library(
         defines = [
             "__EMBEDDED_SOUFFLE__",
         ],
-        deps = ["@souffle//:souffle_lib"],
+        deps = ["@souffle//:souffle_include_lib"],
         alwayslink = True,
         visibility = visibility,
     )
