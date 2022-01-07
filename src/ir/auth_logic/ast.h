@@ -37,7 +37,7 @@ class Principal {
 // Used to represent whether a predicate is negated or not
 enum Sign { kNegated, kPositive };
 
-// Predicate corresponds to a predicate in of the form 
+// Predicate corresponds to a predicate of the form 
 // <pred_name>(arg_1, ..., arg_n), and it may or may not be negated
 class Predicate {
  public:
@@ -50,7 +50,7 @@ class Predicate {
 
   const std::string& name() const { return name_; }
   const std::vector<std::string>& args() const { return args_; }
-  Sign sign() { return sign_; }
+  const Sign sign() const { return sign_; }
 
  private:
   std::string name_;
@@ -123,7 +123,7 @@ class CanSay {
 };
 
 // Fact corresponds to either a base fact or a an expression of the form 
-// <principal> canSay 
+// <principal> canSay <Fact>
 class Fact {
  public:
   explicit Fact(BaseFact base_fact) : value_(std::move(base_fact)) {}
@@ -161,7 +161,7 @@ class Assertion {
   std::variant<Fact, ConditionalAssertion> value_;
 };
 
-// SaysAssertion prepends an assertion with <principal> says"
+// SaysAssertion prepends an assertion with "<principal> says"
 class SaysAssertion {
  public:
   explicit SaysAssertion(Principal principal, std::vector<Assertion> assertions)

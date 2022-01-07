@@ -20,7 +20,7 @@ package(default_visibility = ["//src:__subpackages__"])
 cc_library(
     name = "ast",
     hdrs = [
-        "ast.h",
+        "ast.h", "datalog_ir.h", "lowering_ast_datalog.h"
     ],
     visibility = ["//test:__pkg__"]
 )
