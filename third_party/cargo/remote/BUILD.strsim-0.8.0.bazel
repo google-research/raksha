@@ -25,29 +25,17 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # MIT from expression "MIT OR Apache-2.0"
+    "notice",  # MIT from expression "MIT"
 ])
 
 # Generated Targets
 
-# Unsupported target "build-script-build" with type "custom-build" omitted
+# Unsupported target "benches" with type "bench" omitted
 
 rust_library(
-    name = "winapi",
+    name = "strsim",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "consoleapi",
-        "errhandlingapi",
-        "fileapi",
-        "handleapi",
-        "minwinbase",
-        "minwindef",
-        "ntstatus",
-        "processenv",
-        "std",
-        "winbase",
-        "winerror",
-        "winnt",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -60,8 +48,10 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.9",
+    version = "0.8.0",
     # buildifier: leave-alone
     deps = [
     ],
 )
+
+# Unsupported target "lib" with type "test" omitted

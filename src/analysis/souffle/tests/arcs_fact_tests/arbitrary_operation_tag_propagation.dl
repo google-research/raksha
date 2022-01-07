@@ -1,0 +1,43 @@
+#include "taint.dl"
+#include "fact_test_helper.dl"
+#include "integrity_tag_prop_helper.dl"
+#include "confidentiality_tag_prop_helper.dl"
+
+isAccessPath("result").
+isAccessPath("in1").
+isAccessPath("in2").
+isAccessPath("in3").
+isAccessPath("in4").
+
+// Create some arbitrary operation that the analysis has never seen before.
+operation("owner", "???", "result", ["in1", ["in2", ["in3", ["in4", nil]]]]).
+
+// Because we have a general rule that causes inputs to operations to influence
+// the output, show that we can put a tag on any input and have it show up on
+// the output.
+says_hasTag("owner", "in1", "owner", "tag1").
+says_hasTag("owner", "in2", "owner", "tag2").
+says_hasTag("owner", "in3", "owner", "tag3").
+says_hasTag("owner", "in4", "owner", "tag4").
+
+expectMayHaveTag("in1", "owner", "tag1").
+expectMayHaveTag("result", "owner", "tag1").
+expectMayHaveTag("in2", "owner", "tag2").
+expectMayHaveTag("result", "owner", "tag2").
+expectMayHaveTag("in3", "owner", "tag3").
+expectMayHaveTag("result", "owner", "tag3").
+expectMayHaveTag("in4", "owner", "tag4").
+expectMayHaveTag("result", "owner", "tag4").
+
+// operations other than = do not have a default propagation rule for integrity
+// tags. Show that we can annotate an integrity tag onto every input and it
+// will not show up in the result.
+hasAppliedIntegrityTag("in1", "owner", "integ").
+hasAppliedIntegrityTag("in2", "owner", "integ").
+hasAppliedIntegrityTag("in3", "owner", "integ").
+hasAppliedIntegrityTag("in4", "owner", "integ").
+
+expectHasIntegrityTag("in1", "owner", "integ").
+expectHasIntegrityTag("in2", "owner", "integ").
+expectHasIntegrityTag("in3", "owner", "integ").
+expectHasIntegrityTag("in4", "owner", "integ").

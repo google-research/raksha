@@ -60,6 +60,7 @@ def extracted_datalog_string_test(
         included_dl_scripts = [
             "//src/analysis/souffle:authorization_logic.dl",
             "//src/analysis/souffle:dataflow_graph.dl",
+            "//src/analysis/souffle:operations.dl",
             "//src/analysis/souffle:taint.dl",
             "//src/analysis/souffle:tags.dl",
             "//src/analysis/souffle:fact_test_helper.dl",
@@ -78,6 +79,6 @@ def extracted_datalog_string_test(
         linkopts = ["-pthread"],
         deps = [
             name + "_souffle_lib",
-            "@souffle//:souffle_lib",
+            "@souffle//:souffle_include_lib",
         ],
     )
