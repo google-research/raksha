@@ -49,3 +49,25 @@ RUN rustup toolchain install ${RUST_VERSION} \
 # Souffle is needed to run the tests in authorization logic
 RUN curl -s https://packagecloud.io/install/repositories/souffle-lang/souffle/script.deb.sh | bash
 RUN apt-get update && apt-get install -y souffle
+
+### Prefetch Cargo Depdendencies
+# These docker command leverage cargo-chef to prefetch rust dependencies
+# as described
+# [here](https://www.lpalmieri.com/posts/fast-rust-docker-builds/)
+
+# Install chef.
+# It might also be possible to leverage a docker image
+# that already has chef with the commented out ocmmand
+# FROM lukemathwalker/cargo-chef:latest-rust-1.53.0 as chef
+RUN cargo install cargo-chef
+
+# Copy just the auth logic files (so we can build the deps)
+ARG AUTH_LOGIC_DIR=rust/tools/authorization-logic
+COPY ./${AUTH_LOGIC_DIR} /chef_tmp/${AUTH_LOGIC_DIR}
+
+# Use chef to build the recipe of dependencies
+WORKDIR /chef_tmp/${AUTH_LOGIC_DIR}
+RUN cargo chef prepare --recipe-path recipe.json
+
+# Build just the dependencies for the project
+RUN cargo chef cook --recipe-path recipe.json
