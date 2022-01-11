@@ -86,24 +86,24 @@ class CanActAs {
    Principal right_principal_;
 };
 
-// BaseFact corresponds to a base-case fact that cannot recursively include other 
-// facts through "canSay". "Fact" includes the recursive case. It is necessary 
-// that BaseFact is a separate class from Fact because the RHS of conditional 
-// assertions can only contain BaseFacts.
+// BaseFact corresponds to a base-case fact that cannot recursively include
+// other facts through "canSay". "Fact" includes the recursive case. It is
+// necessary that BaseFact is a separate class from Fact because the RHS of
+// conditional assertions can only contain BaseFacts.
 // Base facts have three forms:
 //  - A predicate
 //  - An attribute
 //  - A canActAs expression
-// The particular choice of form is represented with a variant which is 
-// encapsulated.
+using BaseFactVariantType = std::variant<Predicate, Attribute, CanActAs>;
 class BaseFact {
  public:
   explicit BaseFact(Predicate predicate) : value_(std::move(predicate)) {};
   explicit BaseFact(Attribute attribute) : value_(std::move(attribute)) {};
   explicit BaseFact(CanActAs canActAs) : value_(std::move(canActAs)) {};
+  const BaseFactVariantType& GetValue() const { return value_; }
 
  private:
-  std::variant<Predicate, Attribute, CanActAs> value_;
+  BaseFactVariantType value_;
 };
 
 // CanSay and Fact are forward-declared because they are mutually recursive.
@@ -151,14 +151,16 @@ class ConditionalAssertion {
 // Assertions can have two forms:
 //  - Facts
 //  - Conditional assertions
+using AssertionVariantType = std::variant<Fact, ConditionalAssertion>;
 class Assertion {
  public:
   explicit Assertion(Fact fact) : value_(std::move(fact)) {}
   explicit Assertion(ConditionalAssertion conditional_assertion)
     : value_(std::move(conditional_assertion)) {}
+  const AssertionVariantType& GetValue() const { return value_; }
 
  private:
-  std::variant<Fact, ConditionalAssertion> value_;
+  AssertionVariantType value_;
 };
 
 // SaysAssertion prepends an assertion with "<principal> says"

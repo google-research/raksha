@@ -22,6 +22,9 @@ cc_library(
     hdrs = [
         "ast.h", "datalog_ir.h", "lowering_ast_datalog.h"
     ],
+    deps = [
+      "//src/utils:overloaded"
+    ],
     visibility = ["//test:__pkg__"]
 )
 

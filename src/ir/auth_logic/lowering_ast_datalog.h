@@ -20,6 +20,8 @@
 #define SRC_IR_AUTH_LOGIC_LOWERING_AST_DATALOG_H_
 
 #include "ast.h"
+#include <utility>  //included for std::pair
+#include "src/utils/overloaded.h"
 
 namespace raksha::ir::auth_logic {
 
@@ -79,9 +81,18 @@ namespace raksha::ir::auth_logic {
           attribute.predicate());
     }
 
-    // This produces an extra rule that needs to be generated during the 
-    // translation of "speaker says attribute" into DLIR
-    DLIRCondAssertion SpokenAttributeToDLIR(const Principal& speaker,
+    // This is the translation for the attribute case of a base fact.
+    // This returns two outputs as a pair:
+    // - A predicate, this is the main result of the translation
+    // - An additional rule that allows attributes to be passed with canActAs
+    // This takes both a speaker and the actual attribute as argument because 
+    // the speaker is needed to generate the additional rule. Note all base 
+    // facts have a speaker either explicitly or implicitly:
+    // - If it appears on the LHS of an assertion, it explicitly has a speaker
+    // - If it appears on the RHS of an assertion, it behaves semantically
+    // like has the same speaker as the head of the assertion.
+    DLIRAssertion
+    SpokenAttributeToDLIR(const Principal& speaker,
         const Attribute& attribute) {
       Predicate main_predicate = AttributeToDLIR(attribute);
 
@@ -112,9 +123,74 @@ namespace raksha::ir::auth_logic {
       // This is the full generated rule:
       // `speaker says Y PredX :-
       //    speaker says Y canActAs X, speaker says X PredX`
-      return DLIRCondAssertion(generated_lhs,
-          {speaker_says_y_can_act_as_x, speaker_says_x_pred});
+      return DLIRAssertion(DLIRCondAssertion(
+            generated_lhs, 
+            {speaker_says_y_can_act_as_x, speaker_says_x_pred}));
     }
+
+    // The second return value represents 0 or 1 newly generated rules, so an 
+    // option might seem more intuitive. However, the interface that consumes 
+    // this needs to construct a vector anyway.
+    std::pair<Predicate, DLIRAssertion>
+    BaseFactToDLIR(const Principal& speaker, const BaseFact& base_fact) {
+      return std::visit(raksha::utils::overloaded {
+          [](Predicate predicate) {
+            Predicate dummy_pred = Predicate("pred_name", {"arg1"},
+                kPositive);
+            DLIRAssertion dummy_assertion = DLIRAssertion(
+                DLIRCondAssertion(dummy_pred, {dummy_pred}));
+            return std::make_pair(predicate, dummy_assertion); 
+          },
+          [this, &speaker](Attribute attribute) {
+            return std::make_pair(AttributeToDLIR(attribute),
+                SpokenAttributeToDLIR(speaker, attribute));
+          },
+          [](CanActAs canActAs) {
+            Predicate dummy_pred = Predicate("pred_name", {"arg1"},
+                kPositive);
+            DLIRAssertion dummy_assertion = DLIRAssertion(
+                DLIRCondAssertion(dummy_pred, {dummy_pred}));
+            return std::make_pair(dummy_pred, dummy_assertion);
+          }
+        }, base_fact.GetValue());
+    }
+
+    // This can result in 0 or more new rules because the translation of
+    // nested canSayFacts might result in more than 1 rule.
+    std::pair<Predicate, std::vector<DLIRAssertion>>
+    FactToDLIR(const Principal& speaker, const Fact& fact) {
+      // TODO fill in real implementation. This is just a stub.
+      Predicate dummy_pred = Predicate("pred_name", {"arg1"},
+          kPositive);
+      DLIRAssertion dummy_assertion = DLIRAssertion(
+          DLIRCondAssertion(dummy_pred, {dummy_pred}));
+      // This vector needed to be declared before the call to make_pair because
+      // template argument inference could not figure it out otherwise.
+      std::vector<DLIRAssertion> dummy_assertions = {dummy_assertion};
+      return std::make_pair(dummy_pred, dummy_assertions); 
+    }
+
+
+    // WIP need to figure out error message about the visitor being
+    // non-exhaustive even though it looks exhaustive AFAICT
+    // std::vector<DLIRAssertion>
+    // SingleSaysAssertionToDLIR(const Principal& speaker,
+    //     const Assertion& assertion) {
+    //   return std::visit(raksha::utils::overloaded {
+    //       [this, &speaker](Fact fact) {
+    //         auto[fact_predicate, generated_rules] = FactToDLIR(
+    //             speaker, fact);
+    //         DLIRAssertion main_assertion = DLIRAssertion(
+    //               PushPrin(std::string("says_"), speaker, fact_predicate));
+    //         generated_rules.push_back(main_assertion);
+    //         return generated_rules;
+    //       },
+    //       [](ConditionalAssertion conditional_assertion) {
+    //         std::vector<DLIRAssertion> dummy_ret = {};
+    //         return dummy_ret;
+    //       }
+    //     }, assertion.GetValue());
+    // }
 
     DLIRProgram* ProgToDLIR(const Program& program) {
       // TODO / WIP
