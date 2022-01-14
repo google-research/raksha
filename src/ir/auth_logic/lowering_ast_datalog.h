@@ -167,24 +167,34 @@ class LoweringToDatalogPass {
 
   // WIP need to figure out error message about the visitor being
   // non-exhaustive even though it looks exhaustive AFAICT
-  // std::vector<DLIRAssertion>
-  // SingleSaysAssertionToDLIR(const Principal& speaker,
-  //     const Assertion& assertion) {
-  //   return std::visit(raksha::utils::overloaded {
-  //       [this, &speaker](Fact fact) {
-  //         auto[fact_predicate, generated_rules] = FactToDLIR(
-  //             speaker, fact);
-  //         DLIRAssertion main_assertion = DLIRAssertion(
-  //               PushPrin(std::string("says_"), speaker, fact_predicate));
-  //         generated_rules.push_back(main_assertion);
-  //         return generated_rules;
-  //       },
-  //       [](ConditionalAssertion conditional_assertion) {
-  //         std::vector<DLIRAssertion> dummy_ret = {};
-  //         return dummy_ret;
-  //       }
-  //     }, assertion.GetValue());
-  // }
+  std::vector<DLIRAssertion>
+  SingleSaysAssertionToDLIR(Principal speaker,
+      Assertion assertion) {
+    std::vector<DLIRAssertion> ret = std::visit(
+        raksha::utils::overloaded{
+          [](auto arg) {
+            std::vector<DLIRAssertion> ret = {};
+            return ret;
+          }
+        },
+        assertion.GetValue());
+    return ret;
+    // // ALso tried this, which does not work either:
+    // return std::visit(raksha::utils::overloaded {
+    //     // [this, &speaker](Fact fact) {
+    //     //   auto[fact_predicate, generated_rules] = FactToDLIR(
+    //     //       speaker, fact);
+    //     //   DLIRAssertion main_assertion = DLIRAssertion(
+    //     //         PushPrin(std::string("says_"), speaker, fact_predicate));
+    //     //   generated_rules.push_back(main_assertion);
+    //     //   return generated_rules;
+    //     // },
+    //     // [](ConditionalAssertion conditional_assertion) {
+    //     //   std::vector<DLIRAssertion> dummy_ret = {};
+    //     //   return dummy_ret;
+    //     // }
+    //   }, assertion.GetValue());
+  }
 
   // TODO make this value instead of const reference
   // when doing so no longer causes an error
