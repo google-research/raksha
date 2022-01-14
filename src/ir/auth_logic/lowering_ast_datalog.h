@@ -37,7 +37,7 @@ namespace raksha::ir::auth_logic {
 // implementation detail.)
 class LoweringToDatalogPass {
  public:
-  static DLIRProgram Lower(const Program& auth_logic_program) {
+  static DLIRProgram Lower(Program auth_logic_program) {
     return LoweringToDatalogPass().ProgToDLIR(auth_logic_program);
   }
 
@@ -65,12 +65,12 @@ class LoweringToDatalogPass {
     return Predicate(new_name, new_args, sign_copy);
   }
 
-  Predicate PushPrin(std::string modifier, const Principal& principal,
+  Predicate PushPrin(std::string modifier, Principal principal,
                      Predicate predicate) {
     return PushOntoPred(modifier, {principal.name()}, predicate);
   }
 
-  Predicate AttributeToDLIR(const Attribute& attribute) {
+  Predicate AttributeToDLIR(Attribute attribute) {
     // If attribute is `X pred(args...)` the following predicate is
     // `pred(X, args...)`
     return PushPrin(std::string(""), attribute.principal(),
@@ -87,8 +87,8 @@ class LoweringToDatalogPass {
   // - If it appears on the LHS of an assertion, it explicitly has a speaker
   // - If it appears on the RHS of an assertion, it behaves semantically
   // like has the same speaker as the head of the assertion.
-  DLIRAssertion SpokenAttributeToDLIR(const Principal& speaker,
-                                      const Attribute& attribute) {
+  DLIRAssertion SpokenAttributeToDLIR(Principal speaker,
+                                      Attribute attribute) {
     Predicate main_predicate = AttributeToDLIR(attribute);
 
     // Attributes interact with "canActAs" because if "Y canActAs X"
@@ -127,7 +127,7 @@ class LoweringToDatalogPass {
   // option might seem more intuitive. However, the interface that consumes
   // this needs to construct a vector anyway.
   std::pair<Predicate, DLIRAssertion> BaseFactToDLIR(
-      const Principal& speaker, const BaseFact& base_fact) {
+      Principal speaker, BaseFact base_fact) {
     return std::visit(
         raksha::utils::overloaded{
             [](Predicate predicate) {
@@ -154,7 +154,7 @@ class LoweringToDatalogPass {
   // This can result in 0 or more new rules because the translation of
   // nested canSayFacts might result in more than 1 rule.
   std::pair<Predicate, std::vector<DLIRAssertion>> FactToDLIR(
-      const Principal& speaker, const Fact& fact) {
+      Principal speaker, Fact fact) {
     // TODO fill in real implementation. This is just a stub.
     Predicate dummy_pred = Predicate("pred_name", {"arg1"}, kPositive);
     DLIRAssertion dummy_assertion =
@@ -186,6 +186,8 @@ class LoweringToDatalogPass {
   //     }, assertion.GetValue());
   // }
 
+  // TODO make this value instead of const reference
+  // when doing so no longer causes an error
   DLIRProgram ProgToDLIR(const Program& program) {
     // TODO / WIP
     return DLIRProgram({}, {});
