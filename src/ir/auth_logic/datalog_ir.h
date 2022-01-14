@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Raksha Authors
+ * Copyright 2022 The Raksha Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,54 +14,53 @@
  * limitations under the License.
  */
 
-//! This file contains the datalog IR (DLIR) which makes the translation from
-//! this authorization logic into datalog simpler.
+// This file contains the datalog IR (DLIR) which makes the translation from
+// this authorization logic into datalog simpler.
 #ifndef SRC_IR_AUTH_LOGIC_DATALOG_IR_H_
 #define SRC_IR_AUTH_LOGIC_DATALOG_IR_H_
 
 #include <vector>
-#include "ast.h"
+
+#include "src/ir/auth_logic/ast.h"
 
 namespace raksha::ir::auth_logic {
 
 // A conditional datalog assertion with a left hand side and a right hand
 // side.
 class DLIRCondAssertion {
-  public:
-    explicit DLIRCondAssertion(Predicate lhs,
-        std::vector<Predicate> rhs)
+ public:
+  explicit DLIRCondAssertion(Predicate lhs, std::vector<Predicate> rhs)
       : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
 
-  private:
-    Predicate lhs_;
-    std::vector<Predicate> rhs_;
+ private:
+  Predicate lhs_;
+  std::vector<Predicate> rhs_;
 };
 
 // A Datalog IR assertion is either:
 //  - an unconditional fact which is just a predicate
 //  - a conditional assertion
 class DLIRAssertion {
-  public:
-    explicit DLIRAssertion(Predicate predicate)
-      : value_(std::move(predicate)) {}
-    explicit DLIRAssertion(DLIRCondAssertion condAssertion)
+ public:
+  explicit DLIRAssertion(Predicate predicate) : value_(std::move(predicate)) {}
+  explicit DLIRAssertion(DLIRCondAssertion condAssertion)
       : value_(condAssertion) {}
 
-  private:
-    std::variant<Predicate, DLIRCondAssertion> value_;
+ private:
+  std::variant<Predicate, DLIRCondAssertion> value_;
 };
 
 class DLIRProgram {
-  public:
-    DLIRProgram(std::vector<DLIRAssertion> assertions,
-        std::vector<std::string> outputs)
-      : assertions_(assertions), outputs_(outputs) {}
+ public:
+  DLIRProgram(std::vector<DLIRAssertion> assertions,
+              std::vector<std::string> outputs)
+      : assertions_(std::move(assertions)), outputs_(std::move(outputs)) {}
 
-  private:
-    std::vector<DLIRAssertion> assertions_;
-    std::vector<std::string> outputs_;
+ private:
+  std::vector<DLIRAssertion> assertions_;
+  std::vector<std::string> outputs_;
 };
 
-} // namespace raksha::ir::auth_logic
+}  // namespace raksha::ir::auth_logic
 
-#endif  // SRC_IR_AUTH_LOGIC_AST_H_
+#endif  // SRC_IR_AUTH_LOGIC_DATALOG_IR_H_

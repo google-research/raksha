@@ -23,7 +23,8 @@ cc_library(
         "ast.h", "datalog_ir.h", "lowering_ast_datalog.h"
     ],
     deps = [
-      "//src/utils:overloaded"
+      "//src/utils:overloaded",
+      "@absl//absl/strings:str_format",
     ],
     visibility = ["//test:__pkg__"]
 )
