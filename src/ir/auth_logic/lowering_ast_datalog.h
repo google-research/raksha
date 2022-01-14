@@ -169,7 +169,9 @@ class LoweringToDatalogPass {
   // non-exhaustive even though it looks exhaustive AFAICT
   std::vector<DLIRAssertion>
   SingleSaysAssertionToDLIR(Principal speaker,
+      // BaseFact base_fact,
       Assertion assertion) {
+
     std::vector<DLIRAssertion> ret = std::visit(
         raksha::utils::overloaded{
           [](auto arg) {
@@ -177,6 +179,7 @@ class LoweringToDatalogPass {
             return ret;
           }
         },
+        //base_fact.GetValue()); // XX this works fine
         assertion.GetValue());
     return ret;
     // // ALso tried this, which does not work either:
