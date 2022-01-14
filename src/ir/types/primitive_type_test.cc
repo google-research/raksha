@@ -10,7 +10,7 @@ namespace ir = raksha::ir;
 
 TEST(PrimitiveTypeTest, KindReturnsCorrectKind) {
   PrimitiveType primitive_type;
-  EXPECT_EQ(primitive_type.kind(), Type::Kind::kPrimitive);
+  EXPECT_EQ(primitive_type.kind(), TypeBase::Kind::kPrimitive);
 }
 
 TEST(TestGetAccessPaths, TestGetAccessPaths) {

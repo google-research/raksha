@@ -29,24 +29,24 @@ namespace raksha::ir {
 // equivalent ArcsManifestProtos.
 class HandleConnectionSpec {
  public:
-  explicit HandleConnectionSpec(
-    std::string name, bool reads, bool writes,
-    std::unique_ptr<types::Type> type)
-    : name_(std::move(name)), reads_(reads), writes_(writes),
-      type_(std::move(type)) {}
+  explicit HandleConnectionSpec(std::string name, bool reads, bool writes,
+                                types::Type type)
+      : name_(std::move(name)),
+        reads_(reads),
+        writes_(writes),
+        type_(std::move(type)) {}
 
   const std::string &name() const { return name_; }
   bool reads() const { return reads_; }
   bool writes() const { return writes_; }
-  const types::Type &type() const { return *type_; }
+  const types::Type &type() const { return type_; }
 
   // Get all of the AccessPaths rooted at the associated ParticleSpec
   // (indicated through the provided name) through leaf fields of type_.
   std::vector<AccessPath> GetAccessPaths(
       std::string particle_spec_name) const {
     std::vector<AccessPath> result_paths;
-    AccessPathSelectorsSet selectors_set =
-        type_->GetAccessPathSelectorsSet();
+    AccessPathSelectorsSet selectors_set = type_.GetAccessPathSelectorsSet();
     AccessPathRoot root(
         HandleConnectionSpecAccessPathRoot(
             std::move(particle_spec_name), name_));
@@ -67,7 +67,7 @@ class HandleConnectionSpec {
   // HandleConnectionSpec.
   bool writes_;
   // The type of this HandleConnectionSpec.
-  std::unique_ptr<types::Type> type_;
+  types::Type type_;
 };
 
 }  // namespace raksha::ir

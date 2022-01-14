@@ -9,11 +9,11 @@
 
 namespace raksha::ir::types {
 
-class EntityType : public Type {
+class EntityType : public TypeBase {
  public:
   explicit EntityType(Schema schema) : schema_(std::move(schema)) {}
 
-  Type::Kind kind() const override { return Type::Kind::kEntity; }
+  TypeBase::Kind kind() const override { return TypeBase::Kind::kEntity; }
 
   raksha::ir::AccessPathSelectorsSet
   GetAccessPathSelectorsSet() const override {
