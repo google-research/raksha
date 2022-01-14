@@ -119,7 +119,8 @@ class LoweringToDatalogPass {
     // `speaker says Y PredX :-
     //    speaker says Y canActAs X, speaker says X PredX`
     return DLIRAssertion(DLIRCondAssertion(
-        generated_lhs, {speaker_says_y_can_act_as_x, speaker_says_x_pred}));
+        generated_lhs, {std::move(speaker_says_y_can_act_as_x),
+                        std::move(speaker_says_x_pred)}));
   }
 
   // The second return value represents 0 or 1 newly generated rules, so an
