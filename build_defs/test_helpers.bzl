@@ -14,7 +14,7 @@
 # limitations under the License.
 #----------------------------------------------------------------------------
 
-load("//build_defs:souffle.bzl", "souffle_cc_library")
+load("//build_defs:souffle.bzl", "souffle_cc_library", "gen_souffle_cxx_code")
 
 def extracted_datalog_string_test(
         name,
@@ -53,18 +53,25 @@ def extracted_datalog_string_test(
         visibility = visibility,
     )
 
-    souffle_cc_library(
-        name = name + "_souffle_lib",
+    gen_souffle_cxx_code(
+        name = name + "_cxx",
         src = name + "_dl",
         testonly = True,
         included_dl_scripts = [
             "//src/analysis/souffle:authorization_logic.dl",
+            "//src/analysis/souffle:check_predicate.dl",
             "//src/analysis/souffle:dataflow_graph.dl",
             "//src/analysis/souffle:operations.dl",
             "//src/analysis/souffle:taint.dl",
             "//src/analysis/souffle:tags.dl",
             "//src/analysis/souffle:fact_test_helper.dl",
         ],
+    )
+
+    souffle_cc_library(
+        name = name + "_souffle_lib",
+        src = name + "_cxx",
+        testonly = True,
     )
 
     native.cc_test(
@@ -81,4 +88,69 @@ def extracted_datalog_string_test(
             name + "_souffle_lib",
             "@souffle//:souffle_include_lib",
         ],
+    )
+
+def run_taint_exec_compare_check_results(
+        name,
+        check_file,
+        other_input_files,
+        visibility = None):
+    """Run the Souffle-generated taint executable and ensure that the failing
+    check output file is empty.
+
+    Args:
+      name: String; Name of the test.
+      input_files: List; List of labels indicatinginput files to taint_exec.
+    """
+
+    input_files = other_input_files + [check_file]
+
+    facts_dir_opts = [
+        "--facts=`dirname $(location {})`".format(input_file) for input_file in input_files
+    ]
+
+    native.genrule(
+        name = name + "_test_results",
+        outs = ["checkMatchesExpectation"],
+        srcs = input_files,
+        testonly = True,
+        cmd = ("$(location //src/analysis/souffle:taint_exec) --output=$(RULEDIR) {fact_dirs} && " +
+              "cp $(RULEDIR)/checkMatchesExpectation.csv $@")
+              .format(fact_dirs = " ".join(facts_dir_opts)),
+        tools = ["//src/analysis/souffle:taint_exec"],
+        visibility = visibility,
+    )
+
+    native.genrule(
+        name = name + "_check_matches_expectation_sorted",
+        outs = ["checkMatchesExpectationSorted"],
+        srcs = [":checkMatchesExpectation"],
+        testonly = True,
+        cmd = "sort $< > $@",
+        visibility = visibility
+    )
+
+    native.genrule(
+      name = name + "_check_names",
+      outs = ["checkNames"],
+      srcs = [check_file],
+      testonly = True,
+      cmd = "cut --delimiter=';' --fields=1 $< > $@",
+      visibility = visibility
+    )
+
+    native.genrule(
+      name = name + "_check_names_sorted",
+      outs = ["checkNamesSorted"],
+      srcs = [":checkNames"],
+      testonly = True,
+      cmd = "sort $< > $@",
+      visibility = visibility
+    )
+
+    native.sh_test(
+        name = name,
+        args = ["$(location :checkNamesSorted)", "$(location :checkMatchesExpectationSorted)"],
+        data = [":checkNamesSorted", ":checkMatchesExpectationSorted"],
+        srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:diff_wrapper.sh"]
     )

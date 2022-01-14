@@ -18,6 +18,7 @@
 #define SRC_ANALYSIS_SOUFFLE_TAINT_DL_
 
 #include "authorization_logic.dl"
+#include "check_predicate.dl"
 #include "dataflow_graph.dl"
 #include "tags.dl"
 #include "operations.dl"
@@ -163,5 +164,18 @@ mayHaveTag(base, owner, tag) :-
   isAccessPath(member),
   mayHaveTag(member,owner, tag),
   isMemberOf(base, member).
+
+// TagPresence CheckPredicates evaluate to true if an access path may have
+// a particular tag, false otherwise.
+.decl satisfiedTagPresencePredicates(pred : CheckPredicate)
+
+satisfiedTagPresencePredicates($CP_TagPresence(ap, owner, tag)) :-
+  checkSubExprs($CP_TagPresence(ap, owner, tag)), mayHaveTag(ap, owner, tag).
+
+predicateEval(pred, 1) :- satisfiedTagPresencePredicates(pred).
+
+predicateEval($CP_TagPresence(ap, owner, tag), 0) :-
+  checkSubExprs($CP_TagPresence(ap, owner, tag)),
+  !satisfiedTagPresencePredicates($CP_TagPresence(ap, owner, tag)).
 
 #endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_

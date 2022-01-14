@@ -14,7 +14,7 @@
 # limitations under the License.
 #-----------------------------------------------------------------------------
 load("//build_defs:arcs.bzl", "arcs_manifest_proto")
-load("//build_defs:souffle.bzl", "souffle_cc_library")
+load("//build_defs:souffle.bzl", "souffle_cc_library", "gen_souffle_cxx_code")
 
 def raksha_policy_check(name, src, visibility = None):
     """ Generates a cc_test rule for verifying policy compliance.
@@ -65,11 +65,16 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
     if expect_failure:
       invert_arg = "invert"
     # Generate datalog
-    datalog_target_name = "%s_datalog" % name
-    datalog_target = ":%s" % datalog_target_name
+    datalog_source_target_name = "%s_datalog" % name
+    datalog_source_target = ":%s" % datalog_source_target_name
+    datalog_library_target_name = "%s_datalog_lib" % name
+    datalog_library_target = ":%s" % datalog_library_target_name
+    datalog_cxx_source_target_name = "%s_datalog_cxx" % name
+    datalog_cxx_source_target = ":%s" % datalog_cxx_source_target_name
+
     datalog_file = "%s.dl" % name
     native.genrule(
-        name = datalog_target_name,
+        name = datalog_source_target_name,
         srcs = [
            auth_logic,
            proto_target,
@@ -82,19 +87,22 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
         tools = ["//src/xform_to_datalog:generate_datalog_program"],
     )
     # Generate souffle C++ library
-    souffle_dl_cpp_target_name = "%s_dl_cpp" % name
-    souffle_dl_cpp_target = ":%s" % souffle_dl_cpp_target_name
-    souffle_cc_library(
-        name = souffle_dl_cpp_target_name,
-        src = datalog_target,
+    gen_souffle_cxx_code(
+        name = datalog_cxx_source_target_name,
+        src = datalog_source_target,
         included_dl_scripts = [
             "//src/analysis/souffle:authorization_logic.dl",
+            "//src/analysis/souffle:check_predicate.dl",
             "//src/analysis/souffle:dataflow_graph.dl",
             "//src/analysis/souffle:operations.dl",
             "//src/analysis/souffle:taint.dl",
             "//src/analysis/souffle:tags.dl",
             "//src/analysis/souffle:may_will.dl"
         ]
+    )
+    souffle_cc_library(
+        name = datalog_library_target_name,
+        src = datalog_cxx_source_target,
     )
     native.cc_test(
         name = name,
@@ -109,6 +117,6 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
         linkopts = ["-pthread"],
         deps = [
             "@souffle//:souffle_include_lib",
-            souffle_dl_cpp_target,
+            datalog_library_target,
         ],
     )

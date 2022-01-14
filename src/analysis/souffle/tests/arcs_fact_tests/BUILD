@@ -1,5 +1,6 @@
 load(
     "//build_defs:souffle.bzl",
+    "gen_souffle_cxx_code",
     "souffle_cc_library",
 )
 
@@ -11,22 +12,30 @@ ALL_DL_TEST_FILES = glob(["*.dl"], exclude = ["*_helper.dl"])
 
 TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES = ["claim_not_edge_two_inputs_two_outputs.dl"]
 
-exports_files(["fact_test_driver.cc"])
+exports_files(["fact_test_driver.cc", "diff_wrapper.sh"])
 
-[souffle_cc_library(
-    name = dl_script.replace(".dl", "_souffle_cc_library"),
+[gen_souffle_cxx_code(
+    name = dl_script.replace(".dl", "_souffle_cc_library_code"),
     src = dl_script,
     all_principals_own_all_tags = True,
+    testonly = True,
     included_dl_scripts = [
         ":integrity_tag_prop_helper.dl",
         ":confidentiality_tag_prop_helper.dl",
         "//src/analysis/souffle:authorization_logic.dl",
+        "//src/analysis/souffle:check_predicate.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
         "//src/analysis/souffle:operations.dl",
         "//src/analysis/souffle:taint.dl",
         "//src/analysis/souffle:tags.dl",
         "//src/analysis/souffle:fact_test_helper.dl",
     ],
+) for dl_script in ALL_DL_TEST_FILES]
+
+[souffle_cc_library(
+    name = dl_script.replace(".dl", "_souffle_cc_library"),
+    src = dl_script.replace(".dl", "_souffle_cc_library_code"),
+    testonly = True,
 ) for dl_script in ALL_DL_TEST_FILES]
 
 [cc_test(
@@ -46,19 +55,27 @@ exports_files(["fact_test_driver.cc"])
     ],
 ) for dl_script in ALL_DL_TEST_FILES]
 
-[souffle_cc_library(
-    name = dl_script.replace(".dl", "_no_owners_souffle_cc_library"),
+[gen_souffle_cxx_code(
+    name = dl_script.replace(".dl", "_no_owners_souffle_cc_library_code"),
     src = dl_script,
     all_principals_own_all_tags = False,
+    testonly = True,
     included_dl_scripts = [
         ":integrity_tag_prop_helper.dl",
         "//src/analysis/souffle:authorization_logic.dl",
+        "//src/analysis/souffle:check_predicate.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
         "//src/analysis/souffle:operations.dl",
         "//src/analysis/souffle:taint.dl",
         "//src/analysis/souffle:tags.dl",
         "//src/analysis/souffle:fact_test_helper.dl",
     ],
+) for dl_script in TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES]
+
+[souffle_cc_library(
+    name = dl_script.replace(".dl", "_no_owners_souffle_cc_library"),
+    src = dl_script.replace(".dl", "_no_owners_souffle_cc_library_code"),
+    testonly = True,
 ) for dl_script in TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES]
 
 [cc_test(

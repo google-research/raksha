@@ -1,0 +1,82 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+#ifndef SRC_ANALYSIS_SOUFFLE_CHECK_PREDICATE_DL_
+#define SRC_ANALYSIS_SOUFFLE_CHECK_PREDICATE_DL_
+
+#include "authorization_logic.dl"
+#include "dataflow_graph.dl"
+#include "tags.dl"
+
+.type Bool <: number
+
+.type CheckPredicate =
+  CP_TagPresence { ap: AccessPath, principal: Principal, tag: Tag }
+  | CP_And { lhs: CheckPredicate, rhs: CheckPredicate }
+  | CP_Or { lhs: CheckPredicate, rhs: CheckPredicate }
+  | CP_Implies { antecedent: CheckPredicate, consequent: CheckPredicate }
+  | CP_Not { to_negate: CheckPredicate }
+
+// A check of some predicate on tags.
+.decl checkP(name: symbol, pred: CheckPredicate)
+.input checkP(delimiter=";")
+
+// A check with an expectation of whether it passes or fails. Checks in the
+// regular `check` relation result in a `checkAndExpectation` with an
+// expectation of PASS.
+.decl checkAndExpectation(
+  name: symbol, pred: CheckPredicate, expectation: symbol)
+.input checkAndExpectation(delimiter=";")
+
+checkAndExpectation(name, pred, "PASS") :- checkP(name, pred).
+
+// Deconstruct all top-level check predicates to get subpredicates here.
+.decl checkSubExprs(pred: CheckPredicate)
+checkSubExprs(pred) :- checkAndExpectation(_, pred, _).
+checkSubExprs(lhs), checkSubExprs(rhs) :- checkSubExprs($CP_And(lhs, rhs)).
+checkSubExprs(lhs), checkSubExprs(rhs) :- checkSubExprs($CP_Or(lhs, rhs)).
+checkSubExprs(ant), checkSubExprs(cons) :- checkSubExprs($CP_Implies(ant, cons)).
+checkSubExprs(inner) :- checkSubExprs($CP_Not(inner)).
+
+// Evaluate predicates based upon their subpredicates. The base case, the
+// `TagPresence` branch, requires looking at the `mayHaveTag` relation, so we
+// define it in taint.dl instead of here.
+.decl predicateEval(pred: CheckPredicate, result: Bool)
+predicateEval($CP_Not(inner), lnot subResult) :-
+  checkSubExprs($CP_Not(inner)), predicateEval(inner, subResult).
+predicateEval($CP_And(lhs, rhs), lhsResult land rhsResult) :-
+  checkSubExprs($CP_And(lhs, rhs)), predicateEval(lhs, lhsResult), predicateEval(rhs, rhsResult).
+predicateEval($CP_Or(lhs, rhs), lhsResult lor rhsResult) :-
+  checkSubExprs($CP_Or(lhs, rhs)), predicateEval(lhs, lhsResult), predicateEval(rhs, rhsResult).
+predicateEval($CP_Implies(ant, cons), (lnot antResult) lor (antResult land consResult)) :-
+  checkSubExprs($CP_Implies(ant, cons)), predicateEval(ant, antResult),
+  predicateEval(cons, consResult).
+
+.decl checkAndResult(name: symbol, result: symbol)
+.output checkAndResult(delimiter=";")
+
+checkAndResult(name, "PASS") :-
+  checkAndExpectation(name, pred, _), predicateEval(pred, result), result != 0.
+
+checkAndResult(name, "FAIL") :-
+  checkAndExpectation(name, pred, _), predicateEval(pred, result), result = 0.
+
+// A check which matches the given expectation.
+.decl checkMatchesExpectation(name: symbol)
+.output checkMatchesExpectation(delimiter=";")
+
+checkMatchesExpectation(name) :- checkAndResult(name, result), checkAndExpectation(name, _, result).
+
+#endif // SRC_ANALYSIS_SOUFFLE_CHECK_PREDICATE_DL_
