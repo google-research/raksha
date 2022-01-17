@@ -126,13 +126,15 @@ class CanSay {
 
 // Fact corresponds to either a base fact or a an expression of the form
 // <principal> canSay <Fact>
+using FactVariantType = std::variant<BaseFact, std::unique_ptr<CanSay>>;
 class Fact {
  public:
   explicit Fact(BaseFact base_fact) : value_(std::move(base_fact)) {}
   explicit Fact(std::unique_ptr<CanSay> can_say) : value_(std::move(can_say)) {}
+  const FactVariantType& GetValue() const { return value_; }
 
  private:
-  std::variant<BaseFact, std::unique_ptr<CanSay>> value_;
+  FactVariantType value_;
 };
 
 // ConditionalAssertion the particular form of assertion that can have

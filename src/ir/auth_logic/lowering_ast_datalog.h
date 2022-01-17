@@ -125,28 +125,29 @@ class LoweringToDatalogPass {
 
   // The second return value represents 0 or 1 newly generated rules, so an
   // option might seem more intuitive. However, the interface that consumes
-  // this needs to construct a vector anyway.
-  std::pair<Predicate, DLIRAssertion> BaseFactToDLIR(
+  // this needs to construct a vector anyway, so a vector is used in the
+  // return type.
+  std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIR(
       Principal speaker, BaseFact base_fact) {
     return std::visit(
         raksha::utils::overloaded{
             [](Predicate predicate) {
+              std::vector<DLIRAssertion> pred_list = {};
               Predicate dummy_pred =
                   Predicate("pred_name", {"arg1"}, kPositive);
-              DLIRAssertion dummy_assertion =
-                  DLIRAssertion(DLIRCondAssertion(dummy_pred, {dummy_pred}));
-              return std::make_pair(predicate, dummy_assertion);
+              return std::make_pair(predicate, pred_list);
             },
             [this, &speaker](Attribute attribute) {
+              std::vector<DLIRAssertion> pred_list = 
+                {SpokenAttributeToDLIR(speaker, attribute)};
               return std::make_pair(AttributeToDLIR(attribute),
-                                    SpokenAttributeToDLIR(speaker, attribute));
+                  pred_list);
             },
             [](CanActAs canActAs) {
+              std::vector<DLIRAssertion> pred_list = {};
               Predicate dummy_pred =
                   Predicate("pred_name", {"arg1"}, kPositive);
-              DLIRAssertion dummy_assertion =
-                  DLIRAssertion(DLIRCondAssertion(dummy_pred, {dummy_pred}));
-              return std::make_pair(dummy_pred, dummy_assertion);
+              return std::make_pair(dummy_pred, pred_list);
             }},
         base_fact.GetValue());
   }
@@ -154,7 +155,7 @@ class LoweringToDatalogPass {
   // This can result in 0 or more new rules because the translation of
   // nested canSayFacts might result in more than 1 rule.
   std::pair<Predicate, std::vector<DLIRAssertion>> FactToDLIR(
-      Principal speaker, Fact fact) {
+      Principal speaker, const Fact& fact) {
     // TODO fill in real implementation. This is just a stub.
     Predicate dummy_pred = Predicate("pred_name", {"arg1"}, kPositive);
     DLIRAssertion dummy_assertion =
@@ -165,45 +166,92 @@ class LoweringToDatalogPass {
     return std::make_pair(dummy_pred, dummy_assertions);
   }
 
-  // WIP need to figure out error message about the visitor being
-  // non-exhaustive even though it looks exhaustive AFAICT
   std::vector<DLIRAssertion>
   SingleSaysAssertionToDLIR(Principal speaker,
-      // BaseFact base_fact,
-      Assertion assertion) {
-
-    std::vector<DLIRAssertion> ret = std::visit(
+      const Assertion& assertion) {
+    return std::visit(
         raksha::utils::overloaded{
-          [](auto arg) {
+          // TODO not sure why this signature needs to be a const reference to
+          // make the typechecker happy when the visitor for BaseFactToDLIR did
+          // not need this.
+          [this, &speaker](const Fact& fact) {
+            auto[fact_predicate, generated_rules] = FactToDLIR(
+                speaker, fact);
+            DLIRAssertion main_assertion = DLIRAssertion(
+                  PushPrin(std::string("says_"), speaker, fact_predicate));
+            generated_rules.push_back(main_assertion);
+            return generated_rules;
+          },
+          [](const ConditionalAssertion& conditionalAssertion) {
+            // TODO stub
             std::vector<DLIRAssertion> ret = {};
             return ret;
           }
         },
-        //base_fact.GetValue()); // XX this works fine
         assertion.GetValue());
-    return ret;
-    // // ALso tried this, which does not work either:
-    // return std::visit(raksha::utils::overloaded {
-    //     // [this, &speaker](Fact fact) {
-    //     //   auto[fact_predicate, generated_rules] = FactToDLIR(
-    //     //       speaker, fact);
-    //     //   DLIRAssertion main_assertion = DLIRAssertion(
-    //     //         PushPrin(std::string("says_"), speaker, fact_predicate));
-    //     //   generated_rules.push_back(main_assertion);
-    //     //   return generated_rules;
-    //     // },
-    //     // [](ConditionalAssertion conditional_assertion) {
-    //     //   std::vector<DLIRAssertion> dummy_ret = {};
-    //     //   return dummy_ret;
-    //     // }
-    //   }, assertion.GetValue());
   }
 
-  // TODO make this value instead of const reference
-  // when doing so no longer causes an error
+  std::vector<DLIRAssertion>
+  SaysAssertionToDLIR(const SaysAssertion& says_assertion) {
+    std::vector<DLIRAssertion> ret = {};
+    for(const Assertion& assertion : says_assertion.assertions()) {
+      std::vector<DLIRAssertion> single_translation =
+        SingleSaysAssertionToDLIR(says_assertion.principal(), assertion);
+      ret.insert(ret.end(),
+          std::make_move_iterator(single_translation.begin()),
+          std::make_move_iterator(single_translation.end()));
+    }
+    return ret;
+  }
+
+  std::vector<DLIRAssertion>
+  SaysAssertionsToDLIR(const std::vector<SaysAssertion>& says_assertions) {
+    std::vector<DLIRAssertion> ret = {};
+    for(const SaysAssertion& says_assertion: says_assertions) {
+      auto single_translation = SaysAssertionToDLIR(says_assertion);
+      ret.insert(ret.end(),
+          std::make_move_iterator(single_translation.begin()),
+          std::make_move_iterator(single_translation.end()));
+    }
+    return ret;
+  }
+
+  #define DUMMY_PREDICATE Predicate("grounded_dummy", {"dummy_var"}, kPositive)
+
+  DLIRAssertion
+  QueryToDLIR(const Query& query) {
+    // The assertions that are normally generated during the translation
+    // from facts to dlir facts are not used for queries.
+    auto[main_pred, not_used] = FactToDLIR(query.principal(), query.fact());
+    main_pred = PushPrin(std::string("says_"), query.principal(), main_pred);
+    auto lhs = Predicate(query.name(), {"dummy_var"}, kPositive);
+    return DLIRAssertion(DLIRCondAssertion(
+          lhs, {main_pred, DUMMY_PREDICATE}));
+  }
+
+  std::vector<DLIRAssertion>
+  QueriesToDLIR(const std::vector<Query>& queries) {
+    std::vector<DLIRAssertion> ret = {};
+    for(const Query& query : queries) {
+      ret.push_back(QueryToDLIR(query));
+    }
+    return ret;
+  }
+
   DLIRProgram ProgToDLIR(const Program& program) {
-    // TODO / WIP
-    return DLIRProgram({}, {});
+    auto dlir_assertions = SaysAssertionsToDLIR(program.says_assertions());
+    auto dlir_queries = QueriesToDLIR(program.queries());
+    auto dummy_assertion = DLIRAssertion(DUMMY_PREDICATE);
+    dlir_assertions.insert(dlir_assertions.end(),
+        std::make_move_iterator(dlir_queries.begin()),
+        std::make_move_iterator(dlir_queries.end()));
+    dlir_assertions.push_back(dummy_assertion);
+
+    std::vector<std::string> outputs = {};
+    for(const Query& query: program.queries()) {
+      outputs.push_back(query.name());
+    }
+    return DLIRProgram(dlir_assertions, outputs);
   }
 };
 
