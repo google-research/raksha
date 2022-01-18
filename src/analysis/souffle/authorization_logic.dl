@@ -55,6 +55,7 @@
 
 // The `speaker` says that `path` definitely has `tag` taint.
 .decl says_hasTag(speaker: Principal, path: AccessPath, owner: Principal, tag: Tag)
+.input says_hasTag(delimiter=";")
 
 // The `speaker` says that the `delegatee` can say that `path` has `tag`.
 .decl says_canSay_hasTag(
