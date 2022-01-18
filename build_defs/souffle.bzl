@@ -19,7 +19,7 @@ def gen_souffle_cxx_code(
         src,
         all_principals_own_all_tags = False,
         included_dl_scripts = [],
-        testonly = None,
+        for_test = False,
         visibility = None):
     """Generates a C++ file for the given datalog file.
 
@@ -28,29 +28,23 @@ def gen_souffle_cxx_code(
       src: String; The datalog program.
       all_principals_own_all_tags: allows basically turning off the auth logic aspect.
       included_dl_scripts: List; List of labels indicating datalog files included by src.
-      testonly: bool; Whether the generated rules should be testonly.
+      for_test: bool; Whether to prepare the generated code to be used in a test environment or not.
       visibility: List; List of visibilities.
     """
 
-    # NOTE: Usual standard Bazel code practices would dictate that we qualify
-    # the name of the target, not the name of the source. However, that plays
-    # poorly with Souffle, which will base the name of the library which must
-    # be passed to the driver in the C++ interface off of the name of the source
-    # file rather than the name of the original datalog file.
-    # TL;DR: headaches may result from attempting to use the name as the stem
-    # instead of the src.
-    if all_principals_own_all_tags:
-        cc_file = src + "_no_owners.cpp"
-    else:
-        cc_file = src + ".cpp"
+    cc_file = name + ".cpp"
+
+    testonly = None
+    if for_test:
+        testonly = True
 
     # If testonly was not explicitly set by the caller, set it based upon the
     # value of all_principals_own_all_tags. If the caller tried to explicitly
     # set all_principals_own_all_tags and set testonly to False, complain.
-    if testonly == None:
+    if not for_test:
         testonly = all_principals_own_all_tags
-    elif (testonly == False) and (all_principals_own_all_tags):
-        fail("Cannot set testonly to False and all_principals_own_all_tags to True simultaneously!")
+    elif (not for_test) and (all_principals_own_all_tags):
+        fail("Cannot set all_principals_own_all_tags to True if not for_test!")
 
     include_str = ""
 
@@ -61,9 +55,21 @@ def gen_souffle_cxx_code(
 
     include_opts_str = " ".join(include_dir_opts)
 
-    tag_ownership_str = ""
+    macro_list = []
+    if for_test:
+        macro_list += ["TEST=1"]
     if all_principals_own_all_tags:
-        tag_ownership_str = "--macro='ALL_PRINCIPALS_OWN_ALL_TAGS=1'"
+        macro_list += ["ALL_PRINCIPALS_OWN_ALL_TAGS=1"]
+
+    macro_str_prefix = ""
+    macro_str_suffix = ""
+    first = True
+    for macro in macro_list:
+        macro_str_prefix = "--macro='"
+        macro_str_suffix = "'"
+        break
+
+    macro_str = macro_str_prefix + " ".join(macro_list) + macro_str_suffix
 
     native.genrule(
         name = name,
@@ -71,7 +77,7 @@ def gen_souffle_cxx_code(
         outs = [cc_file],
         testonly = testonly,
         cmd =
-            "$(location @souffle//:souffle) {include_str} {tag_ownership} -g $@ $(location {src_rule})".format(include_str = include_opts_str, tag_ownership = tag_ownership_str, src_rule = src),
+            "$(location @souffle//:souffle) {include_str} {macros} -g $@ $(location {src_rule})".format(include_str = include_opts_str, macros=macro_str, src_rule = src),
         tools = ["@souffle//:souffle"],
         visibility = visibility,
     )

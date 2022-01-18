@@ -108,7 +108,7 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
         name = name,
         srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:fact_test_driver.cc"],
         args = [
-            datalog_file.replace(".dl", "_datalog"),
+            datalog_cxx_source_target_name,
             invert_arg
         ],
         copts = [

@@ -56,7 +56,7 @@ def extracted_datalog_string_test(
     gen_souffle_cxx_code(
         name = name + "_cxx",
         src = name + "_dl",
-        testonly = True,
+        for_test = True,
         included_dl_scripts = [
             "//src/analysis/souffle:authorization_logic.dl",
             "//src/analysis/souffle:check_predicate.dl",
@@ -78,7 +78,7 @@ def extracted_datalog_string_test(
         name = name,
         srcs = ["//src/test_utils/dl_string_extractor:dl_string_parsing_test_driver.cc"],
         args = [
-            name + "_dl",
+            name + "_cxx",
         ],
         copts = [
             "-Iexternal/souffle/src/include/souffle",
@@ -92,8 +92,7 @@ def extracted_datalog_string_test(
 
 def run_taint_exec_compare_check_results(
         name,
-        check_file,
-        other_input_files,
+        input_files,
         visibility = None):
     """Run the Souffle-generated taint executable and ensure that the failing
     check output file is empty.
@@ -103,54 +102,51 @@ def run_taint_exec_compare_check_results(
       input_files: List; List of labels indicatinginput files to taint_exec.
     """
 
-    input_files = other_input_files + [check_file]
-
     facts_dir_opts = [
         "--facts=`dirname $(location {})`".format(input_file) for input_file in input_files
     ]
 
+    # Run the taint analysis Souffle binary to generate the Datalog output
+    # files, then copy the checkAndResult and expectedCheckAndResult output
+    # files to the rule outputs.
     native.genrule(
         name = name + "_test_results",
-        outs = ["checkMatchesExpectation"],
+        outs = ["checkAndResult", "expectedCheckAndResult"],
         srcs = input_files,
         testonly = True,
-        cmd = ("$(location //src/analysis/souffle:taint_exec) --output=$(RULEDIR) {fact_dirs} && " +
-              "cp $(RULEDIR)/checkMatchesExpectation.csv $@")
+        cmd = ("$(location //src/analysis/souffle:taint_exec_test) --output=$(RULEDIR) {fact_dirs} && " +
+               "cp $(RULEDIR)/checkAndResult.csv $(location :checkAndResult) && " +
+               "cp $(RULEDIR)/expectedCheckAndResult.csv $(location :expectedCheckAndResult)")
               .format(fact_dirs = " ".join(facts_dir_opts)),
-        tools = ["//src/analysis/souffle:taint_exec"],
+        tools = ["//src/analysis/souffle:taint_exec_test"],
         visibility = visibility,
     )
 
+    # Sort the checkAndResult contents. Because the check name is the first
+    # field, this should sort them by name.
     native.genrule(
-        name = name + "_check_matches_expectation_sorted",
-        outs = ["checkMatchesExpectationSorted"],
-        srcs = [":checkMatchesExpectation"],
+        name = name + "_check_and_result_sorted",
+        outs = ["checkAndResultSorted"],
+        srcs = [":checkAndResult"],
         testonly = True,
         cmd = "sort $< > $@",
         visibility = visibility
     )
 
+    # Similarly, sort expectedCheckAndResult.
     native.genrule(
-      name = name + "_check_names",
-      outs = ["checkNames"],
-      srcs = [check_file],
-      testonly = True,
-      cmd = "cut --delimiter=';' --fields=1 $< > $@",
-      visibility = visibility
+        name = name + "_expected_check_and_result_sorted",
+        outs = ["expectedCheckAndResultSorted"],
+        srcs = [":expectedCheckAndResult"],
+        testonly = True,
+        cmd = "sort $< > $@",
+        visibility = visibility
     )
 
-    native.genrule(
-      name = name + "_check_names_sorted",
-      outs = ["checkNamesSorted"],
-      srcs = [":checkNames"],
-      testonly = True,
-      cmd = "sort $< > $@",
-      visibility = visibility
-    )
-
+    # Compare the two files for diff equality.
     native.sh_test(
         name = name,
-        args = ["$(location :checkNamesSorted)", "$(location :checkMatchesExpectationSorted)"],
-        data = [":checkNamesSorted", ":checkMatchesExpectationSorted"],
+        args = ["$(location :expectedCheckAndResultSorted)", "$(location :checkAndResultSorted)"],
+        data = [":checkAndResultSorted", ":expectedCheckAndResultSorted"],
         srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:diff_wrapper.sh"]
     )
