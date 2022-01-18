@@ -24,6 +24,6 @@
 
 TEST(CppInterfaceTest, CanLoadDatalogProgram) {
   std::unique_ptr<souffle::SouffleProgram> prog(
-      souffle::ProgramFactory::newInstance("taint"));
+      souffle::ProgramFactory::newInstance("taint_cxx"));
   EXPECT_NE(prog, nullptr);
 }

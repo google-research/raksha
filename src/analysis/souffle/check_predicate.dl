@@ -27,24 +27,17 @@
   | CP_And { lhs: CheckPredicate, rhs: CheckPredicate }
   | CP_Or { lhs: CheckPredicate, rhs: CheckPredicate }
   | CP_Implies { antecedent: CheckPredicate, consequent: CheckPredicate }
-  | CP_Not { to_negate: CheckPredicate }
+// Note: CP_Not will have a result that is the negation of its `inner`
+// field. So `$CP_Not(true) -> false` and `$CP_Not(false) -> true`.
+  | CP_Not { inner: CheckPredicate }
 
 // A check of some predicate on tags.
 .decl checkP(name: symbol, pred: CheckPredicate)
 .input checkP(delimiter=";")
 
-// A check with an expectation of whether it passes or fails. Checks in the
-// regular `check` relation result in a `checkAndExpectation` with an
-// expectation of PASS.
-.decl checkAndExpectation(
-  name: symbol, pred: CheckPredicate, expectation: symbol)
-.input checkAndExpectation(delimiter=";")
-
-checkAndExpectation(name, pred, "PASS") :- checkP(name, pred).
-
 // Deconstruct all top-level check predicates to get subpredicates here.
 .decl checkSubExprs(pred: CheckPredicate)
-checkSubExprs(pred) :- checkAndExpectation(_, pred, _).
+checkSubExprs(pred) :- checkP(_, pred).
 checkSubExprs(lhs), checkSubExprs(rhs) :- checkSubExprs($CP_And(lhs, rhs)).
 checkSubExprs(lhs), checkSubExprs(rhs) :- checkSubExprs($CP_Or(lhs, rhs)).
 checkSubExprs(ant), checkSubExprs(cons) :- checkSubExprs($CP_Implies(ant, cons)).
@@ -67,16 +60,31 @@ predicateEval($CP_Implies(ant, cons), (lnot antResult) lor (antResult land consR
 .decl checkAndResult(name: symbol, result: symbol)
 .output checkAndResult(delimiter=";")
 
-checkAndResult(name, "PASS") :-
-  checkAndExpectation(name, pred, _), predicateEval(pred, result), result != 0.
+checkAndResult(name, "PASS") :- checkP(name, pred), predicateEval(pred, result), result != 0.
 
-checkAndResult(name, "FAIL") :-
-  checkAndExpectation(name, pred, _), predicateEval(pred, result), result = 0.
+checkAndResult(name, "FAIL") :- checkP(name, pred), predicateEval(pred, result), result = 0.
 
-// A check which matches the given expectation.
-.decl checkMatchesExpectation(name: symbol)
-.output checkMatchesExpectation(delimiter=";")
+// Relations used to support tests involving check facts. Not present in
+// production builds.
+#ifdef TEST
 
-checkMatchesExpectation(name) :- checkAndResult(name, result), checkAndExpectation(name, _, result).
+// A check with an attached expectation on whether a test expects this check to
+// pass or fail.
+.decl checkAndExpectation(name: symbol, pred: CheckPredicate, expectation: symbol)
+.input checkAndExpectation(delimiter=";")
+
+checkP(name, pred) :- checkAndExpectation(name, pred, _).
+
+// Produce a list of expected checkAndResults based upon the checks and
+// checkAndExpectations given to a test.
+.decl expectedCheckAndResult(name: symbol, result: symbol)
+.output expectedCheckAndResult(delimiter=";")
+
+// For checks listed in checkAndExpectation, grab the expectation directly from checkAndExpectation.
+expectedCheckAndResult(name, result) :- checkAndExpectation(name, _, result).
+// For checks listed only in checkP, expect that that check passes.
+expectedCheckAndResult(name, "PASS") :- checkP(name, _), !checkAndExpectation(name, _, _).
+
+#endif // TEST
 
 #endif // SRC_ANALYSIS_SOUFFLE_CHECK_PREDICATE_DL_

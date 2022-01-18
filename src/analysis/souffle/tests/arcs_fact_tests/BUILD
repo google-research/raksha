@@ -15,10 +15,10 @@ TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES = ["claim_not_edge_two_inputs_two_outputs
 exports_files(["fact_test_driver.cc", "diff_wrapper.sh"])
 
 [gen_souffle_cxx_code(
-    name = dl_script.replace(".dl", "_souffle_cc_library_code"),
+    name = dl_script.replace(".dl", ""),
     src = dl_script,
     all_principals_own_all_tags = True,
-    testonly = True,
+    for_test = True,
     included_dl_scripts = [
         ":integrity_tag_prop_helper.dl",
         ":confidentiality_tag_prop_helper.dl",
@@ -34,7 +34,7 @@ exports_files(["fact_test_driver.cc", "diff_wrapper.sh"])
 
 [souffle_cc_library(
     name = dl_script.replace(".dl", "_souffle_cc_library"),
-    src = dl_script.replace(".dl", "_souffle_cc_library_code"),
+    src = dl_script.replace(".dl", ""),
     testonly = True,
 ) for dl_script in ALL_DL_TEST_FILES]
 
@@ -56,10 +56,10 @@ exports_files(["fact_test_driver.cc", "diff_wrapper.sh"])
 ) for dl_script in ALL_DL_TEST_FILES]
 
 [gen_souffle_cxx_code(
-    name = dl_script.replace(".dl", "_no_owners_souffle_cc_library_code"),
+    name = dl_script.replace(".dl", "_no_owners"),
     src = dl_script,
     all_principals_own_all_tags = False,
-    testonly = True,
+    for_test = True,
     included_dl_scripts = [
         ":integrity_tag_prop_helper.dl",
         "//src/analysis/souffle:authorization_logic.dl",
@@ -74,7 +74,7 @@ exports_files(["fact_test_driver.cc", "diff_wrapper.sh"])
 
 [souffle_cc_library(
     name = dl_script.replace(".dl", "_no_owners_souffle_cc_library"),
-    src = dl_script.replace(".dl", "_no_owners_souffle_cc_library_code"),
+    src = dl_script.replace(".dl", "_no_owners"),
     testonly = True,
 ) for dl_script in TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES]
 
@@ -82,7 +82,7 @@ exports_files(["fact_test_driver.cc", "diff_wrapper.sh"])
     name = dl_script.replace(".dl", "_no_owners_test"),
     srcs = ["fact_test_driver.cc"],
     args = [
-        dl_script.replace(".dl", ""),
+        dl_script.replace(".dl", "_no_owners"),
         "invert" if dl_script in FAILURE_DL_TEST_FILES else "",
     ],
     copts = [
