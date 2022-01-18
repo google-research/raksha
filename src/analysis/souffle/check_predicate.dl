@@ -27,7 +27,9 @@
   | CP_And { lhs: CheckPredicate, rhs: CheckPredicate }
   | CP_Or { lhs: CheckPredicate, rhs: CheckPredicate }
   | CP_Implies { antecedent: CheckPredicate, consequent: CheckPredicate }
-  | CP_Not { to_negate: CheckPredicate }
+// Note: CP_Not will have a result that is the negation of its `inner`
+// field. So `$CP_Not(true) -> false` and `$CP_Not(false) -> true`.
+  | CP_Not { inner: CheckPredicate }
 
 // A check of some predicate on tags.
 .decl checkP(name: symbol, pred: CheckPredicate)
