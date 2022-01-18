@@ -123,6 +123,48 @@ class LoweringToDatalogPass {
                         std::move(speaker_says_x_pred)}));
   }
 
+  Predicate CanActAsToDLIR(CanActAs can_act_as) {
+    return Predicate("canActAs", {can_act_as.left_principal().name(),
+        can_act_as.right_principal().name()}, kPositive);
+  }
+
+  DLIRAssertion SpokenCanActAsToDLIR(Principal speaker,
+                                  CanActAs can_act_as) {
+    Predicate main_predicate = CanActAsToDLIR(can_act_as);
+    
+    // "canActAs" facts are passed to principals via other canActAs facts in 
+    // essentially the same way as attributes. This function adds extra
+    // rules to pass these around. If the `canActAs` under translation
+    // is `X canActAs Z`, then the rule we need to generate is:
+    // `speaker says Y PredX :-
+    //    speaker says Y canActAs X, speaker says X canActAsZ`
+    // (Where Y is a fresh variable)
+    Principal prin_y = Principal(FreshVar());
+
+    // This is `speaker says Y PredX`
+    Predicate generated_lhs =
+        PushPrin(std::string("says_"), prin_y, main_predicate);
+
+    Predicate y_can_act_as_x = Predicate(std::string("canActAs"),
+        {prin_y.name(), can_act_as.left_principal().name()},
+        Sign::kPositive);
+
+    Predicate speaker_says_y_can_act_as_x =
+        PushPrin(std::string("says_"), speaker, y_can_act_as_x);
+
+    // This is `speaker says X canActAs Z`
+    Predicate speaker_says_x_can_act_as_z =
+        PushPrin(std::string("says_"), speaker, main_predicate);
+
+    // This is the full generated rule:
+    // `speaker says Y PredX :-
+    //    speaker says Y canActAs X, speaker says X canActAs Z`
+    return DLIRAssertion(DLIRCondAssertion(
+        generated_lhs, {std::move(speaker_says_y_can_act_as_x),
+                        std::move(speaker_says_x_can_act_as_z)}));
+
+  }
+
   // The second return value represents 0 or 1 newly generated rules, so an
   // option might seem more intuitive. However, the interface that consumes
   // this needs to construct a vector anyway, so a vector is used in the
@@ -131,23 +173,21 @@ class LoweringToDatalogPass {
       Principal speaker, BaseFact base_fact) {
     return std::visit(
         raksha::utils::overloaded{
+            // To make the typechecker happy the vectors need to be explicitly
+            // declared.
             [](Predicate predicate) {
               std::vector<DLIRAssertion> pred_list = {};
-              Predicate dummy_pred =
-                  Predicate("pred_name", {"arg1"}, kPositive);
               return std::make_pair(predicate, pred_list);
             },
             [this, &speaker](Attribute attribute) {
               std::vector<DLIRAssertion> pred_list = 
                 {SpokenAttributeToDLIR(speaker, attribute)};
-              return std::make_pair(AttributeToDLIR(attribute),
-                  pred_list);
+              return std::make_pair(AttributeToDLIR(attribute), pred_list);
             },
-            [](CanActAs canActAs) {
-              std::vector<DLIRAssertion> pred_list = {};
-              Predicate dummy_pred =
-                  Predicate("pred_name", {"arg1"}, kPositive);
-              return std::make_pair(dummy_pred, pred_list);
+            [this, &speaker](CanActAs canActAs) {
+              std::vector<DLIRAssertion> pred_list =
+                {SpokenCanActAsToDLIR(speaker, canActAs)};
+              return std::make_pair(CanActAsToDLIR(canActAs), pred_list);
             }},
         base_fact.GetValue());
   }
@@ -156,14 +196,24 @@ class LoweringToDatalogPass {
   // nested canSayFacts might result in more than 1 rule.
   std::pair<Predicate, std::vector<DLIRAssertion>> FactToDLIR(
       Principal speaker, const Fact& fact) {
-    // TODO fill in real implementation. This is just a stub.
-    Predicate dummy_pred = Predicate("pred_name", {"arg1"}, kPositive);
-    DLIRAssertion dummy_assertion =
-        DLIRAssertion(DLIRCondAssertion(dummy_pred, {dummy_pred}));
-    // This vector needed to be declared before the call to make_pair because
-    // template argument inference could not figure it out otherwise.
-    std::vector<DLIRAssertion> dummy_assertions = {dummy_assertion};
-    return std::make_pair(dummy_pred, dummy_assertions);
+      return std::visit(
+        raksha::utils::overloaded {
+          [this, &speaker](BaseFact base_fact) {
+            return BaseFactToDLIR(speaker, base_fact);
+          },
+          // To make the typechecker happy, this needs to be a const reference
+          // to a unique ptr... which is surprising to me.
+          [](const std::unique_ptr<CanSay>& can_say) {
+            // TODO fill in real implementation. This is just a stub.
+            Predicate dummy_pred = Predicate("pred_name", {"arg1"}, kPositive);
+            DLIRAssertion dummy_assertion =
+                DLIRAssertion(DLIRCondAssertion(dummy_pred, {dummy_pred}));
+            // This vector needed to be declared before the call to make_pair because
+            // template argument inference could not figure it out otherwise.
+            std::vector<DLIRAssertion> dummy_assertions = {dummy_assertion};
+            return std::make_pair(dummy_pred, dummy_assertions);
+          }
+        }, fact.GetValue());
   }
 
   std::vector<DLIRAssertion>
@@ -216,6 +266,9 @@ class LoweringToDatalogPass {
     return ret;
   }
 
+  // Queries are like predicates with arity 0. Souffle does not have predicates 
+  // with arity 0, so we represent them as having one argument which is a 
+  // constant. 
   #define DUMMY_PREDICATE Predicate("grounded_dummy", {"dummy_var"}, kPositive)
 
   DLIRAssertion
@@ -241,6 +294,8 @@ class LoweringToDatalogPass {
   DLIRProgram ProgToDLIR(const Program& program) {
     auto dlir_assertions = SaysAssertionsToDLIR(program.says_assertions());
     auto dlir_queries = QueriesToDLIR(program.queries());
+    // We need to add a fact that says the dummy variable used in queries is 
+    // grounded.
     auto dummy_assertion = DLIRAssertion(DUMMY_PREDICATE);
     dlir_assertions.insert(dlir_assertions.end(),
         std::make_move_iterator(dlir_queries.begin()),

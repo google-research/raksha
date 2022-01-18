@@ -198,7 +198,7 @@ class Query {
   Fact fact_;
 };
 
-// This is a top-level program which can contain
+// This is a top-level program.
 class Program {
  public:
   explicit Program(std::vector<SaysAssertion> says_assertions,
