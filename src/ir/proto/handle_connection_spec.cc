@@ -20,7 +20,8 @@
 
 namespace raksha::ir::proto {
 
-HandleConnectionSpec Decode(const arcs::HandleConnectionSpecProto &proto) {
+HandleConnectionSpec Decode(types::TypeFactory &type_factory,
+                            const arcs::HandleConnectionSpecProto &proto) {
   std::string name = proto.name();
   CHECK(!name.empty()) << "Found connection spec without required name.";
   bool reads = false;
@@ -45,7 +46,7 @@ HandleConnectionSpec Decode(const arcs::HandleConnectionSpecProto &proto) {
   }
   CHECK(proto.has_type())
     << "Found connection spec " << name << " without required type.";
-  types::Type type = types::proto::Decode(proto.type());
+  types::Type type = types::proto::Decode(type_factory, proto.type());
   return HandleConnectionSpec(std::move(name), reads, writes, std::move(type));
 }
 

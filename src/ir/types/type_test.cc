@@ -5,6 +5,7 @@
 #include <optional>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "google/protobuf/text_format.h"
 #include "google/protobuf/util/message_differencer.h"
@@ -19,10 +20,12 @@
 
 namespace raksha::ir::types {
 
+types::TypeFactory type_factory;
+
 // Helper function for making an unnamed schema from a field map.
-static Schema MakeAnonymousSchema(
+static const Schema &MakeAnonymousSchema(
     absl::flat_hash_map<std::string, Type> field_map) {
-  return Schema(std::nullopt, std::move(field_map));
+  return type_factory.RegisterSchema(std::nullopt, std::move(field_map));
 }
 
 // Helper function for making an entity type with an unnamed schema from a
@@ -230,7 +233,10 @@ INSTANTIATE_TEST_SUITE_P(
 
 class GetAccessPathSelectorsWithProtoTest :
  public testing::TestWithParam<
-  std::tuple<std::string, std::vector<std::string>>> {};
+  std::tuple<std::string, std::vector<std::string>>> {
+ protected:
+  types::TypeFactory type_factory_;
+};
 
 TEST_P(GetAccessPathSelectorsWithProtoTest,
        GetAccessPathSelectorsWithProtoTest) {
@@ -239,7 +245,7 @@ TEST_P(GetAccessPathSelectorsWithProtoTest,
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(type_as_textproto,
                                                           &orig_type_proto))
       << "Failed to parse text proto!";
-  Type type = proto::Decode(orig_type_proto);
+  Type type = proto::Decode(type_factory_, orig_type_proto);
   std::vector<std::string> access_path_str_vec =
       GetAccessPathStrVecFromAccessPathSelectorsSet(
           type.GetAccessPathSelectorsSet());
@@ -299,7 +305,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // TODO(#122): This test should be moved to appropriate file while refactoring.
 TEST(EntityTypeTest, KindReturnsCorrectKind) {
-  EntityType entity_type(Schema(std::nullopt, {}));
+  EntityType entity_type(MakeAnonymousSchema({}));
   EXPECT_EQ(entity_type.kind(), TypeBase::Kind::kEntity);
 }
 

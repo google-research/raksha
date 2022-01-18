@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,23 +12,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//-----------------------------------------------------------------------------
-#ifndef SRC_IR_PROTO_SCHEMA_H_
-#define SRC_IR_PROTO_SCHEMA_H_
+//----------------------------------------------------------------------------
+#include "src/ir/types/type_factory.h"
+
+#include <memory>
 
 #include "src/ir/types/schema.h"
-#include "src/ir/types/type_factory.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
-namespace raksha::ir::types::proto {
+namespace raksha::ir::types {
 
-// Decodes the given `schema_proto` and returns the resulting Schema.
-const Schema& decode(types::TypeFactory& type_factory,
-                     const arcs::SchemaProto& schema_proto);
+const Schema& TypeFactory::RegisterSchema(
+    std::optional<std::string> name,
+    absl::flat_hash_map<std::string, Type> fields) {
+  std::unique_ptr<Schema> new_schema(
+      new Schema(std::move(name), std::move(fields)));
+  const Schema* result = new_schema.get();
+  schemas_.push_back(std::move(new_schema));
+  return *result;
+}
 
-// Encodes the given `schema` as an arcs::SchemaProto.
-arcs::SchemaProto encode(const Schema& schema);
-
-}  // namespace raksha::ir::types::proto
-
-#endif  // SRC_IR_PROTO_SCHEMA_H_
+}  // namespace raksha::ir::types

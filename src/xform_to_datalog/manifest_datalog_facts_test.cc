@@ -301,16 +301,17 @@ class ParseBigManifestTest : public testing::Test {
     arcs::ManifestProto manifest_proto;
     google::protobuf::TextFormat::ParseFromString(
         kManifestTextproto, &manifest_proto);
-    system_spec_ = ir::proto::Decode(manifest_proto);
+    system_spec_ = ir::proto::Decode(type_factory_, manifest_proto);
     CHECK(system_spec_ != nullptr);
     datalog_facts_ = ManifestDatalogFacts::CreateFromManifestProto(
-        *system_spec_, manifest_proto);
+        type_factory_, *system_spec_, manifest_proto);
 
     std::string datalog = datalog_facts_.ToDatalog(ctxt_, "~");
     datalog_strings_ = absl::StrSplit(datalog, "~", absl::SkipEmpty());
   }
 
  protected:
+  ir::types::TypeFactory type_factory_;
   std::unique_ptr<ir::SystemSpec> system_spec_;
   ir::DatalogPrintContext ctxt_;
   ManifestDatalogFacts datalog_facts_;

@@ -19,7 +19,6 @@ class TypeBase {
   virtual Kind kind() const = 0;
 };
 
-
 class Type {
  public:
   Type(std::unique_ptr<TypeBase> type) : type_(std::move(type)) {}
