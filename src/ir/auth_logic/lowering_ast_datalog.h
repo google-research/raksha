@@ -203,15 +203,40 @@ class LoweringToDatalogPass {
           },
           // To make the typechecker happy, this needs to be a const reference
           // to a unique ptr... which is surprising to me.
-          [](const std::unique_ptr<CanSay>& can_say) {
-            // TODO fill in real implementation. This is just a stub.
-            Predicate dummy_pred = Predicate("pred_name", {"arg1"}, kPositive);
-            DLIRAssertion dummy_assertion =
-                DLIRAssertion(DLIRCondAssertion(dummy_pred, {dummy_pred}));
-            // This vector needed to be declared before the call to make_pair because
-            // template argument inference could not figure it out otherwise.
-            std::vector<DLIRAssertion> dummy_assertions = {dummy_assertion};
-            return std::make_pair(dummy_pred, dummy_assertions);
+          [this, &speaker](const std::unique_ptr<CanSay>& can_say) {
+            auto[inner_fact_dlir, gen_rules] = FactToDLIR(speaker, *can_say->fact());
+
+            auto fresh_principal = Principal(FreshVar());
+
+            // The following code generates the extra rule that does 
+            // delegation. This rule is:
+            // ```
+            // speaker says inner_fact_dlir:-
+            //      fresh_principal says inner_fact_dlir,
+            //      speaker says fresh_principal canSay inner_fact_dlir 
+            // ```
+          
+            // This is p says inner_fact_dlir
+            auto lhs = PushPrin(std::string("says_"), speaker, inner_fact_dlir);
+            auto fresh_prin_says_inner = PushPrin(std::string("says_"),
+                fresh_principal, inner_fact_dlir);
+            auto speaker_says_fresh_cansay_inner = PushPrin(std::string("says_"),
+                speaker, PushPrin(std::string("canSay_"),
+                  fresh_principal, inner_fact_dlir));
+            auto rhs = {fresh_prin_says_inner, speaker_says_fresh_cansay_inner};
+            auto generated_rule = DLIRAssertion(DLIRCondAssertion(lhs, rhs));
+            gen_rules.push_back(generated_rule);
+
+            // Note that prin_cansay_pred does not begin with "speaker says"
+            // because only the top-level fact should. This could
+            // be a recursive call, so it might not be processing
+            // the top-level fact. The top-level fact gets wrapped
+            // in a "says" during the call to translate the assertion
+            // in which this appears.
+            auto prin_cansay_pred = PushPrin(std::string("canSay_"),
+                can_say->principal(),
+                inner_fact_dlir);
+            return std::make_pair(prin_cansay_pred, gen_rules);
           }
         }, fact.GetValue());
   }
@@ -221,7 +246,7 @@ class LoweringToDatalogPass {
       const Assertion& assertion) {
     return std::visit(
         raksha::utils::overloaded{
-          // TODO not sure why this signature needs to be a const reference to
+          // I'm not sure why this signature needs to be a const reference to
           // make the typechecker happy when the visitor for BaseFactToDLIR did
           // not need this.
           [this, &speaker](const Fact& fact) {
