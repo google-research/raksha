@@ -257,22 +257,23 @@ class LoweringToDatalogPass {
             generated_rules.push_back(main_assertion);
             return generated_rules;
           },
-          [](const ConditionalAssertion& conditional_assertion) {
-            auto dlir_rhs = {};
+          [this, &speaker](const ConditionalAssertion& conditional_assertion) {
+          std::vector<Predicate> dlir_rhs = {};
             for (auto ast_rhs : conditional_assertion.rhs()) {
               // extra rule are only generated for facts on the LHS,
               // so the rules that would be generated from this RHS fact are 
               // not used.
-              auto[dlir_translation, not_used] = FlatFactToDLIR(speaker, ast_rhs);
+              auto[dlir_translation, not_used] = BaseFactToDLIR(speaker, ast_rhs);
               dlir_rhs.push_back(PushPrin(std::string("says_"),
                     speaker, dlir_translation));
             }
             auto[dlir_lhs, gen_rules] = FactToDLIR(speaker,
                 conditional_assertion.lhs());
-            auto dlir_lhs = PushPrin(std::string("says_"), speaker, lhs_prime);
+            auto dlir_lhs_prime = PushPrin(std::string("says_"), speaker, dlir_lhs);
             auto dlir_assertion = DLIRAssertion(
-                DLIRCondAssertion(dlir_lhs, dlir_rhs));
-            return std::make_pair(dlir_assertion, gen_rules);
+                DLIRCondAssertion(dlir_lhs_prime, dlir_rhs));
+            gen_rules.push_back(dlir_assertion);
+            return gen_rules;
           }
         },
         assertion.GetValue());
