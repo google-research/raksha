@@ -37,11 +37,9 @@ Type Decode(types::TypeFactory& type_factory,
     case arcs::TypeProto::DATA_NOT_SET:
       LOG(FATAL) << "Found a TypeProto with an unset specific type.";
     case arcs::TypeProto::kPrimitive:
-      return Type(
-          std::make_unique<PrimitiveType>(decode(type_proto.primitive())));
+      return decode(type_factory, type_proto.primitive());
     case arcs::TypeProto::kEntity:
-      return Type(std::make_unique<EntityType>(
-          decode(type_factory, type_proto.entity())));
+      return decode(type_factory, type_proto.entity());
     default:
       LOG(FATAL) << "Found unimplemented type. Only Primitive and Entity "
                     "types are currently implemented.";

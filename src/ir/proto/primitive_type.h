@@ -17,12 +17,14 @@
 #define SRC_IR_PROTO_PRIMITIVE_TYPE_H_
 
 #include "src/ir/types/primitive_type.h"
+#include "src/ir/types/type_factory.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types::proto {
 
 // Decodes the given `primitive_type_proto` as a PrimitiveType.
-PrimitiveType decode(const arcs::PrimitiveTypeProto& primitive_type_proto);
+Type decode(TypeFactory& type_factory,
+            const arcs::PrimitiveTypeProto& primitive_type_proto);
 
 // Encodes the given `primitive_type` as an PrimitiveTypeProto.
 arcs::PrimitiveTypeProto encode(const PrimitiveType& primitive_type);
@@ -33,4 +35,3 @@ arcs::TypeProto encodeAsTypeProto(const PrimitiveType& primitive_type);
 }  // namespace raksha::ir::types::proto
 
 #endif  // SRC_IR_PROTO_PRIMITIVE_TYPE_H_
-

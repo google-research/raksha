@@ -28,6 +28,13 @@ class Schema;
 
 class TypeFactory {
  public:
+
+  // Create a primitive type and wrap it in `types::Type`.
+  Type MakePrimitiveType();
+
+  // Create an entity type and wrap it in `types::Type`.
+  Type MakeEntityType(const Schema& schema);
+
   // Create and register the given schema.
   const Schema& RegisterSchema(std::optional<std::string> name,
                                absl::flat_hash_map<std::string, Type> fields);

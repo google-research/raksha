@@ -17,9 +17,19 @@
 
 #include <memory>
 
+#include "src/ir/types/entity_type.h"
+#include "src/ir/types/primitive_type.h"
 #include "src/ir/types/schema.h"
 
 namespace raksha::ir::types {
+
+Type TypeFactory::MakePrimitiveType() {
+  return Type(std::make_unique<PrimitiveType>());
+}
+
+Type TypeFactory::MakeEntityType(const Schema& schema) {
+  return Type(std::make_unique<EntityType>(schema));
+}
 
 const Schema& TypeFactory::RegisterSchema(
     std::optional<std::string> name,

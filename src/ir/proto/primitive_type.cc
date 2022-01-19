@@ -16,11 +16,13 @@
 #include "src/ir/proto/primitive_type.h"
 
 #include "src/ir/types/primitive_type.h"
+#include "src/ir/types/type_factory.h"
 
 namespace raksha::ir::types::proto {
 
-PrimitiveType decode(const arcs::PrimitiveTypeProto &primitive_type_proto) {
-  return PrimitiveType();
+Type decode(TypeFactory& type_factory,
+            const arcs::PrimitiveTypeProto& primitive_type_proto) {
+  return type_factory.MakePrimitiveType();
 }
 
 arcs::PrimitiveTypeProto encode(const PrimitiveType& primitive_type) {

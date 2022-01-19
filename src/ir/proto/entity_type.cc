@@ -19,11 +19,12 @@
 
 namespace raksha::ir::types::proto {
 
-EntityType decode(types::TypeFactory& type_factory,
+Type decode(types::TypeFactory& type_factory,
                   const arcs::EntityTypeProto& entity_type_proto) {
   CHECK(entity_type_proto.has_schema())
       << "Schema is required for Entity types.";
-  return EntityType(decode(type_factory, entity_type_proto.schema()));
+  return type_factory.MakeEntityType(
+      decode(type_factory, entity_type_proto.schema()));
 }
 
 arcs::EntityTypeProto encode(const EntityType& entity_type) {

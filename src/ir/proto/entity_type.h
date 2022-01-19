@@ -23,8 +23,8 @@
 namespace raksha::ir::types::proto {
 
 // Decodes the given `entity_type_proto` as an EntityType.
-EntityType decode(types::TypeFactory& type_factory,
-                  const arcs::EntityTypeProto& entity_type_proto);
+Type decode(types::TypeFactory& type_factory,
+            const arcs::EntityTypeProto& entity_type_proto);
 
 // Encodes the given `entity_type` as an EntityTypeProto.
 arcs::EntityTypeProto encode(const EntityType& entity_type);
