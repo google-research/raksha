@@ -32,7 +32,7 @@ TEST_P(EntityTypeTest, RoundTripPreservesAllInformation) {
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(GetParam(),
                                                             &orig_type_proto))
       << "Failed to parse type proto.";
-  arcs::TypeProto result_type_proto = Encode(*Decode(orig_type_proto));
+  arcs::TypeProto result_type_proto = Encode(Decode(orig_type_proto));
   ASSERT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
       orig_type_proto, result_type_proto));
 }

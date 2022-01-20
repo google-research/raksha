@@ -114,10 +114,10 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
 
         CHECK(connection_proto.has_type())
           << "Handle connection with absent type not allowed.";
-        std::unique_ptr<types::Type> connection_type =
+        types::Type connection_type =
             ir::types::proto::Decode(connection_proto.type());
         ir::AccessPathSelectorsSet access_path_selectors_set =
-            connection_type->GetAccessPathSelectorsSet();
+            connection_type.GetAccessPathSelectorsSet();
 
         // Look up the HandleConnectionSpec to see if the handle connection
         // will read and/or write.

@@ -31,7 +31,7 @@ Schema decode(const arcs::SchemaProto& schema_proto) {
     name = schema_names.at(0);
   }
 
-  absl::flat_hash_map<std::string, std::unique_ptr<Type>> field_map;
+  absl::flat_hash_map<std::string, Type> field_map;
   for (const auto &field_name_type_pair : schema_proto.fields()) {
     const std::string &field_name = field_name_type_pair.first;
     const arcs::TypeProto &type_proto = field_name_type_pair.second;
@@ -52,7 +52,7 @@ arcs::SchemaProto encode(const Schema& schema) {
   auto &fields_map = *schema_proto.mutable_fields();
   for (auto &field_name_type_pair : schema.fields()) {
     const std::string &field_name = field_name_type_pair.first;
-    const Type &field_type = *field_name_type_pair.second;
+    const Type &field_type = field_name_type_pair.second;
 
     auto insert_result = fields_map.insert(
         {field_name, Encode(field_type)});
