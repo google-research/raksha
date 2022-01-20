@@ -23,6 +23,7 @@ cc_library(
         "ast.h", "datalog_ir.h", "lowering_ast_datalog.h"
     ],
     deps = [
+      "//src/common/logging:logging",
       "//src/utils:overloaded",
       "@absl//absl/strings:str_format",
     ],

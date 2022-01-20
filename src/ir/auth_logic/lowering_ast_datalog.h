@@ -20,8 +20,10 @@
 #define SRC_IR_AUTH_LOGIC_LOWERING_AST_DATALOG_H_
 
 #include <utility>  //included for std::pair
+#include <limits>
 
 #include "absl/strings/str_format.h"
+#include "src/common/logging/logging.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/utils/overloaded.h"
 
@@ -130,11 +132,12 @@ class LoweringToDatalogPass {
  private:
   LoweringToDatalogPass() : fresh_var_count_(0) {}
 
-  int fresh_var_count_;
-
   // This returns a fresh variable name. Fresh variables are introduced in a
   // few places during the translation.
-  std::string FreshVar() { return "x__" + std::to_string(++fresh_var_count_); }
+  std::string FreshVar() { 
+    CHECK(fresh_var_count_ < std::numeric_limits<uint64_t>::max());
+    return "x__" + std::to_string(++fresh_var_count_);
+  }
 
   // This function makes a copy of a predicate that prepends the name with
   // another string and prepends the list of arguments with additional
@@ -398,7 +401,8 @@ class LoweringToDatalogPass {
   // Queries are like predicates with arity 0. Souffle does not have predicates 
   // with arity 0, so we represent them as having one argument which is a 
   // constant. 
-  #define DUMMY_PREDICATE Predicate("grounded_dummy", {"dummy_var"}, kPositive)
+  static inline Predicate kDummyPredicate = Predicate("grounded_dummy", {"dummy_var"}, kPositive);
+
 
   DLIRAssertion
   QueryToDLIR(const Query& query) {
@@ -408,7 +412,7 @@ class LoweringToDatalogPass {
     main_pred = PushPrin("says_", query.principal(), main_pred);
     Predicate lhs(query.name(), {"dummy_var"}, kPositive);
     return DLIRAssertion(DLIRCondAssertion(
-          lhs, {main_pred, DUMMY_PREDICATE}));
+          lhs, {main_pred, kDummyPredicate}));
   }
 
   std::vector<DLIRAssertion>
@@ -425,7 +429,7 @@ class LoweringToDatalogPass {
     auto dlir_queries = QueriesToDLIR(program.queries());
     // We need to add a fact that says the dummy variable used in queries is 
     // grounded.
-    DLIRAssertion dummy_assertion(DUMMY_PREDICATE);
+    DLIRAssertion dummy_assertion(kDummyPredicate);
     dlir_assertions.insert(dlir_assertions.end(),
         std::make_move_iterator(dlir_queries.begin()),
         std::make_move_iterator(dlir_queries.end()));
@@ -437,6 +441,8 @@ class LoweringToDatalogPass {
     }
     return DLIRProgram(dlir_assertions, outputs);
   }
+  
+  uint64_t fresh_var_count_;
 };
 
 }  // namespace raksha::ir::auth_logic
