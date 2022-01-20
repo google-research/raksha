@@ -98,7 +98,7 @@ class CanActAs {
 class BaseFact {
  public:
   // BaseFactVariantType gives the different forms of BaseFacts. Client code
-  // should use this type to traverse these forms. This type may be changed in 
+  // should use this type to traverse these forms. This type may be changed in
   // the future.
   using BaseFactVariantType = std::variant<Predicate, Attribute, CanActAs>;
   explicit BaseFact(BaseFactVariantType value) : value_(std::move(value)){};
@@ -130,7 +130,7 @@ class CanSay {
 class Fact {
  public:
   // FactVariantType gives the different forms of Facts. Client code
-  // should use this type to traverse these forms. This type may be changed in 
+  // should use this type to traverse these forms. This type may be changed in
   // the future.
   using FactVariantType = std::variant<BaseFact, std::unique_ptr<CanSay>>;
   explicit Fact(FactVariantType value) : value_(std::move(value)) {}
@@ -161,7 +161,7 @@ class ConditionalAssertion {
 class Assertion {
  public:
   // AssertionVariantType gives the different forms of Facts. Client code
-  // should use this type to traverse these forms. This type may be changed in 
+  // should use this type to traverse these forms. This type may be changed in
   // the future.
   using AssertionVariantType = std::variant<Fact, ConditionalAssertion>;
   explicit Assertion(AssertionVariantType value) : value_(std::move(value)) {}

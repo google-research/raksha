@@ -43,11 +43,11 @@ class DLIRCondAssertion {
 class DLIRAssertion {
  public:
   // DLIRAssertionVariantType represents the alternative forms for
-  // DLIRAssertions. Client code should use this type for traversing 
+  // DLIRAssertions. Client code should use this type for traversing
   // DLIRAssertions. This type may be changed in the future.
   using DLIRAssertionVariantType = std::variant<Predicate, DLIRCondAssertion>;
-  explicit DLIRAssertion(DLIRAssertionVariantType value) 
-    : value_(std::move(value)) {}
+  explicit DLIRAssertion(DLIRAssertionVariantType value)
+      : value_(std::move(value)) {}
 
  private:
   std::variant<Predicate, DLIRCondAssertion> value_;
