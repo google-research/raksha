@@ -33,7 +33,7 @@ TEST_P(DatalogFactsTest, IncludesManifestFactsWithCorrectPrefixAndSuffix) {
                expected_string] = GetParam();
   DatalogFacts datalog_facts(manifest_datalog_facts, auth_logic_datalog_facts);
   ir::DatalogPrintContext ctxt;
-  EXPECT_EQ(datalog_facts.ToDatalog(ctxt), expected_string);
+  EXPECT_EQ(expected_string, datalog_facts.ToDatalog(ctxt));
 }
 
 static std::unique_ptr<ir::ParticleSpec> particle_spec(ir::ParticleSpec::Create(
@@ -70,15 +70,8 @@ INSTANTIATE_TEST_SUITE_P(
 .output duplicateTestCaseNames(IO=stdout)
 .output disallowedUsage(IO=stdout)
 
-.decl isCheck(check_index: symbol, path: AccessPath)
-.decl check(check_index: symbol, owner: Principal, path: AccessPath)
-
-allTests(check_index) :- isCheck(check_index, _).
-testFails(cat(check_index, "-", owner, "-", path)) :-
-  isCheck(check_index, path), ownsAccessPath(owner, path),
-  !check(check_index, owner, path).
-
-testFails("may_will") :- disallowedUsage(_, _, _, _).
+testFails(name) :- checkAndResult(name, "FAIL").
+allTests(name) :- checkAndResult(name, _).
 
 .decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
 .decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
@@ -117,15 +110,8 @@ grounded_dummy("dummy_var").
 .output duplicateTestCaseNames(IO=stdout)
 .output disallowedUsage(IO=stdout)
 
-.decl isCheck(check_index: symbol, path: AccessPath)
-.decl check(check_index: symbol, owner: Principal, path: AccessPath)
-
-allTests(check_index) :- isCheck(check_index, _).
-testFails(cat(check_index, "-", owner, "-", path)) :-
-  isCheck(check_index, path), ownsAccessPath(owner, path),
-  !check(check_index, owner, path).
-
-testFails("may_will") :- disallowedUsage(_, _, _, _).
+testFails(name) :- checkAndResult(name, "FAIL").
+allTests(name) :- checkAndResult(name, _).
 
 .decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
 .decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
@@ -134,7 +120,7 @@ saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
 // Claims:
-says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(owner, "recipe.particle.out").
+claimHasTag("particle", "recipe.particle.out", "tag").
 
 // Checks:
 

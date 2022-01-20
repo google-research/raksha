@@ -24,6 +24,7 @@
 
 .type CheckPredicate =
   CP_TagPresence { ap: AccessPath, principal: Principal, tag: Tag }
+  | CP_TagPresenceDynamicOwner { ap: AccessPath, tag: Tag }
   | CP_And { lhs: CheckPredicate, rhs: CheckPredicate }
   | CP_Or { lhs: CheckPredicate, rhs: CheckPredicate }
   | CP_Implies { antecedent: CheckPredicate, consequent: CheckPredicate }
@@ -42,6 +43,13 @@ checkSubExprs(lhs), checkSubExprs(rhs) :- checkSubExprs($CP_And(lhs, rhs)).
 checkSubExprs(lhs), checkSubExprs(rhs) :- checkSubExprs($CP_Or(lhs, rhs)).
 checkSubExprs(ant), checkSubExprs(cons) :- checkSubExprs($CP_Implies(ant, cons)).
 checkSubExprs(inner) :- checkSubExprs($CP_Not(inner)).
+
+// Populate universes based upon the CP_TagPresence and
+// CP_TagPresenceDynamicOwner branch.
+isAccessPath(ap), isPrincipal(principal), isTag(tag) :-
+  checkSubExprs($CP_TagPresence(ap, principal, tag)).
+
+isAccessPath(ap), isTag(tag) :- checkSubExprs($CP_TagPresenceDynamicOwner(ap, tag)).
 
 // Evaluate predicates based upon their subpredicates. The base case, the
 // `TagPresence` branch, requires looking at the `mayHaveTag` relation, so we

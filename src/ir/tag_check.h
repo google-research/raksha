@@ -33,21 +33,13 @@ class TagCheck {
       : access_path_(std::move(access_path)),
         predicate_(std::move(predicate)) {}
 
-  // Print out the tag check as datalog facts. Note that this emits two
-  // facts: an isCheck fact and a check fact. We produce a unique label for
-  // each check using the DatalogPrintContext. We unconditionally add that
-  // label to isCheck and add that label to check only if the check's
-  // predicate passes. This allows us, in a driver, to assert that the
-  // elements of isCheck and check are equal. If that is the case, all checks
-  // passed. If it is not, at least one check failed.
+  // Print out the tag check as a datalog fact.
   std::string ToDatalog(DatalogPrintContext &ctxt) const {
     constexpr absl::string_view kCheckHasTagFormat =
-        R"(isCheck("$0", "$1"). check("$0", owner, "$1") :-
-  ownsAccessPath(owner, "$1"), $2.)";
+        R"(checkP("%s", %s).)";
     std::string check_label = ctxt.GetUniqueCheckLabel();
-    return absl::Substitute(kCheckHasTagFormat, check_label,
-                            access_path_.ToDatalog(ctxt),
-                            predicate_->ToDatalogRuleBody(access_path_, ctxt));
+    return absl::StrFormat(kCheckHasTagFormat, check_label,
+                           predicate_->ToDatalog(access_path_, ctxt));
   }
 
   bool operator==(const TagCheck &other) const {

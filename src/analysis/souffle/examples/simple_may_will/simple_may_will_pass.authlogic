@@ -19,6 +19,7 @@
     ownsTag("EndUser", "rawVideo").
     "P1" canSay hasTag(PathX, "EndUser", "rawVideo") :- isAccessPath(PathX).
     may("P2", "doLocalComputation", "rawVideo").
+    ownsAccessPath("EndUser", "R.P1#0.foo").
 }
 
 // It would be better if we had control over the manifest syntax and could just 

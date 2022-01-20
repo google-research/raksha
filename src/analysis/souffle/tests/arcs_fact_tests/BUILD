@@ -12,7 +12,8 @@ ALL_DL_TEST_FILES = glob(["*.dl"], exclude = ["*_helper.dl"])
 
 TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES = ["claim_not_edge_two_inputs_two_outputs.dl"]
 
-exports_files(["fact_test_driver.cc", "diff_wrapper.sh"])
+exports_files(["fact_test_driver.cc", "fact_test_driver_with_check_facts.cc",
+               "diff_wrapper.sh"])
 
 [gen_souffle_cxx_code(
     name = dl_script.replace(".dl", ""),
@@ -25,6 +26,7 @@ exports_files(["fact_test_driver.cc", "diff_wrapper.sh"])
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:check_predicate.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
+        "//src/analysis/souffle:may_will.dl",
         "//src/analysis/souffle:operations.dl",
         "//src/analysis/souffle:taint.dl",
         "//src/analysis/souffle:tags.dl",

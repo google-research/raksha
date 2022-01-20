@@ -43,12 +43,12 @@ class TagClaim {
   // Produce a string containing a datalog fact for this TagClaim.
   std::string ToDatalog(DatalogPrintContext &ctxt) const {
     constexpr absl::string_view kClaimTagFormat =
-        R"(%s("%s", "%s", owner, "%s") :- ownsAccessPath(owner, "%s").)";
+        R"(%s("%s", "%s", "%s").)";
     absl::string_view relation_name =
-        (claim_tag_is_present_) ? "says_hasTag" : "says_removeTag";
+        (claim_tag_is_present_) ? "claimHasTag" : "claimRemoveTag";
     return absl::StrFormat(
         kClaimTagFormat, relation_name, claiming_particle_name_,
-        access_path_.ToDatalog(ctxt), tag_, access_path_.ToDatalog(ctxt));
+        access_path_.ToDatalog(ctxt), tag_);
   }
 
   bool operator==(const TagClaim &other) const {

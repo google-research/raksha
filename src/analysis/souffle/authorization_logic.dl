@@ -42,6 +42,7 @@
 
 // The `speaker` says this party is the owner of an access path.
 .decl says_ownsAccessPath(speaker: Principal, owner: Principal, path: AccessPath)
+.input says_ownsAccessPath(delimiter=";")
 
 // The `speaker` says this party is the owner of an access path.
 .decl says_canSay_ownsAccessPath(speaker: Principal, delegatee: Principal,
@@ -56,6 +57,19 @@
 // The `speaker` says that `path` definitely has `tag` taint.
 .decl says_hasTag(speaker: Principal, path: AccessPath, owner: Principal, tag: Tag)
 .input says_hasTag(delimiter=";")
+
+// These relations are used to say that the dataflow graph has claimed that
+// a particular tag is present on a particular path. What that turns into in
+// "says_hasTag" and "says_removeTag" depends upon the `ownsAccessPath` state
+// at that access path.
+.decl claimHasTag(speaker: Principal, path: AccessPath, tag: Tag)
+.decl claimRemoveTag(speaker: Principal, path: AccessPath, tag: Tag)
+
+says_hasTag(speaker, path, owner, tag) :-
+  claimHasTag(speaker, path, tag), ownsAccessPath(owner, path).
+
+says_removeTag(speaker, path, owner, tag) :-
+  claimRemoveTag(speaker, path, tag), ownsAccessPath(owner, path).
 
 // The `speaker` says that the `delegatee` can say that `path` has `tag`.
 .decl says_canSay_hasTag(
@@ -85,5 +99,12 @@ ownsTag(owner, tag) :- says_ownsTag(_, owner, tag).
 
 isPrincipal(owner) :- ownsTag(owner, _).
 isPrincipal(owner) :- ownsAccessPath(owner, _).
+
+isPrincipal(speaker), isAccessPath(ap), isPrincipal(owner), isTag(tag) :-
+  says_hasTag(speaker, ap, owner, tag).
+isPrincipal(speaker), isPrincipal(owner), isTag(tag) :- says_ownsTag(speaker, owner, tag).
+
+isPrincipal(speaker), isAccessPath(ap), isTag(tag) :- claimHasTag(speaker, ap, tag).
+isPrincipal(speaker), isAccessPath(ap), isTag(tag) :- claimRemoveTag(speaker, ap, tag).
 
 #endif // SRC_ANALYSIS_SOUFFLE_AUTHORIZATION_LOGIC_DL_

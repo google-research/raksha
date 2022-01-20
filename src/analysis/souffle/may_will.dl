@@ -37,8 +37,23 @@ disallowedUsage(dataConsumer, usage, owner, tag) :-
 .decl allUsagesAllowed(dummy_var: symbol)
 
 .decl isUsage(usage: Usage)
+// DO NOT SUBMIT
+.output isUsage(IO=stdout)
 
-allUsagesAllowed("dummy_var") :- !disallowedUsage(dataConsumer, usage, owner, tag),
-    isPrincipal(dataConsumer), isUsage(usage), isTag(tag), ownsTag(owner, tag).
+isPrincipal(speaker), isPrincipal(actor), isUsage(usage), isTag(tag) :-
+  saysMay(speaker, actor, usage, tag).
+
+isPrincipal(speaker), isUsage(usage), isAccessPath(ap) :- saysWill(speaker, usage, ap).
+
+allUsagesAllowed("dummy_var") :- count : disallowedUsage(_, _, _, _) = 0.
+
+// TODO: Find a better way to do this.
+// Catch may-will issues as if they were a check.
+checkAndResult("may_will", "FAIL") :- !allUsagesAllowed("dummy_var").
+
+// We phrase this as depending on saysMay so that tests that do not have "may"
+// or "will" involved will not be considered as having had a check of this form
+// at all. Again, we should find a better way to do this.
+checkAndResult("may_will", "PASS") :- allUsagesAllowed("dummy_var").
 
 #endif // MAY_WILL_DL_

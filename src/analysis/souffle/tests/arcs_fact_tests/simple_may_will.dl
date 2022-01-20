@@ -1,0 +1,12 @@
+// This unit test is taken directly from the datalog generated for
+// //src/analysis/souffle/examples/simple_may_will:may_will_pass
+#include "may_will.dl"
+#include "fact_test_helper.dl"
+
+says_ownsTag("EndUser", "EndUser", "rawVideo").
+says_hasTag("EndUser", PathX, "EndUser", "rawVideo") :- says_hasTag(x___1, PathX, "EndUser", "rawVideo"), says_canSay_hasTag("EndUser", x___1, PathX, "EndUser", "rawVideo").
+says_canSay_hasTag("EndUser", "P1", PathX, "EndUser", "rawVideo") :- isAccessPath(PathX).
+saysMay("EndUser", "P2", "doLocalComputation", "rawVideo").
+saysWill("P2", "doLocalComputation", "R.P2#1.foo").
+
+TEST_CASE("may_will_pass") :- allUsagesAllowed("dummy_var").

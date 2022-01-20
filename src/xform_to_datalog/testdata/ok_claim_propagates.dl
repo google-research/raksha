@@ -12,15 +12,8 @@
 .output duplicateTestCaseNames(IO=stdout)
 .output disallowedUsage(IO=stdout)
 
-.decl isCheck(check_index: symbol, path: AccessPath)
-.decl check(check_index: symbol, owner: Principal, path: AccessPath)
-
-allTests(check_index) :- isCheck(check_index, _).
-testFails(cat(check_index, "-", owner, "-", path)) :-
-  isCheck(check_index, path), ownsAccessPath(owner, path),
-  !check(check_index, owner, path).
-
-testFails("may_will") :- disallowedUsage(_, _, _, _).
+testFails(name) :- checkAndResult(name, "FAIL").
+allTests(name) :- checkAndResult(name, _).
 
 .decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
 .decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
@@ -29,11 +22,10 @@ saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
 // Claims:
-says_hasTag("P1", "R.P1#0.foo", owner, "userSelection") :- ownsAccessPath(owner, "R.P1#0.foo").
+claimHasTag("P1", "R.P1#0.foo", "userSelection").
 
 // Checks:
-isCheck("check_num_0", "R.P3#2.bar"). check("check_num_0", owner, "R.P3#2.bar") :-
-  ownsAccessPath(owner, "R.P3#2.bar"), mayHaveTag("R.P3#2.bar", owner, "userSelection").
+checkP("check_num_0", $CP_TagPresenceDynamicOwner("R.P3#2.bar", "userSelection")).
 
 // Edges:
 edge("R.P1#0.foo", "R.handle0").

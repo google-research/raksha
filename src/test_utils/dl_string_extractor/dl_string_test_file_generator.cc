@@ -18,6 +18,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "absl/strings/str_format.h"
 #include "src/common/logging/logging.h"
 #include "src/test_utils/dl_string_extractor/datalog_string.h"
 
@@ -57,19 +58,22 @@ int main(int argc, char **argv) {
   // strings to improve readability. This one has been left because the
   // amount of newlines in it makes it actually more readable as an escaped
   // string.
-  datalog_test_stream << "#include \"taint.dl\"\n\n"
-                      << ".decl dummy(input_num: number)\n\n";
+  datalog_test_stream << "#include \"taint.dl\"\n\n";
 
   // Get our datalog strings from the linked test and output the rules that
   // will check these snippets.
   std::vector datalog_strings =
       raksha::test_utils::dl_string_extractor::GatherDatalogStrings();
-  uint64_t dummy_num = 0;
+  uint64_t check_predicate_name_num = 0;
   for (const extract::DatalogString &dl_string : datalog_strings) {
-    // Have only implemented rule bodies at this time.
-    if (dl_string.kind() != extract::kDlRuleBody) { continue; }
+    // Have only implemented datalog facts at this time.
+    if (dl_string.kind() != extract::kCheckPredicateArg) { continue; }
     datalog_test_stream
-      << "dummy(" << dummy_num++ << ") :- " << dl_string.dl_string() << ".\n";
+      << absl::StrFormat(
+          R"(checkP("check_predicate_name%u", %s).)",
+          ++check_predicate_name_num,
+          dl_string.dl_string())
+      << std::endl;
   }
   return 0;
 }

@@ -15,20 +15,20 @@ namespace raksha::ir {
 class TagCheckToDatalogWithRootTest :
     public testing::TestWithParam<
       std::tuple<
-          std::tuple<std::string, std::string>, AccessPathRoot>>
+          std::tuple<std::string, absl::ParsedFormat<'s'>>, AccessPathRoot>>
       {};
 
 TEST_P(TagCheckToDatalogWithRootTest, TagCheckToDatalogWithRootTest) {
-  const std::tuple<std::string, std::string>
+  const std::tuple<std::string, absl::ParsedFormat<'s'>>
       &textproto_format_string_pair = std::get<0>(GetParam());
   const std::string &check_textproto =
       std::get<0>(textproto_format_string_pair);
-  const absl::string_view expected_todatalog_format_string =
+  const absl::ParsedFormat<'s'> expected_todatalog_format_string =
     std::get<1>(textproto_format_string_pair);
   const AccessPathRoot &root = std::get<1>(GetParam());
   std::string root_string = root.ToString();
-  const std::string &expected_todatalog = absl::Substitute(
-      expected_todatalog_format_string, "check_num_0", root_string);
+  const std::string &expected_todatalog = absl::StrFormat(
+      expected_todatalog_format_string, root_string);
   arcs::CheckProto check_proto;
   google::protobuf::TextFormat::ParseFromString(check_textproto, &check_proto);
   TagCheck unrooted_tag_check = proto::Decode(check_proto);
@@ -63,25 +63,25 @@ static AccessPathRoot instantiated_roots[] = {
 // expected ToDatalog output when the root string is substituted for the %s.
 // This allows us to test the result of combining each of the
 // TagChecks derived from the textprotos with each of the root strings.
-static std::tuple<std::string, std::string>
+static std::tuple<std::string, absl::ParsedFormat<'s'>>
     textproto_to_expected_format_string[] = {
         {R"(access_path: {
       handle: { particle_spec: "ps", handle_connection: "hc" }
       selectors: { field: "field1" } },
       predicate: { label: { semantic_tag: "tag"} })",
-         R"(isCheck("$0", "$1.field1"). check("$0", owner, "$1.field1") :-
-  ownsAccessPath(owner, "$1.field1"), mayHaveTag("$1.field1", owner, "tag").)"},
+         absl::ParsedFormat<'s'>(
+             R"(checkP("check_num_0", $CP_TagPresenceDynamicOwner("%s.field1", "tag")).)")},
         {R"(access_path: {
       handle: { particle_spec: "ps", handle_connection: "hc" } },
       predicate: { label: { semantic_tag: "tag2"} })",
-         R"(isCheck("$0", "$1"). check("$0", owner, "$1") :-
-  ownsAccessPath(owner, "$1"), mayHaveTag("$1", owner, "tag2").)"},
+         absl::ParsedFormat<'s'>(
+             R"(checkP("check_num_0", $CP_TagPresenceDynamicOwner("%s", "tag2")).)")},
         {R"(access_path: {
       handle: { particle_spec: "ps", handle_connection: "hc" },
       selectors: [{ field: "x" }, { field: "y" }] },
       predicate: { label: { semantic_tag: "user_selection"} })",
-         R"(isCheck("$0", "$1.x.y"). check("$0", owner, "$1.x.y") :-
-  ownsAccessPath(owner, "$1.x.y"), mayHaveTag("$1.x.y", owner, "user_selection").)"}};
+         absl::ParsedFormat<'s'>(
+             R"(checkP("check_num_0", $CP_TagPresenceDynamicOwner("%s.x.y", "user_selection")).)")}};
 
 INSTANTIATE_TEST_SUITE_P(
     TagCheckToDatalogWithRootTest, TagCheckToDatalogWithRootTest,

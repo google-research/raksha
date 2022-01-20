@@ -27,17 +27,18 @@
 
 namespace raksha::ir {
 
-class ToDatalogRuleBodyTest :
+class ToDatalogTest :
  public testing::TestWithParam<
-  std::tuple<std::tuple<absl::string_view, absl::string_view>, AccessPath>> {
+  std::tuple<std::tuple<absl::string_view, absl::string_view>,
+             AccessPath>> {
  public:
-  explicit ToDatalogRuleBodyTest() : access_path_(std::get<1>(GetParam())) {
+  explicit ToDatalogTest() : access_path_(std::get<1>(GetParam())) {
     const auto &[textproto, expected_rule_body_format] =
         std::get<0>(GetParam());
 
     textproto_ = textproto;
-    expected_rule_body_ = absl::Substitute(expected_rule_body_format,
-                                           access_path_.ToString(), "owner");
+    expected_rule_body_ =
+        absl::Substitute(expected_rule_body_format, access_path_.ToString());
   }
 
  protected:
@@ -46,14 +47,14 @@ class ToDatalogRuleBodyTest :
   AccessPath access_path_;
 };
 
-TEST_P(ToDatalogRuleBodyTest, ToDatalogRuleBodyTest) {
+TEST_P(ToDatalogTest, ToDatalogTest) {
   DatalogPrintContext ctxt;
   arcs::InformationFlowLabelProto_Predicate predicate_proto;
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
       textproto_, &predicate_proto));
   std::unique_ptr<Predicate> predicate = proto::Decode(predicate_proto);
   EXPECT_EQ(
-      predicate->ToDatalogRuleBody(access_path_, ctxt), expected_rule_body_);
+      predicate->ToDatalog(access_path_, ctxt), expected_rule_body_);
 }
 
 // Helper for making AccessPaths.
@@ -79,7 +80,7 @@ static const AccessPath sample_access_paths[] = {
 
 // Note: look in predicate_textproto_to_rule_body_testdata for
 // predicate_textproto_to_rule_body_format.
-INSTANTIATE_TEST_SUITE_P(ToDatalogRuleBodyTest, ToDatalogRuleBodyTest,
+INSTANTIATE_TEST_SUITE_P(ToDatalogTest, ToDatalogTest,
                          testing::Combine(testing::ValuesIn(
                              predicate_textproto_to_rule_body_format),
                          testing::ValuesIn(sample_access_paths)));

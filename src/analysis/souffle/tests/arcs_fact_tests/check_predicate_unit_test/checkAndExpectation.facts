@@ -1,6 +1,9 @@
 a_has_tag1;$CP_TagPresence("a","P","tag1");PASS
 a_has_tag2;$CP_TagPresence("a","P","tag2");PASS
 should_fail_a_has_tag3;$CP_TagPresence("a","P","tag3");FAIL
+a_has_tag1_dyn;$CP_TagPresenceDynamicOwner("a","tag1");PASS
+a_has_tag2_dyn;$CP_TagPresenceDynamicOwner("a","tag2");PASS
+should_fail_a_has_tag3_dyn;$CP_TagPresenceDynamicOwner("a","tag3");FAIL
 should_fail_a_has_tag1_from_X;$CP_TagPresence("a","X","tag1");FAIL
 a_does_not_have_tag3;$CP_Not($CP_TagPresence("a","P","tag3"));PASS
 a_does_not_have_tag1_from_X;$CP_Not($CP_TagPresence("a","X","tag1"));PASS
@@ -12,3 +15,4 @@ b_not_has_tag1_and_tag2;$CP_Not($CP_And($CP_TagPresence("b","P","tag1"), $CP_Tag
 b_has_tag1_or_tag2;$CP_Or($CP_TagPresence("b","P","tag1"), $CP_TagPresence("b","P","tag2"));PASS
 should_fail_b_has_tag1_implies_tag2;$CP_Implies($CP_TagPresence("b","P","tag1"), $CP_TagPresence("b","P","tag2"));FAIL
 b_has_tag2_implies_tag1;$CP_Implies($CP_TagPresence("b","P","tag2"), $CP_TagPresence("b","P","tag1"));PASS
+c_does_not_have_dyn_owner_tag3;$CP_TagPresenceDynamicOwner("a","tag3");FAIL

@@ -34,32 +34,32 @@ predicate_textproto_to_rule_body_format[] = {
 
     // ap is tag1
     { R"(label: { semantic_tag: "tag1"})",
-      R"(mayHaveTag("$0", $1, "tag1"))" },
+      R"($$CP_TagPresenceDynamicOwner("$0", "tag1"))" },
 
     // ap is tag1 and is tag2
     { R"(
 and: {
   conjunct0: { label: { semantic_tag: "tag1"} }
   conjunct1: { label: { semantic_tag: "tag2"} } })",
-  R"(((mayHaveTag("$0", $1, "tag1")), (mayHaveTag("$0", $1, "tag2"))))"},
+  R"($$CP_And($$CP_TagPresenceDynamicOwner("$0", "tag1"), $$CP_TagPresenceDynamicOwner("$0", "tag2")))"},
 
   // ap is tag1 or is tag2
   { R"(
 or: {
   disjunct0: { label: { semantic_tag: "tag1"} }
   disjunct1: { label: { semantic_tag: "tag2"} } })",
-  R"(((mayHaveTag("$0", $1, "tag1")); (mayHaveTag("$0", $1, "tag2"))))"},
+  R"($$CP_Or($$CP_TagPresenceDynamicOwner("$0", "tag1"), $$CP_TagPresenceDynamicOwner("$0", "tag2")))"},
 
   // ap is not tag1
   { R"(not: { predicate: { label: { semantic_tag: "tag1"} } })",
-    R"(isPrincipal(owner), !(mayHaveTag("$0", $1, "tag1")))"},
+    R"($$CP_Not($$CP_TagPresenceDynamicOwner("$0", "tag1")))"},
 
   // ap is tag1 implies is tag2
   { R"(
 implies: {
   antecedent: { label: { semantic_tag: "tag1"} }
   consequent: { label: { semantic_tag: "tag2"} } })",
-     R"(!(mayHaveTag("$0", $1, "tag1")); ((mayHaveTag("$0", $1, "tag1")), (mayHaveTag("$0", $1, "tag2"))))"
+    R"($$CP_Implies($$CP_TagPresenceDynamicOwner("$0", "tag1"), $$CP_TagPresenceDynamicOwner("$0", "tag2")))"
   },
 
   // ap is tag1 and (is tag2 or is tag3)
@@ -69,7 +69,7 @@ and: {
   conjunct1: {  or: {
     disjunct0: { label: { semantic_tag: "tag2"} }
     disjunct1: { label: { semantic_tag: "tag3"} } } } })",
-  R"(((mayHaveTag("$0", $1, "tag1")), (((mayHaveTag("$0", $1, "tag2")); (mayHaveTag("$0", $1, "tag3"))))))"},
+  R"($$CP_And($$CP_TagPresenceDynamicOwner("$0", "tag1"), $$CP_Or($$CP_TagPresenceDynamicOwner("$0", "tag2"), $$CP_TagPresenceDynamicOwner("$0", "tag3"))))"},
 
   // ap (is tag1 or tag2) and is tag3
   { R"(
@@ -79,8 +79,7 @@ and: {
     disjunct1: { label: { semantic_tag: "tag2"} } } }
   conjunct1: { label: { semantic_tag: "tag3"} } }
 )",
-  R"(((((mayHaveTag("$0", $1, "tag1")); (mayHaveTag("$0", $1, "tag2")))), (mayHaveTag("$0", $1, "tag3"))))"},
-
+  R"($$CP_And($$CP_Or($$CP_TagPresenceDynamicOwner("$0", "tag1"), $$CP_TagPresenceDynamicOwner("$0", "tag2")), $$CP_TagPresenceDynamicOwner("$0", "tag3")))"},
   // ap is tag1 or (is tag2 and is tag3)
   { R"(
 or: {
@@ -88,9 +87,9 @@ or: {
   disjunct1: {  and: {
     conjunct0: { label: { semantic_tag: "tag2"} }
     conjunct1: { label: { semantic_tag: "tag3"} } } } })",
-  R"(((mayHaveTag("$0", $1, "tag1")); (((mayHaveTag("$0", $1, "tag2")), (mayHaveTag("$0", $1, "tag3"))))))"},
+  R"($$CP_Or($$CP_TagPresenceDynamicOwner("$0", "tag1"), $$CP_And($$CP_TagPresenceDynamicOwner("$0", "tag2"), $$CP_TagPresenceDynamicOwner("$0", "tag3"))))"},
 
-  // ap (is tag1 or tag2) and is tag3.
+  // ap (is tag1 and tag2) or is tag3.
   { R"(
 or: {
   disjunct0: {  and: {
@@ -98,7 +97,7 @@ or: {
     conjunct1: { label: { semantic_tag: "tag2"} } } }
   disjunct1: { label: { semantic_tag: "tag3"} } }
 )",
-  R"(((((mayHaveTag("$0", $1, "tag1")), (mayHaveTag("$0", $1, "tag2")))); (mayHaveTag("$0", $1, "tag3"))))"},
+  R"($$CP_Or($$CP_And($$CP_TagPresenceDynamicOwner("$0", "tag1"), $$CP_TagPresenceDynamicOwner("$0", "tag2")), $$CP_TagPresenceDynamicOwner("$0", "tag3")))"},
 
   // ap (is tag1 implies is tag2) implies (is tag3 implies is tag4)
   { R"(
@@ -115,7 +114,7 @@ implies: {
       consequent: { label: { semantic_tag: "tag4"} }
     }
   } })",
-     R"(!(!(mayHaveTag("$0", $1, "tag1")); ((mayHaveTag("$0", $1, "tag1")), (mayHaveTag("$0", $1, "tag2")))); ((!(mayHaveTag("$0", $1, "tag1")); ((mayHaveTag("$0", $1, "tag1")), (mayHaveTag("$0", $1, "tag2")))), (!(mayHaveTag("$0", $1, "tag3")); ((mayHaveTag("$0", $1, "tag3")), (mayHaveTag("$0", $1, "tag4"))))))" }
+     R"($$CP_Implies($$CP_Implies($$CP_TagPresenceDynamicOwner("$0", "tag1"), $$CP_TagPresenceDynamicOwner("$0", "tag2")), $$CP_Implies($$CP_TagPresenceDynamicOwner("$0", "tag3"), $$CP_TagPresenceDynamicOwner("$0", "tag4"))))"}
 };
 }  // namespace raksha::ir
 

@@ -171,4 +171,16 @@ predicateEval($CP_TagPresence(ap, owner, tag), 1) :-
 predicateEval($CP_TagPresence(ap, owner, tag), 0) :-
   checkSubExprs($CP_TagPresence(ap, owner, tag)), !mayHaveTag(ap, owner, tag).
 
+// This helper relation is used to make it very clear that predicateEval can be
+// only 1 xor 0 on a $CP_TagPresenceDynamicOwner.
+.decl tagPresentForSomeOwner(ap: AccessPath, tag: Tag)
+tagPresentForSomeOwner(ap, tag) :-
+  checkSubExprs($CP_TagPresenceDynamicOwner(ap, tag)),
+  ownsAccessPath(owner, ap), mayHaveTag(ap, owner, tag).
+
+predicateEval($CP_TagPresenceDynamicOwner(ap, tag), 1) :- tagPresentForSomeOwner(ap, tag).
+
+predicateEval($CP_TagPresenceDynamicOwner(ap, tag), 0) :-
+  checkSubExprs($CP_TagPresenceDynamicOwner(ap, tag)), !tagPresentForSomeOwner(ap, tag).
+
 #endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_

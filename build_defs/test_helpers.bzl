@@ -38,6 +38,7 @@ def extracted_datalog_string_test(
         copts = ["-std=c++17"],
         deps = [
             dl_string_lib,
+            "@absl//absl/strings:str_format",
             "//src/common/logging:logging",
             "//src/test_utils/dl_string_extractor:datalog_string",
         ],

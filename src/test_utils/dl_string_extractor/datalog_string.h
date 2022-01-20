@@ -22,7 +22,7 @@
 namespace raksha::test_utils::dl_string_extractor {
 
 enum DatalogStringKind {
-  kDlRuleBody,
+  kCheckPredicateArg,
 };
 
 // A string that is a snippet of datalog, marked with the grammatical part of

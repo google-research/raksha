@@ -47,7 +47,7 @@ class Predicate {
   virtual ~Predicate() {}
   // Turns this predicate into a rule body that can be used for checking if
   // the given condition holds.
-  virtual std::string ToDatalogRuleBody(
+  virtual std::string ToDatalog(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const = 0;
   virtual PredicateKind GetPredicateKind() const = 0;
   virtual bool operator==(Predicate const &other) const = 0;
@@ -72,11 +72,11 @@ class And : public Predicate {
 
   virtual ~And() {}
 
-  std::string ToDatalogRuleBody(
+  std::string ToDatalog(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const override {
-    constexpr absl::string_view kFormatString = R"(((%s), (%s)))";
-    return absl::StrFormat(kFormatString, lhs_->ToDatalogRuleBody(ap, ctxt),
-                           rhs_->ToDatalogRuleBody(ap, ctxt));
+    constexpr absl::string_view kFormatString = R"($CP_And(%s, %s))";
+    return absl::StrFormat(kFormatString, lhs_->ToDatalog(ap, ctxt),
+                           rhs_->ToDatalog(ap, ctxt));
   }
 
   static PredicateKind GetKind() { return kAnd; }
@@ -111,12 +111,14 @@ class Implies : public Predicate {
 
   virtual ~Implies() {}
 
-  std::string ToDatalogRuleBody(
+  std::string ToDatalog(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const override {
-    std::string antecedent_str = antecedent_->ToDatalogRuleBody(ap, ctxt);
-    constexpr absl::string_view kFormatString = R"(!(%s); ((%s), (%s)))";
-    return absl::StrFormat(kFormatString, antecedent_str, antecedent_str,
-                           consequent_->ToDatalogRuleBody(ap, ctxt));
+    std::string antecedent_str = antecedent_->ToDatalog(ap, ctxt);
+    constexpr absl::string_view kFormatString = R"($CP_Implies(%s, %s))";
+    return absl::StrFormat(
+        kFormatString,
+        antecedent_->ToDatalog(ap,  ctxt),
+        consequent_->ToDatalog(ap, ctxt));
   }
 
   static PredicateKind GetKind() { return PredicateKind::kImplies; }
@@ -145,11 +147,11 @@ class Not : public Predicate {
 
   virtual ~Not() {}
 
-  std::string ToDatalogRuleBody(
+  std::string ToDatalog(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const override {
-    constexpr absl::string_view kFormatString = R"(isPrincipal(owner), !(%s))";
+    constexpr absl::string_view kFormatString = R"($CP_Not(%s))";
     return absl::StrFormat(kFormatString,
-                           negated_predicate_->ToDatalogRuleBody(ap, ctxt));
+                           negated_predicate_->ToDatalog(ap, ctxt));
   }
 
   static PredicateKind GetKind() { return PredicateKind::kNot; }
@@ -176,11 +178,11 @@ class Or : public Predicate {
 
   virtual ~Or() {}
 
-  std::string ToDatalogRuleBody(
+  std::string ToDatalog(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const override {
-    constexpr absl::string_view kFormatString = R"(((%s); (%s)))";
-    return absl::StrFormat(kFormatString, lhs_->ToDatalogRuleBody(ap, ctxt),
-                           rhs_->ToDatalogRuleBody(ap, ctxt));
+    constexpr absl::string_view kFormatString = R"($CP_Or(%s, %s))";
+    return absl::StrFormat(kFormatString, lhs_->ToDatalog(ap, ctxt),
+                           rhs_->ToDatalog(ap, ctxt));
   }
 
   static PredicateKind GetKind() { return PredicateKind::kOr; }
@@ -208,10 +210,11 @@ class TagPresence : public Predicate {
 
   // The tag presence just turns into a check for the tag on the access_path
   // in the mayHaveTag relation.
-  std::string ToDatalogRuleBody(
+  std::string ToDatalog(
       const AccessPath &access_path,
       const DatalogPrintContext &ctxt) const override {
-    constexpr absl::string_view kFormatStr = R"(mayHaveTag("%s", owner, "%s"))";
+    constexpr absl::string_view kFormatStr =
+        R"($CP_TagPresenceDynamicOwner("%s", "%s"))";
     return absl::StrFormat(kFormatStr, access_path.ToDatalog(ctxt), tag_);
   }
 

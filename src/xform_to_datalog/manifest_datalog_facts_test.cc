@@ -113,11 +113,10 @@ static std::tuple<ManifestDatalogFacts, std::string>
              {ir::Edge(kHandleH1AccessPath, kHandleConnectionInAccessPath),
               ir::Edge(kHandleConnectionOutAccessPath, kHandleH2AccessPath)})}),
          R"(// Claims:
-says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(owner, "recipe.particle.out").
+claimHasTag("particle", "recipe.particle.out", "tag").
 
 // Checks:
-isCheck("check_num_0", "recipe.particle.in"). check("check_num_0", owner, "recipe.particle.in") :-
-  ownsAccessPath(owner, "recipe.particle.in"), mayHaveTag("recipe.particle.in", owner, "tag2").
+checkP("check_num_0", $CP_TagPresenceDynamicOwner("recipe.particle.in", "tag2")).
 
 // Edges:
 edge("recipe.h1", "recipe.particle.in").
@@ -319,12 +318,12 @@ class ParseBigManifestTest : public testing::Test {
 
 static const std::string kExpectedClaimStrings[] = {
     R"(// Claims:)",
-    R"(says_hasTag("PS1", "NamedR.PS1#0.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "NamedR.PS1#0.out_handle.field1").)",
-    R"(says_hasTag("PS1", "NamedR.PS1#1.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "NamedR.PS1#1.out_handle.field1").)",
-    R"(says_hasTag("PS2", "NamedR.PS2#2.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "NamedR.PS2#2.out_handle.field1").)",
-    R"(says_hasTag("PS1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1").)",
-    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1").)",
-    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1").)",
+    R"(claimHasTag("PS1", "NamedR.PS1#0.out_handle.field1", "tag1").)",
+    R"(claimHasTag("PS1", "NamedR.PS1#1.out_handle.field1", "tag1").)",
+    R"(claimHasTag("PS2", "NamedR.PS2#2.out_handle.field1", "tag3").)",
+    R"(claimHasTag("PS1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", "tag1").)",
+    R"(claimHasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "tag3").)",
+    R"(claimHasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "tag3").)",
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
@@ -337,8 +336,7 @@ TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
 }
 
 static constexpr absl::string_view kPattern =
-    R"(isCheck("$0", "$1"). check("$0", owner, "$1") :-
-  ownsAccessPath(owner, "$1"), mayHaveTag("$1", owner, "$2").)";
+    R"(checkP("$0", $$CP_TagPresenceDynamicOwner("$1", "$2")).)";
 
 static std::string kExpectedCheckStrings[] = {
     R"(// Checks:)",
