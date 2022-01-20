@@ -36,6 +36,7 @@
 // A data flow edge. An edge is just a synonym for the `=` operator with `src`
 // as the one operand and `tgt` as the result.
 .decl edge(src: AccessPath, tgt: AccessPath)
+.input edge(delimiter=";")
 
 // Use the previous relations to map an edge to a generated access path
 // representing its midpoint.

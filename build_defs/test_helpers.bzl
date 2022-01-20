@@ -14,7 +14,7 @@
 # limitations under the License.
 #----------------------------------------------------------------------------
 
-load("//build_defs:souffle.bzl", "souffle_cc_library")
+load("//build_defs:souffle.bzl", "souffle_cc_library", "gen_souffle_cxx_code")
 
 def extracted_datalog_string_test(
         name,
@@ -53,12 +53,13 @@ def extracted_datalog_string_test(
         visibility = visibility,
     )
 
-    souffle_cc_library(
-        name = name + "_souffle_lib",
+    gen_souffle_cxx_code(
+        name = name + "_cxx",
         src = name + "_dl",
-        testonly = True,
+        for_test = True,
         included_dl_scripts = [
             "//src/analysis/souffle:authorization_logic.dl",
+            "//src/analysis/souffle:check_predicate.dl",
             "//src/analysis/souffle:dataflow_graph.dl",
             "//src/analysis/souffle:operations.dl",
             "//src/analysis/souffle:taint.dl",
@@ -67,11 +68,17 @@ def extracted_datalog_string_test(
         ],
     )
 
+    souffle_cc_library(
+        name = name + "_souffle_lib",
+        src = name + "_cxx",
+        testonly = True,
+    )
+
     native.cc_test(
         name = name,
         srcs = ["//src/test_utils/dl_string_extractor:dl_string_parsing_test_driver.cc"],
         args = [
-            name + "_dl",
+            name + "_cxx",
         ],
         copts = [
             "-Iexternal/souffle/src/include/souffle",
@@ -81,4 +88,65 @@ def extracted_datalog_string_test(
             name + "_souffle_lib",
             "@souffle//:souffle_include_lib",
         ],
+    )
+
+def run_taint_exec_compare_check_results(
+        name,
+        input_files,
+        visibility = None):
+    """Run the Souffle-generated taint executable and ensure that the failing
+    check output file is empty.
+
+    Args:
+      name: String; Name of the test.
+      input_files: List; List of labels indicatinginput files to taint_exec.
+    """
+
+    facts_dir_opts = [
+        "--facts=`dirname $(location {})`".format(input_file) for input_file in input_files
+    ]
+
+    # Run the taint analysis Souffle binary to generate the Datalog output
+    # files, then copy the checkAndResult and expectedCheckAndResult output
+    # files to the rule outputs.
+    native.genrule(
+        name = name + "_test_results",
+        outs = ["checkAndResult", "expectedCheckAndResult"],
+        srcs = input_files,
+        testonly = True,
+        cmd = ("$(location //src/analysis/souffle:taint_exec_test) --output=$(RULEDIR) {fact_dirs} && " +
+               "cp $(RULEDIR)/checkAndResult.csv $(location :checkAndResult) && " +
+               "cp $(RULEDIR)/expectedCheckAndResult.csv $(location :expectedCheckAndResult)")
+              .format(fact_dirs = " ".join(facts_dir_opts)),
+        tools = ["//src/analysis/souffle:taint_exec_test"],
+        visibility = visibility,
+    )
+
+    # Sort the checkAndResult contents. Because the check name is the first
+    # field, this should sort them by name.
+    native.genrule(
+        name = name + "_check_and_result_sorted",
+        outs = ["checkAndResultSorted"],
+        srcs = [":checkAndResult"],
+        testonly = True,
+        cmd = "sort $< > $@",
+        visibility = visibility
+    )
+
+    # Similarly, sort expectedCheckAndResult.
+    native.genrule(
+        name = name + "_expected_check_and_result_sorted",
+        outs = ["expectedCheckAndResultSorted"],
+        srcs = [":expectedCheckAndResult"],
+        testonly = True,
+        cmd = "sort $< > $@",
+        visibility = visibility
+    )
+
+    # Compare the two files for diff equality.
+    native.sh_test(
+        name = name,
+        args = ["$(location :expectedCheckAndResultSorted)", "$(location :checkAndResultSorted)"],
+        data = [":checkAndResultSorted", ":expectedCheckAndResultSorted"],
+        srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:diff_wrapper.sh"]
     )
