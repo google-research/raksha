@@ -20,6 +20,22 @@ package(default_visibility = ["//src:__subpackages__"])
 load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
 
 cc_library(
+    name = "new_ir",
+    hdrs = [
+        "block.h",
+        "operation.h",
+        "operator.h",
+        "storage.h",
+        "value.h",
+    ],
+    deps = [
+        "//src/ir/types",
+        "@absl//absl/container:flat_hash_map",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "ir",
     srcs = [
         "access_path_root.cc",
