@@ -45,7 +45,7 @@ HandleConnectionSpec Decode(const arcs::HandleConnectionSpecProto &proto) {
   }
   CHECK(proto.has_type())
     << "Found connection spec " << name << " without required type.";
-  std::unique_ptr<types::Type> type = types::proto::Decode(proto.type());
+  types::Type type = types::proto::Decode(proto.type());
   return HandleConnectionSpec(std::move(name), reads, writes, std::move(type));
 }
 

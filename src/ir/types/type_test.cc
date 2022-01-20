@@ -21,19 +21,19 @@ namespace raksha::ir::types {
 
 // Helper function for making an unnamed schema from a field map.
 static Schema MakeAnonymousSchema(
-    absl::flat_hash_map<std::string, std::unique_ptr<Type>> field_map) {
+    absl::flat_hash_map<std::string, Type> field_map) {
   return Schema(std::nullopt, std::move(field_map));
 }
 
 // Helper function for making an entity type with an unnamed schema from a
 // field map.
 static EntityType MakeEntityTypeWithAnonymousSchema(
-    absl::flat_hash_map<std::string, std::unique_ptr<Type>> field_map) {
+    absl::flat_hash_map<std::string, Type> field_map) {
   return EntityType(MakeAnonymousSchema(std::move(field_map)));
 }
 
 static std::unique_ptr<EntityType> MakeUniquePtrEntityTypeWithAnonymousSchema(
-    absl::flat_hash_map<std::string, std::unique_ptr<Type>> field_map) {
+    absl::flat_hash_map<std::string, Type> field_map) {
   return std::make_unique<EntityType>(
       MakeAnonymousSchema(std::move(field_map)));
 }
@@ -44,14 +44,14 @@ static std::unique_ptr<EntityType> MakeUniquePtrEntityTypeWithAnonymousSchema(
 // this is not presented by the selector access path and thus cannot be
 // derived from it.
 template<typename Iter>
-static std::unique_ptr<Type> MakeMinimalTypeFromAccessPathFieldVec(
+static Type MakeMinimalTypeFromAccessPathFieldVec(
     Iter begin_iter, Iter end_iter, uint64_t depth) {
 
   // We expect that the incoming range is never empty.
   EXPECT_NE(begin_iter, end_iter);
   // If they happen to be equal, though, just bail out with a primitive type.
   if (begin_iter == end_iter) {
-    return std::make_unique<PrimitiveType>();
+    return Type(std::make_unique<PrimitiveType>());
   }
 
   // If the first vector does not have the required depth, we expect that we
@@ -62,7 +62,7 @@ static std::unique_ptr<Type> MakeMinimalTypeFromAccessPathFieldVec(
   // we just make a choice.
   if (begin_iter->size() <= depth) {
     EXPECT_EQ(++begin_iter, end_iter);
-    return std::make_unique<PrimitiveType>();
+    return Type(std::make_unique<PrimitiveType>());
   }
 
   // An equality function that compares vectors only by the element at depth.
@@ -86,7 +86,7 @@ static std::unique_ptr<Type> MakeMinimalTypeFromAccessPathFieldVec(
     return vec1.at(depth) < vec2.at(depth);
   };
 
-  absl::flat_hash_map<std::string, std::unique_ptr<Type>> field_map;
+  absl::flat_hash_map<std::string, Type> field_map;
   while (begin_iter != end_iter) {
     const std::vector<std::string> &range_start_vec = *begin_iter;
     std::string field_name = range_start_vec.at(depth);
@@ -105,12 +105,12 @@ static std::unique_ptr<Type> MakeMinimalTypeFromAccessPathFieldVec(
     // Move the iterator past the range of equal fields.
     begin_iter = equal_range_end;
   }
-  return MakeUniquePtrEntityTypeWithAnonymousSchema(std::move(field_map));
+  return Type(MakeUniquePtrEntityTypeWithAnonymousSchema(std::move(field_map)));
 }
 
 // Given a vector of strings representing access paths to leaves, generate a
 // type having all of those access paths and no others.
-static std::unique_ptr<Type> MakeMinimalTypeFromAccessPathStrings(
+static Type MakeMinimalTypeFromAccessPathStrings(
     std::vector<std::string> access_path_strs) {
   std::vector<std::vector<std::string>> access_path_field_vecs;
   for (std::string str : access_path_strs) {
@@ -184,11 +184,10 @@ class RoundTripStrsThroughTypeTest :
 // don't lose information in this process (for the given inputs).
 TEST_P(RoundTripStrsThroughTypeTest, RoundTripStrsThroughTypeTest) {
   std::vector<std::string> original_strs = GetParam();
-  std::unique_ptr<Type> generated_type =
-      MakeMinimalTypeFromAccessPathStrings(original_strs);
+  Type generated_type = MakeMinimalTypeFromAccessPathStrings(original_strs);
   std::vector<std::string> result_strs =
       GetAccessPathStrVecFromAccessPathSelectorsSet(
-          generated_type->GetAccessPathSelectorsSet());
+          generated_type.GetAccessPathSelectorsSet());
 
   EXPECT_THAT(result_strs, testing::UnorderedElementsAreArray(original_strs));
 }
@@ -197,14 +196,13 @@ INSTANTIATE_TEST_SUITE_P(
     RoundTripStrsThroughTypeTest, RoundTripStrsThroughTypeTest,
     testing::ValuesIn(sample_access_path_str_vecs));
 
-
-class TypeProducesAccessPathStrsTest :
-    public testing::TestWithParam<
-      std::tuple<const Type *, std::vector<std::string>>> {};
+class TypeProducesAccessPathStrsTest
+    : public testing::TestWithParam<
+          std::tuple<const TypeBase *, std::vector<std::string>>> {};
 
 TEST_P(TypeProducesAccessPathStrsTest, TypeProducesAccessPathStrsTest) {
   const auto &param_pair = GetParam();
-  const Type * type = std::get<0>(param_pair);
+  const TypeBase *type = std::get<0>(param_pair);
   const std::vector<std::string> expected_strs = std::get<1>(param_pair);
 
   const std::vector<std::string> result_strs =
@@ -216,17 +214,14 @@ TEST_P(TypeProducesAccessPathStrsTest, TypeProducesAccessPathStrsTest) {
 
 static PrimitiveType kPrimitive;
 static EntityType kEmptyEntity(MakeEntityTypeWithAnonymousSchema(
-    absl::flat_hash_map<std::string, std::unique_ptr<Type>>{}));
+    absl::flat_hash_map<std::string, Type>()));
 
 // Show that we can have aliasing in subpaths between paths that end in a
 // PrimitiveType and paths that end in an empty EntityType. This should be
 // disambiguated by the top-level type of the path, but it seems important to
 // note in a test.
-static std::tuple<const Type *, std::vector<std::string>>
-types_to_access_path_lists[] = {
-    { &kPrimitive, {""} },
-    { &kEmptyEntity, {""} }
-};
+static std::tuple<const TypeBase *, std::vector<std::string>>
+    types_to_access_path_lists[] = {{&kPrimitive, {""}}, {&kEmptyEntity, {""}}};
 
 INSTANTIATE_TEST_SUITE_P(
     TypeProducesAccessPathStrsTest,
@@ -244,10 +239,10 @@ TEST_P(GetAccessPathSelectorsWithProtoTest,
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(type_as_textproto,
                                                           &orig_type_proto))
       << "Failed to parse text proto!";
-  std::unique_ptr<Type> type = proto::Decode(orig_type_proto);
+  Type type = proto::Decode(orig_type_proto);
   std::vector<std::string> access_path_str_vec =
       GetAccessPathStrVecFromAccessPathSelectorsSet(
-          type->GetAccessPathSelectorsSet());
+          type.GetAccessPathSelectorsSet());
   EXPECT_THAT(
       access_path_str_vec,
       testing::UnorderedElementsAreArray(expected_access_path_strs));
@@ -305,7 +300,7 @@ INSTANTIATE_TEST_SUITE_P(
 // TODO(#122): This test should be moved to appropriate file while refactoring.
 TEST(EntityTypeTest, KindReturnsCorrectKind) {
   EntityType entity_type(Schema(std::nullopt, {}));
-  EXPECT_EQ(entity_type.kind(), Type::Kind::kEntity);
+  EXPECT_EQ(entity_type.kind(), TypeBase::Kind::kEntity);
 }
 
 }  // namespace raksha::transform::types

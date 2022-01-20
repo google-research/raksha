@@ -64,10 +64,10 @@ std::vector<ir::HandleConnectionSpec> GetHandleConnectionSpecs() {
   std::vector<ir::HandleConnectionSpec> result;
   result.push_back(ir::HandleConnectionSpec(
       "in", /*reads=*/true, /*writes=*/false,
-      /*type=*/std::make_unique<ir::types::PrimitiveType>()));
+      /*type=*/ir::types::Type(std::make_unique<ir::types::PrimitiveType>())));
   result.push_back(ir::HandleConnectionSpec(
       "out", /*reads=*/false, /*writes=*/true,
-      /*type=*/std::make_unique<ir::types::PrimitiveType>()));
+      /*type=*/ir::types::Type(std::make_unique<ir::types::PrimitiveType>())));
   return result;
 }
 
