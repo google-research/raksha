@@ -1,6 +1,8 @@
 load(
     "//build_defs:souffle.bzl",
+    "gen_souffle_cxx_code",
     "souffle_cc_library",
+    "souffle_cc_binary",
 )
 
 package(default_visibility = ["//src:__subpackages__"])
@@ -21,19 +23,45 @@ cc_test(
     ],
 )
 
-souffle_cc_library(
-    name = "taint_dl",
+gen_souffle_cxx_code(
+    name = "taint_cxx",
     src = "taint.dl",
     included_dl_scripts = [
         "authorization_logic.dl",
+        "check_predicate.dl",
         "dataflow_graph.dl",
         "operations.dl",
         "tags.dl",
     ],
 )
 
+gen_souffle_cxx_code(
+    name = "taint_cxx_for_test",
+    src = "taint.dl",
+    included_dl_scripts = [
+        "authorization_logic.dl",
+        "check_predicate.dl",
+        "dataflow_graph.dl",
+        "operations.dl",
+        "tags.dl",
+    ],
+    for_test = True,
+)
+
+souffle_cc_library(
+    name = "taint_dl",
+    src = ":taint_cxx",
+)
+
+souffle_cc_binary(
+    name = "taint_exec_test",
+    src = ":taint_cxx_for_test",
+    testonly = True,
+)
+
 exports_files([
     "authorization_logic.dl",
+    "check_predicate.dl",
     "dataflow_graph.dl",
     "fact_test_helper.dl",
     "operations.dl",
