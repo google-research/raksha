@@ -95,12 +95,13 @@ class CanActAs {
 //  - A predicate
 //  - An attribute
 //  - A canActAs expression
-using BaseFactVariantType = std::variant<Predicate, Attribute, CanActAs>;
 class BaseFact {
  public:
-  explicit BaseFact(Predicate predicate) : value_(std::move(predicate)){};
-  explicit BaseFact(Attribute attribute) : value_(std::move(attribute)){};
-  explicit BaseFact(CanActAs canActAs) : value_(std::move(canActAs)){};
+  // BaseFactVariantType gives the different forms of BaseFacts. Client code
+  // should use this type to traverse these forms. This type may be changed in 
+  // the future.
+  using BaseFactVariantType = std::variant<Predicate, Attribute, CanActAs>;
+  explicit BaseFact(BaseFactVariantType value) : value_(std::move(value)){};
   const BaseFactVariantType& GetValue() const { return value_; }
 
  private:
@@ -126,11 +127,13 @@ class CanSay {
 
 // Fact corresponds to either a base fact or a an expression of the form
 // <principal> canSay <Fact>
-using FactVariantType = std::variant<BaseFact, std::unique_ptr<CanSay>>;
 class Fact {
  public:
-  explicit Fact(BaseFact base_fact) : value_(std::move(base_fact)) {}
-  explicit Fact(std::unique_ptr<CanSay> can_say) : value_(std::move(can_say)) {}
+  // FactVariantType gives the different forms of Facts. Client code
+  // should use this type to traverse these forms. This type may be changed in 
+  // the future.
+  using FactVariantType = std::variant<BaseFact, std::unique_ptr<CanSay>>;
+  explicit Fact(FactVariantType value) : value_(std::move(value)) {}
   const FactVariantType& GetValue() const { return value_; }
 
  private:
@@ -155,12 +158,13 @@ class ConditionalAssertion {
 // Assertions can have two forms:
 //  - Facts
 //  - Conditional assertions
-using AssertionVariantType = std::variant<Fact, ConditionalAssertion>;
 class Assertion {
  public:
-  explicit Assertion(Fact fact) : value_(std::move(fact)) {}
-  explicit Assertion(ConditionalAssertion conditional_assertion)
-      : value_(std::move(conditional_assertion)) {}
+  // AssertionVariantType gives the different forms of Facts. Client code
+  // should use this type to traverse these forms. This type may be changed in 
+  // the future.
+  using AssertionVariantType = std::variant<Fact, ConditionalAssertion>;
+  explicit Assertion(AssertionVariantType value) : value_(std::move(value)) {}
   const AssertionVariantType& GetValue() const { return value_; }
 
  private:

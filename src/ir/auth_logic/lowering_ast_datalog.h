@@ -123,7 +123,7 @@ namespace raksha::ir::auth_logic {
 
 class LoweringToDatalogPass {
  public:
-  static DLIRProgram Lower(Program auth_logic_program) {
+  static DLIRProgram Lower(const Program& auth_logic_program) {
     return LoweringToDatalogPass().ProgToDLIR(auth_logic_program);
   }
 
@@ -153,7 +153,7 @@ class LoweringToDatalogPass {
 
   Predicate PushPrin(std::string modifier, Principal principal,
                      Predicate predicate) {
-    return PushOntoPred(modifier, {principal.name()}, predicate);
+    return PushOntoPred(std::move(modifier), {principal.name()}, predicate);
   }
 
   Predicate AttributeToDLIR(Attribute attribute) {
@@ -188,18 +188,18 @@ class LoweringToDatalogPass {
 
     // This is `speaker says Y PredX`
     Predicate generated_lhs =
-        PushPrin(std::string("says_"), prin_y, main_predicate);
+        PushPrin("says_", prin_y, main_predicate);
 
     Predicate y_can_act_as_x = Predicate(
-        std::string("canActAs"), {prin_y.name(), attribute.principal().name()},
+        "canActAs", {prin_y.name(), attribute.principal().name()},
         Sign::kPositive);
 
     Predicate speaker_says_y_can_act_as_x =
-        PushPrin(std::string("says_"), speaker, y_can_act_as_x);
+        PushPrin("says_", speaker, y_can_act_as_x);
 
     // This is `speaker says X PredX`
     Predicate speaker_says_x_pred =
-        PushPrin(std::string("says_"), speaker, main_predicate);
+        PushPrin("says_", speaker, main_predicate);
 
     // This is the full generated rule:
     // `speaker says Y PredX :-
@@ -234,18 +234,18 @@ class LoweringToDatalogPass {
 
     // This is `speaker says Y PredX`
     Predicate generated_lhs =
-        PushPrin(std::string("says_"), prin_y, main_predicate);
+        PushPrin("says_", prin_y, main_predicate);
 
-    Predicate y_can_act_as_x = Predicate(std::string("canActAs"),
+    Predicate y_can_act_as_x = Predicate("canActAs",
         {prin_y.name(), can_act_as.left_principal().name()},
         Sign::kPositive);
 
     Predicate speaker_says_y_can_act_as_x =
-        PushPrin(std::string("says_"), speaker, y_can_act_as_x);
+        PushPrin("says_", speaker, y_can_act_as_x);
 
     // This is `speaker says X canActAs Z`
     Predicate speaker_says_x_can_act_as_z =
-        PushPrin(std::string("says_"), speaker, main_predicate);
+        PushPrin("says_", speaker, main_predicate);
 
     // This is the full generated rule:
     // `speaker says Y PredX :-
@@ -297,7 +297,7 @@ class LoweringToDatalogPass {
           [this, &speaker](const std::unique_ptr<CanSay>& can_say) {
             auto[inner_fact_dlir, gen_rules] = FactToDLIR(speaker, *can_say->fact());
 
-            auto fresh_principal = Principal(FreshVar());
+            Principal fresh_principal(FreshVar());
 
             // The following code generates the extra rule that does 
             // delegation. This rule is:
@@ -308,14 +308,14 @@ class LoweringToDatalogPass {
             // ```
           
             // This is p says inner_fact_dlir
-            auto lhs = PushPrin(std::string("says_"), speaker, inner_fact_dlir);
-            auto fresh_prin_says_inner = PushPrin(std::string("says_"),
+            auto lhs = PushPrin("says_", speaker, inner_fact_dlir);
+            auto fresh_prin_says_inner = PushPrin("says_",
                 fresh_principal, inner_fact_dlir);
-            auto speaker_says_fresh_cansay_inner = PushPrin(std::string("says_"),
-                speaker, PushPrin(std::string("canSay_"),
+            auto speaker_says_fresh_cansay_inner = PushPrin("says_",
+                speaker, PushPrin("canSay_",
                   fresh_principal, inner_fact_dlir));
             auto rhs = {fresh_prin_says_inner, speaker_says_fresh_cansay_inner};
-            auto generated_rule = DLIRAssertion(DLIRCondAssertion(lhs, rhs));
+            DLIRAssertion generated_rule(DLIRCondAssertion(lhs, rhs));
             gen_rules.push_back(generated_rule);
 
             // Note that prin_cansay_pred does not begin with "speaker says"
@@ -324,7 +324,7 @@ class LoweringToDatalogPass {
             // the top-level fact. The top-level fact gets wrapped
             // in a "says" during the call to translate the assertion
             // in which this appears.
-            auto prin_cansay_pred = PushPrin(std::string("canSay_"),
+            auto prin_cansay_pred = PushPrin("canSay_",
                 can_say->principal(),
                 inner_fact_dlir);
             return std::make_pair(prin_cansay_pred, gen_rules);
@@ -344,7 +344,7 @@ class LoweringToDatalogPass {
             auto[fact_predicate, generated_rules] = FactToDLIR(
                 speaker, fact);
             DLIRAssertion main_assertion = DLIRAssertion(
-                  PushPrin(std::string("says_"), speaker, fact_predicate));
+                  PushPrin("says_", speaker, fact_predicate));
             generated_rules.push_back(main_assertion);
             return generated_rules;
           },
@@ -355,14 +355,14 @@ class LoweringToDatalogPass {
               // so the rules that would be generated from this RHS fact are 
               // not used.
               auto[dlir_translation, not_used] = BaseFactToDLIR(speaker, ast_rhs);
-              dlir_rhs.push_back(PushPrin(std::string("says_"),
+              dlir_rhs.push_back(PushPrin("says_",
                     speaker, dlir_translation));
             }
             auto[dlir_lhs, gen_rules] = FactToDLIR(speaker,
                 conditional_assertion.lhs());
-            auto dlir_lhs_prime = PushPrin(std::string("says_"), speaker, dlir_lhs);
-            auto dlir_assertion = DLIRAssertion(
-                DLIRCondAssertion(dlir_lhs_prime, dlir_rhs));
+            auto dlir_lhs_prime = PushPrin("says_", speaker, dlir_lhs);
+            DLIRAssertion dlir_assertion(DLIRCondAssertion(dlir_lhs_prime,
+                  dlir_rhs));
             gen_rules.push_back(dlir_assertion);
             return gen_rules;
           }
@@ -405,8 +405,8 @@ class LoweringToDatalogPass {
     // The assertions that are normally generated during the translation
     // from facts to dlir facts are not used for queries.
     auto[main_pred, not_used] = FactToDLIR(query.principal(), query.fact());
-    main_pred = PushPrin(std::string("says_"), query.principal(), main_pred);
-    auto lhs = Predicate(query.name(), {"dummy_var"}, kPositive);
+    main_pred = PushPrin("says_", query.principal(), main_pred);
+    Predicate lhs(query.name(), {"dummy_var"}, kPositive);
     return DLIRAssertion(DLIRCondAssertion(
           lhs, {main_pred, DUMMY_PREDICATE}));
   }
@@ -425,7 +425,7 @@ class LoweringToDatalogPass {
     auto dlir_queries = QueriesToDLIR(program.queries());
     // We need to add a fact that says the dummy variable used in queries is 
     // grounded.
-    auto dummy_assertion = DLIRAssertion(DUMMY_PREDICATE);
+    DLIRAssertion dummy_assertion(DUMMY_PREDICATE);
     dlir_assertions.insert(dlir_assertions.end(),
         std::make_move_iterator(dlir_queries.begin()),
         std::make_move_iterator(dlir_queries.end()));

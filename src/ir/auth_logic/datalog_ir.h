@@ -42,9 +42,12 @@ class DLIRCondAssertion {
 //  - a conditional assertion
 class DLIRAssertion {
  public:
-  explicit DLIRAssertion(Predicate predicate) : value_(std::move(predicate)) {}
-  explicit DLIRAssertion(DLIRCondAssertion condAssertion)
-      : value_(condAssertion) {}
+  // DLIRAssertionVariantType represents the alternative forms for
+  // DLIRAssertions. Client code should use this type for traversing 
+  // DLIRAssertions. This type may be changed in the future.
+  using DLIRAssertionVariantType = std::variant<Predicate, DLIRCondAssertion>;
+  explicit DLIRAssertion(DLIRAssertionVariantType value) 
+    : value_(std::move(value)) {}
 
  private:
   std::variant<Predicate, DLIRCondAssertion> value_;
