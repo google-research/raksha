@@ -26,7 +26,7 @@ ir::AccessPathSelectorsSet Schema::GetAccessPathSelectorsSet() const {
         ir::Selector(ir::FieldSelector(field_name_type_pair.first));
 
     ir::AccessPathSelectorsSet field_access_paths =
-        field_name_type_pair.second->GetAccessPathSelectorsSet();
+        field_name_type_pair.second.GetAccessPathSelectorsSet();
 
     result = ir::AccessPathSelectorsSet::Union(
         std::move(result),

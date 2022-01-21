@@ -30,6 +30,7 @@ int run_test(std::string const &test_name) {
   // We want one command line arg, the name of the current test module.
   std::unique_ptr<souffle::SouffleProgram> prog(
       souffle::ProgramFactory::newInstance(test_name));
+  std::cout << "Attempting to run souffle program " << test_name << std::endl;
   assert(prog != nullptr);
 
   prog->run();

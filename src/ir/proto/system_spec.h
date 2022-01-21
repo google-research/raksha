@@ -17,11 +17,13 @@
 #define SRC_IR_PROTO_SYSTEM_SPEC_H_
 
 #include "src/ir/system_spec.h"
+#include "src/ir/types/type_factory.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::proto {
 
-std::unique_ptr<SystemSpec> Decode(const arcs::ManifestProto &manifest_proto);
+std::unique_ptr<SystemSpec> Decode(types::TypeFactory& type_factory,
+                                   const arcs::ManifestProto& manifest_proto);
 
 }  // namespace raksha::ir::proto
 
