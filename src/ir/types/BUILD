@@ -2,12 +2,16 @@ package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
     name = "types",
-    srcs = ["schema.cc"],
+    srcs = [
+        "schema.cc",
+        "type_factory.cc",
+    ],
     hdrs = [
         "entity_type.h",
         "primitive_type.h",
         "schema.h",
         "type.h",
+        "type_factory.h",
     ],
     deps = [
         "//src/common/logging",

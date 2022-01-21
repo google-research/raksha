@@ -12,10 +12,6 @@ namespace raksha::ir::types {
 
 class Schema {
  public:
-  explicit Schema(std::optional<std::string> name,
-                  absl::flat_hash_map<std::string, Type> fields)
-      : name_(std::move(name)), fields_(std::move(fields)) {}
-
   raksha::ir::AccessPathSelectorsSet GetAccessPathSelectorsSet() const;
 
   const std::optional<std::string>& name() const { return name_; }
@@ -24,7 +20,13 @@ class Schema {
     return fields_;
   }
 
+  friend class TypeFactory;
+
  private:
+  explicit Schema(std::optional<std::string> name,
+                  absl::flat_hash_map<std::string, Type> fields)
+      : name_(std::move(name)), fields_(std::move(fields)) {}
+
   std::optional<std::string> name_;
   absl::flat_hash_map<std::string, Type> fields_;
 };

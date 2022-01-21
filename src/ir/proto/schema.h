@@ -17,12 +17,14 @@
 #define SRC_IR_PROTO_SCHEMA_H_
 
 #include "src/ir/types/schema.h"
+#include "src/ir/types/type_factory.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types::proto {
 
 // Decodes the given `schema_proto` and returns the resulting Schema.
-Schema decode(const arcs::SchemaProto& schema_proto);
+const Schema& decode(types::TypeFactory& type_factory,
+                     const arcs::SchemaProto& schema_proto);
 
 // Encodes the given `schema` as an arcs::SchemaProto.
 arcs::SchemaProto encode(const Schema& schema);

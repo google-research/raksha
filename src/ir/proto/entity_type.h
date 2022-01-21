@@ -17,12 +17,14 @@
 #define SRC_IR_PROTO_ENTITY_TYPE_H_
 
 #include "src/ir/types/entity_type.h"
+#include "src/ir/types/type_factory.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types::proto {
 
 // Decodes the given `entity_type_proto` as an EntityType.
-EntityType decode(const arcs::EntityTypeProto& entity_type_proto);
+Type decode(types::TypeFactory& type_factory,
+            const arcs::EntityTypeProto& entity_type_proto);
 
 // Encodes the given `entity_type` as an EntityTypeProto.
 arcs::EntityTypeProto encode(const EntityType& entity_type);

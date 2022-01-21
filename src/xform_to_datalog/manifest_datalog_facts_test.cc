@@ -42,6 +42,8 @@ TEST_P(ManifestDatalogFactsToDatalogTest, ManifestDatalogFactsToDatalogTest) {
   EXPECT_EQ(datalog_facts.ToDatalog(ctxt), expected_result_string);
 }
 
+static ir::types::TypeFactory type_factory;
+
 static const ir::AccessPath kHandleH1AccessPath(
     ir::AccessPathRoot(ir::HandleAccessPathRoot("recipe", "h1")),
     ir::AccessPathSelectors());
@@ -62,12 +64,12 @@ static const ir::AccessPath kHandleConnectionOutAccessPath(
 
 std::vector<ir::HandleConnectionSpec> GetHandleConnectionSpecs() {
   std::vector<ir::HandleConnectionSpec> result;
-  result.push_back(ir::HandleConnectionSpec(
-      "in", /*reads=*/true, /*writes=*/false,
-      /*type=*/ir::types::Type(std::make_unique<ir::types::PrimitiveType>())));
-  result.push_back(ir::HandleConnectionSpec(
-      "out", /*reads=*/false, /*writes=*/true,
-      /*type=*/ir::types::Type(std::make_unique<ir::types::PrimitiveType>())));
+  result.push_back(
+      ir::HandleConnectionSpec("in", /*reads=*/true, /*writes=*/false,
+                               /*type=*/type_factory.MakePrimitiveType()));
+  result.push_back(
+      ir::HandleConnectionSpec("out", /*reads=*/false, /*writes=*/true,
+                               /*type=*/type_factory.MakePrimitiveType()));
   return result;
 }
 
@@ -301,10 +303,10 @@ class ParseBigManifestTest : public testing::Test {
     arcs::ManifestProto manifest_proto;
     google::protobuf::TextFormat::ParseFromString(
         kManifestTextproto, &manifest_proto);
-    system_spec_ = ir::proto::Decode(manifest_proto);
+    system_spec_ = ir::proto::Decode(type_factory, manifest_proto);
     CHECK(system_spec_ != nullptr);
     datalog_facts_ = ManifestDatalogFacts::CreateFromManifestProto(
-        *system_spec_, manifest_proto);
+        type_factory, *system_spec_, manifest_proto);
 
     std::string datalog = datalog_facts_.ToDatalog(ctxt_, "~");
     datalog_strings_ = absl::StrSplit(datalog, "~", absl::SkipEmpty());

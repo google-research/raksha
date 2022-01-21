@@ -26,6 +26,7 @@
 namespace raksha::ir::proto {
 
 std::unique_ptr<ParticleSpec> Decode(
+    types::TypeFactory &type_factory,
     const arcs::ParticleSpecProto &particle_spec_proto) {
   std::string name = particle_spec_proto.name();
   CHECK(!name.empty()) << "Expected particle spec to have a name.";
@@ -33,7 +34,7 @@ std::unique_ptr<ParticleSpec> Decode(
   std::vector<HandleConnectionSpec> handle_connection_specs;
   for (const arcs::HandleConnectionSpecProto &hcs_proto :
       particle_spec_proto.connections()) {
-    handle_connection_specs.push_back(proto::Decode(hcs_proto));
+    handle_connection_specs.push_back(proto::Decode(type_factory, hcs_proto));
   }
 
   std::vector<TagClaim> tag_claims;

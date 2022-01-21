@@ -20,11 +20,13 @@
 #include "src/common/logging/logging.h"
 #include "src/ir/proto/entity_type.h"
 #include "src/ir/proto/primitive_type.h"
+#include "src/ir/types/type_factory.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types::proto {
 
-Type Decode(const arcs::TypeProto &type_proto) {
+Type Decode(types::TypeFactory& type_factory,
+            const arcs::TypeProto& type_proto) {
   // Delegate to the various CreateFromProto implementations on the base types
   // depending upon which specific type is contained within the TypeProto.
   CHECK(!type_proto.optional())
@@ -35,10 +37,9 @@ Type Decode(const arcs::TypeProto &type_proto) {
     case arcs::TypeProto::DATA_NOT_SET:
       LOG(FATAL) << "Found a TypeProto with an unset specific type.";
     case arcs::TypeProto::kPrimitive:
-      return Type(
-          std::make_unique<PrimitiveType>(decode(type_proto.primitive())));
+      return decode(type_factory, type_proto.primitive());
     case arcs::TypeProto::kEntity:
-      return Type(std::make_unique<EntityType>(decode(type_proto.entity())));
+      return decode(type_factory, type_proto.entity());
     default:
       LOG(FATAL) << "Found unimplemented type. Only Primitive and Entity "
                     "types are currently implemented.";
