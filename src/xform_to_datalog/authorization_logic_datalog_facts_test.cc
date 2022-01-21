@@ -24,35 +24,44 @@
 #include "absl/strings/string_view.h"
 #include "absl/strings/str_cat.h"
 #include "src/common/testing/gtest.h"
-#include "src/xform_to_datalog/authorization_logic_test_utils.h"
+#include "src/test_utils/utils.h"
 
 namespace fs = std::filesystem;
 
 namespace raksha::xform_to_datalog {
 
-class AuthorizationLogicDatalogFactsTest : public AuthorizationLogicTest {};
+static const std::vector<absl::string_view> programs = {"simple_auth_logic", "empty_auth_logic", "says_owns_tag"};
 
-TEST_F(AuthorizationLogicDatalogFactsTest, InvokesRustToolAndGeneratesOutput) {
-  for (absl::string_view program :
-       {"simple_auth_logic", "empty_auth_logic", "says_owns_tag"}) {
-    fs::path test_data_dir = GetTestDataDir();
+class AuthorizationLogicDatalogFactsTest : 
+    public::testing::TestWithParam<absl::string_view> {};
+
+TEST_P(AuthorizationLogicDatalogFactsTest, InvokesRustToolAndGeneratesOutput) {
+    absl::string_view param = GetParam();
+    fs::path test_data_dir = test_utils::GetTestDataDir("src/xform_to_datalog/testdata");
     auto auth_facts =
-        AuthorizationLogicDatalogFacts::create(test_data_dir.c_str(), program);
+        AuthorizationLogicDatalogFacts::create(test_data_dir.c_str(), param);
     ASSERT_TRUE(auth_facts.has_value());
 
     std::vector<std::string> actual_datalog =
       absl::StrSplit(auth_facts->ToDatalog(), "\n", absl::SkipEmpty());
     std::vector<std::string> expected_datalog =
-        ReadFileLines(test_data_dir / absl::StrCat(program, ".dl"));
+        test_utils::ReadFileLines(test_data_dir / absl::StrCat(param, ".dl"));
 
     // Need to compare individual lines as the output order is
     // non-deterministic.
     ASSERT_THAT(actual_datalog,
                 testing::UnorderedElementsAreArray(expected_datalog));
-  }
+  
 }
 
-TEST_F(AuthorizationLogicDatalogFactsTest, InvalidFileReturnsNullOpt) {
+INSTANTIATE_TEST_SUITE_P(
+    AuthorizationLogicDatalogFactsTest,
+    AuthorizationLogicDatalogFactsTest,
+    testing::ValuesIn(programs)
+
+);
+
+TEST(AuthorizationLogicDatalogFactsTest, InvalidFileReturnsNullOpt) {
   auto auth_facts = AuthorizationLogicDatalogFacts::create("blah", "blah");
   EXPECT_EQ(auth_facts, std::nullopt);
 }
