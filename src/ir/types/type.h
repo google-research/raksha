@@ -19,10 +19,8 @@ class TypeBase {
   virtual Kind kind() const = 0;
 };
 
-
 class Type {
  public:
-  Type(std::unique_ptr<TypeBase> type) : type_(std::move(type)) {}
 
   raksha::ir::AccessPathSelectorsSet GetAccessPathSelectorsSet() const {
     return type_->GetAccessPathSelectorsSet();
@@ -32,7 +30,10 @@ class Type {
   // stop-gap solution to work with the rest of the code base.
   const TypeBase& type_base() const { return *type_.get(); }
 
+  friend class TypeFactory;
  private:
+  Type(std::unique_ptr<TypeBase> type) : type_(std::move(type)) {}
+
   std::unique_ptr<TypeBase> type_;
 };
 

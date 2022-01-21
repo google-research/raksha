@@ -17,6 +17,7 @@
 #define SRC_IR_SYSTEM_SPEC_H_
 
 #include "src/ir/particle_spec.h"
+#include "src/ir/types/type_factory.h"
 
 namespace raksha::ir {
 
