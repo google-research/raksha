@@ -37,8 +37,6 @@ disallowedUsage(dataConsumer, usage, owner, tag) :-
 .decl allUsagesAllowed(dummy_var: symbol)
 
 .decl isUsage(usage: Usage)
-// DO NOT SUBMIT
-.output isUsage(IO=stdout)
 
 isPrincipal(speaker), isPrincipal(actor), isUsage(usage), isTag(tag) :-
   saysMay(speaker, actor, usage, tag).
@@ -47,7 +45,7 @@ isPrincipal(speaker), isUsage(usage), isAccessPath(ap) :- saysWill(speaker, usag
 
 allUsagesAllowed("dummy_var") :- count : disallowedUsage(_, _, _, _) = 0.
 
-// TODO: Find a better way to do this.
+// TODO(#270): Stop sending `may_will` into the `check` mechanisms.
 // Catch may-will issues as if they were a check.
 checkAndResult("may_will", "FAIL") :- !allUsagesAllowed("dummy_var").
 
