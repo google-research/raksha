@@ -33,45 +33,41 @@ namespace value {
 
 // TODO: validate fields.
 
-// A value that is an argument to a block.
-class BlockArgument {
+template <typename T>
+class NamedValue {
  public:
-  BlockArgument(const Block& block, std::string name)
-      : block_(&block), argument_name_(std::move(name)) {}
+  NamedValue(const T& element, absl::string_view name)
+      : element_(&element), name_(name) {}
 
-  BlockArgument(const BlockArgument&) = default;
-  BlockArgument& operator=(const BlockArgument&) = default;
+  NamedValue(const NamedValue&) = default;
+  NamedValue& operator=(const NamedValue&) = default;
+  NamedValue(NamedValue&&) = default;
+  NamedValue& operator=(NamedValue&&) = default;
+
+  const T& element() const { return *element_; }
+  absl::string_view name() const { return name_; }
 
  private:
-  const Block* block_;
-  std::string argument_name_;
+  const T* element_;
+  std::string name_;
 };
 
-// A value that is the output of a block.
-class BlockResult {
+class BlockArgument : NamedValue<Block> {
  public:
-  BlockResult(const Block& block, std::string name)
-      : block_(&block), result_name_(std::move(name)) {}
-
-  BlockResult(const BlockResult&) = default;
-  BlockResult& operator=(const BlockResult&) = default;
-
- private:
-  const Block* block_;
-  std::string result_name_;
+  using NamedValue<Block>::NamedValue;
+  const Block& block() const { return element(); }
 };
 
-// A value that is the result of an operation.
-class OperationResult {
+class BlockResult : NamedValue<Block> {
  public:
-  OperationResult(const Operation& op, std::string name)
-      : operation_(&op), operand_name_(name) {}
+  using NamedValue<Block>::NamedValue;
+  const Block& block() const { return element(); }
+};
 
-  OperationResult(const OperationResult&) = default;
-  OperationResult& operator=(const OperationResult&) = default;
- private:
-  const Operation* operation_;
-  std::string operand_name_;
+class OperationResult : NamedValue<Operation> {
+ public:
+  using NamedValue<Operation>::NamedValue;
+  const Operation& operation() const { return element(); }
 };
 
 // A field within another value.
@@ -103,12 +99,12 @@ class Field {
 };
 
 // Indicates the value in a storage.
-class Store {
+class StoredValue {
  public:
-  Store(const Storage& storage) : storage_(&storage) {}
+  StoredValue(const Storage& storage) : storage_(&storage) {}
 
-  Store(const Store&) = default;
-  Store& operator=(const Store&) = default;
+  StoredValue(const StoredValue&) = default;
+  StoredValue& operator=(const StoredValue&) = default;
 
  private:
   const Storage* storage_;
@@ -133,18 +129,17 @@ class Value {
   Value(value::Field arg) : value_(std::move(arg)) {}
   Value(value::Constant arg) : value_(std::move(arg)) {}
   Value(value::Any arg) : value_(std::move(arg)) {}
-  Value(value::Store arg) : value_(std::move(arg)) {}
+  Value(value::StoredValue arg) : value_(std::move(arg)) {}
 
  private:
   std::variant<value::BlockArgument, value::BlockResult, value::OperationResult,
-               value::Field, value::Store, value::Constant, value::Any>
+               value::Field, value::StoredValue, value::Constant, value::Any>
       value_;
 };
 
 using ValueList = std::vector<Value>;
 using NamedValueMap = absl::flat_hash_map<std::string, Value>;
 using NamedValueListMap = absl::flat_hash_map<std::string, ValueList>;
-using DataDeclMap = absl::flat_hash_map<std::string, types::Type>;
 
 }  // namespace raksha::ir
 

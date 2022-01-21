@@ -23,6 +23,7 @@ cc_library(
     name = "new_ir",
     hdrs = [
         "block.h",
+        "data_decl.h",
         "operation.h",
         "operator.h",
         "storage.h",

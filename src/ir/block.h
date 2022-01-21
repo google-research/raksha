@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "src/ir/data_decl.h"
 #include "src/ir/operation.h"
 #include "src/ir/operator.h"
 #include "src/ir/types/type.h"
@@ -39,17 +40,17 @@ class Block {
   Block& operator=(const Block&) = delete;
 
   const OperationList& operations() const { return operations_; }
-  const DataDeclMap& inputs() const { return inputs_; }
-  const DataDeclMap& outputs() const { return outputs_; }
+  const DataDeclCollection& inputs() const { return inputs_; }
+  const DataDeclCollection& outputs() const { return outputs_; }
   const NamedValueListMap& results() const { return results_; }
 
   friend class BlockBuilder;
 
  private:
   // The inputs to this block.
-  DataDeclMap inputs_;
+  DataDeclCollection inputs_;
   // Outputs from this block.
-  DataDeclMap outputs_;
+  DataDeclCollection outputs_;
   // The list of operations that belong to this block. This can be empty.
   OperationList operations_;
   // Maps the outputs of the operations in the list of operations in this block

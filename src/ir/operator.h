@@ -31,18 +31,16 @@ class Block;
 // function) that is compose of other operations.
 class Operator {
  public:
-  using Name = std::string;
-
-  Operator(std::string name, std::unique_ptr<Block> implementation)
-      : name_(std::move(name)), implementation_(std::move(implementation)) {
+  Operator(absl::string_view name, std::unique_ptr<Block> implementation)
+      : name_(name), implementation_(std::move(implementation)) {
     CHECK(implementation_ != nullptr);
   }
 
-  const Name& name() const { return name_; }
+  const std::string& name() const { return name_; }
   const Block& implementation() const { return *implementation_.get(); }
 
  private:
-  Name name_;
+  std::string name_;
   // If the implementation has no operations, then this is one of the basic
   // operators like `+`, `-`, etc., that cannot be split up any further.
   std::unique_ptr<Block> implementation_;
