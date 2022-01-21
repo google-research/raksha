@@ -32,16 +32,12 @@ class BlockBuilder {
   BlockBuilder() : block_(std::make_unique<Block>()) {}
 
   BlockBuilder& AddInput(std::string name, types::Type type) {
-    auto insertion_result = block_->inputs_.insert(
-        {std::move(name), std::move(type)});
-    CHECK(insertion_result.second);
+    block_->inputs_.AddDecl(name, std::move(type));
     return *this;
   }
 
   BlockBuilder& AddOutput(std::string name, types::Type type) {
-    auto insertion_result =
-        block_->outputs_.insert({std::move(name), std::move(type)});
-    CHECK(insertion_result.second);
+    block_->outputs_.AddDecl(name, std::move(type));
     return *this;
   }
 
@@ -60,7 +56,7 @@ class BlockBuilder {
   }
 
   BlockBuilder& AddResult(absl::string_view name, Value output) {
-    CHECK(block_->outputs_.find(name) != block_->outputs_.end());
+    CHECK(block_->outputs_.FindDecl(name) != nullptr);
     block_->results_[name].push_back(output);
     return *this;
   }

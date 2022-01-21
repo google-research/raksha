@@ -128,12 +128,13 @@ TEST(NewIrTest, TrySomeStuff) {
   // P1
   //  bar: reads h1
   //  foo: writes h2
-  std::unique_ptr<Operation> particle_instance(new Operation(
-     nullptr, *particle_p1, {{"bar", {Value(value::Store(*input_storage))}}}));
+  std::unique_ptr<Operation> particle_instance(
+      new Operation(nullptr, *particle_p1,
+                    {{"bar", {Value(value::StoredValue(*input_storage))}}}));
   std::unique_ptr<Operation> write_storage(new Operation(
       nullptr, *write_op,
       {{"src", {Value(value::OperationResult(*particle_instance, "foo"))}},
-       {"tgt", {Value(value::Store(*output_storage))}}}));
+       {"tgt", {Value(value::StoredValue(*output_storage))}}}));
 
   ASSERT_EQ(particle_instance->op().name(), "arcs.particle.P1");
   ASSERT_EQ(write_storage->op().name(), "core.write");
