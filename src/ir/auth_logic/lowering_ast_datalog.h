@@ -255,6 +255,26 @@ class LoweringToDatalogPass {
                         std::move(speaker_says_x_can_act_as_z)}));
   }
 
+  std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIRInner(
+      Principal speaker, Predicate predicate) {
+    std::vector<DLIRAssertion> pred_list = {};
+    return std::make_pair(predicate, pred_list);
+  }
+
+  std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIRInner(
+      Principal speaker, Attribute attribute) {
+    std::vector<DLIRAssertion> pred_list = {
+        SpokenAttributeToDLIR(speaker, attribute)};
+    return std::make_pair(AttributeToDLIR(attribute), pred_list);
+  }
+
+  std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIRInner(
+      Principal speaker, CanActAs canActAs) {
+    std::vector<DLIRAssertion> pred_list = {
+        SpokenCanActAsToDLIR(speaker, canActAs)};
+    return std::make_pair(CanActAsToDLIR(canActAs), pred_list);
+  }
+
   // The second return value represents 0 or 1 newly generated rules, so an
   // option might seem more intuitive. However, the interface that consumes
   // this needs to construct a vector anyway, so a vector is used in the
@@ -262,23 +282,9 @@ class LoweringToDatalogPass {
   std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIR(
       Principal speaker, BaseFact base_fact) {
     return std::visit(
-        raksha::utils::overloaded{
-            // To make the typechecker happy the vectors need to be explicitly
-            // declared.
-            [](Predicate predicate) {
-              std::vector<DLIRAssertion> pred_list = {};
-              return std::make_pair(predicate, pred_list);
-            },
-            [this, &speaker](Attribute attribute) {
-              std::vector<DLIRAssertion> pred_list = {
-                  SpokenAttributeToDLIR(speaker, attribute)};
-              return std::make_pair(AttributeToDLIR(attribute), pred_list);
-            },
-            [this, &speaker](CanActAs canActAs) {
-              std::vector<DLIRAssertion> pred_list = {
-                  SpokenCanActAsToDLIR(speaker, canActAs)};
-              return std::make_pair(CanActAsToDLIR(canActAs), pred_list);
-            }},
+        [this, &speaker](auto value) {
+          return BaseFactToDLIRInner(speaker, value);
+        },
         base_fact.GetValue());
   }
 
