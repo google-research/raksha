@@ -18,8 +18,9 @@
 #include "absl/container/flat_hash_map.h"
 #include "src/ir/handle_connection_spec.h"
 #include "src/ir/particle_spec.h"
-#include "src/ir/proto/type.h"
 #include "src/ir/proto/system_spec.h"
+#include "src/ir/proto/type.h"
+#include "src/ir/types/type_factory.h"
 
 namespace raksha::xform_to_datalog {
 
@@ -33,7 +34,7 @@ namespace types = raksha::ir::types;
 //  traversal. This works, but it is hard to read and hard to test. We should
 //  break this up.
 ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
-    const ir::SystemSpec& system_spec,
+    types::TypeFactory &type_factory, const ir::SystemSpec &system_spec,
     const arcs::ManifestProto &manifest_proto) {
   // These collections will be used as inputs to the constructor that we
   // return from this function.
@@ -114,10 +115,10 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
 
         CHECK(connection_proto.has_type())
           << "Handle connection with absent type not allowed.";
-        std::unique_ptr<types::Type> connection_type =
-            ir::types::proto::Decode(connection_proto.type());
+        types::Type connection_type =
+            ir::types::proto::Decode(type_factory, connection_proto.type());
         ir::AccessPathSelectorsSet access_path_selectors_set =
-            connection_type->GetAccessPathSelectorsSet();
+            connection_type.GetAccessPathSelectorsSet();
 
         // Look up the HandleConnectionSpec to see if the handle connection
         // will read and/or write.

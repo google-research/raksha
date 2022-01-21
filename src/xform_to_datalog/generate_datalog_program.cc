@@ -27,6 +27,7 @@
 #include "src/ir/datalog_print_context.h"
 #include "src/ir/proto/system_spec.h"
 #include "src/ir/system_spec.h"
+#include "src/ir/types/type_factory.h"
 #include "src/xform_to_datalog/authorization_logic_datalog_facts.h"
 #include "src/xform_to_datalog/datalog_facts.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
@@ -89,11 +90,12 @@ int main(int argc, char *argv[]) {
 
   // Turn each ParticleSpecProto indicated in the manifest_proto into a
   // ParticleSpec object, which we can use directly.
+  raksha::ir::types::TypeFactory type_factory;
   std::unique_ptr<raksha::ir::SystemSpec> system_spec =
-      raksha::ir::proto::Decode(manifest_proto);
+      raksha::ir::proto::Decode(type_factory, manifest_proto);
   CHECK(system_spec != nullptr);
   auto manifest_datalog_facts = ManifestDatalogFacts::CreateFromManifestProto(
-      *system_spec, manifest_proto);
+      type_factory, *system_spec, manifest_proto);
 
   std::filesystem::path auth_logic_filename = auth_logic_filepath.filename();
   auth_logic_filepath.remove_filename();

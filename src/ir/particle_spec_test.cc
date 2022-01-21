@@ -18,9 +18,10 @@
 
 #include <google/protobuf/text_format.h>
 
-#include "src/common/testing/gtest.h"
 #include "src/common/logging/logging.h"
+#include "src/common/testing/gtest.h"
 #include "src/ir/proto/particle_spec.h"
+#include "src/ir/types/type_factory.h"
 
 namespace raksha::ir {
 
@@ -35,17 +36,20 @@ struct ParticleSpecProtoAndExpectedInfo {
 class ParticleSpecFromProtoTest :
    public testing::TestWithParam<ParticleSpecProtoAndExpectedInfo> {
  protected:
-  ParticleSpecFromProtoTest() : particle_spec_(CreateParticleSpec()) {}
+  ParticleSpecFromProtoTest()
+      : particle_spec_(CreateParticleSpec(type_factory_)) {}
 
-  static std::unique_ptr<ParticleSpec> CreateParticleSpec() {
+  static std::unique_ptr<ParticleSpec> CreateParticleSpec(
+      types::TypeFactory& type_factory) {
     arcs::ParticleSpecProto particle_spec_proto;
     std::string textproto = GetParam().textproto;
     CHECK(google::protobuf::TextFormat::ParseFromString(
         textproto, &particle_spec_proto))
         << "Particle spec textproto did not parse correctly.";
-    return proto::Decode(particle_spec_proto);
+    return proto::Decode(type_factory, particle_spec_proto);
   }
 
+  types::TypeFactory type_factory_;
   std::unique_ptr<ParticleSpec> particle_spec_;
 };
 
