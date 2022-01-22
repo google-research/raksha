@@ -94,6 +94,7 @@ class Field {
   Field(Field&&) = default;
 
  private:
+  // We use `unique_ptr` to break the cycle involving variants of a `Value`.
   std::unique_ptr<Value> parent_;
   std::string field_name_;
 };

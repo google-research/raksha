@@ -54,9 +54,7 @@ class DataDeclCollection {
   }
 
  private:
-  using DataDeclMap =
-      absl::flat_hash_map<std::string, std::unique_ptr<DataDecl>>;
-  DataDeclMap decls_;
+  absl::flat_hash_map<std::string, std::unique_ptr<DataDecl>> decls_;
 };
 
 }  // namespace raksha::ir

@@ -27,8 +27,8 @@ namespace raksha::ir {
 class Block;
 
 // Signature of an operator. An operator could be simple operators (e.g., `+`,
-// `-`, `sql.select`, `sql.groupby`) or complex operators (e.g., particle,
-// function) that is compose of other operations.
+// `-`) or complex operators (e.g., particle, function) that is compose of other
+// operations.
 class Operator {
  public:
   Operator(absl::string_view name, std::unique_ptr<Block> implementation)
