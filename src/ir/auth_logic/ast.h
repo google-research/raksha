@@ -53,6 +53,30 @@ class Predicate {
   const std::vector<std::string>& args() const { return args_; }
   Sign sign() const { return sign_; }
 
+  // We need a hash function for predicates because the SouffleEmitter
+  // uses an std::unordered_set to track which predicates have already been
+  // declared.
+  struct HashFunction {
+    size_t operator()(const Predicate& predicate) const {
+      size_t ret = std::hash<std::string>()(predicate.name()) ^
+                   std::hash<int>()(predicate.sign());
+      for (auto arg : predicate.args()) {
+        ret ^= std::hash<std::string>()(arg);
+      }
+      return ret;
+    }
+  };
+
+  // Equality is also needed to use a Predicate in an std::unordered_set
+  bool operator==(const Predicate& otherPredicate) const {
+    if (this->args().size() != otherPredicate.args().size()) return false;
+    for (int i = 0; i < this->args().size(); i++) {
+      if (this->args()[i] != otherPredicate.args()[i]) return false;
+    }
+    return this->name() == otherPredicate.name() &&
+           this->sign() == otherPredicate.sign();
+  }
+
  private:
   std::string name_;
   std::vector<std::string> args_;

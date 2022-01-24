@@ -23,6 +23,7 @@ cc_library(
     name = "ast",
     hdrs = [
         "ast.h",
+        "datalog_ir.h",
     ],
     visibility = ["//test:__pkg__"],
     deps = [
@@ -41,6 +42,7 @@ cc_library(
         "lowering_ast_datalog.h",
         "map_iter.h",
         "move_append.h",
+        "souffle_emitter.h"    # TODO move this
     ],
     visibility = ["//test:__pkg__"],
     deps = [

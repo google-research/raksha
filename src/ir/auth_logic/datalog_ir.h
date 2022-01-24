@@ -31,6 +31,8 @@ class DLIRCondAssertion {
  public:
   explicit DLIRCondAssertion(Predicate lhs, std::vector<Predicate> rhs)
       : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+  const Predicate& lhs() { return lhs_; }
+  const std::vector<Predicate>& rhs() { return rhs_; }
 
  private:
   Predicate lhs_;
@@ -48,6 +50,7 @@ class DLIRAssertion {
   using DLIRAssertionVariantType = std::variant<Predicate, DLIRCondAssertion>;
   explicit DLIRAssertion(DLIRAssertionVariantType value)
       : value_(std::move(value)) {}
+  const DLIRAssertionVariantType& GetValue() const { return value_; }
 
  private:
   std::variant<Predicate, DLIRCondAssertion> value_;
@@ -58,6 +61,8 @@ class DLIRProgram {
   DLIRProgram(std::vector<DLIRAssertion> assertions,
               std::vector<std::string> outputs)
       : assertions_(std::move(assertions)), outputs_(std::move(outputs)) {}
+  const std::vector<DLIRAssertion>& assertions() { return assertions_; }
+  const std::vector<std::string>& outputs() { return outputs_; }
 
  private:
   std::vector<DLIRAssertion> assertions_;
