@@ -227,19 +227,6 @@ load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 gazelle_dependencies()
 
 http_archive(
-    name = "com_google_protobuf",
-    sha256 = "9b4ee22c250fe31b16f1a24d61467e40780a3fbb9b91c3b65be2a376ed913a1a",
-    strip_prefix = "protobuf-3.13.0",
-    urls = [
-        "https://github.com/protocolbuffers/protobuf/archive/v3.13.0.tar.gz",
-    ],
-)
-
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
-
-http_archive(
     name = "buildtools",
     sha256 = "d368c47bbfc055010f118efb2962987475418737e901f7782d2a966d1dc80296",
     strip_prefix = "buildtools-4.2.5",
