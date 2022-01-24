@@ -8,6 +8,7 @@ RESULT_UI="--bes_backend=buildeventservice.googleapis.com --bes_timeout=60s \
            --project_id=google.com:raksha-ci"
 BAZEL_CONFIG="--config=remote --remote_instance_name=${REMOTE_INSTANCE_NAME} ${RESULT_UI}"
 BAZELISK="bazelisk"
+BUILDIFIER="buildifier"
 
 post_commit_status() {
   STATUS_CONTEXT=$1
@@ -57,6 +58,9 @@ bazel_run() {
     return 1
   fi
 }
+
+# Verify that all Bazel files are formatted correctly.
+$BUILDIFIER -mode=check -r `pwd`
 
 # Verifies that the following targets build fine:
 #  - Arcs parser and proto works.
