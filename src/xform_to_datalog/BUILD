@@ -29,9 +29,9 @@ cc_test(
     data = ["//src/xform_to_datalog/testdata:auth_logic"],
     deps = [
         ":authorization_logic",
-        "//src/test_utils:utils",
         "//src/common/logging",
         "//src/common/testing:gtest",
+        "//src/test_utils:utils",
     ],
 )
 
@@ -53,9 +53,9 @@ cc_test(
     data = ["//src/xform_to_datalog/testdata:auth_logic"],
     deps = [
         ":authorization_logic_datalog_facts",
-        "//src/test_utils:utils",
         "//src/common/logging",
         "//src/common/testing:gtest",
+        "//src/test_utils:utils",
         "@absl//absl/strings",
     ],
 )
@@ -76,9 +76,9 @@ cc_test(
     srcs = ["datalog_facts_test.cc"],
     data = ["//src/xform_to_datalog/testdata:auth_logic"],
     deps = [
-        "//src/test_utils:utils",
         ":datalog_facts",
         "//src/common/testing:gtest",
+        "//src/test_utils:utils",
     ],
 )
 
@@ -110,8 +110,8 @@ cc_binary(
     srcs = ["generate_datalog_program.cc"],
     deps = [
         ":datalog_facts",
-        "//src/ir/proto:system_spec",
         "//src/common/logging",
+        "//src/ir/proto:system_spec",
         "@absl//absl/flags:flag",
         "@absl//absl/flags:parse",
         "@absl//absl/flags:usage",

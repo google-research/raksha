@@ -17,7 +17,6 @@
 
 package(default_visibility = ["//visibility:public"])
 
-
 toolchain(
     name = "cc-toolchain",
     exec_compatible_with = [
@@ -35,7 +34,6 @@ toolchain(
 
 platform(
     name = "platform",
-    parents = ["@local_config_platform//:host"],
     constraint_values = [
         "@bazel_tools//platforms:linux",
         "@bazel_tools//platforms:x86_64",
@@ -45,4 +43,5 @@ platform(
         "container-image": "docker://us-central1-docker.pkg.dev/google.com/raksha-ci/gcb-docker-images/gcb@sha256:69208a81970d0b259154c39711eb2df85548c52cd811419cb04e4e2ad311c773",
         "OSFamily": "Linux",
     },
+    parents = ["@local_config_platform//:host"],
 )
