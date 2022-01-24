@@ -20,6 +20,7 @@
 #define SRC_IR_AUTH_LOGIC_LOWERING_AST_DATALOG_H_
 
 #include <limits>
+#include <memory>
 #include <utility>  //included for std::pair
 
 #include "absl/strings/str_format.h"

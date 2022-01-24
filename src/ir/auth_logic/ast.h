@@ -19,6 +19,7 @@
 #ifndef SRC_IR_AUTH_LOGIC_AST_H_
 #define SRC_IR_AUTH_LOGIC_AST_H_
 
+#include <memory>
 #include <string>
 #include <variant>
 #include <vector>
