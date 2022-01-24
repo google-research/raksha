@@ -77,7 +77,7 @@ def gen_souffle_cxx_code(
         outs = [cc_file],
         testonly = testonly,
         cmd =
-            "$(location @souffle//:souffle) {include_str} {macros} -g $@ $(location {src_rule})".format(include_str = include_opts_str, macros=macro_str, src_rule = src),
+            "$(location @souffle//:souffle) {include_str} {macros} -g $@ $(location {src_rule})".format(include_str = include_opts_str, macros = macro_str, src_rule = src),
         tools = ["@souffle//:souffle"],
         visibility = visibility,
     )

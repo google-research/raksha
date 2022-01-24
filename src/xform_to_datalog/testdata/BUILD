@@ -21,15 +21,15 @@ licenses(["notice"])
 
 filegroup(
     name = "auth_logic",
+    testonly = True,
     srcs = [
         "empty_auth_logic",
         "empty_auth_logic.dl",
-        "simple_auth_logic",
-        "simple_auth_logic.dl",
         "says_owns_tag",
         "says_owns_tag.dl",
+        "simple_auth_logic",
+        "simple_auth_logic.dl",
     ],
-    testonly = True
 )
 
 arcs_manifest_proto(
@@ -45,5 +45,5 @@ filegroup(
         "ok_claim_propagates.auth",
         "ok_claim_propagates.dl",
         ":ok_claim_propagates_proto",
-    ]
+    ],
 )
