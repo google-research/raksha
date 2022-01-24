@@ -6,11 +6,11 @@
 
 namespace raksha::ir::types {
 
-class Type {
+class TypeBase {
  public:
   enum class Kind { kPrimitive, kEntity };
 
-  virtual ~Type() {}
+  virtual ~TypeBase() {}
 
   virtual raksha::ir::AccessPathSelectorsSet GetAccessPathSelectorsSet()
       const = 0;
@@ -18,6 +18,25 @@ class Type {
   // Returns the kind of type.
   virtual Kind kind() const = 0;
 };
+
+class Type {
+ public:
+
+  raksha::ir::AccessPathSelectorsSet GetAccessPathSelectorsSet() const {
+    return type_->GetAccessPathSelectorsSet();
+  }
+
+  // TODO: This should be removed to hide the TypeBase.  method is added as a
+  // stop-gap solution to work with the rest of the code base.
+  const TypeBase& type_base() const { return *type_.get(); }
+
+  friend class TypeFactory;
+ private:
+  Type(std::unique_ptr<TypeBase> type) : type_(std::move(type)) {}
+
+  std::unique_ptr<TypeBase> type_;
+};
+
 
 }  // namespace raksha::ir::types
 

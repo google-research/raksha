@@ -21,6 +21,7 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/proto/handle_connection_spec.h"
+#include "src/ir/types/type_factory.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir {
@@ -33,7 +34,10 @@ struct ProtoStringAndExpectations {
 };
 
 class RoundTripHandleConnectionSpecProtoTest :
-    public testing::TestWithParam<ProtoStringAndExpectations> {};
+    public testing::TestWithParam<ProtoStringAndExpectations> {
+protected:
+  types::TypeFactory type_factory_;
+};
 
 TEST_P(RoundTripHandleConnectionSpecProtoTest,
        RoundTripHandleConnectionSpecProtoTest) {
@@ -42,7 +46,8 @@ TEST_P(RoundTripHandleConnectionSpecProtoTest,
   arcs::HandleConnectionSpecProto original_proto;
   google::protobuf::TextFormat::ParseFromString(
       info.proto_str, &original_proto);
-  HandleConnectionSpec handle_connection_spec = proto::Decode(original_proto);
+  HandleConnectionSpec handle_connection_spec =
+      proto::Decode(type_factory_, original_proto);
 
   EXPECT_EQ(handle_connection_spec.name(), info.expected_name);
   EXPECT_EQ(handle_connection_spec.reads(), info.expected_reads);
@@ -86,14 +91,18 @@ struct ProtoStringAndExpectedAccessPathPieces {
 
 class GetAccessPathTest :
  public testing::TestWithParam<
-  std::tuple<ProtoStringAndExpectedAccessPathPieces, std::string>> {};
+  std::tuple<ProtoStringAndExpectedAccessPathPieces, std::string>> {
+ protected:
+  types::TypeFactory type_factory_;
+};
 
 TEST_P(GetAccessPathTest, GetAccessPathTest) {
   const ProtoStringAndExpectedAccessPathPieces &param = std::get<0>(GetParam());
   const std::string &particle_spec_name = std::get<1>(GetParam());
   arcs::HandleConnectionSpecProto hcs_proto;
   google::protobuf::TextFormat::ParseFromString(param.textproto, &hcs_proto);
-  HandleConnectionSpec handle_connection_spec = proto::Decode(hcs_proto);
+  HandleConnectionSpec handle_connection_spec =
+      proto::Decode(type_factory_, hcs_proto);
   std::vector<ir::AccessPath> access_paths =
       handle_connection_spec.GetAccessPaths(particle_spec_name);
   std::vector<std::string> found_access_path_selector_strings;

@@ -25,13 +25,15 @@
 
 namespace raksha::ir::proto {
 
-std::unique_ptr<SystemSpec> Decode(const arcs::ManifestProto &manifest_proto) {
+std::unique_ptr<SystemSpec> Decode(types::TypeFactory &type_factory,
+                                   const arcs::ManifestProto &manifest_proto) {
   // Turn each ParticleSpecProto indicated in the manifest_proto into a
   // ParticleSpec object, which we can use directly.
   auto system_spec = std::make_unique<SystemSpec>();
   for (const arcs::ParticleSpecProto &particle_spec_proto :
        manifest_proto.particle_specs()) {
-    system_spec->AddParticleSpec(ir::proto::Decode(particle_spec_proto));
+    system_spec->AddParticleSpec(
+        ir::proto::Decode(type_factory, particle_spec_proto));
   }
   return system_spec;
 }

@@ -26,6 +26,7 @@
 #include "src/ir/system_spec.h"
 #include "src/ir/tag_check.h"
 #include "src/ir/tag_claim.h"
+#include "src/ir/types/type_factory.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::xform_to_datalog {
@@ -60,7 +61,8 @@ class ManifestDatalogFacts {
   };
 
   static ManifestDatalogFacts CreateFromManifestProto(
-      const ir::SystemSpec& system_spec,
+      raksha::ir::types::TypeFactory &type_factory,
+      const ir::SystemSpec &system_spec,
       const arcs::ManifestProto &manifest_proto);
 
   // A default constructor creates a sensible, legal state (no facts) and
