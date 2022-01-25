@@ -26,8 +26,8 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "src/common/logging/logging.h"
-#include "src/ir/auth_logic/datalog_ir.h"
 #include "src/ir/auth_logic/ast.h"
+#include "src/ir/auth_logic/datalog_ir.h"
 #include "src/utils/overloaded.h"
 
 namespace raksha::ir::auth_logic {
@@ -144,13 +144,14 @@ class LoweringToDatalogPass {
 
   // This function takes a `predicate` and creates a new predicate as follows:
   //   - Prepend the `modifier` to the name of the given `predicate`.
-  //   - Prepend the given `args` to the original list of arguments of `predicate`.
-  // 
-  // This is used in a few places in the translation, for example, to translate 
+  //   - Prepend the given `args` to the original list of arguments of
+  //   `predicate`.
+  //
+  // This is used in a few places in the translation, for example, to translate
   // "X says blah(args)" into "says_blah(X, args)".
   Predicate PushOntoPredicate(absl::string_view modifier,
-                         std::vector<std::string> new_args,
-                         const Predicate& predicate) {
+                              std::vector<std::string> new_args,
+                              const Predicate& predicate) {
     std::string new_name = absl::StrCat(std::move(modifier), predicate.name());
     new_args.insert(new_args.end(),
                     std::make_move_iterator(predicate.args().begin()),
@@ -159,23 +160,23 @@ class LoweringToDatalogPass {
     return Predicate(new_name, new_args, sign_copy);
   }
 
-
   // This function is an abbreviation for `PushPrin` where:
   // - a modifier is added
   // - just one new principal is added as an argument.
   // This is a common case in this translation because it is used for
-  // `x says blah(args)` and `x canActAs y` and other constructions involving a 
+  // `x says blah(args)` and `x canActAs y` and other constructions involving a
   // principal name.
   Predicate PushPrincipal(std::string modifier, const Principal& principal,
-                     const Predicate& predicate) {
-    return PushOntoPredicate(std::move(modifier), {principal.name()}, predicate);
+                          const Predicate& predicate) {
+    return PushOntoPredicate(std::move(modifier), {principal.name()},
+                             predicate);
   }
 
   Predicate AttributeToDLIR(const Attribute& attribute) {
     // If attribute is `X pred(args...)` the following predicate is
     // `pred(X, args...)`
     return PushPrincipal(std::string(""), attribute.principal(),
-                    attribute.predicate());
+                         attribute.predicate());
   }
 
   // Translating an attribute results in two objects:
@@ -203,7 +204,7 @@ class LoweringToDatalogPass {
   // these facts around. This function is for generating the extra rule and
   // it works similarly to "SpokenAttributeToDLIR".
   DLIRAssertion SpokenCanActAsToDLIR(const Principal& speaker,
-      const CanActAs& can_act_as);
+                                     const CanActAs& can_act_as);
 
   std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIRInner(
       const Principal& speaker, const Predicate& predicate) {
@@ -244,7 +245,7 @@ class LoweringToDatalogPass {
       const Principal& speaker, const Fact& fact);
 
   std::vector<DLIRAssertion> SingleSaysAssertionToDLIR(
-      const Principal& speaker, const Assertion& assertion); 
+      const Principal& speaker, const Assertion& assertion);
 
   std::vector<DLIRAssertion> SaysAssertionToDLIR(
       const SaysAssertion& says_assertion) {
