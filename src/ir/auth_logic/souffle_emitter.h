@@ -17,9 +17,10 @@
 #ifndef SRC_IR_AUTH_LOGIC_SOUFFLE_EMITTER_H_
 #define SRC_IR_AUTH_LOGIC_SOUFFLE_EMITTER_H_
 
-#include <unordered_set>
-
-#include "src/ir/auth_logic/ast.h"
+#include "absl/container/flat_hash_set.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
+#include "src/ir/auth_logic/datalog_ir.h"
 
 namespace raksha::ir::auth_logic {
 
@@ -30,17 +31,17 @@ class SouffleEmitter {
       std::string body = emitter.EmitProgramBody(program);
       std::string outputs = emitter.EmitOutputs(program);
       std::string decls = emitter.EmitDeclarations();
-      return std::move(body) 
-        + "\n" 
-        + std::move(outputs) 
-        + "\n" 
-        + std::move(decls);
+      return absl::StrCat(std::move(body),
+        "\n",
+        std::move(outputs),
+        "\n",
+        std::move(decls));
     }
 
   private:
     SouffleEmitter() 
       : declarations_(
-          std::unordered_set<Predicate, Predicate::HashFunction>()) 
+          absl::flat_hash_set<Predicate, Predicate::HashFunction>()) 
     {};
 
     // This function produces a normalized version of predicates to
@@ -75,9 +76,10 @@ class SouffleEmitter {
       // Whenever a new predicate is encountered, it is added to the set of 
       // declarations (which does not include duplicates because it is a set).
       declarations_.insert(PredToDeclaration(predicate));
-      return (predicate.sign() == kNegated ? "!" : "")
-          + predicate.name()
-          + "(" + EmitVecSeparated(predicate.args(), ", ") + ")";
+      return absl::StrCat(
+        predicate.sign() == kNegated ? "!" : "",
+        predicate.name(),
+        "(", absl::StrJoin(predicate.args(), ", "), ")");
     }
 
     std::string EmitAssertionInner(Predicate predicate) {
@@ -90,8 +92,8 @@ class SouffleEmitter {
       for(auto arg: cond_assertion.rhs()) {
         rhs_translated.push_back(EmitPredicate(arg));
       }
-      std::string rhs = EmitVecSeparated(rhs_translated, ", ");
-      return std::move(lhs) + " :- " + std::move(rhs) + ".";
+      return absl::StrCat(std::move(lhs), " :- ",
+          absl::StrJoin(rhs_translated, ", "), ".");
     }
 
     std::string EmitAssertion(DLIRAssertion assertion) {
@@ -105,26 +107,24 @@ class SouffleEmitter {
       for(auto assertion : program.assertions()) {
         body_translated.push_back(EmitAssertion(assertion));
       }
-      return EmitVecSeparated(body_translated, "\n");
+      return absl::StrJoin(body_translated, "\n");
     }
 
     std::string EmitOutputs(DLIRProgram program) {
       std::string ret;
       for (auto out : program.outputs()) {
-        ret += ".output " + out + "\n";
+        absl::StrAppend(&ret, absl::StrCat(".output", out, "\n"));
       }
       return ret;
     }
 
     std::string EmitDeclaration(Predicate predicate) {
-      std::string args = "";
-      bool is_first = true;
+      std::vector<std::string> args_with_types;
       for(auto elm : predicate.args()) {
-        if(!is_first) { args += ", "; } else { is_first = false; }
-        args += elm + ": symbol";
+        args_with_types.push_back(absl::StrCat(elm, ": symbol"));
       }
-      return ".decl " + predicate.name() + "("
-        + args + ")";
+      return absl::StrCat(".decl ", predicate.name(),
+          "(", absl::StrJoin(args_with_types, ", "), ")");
     }
 
     std::string EmitDeclarations() {
@@ -132,10 +132,10 @@ class SouffleEmitter {
       for(auto decl : declarations_) {
         ret.push_back(EmitDeclaration(decl));
       }
-      return EmitVecSeparated(ret, "\n");
+      return absl::StrJoin(ret, "\n");
     }
 
-    std::unordered_set<Predicate, Predicate::HashFunction> declarations_;
+    absl::flat_hash_set<Predicate, Predicate::HashFunction> declarations_;
 };
 
 }  // namespace raksha::ir::auth_logic

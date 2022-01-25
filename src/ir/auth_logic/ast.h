@@ -69,12 +69,19 @@ class Predicate {
 
   // Equality is also needed to use a Predicate in an std::unordered_set
   bool operator==(const Predicate& otherPredicate) const {
-    if (this->args().size() != otherPredicate.args().size()) return false;
-    for (int i = 0; i < this->args().size(); i++) {
-      if (this->args()[i] != otherPredicate.args()[i]) return false;
+    if (this->name() != otherPredicate.name()) {
+        return false;
     }
-    return this->name() == otherPredicate.name() &&
-           this->sign() == otherPredicate.sign();
+    if (this->sign() != otherPredicate.sign()) {
+        return false;
+    }
+    if (this->args().size() != otherPredicate.args().size()) {
+      return false;
+    }
+    for (int i = 0; i < this->args().size(); i++) {
+      if (this->args().at(i) != otherPredicate.args().at(i)) return false;
+    }
+    return true;
   }
 
  private:
