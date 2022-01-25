@@ -140,10 +140,12 @@ class LoweringToDatalogPass {
     return "x__" + std::to_string(++fresh_var_count_);
   }
 
-  // This function makes a copy of a predicate that prepends the name with
-  // another string and prepends the list of arguments with additional
-  // arguments. This is used in a few places in the translation, for
-  // example, to translate "X says blah(args)" into "says_blah(X, args)".
+  // This function takes a `predicate` and creates a new predicate as follows:
+  //   - Prepend the `modifier` to the name of the given `predicate`.
+  //   - Prepend the given `args` to the original list of arguments of `predicate`.
+  // 
+  // This is used in a few places in the translation, for example, to translate 
+  // "X says blah(args)" into "says_blah(X, args)".
   Predicate PushOntoPred(std::string modifier,
                          std::vector<std::string> new_args,
                          Predicate predicate) {
