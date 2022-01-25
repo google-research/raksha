@@ -44,8 +44,8 @@ cc_library(
     ],
     visibility = ["//test:__pkg__"],
     deps = [
-        "//src/ir/auth_logic:ast",
         "//src/common/logging",
+        "//src/ir/auth_logic:ast",
         "//src/utils:overloaded",
         "@absl//absl/strings:str_format",
     ],
