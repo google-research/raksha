@@ -58,18 +58,7 @@ class SouffleEmitter {
       for( int i=0; i < predicate.args().size(); i++ ) {
         decl_args.push_back("x" + std::to_string(i));
       }
-      return Predicate(predicate.name(), predicate.args(), kPositive);
-    }
-
-    std::string EmitVecSeparated(std::vector<std::string> vec,
-        std::string sep) {
-      std::string ret = "";
-      bool is_first = true;
-      for(auto elm : vec) {
-        if( !is_first ) { ret += sep; } else { is_first = false; }
-        ret += elm;
-      }
-      return ret;
+      return Predicate(predicate.name(), decl_args, kPositive);
     }
 
     std::string EmitPredicate(Predicate predicate) {
