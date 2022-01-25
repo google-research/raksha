@@ -14,7 +14,7 @@
 # limitations under the License.
 #-----------------------------------------------------------------------------
 load("//build_defs:arcs.bzl", "arcs_manifest_proto")
-load("//build_defs:souffle.bzl", "souffle_cc_library", "gen_souffle_cxx_code")
+load("//build_defs:souffle.bzl", "gen_souffle_cxx_code", "souffle_cc_library")
 
 def raksha_policy_check(name, src, visibility = None):
     """ Generates a cc_test rule for verifying policy compliance.
@@ -26,6 +26,7 @@ def raksha_policy_check(name, src, visibility = None):
                    by `// __AUTH_LOGIC__` line separator.
       visibility: List; List of visibilities.
     """
+
     # Split file into two '.arcs' and '.auth'.
     arcs_file = src.replace(".raksha", ".arcs")
     auth_file = src.replace(".raksha", ".auth")
@@ -35,14 +36,14 @@ def raksha_policy_check(name, src, visibility = None):
         srcs = [src],
         outs = [arcs_file, auth_file],
         cmd = "csplit --prefix=part $< '/^//[ \t]*__AUTH_LOGIC__[ \t]*$$/' " +
-           "&& cp part00 $(location %s) && cp part01 $(location %s)"
-           % (arcs_file, auth_file)
+              "&& cp part00 $(location %s) && cp part01 $(location %s)" %
+              (arcs_file, auth_file),
     )
     policy_check(
         name,
         dataflow_graph = arcs_file,
         auth_logic = auth_file,
-        visibility = visibility
+        visibility = visibility,
     )
 
 def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visibility = None):
@@ -54,6 +55,7 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
       auth_logic: String; The file with authorization logic facts.
       visibility: List; List of visibilities.
     """
+
     # Parse .arcs into proto
     proto_target_name = "%s_proto" % name
     proto_target = ":%s" % proto_target_name
@@ -63,7 +65,8 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
     )
     invert_arg = ""
     if expect_failure:
-      invert_arg = "invert"
+        invert_arg = "invert"
+
     # Generate datalog
     datalog_source_target_name = "%s_datalog" % name
     datalog_source_target = ":%s" % datalog_source_target_name
@@ -76,16 +79,17 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
     native.genrule(
         name = datalog_source_target_name,
         srcs = [
-           auth_logic,
-           proto_target,
+            auth_logic,
+            proto_target,
         ],
         outs = [datalog_file],
         cmd = "$(location //src/xform_to_datalog:generate_datalog_program) " +
-               " --auth_logic_file=\"$(location %s)\" " % auth_logic +
-               " --manifest_proto=\"$(location %s)\" " % proto_target +
-               " --datalog_file=\"$@\" ",
+              " --auth_logic_file=\"$(location %s)\" " % auth_logic +
+              " --manifest_proto=\"$(location %s)\" " % proto_target +
+              " --datalog_file=\"$@\" ",
         tools = ["//src/xform_to_datalog:generate_datalog_program"],
     )
+
     # Generate souffle C++ library
     gen_souffle_cxx_code(
         name = datalog_cxx_source_target_name,
@@ -97,8 +101,8 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
             "//src/analysis/souffle:operations.dl",
             "//src/analysis/souffle:taint.dl",
             "//src/analysis/souffle:tags.dl",
-            "//src/analysis/souffle:may_will.dl"
-        ]
+            "//src/analysis/souffle:may_will.dl",
+        ],
     )
     souffle_cc_library(
         name = datalog_library_target_name,
@@ -109,7 +113,7 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
         srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:fact_test_driver.cc"],
         args = [
             datalog_cxx_source_target_name,
-            invert_arg
+            invert_arg,
         ],
         copts = [
             "-Iexternal/souffle/src/include/souffle",

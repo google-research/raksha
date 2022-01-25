@@ -21,8 +21,9 @@ cc_library(
     testonly = True,
     srcs = ["utils.cc"],
     hdrs = ["utils.h"],
-    deps = ["//src/common/logging",
+    deps = [
+        "//src/common/logging",
         "//src/common/testing:gtest",
-        "@absl//absl/strings",],
+        "@absl//absl/strings",
+    ],
 )
-

@@ -27,7 +27,7 @@ cc_library(
       "//src/utils:overloaded",
       "@absl//absl/strings:str_format",
     ],
-    visibility = ["//test:__pkg__"]
+    visibility = ["//test:__pkg__"],
 )
 
 cc_library(
@@ -43,7 +43,7 @@ cc_library(
       "//src/utils:overloaded",
       "@absl//absl/strings:str_format",
     ],
-    visibility = ["//test:__pkg__"]
+    visibility = ["//test:__pkg__"],
 )
 
 cc_test(
@@ -52,5 +52,5 @@ cc_test(
     deps = [
         ":ast",
         "//src/common/testing:gtest",
-    ]
+    ],
 )

@@ -8,11 +8,10 @@ BUILD_ERROR_ARCS_MANIFEST_PATTERNS = [
 
 BUILDING_ARCS_MANIFESTS = glob(
     ["*.arcs"],
-    exclude = BUILD_ERROR_ARCS_MANIFEST_PATTERNS
+    exclude = BUILD_ERROR_ARCS_MANIFEST_PATTERNS,
 )
 
 [arcs_manifest_proto(
     name = manifest.replace(".arcs", "_proto"),
     src = manifest,
- ) for manifest in BUILDING_ARCS_MANIFESTS]
-
+) for manifest in BUILDING_ARCS_MANIFESTS]
