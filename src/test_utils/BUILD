@@ -27,3 +27,5 @@ cc_library(
         "@absl//absl/strings",
     ],
 )
+
+licenses(["notice"])

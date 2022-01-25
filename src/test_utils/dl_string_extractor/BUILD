@@ -26,3 +26,5 @@ exports_files([
     "dl_string_parsing_test_driver.cc",
     "dl_string_test_file_generator.cc",
 ])
+
+licenses(["notice"])

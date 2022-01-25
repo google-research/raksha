@@ -12,3 +12,5 @@ policy_check(
     auth_logic = "multimic_no_userc_tag.authlogic",
     dataflow_graph = "multimic.arcs",
 )
+
+licenses(["notice"])

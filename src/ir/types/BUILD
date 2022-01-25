@@ -45,3 +45,5 @@ cc_test(
         "@absl//absl/strings",
     ],
 )
+
+licenses(["notice"])

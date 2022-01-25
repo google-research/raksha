@@ -26,3 +26,5 @@ nodejs_binary(
     ],
     entry_point = ":manifest2proto-cli.cjs",
 )
+
+licenses(["notice"])

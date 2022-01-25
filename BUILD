@@ -4,3 +4,5 @@ load("@buildtools//buildifier:def.bzl", "buildifier")
 buildifier(
     name = "buildifier",
 )
+
+licenses(["notice"])

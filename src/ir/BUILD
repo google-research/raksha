@@ -260,3 +260,5 @@ extracted_datalog_string_test(
     name = "predicate_extraction_test",
     dl_string_lib = ":predicate_textproto_to_rule_body_testdata",
 )
+
+licenses(["notice"])

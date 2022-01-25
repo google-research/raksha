@@ -15,3 +15,5 @@ arcs_manifest_proto(
     src = "VisionPipeline.arcs",
     deps = [],
 )
+
+licenses(["notice"])

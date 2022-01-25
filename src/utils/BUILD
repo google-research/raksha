@@ -45,3 +45,5 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
+
+licenses(["notice"])

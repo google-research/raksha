@@ -7,3 +7,5 @@ run_taint_exec_compare_check_results(
     name = "ok_claim_propagates",
     input_files = glob(["*.facts"]),
 )
+
+licenses(["notice"])

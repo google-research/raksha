@@ -181,3 +181,5 @@ cc_test(
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
+
+licenses(["notice"])

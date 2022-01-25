@@ -15,3 +15,5 @@ BUILDING_ARCS_MANIFESTS = glob(
     name = manifest.replace(".arcs", "_proto"),
     src = manifest,
 ) for manifest in BUILDING_ARCS_MANIFESTS]
+
+licenses(["notice"])
