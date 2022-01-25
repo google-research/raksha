@@ -22,12 +22,12 @@ cc_library(
     hdrs = [
         "ast.h",
     ],
-    deps = [
-      "//src/common/logging:logging",
-      "//src/utils:overloaded",
-      "@absl//absl/strings:str_format",
-    ],
     visibility = ["//test:__pkg__"],
+    deps = [
+        "//src/common/logging",
+        "//src/utils:overloaded",
+        "@absl//absl/strings:str_format",
+    ],
 )
 
 cc_library(
@@ -38,12 +38,12 @@ cc_library(
         "datalog_ir.h",
         "lowering_ast_datalog.h",
     ],
-    deps = [
-      "//src/common/logging:logging",
-      "//src/utils:overloaded",
-      "@absl//absl/strings:str_format",
-    ],
     visibility = ["//test:__pkg__"],
+    deps = [
+        "//src/common/logging",
+        "//src/utils:overloaded",
+        "@absl//absl/strings:str_format",
+    ],
 )
 
 cc_test(
