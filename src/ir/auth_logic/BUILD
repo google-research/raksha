@@ -20,7 +20,23 @@ package(default_visibility = ["//src:__subpackages__"])
 cc_library(
     name = "ast",
     hdrs = [
-        "ast.h", "datalog_ir.h", "lowering_ast_datalog.h"
+        "ast.h",
+    ],
+    deps = [
+      "//src/common/logging:logging",
+      "//src/utils:overloaded",
+      "@absl//absl/strings:str_format",
+    ],
+    visibility = ["//test:__pkg__"]
+)
+
+cc_library(
+    name = "lowering_ast_datalog",
+    srcs = ["lowering_ast_datalog.cc"],
+    hdrs = [
+        "ast.h",
+        "datalog_ir.h",
+        "lowering_ast_datalog.h",
     ],
     deps = [
       "//src/common/logging:logging",

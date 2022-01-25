@@ -23,8 +23,10 @@
 #include <memory>
 #include <utility>  //included for std::pair
 
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "src/common/logging/logging.h"
+#include "src/ir/auth_logic/datalog_ir.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/utils/overloaded.h"
 
@@ -146,10 +148,10 @@ class LoweringToDatalogPass {
   // 
   // This is used in a few places in the translation, for example, to translate 
   // "X says blah(args)" into "says_blah(X, args)".
-  Predicate PushOntoPred(std::string modifier,
+  Predicate PushOntoPredicate(absl::string_view modifier,
                          std::vector<std::string> new_args,
-                         Predicate predicate) {
-    std::string new_name = modifier + predicate.name();
+                         const Predicate& predicate) {
+    std::string new_name = absl::StrCat(std::move(modifier), predicate.name());
     new_args.insert(new_args.end(),
                     std::make_move_iterator(predicate.args().begin()),
                     std::make_move_iterator(predicate.args().end()));
@@ -157,15 +159,22 @@ class LoweringToDatalogPass {
     return Predicate(new_name, new_args, sign_copy);
   }
 
-  Predicate PushPrin(std::string modifier, Principal principal,
-                     Predicate predicate) {
-    return PushOntoPred(std::move(modifier), {principal.name()}, predicate);
+
+  // This function is an abbreviation for `PushPrin` where:
+  // - a modifier is added
+  // - just one new principal is added as an argument.
+  // This is a common case in this translation because it is used for
+  // `x says blah(args)` and `x canActAs y` and other constructions involving a 
+  // principal name.
+  Predicate PushPrincipal(std::string modifier, const Principal& principal,
+                     const Predicate& predicate) {
+    return PushOntoPredicate(std::move(modifier), {principal.name()}, predicate);
   }
 
-  Predicate AttributeToDLIR(Attribute attribute) {
+  Predicate AttributeToDLIR(const Attribute& attribute) {
     // If attribute is `X pred(args...)` the following predicate is
     // `pred(X, args...)`
-    return PushPrin(std::string(""), attribute.principal(),
+    return PushPrincipal(std::string(""), attribute.principal(),
                     attribute.predicate());
   }
 
@@ -179,40 +188,9 @@ class LoweringToDatalogPass {
   // - If it appears on the LHS of an assertion, it explicitly has a speaker
   // - If it appears on the RHS of an assertion, it behaves semantically
   // like it has the same speaker as the head of the assertion.
-  DLIRAssertion SpokenAttributeToDLIR(Principal speaker, Attribute attribute) {
-    Predicate main_predicate = AttributeToDLIR(attribute);
+  DLIRAssertion SpokenAttributeToDLIR(Principal speaker, Attribute attribute);
 
-    // Attributes interact with "canActAs" because if "Y canActAs X"
-    // then Y also picks up X's attributes. We need to generate
-    // an additional rule to implement this behavior. If the attribute
-    // under translation is `X PredX`, the additional rule is:
-    // `speaker says Y PredX :-
-    //    speaker says Y canActAs X, speaker says X PredX`
-    // (Where Y is a fresh variable)
-    Principal prin_y = Principal(FreshVar());
-
-    // This is `speaker says Y PredX`
-    Predicate generated_lhs = PushPrin("says_", prin_y, main_predicate);
-
-    Predicate y_can_act_as_x =
-        Predicate("canActAs", {prin_y.name(), attribute.principal().name()},
-                  Sign::kPositive);
-
-    Predicate speaker_says_y_can_act_as_x =
-        PushPrin("says_", speaker, y_can_act_as_x);
-
-    // This is `speaker says X PredX`
-    Predicate speaker_says_x_pred = PushPrin("says_", speaker, main_predicate);
-
-    // This is the full generated rule:
-    // `speaker says Y PredX :-
-    //    speaker says Y canActAs X, speaker says X PredX`
-    return DLIRAssertion(DLIRCondAssertion(
-        generated_lhs, {std::move(speaker_says_y_can_act_as_x),
-                        std::move(speaker_says_x_pred)}));
-  }
-
-  Predicate CanActAsToDLIR(CanActAs can_act_as) {
+  Predicate CanActAsToDLIR(const CanActAs& can_act_as) {
     return Predicate("canActAs",
                      {can_act_as.left_principal().name(),
                       can_act_as.right_principal().name()},
@@ -224,55 +202,24 @@ class LoweringToDatalogPass {
   // CanActAs also results in both a predicate and an extra rule that passes
   // these facts around. This function is for generating the extra rule and
   // it works similarly to "SpokenAttributeToDLIR".
-  DLIRAssertion SpokenCanActAsToDLIR(Principal speaker, CanActAs can_act_as) {
-    Predicate main_predicate = CanActAsToDLIR(can_act_as);
-
-    // "canActAs" facts are passed to principals via other canActAs facts in
-    // essentially the same way as attributes. This function adds extra
-    // rules to pass these around. If the `canActAs` under translation
-    // is `X canActAs Z`, then the rule we need to generate is:
-    // `speaker says Y PredX :-
-    //    speaker says Y canActAs X, speaker says X canActAsZ`
-    // (Where Y is a fresh variable)
-    Principal prin_y = Principal(FreshVar());
-
-    // This is `speaker says Y PredX`
-    Predicate generated_lhs = PushPrin("says_", prin_y, main_predicate);
-
-    Predicate y_can_act_as_x = Predicate(
-        "canActAs", {prin_y.name(), can_act_as.left_principal().name()},
-        Sign::kPositive);
-
-    Predicate speaker_says_y_can_act_as_x =
-        PushPrin("says_", speaker, y_can_act_as_x);
-
-    // This is `speaker says X canActAs Z`
-    Predicate speaker_says_x_can_act_as_z =
-        PushPrin("says_", speaker, main_predicate);
-
-    // This is the full generated rule:
-    // `speaker says Y PredX :-
-    //    speaker says Y canActAs X, speaker says X canActAs Z`
-    return DLIRAssertion(DLIRCondAssertion(
-        generated_lhs, {std::move(speaker_says_y_can_act_as_x),
-                        std::move(speaker_says_x_can_act_as_z)}));
-  }
+  DLIRAssertion SpokenCanActAsToDLIR(const Principal& speaker,
+      const CanActAs& can_act_as);
 
   std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIRInner(
-      Principal speaker, Predicate predicate) {
+      const Principal& speaker, const Predicate& predicate) {
     std::vector<DLIRAssertion> pred_list = {};
     return std::make_pair(predicate, pred_list);
   }
 
   std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIRInner(
-      Principal speaker, Attribute attribute) {
+      const Principal& speaker, const Attribute& attribute) {
     std::vector<DLIRAssertion> pred_list = {
         SpokenAttributeToDLIR(speaker, attribute)};
     return std::make_pair(AttributeToDLIR(attribute), pred_list);
   }
 
   std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIRInner(
-      Principal speaker, CanActAs canActAs) {
+      const Principal& speaker, const CanActAs& canActAs) {
     std::vector<DLIRAssertion> pred_list = {
         SpokenCanActAsToDLIR(speaker, canActAs)};
     return std::make_pair(CanActAsToDLIR(canActAs), pred_list);
@@ -283,7 +230,7 @@ class LoweringToDatalogPass {
   // this needs to construct a vector anyway, so a vector is used in the
   // return type.
   std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIR(
-      Principal speaker, BaseFact base_fact) {
+      const Principal& speaker, const BaseFact& base_fact) {
     return std::visit(
         [this, &speaker](auto value) {
           return BaseFactToDLIRInner(speaker, value);
@@ -294,91 +241,10 @@ class LoweringToDatalogPass {
   // This can result in 0 or more new rules because the translation of
   // nested canSayFacts might result in more than 1 rule.
   std::pair<Predicate, std::vector<DLIRAssertion>> FactToDLIR(
-      Principal speaker, const Fact& fact) {
-    return std::visit(
-        raksha::utils::overloaded{
-            [this, &speaker](BaseFact base_fact) {
-              return BaseFactToDLIR(speaker, base_fact);
-            },
-            // To make the typechecker happy, this needs to be a const reference
-            // to a unique ptr... which is surprising to me.
-            [this, &speaker](const std::unique_ptr<CanSay>& can_say) {
-              auto [inner_fact_dlir, gen_rules] =
-                  FactToDLIR(speaker, *can_say->fact());
-
-              Principal fresh_principal(FreshVar());
-
-              // The following code generates the extra rule that does
-              // delegation. This rule is:
-              // ```
-              // speaker says inner_fact_dlir:-
-              //      fresh_principal says inner_fact_dlir,
-              //      speaker says fresh_principal canSay inner_fact_dlir
-              // ```
-
-              // This is p says inner_fact_dlir
-              auto lhs = PushPrin("says_", speaker, inner_fact_dlir);
-              auto fresh_prin_says_inner =
-                  PushPrin("says_", fresh_principal, inner_fact_dlir);
-              auto speaker_says_fresh_cansay_inner = PushPrin(
-                  "says_", speaker,
-                  PushPrin("canSay_", fresh_principal, inner_fact_dlir));
-              auto rhs = {fresh_prin_says_inner,
-                          speaker_says_fresh_cansay_inner};
-              DLIRAssertion generated_rule(DLIRCondAssertion(lhs, rhs));
-              gen_rules.push_back(generated_rule);
-
-              // Note that prin_cansay_pred does not begin with "speaker says"
-              // because only the top-level fact should. This could
-              // be a recursive call, so it might not be processing
-              // the top-level fact. The top-level fact gets wrapped
-              // in a "says" during the call to translate the assertion
-              // in which this appears.
-              auto prin_cansay_pred =
-                  PushPrin("canSay_", can_say->principal(), inner_fact_dlir);
-              return std::make_pair(prin_cansay_pred, gen_rules);
-            }},
-        fact.GetValue());
-  }
+      const Principal& speaker, const Fact& fact);
 
   std::vector<DLIRAssertion> SingleSaysAssertionToDLIR(
-      Principal speaker, const Assertion& assertion) {
-    return std::visit(
-        raksha::utils::overloaded{
-            // I'm not sure why this signature needs to be a const reference to
-            // make the typechecker happy when the visitor for BaseFactToDLIR
-            // did
-            // not need this.
-            [this, &speaker](const Fact& fact) {
-              auto [fact_predicate, generated_rules] =
-                  FactToDLIR(speaker, fact);
-              DLIRAssertion main_assertion =
-                  DLIRAssertion(PushPrin("says_", speaker, fact_predicate));
-              generated_rules.push_back(main_assertion);
-              return generated_rules;
-            },
-            [this,
-             &speaker](const ConditionalAssertion& conditional_assertion) {
-              std::vector<Predicate> dlir_rhs = {};
-              for (auto ast_rhs : conditional_assertion.rhs()) {
-                // extra rule are only generated for facts on the LHS,
-                // so the rules that would be generated from this RHS fact are
-                // not used.
-                auto [dlir_translation, not_used] =
-                    BaseFactToDLIR(speaker, ast_rhs);
-                dlir_rhs.push_back(
-                    PushPrin("says_", speaker, dlir_translation));
-              }
-              auto [dlir_lhs, gen_rules] =
-                  FactToDLIR(speaker, conditional_assertion.lhs());
-              auto dlir_lhs_prime = PushPrin("says_", speaker, dlir_lhs);
-              DLIRAssertion dlir_assertion(
-                  DLIRCondAssertion(dlir_lhs_prime, dlir_rhs));
-              gen_rules.push_back(dlir_assertion);
-              return gen_rules;
-            }},
-        assertion.GetValue());
-  }
+      const Principal& speaker, const Assertion& assertion); 
 
   std::vector<DLIRAssertion> SaysAssertionToDLIR(
       const SaysAssertion& says_assertion) {
@@ -413,7 +279,7 @@ class LoweringToDatalogPass {
     // The assertions that are normally generated during the translation
     // from facts to dlir facts are not used for queries.
     auto [main_pred, not_used] = FactToDLIR(query.principal(), query.fact());
-    main_pred = PushPrin("says_", query.principal(), main_pred);
+    main_pred = PushPrincipal("says_", query.principal(), main_pred);
     Predicate lhs(query.name(), {"dummy_var"}, kPositive);
     return DLIRAssertion(DLIRCondAssertion(lhs, {main_pred, kDummyPredicate}));
   }
