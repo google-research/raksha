@@ -18,8 +18,27 @@
 licenses(["notice"])
 
 load("@buildtools//buildifier:def.bzl", "buildifier")
+load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
 
 # Target to fix all bazel files in Raksha repo.
 buildifier(
     name = "buildifier",
 )
+
+# Generates `compile_commands.json` for use with clangd.
+#
+# Run `bazel run //:refresh_compile_commands` to generate.
+#
+refresh_compile_commands(
+    name = "refresh_compile_commands",
+
+    # Specify the targets of interest.
+    # For example, specify a dict of targets and their arguments:
+    targets = {
+        "//src/...": "",
+    },
+    # For more details, feel free to look into the following bzl file:
+    #   `external/hedron_compile_commands/refresh_compile_commands.bzl`.
+)
+
+licenses(["notice"])
