@@ -22,39 +22,36 @@
 
 namespace raksha {
 namespace {
-template <typename T>
+
 class RefCounterTest : public ::testing::Test {};
 
-using RefCounterTypes = testing::Types<RefCounter<false>, RefCounter<true>>;
-TYPED_TEST_SUITE(RefCounterTest, RefCounterTypes);
-
-TYPED_TEST(RefCounterTest, Initialization) {
-  TypeParam zero_count(0);
+TEST_F(RefCounterTest, Initialization) {
+  RefCounter zero_count(0);
   EXPECT_EQ(zero_count, 0);
-  TypeParam five_count(5);
+  RefCounter five_count(5);
   EXPECT_EQ(five_count, 5);
 }
 
-TYPED_TEST(RefCounterTest, FetchAddIncrementsAndReturnsOldValue) {
-  TypeParam count(5);
+TEST_F(RefCounterTest, FetchAddIncrementsAndReturnsOldValue) {
+  RefCounter count(5);
   EXPECT_EQ(count.FetchAdd(2), 5);
   EXPECT_EQ(count, 7);
   EXPECT_EQ(count.FetchAdd(1), 7);
   EXPECT_EQ(count, 8);
 }
 
-TYPED_TEST(RefCounterTest, FetchSubDecrementsAndReturnsOldValue) {
-  TypeParam count(5);
+TEST_F(RefCounterTest, FetchSubDecrementsAndReturnsOldValue) {
+  RefCounter count(5);
   EXPECT_EQ(count.FetchSub(2), 5);
   EXPECT_EQ(count, 3);
   EXPECT_EQ(count.FetchSub(1), 3);
   EXPECT_EQ(count, 2);
 }
 
-TYPED_TEST(RefCounterTest, FetchSubDecrementToLessThanZeroCausesFailure) {
+TEST_F(RefCounterTest, FetchSubDecrementToLessThanZeroCausesFailure) {
   EXPECT_DEATH(
       {
-        TypeParam count(2);
+        RefCounter count(2);
         count.FetchSub(3);
       },
       "FetchSub can decrement below zero.");
