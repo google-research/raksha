@@ -15,6 +15,8 @@
 #
 #-------------------------------------------------------------------------------
 
+licenses(["notice"])
+
 package(default_visibility = ["//src:__subpackages__"])
 
 load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
@@ -260,5 +262,3 @@ extracted_datalog_string_test(
     name = "predicate_extraction_test",
     dl_string_lib = ":predicate_textproto_to_rule_body_testdata",
 )
-
-licenses(["notice"])

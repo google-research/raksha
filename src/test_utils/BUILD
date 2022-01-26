@@ -14,6 +14,8 @@
 # limitations under the License.
 #-----------------------------------------------------------------------------
 
+licenses(["notice"])
+
 package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
@@ -27,5 +29,3 @@ cc_library(
         "@absl//absl/strings",
     ],
 )
-
-licenses(["notice"])
