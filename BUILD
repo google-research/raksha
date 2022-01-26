@@ -35,7 +35,7 @@ refresh_compile_commands(
     # Specify the targets of interest.
     # For example, specify a dict of targets and their arguments:
     targets = {
-      "//src/...": "",
+        "//src/...": "",
     },
     # For more details, feel free to look into the following bzl file:
     #   `external/hedron_compile_commands/refresh_compile_commands.bzl`.
