@@ -44,7 +44,6 @@ class RefCounted {
   void Retain() { count_.FetchAdd(1); }
 
   void Release() {
-    CHECK(count_ != 0) << "Reference count is already zero.";
     size_t old = count_.FetchSub(1);
     if (old == 1) {
       delete this;

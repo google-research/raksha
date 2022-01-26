@@ -68,7 +68,7 @@ TEST(RefCountedTest, FailsWhenReleaseCalledOnZeroRefCount) {
         RefCountedType x;
         RefCountManager<RefCountedType>::Release(&x);
       },
-      "Reference count is already zero.");
+      "FetchSub can decrement below zero.");
 }
 
 }  // namespace
