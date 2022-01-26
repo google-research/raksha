@@ -22,11 +22,17 @@
 
 namespace raksha {
 
+template <typename T>
+class intrusive_ptr;
+
 // Specialize this class for your type if you want custom reference counting.
 template <typename T>
 class RefCountManager {
   static void Retain(T* ptr) { ptr->Retain(); }
   static void Release(T* ptr) { ptr->Release(); }
+
+  // So that it can call `Retain` and `Release`.
+  friend class intrusive_ptr<T>;
 };
 
 // A helper class that allows a type `T` to be reference counted for an
