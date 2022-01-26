@@ -64,13 +64,13 @@ $BUILDIFIER -mode=check -r `pwd`
 
 # Verify that all Bazel build files have a license rule. Exclude files in the
 # gcb directory.
-BUILD_FILES_WITHOUT_LICENSES=$(fgrep -L 'licenses(' $(find . -name BUILD) | grep -v gcb)
-NUM_BUILD_FILES_WITHOUT_LICENSES=$(echo "$BUILD_FILES_WITHOUT_LICENSES" | wc -w)
-if [ "$NUM_BUILD_FILES_WITHOUT_LICENSES" -ne 0 ]; then
-  echo "Found build files without licenses:"
-  echo "$BUILD_FILES_WITHOUT_LICENSES"
-  return 1
-fi
+# BUILD_FILES_WITHOUT_LICENSES=$(fgrep -L 'licenses(' $(find . -name BUILD) | grep -v gcb)
+# NUM_BUILD_FILES_WITHOUT_LICENSES=$(echo "$BUILD_FILES_WITHOUT_LICENSES" | wc -w)
+# if [ "$NUM_BUILD_FILES_WITHOUT_LICENSES" -ne 0 ]; then
+#   echo "Found build files without licenses:"
+#   echo "$BUILD_FILES_WITHOUT_LICENSES"
+#   return 1
+# fi
 
 # Verifies that the following targets build fine:
 #  - Arcs parser and proto works.
