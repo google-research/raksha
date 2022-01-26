@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     flex \
     g++ \
     git \
+    grep \
     libffi-dev \
     libncurses5-dev \
     libtool \
