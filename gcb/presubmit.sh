@@ -59,18 +59,26 @@ bazel_run() {
   fi
 }
 
+check_build_files_for_licenses_rule() {
+  # Note: We pipe the result of grep into echo to "swallow" the exit code of
+  # grep, as we do not want it to keep going whether grep succeeds or fails.
+  BUILD_FILES_WITHOUT_LICENSES=$(fgrep -L 'licenses(' $(find . -name BUILD) | grep -v gcb | echo)
+  echo "Debug print of BUILD_FILES_WITHOUT_LICENSES"
+  echo "$BUILD_FILES_WITHOUT_LICENSES"
+  NUM_BUILD_FILES_WITHOUT_LICENSES=$(echo "$BUILD_FILES_WITHOUT_LICENSES" | wc -w)
+  if [ "$NUM_BUILD_FILES_WITHOUT_LICENSES" -ne 0 ]; then
+    echo "Found build files without licenses:"
+    echo "$BUILD_FILES_WITHOUT_LICENSES"
+    return 1
+  fi
+}
+
 # Verify that all Bazel files are formatted correctly.
 $BUILDIFIER -mode=check -r `pwd`
 
 # Verify that all Bazel build files have a license rule. Exclude files in the
 # gcb directory.
-# BUILD_FILES_WITHOUT_LICENSES=$(fgrep -L 'licenses(' $(find . -name BUILD) | grep -v gcb)
-# NUM_BUILD_FILES_WITHOUT_LICENSES=$(echo "$BUILD_FILES_WITHOUT_LICENSES" | wc -w)
-# if [ "$NUM_BUILD_FILES_WITHOUT_LICENSES" -ne 0 ]; then
-#   echo "Found build files without licenses:"
-#   echo "$BUILD_FILES_WITHOUT_LICENSES"
-#   return 1
-# fi
+check_build_files_for_licenses_rule
 
 # Verifies that the following targets build fine:
 #  - Arcs parser and proto works.
