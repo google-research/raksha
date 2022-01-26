@@ -20,6 +20,21 @@ licenses(["notice"])
 package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
+    name = "ref_counter",
+    hdrs = ["ref_counter.h"],
+    deps = ["//src/common/logging"],
+)
+
+cc_test(
+    name = "ref_counter_test",
+    srcs = ["ref_counter_test.cc"],
+    deps = [
+        ":ref_counter",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
     name = "overloaded",
     hdrs = ["overloaded.h"],
     deps = [],
