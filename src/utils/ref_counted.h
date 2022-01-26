@@ -47,12 +47,12 @@ class RefCounted {
     CHECK(count_ != 0) << "Reference count is already zero.";
     size_t old = count_.FetchSub(1);
     if (old == 1) {
-      delete static_cast<T*>(this);
+      delete this;
     }
   }
 
  protected:
-  ~RefCounted() {}
+  virtual ~RefCounted() {}
 
  private:
   // So that it can call `Retain` and `Release`.
