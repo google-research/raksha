@@ -16,6 +16,8 @@
 load("//build_defs:arcs.bzl", "arcs_manifest_proto")
 load("//build_defs:souffle.bzl", "gen_souffle_cxx_code", "souffle_cc_library")
 
+licenses(["notice"])
+
 def raksha_policy_check(name, src, visibility = None):
     """ Generates a cc_test rule for verifying policy compliance.
 
@@ -35,7 +37,7 @@ def raksha_policy_check(name, src, visibility = None):
         name = splitter_target,
         srcs = [src],
         outs = [arcs_file, auth_file],
-        cmd = "csplit --prefix=part $< '/^//[ \t]*__AUTH_LOGIC__[ \t]*$$/' " +
+        cmd = "csplit -f part $< '/^//[ \t]*__AUTH_LOGIC__[ \t]*$$/' " +
               "&& cp part00 $(location %s) && cp part01 $(location %s)" %
               (arcs_file, auth_file),
     )
