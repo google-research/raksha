@@ -12,3 +12,7 @@ rekor-cli upload --artifact endorsement_file.toml --signature endorsement_file.t
 
 the output of this is:
 Created entry at index 1179202, available at: https://rekor.sigstore.dev/api/v1/log/entries/2915261201b046db4f4487becd87ebf93829e9cadd8108c1ef50101b295fe854
+
+The contents of "rekor_log_cli_output.txt" can be reproduced with:
+
+rekor-cli get --uuid=2915261201b046db4f4487becd87ebf93829e9cadd8108c1ef50101b295fe854
