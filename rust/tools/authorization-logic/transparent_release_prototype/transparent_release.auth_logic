@@ -58,6 +58,7 @@ top_level_test = query "Verifier_OakFunctionsLoader" says
     "Binary_OakFunctionsLoader" canActAs "OakFunctionsLoader" :-
         "Binary_OakFunctionsLoader"
             hasProvenance("ProvenanceFile_OakFunctionsLoader"),
+        "EndorsementFile_OakFunctionsLoader" canActAs "ValidRekorEntry",
         expected_hash("Binary_OakFunctionsLoader", binary_hash),
         measured_hash("Binary_OakFunctionsLoader", binary_hash),
         expected_hash("ProvenanceFile_OakFunctionsLoader", provenance_hash),
@@ -68,6 +69,7 @@ top_level_test = query "Verifier_OakFunctionsLoader" says
     isSymbol("cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1").
     isSymbol("ProvenanceFile_OakFunctionsLoader").
     isSymbol("Binary_OakFunctionsLoader").
+    isSymbol("EndorsementFile_OakFunctionsLoader").
 }
 
 //-----------------------------------------------------------------------------
@@ -91,6 +93,15 @@ top_level_test = query "Verifier_OakFunctionsLoader" says
 // - endorsement file --> "endorsement_file.toml"
 // - application name --> "OakFunctionsLoader"
 // And the expiry time and release time are converted into epoch
+//
+//
+// # this is an endorsement file for the Oak Functions Loader
+// [[endorsement]]
+// binary_hash = "cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1"
+// provenance_file = "https://github.com/project-oak/oak/blob/provenances/cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1.toml"
+// provenance_file_hash = "58c705880605d2f0eda58f9403811277ea2a31128223532ad93e778cb330af0f"
+// release_timestamp = "2021-10-21T19:14:57"
+// expiry_timestamp = "2021-11-21T19:14:57"
 
 // Endorsement File Wrapper Output
 "EndorsementFile_OakFunctionsLoader" says {
