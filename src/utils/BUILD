@@ -36,6 +36,7 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
+
 cc_library(
     name = "ref_counter",
     hdrs = ["ref_counter.h"],
