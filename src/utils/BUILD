@@ -20,6 +20,34 @@ licenses(["notice"])
 package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
+    name = "intrusive_ptr",
+    hdrs = ["intrusive_ptr.h"],
+    deps = [
+        ":ref_counted",
+        "//src/common/logging",
+    ],
+)
+
+cc_test(
+    name = "intrusive_ptr_with_ref_counted_test",
+    srcs = ["intrusive_ptr_with_ref_counted_test.cc"],
+    deps = [
+        ":intrusive_ptr",
+        ":ref_counted",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_test(
+    name = "intrusive_ptr_test",
+    srcs = ["intrusive_ptr_test.cc"],
+    deps = [
+        ":intrusive_ptr",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
     name = "ref_counted",
     hdrs = ["ref_counted.h"],
     deps = [
