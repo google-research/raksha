@@ -35,7 +35,7 @@ def raksha_policy_check(name, src, visibility = None):
         name = splitter_target,
         srcs = [src],
         outs = [arcs_file, auth_file],
-        cmd = "csplit --prefix=part $< '/^//[ \t]*__AUTH_LOGIC__[ \t]*$$/' " +
+        cmd = "csplit -f part $< '/^//[ \t]*__AUTH_LOGIC__[ \t]*$$/' " +
               "&& cp part00 $(location %s) && cp part01 $(location %s)" %
               (arcs_file, auth_file),
     )
