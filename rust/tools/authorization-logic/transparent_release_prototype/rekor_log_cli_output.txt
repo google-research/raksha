@@ -1,0 +1,21 @@
+LogID: c0d23d6ad406973f9559f3ba2d1ca01f84147d8ffc5b8445c224f98b9591801d
+Index: 1179202
+IntegratedTime: 2022-01-27T14:07:43Z
+UUID: 2915261201b046db4f4487becd87ebf93829e9cadd8108c1ef50101b295fe854
+Body: {
+  "RekordObj": {
+    "data": {
+      "hash": {
+        "algorithm": "sha256",
+        "value": "505301f31de3858ac2aea1d9971299d3d65173202a8bf7b4f3f4045377d40ccc"
+      }
+    },
+    "signature": {
+      "content": "MEUCICIBoBVCtrlQujEQ8uuuhcmbp2+ApEHdsQsMv5DOHoq1AiEA1mE6BHq0EpUt61Uab7UkmwqgVHYBisN6MFtKLThQ79c=",
+      "format": "x509",
+      "publicKey": {
+        "content": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFQlhFYmVzNkZFUFY2dmRKbFQ5Nm95M1doQlJxNwpvZ1NPN3BYVkdFY2svbkJZeDhHS2ozZGpJbk5FeTJFSXhOQmM0VTRJUkVZKzUyZUo4RzYrK3AvL1BRPT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg=="
+      }
+    }
+  }
+}

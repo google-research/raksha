@@ -1,4 +1,76 @@
 //-----------------------------------------------------------------------------
+// Top Level 
+//-----------------------------------------------------------------------------
+// The "top level" is how verifiers run this process. Internally, the 
+// "top level" calls all of these wrappers with the right arguments, passes the 
+// generated authorization logic code to the authorization logic compiler,
+// then finally makes a query to the authorization logic compiler.
+//
+// The top level could be any of: A Bazil rule, a makefule target, or a binary 
+// with a CLI. Either way:
+//
+// Top Level Inputs:
+//   - AppName --  name of the application (for generating principal names)
+//   - EndorsementFilePath -- path to endorsement file
+//   - ProvenenanceFilePath -- a path to the provenance file
+//   - ProductTeamPubKeyPath -- path to product team pubkey
+// Internally, the calls to the wrappers are:
+//   - EndorsementFileWrapper(EndorsementFilePath, AppName)
+//   - ProvenanceFileBuildWrapper(ProvenanceFilePath, AppName)
+//   - HashCheckWrapper(ProvenanceFilePath, StrCat("ProvenanceFile_", AppName))
+//   - HashCheckWrapper(EndorsementFilePath, StrCat("EndorsementFile_", AppName))
+//   - UnixTimeWrapper()
+//   - RekorLogCheckWrapper(AppName, ProductTeamPubKeyPath, EndorsementFilePath)
+//   - VerificationPolicyGenerator(AppName)
+// The query that the top level checks is:
+
+top_level_test = query "Verifier_OakFunctionsLoader" says 
+  "Binary_OakFunctionsLoader" canActAs "OakFunctionsLoader"?
+
+//-----------------------------------------------------------------------------
+// Verification Policy Generator
+//-----------------------------------------------------------------------------
+// This is the code that does the "verification" steps. We need a small CLI
+// that takes just the application name (e.g. "OakFunctionsLoader") as an
+// input (the names of the provenance file and endorsement file are just 
+// concatenations with the application name).
+// The output is this authorization logic code.
+
+"Verifier_OakFunctionsLoader" says {
+    "EndorsementFile_OakFunctionsLoader" canSay
+        expected_hash("ProvenanceFile_OakFunctionsLoader", some_hash) :-
+            isSymbol(some_hash).
+    
+    "EndorsementFile_OakFunctionsLoader" canSay
+        expected_hash("Binary_OakFunctionsLoader", some_hash) :-
+            isSymbol(some_hash).
+
+    "ProvenanceFileBuilder" canSay 
+        "Binary_OakFunctionsLoader" hasProvenance(some_provenance_file) :-
+            isSymbol(some_provenance_file).
+
+    "Sha256Wrapper" canSay measured_hash(some_object, some_hash) :-
+        isSymbol(some_object), isSymbol(some_hash).
+
+    "RekorLogCheck" canSay some_object canActAs "ValidRekorEntry"
+      :- isSymbol(some_object).
+
+    "Binary_OakFunctionsLoader" canActAs "OakFunctionsLoader" :-
+        "Binary_OakFunctionsLoader"
+            hasProvenance("ProvenanceFile_OakFunctionsLoader"),
+        expected_hash("Binary_OakFunctionsLoader", binary_hash),
+        measured_hash("Binary_OakFunctionsLoader", binary_hash),
+        expected_hash("ProvenanceFile_OakFunctionsLoader", provenance_hash),
+        measured_hash("ProvenanceFile_OakFunctionsLoader", provenance_hash).
+
+    // This we hopefully can get rid of for the real version:
+    isSymbol("6de656f11599c11548519af6b7385504ed845a4ff6600745cb3d9e174b8956af").
+    isSymbol("cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1").
+    isSymbol("ProvenanceFile_OakFunctionsLoader").
+    isSymbol("Binary_OakFunctionsLoader").
+}
+
+//-----------------------------------------------------------------------------
 // Endorsement File Wrapper
 //-----------------------------------------------------------------------------
 
@@ -67,17 +139,54 @@
 }
 
 //-----------------------------------------------------------------------------
+// Provenance File Builder Wrapper
+//-----------------------------------------------------------------------------
+// Building binaries from provenance files is automated by code in the 
+// trasnparent release process 
+// [here](https://github.com/project-oak/transparent-release/blob/2c8f8292cab31dbacbf5f4352b51025599ae78c3/common/common.go#L98)
+// (transparent-release/common/common.go::Build())
+// When this runs successful, we know that the provenance file really produces 
+// a binary. So we trust this builder to say that a principal representing the 
+// binary is built by the provenance file.
+//
+// Wrapper inputs:
+// - A path to the provenance file 
+// - principal name for application
+// Internally:
+//  - the wrapper calls `LoadBuildConfigFromProvenance` on the provenance file 
+//  to generate a `BuildConfig` object (or the appropriate call sequence for 
+//  getting a BuildConfig from a provenance file is done)
+//  - The `BuildConfig` is passed to `Build()`. If this succeeds the output is 
+//  the following.
+//
+// The arguments in this example are:
+// - provenance file: "provenance_file.toml"
+// - principal name for application: "OakFunctionsLoader"
+
+"ProvenanceFileBuilder" says {
+    "Binary_OakFunctionsLoader"
+        hasProvenance("ProvenanceFile_OakFunctionsLoader").
+}
+
+//-----------------------------------------------------------------------------
 // Hash Check Wrapper (Checks hashes on files)
 //-----------------------------------------------------------------------------
 // We need a wrapper (another standalone program) that outputs a measurement
 // (sha256) of various files as authorization logic (provenance file, binary).
 // This wrapper will compute the sha256 directly (for example, using the CLI program
-// "sha256sum"). An alternative design based on parsing hashes from other 
-// sources is shown towards the end of this section.
-// (Note that, if we use a wrapper that checks the hash, we just 
-// need to write one and we can use it for both the provenance file and 
-// endorsement file. Whereas, if we want to parse hashes from other sources, we 
-// need to write one wrapper per souce).
+// "sha256sum", or by calling 
+// [the code in the transparent release repository that checks
+// hashes](https://github.com/project-oak/transparent-release/blob/2c8f8292cab31dbacbf5f4352b51025599ae78c3/common/common.go#L316)
+// ).
+//
+// The hash check wrapper for the binary can run on the "output_path" from 
+// transparent-release/common/BuildConfig, which is where the binary is stored 
+// after it is built.
+//
+// (You could imagine extending transparent-release/common::Build() to just output 
+// the hash instead, but then there would be two principals trusted for 
+// producing hashes instead of just one, so the trust assumptions would be less 
+// clear.)
 
 // The arguments to this program are:
 // - the name of the file to be measured (hash checked)
@@ -98,31 +207,10 @@
 // For the binary, the inputs are:
 //    file name --> "oak_functions_loader.exe" (I don't have an example binary)
 //    principal name --> "Binary_OakFunctionsLoader"
-
 "Sha256Wrapper" says {
     measured_hash("Binary_OakFunctionsLoader",
       "cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1").
 }
-
-///// Alternative design for checking hashes of provenance file and binary
-///// by parsing from souce.
-// Instead, we may wish to parse the hash from some other source like a BUILD
-// file that already has the hash for the binary. In this case, we would
-// need to write one wrapper per source. (e.g. the source for the provenance 
-// file and the source for the binary).
-// 
-// In this case the inputs would be:
-//    - file_name_of_source (e.g. some BUILD)
-//    - principal name of object being measured (e.g., 
-//        "ProvenanceFile_OakFunctionsLoader")
-// The outputs would be:
-//  "BUILDHashParser" says {
-//     measured_hash("ProvenanceFile_OakFunctionsLoader",
-//       "6de656f11599c11548519af6b7385504ed845a4ff6600745cb3d9e174b8956af").
-//  }
-//  (where the principal of the "speaker" is specific to each "source".)
-//
-// The rest of this code is assuming the "sha256sum" wrapper is used.
 
 //-----------------------------------------------------------------------------
 // Unix Time Wrapper
@@ -136,73 +224,42 @@
 // authorization logic code that looks like this:
 
 "UnixEpochTime" says {
-  RealTimeIs("1634843698").
+    RealTimeIs("1634843698").
 }
 
 //-----------------------------------------------------------------------------
-// Verification Policy
+// Rekor Log Check Wrapper
 //-----------------------------------------------------------------------------
-// This is the code that does the "verification" steps. We need a small CLI
-// that takes just the application name (e.g. "OakFunctionsLoader") as an
-// input (the names of the provenance file and endorsement file are just 
-// concatenations with the application name).
-// The output is this authorization logic code.
+// To check if an endorsement file really is a valid rekor log entry,
+// the rekor CLI is called.
+//
+// Inputs to wrapper:
+//     - name of app (for generating principal names)
+//     - public key path of product team
+//     - path to endorsement file
+//     (- optionally: the product team could supply the UUID of the
+//     specific record for this version of the endorsement file
+//     and the endorsement file signature to skip the for loop)
+// Internally:
+//      - the wrapper calls `rekor-cli search --public-key=<pubkey> 
+//              --pki-format=x509` 
+//       to get all the UUIDs for records with this key
+//      - for each UUID:
+//            - call `rekor-cli get --uuid=<UUID>` returning
+//            someting that looks like `rekor_log_cli_output.txt`
+//            - fetch `signature.content` and verify this signature
+//            with the signature of the endorsement file from
+//            the prod team. Succeed and produce auth logic output if
+//            verification succeeds
+//      - if loop terminates without success, throw error
 
-// "VerificationPolicy" says {
-//    "RekorPublicInstanceChecker" canSay {
-//      SomeAppEndorsementFile isIncludedIn("url/of/rekor/service", time) :-
-//          isNumber(time).
-//      SomeAppEndorsementFile hasIdentity EndorsementHash :-
-//         isNumber(EndorsementHash).
-//    }
-//    "InclusionProofChecker" canSay {
-//         Record includedViaInclusionProof(Log, EndorsementHash, Time) :-
-//             isRecord(Record), isLog(Log),
-//             isNumber(EndorsementHash), isNumber(Time).
-//    }
+
+// The example inputs are:
+//  - App name "OakFunctionsLoader"
+//  - pubkey path "ec_public.pem"
 // 
-//    "path/to/serialized_endorsement_file" canActAs "EndorsementPrincipal" :-
-//        "EndorsementPrincipal" includedViaInclusionProof("url/of/rekor/service", 
-//           EndorsementHash, time1), 
-//        "EndorsementPrincipal" includedIn("url/of/rekor/service", time2),
-//        "path/to/serialized_endorsement_file" hasMeasurement     
-//        "EndorsementPrincipal", time1 > time2.      
-// }
+// (There are is also an example signature "endorsement_file.toml.sig")
 
-"Verifier_OakFunctionsLoader" says {
-    "EndorsementFile_OakFunctionsLoader" canSay
-        expected_hash("ProvenanceFile_OakFunctionsLoader", some_hash) :-
-            isSymbol(some_hash).
-    
-    "EndorsementFile_OakFunctionsLoader" canSay
-        expected_hash("Binary_OakFunctionsLoader", some_hash) :-
-            isSymbol(some_hash).
-
-    "EndorsementFile_OakFunctionsLoader" canSay 
-        "OakFunctionsLoader" hasProvenance(some_provenance_file) :-
-            isSymbol(some_provenance_file).
-
-    "Sha256Wrapper" canSay measured_hash(some_object, some_hash) :-
-        isSymbol(some_object), isSymbol(some_hash).
-
-    "Binary_OakFunctionsLoader" canActAs "OakFunctionsLoader" :-
-        "OakFunctionsLoader" hasProvenance("ProvenanceFile_OakFunctionsLoader"),
-        expected_hash("Binary_OakFunctionsLoader", binary_hash),
-        measured_hash("Binary_OakFunctionsLoader", binary_hash),
-        expected_hash("ProvenanceFile_OakFunctionsLoader", provenance_hash),
-        measured_hash("ProvenanceFile_OakFunctionsLoader", provenance_hash).
-
-    // This we hopefully can get rid of for the real version:
-    isSymbol("6de656f11599c11548519af6b7385504ed845a4ff6600745cb3d9e174b8956af").
-    isSymbol("cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1").
-    isSymbol("ProvenanceFile_OakFunctionsLoader").
-    isSymbol("Binary_OakFunctionsLoader").
+"RekorLogCheck" says {
+    "EndorsementFile_OakFunctionsLoader" canActAs "ValidRekorEntry".
 }
-
-//-----------------------------------------------------------------------------
-// Top Level 
-//-----------------------------------------------------------------------------
-// TODO
-
-top_level_test = query "Verifier_OakFunctionsLoader" says 
-  "Binary_OakFunctionsLoader" canActAs "OakFunctionsLoader"?
