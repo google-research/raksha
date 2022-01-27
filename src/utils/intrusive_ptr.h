@@ -20,6 +20,9 @@
 
 namespace raksha {
 
+// An implemntation of reference counted ptr where the reference count is
+// embedded in the object itself (i.e., intrusive). This is mostly based on the
+// implementation of boost::intrusive_ptr.
 template <typename T>
 class intrusive_ptr {
  public:

@@ -32,7 +32,12 @@ class RefCountedType {
   void set_id(std::string id) { std::swap(id_, id); }
   const std::string& id() const { return id_; }
   void Retain() { count_++; }
-  void Release() { count_--; }
+  void Release() {
+    count_--;
+    if (count_ == 0) {
+      delete this;
+    }
+  }
 
  private:
   std::string id_;
@@ -41,50 +46,58 @@ class RefCountedType {
 
 using RefCountedTypePtr = intrusive_ptr<RefCountedType>;
 
+// We create a raw pointer for test. However, in practice, we should avoid
+// creating raw pointers and use `make_intrusive_ptr` factory method to create
+// and warp the object immediately.
+RefCountedType* MakeRefCountedTypeInstance(std::string id = "<unknown>",
+                                           unsigned int initial_count = 0) {
+  return new RefCountedType(id, initial_count);
+}
+
 TEST(IntrusivePtrTest, DefaultConstructorInitializesToNullptr) {
   RefCountedTypePtr null;
   EXPECT_EQ(null.get(), nullptr);
 }
 
 TEST(IntrusivePtrTest, ConstructorIncreasesCountAndSavesPtr) {
-  auto value = std::make_unique<RefCountedType>();
+  RefCountedType* value = MakeRefCountedTypeInstance();
   EXPECT_EQ(value->count(), 0);
-
-  RefCountedTypePtr ptr(value.get());
+  RefCountedTypePtr ptr(value);
   EXPECT_EQ(value->count(), 1);
 
-  EXPECT_EQ(ptr.get(), value.get());
+  EXPECT_EQ(ptr.get(), value);
+  // When `ptr` is destroyed, object pointed to by `value` gets destroyed.
 }
 
 TEST(IntrusivePtrTest, CopyConstructorIncreasesCountAndSharesPtr) {
-  auto value = std::make_unique<RefCountedType>();
+  RefCountedType* value = MakeRefCountedTypeInstance();
   EXPECT_EQ(value->count(), 0);
-
-  RefCountedTypePtr ptr(value.get());
+  RefCountedTypePtr ptr(value);
   EXPECT_EQ(value->count(), 1);
 
   RefCountedTypePtr copy = ptr;
   EXPECT_EQ(value->count(), 2);
   EXPECT_EQ(ptr.get(), copy.get());
+  // When `ptr` and `object` are destroyed, object pointed to by `value` gets
+  // destroyed.
 }
 
 TEST(IntrusivePtrTest, MoveConstructorMaintainsCountAndNullifiesOther) {
-  auto value = std::make_unique<RefCountedType>();
+  RefCountedType* value = MakeRefCountedTypeInstance();
   EXPECT_EQ(value->count(), 0);
-
-  RefCountedTypePtr ptr(value.get());
+  RefCountedTypePtr ptr(value);
   EXPECT_EQ(value->count(), 1);
 
   RefCountedTypePtr moved = std::move(ptr);
   EXPECT_EQ(value->count(), 1);
   EXPECT_EQ(ptr.get(), nullptr);
+  // When `moved` is destroyed, object pointed to by `value` gets destroyed.
 }
 
 TEST(IntrusivePtrTest, AssignmentIncreasesCountAndSharesPtr) {
-  auto value = std::make_unique<RefCountedType>();
+  RefCountedType* value = MakeRefCountedTypeInstance();
   EXPECT_EQ(value->count(), 0);
-
-  RefCountedTypePtr ptr(value.get());
+  RefCountedTypePtr ptr(value);
   EXPECT_EQ(value->count(), 1);
 
   RefCountedTypePtr assigned;
@@ -93,18 +106,22 @@ TEST(IntrusivePtrTest, AssignmentIncreasesCountAndSharesPtr) {
   assigned = ptr;
   EXPECT_EQ(value->count(), 2);
   EXPECT_EQ(ptr.get(), assigned.get());
+  // When `ptr` and `assigned` are destroyed, the object pointed to by `value`
+  // gets destroyed.
 }
 
 TEST(IntrusivePtrTest, GetReturnsSavedPointer) {
-  auto value = std::make_unique<RefCountedType>();
-  RefCountedTypePtr ptr(value.get());
-  EXPECT_EQ(ptr.get(), value.get());
+  auto value = MakeRefCountedTypeInstance();
+  RefCountedTypePtr ptr(value);
+  EXPECT_EQ(ptr.get(), value);
+  // When `ptr` is destroyed, the object pointed to by `value` is destroyed.
 }
 
 TEST(IntrusivePtrTest, DereferenceReturnsSavedObject) {
-  auto value = std::make_unique<RefCountedType>();
-  RefCountedTypePtr ptr(value.get());
-  EXPECT_EQ(&(*ptr), value.get());
+  auto value = MakeRefCountedTypeInstance();
+  RefCountedTypePtr ptr(value);
+  EXPECT_EQ(&(*ptr), value);
+  // When `ptr` is destroyed, the object pointed to by `value` is destroyed.
 }
 
 TEST(IntrusivePtrTest, DereferencingNullCausesFailure) {
@@ -117,11 +134,12 @@ TEST(IntrusivePtrTest, DereferencingNullCausesFailure) {
 }
 
 TEST(IntrusivePtrTest, ArrowOperatorProvidesAccessToSavedPtr) {
-  auto value = std::make_unique<RefCountedType>("NewValue");
-  RefCountedTypePtr ptr(value.get());
+  auto value = MakeRefCountedTypeInstance("NewValue");
+  RefCountedTypePtr ptr(value);
   EXPECT_EQ(value->id(), "NewValue");
   ptr->set_id("UpdatedValue");
   EXPECT_EQ(value->id(), "UpdatedValue");
+  // When `ptr` is destroyed, the object pointed to by `value` is destroyed.
 }
 
 TEST(IntrusivePtrTest, FactoryConstructionWorks) {
@@ -140,15 +158,21 @@ TEST(IntrusivePtrTest, FactoryConstructionWorks) {
 }
 
 TEST(IntrusivePtrTest, DestructorReducesCount) {
-  auto value = std::make_unique<RefCountedType>();
-  EXPECT_EQ(value->count(), 0);
-
+  RefCountedTypePtr ptr = make_intrusive_ptr<RefCountedType>();
+  EXPECT_EQ(ptr->count(), 1);
   {
-    RefCountedTypePtr ptr(value.get());
-    EXPECT_EQ(value->count(), 1);
-    // RefCountedTypePtr is destroyed at the end of this scope.
+    RefCountedTypePtr copy = ptr;
+    EXPECT_EQ(ptr->count(), 2);
+    {
+      RefCountedTypePtr another_copy = copy;
+      EXPECT_EQ(ptr->count(), 3);
+      // `another_copy` is destroyed at the end of this scope, but `copy` is
+      // alive.
+    }
+    EXPECT_EQ(ptr->count(), 2);
+    // `copy` is destroyed at the end of this scope.
   }
-  EXPECT_EQ(value->count(), 0);
+  EXPECT_EQ(ptr->count(), 1);
 }
 
 }  // namespace
