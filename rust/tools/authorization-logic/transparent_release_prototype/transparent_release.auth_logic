@@ -22,48 +22,48 @@
 
 // Endorsement File Wrapper Output
 "EndorsementFile_OakFunctionsLoader" says {
-    expeced_hash("ProvenanceFile_OakFunctionsLoader",
+    expected_hash("ProvenanceFile_OakFunctionsLoader",
         "6de656f11599c11548519af6b7385504ed845a4ff6600745cb3d9e174b8956af")
-           :- isTime(real_time),
+           :- RealTimeIs(real_time),        
               greater_than(real_time, "1634843697"),  // Release time
               less_than(real_time, "1637522097").     // expiry time
 
-     expected_hash("Binary_OakFunctionsLoader",
+    expected_hash("Binary_OakFunctionsLoader",
         "cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1")
-            :- isTime(real_time),
+            :- RealTimeIs(real_time),
                greater_than(real_time, "1634843697"), 
                less_than(real_time, "1637522097").
 
-     // Ideally, we would actually write the above two rules in the following 
-     // way. We don't have support for numbers (the numbers above are actually
-     // strings).
-     // expeced_hash("ProvenanceFile_OakFunctionsLoader",
-     //     "6de656f11599c11548519af6b7385504ed845a4ff6600745cb3d9e174b8956af")
-     //        :- isTime(real_time), 
-     //           real_time > 1634843697, real_time < 1637522097
-     //
-     //  expected_hash("Binary_OakFunctionsLoader",
-     //     "cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1")
-     //         :- isTime(real_time),
-     //            real_time > 1634843697, real_time < 1637522097.
+    // Ideally, we would actually write the above two rules in the following 
+    // way. We don't have support for numbers (the numbers above are actually
+    // strings).
+    // expected_hash("ProvenanceFile_OakFunctionsLoader",
+    //     "6de656f11599c11548519af6b7385504ed845a4ff6600745cb3d9e174b8956af")
+    //        :- RealTimeIs(real_time), 
+    //           real_time > 1634843697, real_time < 1637522097
+    //
+    //  expected_hash("Binary_OakFunctionsLoader",
+    //     "cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1")
+    //         :- RealTimeIs(real_time),
+    //            real_time > 1634843697, real_time < 1637522097.
  
-     // This just links the application name principal to the provenance file
-     // principal.
-     // TODO maybe it makes more sense if the thing that builds binary
-     // files emits "Binary_OakFunctionsLoader" hasProvenance(...)
-     "OakFunctionsLoader" hasProvenance("ProvenanceFile_OakFunctionsLoader").
+    // This just links the application name principal to the provenance file
+    // principal.
+    // TODO maybe it makes more sense if the thing that builds binary
+    // files emits "Binary_OakFunctionsLoader" hasProvenance(...)
+    "OakFunctionsLoader" hasProvenance("ProvenanceFile_OakFunctionsLoader").
 
-     // The endorsement file trusts the unix epoch time wrapper
-     // to give the real time (because the endorsement file relies on this
-     // to do revocation)
-     "UnixEpochTime" canSay isTime(real_time) :- isNumber(real_time).
+    // The endorsement file trusts the unix epoch time wrapper
+    // to give the real time (because the endorsement file relies on this
+    // to do revocation)
+    "UnixEpochTime" canSay RealTimeIs(real_time) :- isSymbol(real_time).
 
-     // These two rules should go away once we support numbers and comparisons:
-     // These are just here to make the proof of concept work.
-     "UnixEpochTime" canSay greater_than(real_time, some_time)
-        :- isNumber(real_time), isNumber(some_time).
-     "UnixEpochTime" canSay less_than(real_time, some_time)
-        :- isNumber(real_time), isNumber(some_time).
+    // This should go away after we fix the multiverse problem
+    isSymbol("1634843698").
+
+    // These should go away when we can support comparisons
+    greater_than("1634843698", "1634843697").
+    less_than("1634843698", "1637522097").
 }
 
 //-----------------------------------------------------------------------------
@@ -100,7 +100,7 @@
 //    principal name --> "Binary_OakFunctionsLoader"
 
 "Sha256Wrapper" says {
-    measured_hash("Binary_OakFunctionLoader",
+    measured_hash("Binary_OakFunctionsLoader",
       "cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1").
 }
 
@@ -136,7 +136,7 @@
 // authorization logic code that looks like this:
 
 "UnixEpochTime" says {
-  isTime("1634843698").
+  RealTimeIs("1634843698").
 }
 
 //-----------------------------------------------------------------------------
@@ -171,15 +171,15 @@
 
 "Verifier_OakFunctionsLoader" says {
     "EndorsementFile_OakFunctionsLoader" canSay
-        expeced_hash("ProvenanceFile_OakFunctionsLoader", some_hash) :-
+        expected_hash("ProvenanceFile_OakFunctionsLoader", some_hash) :-
             isSymbol(some_hash).
     
     "EndorsementFile_OakFunctionsLoader" canSay
-        expeced_hash("Binary_OakFunctionsLoader", some_hash) :-
+        expected_hash("Binary_OakFunctionsLoader", some_hash) :-
             isSymbol(some_hash).
 
     "EndorsementFile_OakFunctionsLoader" canSay 
-        "Binary_OakFunctionsLoader" hasProvenance(some_provenance_file) :-
+        "OakFunctionsLoader" hasProvenance(some_provenance_file) :-
             isSymbol(some_provenance_file).
 
     "Sha256Wrapper" canSay measured_hash(some_object, some_hash) :-
@@ -191,5 +191,18 @@
         measured_hash("Binary_OakFunctionsLoader", binary_hash),
         expected_hash("ProvenanceFile_OakFunctionsLoader", provenance_hash),
         measured_hash("ProvenanceFile_OakFunctionsLoader", provenance_hash).
+
+    // This we hopefully can get rid of for the real version:
+    isSymbol("6de656f11599c11548519af6b7385504ed845a4ff6600745cb3d9e174b8956af").
+    isSymbol("cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1").
+    isSymbol("ProvenanceFile_OakFunctionsLoader").
+    isSymbol("Binary_OakFunctionsLoader").
 }
 
+//-----------------------------------------------------------------------------
+// Top Level 
+//-----------------------------------------------------------------------------
+// TODO
+
+top_level_test = query "Verifier_OakFunctionsLoader" says 
+  "Binary_OakFunctionsLoader" canActAs "OakFunctionsLoader"?
