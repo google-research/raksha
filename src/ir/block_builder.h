@@ -21,7 +21,6 @@
 #include "absl/container/flat_hash_map.h"
 #include "src/ir/block.h"
 #include "src/ir/operation.h"
-#include "src/ir/block.h"
 #include "src/ir/types/type.h"
 #include "src/ir/value.h"
 
@@ -41,9 +40,11 @@ class BlockBuilder {
     return *this;
   }
 
-  const Operation& AddOperation(const Operator& op, NamedValueListMap inputs) {
-    std::unique_ptr<Operation> operation(
-        new Operation(block_.get(), op, std::move(inputs)));
+  const Operation& AddOperation(const Operator& op,
+                                NamedAttributeMap attributes,
+                                NamedValueListMap inputs) {
+    std::unique_ptr<Operation> operation(new Operation(
+        block_.get(), op, std::move(attributes), std::move(inputs)));
     const Operation* result = operation.get();
     block_->operations_.push_back(std::move(operation));
     return *result;
@@ -68,6 +69,5 @@ class BlockBuilder {
 };
 
 }  // namespace raksha::ir
-
 
 #endif  // SRC_IR_BLOCK_BUILDER_H_

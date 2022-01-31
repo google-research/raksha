@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "src/ir/attribute.h"
 #include "src/ir/operator.h"
 #include "src/ir/types/type.h"
 #include "src/ir/value.h"
@@ -28,8 +29,12 @@ namespace raksha::ir {
 // An Operation represents a unit of execution.
 class Operation {
  public:
-  Operation(const Block* parent, const Operator& op, NamedValueListMap inputs)
-      : parent_(parent), op_(&op), inputs_(std::move(inputs)) {}
+  Operation(const Block* parent, const Operator& op,
+            NamedAttributeMap attributes, NamedValueListMap inputs)
+      : parent_(parent),
+        op_(&op),
+        attributes_(std::move(attributes)),
+        inputs_(std::move(inputs)) {}
 
   // Disable copy (and move) semantics.
   Operation(const Operation&) = delete;
@@ -44,11 +49,12 @@ class Operation {
   const Block* parent_;
   // The operator being executed.
   const Operator* op_;
-  // The inputs to the operator.
+  // The attributes of the operation.
+  NamedAttributeMap attributes_;
+  // The inputs of the operation.
   NamedValueListMap inputs_;
 };
 
 }  // namespace raksha::ir
-
 
 #endif  // SRC_IR_OPERATION_H_

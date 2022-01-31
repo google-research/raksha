@@ -15,15 +15,16 @@
 #
 #-------------------------------------------------------------------------------
 
+load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
+
 licenses(["notice"])
 
 package(default_visibility = ["//src:__subpackages__"])
 
-load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
-
 cc_library(
     name = "new_ir",
     hdrs = [
+        "attribute.h",
         "block.h",
         "block_builder.h",
         "context.h",
@@ -35,6 +36,7 @@ cc_library(
     ],
     deps = [
         "//src/ir/types",
+        "//src/utils:intrusive_ptr",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings",
     ],

@@ -1,9 +1,9 @@
 #include "absl/container/flat_hash_set.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/block_builder.h"
 #include "src/ir/context.h"
 #include "src/ir/operation.h"
 #include "src/ir/operator.h"
-#include "src/ir/block_builder.h"
 #include "src/ir/storage.h"
 #include "src/ir/types/primitive_type.h"
 #include "src/ir/value.h"
@@ -48,6 +48,18 @@ TEST(NewIrTest, TrySomeStuff) {
               .build()));
   ASSERT_NE(make_foo_op, nullptr);
 
+  const Operator* make_particle_op = context.RegisterOperator(
+      std::make_unique<Operator>("core.make_particle", BlockBuilder().build()));
+  ASSERT_NE(make_particle_op, nullptr);
+
+  const Operator* call_particle_op = context.RegisterOperator(
+      std::make_unique<Operator>("core.call_particle", BlockBuilder().build()));
+  ASSERT_NE(call_particle_op, nullptr);
+
+  const Operator* read_field_op = context.RegisterOperator(
+      std::make_unique<Operator>("core.read_field", BlockBuilder().build()));
+  ASSERT_NE(read_field_op, nullptr);
+
   // Write Storage
   const Operator* write_op =
       context.RegisterOperator(std::make_unique<Operator>(
@@ -75,14 +87,13 @@ TEST(NewIrTest, TrySomeStuff) {
       BlockBuilder()
           .AddInput("bar", type_factory.MakePrimitiveType())
           .AddOutput("foo", type_factory.MakePrimitiveType())
-          .AddImplementation([&values, tag_claim_op, make_foo_op](
-                                 BlockBuilder& builder, Block& block) {
+          .AddImplementation([&values, tag_claim_op, make_foo_op,
+                              read_field_op](BlockBuilder& builder,
+                                             Block& block) {
             // Create values for bar.x and bar.y
             Value* bar =
                 *(values.insert(new Value(value::BlockArgument(block, "bar")))
                       .first);
-            Value bar_x = Value(value::Field(*bar, "x"));
-            Value bar_y = Value(value::Field(*bar, "y"));
 
             // Build claim foo.a is "UserSelection".
             //
@@ -90,12 +101,29 @@ TEST(NewIrTest, TrySomeStuff) {
             // ir::Predicate instance.
             Value userSelection = Value(value::Constant());
 
+            const Operation& bar_x_op = builder.AddOperation(
+                *read_field_op,
+                {{"field", AttributeFactory::MakeStringAttribute("x")}},
+                {
+                    {"input", {*bar}},
+                });
+
+            const Operation& bar_y_op = builder.AddOperation(
+                *read_field_op,
+                {{"field", AttributeFactory::MakeStringAttribute("y")}},
+                {
+                    {"input", {*bar}},
+                });
+
+            Value bar_x = Value(value::OperationResult(bar_x_op, "output"));
+            Value bar_y = Value(value::OperationResult(bar_y_op, "output"));
+
             // Input of tag claim operation is mapped to both bar.x and bar.y to
             // reflect the fact that foo.a may get its value from both.  We also
             // add a "Any()" as an input to indicate that foo.a would also be
             // created from something other than `bar.x` and `bar.y`.
             const Operation& foo_a = builder.AddOperation(
-                *tag_claim_op,
+                *tag_claim_op, {},
                 {
                     {"input", {bar_x, bar_y, Value(value::Any())}},
                     {"predicate", {userSelection}},
@@ -103,7 +131,7 @@ TEST(NewIrTest, TrySomeStuff) {
 
             // Create `foo` for the output.
             const Operation& foo = builder.AddOperation(
-                *make_foo_op,
+                *make_foo_op, {},
                 {{"a", {Value(value::OperationResult(foo_a, "output"))}},
                  {"b", {bar_y}}});
 
@@ -129,10 +157,10 @@ TEST(NewIrTest, TrySomeStuff) {
   //  bar: reads h1
   //  foo: writes h2
   std::unique_ptr<Operation> particle_instance(
-      new Operation(nullptr, *particle_p1,
+      new Operation(nullptr, *particle_p1, {},
                     {{"bar", {Value(value::StoredValue(*input_storage))}}}));
   std::unique_ptr<Operation> write_storage(new Operation(
-      nullptr, *write_op,
+      nullptr, *write_op, {},
       {{"src", {Value(value::OperationResult(*particle_instance, "foo"))}},
        {"tgt", {Value(value::StoredValue(*output_storage))}}}));
 
