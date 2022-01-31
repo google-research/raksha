@@ -5,31 +5,33 @@ steps:
   args: ['pull', '${_DOCKER_IMAGE}']
   waitFor: ['-']
 
-# Build the new Docker image (caching from the pre-built one)
-- id: 'build-image'
-  waitFor: ['pull-image']
-  name: 'gcr.io/cloud-builders/docker'
-  args: [
-    'build',
-    '--network=cloudbuild',
-    '--cache-from=${_DOCKER_IMAGE}',
-    '--tag=${_DOCKER_IMAGE}',
-    '.',
-  ]
+# TODO(#292): We are hitting the rate limiter for Souffle installs.
+# Disable the rebuild of images for now.
+# # Build the new Docker image (caching from the pre-built one)
+# - id: 'build-image'
+#   waitFor: ['pull-image']
+#   name: 'gcr.io/cloud-builders/docker'
+#   args: [
+#     'build',
+#     '--network=cloudbuild',
+#     '--cache-from=${_DOCKER_IMAGE}',
+#     '--tag=${_DOCKER_IMAGE}',
+#     '.',
+#   ]
 
-# Push updated Docker image to Container Registry.
-- id: 'push-image'
-  waitFor: ['build-image']
-  name: 'gcr.io/cloud-builders/docker'
-  args: [
-    'push',
-    '${_DOCKER_IMAGE}',
-  ]
+# # Push updated Docker image to Container Registry.
+# - id: 'push-image'
+#   waitFor: ['build-image']
+#   name: 'gcr.io/cloud-builders/docker'
+#   args: [
+#     'push',
+#     '${_DOCKER_IMAGE}',
+#   ]
 
 # Run presubmit tests.
 - id: 'presubmit'
   secretEnv: ['GITHUB_COMMIT_STATUS_TOKEN']
-  waitFor: ['build-image']
+  waitFor: ['pull-image']
   name: '${_DOCKER_IMAGE}'
   entrypoint: 'bash'
   args: ['./gcb/presubmit.sh']
@@ -39,7 +41,7 @@ steps:
 
 # Run authorization logic tests 
 - id: 'auth_logic_tests'
-  waitFor: ['build-image']
+  waitFor: ['pull-image']
   name: '${_DOCKER_IMAGE}'
   entrypoint: 'bash'
   args: ['./gcb/auth_logic.sh']
