@@ -66,5 +66,6 @@ exports_files([
     "fact_test_helper.dl",
     "operations.dl",
     "tags.dl",
+    "taint.dl",
     "may_will.dl",
 ])
