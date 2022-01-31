@@ -15,6 +15,8 @@
 #
 #-------------------------------------------------------------------------------
 
+licenses(["notice"])
+
 package(default_visibility = ["//src:__subpackages__"])
 
 load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")

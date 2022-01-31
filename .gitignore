@@ -5,3 +5,5 @@ bazel-testlogs
 **/*.swp
 .vscode/**
 .clwb/**
+.cache/clangd/**
+compile_commands.json
