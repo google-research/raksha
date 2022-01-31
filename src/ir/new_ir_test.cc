@@ -18,6 +18,13 @@ TEST(NewIrTest, TrySomeStuff) {
   // In reality we will have to create the correct types.
   // For generic operators, we should also create a TypeVariable type.
 
+  const Operator* constant_op =
+      context.RegisterOperator(std::make_unique<Operator>(
+          "core.constant",
+          BlockBuilder()
+              .AddOutput("result", type_factory.MakePrimitiveType())
+              .build()));
+  ASSERT_NE(constant_op, nullptr);
   const Operator* select_op =
       context.RegisterOperator(std::make_unique<Operator>(
           "sql.select",
@@ -87,9 +94,9 @@ TEST(NewIrTest, TrySomeStuff) {
       BlockBuilder()
           .AddInput("bar", type_factory.MakePrimitiveType())
           .AddOutput("foo", type_factory.MakePrimitiveType())
-          .AddImplementation([&values, tag_claim_op, make_foo_op,
-                              read_field_op](BlockBuilder& builder,
-                                             Block& block) {
+          .AddImplementation([&values, tag_claim_op, make_foo_op, read_field_op,
+                              constant_op](BlockBuilder& builder,
+                                           Block& block) {
             // Create values for bar.x and bar.y
             Value* bar =
                 *(values.insert(new Value(value::BlockArgument(block, "bar")))
@@ -99,7 +106,13 @@ TEST(NewIrTest, TrySomeStuff) {
             //
             // create "userSelection" predicate. TODO: Store the actual
             // ir::Predicate instance.
-            Value userSelection = Value(value::Constant());
+            const Operation& predicate_op = builder.AddOperation(
+                *constant_op,
+                {{"predicate",
+                  AttributeFactory::MakeStringAttribute("userSelection")}},
+                {});
+            Value userSelection =
+                Value(value::OperationResult(predicate_op, "result"));
 
             const Operation& bar_x_op = builder.AddOperation(
                 *read_field_op,

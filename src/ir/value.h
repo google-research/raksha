@@ -58,11 +58,11 @@ class BlockArgument : NamedValue<Block> {
   const Block& block() const { return element(); }
 };
 
-class BlockResult : NamedValue<Block> {
- public:
-  using NamedValue<Block>::NamedValue;
-  const Block& block() const { return element(); }
-};
+// class BlockResult : NamedValue<Block> {
+//  public:
+//   using NamedValue<Block>::NamedValue;
+//   const Block& block() const { return element(); }
+// };
 
 class OperationResult : NamedValue<Operation> {
  public:
@@ -70,34 +70,34 @@ class OperationResult : NamedValue<Operation> {
   const Operation& operation() const { return element(); }
 };
 
-// A field within another value.
-// Note: copying around `Field` values can be expensive.
-class Field {
- public:
-  Field(const Value& parent, std::string field_name)
-      : parent_(std::make_unique<Value>(parent)),
-        field_name_(std::move(field_name)) {}
+// // A field within another value.
+// // Note: copying around `Field` values can be expensive.
+// class Field {
+//  public:
+//   Field(const Value& parent, std::string field_name)
+//       : parent_(std::make_unique<Value>(parent)),
+//         field_name_(std::move(field_name)) {}
 
-  // Custom copy constructor.
-  Field(const Field& other)
-      : parent_(std::make_unique<Value>(*other.parent_)),
-        field_name_(other.field_name_) {}
+//   // Custom copy constructor.
+//   Field(const Field& other)
+//       : parent_(std::make_unique<Value>(*other.parent_)),
+//         field_name_(other.field_name_) {}
 
-  // Custom assignment operator.
-  Field& operator=(Field other) {
-    using std::swap;
-    swap(*this, other);
-    return *this;
-  }
+//   // Custom assignment operator.
+//   Field& operator=(Field other) {
+//     using std::swap;
+//     swap(*this, other);
+//     return *this;
+//   }
 
-  // Default move semantics
-  Field(Field&&) = default;
+//   // Default move semantics
+//   Field(Field&&) = default;
 
- private:
-  // We use `unique_ptr` to break the cycle involving variants of a `Value`.
-  std::unique_ptr<Value> parent_;
-  std::string field_name_;
-};
+//  private:
+//   // We use `unique_ptr` to break the cycle involving variants of a `Value`.
+//   std::unique_ptr<Value> parent_;
+//   std::string field_name_;
+// };
 
 // Indicates the value in a storage.
 class StoredValue {
@@ -127,16 +127,17 @@ class Any {};
 class Value {
  public:
   Value(value::BlockArgument arg) : value_(std::move(arg)) {}
-  Value(value::BlockResult arg) : value_(std::move(arg)) {}
+  // Value(value::BlockResult arg) : value_(std::move(arg)) {}
   Value(value::OperationResult arg) : value_(std::move(arg)) {}
-  Value(value::Field arg) : value_(std::move(arg)) {}
-  Value(value::Constant arg) : value_(std::move(arg)) {}
+  // Value(value::Field arg) : value_(std::move(arg)) {}
+  // Value(value::Constant arg) : value_(std::move(arg)) {}
   Value(value::Any arg) : value_(std::move(arg)) {}
   Value(value::StoredValue arg) : value_(std::move(arg)) {}
 
  private:
-  std::variant<value::BlockArgument, value::BlockResult, value::OperationResult,
-               value::Field, value::StoredValue, value::Constant, value::Any>
+  // value::Field, value::Constant, value::BlockResult,
+  std::variant<value::BlockArgument, value::OperationResult, value::StoredValue,
+               value::Any>
       value_;
 };
 
