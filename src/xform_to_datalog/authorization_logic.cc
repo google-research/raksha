@@ -45,16 +45,16 @@ int GenerateDatalogFactsFromAuthorizationLogic(
     const std::filesystem::path &result_dir,
     const std::vector<absl::string_view> &relations_to_not_declare) {
 
-// If authorization logic has been disabled, return an exit code as if it
-// always failed. While a CHECK would be friendlier, this makes the
-// uncommonly-taken conditional compilation branch add no dependencies and
-// requires no new includes, which reduces the possibility that this conditional
-// compilation branch will stop working.
   const std::string relations_to_not_declare_str =
     absl::StrJoin(relations_to_not_declare, ",");
 
   return 
 #ifdef DISABLE_AUTHORIZATION_LOGIC
+// If authorization logic has been disabled, return an exit code as if it
+// always failed. While a CHECK would be friendlier, this makes the
+// uncommonly-taken conditional compilation branch add no dependencies and
+// requires no new includes, which reduces the possibility that this conditional
+// compilation branch will stop working.
   1
 #else
   generate_datalog_facts_from_authorization_logic(
