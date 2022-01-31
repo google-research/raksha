@@ -27,6 +27,7 @@
 
 #include "absl/strings/string_view.h"
 #include "absl/strings/str_join.h"
+#include "src/common/logging/logging.h"
 
 #ifndef DISABLE_AUTHORIZATION_LOGIC
 
@@ -48,13 +49,25 @@ int GenerateDatalogFactsFromAuthorizationLogic(
   const std::string relations_to_not_declare_str =
     absl::StrJoin(relations_to_not_declare, ",");
 
+  // Turn the macro DISABLE_AUTHORIZATION_LOGIC into an expression the compiler
+  // understands so we can put it into the CHECK.
+  constexpr bool auth_logic_enabled =
+#ifdef DISABLE_AUTHORIZATION_LOGIC
+    false
+#else
+    true
+#endif
+  ;
+
+  CHECK(auth_logic_enabled)
+    << "Attempted to use authorization logic compiler when it has been disabled"
+   << " using DISABLE_AUTHORIZATION_LOGIC.";
+
   return 
 #ifdef DISABLE_AUTHORIZATION_LOGIC
 // If authorization logic has been disabled, return an exit code as if it
-// always failed. While a CHECK would be friendlier, this makes the
-// uncommonly-taken conditional compilation branch add no dependencies and
-// requires no new includes, which reduces the possibility that this conditional
-// compilation branch will stop working.
+// always failed. This should be unreachable due to the CHECK, and acts only as
+// a way to keep the compiler happy.
   1
 #else
   generate_datalog_facts_from_authorization_logic(

@@ -23,6 +23,7 @@ cc_library(
     hdrs = ["authorization_logic.h"],
     deps = [
         "//rust/tools/authorization-logic:authorization_logic_lib",
+        "//src/common/logging",
         "@absl//absl/strings",
     ],
 )
