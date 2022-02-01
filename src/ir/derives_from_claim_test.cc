@@ -16,7 +16,7 @@
 
 #include "src/ir/derives_from_claim.h"
 
-#include <google/protobuf/text_format.h>
+#include "google/protobuf/text_format.h"
 
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
