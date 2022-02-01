@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/strings/str_join.h"
 #include "src/ir/attribute.h"
 #include "src/ir/operator.h"
 #include "src/ir/types/type.h"
@@ -43,6 +44,25 @@ class Operation {
   const Operator& op() const { return *op_; }
   const Block* parent() const { return parent_; }
   const NamedValueListMap& inputs() const { return inputs_; }
+
+  std::string ToString() const {
+    constexpr absl::string_view kOperationFormat = "%s [%s](%s)";
+    std::string attributes_string;
+    for (const auto& [name, attribute] : attributes_) {
+      absl::StrAppendFormat(&attributes_string, "%s: %s", name,
+                            attribute->ToString());
+    }
+    std::string inputs_string;
+    for (const auto& [name, input] : inputs_) {
+      absl::StrAppendFormat(
+          &inputs_string, "%s: %s", name,
+          absl::StrJoin(input, ",", [](std::string* out, const Value& x) {
+            return out->append(x.ToString());
+          }));
+    }
+    return absl::StrFormat(kOperationFormat, op_->name(), attributes_string,
+                           inputs_string);
+  }
 
  private:
   // The parent block if any to which this operation belongs to.

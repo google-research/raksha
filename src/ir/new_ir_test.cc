@@ -179,6 +179,10 @@ TEST(NewIrTest, TrySomeStuff) {
 
   ASSERT_EQ(particle_instance->op().name(), "arcs.particle.P1");
   ASSERT_EQ(write_storage->op().name(), "core.write");
+
+  for (const auto& op : particle_p1->implementation().operations()) {
+    LOG(INFO) << op->ToString();
+  }
 }
 
 }  // namespace raksha::ir

@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/strings/str_format.h"
 #include "src/ir/storage.h"
 #include "src/ir/types/type.h"
 
@@ -46,58 +47,26 @@ class NamedValue {
 
   const T& element() const { return *element_; }
   absl::string_view name() const { return name_; }
+  std::string ToString() const {
+    return absl::StrFormat("%p:%s", element_, name_);
+  }
 
  private:
   const T* element_;
   std::string name_;
 };
 
-class BlockArgument : NamedValue<Block> {
+class BlockArgument : public NamedValue<Block> {
  public:
   using NamedValue<Block>::NamedValue;
   const Block& block() const { return element(); }
 };
 
-// class BlockResult : NamedValue<Block> {
-//  public:
-//   using NamedValue<Block>::NamedValue;
-//   const Block& block() const { return element(); }
-// };
-
-class OperationResult : NamedValue<Operation> {
+class OperationResult : public NamedValue<Operation> {
  public:
   using NamedValue<Operation>::NamedValue;
   const Operation& operation() const { return element(); }
 };
-
-// // A field within another value.
-// // Note: copying around `Field` values can be expensive.
-// class Field {
-//  public:
-//   Field(const Value& parent, std::string field_name)
-//       : parent_(std::make_unique<Value>(parent)),
-//         field_name_(std::move(field_name)) {}
-
-//   // Custom copy constructor.
-//   Field(const Field& other)
-//       : parent_(std::make_unique<Value>(*other.parent_)),
-//         field_name_(other.field_name_) {}
-
-//   // Custom assignment operator.
-//   Field& operator=(Field other) {
-//     using std::swap;
-//     swap(*this, other);
-//     return *this;
-//   }
-
-//   // Default move semantics
-//   Field(Field&&) = default;
-
-//  private:
-//   // We use `unique_ptr` to break the cycle involving variants of a `Value`.
-//   std::unique_ptr<Value> parent_;
-//   std::string field_name_;
-// };
 
 // Indicates the value in a storage.
 class StoredValue {
@@ -109,17 +78,17 @@ class StoredValue {
 
   const Storage* storage() const { return storage_; }
 
+  std::string ToString() const { return "<<STORAGE>>"; }
+
  private:
   const Storage* storage_;
 };
 
-// TODO:
-class Constant {
-  // int, string, etc.
-};
-
 // A special value to indicate that it can be anything.
-class Any {};
+class Any {
+ public:
+  std::string ToString() const { return "<<ANY>>"; }
+};
 
 }  // namespace value
 
@@ -127,12 +96,14 @@ class Any {};
 class Value {
  public:
   Value(value::BlockArgument arg) : value_(std::move(arg)) {}
-  // Value(value::BlockResult arg) : value_(std::move(arg)) {}
   Value(value::OperationResult arg) : value_(std::move(arg)) {}
-  // Value(value::Field arg) : value_(std::move(arg)) {}
-  // Value(value::Constant arg) : value_(std::move(arg)) {}
   Value(value::Any arg) : value_(std::move(arg)) {}
   Value(value::StoredValue arg) : value_(std::move(arg)) {}
+
+  std::string ToString() const {
+    return std::visit([](const auto& variant) { return variant.ToString(); },
+                      value_);
+  }
 
  private:
   // value::Field, value::Constant, value::BlockResult,

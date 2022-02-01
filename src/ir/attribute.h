@@ -16,6 +16,7 @@
 #ifndef SRC_IR_ATTRIBUTE_H_
 #define SRC_IR_ATTRIBUTE_H_
 
+#include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "src/utils/intrusive_ptr.h"
 
@@ -26,6 +27,8 @@ class AttributeBase : public RefCounted<AttributeBase> {
  public:
   virtual ~AttributeBase() {}
 
+  virtual std::string ToString() const = 0;
+
  private:
   // TODO: Add kind.
 };
@@ -35,6 +38,10 @@ class IntAttribute : public AttributeBase {
   IntAttribute(int value) : value_(value) {}
   int value() const { return value_; }
 
+  std::string ToString() const override {
+    return absl::StrFormat("%d", value_);
+  }
+
  private:
   int value_;
 };
@@ -43,6 +50,7 @@ class StringAttribute : public AttributeBase {
  public:
   StringAttribute(absl::string_view value) : value_(value) {}
   absl::string_view value() const { return value_; }
+  std::string ToString() const override { return value_; }
 
  private:
   std::string value_;
