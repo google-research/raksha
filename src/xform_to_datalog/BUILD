@@ -19,8 +19,13 @@ licenses(["notice"])
 
 cc_library(
     name = "authorization_logic",
+    srcs = ["authorization_logic.cc"],
     hdrs = ["authorization_logic.h"],
-    deps = ["//rust/tools/authorization-logic:authorization_logic_lib"],
+    deps = [
+        "//rust/tools/authorization-logic:authorization_logic_lib",
+        "//src/common/logging",
+        "@absl//absl/strings",
+    ],
 )
 
 cc_test(

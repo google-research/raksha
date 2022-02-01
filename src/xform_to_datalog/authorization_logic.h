@@ -16,12 +16,18 @@
 #ifndef SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
 #define SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
 
+#include <filesystem>
+
+#include "absl/strings/string_view.h"
+
 namespace raksha::xform_to_datalog {
 
-// Generates datalog facts from the given program.
-extern "C" int generate_datalog_facts_from_authorization_logic(
-  const char* program, const char* program_path,
-  const char* out_dir, const char* decl_skip_vec);
+int GenerateDatalogFactsFromAuthorizationLogic(
+    absl::string_view program,
+    const std::filesystem::path &program_dir,
+    const std::filesystem::path &result_dir,
+    const std::vector<absl::string_view> &relations_to_not_declare);
+
 }
 
 #endif  // SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
