@@ -29,6 +29,8 @@
 #include "absl/strings/str_join.h"
 #include "src/common/logging/logging.h"
 
+// For now, we need to be able to disable authorization logic to smooth the
+// process of importing Raksha into Google's internal codebase.
 #ifndef DISABLE_AUTHORIZATION_LOGIC
 
 // Generates datalog facts from the given program.
