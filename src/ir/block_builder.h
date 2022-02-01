@@ -42,7 +42,7 @@ class BlockBuilder {
 
   const Operation& AddOperation(const Operator& op,
                                 NamedAttributeMap attributes,
-                                NamedValueListMap inputs) {
+                                NamedValueMap inputs) {
     std::unique_ptr<Operation> operation(new Operation(
         block_.get(), op, std::move(attributes), std::move(inputs)));
     const Operation* result = operation.get();
@@ -58,7 +58,7 @@ class BlockBuilder {
 
   BlockBuilder& AddResult(absl::string_view name, Value output) {
     CHECK(block_->outputs_.FindDecl(name) != nullptr);
-    block_->results_[name].push_back(output);
+    block_->results_.insert({std::string(name), output});
     return *this;
   }
 

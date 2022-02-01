@@ -31,7 +31,7 @@ namespace raksha::ir {
 class Operation {
  public:
   Operation(const Block* parent, const Operator& op,
-            NamedAttributeMap attributes, NamedValueListMap inputs)
+            NamedAttributeMap attributes, NamedValueMap inputs)
       : parent_(parent),
         op_(&op),
         attributes_(std::move(attributes)),
@@ -43,7 +43,7 @@ class Operation {
 
   const Operator& op() const { return *op_; }
   const Block* parent() const { return parent_; }
-  const NamedValueListMap& inputs() const { return inputs_; }
+  const NamedValueMap& inputs() const { return inputs_; }
 
   std::string ToString() const {
     constexpr absl::string_view kOperationFormat = "%s [%s](%s)";
@@ -54,11 +54,7 @@ class Operation {
     }
     std::string inputs_string;
     for (const auto& [name, input] : inputs_) {
-      absl::StrAppendFormat(
-          &inputs_string, "%s: %s", name,
-          absl::StrJoin(input, ",", [](std::string* out, const Value& x) {
-            return out->append(x.ToString());
-          }));
+      absl::StrAppendFormat(&inputs_string, "%s: %s", name, input.ToString());
     }
     return absl::StrFormat(kOperationFormat, op_->name(), attributes_string,
                            inputs_string);
@@ -72,7 +68,7 @@ class Operation {
   // The attributes of the operation.
   NamedAttributeMap attributes_;
   // The inputs of the operation.
-  NamedValueListMap inputs_;
+  NamedValueMap inputs_;
 };
 
 }  // namespace raksha::ir

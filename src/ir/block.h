@@ -42,7 +42,7 @@ class Block {
   const OperationList& operations() const { return operations_; }
   const DataDeclCollection& inputs() const { return inputs_; }
   const DataDeclCollection& outputs() const { return outputs_; }
-  const NamedValueListMap& results() const { return results_; }
+  const NamedValueMap& results() const { return results_; }
 
   friend class BlockBuilder;
 
@@ -56,10 +56,9 @@ class Block {
   // Maps the outputs of the operations in the list of operations in this block
   // to the corresponding name. Note that a result can have more than one value
   // which is used to represent non-determinism.
-  NamedValueListMap results_;
+  NamedValueMap results_;
 };
 
 }  // namespace raksha::ir
-
 
 #endif  // SRC_IR_BLOCK_H_

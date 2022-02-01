@@ -67,6 +67,14 @@ TEST(NewIrTest, TrySomeStuff) {
       std::make_unique<Operator>("core.read_field", BlockBuilder().build()));
   ASSERT_NE(read_field_op, nullptr);
 
+  const Operator* choose_op = context.RegisterOperator(
+      std::make_unique<Operator>("core.choose", BlockBuilder().build()));
+  ASSERT_NE(choose_op, nullptr);
+
+  const Operator* merge_op = context.RegisterOperator(
+      std::make_unique<Operator>("core.merge", BlockBuilder().build()));
+  ASSERT_NE(merge_op, nullptr);
+
   // Write Storage
   const Operator* write_op =
       context.RegisterOperator(std::make_unique<Operator>(
@@ -75,10 +83,6 @@ TEST(NewIrTest, TrySomeStuff) {
                             .AddInput("tgt", type_factory.MakePrimitiveType())
                             .build()));
   ASSERT_NE(make_foo_op, nullptr);
-
-  // Temporary hack to manage Value instances used in value::Field
-  // value::Field should manage the pointers on its own.
-  absl::flat_hash_set<Value*> values;
 
   // particle P1 as an operator
   //
@@ -94,13 +98,11 @@ TEST(NewIrTest, TrySomeStuff) {
       BlockBuilder()
           .AddInput("bar", type_factory.MakePrimitiveType())
           .AddOutput("foo", type_factory.MakePrimitiveType())
-          .AddImplementation([&values, tag_claim_op, make_foo_op, read_field_op,
-                              constant_op](BlockBuilder& builder,
-                                           Block& block) {
+          .AddImplementation([tag_claim_op, make_foo_op, read_field_op,
+                              constant_op,
+                              merge_op](BlockBuilder& builder, Block& block) {
             // Create values for bar.x and bar.y
-            Value* bar =
-                *(values.insert(new Value(value::BlockArgument(block, "bar")))
-                      .first);
+            Value bar(value::BlockArgument(block, "bar"));
 
             // Build claim foo.a is "UserSelection".
             //
@@ -118,35 +120,40 @@ TEST(NewIrTest, TrySomeStuff) {
                 *read_field_op,
                 {{"field", AttributeFactory::MakeStringAttribute("x")}},
                 {
-                    {"input", {*bar}},
+                    {"input", bar},
                 });
 
             const Operation& bar_y_op = builder.AddOperation(
                 *read_field_op,
                 {{"field", AttributeFactory::MakeStringAttribute("y")}},
                 {
-                    {"input", {*bar}},
+                    {"input", bar},
                 });
 
             Value bar_x = Value(value::OperationResult(bar_x_op, "output"));
             Value bar_y = Value(value::OperationResult(bar_y_op, "output"));
 
-            // Input of tag claim operation is mapped to both bar.x and bar.y to
-            // reflect the fact that foo.a may get its value from both.  We also
-            // add a "Any()" as an input to indicate that foo.a would also be
-            // created from something other than `bar.x` and `bar.y`.
+            const Operation& pred_input = builder.AddOperation(
+                *merge_op, {},
+                {{"0", bar_x}, {"1", bar_y}, {"2", Value(value::Any())}});
+            // Input of tag claim operation is mapped to both bar.x and
+            // bar.y to reflect the fact that foo.a may get its value
+            // from both.  We also add a "Any()" as an input to indicate
+            // that foo.a would also be created from something other
+            // than `bar.x` and `bar.y`.
             const Operation& foo_a = builder.AddOperation(
                 *tag_claim_op, {},
                 {
-                    {"input", {bar_x, bar_y, Value(value::Any())}},
-                    {"predicate", {userSelection}},
+                    {"input",
+                     Value(value::OperationResult(pred_input, "output"))},
+                    {"predicate", userSelection},
                 });
 
             // Create `foo` for the output.
             const Operation& foo = builder.AddOperation(
                 *make_foo_op, {},
-                {{"a", {Value(value::OperationResult(foo_a, "output"))}},
-                 {"b", {bar_y}}});
+                {{"a", Value(value::OperationResult(foo_a, "output"))},
+                 {"b", bar_y}});
 
             // Assign the foo constructed from these operations to be the
             // output of this particle.
