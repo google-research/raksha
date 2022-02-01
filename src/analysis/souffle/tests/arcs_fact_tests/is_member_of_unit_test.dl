@@ -1,5 +1,5 @@
-#include "taint.dl"
-#include "fact_test_helper.dl"
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/fact_test_helper.dl"
 
 // Leaf AccessPaths: These are AccessPaths to leaf fields, similar to what we expect might be
 // introduced by a claim or an edge.

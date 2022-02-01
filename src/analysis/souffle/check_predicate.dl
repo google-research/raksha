@@ -16,9 +16,9 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_CHECK_PREDICATE_DL_
 #define SRC_ANALYSIS_SOUFFLE_CHECK_PREDICATE_DL_
 
-#include "authorization_logic.dl"
-#include "dataflow_graph.dl"
-#include "tags.dl"
+#include "src/analysis/souffle/authorization_logic.dl"
+#include "src/analysis/souffle/dataflow_graph.dl"
+#include "src/analysis/souffle/tags.dl"
 
 .type Bool <: number
 

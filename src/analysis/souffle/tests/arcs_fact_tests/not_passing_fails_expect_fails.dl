@@ -1,5 +1,5 @@
 // Used to ensure that a test with a simple failing rule fails.
-#include "taint.dl"
-#include "fact_test_helper.dl"
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/fact_test_helper.dl"
 
 TEST_CASE("not_passing_fails") :- 1 = 2.

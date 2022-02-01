@@ -16,7 +16,7 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_
 #define SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_
 
-#include "dataflow_graph.dl"
+#include "src/analysis/souffle/dataflow_graph.dl"
 
 // The symbol representing the operator. For operations commonly represented by
 // a single character operator (such as +, =, /, *, etc), the operator will be

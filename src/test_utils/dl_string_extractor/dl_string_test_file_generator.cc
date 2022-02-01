@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
   // strings to improve readability. This one has been left because the
   // amount of newlines in it makes it actually more readable as an escaped
   // string.
-  datalog_test_stream << "#include \"taint.dl\"\n\n"
+  datalog_test_stream << "#include \"src/analysis/souffle/taint.dl\"\n\n"
                       << ".decl dummy(input_num: number)\n\n";
 
   // Get our datalog strings from the linked test and output the rules that

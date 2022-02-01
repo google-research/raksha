@@ -1,3 +1,3 @@
 // Used to ensure that a test with no requirements fails.
-#include "taint.dl"
-#include "fact_test_helper.dl"
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/fact_test_helper.dl"
