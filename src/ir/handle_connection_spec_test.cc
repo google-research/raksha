@@ -16,8 +16,8 @@
 
 #include "src/ir/handle_connection_spec.h"
 
-#include <google/protobuf/util/message_differencer.h>
-#include <google/protobuf/text_format.h>
+#include "google/protobuf/util/message_differencer.h"
+#include "google/protobuf/text_format.h"
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/proto/handle_connection_spec.h"
