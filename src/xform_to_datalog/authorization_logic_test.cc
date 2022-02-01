@@ -27,6 +27,16 @@ namespace raksha::xform_to_datalog {
 
 namespace fs = std::filesystem;
 
+// If authorization logic is disabled, just run a single, always-true dummy
+// test.
+#ifdef DISABLE_AUTHORIZATION_LOGIC
+
+TEST(Dummy, Dummy) {
+  ASSERT_EQ(1, 1);
+}
+
+#else
+
 TEST(AuthorizationLogicTest, InvokesRustToolAndGeneratesOutput) {
   const fs::path& test_data_dir = test_utils::GetTestDataDir("src/xform_to_datalog/testdata");
   fs::path output_dir = fs::temp_directory_path();
@@ -51,5 +61,7 @@ TEST(AuthorizationLogicTest, ErrorsInRustToolReturnsNonZeroValue) {
     "simple_auth_logic", "blah", "blah", {});
   ASSERT_EQ(res, 1);
 }
+
+#endif
   
 }  // namespace raksha::xform_to_datalog
