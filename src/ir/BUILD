@@ -61,10 +61,8 @@ cc_library(
         "//src/ir/proto:access_path",
         "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
-        "@absl//absl/container:flat_hash_set",
-        "@absl//absl/hash",
         "@absl//absl/strings",
-        "@absl//absl/types:variant",
+        "@absl//absl/strings:str_format",
     ],
 )
 
@@ -84,6 +82,7 @@ cc_library(
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/hash",
         "@absl//absl/strings",
+        "@absl//absl/types:variant",
     ],
 )
 
@@ -119,11 +118,9 @@ cc_test(
     name = "field_selector_test",
     srcs = ["field_selector_test.cc"],
     deps = [
-        ":ir",
+        ":access_path",
         "//src/common/testing:gtest",
-        "@absl//absl/hash",
         "@absl//absl/hash:hash_testing",
-        "@absl//absl/strings",
     ],
 )
 
@@ -153,6 +150,7 @@ cc_test(
     name = "edge_test",
     srcs = ["edge_test.cc"],
     deps = [
+        ":access_path",
         ":ir",
         "//src/common/testing:gtest",
     ],
