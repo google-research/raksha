@@ -23,13 +23,13 @@ package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
     name = "new_ir",
+    srcs = ["operation.cc"],
     hdrs = [
         "attribute.h",
-        "block.h",
         "block_builder.h",
         "context.h",
         "data_decl.h",
-        "operation.h",
+        "module.h",
         "operator.h",
         "storage.h",
         "value.h",

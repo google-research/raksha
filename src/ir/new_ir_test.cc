@@ -2,7 +2,8 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/block_builder.h"
 #include "src/ir/context.h"
-#include "src/ir/operation.h"
+#include "src/ir/module.h"
+//#include "src/ir/operation.h"
 #include "src/ir/operator.h"
 #include "src/ir/storage.h"
 #include "src/ir/types/primitive_type.h"
@@ -19,69 +20,71 @@ TEST(NewIrTest, TrySomeStuff) {
   // For generic operators, we should also create a TypeVariable type.
 
   const Operator* constant_op =
-      context.RegisterOperator(std::make_unique<Operator>(
-          "core.constant",
-          BlockBuilder()
-              .AddOutput("result", type_factory.MakePrimitiveType())
-              .build()));
-  ASSERT_NE(constant_op, nullptr);
+      context.RegisterOperator(std::make_unique<Operator>("core.constant"));
+  // ,
+  //           BlockBuilder()
+  //               .AddOutput("result", type_factory.MakePrimitiveType())
+  //               .build())  ASSERT_NE(constant_op, nullptr);
   const Operator* select_op =
-      context.RegisterOperator(std::make_unique<Operator>(
-          "sql.select",
-          BlockBuilder()
-              .AddInput("input", type_factory.MakePrimitiveType())
-              .AddOutput("output", type_factory.MakePrimitiveType())
-              .build()));
+      context.RegisterOperator(std::make_unique<Operator>("sql.select"));
+  //   ,
+  //   BlockBuilder()
+  //       .AddInput("input", type_factory.MakePrimitiveType())
+  //       .AddOutput("output", type_factory.MakePrimitiveType())
+  //       .build())
   ASSERT_NE(select_op, nullptr);
 
   const Operator* tag_claim_op =
-      context.RegisterOperator(std::make_unique<Operator>(
-          "arcs.tag_claim",
-          BlockBuilder()
-              .AddInput("input", type_factory.MakePrimitiveType())
-              .AddInput("predicate", type_factory.MakePrimitiveType())
-              .AddOutput("output", type_factory.MakePrimitiveType())
-              .build()));
+      context.RegisterOperator(std::make_unique<Operator>("arcs.tag_claim"));
+  //   ,
+  //   BlockBuilder()
+  //       .AddInput("input", type_factory.MakePrimitiveType())
+  //       .AddInput("predicate", type_factory.MakePrimitiveType())
+  //       .AddOutput("output", type_factory.MakePrimitiveType())
+  //       .build()
   ASSERT_NE(tag_claim_op, nullptr);
 
   // Foo {a, b}
   const Operator* make_foo_op =
-      context.RegisterOperator(std::make_unique<Operator>(
-          "core.makeFoo",
-          BlockBuilder()
-              .AddInput("a", type_factory.MakePrimitiveType())
-              .AddInput("b", type_factory.MakePrimitiveType())
-              .AddOutput("value", type_factory.MakePrimitiveType())
-              .build()));
+      context.RegisterOperator(std::make_unique<Operator>("core.makeFoo"));
+  //   ,
+  //   BlockBuilder()
+  //       .AddInput("a", type_factory.MakePrimitiveType())
+  //       .AddInput("b", type_factory.MakePrimitiveType())
+  //       .AddOutput("value", type_factory.MakePrimitiveType())
+  //       .build())
   ASSERT_NE(make_foo_op, nullptr);
 
-  const Operator* make_particle_op = context.RegisterOperator(
-      std::make_unique<Operator>("core.make_particle", BlockBuilder().build()));
+  const Operator* make_particle_op =
+      context.RegisterOperator(std::make_unique<Operator>(
+          "core.make_particle"));  // , BlockBuilder().build()
   ASSERT_NE(make_particle_op, nullptr);
 
-  const Operator* call_particle_op = context.RegisterOperator(
-      std::make_unique<Operator>("core.call_particle", BlockBuilder().build()));
+  const Operator* call_particle_op =
+      context.RegisterOperator(std::make_unique<Operator>(
+          "core.call_particle"));  // , BlockBuilder().build()
   ASSERT_NE(call_particle_op, nullptr);
 
-  const Operator* read_field_op = context.RegisterOperator(
-      std::make_unique<Operator>("core.read_field", BlockBuilder().build()));
+  const Operator* read_field_op =
+      context.RegisterOperator(std::make_unique<Operator>(
+          "core.read_field"));  // , BlockBuilder().build()
   ASSERT_NE(read_field_op, nullptr);
 
   const Operator* choose_op = context.RegisterOperator(
-      std::make_unique<Operator>("core.choose", BlockBuilder().build()));
+      std::make_unique<Operator>("core.choose"));  // , BlockBuilder().build()
   ASSERT_NE(choose_op, nullptr);
 
   const Operator* merge_op = context.RegisterOperator(
-      std::make_unique<Operator>("core.merge", BlockBuilder().build()));
+      std::make_unique<Operator>("core.merge"));  // , BlockBuilder().build()
   ASSERT_NE(merge_op, nullptr);
 
   // Write Storage
   const Operator* write_op =
-      context.RegisterOperator(std::make_unique<Operator>(
-          "core.write", BlockBuilder()
-                            .AddInput("src", type_factory.MakePrimitiveType())
-                            .AddInput("tgt", type_factory.MakePrimitiveType())
-                            .build()));
+      context.RegisterOperator(std::make_unique<Operator>("core.write"));
+  //   , BlockBuilder()
+  //                     .AddInput("src", type_factory.MakePrimitiveType())
+  //                     .AddInput("tgt", type_factory.MakePrimitiveType())
+  //                     .build()
   ASSERT_NE(make_foo_op, nullptr);
 
   // particle P1 as an operator
@@ -161,9 +164,9 @@ TEST(NewIrTest, TrySomeStuff) {
                               Value(value::OperationResult(foo, "value")));
           })
           .build();
-  const Operator* particle_p1 = context.RegisterOperator(
-      std::make_unique<Operator>("arcs.particle.P1", std::move(block)));
-
+  const Operator* particle_p1 =
+      context.RegisterOperator(std::make_unique<Operator>("arcs.MakeParticle"));
+  //, std::move(block))
   ASSERT_NE(particle_p1, nullptr);
 
   // Instances of particle are represented as operations.
@@ -184,10 +187,10 @@ TEST(NewIrTest, TrySomeStuff) {
       {{"src", {Value(value::OperationResult(*particle_instance, "foo"))}},
        {"tgt", {Value(value::StoredValue(*output_storage))}}}));
 
-  ASSERT_EQ(particle_instance->op().name(), "arcs.particle.P1");
+  ASSERT_EQ(particle_instance->op().name(), "arcs.MakeParticle");
   ASSERT_EQ(write_storage->op().name(), "core.write");
 
-  for (const auto& op : particle_p1->implementation().operations()) {
+  for (const auto& op : block->operations()) {
     LOG(INFO) << op->ToString();
   }
 }

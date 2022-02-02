@@ -19,8 +19,6 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
-#include "src/ir/operation.h"
-#include "src/ir/operator.h"
 #include "src/ir/types/type.h"
 #include "src/ir/value.h"
 
@@ -28,9 +26,9 @@ namespace raksha::ir {
 
 // A data declaration, which corresponds to an input or output of a block.
 class DataDecl {
-public:
- DataDecl(absl::string_view name, types::Type type)
-     : name_(name), type_(std::move(type)) {}
+ public:
+  DataDecl(absl::string_view name, types::Type type)
+      : name_(name), type_(std::move(type)) {}
 
  private:
   std::string name_;

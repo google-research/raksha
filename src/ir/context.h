@@ -17,7 +17,8 @@
 #define SRC_IR_CONTEXT_H_
 
 #include "absl/container/flat_hash_map.h"
-#include "src/ir/operation.h"
+#include "src/ir/operator.h"
+//#include "src/ir/operation.h"
 #include "src/ir/types/type_factory.h"
 
 namespace raksha::ir {
@@ -34,13 +35,12 @@ class Context {
 
   // Returns the Operator with a particular name. If there is no
   // operator with that name, returns nullptr.
-  const Operator *GetOperator(
-      absl::string_view operators_name) const {
+  const Operator *GetOperator(absl::string_view operators_name) const {
     auto find_res = operators_.find(operators_name);
     return (find_res != operators_.end()) ? find_res->second.get() : nullptr;
   }
 
-  types::TypeFactory& type_factory() { return type_factory_; }
+  types::TypeFactory &type_factory() { return type_factory_; }
 
  private:
   // The particles in the system spec.

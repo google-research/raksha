@@ -25,17 +25,21 @@ namespace raksha::ir {
 // Base class for attributes associated with IR elements.
 class AttributeBase : public RefCounted<AttributeBase> {
  public:
+  enum class Kind { kInt, kString };
+  AttributeBase(Kind kind) : kind_(kind) {}
   virtual ~AttributeBase() {}
 
+  virtual Kind kind() const { return kind_; }
   virtual std::string ToString() const = 0;
 
  private:
   // TODO: Add kind.
+  Kind kind_;
 };
 
 class IntAttribute : public AttributeBase {
  public:
-  IntAttribute(int value) : value_(value) {}
+  IntAttribute(int value) : AttributeBase(Kind::kInt), value_(value) {}
   int value() const { return value_; }
 
   std::string ToString() const override {
@@ -48,7 +52,8 @@ class IntAttribute : public AttributeBase {
 
 class StringAttribute : public AttributeBase {
  public:
-  StringAttribute(absl::string_view value) : value_(value) {}
+  StringAttribute(absl::string_view value)
+      : AttributeBase(Kind::kString), value_(value) {}
   absl::string_view value() const { return value_; }
   std::string ToString() const override { return value_; }
 

@@ -13,32 +13,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_IR_OPERATOR_H_
-#define SRC_IR_OPERATOR_H_
-
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
-#include "src/ir/types/type.h"
-#include "src/ir/value.h"
+#include "absl/strings/str_join.h"
+#include "src/ir/module.h"
 
 namespace raksha::ir {
 
-class Block;
-
-// Signature of an operator. An operator could be simple operators (e.g., `+`,
-// `-`) or complex operators (e.g., particle, function) that is compose of other
-// operations.
-class Operator {
- public:
-  Operator(absl::string_view name) : name_(name) {}
-
-  const std::string& name() const { return name_; }
-
- private:
-  std::string name_;
-};
+std::string Operation::ToString() const {
+  constexpr absl::string_view kOperationFormat = "%s [%s](%s)";
+  std::string attributes_string;
+  for (const auto& [name, attribute] : attributes_) {
+    absl::StrAppendFormat(&attributes_string, "%s: %s, ", name,
+                          attribute->ToString());
+  }
+  std::string inputs_string;
+  for (const auto& [name, input] : inputs_) {
+    absl::StrAppendFormat(&inputs_string, "%s: %s, ", name, input.ToString());
+  }
+  return absl::StrFormat(kOperationFormat, op_->name(), attributes_string,
+                         inputs_string);
+}
 
 }  // namespace raksha::ir
-
-#endif  // SRC_IR_OPERATOR_H_
