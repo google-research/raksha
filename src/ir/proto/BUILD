@@ -68,7 +68,6 @@ cc_library(
         ":access_path",
         ":predicate",
         "//src/ir",
-        "//src/ir:access_path",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
