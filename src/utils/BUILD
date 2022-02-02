@@ -24,7 +24,6 @@ cc_library(
     hdrs = ["intrusive_ptr.h"],
     deps = [
         ":ref_counted",
-        "//src/common/logging",
     ],
 )
 
@@ -52,7 +51,6 @@ cc_library(
     hdrs = ["ref_counted.h"],
     deps = [
         ":ref_counter",
-        "//src/common/logging",
     ],
 )
 
