@@ -23,6 +23,16 @@
 
 namespace raksha::xform_to_datalog {
 
+// If authorization logic is disabled, just run a single, always-true dummy
+// test.
+#ifdef DISABLE_AUTHORIZATION_LOGIC
+
+TEST(Dummy, Dummy) {
+  ASSERT_EQ(1, 1);
+}
+
+#else
+
 const std::string path = "src/xform_to_datalog/testdata";
 
 class DatalogFactsTest
@@ -152,5 +162,7 @@ says_cond1("prin1", "foo").
 grounded_dummy("dummy_var").
 
 )")));
+
+#endif
 
 }  // namespace raksha::xform_to_datalog
