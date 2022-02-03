@@ -95,7 +95,6 @@ cc_library(
     hdrs = ["manifest_datalog_facts.h"],
     deps = [
         "//src/ir",
-        "//src/ir/proto:particle_spec",
         "//src/ir/proto:system_spec",
         "//src/ir/proto:types",
         "//src/ir/types",
