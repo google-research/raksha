@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 #ifndef SRC_IR_ATTRIBUTE_H_
 #define SRC_IR_ATTRIBUTE_H_
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "src/utils/intrusive_ptr.h"
@@ -33,13 +34,17 @@ class AttributeBase : public RefCounted<AttributeBase> {
   virtual std::string ToString() const = 0;
 
  private:
-  // TODO: Add kind.
   Kind kind_;
 };
 
+using Attribute = intrusive_ptr<const AttributeBase>;
+
 class IntAttribute : public AttributeBase {
  public:
-  IntAttribute(int value) : AttributeBase(Kind::kInt), value_(value) {}
+  static Attribute Create(int value) {
+    return Attribute(new IntAttribute(value));
+  }
+
   int value() const { return value_; }
 
   std::string ToString() const override {
@@ -47,32 +52,28 @@ class IntAttribute : public AttributeBase {
   }
 
  private:
+  IntAttribute(int value) : AttributeBase(Kind::kInt), value_(value) {}
+
   int value_;
 };
 
 class StringAttribute : public AttributeBase {
  public:
-  StringAttribute(absl::string_view value)
-      : AttributeBase(Kind::kString), value_(value) {}
+  static Attribute Create(absl::string_view value) {
+    return Attribute(new StringAttribute(value));
+  }
+
   absl::string_view value() const { return value_; }
   std::string ToString() const override { return value_; }
 
  private:
+  StringAttribute(absl::string_view value)
+      : AttributeBase(Kind::kString), value_(value) {}
+
   std::string value_;
 };
 
-using Attribute = intrusive_ptr<const AttributeBase>;
 using NamedAttributeMap = absl::flat_hash_map<std::string, Attribute>;
-
-class AttributeFactory {
- public:
-  static Attribute MakeStringAttribute(absl::string_view value) {
-    return Attribute(new StringAttribute(value));
-  }
-  static Attribute MakeIntAttribute(int value) {
-    return Attribute(new IntAttribute(value));
-  }
-};
 
 }  // namespace raksha::ir
 

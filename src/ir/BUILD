@@ -25,7 +25,6 @@ cc_library(
     name = "new_ir",
     srcs = ["operation.cc"],
     hdrs = [
-        "attribute.h",
         "block.h",
         "block_builder.h",
         "context.h",
@@ -50,6 +49,25 @@ cc_test(
     deps = [
         ":ir",
         ":new_ir",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
+    name = "attribute",
+    hdrs = ["attribute.h"],
+    deps = [
+        "//src/utils:intrusive_ptr",
+        "@absl//absl/container:flat_hash_map",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "attribute_test",
+    srcs = ["attribute_test.cc"],
+    deps = [
+        ":attribute",
         "//src/common/testing:gtest",
     ],
 )
