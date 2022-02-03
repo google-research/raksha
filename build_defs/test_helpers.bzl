@@ -35,7 +35,7 @@ def extracted_datalog_string_test(
         name = "dl_string_test_file_generator_for_" + name,
         testonly = True,
         srcs = ["//src/test_utils/dl_string_extractor:dl_string_test_file_generator.cc"],
-        copts = ["-std=c++17"],
+        copts = ["-std=c++17", "-fexceptions"],
         deps = [
             dl_string_lib,
             "//src/common/logging:logging",
@@ -81,6 +81,7 @@ def extracted_datalog_string_test(
             name + "_cxx",
         ],
         copts = [
+            "-fexceptions",
             "-Iexternal/souffle/src/include/souffle",
         ],
         linkopts = ["-pthread"],

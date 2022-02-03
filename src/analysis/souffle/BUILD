@@ -13,6 +13,7 @@ cc_test(
     name = "cpp_interface_test",
     srcs = ["cpp_interface_test.cc"],
     copts = [
+        "-fexceptions",
         "-Iexternal/souffle/src/include/souffle",
     ],
     linkopts = ["-pthread"],

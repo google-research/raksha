@@ -5,6 +5,12 @@ try-import %workspace%/gcb/rbe/remote.bazelrc
 build --cxxopt='-std=c++17'
 build --cxxopt='-Werror' --cxxopt='-Wall'
 build --cxxopt='-Wno-deprecated-declarations'
+# Why are we doing this when Souffle-generated C++ clearly uses exceptions?
+# Well, Google famously does not like C++ exceptions in its internal codebase,
+# so we will need to explicitly override that in Raksha files everywhere we
+# build Souffle C++ code to have Raksha build when imported into Google. This
+# default acts as a simulation of that property of Google's internal codebase.
+build --cxxopt='-fno-exceptions'
 build --host_cxxopt='-std=c++17'
 # Note: We usually try to keep the cxxopt and host_cxxopt consistent. That is
 # not a good idea for this line. It appears that adding -Werror to host_cxxopt
@@ -14,3 +20,6 @@ build --host_cxxopt='-std=c++17'
 # warnings from our third party packages.
 # build --host_cxxopt='-Werror' --host_cxxopt='-Wall'
 build --host_cxxopt='-Wno-deprecated-declarations'
+# Similarly, we should not set this flag that we're using as a debugging
+# assistant when compiling third party libraries.
+# build --host_cxxopt='-fno-exceptions'
