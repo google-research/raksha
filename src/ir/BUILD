@@ -34,7 +34,6 @@ cc_library(
     deps = [
         "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
-        "@absl//absl/strings",
     ],
 )
 
@@ -61,10 +60,8 @@ cc_library(
         "//src/ir/proto:access_path",
         "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
-        "@absl//absl/container:flat_hash_set",
-        "@absl//absl/hash",
         "@absl//absl/strings",
-        "@absl//absl/types:variant",
+        "@absl//absl/strings:str_format",
     ],
 )
 
@@ -84,6 +81,7 @@ cc_library(
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/hash",
         "@absl//absl/strings",
+        "@absl//absl/types:variant",
     ],
 )
 
@@ -91,11 +89,9 @@ cc_test(
     name = "access_path_selectors_test",
     srcs = ["access_path_selectors_test.cc"],
     deps = [
-        ":ir",
+        ":access_path",
         "//src/common/testing:gtest",
-        "@absl//absl/hash",
         "@absl//absl/hash:hash_testing",
-        "@absl//absl/status",
         "@absl//absl/status:statusor",
         "@absl//absl/strings",
     ],
@@ -105,12 +101,10 @@ cc_test(
     name = "access_path_selectors_set_test",
     srcs = ["access_path_selectors_set_test.cc"],
     deps = [
-        ":ir",
+        ":access_path",
         "//src/common/testing:gtest",
         "@absl//absl/container:btree",
         "@absl//absl/container:flat_hash_set",
-        "@absl//absl/hash",
-        "@absl//absl/hash:hash_testing",
         "@absl//absl/strings",
     ],
 )
@@ -119,11 +113,9 @@ cc_test(
     name = "field_selector_test",
     srcs = ["field_selector_test.cc"],
     deps = [
-        ":ir",
+        ":access_path",
         "//src/common/testing:gtest",
-        "@absl//absl/hash",
         "@absl//absl/hash:hash_testing",
-        "@absl//absl/strings",
     ],
 )
 
@@ -131,11 +123,9 @@ cc_test(
     name = "selector_test",
     srcs = ["selector_test.cc"],
     deps = [
-        ":ir",
+        ":access_path",
         "//src/common/testing:gtest",
-        "@absl//absl/hash",
         "@absl//absl/hash:hash_testing",
-        "@absl//absl/strings",
     ],
 )
 
@@ -143,7 +133,7 @@ cc_test(
     name = "access_path_test",
     srcs = ["access_path_test.cc"],
     deps = [
-        ":ir",
+        ":access_path",
         "//src/common/testing:gtest",
         "@absl//absl/hash:hash_testing",
     ],
@@ -153,6 +143,7 @@ cc_test(
     name = "edge_test",
     srcs = ["edge_test.cc"],
     deps = [
+        ":access_path",
         ":ir",
         "//src/common/testing:gtest",
     ],
@@ -163,6 +154,7 @@ cc_test(
     srcs = ["system_spec_test.cc"],
     deps = [
         ":ir",
+        "//src/common/logging",
         "//src/common/testing:gtest",
     ],
 )
@@ -171,10 +163,10 @@ cc_test(
     name = "tag_claim_test",
     srcs = ["tag_claim_test.cc"],
     deps = [
+        ":access_path",
         ":ir",
         "//src/common/testing:gtest",
         "//src/ir/proto:tag_claim",
-        "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],
 )
@@ -183,6 +175,7 @@ cc_test(
     name = "tag_check_test",
     srcs = ["tag_check_test.cc"],
     deps = [
+        ":access_path",
         ":ir",
         "//src/common/testing:gtest",
         "//src/ir/proto:predicate",
@@ -196,7 +189,7 @@ cc_test(
     name = "access_path_root_test",
     srcs = ["access_path_root_test.cc"],
     deps = [
-        ":ir",
+        ":access_path",
         "//src/common/testing:gtest",
         "@absl//absl/hash:hash_testing",
     ],
@@ -208,6 +201,7 @@ cc_test(
     deps = [
         ":ir",
         "//src/common/testing:gtest",
+        "//src/ir/proto:access_path",
         "//src/ir/proto:derives_from_claim",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
@@ -233,6 +227,7 @@ cc_test(
         ":predicate_textproto_to_rule_body_testdata",
         "//src/common/testing:gtest",
         "//src/ir/proto:predicate",
+        "//third_party/arcs/proto:manifest_cc_proto",
         "@absl//absl/strings",
     ],
 )
@@ -244,6 +239,8 @@ cc_test(
         ":ir",
         "//src/common/testing:gtest",
         "//src/ir/proto:handle_connection_spec",
+        "//src/ir/types",
+        "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
 
@@ -252,9 +249,10 @@ cc_test(
     srcs = ["particle_spec_test.cc"],
     deps = [
         ":ir",
+        "//src/common/logging",
         "//src/common/testing:gtest",
-        "//src/ir/proto:handle_connection_spec",
         "//src/ir/proto:particle_spec",
+        "//src/ir/types",
     ],
 )
 

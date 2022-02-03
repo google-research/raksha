@@ -19,10 +19,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
-#include "src/ir/operation.h"
-#include "src/ir/operator.h"
 #include "src/ir/types/type.h"
-#include "src/ir/value.h"
 
 namespace raksha::ir {
 

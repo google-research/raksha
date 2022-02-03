@@ -34,6 +34,7 @@ cc_library(
         "type.h",
     ],
     deps = [
+        "//src/common/logging",
         "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
@@ -64,9 +65,9 @@ cc_library(
     name = "tag_check",
     hdrs = ["tag_check.h"],
     deps = [
+        ":access_path",
+        ":predicate",
         "//src/ir",
-        "//src/ir:access_path",
-        "//src/ir/proto:predicate",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
@@ -77,7 +78,6 @@ cc_library(
     hdrs = ["tag_claim.h"],
     deps = [
         "//src/ir",
-        "//src/ir:access_path",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
@@ -87,7 +87,6 @@ cc_library(
     hdrs = ["derives_from_claim.h"],
     deps = [
         "//src/ir",
-        "//src/ir:access_path",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
@@ -97,9 +96,9 @@ cc_library(
     srcs = ["handle_connection_spec.cc"],
     hdrs = ["handle_connection_spec.h"],
     deps = [
+        ":types",
         "//src/ir",
-        "//src/ir:access_path",
-        "//src/ir/proto:types",
+        "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
@@ -111,11 +110,11 @@ cc_library(
     deps = [
         ":derives_from_claim",
         ":handle_connection_spec",
+        ":predicate",
         ":tag_check",
         ":tag_claim",
         "//src/ir",
-        "//src/ir:access_path",
-        "//src/ir/proto:types",
+        "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
@@ -127,8 +126,7 @@ cc_library(
     deps = [
         ":particle_spec",
         "//src/ir",
-        "//src/ir:access_path",
-        "//src/ir/proto:types",
+        "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
@@ -139,7 +137,6 @@ cc_test(
     deps = [
         ":access_path",
         "//src/common/testing:gtest",
-        "//src/ir",
     ],
 )
 
@@ -149,7 +146,6 @@ cc_test(
     deps = [
         ":access_path",
         "//src/common/testing:gtest",
-        "//src/ir",
     ],
 )
 
@@ -159,7 +155,6 @@ cc_test(
     deps = [
         ":access_path",
         "//src/common/testing:gtest",
-        "//src/ir",
     ],
 )
 

@@ -16,7 +16,7 @@
 
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
 
-#include <google/protobuf/text_format.h>
+#include "google/protobuf/text_format.h"
 
 #include "absl/strings/substitute.h"
 #include "src/common/testing/gtest.h"

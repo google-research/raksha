@@ -37,7 +37,7 @@ cc_library(
         "//src/ir:access_path",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",
-        "@absl//absl/strings",
+        "@absl//absl/hash",
     ],
 )
 
@@ -47,7 +47,7 @@ cc_test(
     deps = [
         ":types",
         "//src/common/testing:gtest",
-        "//src/ir",
+        "//src/ir:access_path",
     ],
 )
 
@@ -58,7 +58,7 @@ cc_test(
         ":types",
         "//src/common/logging",
         "//src/common/testing:gtest",
-        "//src/ir",
+        "//src/ir:access_path",
         "//src/ir/proto:types",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings",

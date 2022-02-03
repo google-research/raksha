@@ -20,11 +20,10 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "src/ir/types/type.h"
+#include "src/ir/block.h"
 #include "src/ir/value.h"
 
 namespace raksha::ir {
-
-class Block;
 
 // Signature of an operator. An operator could be simple operators (e.g., `+`,
 // `-`) or complex operators (e.g., particle, function) that is compose of other
