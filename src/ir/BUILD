@@ -26,10 +26,12 @@ cc_library(
     srcs = ["operation.cc"],
     hdrs = [
         "attribute.h",
+        "block.h",
         "block_builder.h",
         "context.h",
         "data_decl.h",
         "module.h",
+        "operation.h",
         "operator.h",
         "storage.h",
         "value.h",

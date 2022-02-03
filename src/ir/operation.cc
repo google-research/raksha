@@ -20,6 +20,8 @@
 
 namespace raksha::ir {
 
+Operation::~Operation() {}
+
 std::string Operation::ToString() const {
   constexpr absl::string_view kOperationFormat = "%s [%s](%s)";
   std::string attributes_string;
