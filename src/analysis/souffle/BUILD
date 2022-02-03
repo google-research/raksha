@@ -16,6 +16,7 @@ cc_test(
         "-fexceptions",
         "-Iexternal/souffle/src/include/souffle",
     ],
+    features = ["-use_header_modules"],  # Incompatible with -fexceptions.
     linkopts = ["-pthread"],
     deps = [
         ":taint_dl",

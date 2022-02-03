@@ -107,6 +107,7 @@ def souffle_cc_library(
             # don't care about non-critical issues in it. Turn off warnings.
             "-w",
         ],
+        features = ["-use_header_modules"],  # Incompatible with -fexceptions.
         defines = [
             "__EMBEDDED_SOUFFLE__",
         ],
@@ -140,6 +141,7 @@ def souffle_cc_binary(
             # don't care about non-critical issues in it. Turn off warnings.
             "-w",
         ],
+        features = ["-use_header_modules"],  # Incompatible with -fexceptions.
         deps = ["@souffle//:souffle_include_lib"],
         visibility = visibility,
     )

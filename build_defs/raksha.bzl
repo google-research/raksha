@@ -119,6 +119,7 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
             "-fexceptions",
             "-Iexternal/souffle/src/include/souffle",
         ],
+        features = ["-use_header_modules"],  # Incompatible with -fexceptions.
         linkopts = ["-pthread"],
         deps = [
             "@souffle//:souffle_include_lib",

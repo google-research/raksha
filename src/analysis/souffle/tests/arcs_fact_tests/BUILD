@@ -55,6 +55,7 @@ exports_files([
         "-fexceptions",
         "-Iexternal/souffle/src/include/souffle",
     ],
+    features = ["-use_header_modules"],  # Incompatible with -fexceptions.
     linkopts = ["-pthread"],
     deps = [
         "@souffle//:souffle_include_lib",
@@ -97,6 +98,7 @@ exports_files([
         "-Iexternal/souffle/src/include/souffle",
         "-DALL_PRINCIPALS_OWN_ALL_TAGS=1",
     ],
+    features = ["-use_header_modules"],  # Incompatible with -fexceptions.
     linkopts = ["-pthread"],
     deps = [
         "@souffle//:souffle_include_lib",

@@ -35,7 +35,11 @@ def extracted_datalog_string_test(
         name = "dl_string_test_file_generator_for_" + name,
         testonly = True,
         srcs = ["//src/test_utils/dl_string_extractor:dl_string_test_file_generator.cc"],
-        copts = ["-std=c++17", "-fexceptions"],
+        copts = [
+          "-std=c++17",
+          "-fexceptions"
+        ],
+        features = ["-use_header_modules"],  # Incompatible with -fexceptions.
         deps = [
             dl_string_lib,
             "//src/common/logging:logging",
@@ -84,6 +88,7 @@ def extracted_datalog_string_test(
             "-fexceptions",
             "-Iexternal/souffle/src/include/souffle",
         ],
+        features = ["-use_header_modules"],  # Incompatible with -fexceptions.
         linkopts = ["-pthread"],
         deps = [
             name + "_souffle_lib",
