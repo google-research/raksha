@@ -155,6 +155,12 @@ TEST(IntrusivePtrTest, FactoryConstructionWorks) {
   EXPECT_EQ(another_ptr->count(), 11);
   EXPECT_EQ(another_ptr->id(), "AnotherValue");
   EXPECT_NE(ptr.get(), another_ptr.get());
+  // Note that another_ptr going out of scope would only cause the count to be
+  // decreased by one. So we need to decrease it ourselves 10 times to ensure
+  // that this test deletes the pointed-to value.
+  for (int i = 0; i < 10; ++i) {
+    another_ptr->Release();
+  }
 }
 
 TEST(IntrusivePtrTest, DestructorReducesCount) {
