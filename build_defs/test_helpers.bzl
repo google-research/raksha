@@ -36,8 +36,8 @@ def extracted_datalog_string_test(
         testonly = True,
         srcs = ["//src/test_utils/dl_string_extractor:dl_string_test_file_generator.cc"],
         copts = [
-          "-std=c++17",
-          "-fexceptions"
+            "-std=c++17",
+            "-fexceptions",
         ],
         features = ["-use_header_modules"],  # Incompatible with -fexceptions.
         deps = [
