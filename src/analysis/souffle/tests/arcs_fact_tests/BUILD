@@ -52,6 +52,7 @@ exports_files([
         "invert" if dl_script in FAILURE_DL_TEST_FILES else "",
     ],
     copts = [
+        "-fexceptions",
         "-Iexternal/souffle/src/include/souffle",
     ],
     linkopts = ["-pthread"],
@@ -92,6 +93,7 @@ exports_files([
         "invert" if dl_script in FAILURE_DL_TEST_FILES else "",
     ],
     copts = [
+        "-fexceptions",
         "-Iexternal/souffle/src/include/souffle",
         "-DALL_PRINCIPALS_OWN_ALL_TAGS=1",
     ],

@@ -116,6 +116,7 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
             invert_arg,
         ],
         copts = [
+            "-fexceptions",
             "-Iexternal/souffle/src/include/souffle",
         ],
         linkopts = ["-pthread"],
