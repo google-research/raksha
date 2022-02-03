@@ -31,14 +31,15 @@ namespace raksha::xform_to_datalog {
 std::optional<AuthorizationLogicDatalogFacts>
 AuthorizationLogicDatalogFacts::create(
   const std::filesystem::path &program_dir, absl::string_view program) {
-  auto result_dir = std::filesystem::temp_directory_path();
+  const std::filesystem::path result_dir =
+    std::filesystem::temp_directory_path();
 
   // List of relations to not declare in the generated auth logic code
   // because we already have definitions within the Raksha dataflow files for
-  // this purpose. We use an array here and create the composite string to pass
+  // this purpose. We use an vector here and create the composite string to pass
   // into the Rust code with StrJoin to make the code a bit more readable and to
   // prevent typos changing the interpretation of the list.
-  constexpr absl::string_view kRelationsToNotDeclare[] = {
+  const std::vector<absl::string_view> kRelationsToNotDeclare{
       "says_ownsTag",
       "says_ownsAccessPath",
       "says_hasTag",
@@ -51,9 +52,9 @@ AuthorizationLogicDatalogFacts::create(
       "isTag",
       "isPrincipal"
   };
-  int res = generate_datalog_facts_from_authorization_logic(
-    program.data(), program_dir.c_str(), result_dir.c_str(),
-    absl::StrJoin(kRelationsToNotDeclare, ",").c_str());
+
+  int res = GenerateDatalogFactsFromAuthorizationLogic(
+    program, program_dir, result_dir, kRelationsToNotDeclare);
   if (res) {
     LOG(ERROR) << "Failure running the authorization logic compiler.\n";
     return std::nullopt;

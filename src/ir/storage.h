@@ -12,23 +12,28 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//-----------------------------------------------------------------------------
-#ifndef SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
-#define SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
+//----------------------------------------------------------------------------
+#ifndef SRC_IR_STORAGE_H_
+#define SRC_IR_STORAGE_H_
 
-#include <filesystem>
+#include "src/ir/types/type.h"
 
-#include "absl/strings/string_view.h"
+namespace raksha::ir {
 
-namespace raksha::xform_to_datalog {
+// A class that represents a storage.
+class Storage {
+ public:
+  Storage(types::Type type) : type_(std::move(type)) {}
 
-int GenerateDatalogFactsFromAuthorizationLogic(
-    absl::string_view program,
-    const std::filesystem::path &program_dir,
-    const std::filesystem::path &result_dir,
-    const std::vector<absl::string_view> &relations_to_not_declare);
+  // Disable copy (and move) semantics.
+  Storage(const Storage&) = delete;
+  Storage& operator=(const Storage&) = delete;
 
-}
+ private:
+  types::Type type_;
+  // TODO: We will add additional attributes like ttl, medium, etc.
+};
 
-#endif  // SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
+}  // namespace raksha::ir
 
+#endif  // SRC_IR_STORAGE_H_

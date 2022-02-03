@@ -15,6 +15,8 @@
 #
 #-------------------------------------------------------------------------------
 
+licenses(["notice"])
+
 package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
@@ -22,7 +24,7 @@ cc_library(
     hdrs = [
         "ast.h",
     ],
-    visibility = ["//test:__pkg__"]
+    visibility = ["//test:__pkg__"],
 )
 
 cc_test(
@@ -31,5 +33,5 @@ cc_test(
     deps = [
         ":ast",
         "//src/common/testing:gtest",
-    ]
+    ],
 )

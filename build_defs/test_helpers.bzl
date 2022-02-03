@@ -14,7 +14,7 @@
 # limitations under the License.
 #----------------------------------------------------------------------------
 
-load("//build_defs:souffle.bzl", "souffle_cc_library", "gen_souffle_cxx_code")
+load("//build_defs:souffle.bzl", "gen_souffle_cxx_code", "souffle_cc_library")
 
 def extracted_datalog_string_test(
         name,
@@ -35,7 +35,7 @@ def extracted_datalog_string_test(
         name = "dl_string_test_file_generator_for_" + name,
         testonly = True,
         srcs = ["//src/test_utils/dl_string_extractor:dl_string_test_file_generator.cc"],
-        copts = ["-std=c++17"],
+        copts = ["-std=c++17", "-fexceptions"],
         deps = [
             dl_string_lib,
             "@absl//absl/strings:str_format",
@@ -82,6 +82,7 @@ def extracted_datalog_string_test(
             name + "_cxx",
         ],
         copts = [
+            "-fexceptions",
             "-Iexternal/souffle/src/include/souffle",
         ],
         linkopts = ["-pthread"],
@@ -104,7 +105,8 @@ def run_taint_exec_compare_check_results(
     """
 
     facts_dir_opts = [
-        "--facts=`dirname $(location {})`".format(input_file) for input_file in input_files
+        "--facts=`dirname $(location {})`".format(input_file)
+        for input_file in input_files
     ]
 
     # Run the taint analysis Souffle binary to generate the Datalog output
@@ -118,7 +120,7 @@ def run_taint_exec_compare_check_results(
         cmd = ("$(location //src/analysis/souffle:taint_exec_test) --output=$(RULEDIR) {fact_dirs} && " +
                "cp $(RULEDIR)/checkAndResult.csv $(location :checkAndResult) && " +
                "cp $(RULEDIR)/expectedCheckAndResult.csv $(location :expectedCheckAndResult)")
-              .format(fact_dirs = " ".join(facts_dir_opts)),
+            .format(fact_dirs = " ".join(facts_dir_opts)),
         tools = ["//src/analysis/souffle:taint_exec_test"],
         visibility = visibility,
     )
@@ -131,7 +133,7 @@ def run_taint_exec_compare_check_results(
         srcs = [":checkAndResult"],
         testonly = True,
         cmd = "sort $< > $@",
-        visibility = visibility
+        visibility = visibility,
     )
 
     # Similarly, sort expectedCheckAndResult.
@@ -141,7 +143,7 @@ def run_taint_exec_compare_check_results(
         srcs = [":expectedCheckAndResult"],
         testonly = True,
         cmd = "sort $< > $@",
-        visibility = visibility
+        visibility = visibility,
     )
 
     # Compare the two files for diff equality.
@@ -149,5 +151,5 @@ def run_taint_exec_compare_check_results(
         name = name,
         args = ["$(location :expectedCheckAndResultSorted)", "$(location :checkAndResultSorted)"],
         data = [":checkAndResultSorted", ":expectedCheckAndResultSorted"],
-        srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:diff_wrapper.sh"]
+        srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:diff_wrapper.sh"],
     )

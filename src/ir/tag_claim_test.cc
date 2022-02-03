@@ -16,8 +16,8 @@
 
 #include "src/ir/tag_claim.h"
 
-#include <google/protobuf/util/message_differencer.h>
-#include <google/protobuf/text_format.h>
+#include "google/protobuf/util/message_differencer.h"
+#include "google/protobuf/text_format.h"
 
 #include "absl/strings/str_format.h"
 #include "src/common/testing/gtest.h"

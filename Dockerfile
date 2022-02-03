@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     flex \
     g++ \
     git \
+    grep \
     libffi-dev \
     libncurses5-dev \
     libtool \
@@ -30,6 +31,10 @@ ENV JAVA_HOME /usr/lib/jvm/default-java
 # Set up baselisk.
 RUN wget https://github.com/bazelbuild/bazelisk/releases/download/v1.10.1/bazelisk-linux-amd64 \
     -O /usr/local/bin/bazelisk && chmod a+x /usr/local/bin/bazelisk
+
+# Set up buildifier
+RUN wget https://github.com/bazelbuild/buildtools/releases/download/4.2.5/buildifier-linux-amd64 \
+    -O /usr/local/bin/buildifier && chmod a+x /usr/local/bin/buildifier
 
 # Rust is needed for authorization logic
 ARG rustup_dir=/usr/local/cargo

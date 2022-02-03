@@ -8,12 +8,18 @@ licenses(["notice"])
 
 FAILURE_DL_TEST_FILES = glob(["*_expect_fails.dl"])
 
-ALL_DL_TEST_FILES = glob(["*.dl"], exclude = ["*_helper.dl"])
+ALL_DL_TEST_FILES = glob(
+    ["*.dl"],
+    exclude = ["*_helper.dl"],
+)
 
 TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES = ["claim_not_edge_two_inputs_two_outputs.dl"]
 
-exports_files(["fact_test_driver.cc", "fact_test_driver_with_check_facts.cc",
-               "diff_wrapper.sh"])
+exports_files([
+    "fact_test_driver.cc",
+    "fact_test_driver_with_check_facts.cc",
+    "diff_wrapper.sh",
+])
 
 [gen_souffle_cxx_code(
     name = dl_script.replace(".dl", ""),
@@ -36,8 +42,8 @@ exports_files(["fact_test_driver.cc", "fact_test_driver_with_check_facts.cc",
 
 [souffle_cc_library(
     name = dl_script.replace(".dl", "_souffle_cc_library"),
-    src = dl_script.replace(".dl", ""),
     testonly = True,
+    src = dl_script.replace(".dl", ""),
 ) for dl_script in ALL_DL_TEST_FILES]
 
 [cc_test(
@@ -48,6 +54,7 @@ exports_files(["fact_test_driver.cc", "fact_test_driver_with_check_facts.cc",
         "invert" if dl_script in FAILURE_DL_TEST_FILES else "",
     ],
     copts = [
+        "-fexceptions",
         "-Iexternal/souffle/src/include/souffle",
     ],
     linkopts = ["-pthread"],
@@ -76,8 +83,8 @@ exports_files(["fact_test_driver.cc", "fact_test_driver_with_check_facts.cc",
 
 [souffle_cc_library(
     name = dl_script.replace(".dl", "_no_owners_souffle_cc_library"),
-    src = dl_script.replace(".dl", "_no_owners"),
     testonly = True,
+    src = dl_script.replace(".dl", "_no_owners"),
 ) for dl_script in TURN_OFF_ALL_OWNERS_OWN_ALL_TAGS_FILES]
 
 [cc_test(
@@ -88,6 +95,7 @@ exports_files(["fact_test_driver.cc", "fact_test_driver_with_check_facts.cc",
         "invert" if dl_script in FAILURE_DL_TEST_FILES else "",
     ],
     copts = [
+        "-fexceptions",
         "-Iexternal/souffle/src/include/souffle",
         "-DALL_PRINCIPALS_OWN_ALL_TAGS=1",
     ],

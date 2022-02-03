@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,22 +13,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
-#define SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
 
+#include <cstdlib>
 #include <filesystem>
+#include <fstream>
+#include <vector>
 
-#include "absl/strings/string_view.h"
+#ifndef SRC_TEST_UTILS_UTILS_H_
+#define SRC_TEST_UTILS_UTILS_H_
 
-namespace raksha::xform_to_datalog {
+namespace raksha::test_utils {
+// Typically used to get ROOT DiRECTORY for testing. 
+// Takes path string as parameter and returns $TEST_SRCDIR/$TEST_WORKSPACE/path
+std::filesystem::path GetTestDataDir(std::string path);
+// Reads file line by line, stores in a vector and returns it.
+std::vector<std::string> ReadFileLines(const std::filesystem::path& file); 
 
-int GenerateDatalogFactsFromAuthorizationLogic(
-    absl::string_view program,
-    const std::filesystem::path &program_dir,
-    const std::filesystem::path &result_dir,
-    const std::vector<absl::string_view> &relations_to_not_declare);
+} //namespace raksha::test_utils
 
-}
-
-#endif  // SRC_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
+#endif //SRC_TEST_UTILS_UTILS_H_
 
