@@ -51,8 +51,7 @@ def gen_souffle_cxx_code(
     include_dir_opts = [
         "--include-dir=`dirname $(location {})`".format(include_file)
         for include_file in included_dl_scripts
-    ]
-        
+    ]      
 
     include_opts_str = " ".join(include_dir_opts)
 
