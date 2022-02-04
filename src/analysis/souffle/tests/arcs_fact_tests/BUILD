@@ -55,6 +55,10 @@ exports_files([
         "-fexceptions",
         "-Iexternal/souffle/src/include/souffle",
     ],
+    # Turn off header modules, as Google precompiled headers use
+    # -fno-exceptions, and combining a precompiled header with -fno-exceptions
+    # with a binary that uses -fexceptions makes Clang upset.
+    features = ["-use_header_modules"],
     linkopts = ["-pthread"],
     deps = [
         "@souffle//:souffle_include_lib",
@@ -97,6 +101,10 @@ exports_files([
         "-Iexternal/souffle/src/include/souffle",
         "-DALL_PRINCIPALS_OWN_ALL_TAGS=1",
     ],
+    # Turn off header modules, as Google precompiled headers use
+    # -fno-exceptions, and combining a precompiled header with -fno-exceptions
+    # with a binary that uses -fexceptions makes Clang upset.
+    features = ["-use_header_modules"],
     linkopts = ["-pthread"],
     deps = [
         "@souffle//:souffle_include_lib",

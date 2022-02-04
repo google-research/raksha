@@ -35,7 +35,15 @@ def extracted_datalog_string_test(
         name = "dl_string_test_file_generator_for_" + name,
         testonly = True,
         srcs = ["//src/test_utils/dl_string_extractor:dl_string_test_file_generator.cc"],
-        copts = ["-std=c++17", "-fexceptions"],
+        copts = [
+            "-std=c++17",
+            "-fexceptions",
+        ],
+        # Turn off header modules, as Google precompiled headers use
+        # -fno-exceptions, and combining a precompiled header with
+        # -fno-exceptions with a binary that uses -fexceptions makes Clang
+        # upset.
+        features = ["-use_header_modules"],
         deps = [
             dl_string_lib,
             "//src/common/logging:logging",
@@ -84,6 +92,11 @@ def extracted_datalog_string_test(
             "-fexceptions",
             "-Iexternal/souffle/src/include/souffle",
         ],
+        # Turn off header modules, as Google precompiled headers use
+        # -fno-exceptions, and combining a precompiled header with
+        # -fno-exceptions with a binary that uses -fexceptions makes Clang
+        # upset.
+        features = ["-use_header_modules"],
         linkopts = ["-pthread"],
         deps = [
             name + "_souffle_lib",
