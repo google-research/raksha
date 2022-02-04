@@ -15,4 +15,6 @@ b_not_has_tag1_and_tag2;$CP_Not($CP_And($CP_TagPresence("b","P","tag1"), $CP_Tag
 b_has_tag1_or_tag2;$CP_Or($CP_TagPresence("b","P","tag1"), $CP_TagPresence("b","P","tag2"));PASS
 should_fail_b_has_tag1_implies_tag2;$CP_Implies($CP_TagPresence("b","P","tag1"), $CP_TagPresence("b","P","tag2"));FAIL
 b_has_tag2_implies_tag1;$CP_Implies($CP_TagPresence("b","P","tag2"), $CP_TagPresence("b","P","tag1"));PASS
-c_does_not_have_dyn_owner_tag3;$CP_TagPresenceDynamicOwner("a","tag3");FAIL
+c_does_not_have_dyn_owner_tag3;$CP_TagPresenceDynamicOwner("c","tag3");FAIL
+c_does_have_dyn_owner_tag4;$CP_TagPresenceDynamicOwner("c","tag4");PASS
+unmentioned_ap_does_not_have_tag1;$CP_TagPresenceDynamicOwner("unmentioned_ap","tag1");FAIL

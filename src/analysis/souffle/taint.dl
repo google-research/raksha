@@ -171,16 +171,37 @@ predicateEval($CP_TagPresence(ap, owner, tag), 1) :-
 predicateEval($CP_TagPresence(ap, owner, tag), 0) :-
   checkSubExprs($CP_TagPresence(ap, owner, tag)), !mayHaveTag(ap, owner, tag).
 
-// This helper relation is used to make it very clear that predicateEval can be
-// only 1 xor 0 on a $CP_TagPresenceDynamicOwner.
-.decl tagPresentForSomeOwner(ap: AccessPath, tag: Tag)
-tagPresentForSomeOwner(ap, tag) :-
-  checkSubExprs($CP_TagPresenceDynamicOwner(ap, tag)),
-  ownsAccessPath(owner, ap), mayHaveTag(ap, owner, tag).
+// The total number of principals that have ownership on this AccessPath.
+.decl numOwnersAtAccessPath(ap: AccessPath, numOwners: number)
+numOwnersAtAccessPath(ap, count : { ownsAccessPath(owner, ap) }) :-
+  checkSubExprs($CP_TagPresenceDynamicOwner(ap, _)).
 
-predicateEval($CP_TagPresenceDynamicOwner(ap, tag), 1) :- tagPresentForSomeOwner(ap, tag).
+// The total number of owners that agree that some tag is present on the given
+// AccessPath.
+.decl numOwnersSayingTagPresentAtAccessPath(ap: AccessPath, tag: Tag, numOwners: number)
+numOwnersSayingTagPresentAtAccessPath(
+  ap, tag, count : { ownsAccessPath(owner, ap), mayHaveTag(ap, owner, tag) }) :-
+  checkSubExprs($CP_TagPresenceDynamicOwner(ap, tag)).
 
+// If the number of owners that say that a tag is present on an AccessPath is
+// the same as the total number of owners on that AccessPath, and the number of
+// owners is greater than 0, all owners agree that the tag is present on that
+// AccessPath.
+.decl allOwnersAgreeTagPresentAtAccessPath(ap: AccessPath, tag: Tag)
+allOwnersAgreeTagPresentAtAccessPath(ap, tag) :-
+  numOwnersAtAccessPath(ap, numOwners),
+  numOwnersSayingTagPresentAtAccessPath(ap, tag, numOwnersSayingTagPresent),
+  numOwners = numOwnersSayingTagPresent, numOwners > 0.
+
+// TagPresenceDynamicOwner evaluates to true if all owners agree that the tag
+// is present and there is at least one owner.
+predicateEval($CP_TagPresenceDynamicOwner(ap, tag), 1) :-
+  allOwnersAgreeTagPresentAtAccessPath(ap, tag).
+
+// TagPresenceDynamicOwner evaluates to false if some owner does not agree that
+// the tag is present or if there are no owners at all.
 predicateEval($CP_TagPresenceDynamicOwner(ap, tag), 0) :-
-  checkSubExprs($CP_TagPresenceDynamicOwner(ap, tag)), !tagPresentForSomeOwner(ap, tag).
+  checkSubExprs($CP_TagPresenceDynamicOwner(ap, tag)),
+  !allOwnersAgreeTagPresentAtAccessPath(ap, tag).
 
 #endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_
