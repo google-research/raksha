@@ -20,8 +20,8 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_AUTHORIZATION_LOGIC_DL_
 #define SRC_ANALYSIS_SOUFFLE_AUTHORIZATION_LOGIC_DL_
 
-#include "dataflow_graph.dl"
-#include "tags.dl"
+#include "src/analysis/souffle/dataflow_graph.dl"
+#include "src/analysis/souffle/tags.dl"
 
 // A Principal that makes assertions in authorization logic
 .type Principal <: symbol

@@ -2,8 +2,8 @@
 // other succeeds. This matches closely the case we want to prevent from happening in the repo, as
 // if we did not take care to prevent this, one instance of the name would be added to the
 // testSucceeds set, masking the other failure.
-#include "taint.dl"
-#include "fact_test_helper.dl"
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/fact_test_helper.dl"
 
 TEST_CASE("one_equal_to_one") :- 1 = 1.
 TEST_CASE("one_equal_to_one") :- 1 = 2.

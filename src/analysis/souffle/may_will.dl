@@ -1,7 +1,7 @@
 #ifndef MAY_WILL_DL_
 #define MAY_WILL_DL_
 
-#include "taint.dl"
+#include "src/analysis/souffle/taint.dl"
 
 .type Usage <: symbol
 
