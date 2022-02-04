@@ -25,10 +25,11 @@ namespace {
 
 class RefCountedType {
  public:
-  RefCountedType(std::string id = "<unknown>", unsigned int initial_count = 0)
-      : id_(id), count_(initial_count) {}
+  RefCountedType(std::string id = "<unknown>", bool some_flag = false)
+      : id_(id), some_flag_(some_flag), count_(0) {}
 
   unsigned int count() const { return count_; }
+  bool some_flag() const { return some_flag_; }
   void set_id(std::string id) { std::swap(id_, id); }
   const std::string& id() const { return id_; }
   void Retain() { count_++; }
@@ -41,6 +42,7 @@ class RefCountedType {
 
  private:
   std::string id_;
+  bool some_flag_;
   unsigned int count_;
 };
 
@@ -50,8 +52,8 @@ using RefCountedTypePtr = intrusive_ptr<RefCountedType>;
 // creating raw pointers and use `make_intrusive_ptr` factory method to create
 // and warp the object immediately.
 RefCountedType* MakeRefCountedTypeInstance(std::string id = "<unknown>",
-                                           unsigned int initial_count = 0) {
-  return new RefCountedType(id, initial_count);
+                                           bool some_flag = false) {
+  return new RefCountedType(id, some_flag);
 }
 
 TEST(IntrusivePtrTest, DefaultConstructorInitializesToNullptr) {
@@ -146,15 +148,19 @@ TEST(IntrusivePtrTest, FactoryConstructionWorks) {
   auto default_obj = make_intrusive_ptr<RefCountedType>();
   EXPECT_EQ(default_obj->count(), 1);
   EXPECT_EQ(default_obj->id(), "<unknown>");
+  EXPECT_EQ(default_obj->some_flag(), false);
 
   auto ptr = make_intrusive_ptr<RefCountedType>("NewValue");
   EXPECT_EQ(ptr->count(), 1);
   EXPECT_EQ(ptr->id(), "NewValue");
+  EXPECT_EQ(ptr->some_flag(), false);
 
-  auto another_ptr = make_intrusive_ptr<RefCountedType>("AnotherValue", 10);
-  EXPECT_EQ(another_ptr->count(), 11);
+  auto another_ptr = make_intrusive_ptr<RefCountedType>("AnotherValue", true);
+  EXPECT_EQ(another_ptr->count(), 1);
   EXPECT_EQ(another_ptr->id(), "AnotherValue");
+  EXPECT_EQ(another_ptr->some_flag(), true);
   EXPECT_NE(ptr.get(), another_ptr.get());
+  // All objects will be destroyed when the intrusive_pointers go out of scope.
 }
 
 TEST(IntrusivePtrTest, DestructorReducesCount) {
