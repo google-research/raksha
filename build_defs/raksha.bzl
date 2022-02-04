@@ -110,7 +110,7 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
     )
     native.cc_test(
         name = name,
-        srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:fact_test_driver_with_check_facts.cc"],
+        srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:fact_test_driver.cc"],
         args = [
             datalog_cxx_source_target_name,
             invert_arg,
