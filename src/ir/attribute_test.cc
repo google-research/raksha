@@ -21,12 +21,12 @@ namespace raksha::ir {
 namespace {
 
 class IntAttributeTest
-    : public testing::TestWithParam<std::pair<int, const char*>> {};
+    : public testing::TestWithParam<std::pair<int64_t, absl::string_view>> {};
 
 TEST_P(IntAttributeTest, KindAndToStringWorks) {
   const auto& [value, string_rep] = GetParam();
-  auto int_attribute = IntAttribute::Create(value);
-  EXPECT_EQ(int_attribute->kind(), AttributeBase::Kind::kInt);
+  auto int_attribute = Int64Attribute::Create(value);
+  EXPECT_EQ(int_attribute->kind(), AttributeBase::Kind::kInt64);
   EXPECT_EQ(int_attribute->ToString(), string_rep);
 }
 
@@ -39,9 +39,9 @@ class StringAttributeTest : public testing::TestWithParam<absl::string_view> {};
 
 TEST_P(StringAttributeTest, KindAndToStringWorks) {
   const auto& value = GetParam();
-  auto int_attribute = StringAttribute::Create(value);
-  EXPECT_EQ(int_attribute->kind(), AttributeBase::Kind::kString);
-  EXPECT_EQ(int_attribute->ToString(), value);
+  auto string_attribute = StringAttribute::Create(value);
+  EXPECT_EQ(string_attribute->kind(), AttributeBase::Kind::kString);
+  EXPECT_EQ(string_attribute->ToString(), value);
 }
 
 INSTANTIATE_TEST_SUITE_P(StringAttributeTest, StringAttributeTest,

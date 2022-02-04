@@ -26,7 +26,7 @@ namespace raksha::ir {
 // Base class for attributes associated with IR elements.
 class AttributeBase : public RefCounted<AttributeBase> {
  public:
-  enum class Kind { kInt, kString };
+  enum class Kind { kInt64, kString };
   AttributeBase(Kind kind) : kind_(kind) {}
   virtual ~AttributeBase() {}
 
@@ -39,10 +39,10 @@ class AttributeBase : public RefCounted<AttributeBase> {
 
 using Attribute = intrusive_ptr<const AttributeBase>;
 
-class IntAttribute : public AttributeBase {
+class Int64Attribute : public AttributeBase {
  public:
   static Attribute Create(int value) {
-    return Attribute(new IntAttribute(value));
+    return Attribute(new Int64Attribute(value));
   }
 
   int value() const { return value_; }
@@ -52,9 +52,9 @@ class IntAttribute : public AttributeBase {
   }
 
  private:
-  IntAttribute(int value) : AttributeBase(Kind::kInt), value_(value) {}
+  Int64Attribute(int64_t value) : AttributeBase(Kind::kInt64), value_(value) {}
 
-  int value_;
+  int64_t value_;
 };
 
 class StringAttribute : public AttributeBase {
