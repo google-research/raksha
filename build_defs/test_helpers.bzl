@@ -39,7 +39,11 @@ def extracted_datalog_string_test(
             "-std=c++17",
             "-fexceptions",
         ],
-        features = ["-use_header_modules"],  # Incompatible with -fexceptions.
+        # Turn off header modules, as Google precompiled headers use
+        # -fno-exceptions, and combining a precompiled header with
+        # -fno-exceptions with a binary that uses -fexceptions makes Clang
+        # upset.
+        features = ["-use_header_modules"],
         deps = [
             dl_string_lib,
             "//src/common/logging:logging",
@@ -88,7 +92,11 @@ def extracted_datalog_string_test(
             "-fexceptions",
             "-Iexternal/souffle/src/include/souffle",
         ],
-        features = ["-use_header_modules"],  # Incompatible with -fexceptions.
+        # Turn off header modules, as Google precompiled headers use
+        # -fno-exceptions, and combining a precompiled header with
+        # -fno-exceptions with a binary that uses -fexceptions makes Clang
+        # upset.
+        features = ["-use_header_modules"],
         linkopts = ["-pthread"],
         deps = [
             name + "_souffle_lib",
