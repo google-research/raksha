@@ -56,12 +56,14 @@ class NamedValue {
   std::string name_;
 };
 
+// Indicates the argument to a block.
 class BlockArgument : public NamedValue<Block> {
  public:
   using NamedValue<Block>::NamedValue;
   const Block& block() const { return element(); }
 };
 
+// Indicates the result of an operation.
 class OperationResult : public NamedValue<Operation> {
  public:
   using NamedValue<Operation>::NamedValue;

@@ -113,22 +113,18 @@ TEST(NewIrTest, TrySomeStuff) {
             // ir::Predicate instance.
             const Operation& predicate_op = builder.AddOperation(
                 *constant_op,
-                {{"predicate",
-                  AttributeFactory::MakeStringAttribute("userSelection")}},
-                {});
+                {{"predicate", StringAttribute::Create("userSelection")}}, {});
             Value userSelection =
                 Value(value::OperationResult(predicate_op, "result"));
 
             const Operation& bar_x_op = builder.AddOperation(
-                *read_field_op,
-                {{"field", AttributeFactory::MakeStringAttribute("x")}},
+                *read_field_op, {{"field", StringAttribute::Create("x")}},
                 {
                     {"input", bar},
                 });
 
             const Operation& bar_y_op = builder.AddOperation(
-                *read_field_op,
-                {{"field", AttributeFactory::MakeStringAttribute("y")}},
+                *read_field_op, {{"field", StringAttribute::Create("y")}},
                 {
                     {"input", bar},
                 });

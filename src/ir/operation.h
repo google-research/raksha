@@ -42,6 +42,7 @@ class Operation {
   const Operator& op() const { return *op_; }
   const Block* parent() const { return parent_; }
   const NamedValueMap& inputs() const { return inputs_; }
+  const NamedAttributeMap& attributes() const { return attributes_; }
 
   // Declaring the destructor explicitly and implementing it in the cc file to
   // avoid circular include dependency between Module and Operation.

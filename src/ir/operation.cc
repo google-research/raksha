@@ -15,7 +15,9 @@
 //----------------------------------------------------------------------------
 #include <vector>
 
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
+#include "src/ir/attribute.h"
 #include "src/ir/module.h"
 
 namespace raksha::ir {
@@ -24,15 +26,19 @@ Operation::~Operation() {}
 
 std::string Operation::ToString() const {
   constexpr absl::string_view kOperationFormat = "%s [%s](%s)";
-  std::string attributes_string;
-  for (const auto& [name, attribute] : attributes_) {
-    absl::StrAppendFormat(&attributes_string, "%s: %s, ", name,
-                          attribute->ToString());
-  }
-  std::string inputs_string;
-  for (const auto& [name, input] : inputs_) {
-    absl::StrAppendFormat(&inputs_string, "%s: %s, ", name, input.ToString());
-  }
+  std::string attributes_string = absl::StrJoin(
+      attributes_, ", ",
+      [](std::string* out, const NamedAttributeMap::value_type& v) {
+        const auto& [name, attribute] = v;
+        absl::StrAppend(out, name, ": ", attribute->ToString());
+      });
+
+  std::string inputs_string = absl::StrJoin(
+      inputs_, ", ", [](std::string* out, const NamedValueMap::value_type& v) {
+        const auto& [name, value] = v;
+        absl::StrAppend(out, name, ": ", value.ToString());
+      });
+
   return absl::StrFormat(kOperationFormat, op_->name(), attributes_string,
                          inputs_string);
 }
