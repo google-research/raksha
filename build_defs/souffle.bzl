@@ -107,6 +107,11 @@ def souffle_cc_library(
             # don't care about non-critical issues in it. Turn off warnings.
             "-w",
         ],
+        # Turn off header modules, as Google precompiled headers use
+        # -fno-exceptions, and combining a precompiled header with
+        # -fno-exceptions with a binary that uses -fexceptions makes Clang
+        # upset.
+        features = ["-use_header_modules"],
         defines = [
             "__EMBEDDED_SOUFFLE__",
         ],
@@ -140,6 +145,11 @@ def souffle_cc_binary(
             # don't care about non-critical issues in it. Turn off warnings.
             "-w",
         ],
+        # Turn off header modules, as Google precompiled headers use
+        # -fno-exceptions, and combining a precompiled header with
+        # -fno-exceptions with a binary that uses -fexceptions makes Clang
+        # upset.
+        features = ["-use_header_modules"],
         deps = ["@souffle//:souffle_include_lib"],
         visibility = visibility,
     )
