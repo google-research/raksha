@@ -76,6 +76,23 @@ cc_test(
 )
 
 cc_library(
+    name = "operator",
+    hdrs = ["operator.h"],
+    deps = [
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "operator_test",
+    srcs = ["operator_test.cc"],
+    deps = [
+        ":operator",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
     name = "ir",
     srcs = [
         "access_path_root.cc",
