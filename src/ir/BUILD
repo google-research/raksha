@@ -57,8 +57,6 @@ cc_test(
 )
 
 cc_library(
-<<<<<<< HEAD
-=======
     name = "data_decl",
     hdrs = ["data_decl.h"],
     deps = [
@@ -78,7 +76,6 @@ cc_test(
 )
 
 cc_library(
->>>>>>> a2d4ba5 (Cleanup DataDecl API and add unit tests.)
     name = "ir",
     srcs = [
         "access_path_root.cc",
