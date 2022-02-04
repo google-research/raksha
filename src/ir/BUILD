@@ -15,11 +15,11 @@
 #
 #-------------------------------------------------------------------------------
 
+load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
+
 licenses(["notice"])
 
 package(default_visibility = ["//src:__subpackages__"])
-
-load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
 
 cc_library(
     name = "new_ir",
@@ -34,6 +34,25 @@ cc_library(
     deps = [
         "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_library(
+    name = "attribute",
+    hdrs = ["attribute.h"],
+    deps = [
+        "//src/utils:intrusive_ptr",
+        "@absl//absl/container:flat_hash_map",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "attribute_test",
+    srcs = ["attribute_test.cc"],
+    deps = [
+        ":attribute",
+        "//src/common/testing:gtest",
     ],
 )
 
