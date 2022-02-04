@@ -29,7 +29,7 @@ class Operator {
  public:
   Operator(absl::string_view name) : name_(name) {}
 
-  const std::string& name() const { return name_; }
+  absl::string_view name() const { return name_; }
 
  private:
   std::string name_;

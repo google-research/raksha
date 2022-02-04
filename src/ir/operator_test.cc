@@ -23,7 +23,7 @@ namespace {
 class OperatorTest : public testing::TestWithParam<absl::string_view> {};
 
 TEST_P(OperatorTest, NameIsCorrectlySet) {
-  const auto& name = GetParam();
+  absl::string_view name = GetParam();
   Operator op(name);
   EXPECT_EQ(op.name(), name);
 }
