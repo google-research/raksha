@@ -72,7 +72,7 @@ class Block {
   // The type for a collection of `Operation` instances.
   using OperationList = std::vector<std::unique_ptr<Operation>>;
 
-  Block() = default;
+  Block() : module_(nullptr) {}
 
   // Disable copy (and move) semantics.
   Block(const Block&) = delete;
