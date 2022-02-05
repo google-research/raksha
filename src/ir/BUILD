@@ -56,6 +56,27 @@ cc_test(
 )
 
 cc_library(
+    name = "block_builder",
+    hdrs = ["block_builder.h"],
+    deps = [
+        ":module",
+        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_test(
+    name = "block_builder_test",
+    srcs = [
+        "block_builder_test.cc",
+    ],
+    deps = [
+        ":block_builder",
+        ":ir_context",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
     name = "data_decl",
     hdrs = ["data_decl.h"],
     deps = [
