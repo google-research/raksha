@@ -1,8 +1,8 @@
 // Used to ensure that a test with a duplicated test case name fails, even if both cases succeed.
 // This prevents us from having spurious successes due to a failing test having the same name as
 // a passing one.
-#include "taint.dl"
-#include "fact_test_helper.dl"
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/fact_test_helper.dl"
 
 TEST_CASE("one_equal_to_one") :- 1 = 1.
 TEST_CASE("one_equal_to_one") :- 2 = 2.

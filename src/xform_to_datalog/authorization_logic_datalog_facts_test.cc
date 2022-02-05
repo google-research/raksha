@@ -30,6 +30,16 @@ namespace fs = std::filesystem;
 
 namespace raksha::xform_to_datalog {
 
+// If authorization logic is disabled, just run a single, always-true dummy
+// test.
+#ifdef DISABLE_AUTHORIZATION_LOGIC
+
+TEST(Dummy, Dummy) {
+  ASSERT_EQ(1, 1);
+}
+
+#else
+
 static const std::vector<absl::string_view> programs = {"simple_auth_logic", "empty_auth_logic", "says_owns_tag"};
 
 class AuthorizationLogicDatalogFactsTest : 
@@ -65,5 +75,7 @@ TEST(AuthorizationLogicDatalogFactsTest, InvalidFileReturnsNullOpt) {
   auto auth_facts = AuthorizationLogicDatalogFacts::create("blah", "blah");
   EXPECT_EQ(auth_facts, std::nullopt);
 }
+
+#endif
 
 }  // namespace raksha::xform_to_datalog

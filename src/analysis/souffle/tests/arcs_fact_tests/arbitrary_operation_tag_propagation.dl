@@ -1,7 +1,7 @@
-#include "taint.dl"
-#include "fact_test_helper.dl"
-#include "integrity_tag_prop_helper.dl"
-#include "confidentiality_tag_prop_helper.dl"
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/fact_test_helper.dl"
+#include "src/analysis/souffle/tests/arcs_fact_tests/integrity_tag_prop_helper.dl"
+#include "src/analysis/souffle/tests/arcs_fact_tests/confidentiality_tag_prop_helper.dl"
 
 isAccessPath("result").
 isAccessPath("in1").

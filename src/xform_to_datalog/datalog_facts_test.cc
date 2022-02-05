@@ -23,6 +23,16 @@
 
 namespace raksha::xform_to_datalog {
 
+// If authorization logic is disabled, just run a single, always-true dummy
+// test.
+#ifdef DISABLE_AUTHORIZATION_LOGIC
+
+TEST(Dummy, Dummy) {
+  ASSERT_EQ(1, 1);
+}
+
+#else
+
 const std::string path = "src/xform_to_datalog/testdata";
 
 class DatalogFactsTest
@@ -60,8 +70,8 @@ INSTANTIATE_TEST_SUITE_P(
                             "empty_auth_logic")),
                         R"(// GENERATED FILE, DO NOT EDIT!
 
-#include "taint.dl"
-#include "may_will.dl"
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/may_will.dl"
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
@@ -107,8 +117,8 @@ grounded_dummy("dummy_var").
                             "simple_auth_logic")),
                         R"(// GENERATED FILE, DO NOT EDIT!
 
-#include "taint.dl"
-#include "may_will.dl"
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/may_will.dl"
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
@@ -152,5 +162,7 @@ says_cond1("prin1", "foo").
 grounded_dummy("dummy_var").
 
 )")));
+
+#endif
 
 }  // namespace raksha::xform_to_datalog

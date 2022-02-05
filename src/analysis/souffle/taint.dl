@@ -17,11 +17,11 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_TAINT_DL_
 #define SRC_ANALYSIS_SOUFFLE_TAINT_DL_
 
-#include "authorization_logic.dl"
-#include "check_predicate.dl"
-#include "dataflow_graph.dl"
-#include "tags.dl"
-#include "operations.dl"
+#include "src/analysis/souffle/authorization_logic.dl"
+#include "src/analysis/souffle/check_predicate.dl"
+#include "src/analysis/souffle/dataflow_graph.dl"
+#include "src/analysis/souffle/tags.dl"
+#include "src/analysis/souffle/operations.dl"
 
 //-----------------------------------------------------------------------------
 // Relation Declarations

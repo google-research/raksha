@@ -47,9 +47,9 @@ class RefCounted {
   RefCounted& operator=(const RefCounted&) = delete;
 
  private:
-  void Retain() { count_.FetchAdd(1); }
+  void Retain() const { count_.FetchAdd(1); }
 
-  void Release() {
+  void Release() const {
     size_t old = count_.FetchSub(1);
     if (old == 1) {
       delete this;
@@ -61,7 +61,9 @@ class RefCounted {
 
  private:
   // So that it can call `Retain` and `Release`.
-  friend class RefCountManager<T>;
+  template <typename U>
+  friend class RefCountManager;
+
   mutable RefCounter count_;
 };
 
