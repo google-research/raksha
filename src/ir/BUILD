@@ -21,18 +21,15 @@ licenses(["notice"])
 
 package(default_visibility = ["//src:__subpackages__"])
 
-cc_library(
-    name = "new_ir",
-    hdrs = [
-        "block.h",
-        "data_decl.h",
-        "operation.h",
-        "operator.h",
-        "value.h",
-    ],
+cc_test(
+    name = "new_ir_test",
+    srcs = ["new_ir_test.cc"],
     deps = [
-        "//src/ir/types",
-        "@absl//absl/container:flat_hash_map",
+        ":block_builder",
+        ":ir_context",
+        ":module",
+        ":operator",
+        "//src/common/testing:gtest",
     ],
 )
 
