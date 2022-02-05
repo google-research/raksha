@@ -16,9 +16,7 @@
 #include "src/ir/ssa_names.h"
 
 #include "src/common/testing/gtest.h"
-#include "src/ir/block.h"
-#include "src/ir/data_decl.h"
-#include "src/ir/operation.h"
+#include "src/ir/module.h"
 #include "src/ir/operator.h"
 
 namespace raksha::ir {
