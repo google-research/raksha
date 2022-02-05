@@ -75,6 +75,25 @@ cc_test(
 )
 
 cc_library(
+    name = "ir_context",
+    hdrs = ["ir_context.h"],
+    deps = [
+        ":operator",
+        "//src/ir/types",
+        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_test(
+    name = "ir_context_test",
+    srcs = ["ir_context_test.cc"],
+    deps = [
+        ":ir_context",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
     name = "operator",
     hdrs = ["operator.h"],
     deps = [
