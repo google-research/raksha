@@ -16,8 +16,6 @@
 #ifndef SRC_IR_DATA_DECL_H_
 #define SRC_IR_DATA_DECL_H_
 
-#include <vector>
-
 #include "absl/container/flat_hash_map.h"
 #include "src/ir/types/type.h"
 
@@ -25,9 +23,12 @@ namespace raksha::ir {
 
 // A data declaration, which corresponds to an input or output of a block.
 class DataDecl {
-public:
- DataDecl(absl::string_view name, types::Type type)
-     : name_(name), type_(std::move(type)) {}
+ public:
+  DataDecl(absl::string_view name, types::Type type)
+      : name_(name), type_(std::move(type)) {}
+
+  absl::string_view name() const { return name_; }
+  const types::Type& type() const { return type_; }
 
  private:
   std::string name_;
@@ -38,11 +39,12 @@ class DataDeclCollection {
  public:
   // Adds a declaration to the collection. Fails if there is already a
   // declaration with the given name.
-  void AddDecl(absl::string_view name, types::Type type) {
+  const DataDecl& AddDecl(absl::string_view name, types::Type type) {
     auto insertion_result = decls_.insert(
         {std::string(name), std::make_unique<DataDecl>(name, std::move(type))});
     CHECK(insertion_result.second)
-        << "Adding a duplicate declaration for " << name << ".";
+        << "Adding a duplicate declaration for `" << name << "`.";
+    return *(insertion_result.first)->second.get();
   }
 
   const DataDecl* FindDecl(absl::string_view name) {

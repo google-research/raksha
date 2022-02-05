@@ -57,6 +57,25 @@ cc_test(
 )
 
 cc_library(
+    name = "data_decl",
+    hdrs = ["data_decl.h"],
+    deps = [
+        "//src/ir/types",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "data_decl_test",
+    srcs = ["data_decl_test.cc"],
+    deps = [
+        ":data_decl",
+        "//src/common/testing:gtest",
+        "//src/ir/types",
+    ],
+)
+
+cc_library(
     name = "ir",
     srcs = [
         "access_path_root.cc",
