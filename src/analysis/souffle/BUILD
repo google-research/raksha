@@ -13,8 +13,13 @@ cc_test(
     name = "cpp_interface_test",
     srcs = ["cpp_interface_test.cc"],
     copts = [
+        "-fexceptions",
         "-Iexternal/souffle/src/include/souffle",
     ],
+    # Turn off header modules, as Google precompiled headers use
+    # -fno-exceptions, and combining a precompiled header with -fno-exceptions
+    # with a binary that uses -fexceptions makes Clang upset.
+    features = ["-use_header_modules"],
     linkopts = ["-pthread"],
     deps = [
         ":taint_dl",
@@ -66,5 +71,6 @@ exports_files([
     "fact_test_helper.dl",
     "operations.dl",
     "tags.dl",
+    "taint.dl",
     "may_will.dl",
 ])

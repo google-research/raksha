@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #-----------------------------------------------------------------------------
+
+licenses(["notice"])
+
 load("@build_bazel_rules_nodejs//:index.bzl", "nodejs_binary")
 
 package(default_visibility = ["//visibility:public"])
@@ -24,5 +27,5 @@ nodejs_binary(
         "manifest2proto-cli.cjs",
         "//third_party/arcs/proto:proto_files",
     ],
-    entry_point = ":manifest2proto-cli.cjs",
+    entry_point = "manifest2proto-cli.cjs",
 )

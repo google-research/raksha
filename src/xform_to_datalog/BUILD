@@ -19,8 +19,13 @@ licenses(["notice"])
 
 cc_library(
     name = "authorization_logic",
+    srcs = ["authorization_logic.cc"],
     hdrs = ["authorization_logic.h"],
-    deps = ["//rust/tools/authorization-logic:authorization_logic_lib"],
+    deps = [
+        "//rust/tools/authorization-logic:authorization_logic_lib",
+        "//src/common/logging",
+        "@absl//absl/strings",
+    ],
 )
 
 cc_test(
@@ -29,7 +34,6 @@ cc_test(
     data = ["//src/xform_to_datalog/testdata:auth_logic"],
     deps = [
         ":authorization_logic",
-        "//src/common/logging",
         "//src/common/testing:gtest",
         "//src/test_utils:utils",
     ],
@@ -53,7 +57,6 @@ cc_test(
     data = ["//src/xform_to_datalog/testdata:auth_logic"],
     deps = [
         ":authorization_logic_datalog_facts",
-        "//src/common/logging",
         "//src/common/testing:gtest",
         "//src/test_utils:utils",
         "@absl//absl/strings",
@@ -68,6 +71,7 @@ cc_library(
         ":manifest_datalog_facts",
         "//src/ir",
         "//third_party/arcs/proto:manifest_cc_proto",
+        "@absl//absl/strings:str_format",
     ],
 )
 
@@ -76,8 +80,11 @@ cc_test(
     srcs = ["datalog_facts_test.cc"],
     data = ["//src/xform_to_datalog/testdata:auth_logic"],
     deps = [
+        ":authorization_logic_datalog_facts",
         ":datalog_facts",
+        ":manifest_datalog_facts",
         "//src/common/testing:gtest",
+        "//src/ir",
         "//src/test_utils:utils",
     ],
 )
@@ -88,10 +95,12 @@ cc_library(
     hdrs = ["manifest_datalog_facts.h"],
     deps = [
         "//src/ir",
-        "//src/ir/proto:particle_spec",
         "//src/ir/proto:system_spec",
         "//src/ir/proto:types",
+        "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",
+        "@absl//absl/container:flat_hash_map",
+        "@absl//absl/strings:str_format",
     ],
 )
 
@@ -101,7 +110,11 @@ cc_test(
     deps = [
         ":manifest_datalog_facts",
         "//src/common/testing:gtest",
+        "//src/ir",
+        "//src/ir/proto:system_spec",
+        "//src/ir/types",
         "//src/utils:ranges",
+        "@absl//absl/strings",
     ],
 )
 
@@ -109,9 +122,13 @@ cc_binary(
     name = "generate_datalog_program",
     srcs = ["generate_datalog_program.cc"],
     deps = [
+        ":authorization_logic_datalog_facts",
         ":datalog_facts",
+        ":manifest_datalog_facts",
         "//src/common/logging",
+        "//src/ir",
         "//src/ir/proto:system_spec",
+        "//src/ir/types",
         "@absl//absl/flags:flag",
         "@absl//absl/flags:parse",
         "@absl//absl/flags:usage",

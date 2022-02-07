@@ -19,8 +19,8 @@
 //    foo: writes h
 //  P2
 //    foo: reads h
-#include "taint.dl"
-#include "fact_test_helper.dl"
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/fact_test_helper.dl"
 
 says_hasTag("P1", "R.P1.foo.a", "P1", "userSelection").
 says_hasTag("P1", "R.P1.foo.b", "P1", "screenContent").

@@ -59,8 +59,39 @@ bazel_run() {
   fi
 }
 
+check_build_files_for_licenses_rule() {
+  # Note: We pipe the result of grep into echo to "swallow" the exit code of
+  # grep, as we do not want it to keep going whether grep succeeds or fails.
+  BUILD_FILES_WITHOUT_LICENSES=$(fgrep -L 'licenses(' $(find . -name BUILD) | grep -v gcb | echo)
+  NUM_BUILD_FILES_WITHOUT_LICENSES=$(echo "$BUILD_FILES_WITHOUT_LICENSES" | wc -w)
+  if [ "$NUM_BUILD_FILES_WITHOUT_LICENSES" -ne 0 ]; then
+    echo "Found build files without licenses:"
+    echo "$BUILD_FILES_WITHOUT_LICENSES"
+    return 1
+  fi
+}
+
+check_copyright() {
+  # TODO(#285): Enforce copyright header on more files.
+  ENFORCE_COPYRIGHT_FILES=$(find . -name BUILD)
+  FILES_WITHOUT_COPYRIGHT=$(grep -L 'Copyright 20[0-9][0-9] Google LLC' $ENFORCE_COPYRIGHT_FILES | echo)
+  NUM_FILES_WITHOUT_COPYRIGHT=$(echo $FILES_WITHOUT_COPYRIGHT | wc -w)
+  if [ "$NUM_FILES_WITHOUT_COPYRIGHT" -ne 0 ]; then
+    echo "Found files without copyright header:"
+    echo "$FILES_WITHOUT_COPYRIGHT"
+    return 1
+  fi
+}
+
 # Verify that all Bazel files are formatted correctly.
 $BUILDIFIER -mode=check -r `pwd`
+
+# Verify that all Bazel build files have a license rule. Exclude files in the
+# gcb directory.
+check_build_files_for_licenses_rule
+
+# Verify that files have copyright header.
+check_copyright
 
 # Verifies that the following targets build fine:
 #  - Arcs parser and proto works.

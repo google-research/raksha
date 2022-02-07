@@ -1,8 +1,8 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_
 #define SRC_ANALYSIS_SOUFFLE_ANALYZE_TAG_CHECKS_TEST_HELPER_DL_
 
-#include "authorization_logic.dl"
-#include "taint.dl"
+#include "src/analysis/souffle/authorization_logic.dl"
+#include "src/analysis/souffle/taint.dl"
 
 .type TestAspectName <: symbol
 
