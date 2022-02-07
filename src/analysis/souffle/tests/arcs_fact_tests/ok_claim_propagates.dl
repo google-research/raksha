@@ -22,8 +22,8 @@
 //    bar: reads h2
 //
 // The below fact-based test is hand-derived from the above Arcs manifest test.
-#include "taint.dl"
-#include "fact_test_helper.dl"
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/fact_test_helper.dl"
 
 says_hasTag("P1", "R.P1.foo", "P1", "userSelection").
 edge("R.P1.foo", "R.h1.Foo").

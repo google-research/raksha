@@ -13,28 +13,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_IR_OPERATOR_H_
-#define SRC_IR_OPERATOR_H_
+#include "src/ir/operator.h"
 
-#include <string>
-
-#include "absl/strings/string_view.h"
+#include "src/common/testing/gtest.h"
 
 namespace raksha::ir {
+namespace {
 
-// Signature of an operator. An operator could be simple operators (e.g., `+`,
-// `-`) or complex operators (e.g., particle, function) that is compose of other
-// operations.
-class Operator {
- public:
-  Operator(absl::string_view name) : name_(name) {}
+class OperatorTest : public testing::TestWithParam<absl::string_view> {};
 
-  absl::string_view name() const { return name_; }
+TEST_P(OperatorTest, NameIsCorrectlySet) {
+  absl::string_view name = GetParam();
+  Operator op(name);
+  EXPECT_EQ(op.name(), name);
+}
 
- private:
-  std::string name_;
-};
+INSTANTIATE_TEST_SUITE_P(OperatorTest, OperatorTest,
+                         testing::Values("core.choose", "core.constant",
+                                         "arcs.make_particle"));
 
+}  // namespace
 }  // namespace raksha::ir
-
-#endif  // SRC_IR_OPERATOR_H_

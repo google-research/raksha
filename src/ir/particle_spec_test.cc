@@ -16,7 +16,7 @@
 
 #include "src/ir/particle_spec.h"
 
-#include <google/protobuf/text_format.h>
+#include "google/protobuf/text_format.h"
 
 #include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"

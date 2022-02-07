@@ -56,8 +56,8 @@ class DatalogFacts {
   static constexpr char kDatalogFileFormat[] =
       R"(// GENERATED FILE, DO NOT EDIT!
 
-#include "taint.dl"
-#include "may_will.dl"
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/may_will.dl"
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)

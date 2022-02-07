@@ -35,7 +35,7 @@ def raksha_policy_check(name, src, visibility = None):
         name = splitter_target,
         srcs = [src],
         outs = [arcs_file, auth_file],
-        cmd = "csplit --prefix=part $< '/^//[ \t]*__AUTH_LOGIC__[ \t]*$$/' " +
+        cmd = "csplit -f part $< '/^//[ \t]*__AUTH_LOGIC__[ \t]*$$/' " +
               "&& cp part00 $(location %s) && cp part01 $(location %s)" %
               (arcs_file, auth_file),
     )
@@ -116,8 +116,14 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
             invert_arg,
         ],
         copts = [
+            "-fexceptions",
             "-Iexternal/souffle/src/include/souffle",
         ],
+        # Turn off header modules, as Google precompiled headers use
+        # -fno-exceptions, and combining a precompiled header with
+        # -fno-exceptions with a binary that uses -fexceptions makes Clang
+        # upset.
+        features = ["-use_header_modules"],
         linkopts = ["-pthread"],
         deps = [
             "@souffle//:souffle_include_lib",
