@@ -15,11 +15,11 @@
 #
 #-------------------------------------------------------------------------------
 
+load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
+
 licenses(["notice"])
 
 package(default_visibility = ["//src:__subpackages__"])
-
-load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
 
 cc_library(
     name = "new_ir",
@@ -34,6 +34,61 @@ cc_library(
     deps = [
         "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_library(
+    name = "attribute",
+    hdrs = ["attribute.h"],
+    deps = [
+        "//src/utils:intrusive_ptr",
+        "@absl//absl/container:flat_hash_map",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "attribute_test",
+    srcs = ["attribute_test.cc"],
+    deps = [
+        ":attribute",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
+    name = "data_decl",
+    hdrs = ["data_decl.h"],
+    deps = [
+        "//src/ir/types",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "data_decl_test",
+    srcs = ["data_decl_test.cc"],
+    deps = [
+        ":data_decl",
+        "//src/common/testing:gtest",
+        "//src/ir/types",
+    ],
+)
+
+cc_library(
+    name = "operator",
+    hdrs = ["operator.h"],
+    deps = [
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "operator_test",
+    srcs = ["operator_test.cc"],
+    deps = [
+        ":operator",
+        "//src/common/testing:gtest",
     ],
 )
 
