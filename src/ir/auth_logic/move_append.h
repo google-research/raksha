@@ -21,14 +21,11 @@
 
 namespace raksha::ir::auth_logic {
 
- template <typename T> 
- void MoveAppend(std::vector<T>& dst, std::vector<T>&& src) {
-   dst.insert(
-     dst.end(), 
-     std::make_move_iterator(src.begin()), 
-     std::make_move_iterator(src.end()));
- }
+template <typename T>
+void MoveAppend(std::vector<T>& dst, std::vector<T>&& src) {
+  dst.insert(dst.end(), std::make_move_iterator(src.begin()),
+             std::make_move_iterator(src.end()));
+}
 
-} // namespace raksha::ir::auth_logic
-#endif //SRC_IR_AUTH_LOGIC_MOVE_APPEND_H_
-
+}  // namespace raksha::ir::auth_logic
+#endif  // SRC_IR_AUTH_LOGIC_MOVE_APPEND_H_

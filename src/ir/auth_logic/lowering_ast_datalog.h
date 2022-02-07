@@ -154,9 +154,9 @@ class LoweringToDatalogPass {
                               std::vector<std::string> new_args,
                               const Predicate& predicate) {
     std::string new_name = absl::StrCat(std::move(modifier), predicate.name());
-    // This seemingly pointless line is needed to help C++ figure out the type 
+    // This seemingly pointless line is needed to help C++ figure out the type
     // of predicate.args() when it is passed to MoveAppend:
-    std::vector<std::string> pred_args = std::move(predicate.args()); 
+    std::vector<std::string> pred_args = std::move(predicate.args());
     MoveAppend(new_args, std::move(pred_args));
     Sign sign_copy = predicate.sign();
     return Predicate(new_name, std::move(new_args), sign_copy);
@@ -168,12 +168,12 @@ class LoweringToDatalogPass {
   // This is a common case in this translation because it is used for
   // `x says blah(args)` and `x canActAs y` and other constructions involving a
   // principal name.
-  Predicate PushPrincipal(absl::string_view modifier, const Principal& principal,
+  Predicate PushPrincipal(absl::string_view modifier,
+                          const Principal& principal,
                           const Predicate& predicate) {
-    return PushOntoPredicate(modifier, {principal.name()},
-                             predicate);
+    return PushOntoPredicate(modifier, {principal.name()}, predicate);
   }
-  
+
   Predicate AttributeToDLIR(const Attribute& attribute);
 
   // Translating an attribute results in two objects:
@@ -186,8 +186,9 @@ class LoweringToDatalogPass {
   // - If it appears on the LHS of an assertion, it explicitly has a speaker
   // - If it appears on the RHS of an assertion, it behaves semantically
   // like it has the same speaker as the head of the assertion.
-  DLIRAssertion SpokenAttributeToDLIR(const Principal& speaker, const Attribute& attribute);
-  
+  DLIRAssertion SpokenAttributeToDLIR(const Principal& speaker,
+                                      const Attribute& attribute);
+
   Predicate CanActAsToDLIR(const CanActAs& can_act_as);
 
   // In the same way that attributes are passed around with "CanActAs", so
@@ -234,7 +235,7 @@ class LoweringToDatalogPass {
   static inline Predicate kDummyPredicate =
       Predicate("grounded_dummy", {"dummy_var"}, kPositive);
 
-  DLIRAssertion QueryToDLIR(const Query& query); 
+  DLIRAssertion QueryToDLIR(const Query& query);
 
   std::vector<DLIRAssertion> QueriesToDLIR(const std::vector<Query>& queries);
 
