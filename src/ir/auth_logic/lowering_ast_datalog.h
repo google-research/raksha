@@ -28,6 +28,7 @@
 #include "src/common/logging/logging.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/auth_logic/datalog_ir.h"
+#include "src/ir/auth_logic/move_append.h"
 #include "src/utils/overloaded.h"
 
 namespace raksha::ir::auth_logic {
@@ -153,31 +154,27 @@ class LoweringToDatalogPass {
                               std::vector<std::string> new_args,
                               const Predicate& predicate) {
     std::string new_name = absl::StrCat(std::move(modifier), predicate.name());
-    new_args.insert(new_args.end(),
-                    std::make_move_iterator(predicate.args().begin()),
-                    std::make_move_iterator(predicate.args().end()));
+    // This seemingly pointless line is needed to help C++ figure out the type 
+    // of predicate.args() when it is passed to MoveAppend:
+    std::vector<std::string> pred_args = std::move(predicate.args()); 
+    MoveAppend(new_args, std::move(pred_args));
     Sign sign_copy = predicate.sign();
-    return Predicate(new_name, new_args, sign_copy);
+    return Predicate(new_name, std::move(new_args), sign_copy);
   }
 
-  // This function is an abbreviation for `PushPrin` where:
+  // This function is an abbreviation for `PushPrincipal` where:
   // - a modifier is added
   // - just one new principal is added as an argument.
   // This is a common case in this translation because it is used for
   // `x says blah(args)` and `x canActAs y` and other constructions involving a
   // principal name.
-  Predicate PushPrincipal(std::string modifier, const Principal& principal,
+  Predicate PushPrincipal(absl::string_view modifier, const Principal& principal,
                           const Predicate& predicate) {
-    return PushOntoPredicate(std::move(modifier), {principal.name()},
+    return PushOntoPredicate(modifier, {principal.name()},
                              predicate);
   }
-
-  Predicate AttributeToDLIR(const Attribute& attribute) {
-    // If attribute is `X pred(args...)` the following predicate is
-    // `pred(X, args...)`
-    return PushPrincipal(std::string(""), attribute.principal(),
-                         attribute.predicate());
-  }
+  
+  Predicate AttributeToDLIR(const Attribute& attribute);
 
   // Translating an attribute results in two objects:
   // - A predicate, this is the main result of the translation
@@ -189,14 +186,9 @@ class LoweringToDatalogPass {
   // - If it appears on the LHS of an assertion, it explicitly has a speaker
   // - If it appears on the RHS of an assertion, it behaves semantically
   // like it has the same speaker as the head of the assertion.
-  DLIRAssertion SpokenAttributeToDLIR(Principal speaker, Attribute attribute);
-
-  Predicate CanActAsToDLIR(const CanActAs& can_act_as) {
-    return Predicate("canActAs",
-                     {can_act_as.left_principal().name(),
-                      can_act_as.right_principal().name()},
-                     kPositive);
-  }
+  DLIRAssertion SpokenAttributeToDLIR(const Principal& speaker, const Attribute& attribute);
+  
+  Predicate CanActAsToDLIR(const CanActAs& can_act_as);
 
   // In the same way that attributes are passed around with "CanActAs", so
   // are other "CanActAs" facts. To implement this, the translation of
@@ -207,37 +199,20 @@ class LoweringToDatalogPass {
                                      const CanActAs& can_act_as);
 
   std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIRInner(
-      const Principal& speaker, const Predicate& predicate) {
-    std::vector<DLIRAssertion> pred_list = {};
-    return std::make_pair(predicate, pred_list);
-  }
+      const Principal& speaker, const Predicate& predicate);
 
   std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIRInner(
-      const Principal& speaker, const Attribute& attribute) {
-    std::vector<DLIRAssertion> pred_list = {
-        SpokenAttributeToDLIR(speaker, attribute)};
-    return std::make_pair(AttributeToDLIR(attribute), pred_list);
-  }
+      const Principal& speaker, const Attribute& attribute);
 
   std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIRInner(
-      const Principal& speaker, const CanActAs& canActAs) {
-    std::vector<DLIRAssertion> pred_list = {
-        SpokenCanActAsToDLIR(speaker, canActAs)};
-    return std::make_pair(CanActAsToDLIR(canActAs), pred_list);
-  }
+      const Principal& speaker, const CanActAs& canActAs);
 
   // The second return value represents 0 or 1 newly generated rules, so an
   // option might seem more intuitive. However, the interface that consumes
   // this needs to construct a vector anyway, so a vector is used in the
   // return type.
   std::pair<Predicate, std::vector<DLIRAssertion>> BaseFactToDLIR(
-      const Principal& speaker, const BaseFact& base_fact) {
-    return std::visit(
-        [this, &speaker](auto value) {
-          return BaseFactToDLIRInner(speaker, value);
-        },
-        base_fact.GetValue());
-  }
+      const Principal& speaker, const BaseFact& base_fact);
 
   // This can result in 0 or more new rules because the translation of
   // nested canSayFacts might result in more than 1 rule.
@@ -248,27 +223,10 @@ class LoweringToDatalogPass {
       const Principal& speaker, const Assertion& assertion);
 
   std::vector<DLIRAssertion> SaysAssertionToDLIR(
-      const SaysAssertion& says_assertion) {
-    std::vector<DLIRAssertion> ret = {};
-    for (const Assertion& assertion : says_assertion.assertions()) {
-      std::vector<DLIRAssertion> single_translation =
-          SingleSaysAssertionToDLIR(says_assertion.principal(), assertion);
-      ret.insert(ret.end(), std::make_move_iterator(single_translation.begin()),
-                 std::make_move_iterator(single_translation.end()));
-    }
-    return ret;
-  }
+      const SaysAssertion& says_assertion);
 
   std::vector<DLIRAssertion> SaysAssertionsToDLIR(
-      const std::vector<SaysAssertion>& says_assertions) {
-    std::vector<DLIRAssertion> ret = {};
-    for (const SaysAssertion& says_assertion : says_assertions) {
-      auto single_translation = SaysAssertionToDLIR(says_assertion);
-      ret.insert(ret.end(), std::make_move_iterator(single_translation.begin()),
-                 std::make_move_iterator(single_translation.end()));
-    }
-    return ret;
-  }
+      const std::vector<SaysAssertion>& says_assertions);
 
   // Queries are like predicates with arity 0. Souffle does not have predicates
   // with arity 0, so we represent them as having one argument which is a
@@ -276,40 +234,11 @@ class LoweringToDatalogPass {
   static inline Predicate kDummyPredicate =
       Predicate("grounded_dummy", {"dummy_var"}, kPositive);
 
-  DLIRAssertion QueryToDLIR(const Query& query) {
-    // The assertions that are normally generated during the translation
-    // from facts to dlir facts are not used for queries.
-    auto [main_pred, not_used] = FactToDLIR(query.principal(), query.fact());
-    main_pred = PushPrincipal("says_", query.principal(), main_pred);
-    Predicate lhs(query.name(), {"dummy_var"}, kPositive);
-    return DLIRAssertion(DLIRCondAssertion(lhs, {main_pred, kDummyPredicate}));
-  }
+  DLIRAssertion QueryToDLIR(const Query& query); 
 
-  std::vector<DLIRAssertion> QueriesToDLIR(const std::vector<Query>& queries) {
-    std::vector<DLIRAssertion> ret = {};
-    for (const Query& query : queries) {
-      ret.push_back(QueryToDLIR(query));
-    }
-    return ret;
-  }
+  std::vector<DLIRAssertion> QueriesToDLIR(const std::vector<Query>& queries);
 
-  DLIRProgram ProgToDLIR(const Program& program) {
-    auto dlir_assertions = SaysAssertionsToDLIR(program.says_assertions());
-    auto dlir_queries = QueriesToDLIR(program.queries());
-    // We need to add a fact that says the dummy variable used in queries is
-    // grounded.
-    DLIRAssertion dummy_assertion(kDummyPredicate);
-    dlir_assertions.insert(dlir_assertions.end(),
-                           std::make_move_iterator(dlir_queries.begin()),
-                           std::make_move_iterator(dlir_queries.end()));
-    dlir_assertions.push_back(dummy_assertion);
-
-    std::vector<std::string> outputs = {};
-    for (const Query& query : program.queries()) {
-      outputs.push_back(query.name());
-    }
-    return DLIRProgram(dlir_assertions, outputs);
-  }
+  DLIRProgram ProgToDLIR(const Program& program);
 
   uint64_t fresh_var_count_;
 };
