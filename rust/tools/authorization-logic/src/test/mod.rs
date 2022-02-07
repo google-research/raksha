@@ -23,3 +23,4 @@ mod test_dots_and_quotes;
 mod test_negation;
 mod test_multimic_no_overrides;
 mod test_multimic_overrides;
+mod test_parser;
