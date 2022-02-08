@@ -53,12 +53,14 @@ int main(int argc, char **argv) {
   }
 
   // Output headers we may need and declarations for relations.
-  // Note: Most other escaped strings in the file have turned into raw
-  // strings to improve readability. This one has been left because the
-  // amount of newlines in it makes it actually more readable as an escaped
-  // string.
-  datalog_test_stream << "#include \"src/analysis/souffle/taint.dl\"\n\n"
-                      << ".decl dummy(input_num: number)\n\n";
+  // Note: keep this as a raw string to make string substitutions easier when
+  // importing into Google's internal codebase.
+  datalog_test_stream <<
+    R"(#include "src/analysis/souffle/taint.dl"
+
+.decl dummy(input_num: number)
+
+)";
 
   // Get our datalog strings from the linked test and output the rules that
   // will check these snippets.
