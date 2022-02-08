@@ -66,6 +66,16 @@ cc_library(
 )
 
 cc_test(
+    name = "souffle_emitter_test",
+    srcs = ["souffle_emitter_test.cc"],
+    deps = [
+        ":souffle_emitter",
+        "//src/common/testing:gtest",
+    ],
+)
+
+
+cc_test(
     name = "ast_test",
     srcs = ["ast_test.cc"],
     deps = [

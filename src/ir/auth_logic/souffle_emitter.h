@@ -26,7 +26,7 @@ namespace raksha::ir::auth_logic {
 
 class SouffleEmitter {
  public:
-  std::string EmitProgram(DLIRProgram program) {
+  static std::string EmitProgram(DLIRProgram program) {
     SouffleEmitter emitter;
     std::string body = emitter.EmitProgramBody(program);
     std::string outputs = emitter.EmitOutputs(program);
@@ -52,7 +52,7 @@ class SouffleEmitter {
   Predicate PredToDeclaration(Predicate predicate) {
     std::vector<std::string> decl_args;
     for (int i = 0; i < predicate.args().size(); i++) {
-      decl_args.push_back("x" + std::to_string(i));
+      decl_args.push_back(absl::StrCat("x", std::to_string(i)));
     }
     return Predicate(predicate.name(), decl_args, kPositive);
   }
@@ -67,7 +67,7 @@ class SouffleEmitter {
   }
 
   std::string EmitAssertionInner(Predicate predicate) {
-    return EmitPredicate(predicate) + ".";
+    return absl::StrCat(EmitPredicate(predicate), ".");
   }
 
   std::string EmitAssertionInner(DLIRCondAssertion cond_assertion) {
@@ -96,7 +96,7 @@ class SouffleEmitter {
   std::string EmitOutputs(DLIRProgram program) {
     std::string ret;
     for (auto out : program.outputs()) {
-      absl::StrAppend(&ret, absl::StrCat(".output", out, "\n"));
+      absl::StrAppend(&ret, absl::StrCat(".output ", out, "\n"));
     }
     return ret;
   }
