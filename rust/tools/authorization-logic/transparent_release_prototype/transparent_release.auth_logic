@@ -6,7 +6,7 @@
 // generated authorization logic code to the authorization logic compiler,
 // then finally makes a query to the authorization logic compiler.
 //
-// The top level could be any of: A Bazil rule, a makefule target, or a binary 
+// The top level could be any of: A Bazel rule, a makefile target, or a binary 
 // with a CLI. Either way:
 //
 // Top Level Inputs:
