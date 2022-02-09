@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,15 +31,22 @@ TEST(IRContextTest, GetOperatorReturnsRegisteredOperator) {
   IRContext context;
   const Operator& registered_op =
       context.RegisterOperator(std::make_unique<Operator>("core.choose"));
-  const Operator* op = context.GetOperator("core.choose");
-  EXPECT_EQ(op->name(), "core.choose");
-  EXPECT_EQ(op, &registered_op);
+  const Operator& op = context.GetOperator("core.choose");
+  EXPECT_EQ(op.name(), "core.choose");
+  EXPECT_EQ(&op, &registered_op);
 }
 
-TEST(IRContextTest, GetOperatorReturnsNullptrForUnregisteredOperator) {
+TEST(IRContextTest, IsRegisteredOperatorReturnsCorrectValues) {
   IRContext context;
-  const Operator* op = context.GetOperator("core.choose");
-  EXPECT_EQ(op, nullptr);
+  context.RegisterOperator(std::make_unique<Operator>("core.choose"));
+  EXPECT_TRUE(context.IsRegisteredOperator("core.choose"));
+  EXPECT_FALSE(context.IsRegisteredOperator("core.nose"));
+}
+
+TEST(IRContextDeathTest, GetOperatorFailsForUnregisteredOperator) {
+  IRContext context;
+  EXPECT_DEATH({ context.GetOperator("core.choose"); },
+               "Looking up an unregistered operator 'core.choose'.");
 }
 
 TEST(IRContextDeathTest, DuplicateRegistrationCausesFailure) {

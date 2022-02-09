@@ -41,9 +41,16 @@ class IRContext {
 
   // Returns the Operator with a particular name. If there is no
   // operator with that name, returns nullptr.
-  const Operator *GetOperator(absl::string_view operators_name) const {
+  const Operator &GetOperator(absl::string_view operators_name) const {
     auto find_res = operators_.find(operators_name);
-    return (find_res != operators_.end()) ? find_res->second.get() : nullptr;
+    CHECK(find_res != operators_.end())
+        << "Looking up an unregistered operator '" << operators_name << "'.";
+    return *find_res->second;
+  }
+
+  // Returns true if the operator is registered with this context.
+  bool IsRegisteredOperator(absl::string_view operators_name) const {
+    return operators_.find(operators_name) != operators_.end();
   }
 
  private:
