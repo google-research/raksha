@@ -143,29 +143,6 @@ class LoweringToDatalogPass {
     return "x__" + std::to_string(++fresh_var_count_);
   }
 
-  // This function takes a `predicate` and creates a new predicate as follows:
-  //   - Prepend the `modifier` to the name of the given `predicate`.
-  //   - Prepend the given `args` to the original list of arguments of
-  //   `predicate`.
-  //
-  // This is used in a few places in the translation, for example, to translate
-  // "X says blah(args)" into "says_blah(X, args)".
-  Predicate PushOntoPredicate(absl::string_view modifier,
-                              std::vector<std::string> new_args,
-                              const Predicate& predicate);
-
-  // This function is an abbreviation for `PushPrincipal` where:
-  // - a modifier is added
-  // - just one new principal is added as an argument.
-  // This is a common case in this translation because it is used for
-  // `x says blah(args)` and `x canActAs y` and other constructions involving a
-  // principal name.
-  Predicate PushPrincipal(absl::string_view modifier,
-                          const Principal& principal,
-                          const Predicate& predicate);
-
-  Predicate AttributeToDLIR(const Attribute& attribute);
-
   // Translating an attribute results in two objects:
   // - A predicate, this is the main result of the translation
   // - An additional rule that allows attributes to be passed with canActAs
@@ -178,8 +155,6 @@ class LoweringToDatalogPass {
   // like it has the same speaker as the head of the assertion.
   DLIRAssertion SpokenAttributeToDLIR(const Principal& speaker,
                                       const Attribute& attribute);
-
-  Predicate CanActAsToDLIR(const CanActAs& can_act_as);
 
   // In the same way that attributes are passed around with "CanActAs", so
   // are other "CanActAs" facts. To implement this, the translation of

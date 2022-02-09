@@ -22,7 +22,14 @@
 
 namespace raksha::ir::auth_logic {
   
-Predicate LoweringToDatalogPass::PushOntoPredicate(absl::string_view modifier,
+// This function takes a `predicate` and creates a new predicate as follows:
+//   - Prepend the `modifier` to the name of the given `predicate`.
+//   - Prepend the given `args` to the original list of arguments of
+//   `predicate`.
+//
+// This is used in a few places in the translation, for example, to translate
+// "X says blah(args)" into "says_blah(X, args)".
+Predicate PushOntoPredicate(absl::string_view modifier,
                             std::vector<std::string> new_args,
                             const Predicate& predicate) {
   std::string new_name = absl::StrCat(std::move(modifier), predicate.name());
@@ -34,13 +41,19 @@ Predicate LoweringToDatalogPass::PushOntoPredicate(absl::string_view modifier,
   return Predicate(new_name, std::move(new_args), sign_copy);
 }
 
-Predicate LoweringToDatalogPass::PushPrincipal(absl::string_view modifier,
+// This function is an abbreviation for `PushPrincipal` where:
+// - a modifier is added
+// - just one new principal is added as an argument.
+// This is a common case in this translation because it is used for
+// `x says blah(args)` and `x canActAs y` and other constructions involving a
+// principal name.
+Predicate PushPrincipal(absl::string_view modifier,
                         const Principal& principal,
                         const Predicate& predicate) {
   return PushOntoPredicate(modifier, {principal.name()}, predicate);
 }
 
-Predicate LoweringToDatalogPass::AttributeToDLIR(const Attribute& attribute) {
+Predicate AttributeToDLIR(const Attribute& attribute) {
   // If attribute is `X pred(args...)` the following predicate is
   // `pred(X, args...)`
   return PushPrincipal(std::string(""), attribute.principal(),
@@ -82,7 +95,7 @@ DLIRAssertion LoweringToDatalogPass::SpokenAttributeToDLIR(
                                         std::move(speaker_says_x_pred)}));
 }
 
-Predicate LoweringToDatalogPass::CanActAsToDLIR(const CanActAs& can_act_as) {
+Predicate CanActAsToDLIR(const CanActAs& can_act_as) {
   return Predicate(
       "canActAs",
       {can_act_as.left_principal().name(), can_act_as.right_principal().name()},
