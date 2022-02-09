@@ -32,13 +32,11 @@ class SouffleEmitter {
     std::string outputs = emitter.EmitOutputs(program);
     std::string decls = emitter.EmitDeclarations();
     return absl::StrCat(std::move(body), "\n", std::move(outputs), "\n",
-                        std::move(decls));
+                        std::move(decls), "\n");
   }
 
  private:
-  SouffleEmitter()
-      : declarations_(
-            absl::btree_set<Predicate>()){};
+  SouffleEmitter() : declarations_(absl::btree_set<Predicate>()){};
 
   // This function produces a normalized version of predicates to
   // be used when generating declarations of the predicates. It replaces
@@ -95,25 +93,25 @@ class SouffleEmitter {
 
   std::string EmitOutputs(const DLIRProgram& program) {
     return absl::StrJoin(program.outputs(), "\n",
-        [](std::string *out, const std::string& prog_out){
-          return absl::StrAppend(out, absl::StrCat(".output ", prog_out));
-    });
+                         [](std::string* out, const std::string& prog_out) {
+                           return absl::StrAppend(
+                               out, absl::StrCat(".output ", prog_out));
+                         });
   }
 
   std::string EmitDeclaration(const Predicate& predicate) {
-    std::string arguments = absl::StrJoin(predicate.args(), ", ",
-          [](std::string *out, const std::string& arg) {
-            return absl::StrAppend(out, absl::StrCat(arg, ": symbol"));
-          });
-    return absl::StrCat(".decl ", predicate.name(), "(",
-        arguments, ")");
+    std::string arguments = absl::StrJoin(
+        predicate.args(), ", ", [](std::string* out, const std::string& arg) {
+          return absl::StrAppend(out, absl::StrCat(arg, ": symbol"));
+        });
+    return absl::StrCat(".decl ", predicate.name(), "(", arguments, ")");
   }
 
   std::string EmitDeclarations() {
     return absl::StrJoin(declarations_, "\n",
-        [this](std::string *out, auto decl) {
-          return absl::StrAppend(out, EmitDeclaration(decl));
-        });
+                         [this](std::string* out, auto decl) {
+                           return absl::StrAppend(out, EmitDeclaration(decl));
+                         });
   }
 
   absl::btree_set<Predicate> declarations_;

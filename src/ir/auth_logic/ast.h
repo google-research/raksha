@@ -53,12 +53,11 @@ class Predicate {
   const std::vector<std::string>& args() const { return args_; }
   Sign sign() const { return sign_; }
 
-
   // < operator is needed for btree_set, which is only used for declarations.
   // Since declarations are uniquely defined by the name of the predicate,
-  // this implementation that just uses < on the predicate names should be 
+  // this implementation that just uses < on the predicate names should be
   // sufficent in the context where it is used.
-  bool operator< (const Predicate& otherPredicate) const {
+  bool operator<(const Predicate& otherPredicate) const {
     return this->name() < otherPredicate.name();
   }
 
