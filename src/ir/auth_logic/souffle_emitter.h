@@ -101,12 +101,12 @@ class SouffleEmitter {
   }
 
   std::string EmitDeclaration(const Predicate& predicate) {
-    std::vector<std::string> args_with_types;
-    for (auto elm : predicate.args()) {
-      args_with_types.push_back(absl::StrCat(elm, ": symbol"));
-    }
+    std::string arguments = absl::StrJoin(predicate.args(), ", ",
+          [](std::string *out, const std::string& arg) {
+            return absl::StrAppend(out, absl::StrCat(arg, ": symbol"));
+          });
     return absl::StrCat(".decl ", predicate.name(), "(",
-                        absl::StrJoin(args_with_types, ", "), ")");
+        arguments, ")");
   }
 
   std::string EmitDeclarations() {
