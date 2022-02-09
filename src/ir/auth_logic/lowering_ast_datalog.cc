@@ -217,16 +217,12 @@ LoweringToDatalogPass::GenerateDLIRAssertions(const Principal& speaker,
 std::vector<DLIRAssertion>
 LoweringToDatalogPass::GenerateDLIRAssertions(const Principal& speaker,
     const ConditionalAssertion& conditional_assertion) {
-    std::vector<Predicate> dlir_rhs = {};
-    for (auto ast_rhs : conditional_assertion.rhs()) {
-      // extra rule are only generated for facts on the LHS,
-      // so the rules that would be generated from this RHS fact are
-      // not used.
-      auto [dlir_translation, not_used] =
-          BaseFactToDLIR(speaker, ast_rhs);
-      dlir_rhs.push_back(
-          PushPrincipal("says_", speaker, dlir_translation));
-    }
+    auto dlir_rhs = MapIter<BaseFact, Predicate>(conditional_assertion.rhs(),
+        [this, speaker](const BaseFact& base_fact) {
+          auto[dlir_translation, not_used] = 
+            BaseFactToDLIR(speaker, base_fact);
+          return PushPrincipal("says_", speaker, dlir_translation);
+        });
     auto [dlir_lhs, gen_rules] =
         FactToDLIR(speaker, conditional_assertion.lhs());
     auto dlir_lhs_prime = PushPrincipal("says_", speaker, dlir_lhs);
@@ -292,10 +288,8 @@ DLIRProgram LoweringToDatalogPass::ProgToDLIR(const Program& program) {
   MoveAppend(dlir_assertions, std::move(dlir_queries));
   dlir_assertions.push_back(dummy_assertion);
 
-  std::vector<std::string> outputs = {};
-  for (const Query& query : program.queries()) {
-    outputs.push_back(query.name());
-  }
+  auto outputs = MapIter<Query, std::string>(program.queries(),
+      [](const Query& query) { return query.name(); });
   return DLIRProgram(dlir_assertions, outputs);
 }
 
