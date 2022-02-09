@@ -29,6 +29,7 @@ cc_library(
         "//src/common/logging",
         "//src/utils:overloaded",
         "@absl//absl/strings:str_format",
+        "@absl//absl/hash:hash",
     ],
 )
 
@@ -40,7 +41,6 @@ cc_library(
         "lowering_ast_datalog.h",
         "map_iter.h",
         "move_append.h",
-        "souffle_emitter.h"    # TODO move this
     ],
     visibility = ["//test:__pkg__"],
     deps = [
@@ -60,7 +60,7 @@ cc_library(
     deps = [
         "//src/ir/auth_logic:ast",
         "//src/ir/auth_logic:lowering_ast_datalog",
-        "@absl//absl/container:flat_hash_set",
+        "@absl//absl/container:btree",
         "@absl//absl/strings",
     ],
 )

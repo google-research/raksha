@@ -156,6 +156,8 @@ class LoweringToDatalogPass {
   DLIRAssertion SpokenAttributeToDLIR(const Principal& speaker,
                                       const Attribute& attribute);
 
+  Predicate CanActAsToDLIR(const CanActAs& can_act_as);
+
   // In the same way that attributes are passed around with "CanActAs", so
   // are other "CanActAs" facts. To implement this, the translation of
   // CanActAs also results in both a predicate and an extra rule that passes

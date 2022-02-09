@@ -46,8 +46,8 @@ namespace raksha::ir::auth_logic {
 R"(says_foo(TestPrincipal, bar, baz).
 grounded_dummy(dummy_var).
 
-.decl says_foo(x0: symbol, x1: symbol, x2: symbol)
-.decl grounded_dummy(x0: symbol))";
+.decl grounded_dummy(x0: symbol)
+.decl says_foo(x0: symbol, x1: symbol, x2: symbol))";
 
       std::string actual = SouffleEmitter::EmitProgram(
           LoweringToDatalogPass::Lower(BuildPredicateTestProgram()));
@@ -70,8 +70,8 @@ R"(says_hasProperty(TestSpeaker, x__1, wellTested) :- says_canActAs(TestSpeaker,
 says_hasProperty(TestSpeaker, OtherTestPrincipal, wellTested).
 grounded_dummy(dummy_var).
 
-.decl says_canActAs(x0: symbol, x1: symbol, x2: symbol)
 .decl grounded_dummy(x0: symbol)
+.decl says_canActAs(x0: symbol, x1: symbol, x2: symbol)
 .decl says_hasProperty(x0: symbol, x1: symbol, x2: symbol))";
 
       std::string actual = SouffleEmitter::EmitProgram(
@@ -120,9 +120,9 @@ R"(says_grantAccess(TestSpeaker, secretFile) :- says_grantAccess(x__1, secretFil
 says_canSay_grantAccess(TestSpeaker, PrincipalA, secretFile).
 grounded_dummy(dummy_var).
 
-.decl says_grantAccess(x0: symbol, x1: symbol)
+.decl grounded_dummy(x0: symbol)
 .decl says_canSay_grantAccess(x0: symbol, x1: symbol, x2: symbol)
-.decl grounded_dummy(x0: symbol))";
+.decl says_grantAccess(x0: symbol, x1: symbol))";
 
       std::string actual = SouffleEmitter::EmitProgram(
           LoweringToDatalogPass::Lower(BuildCanSayProgram()));
@@ -153,10 +153,10 @@ says_canSay_grantAccess(TestSpeaker, PrincipalA, secretFile) :- says_canSay_gran
 says_canSay_canSay_grantAccess(TestSpeaker, PrincipalB, PrincipalA, secretFile).
 grounded_dummy(dummy_var).
 
-.decl says_canSay_canSay_grantAccess(x0: symbol, x1: symbol, x2: symbol, x3: symbol)
 .decl grounded_dummy(x0: symbol)
-.decl says_grantAccess(x0: symbol, x1: symbol)
-.decl says_canSay_grantAccess(x0: symbol, x1: symbol, x2: symbol))";
+.decl says_canSay_canSay_grantAccess(x0: symbol, x1: symbol, x2: symbol, x3: symbol)
+.decl says_canSay_grantAccess(x0: symbol, x1: symbol, x2: symbol)
+.decl says_grantAccess(x0: symbol, x1: symbol))";
 
       std::string actual = SouffleEmitter::EmitProgram(
           LoweringToDatalogPass::Lower(BuildDoubleCanSayProgram()));
@@ -179,8 +179,8 @@ grounded_dummy(dummy_var).
 R"(says_canAccess(TestSpeaker, somePerson, someFile) :- says_isEmployee(TestSpeaker, somePerson).
 grounded_dummy(dummy_var).
 
-.decl says_canAccess(x0: symbol, x1: symbol, x2: symbol)
 .decl grounded_dummy(x0: symbol)
+.decl says_canAccess(x0: symbol, x1: symbol, x2: symbol)
 .decl says_isEmployee(x0: symbol, x1: symbol))";
       std::string actual = SouffleEmitter::EmitProgram(
           LoweringToDatalogPass::Lower(BuildConditionalProgram()));
@@ -221,8 +221,8 @@ grounded_dummy(dummy_var).
 says_isEmployee(TestPrincipal, somePerson).
 grounded_dummy(dummy_var).
 
-.decl says_canAccess(x0: symbol, x1: symbol, x2: symbol)
 .decl grounded_dummy(x0: symbol)
+.decl says_canAccess(x0: symbol, x1: symbol, x2: symbol)
 .decl says_isEmployee(x0: symbol, x1: symbol))";
       std::string actual = SouffleEmitter::EmitProgram(
           LoweringToDatalogPass::Lower(BuildMultiAssertionProgram()));
@@ -238,14 +238,22 @@ grounded_dummy(dummy_var).
     }
 
     TEST(EmitterTestSuite, QueryTestProgram) {
-      std::string expected = 
+      std::string expected =
 R"(theTestQuery(dummy_var) :- says_anything(TestSpeaker, atAll), grounded_dummy(dummy_var).
 grounded_dummy(dummy_var).
 .output theTestQuery
 
-.decl theTestQuery(x0: symbol)
+.decl grounded_dummy(x0: symbol)
 .decl says_anything(x0: symbol, x1: symbol)
-.decl grounded_dummy(x0: symbol))";
+.decl theTestQuery(x0: symbol))";
+
+// R"(theTestQuery(dummy_var) :- says_anything(TestSpeaker, atAll), grounded_dummy(dummy_var).
+// grounded_dummy(dummy_var).
+// .output theTestQuery
+// 
+// .decl theTestQuery(x0: symbol)
+// .decl says_anything(x0: symbol, x1: symbol)
+// .decl grounded_dummy(x0: symbol))";
 
       std::string actual = SouffleEmitter::EmitProgram(
           LoweringToDatalogPass::Lower(BuildQueryProgram()));

@@ -53,35 +53,13 @@ class Predicate {
   const std::vector<std::string>& args() const { return args_; }
   Sign sign() const { return sign_; }
 
-  // We need a hash function for predicates because the SouffleEmitter
-  // uses an std::unordered_set to track which predicates have already been
-  // declared.
-  struct HashFunction {
-    size_t operator()(const Predicate& predicate) const {
-      size_t ret = std::hash<std::string>()(predicate.name()) ^
-                   std::hash<int>()(predicate.sign());
-      for (auto arg : predicate.args()) {
-        ret ^= std::hash<std::string>()(arg);
-      }
-      return ret;
-    }
-  };
 
-  // Equality is also needed to use a Predicate in an std::unordered_set
-  bool operator==(const Predicate& otherPredicate) const {
-    if (this->name() != otherPredicate.name()) {
-        return false;
-    }
-    if (this->sign() != otherPredicate.sign()) {
-        return false;
-    }
-    if (this->args().size() != otherPredicate.args().size()) {
-      return false;
-    }
-    for (int i = 0; i < this->args().size(); i++) {
-      if (this->args().at(i) != otherPredicate.args().at(i)) return false;
-    }
-    return true;
+  // < operator is needed for btree_set, which is only used for declarations.
+  // Since declarations are uniquely defined by the name of the predicate,
+  // this implementation that just uses < on the predicate names should be 
+  // sufficent in the context where it is used.
+  bool operator< (const Predicate& otherPredicate) const {
+    return this->name() < otherPredicate.name();
   }
 
  private:
