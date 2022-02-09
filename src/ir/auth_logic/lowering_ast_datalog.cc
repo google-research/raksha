@@ -20,6 +20,24 @@
 #include "src/ir/auth_logic/move_append.h"
 
 namespace raksha::ir::auth_logic {
+  
+Predicate LoweringToDatalogPass::PushOntoPredicate(absl::string_view modifier,
+                            std::vector<std::string> new_args,
+                            const Predicate& predicate) {
+  std::string new_name = absl::StrCat(std::move(modifier), predicate.name());
+  // This seemingly pointless line is needed to help C++ figure out the type
+  // of predicate.args() when it is passed to MoveAppend:
+  std::vector<std::string> pred_args = std::move(predicate.args());
+  MoveAppend(new_args, std::move(pred_args));
+  Sign sign_copy = predicate.sign();
+  return Predicate(new_name, std::move(new_args), sign_copy);
+}
+
+Predicate LoweringToDatalogPass::PushPrincipal(absl::string_view modifier,
+                        const Principal& principal,
+                        const Predicate& predicate) {
+  return PushOntoPredicate(modifier, {principal.name()}, predicate);
+}
 
 Predicate LoweringToDatalogPass::AttributeToDLIR(const Attribute& attribute) {
   // If attribute is `X pred(args...)` the following predicate is

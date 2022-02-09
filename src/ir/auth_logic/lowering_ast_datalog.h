@@ -152,15 +152,7 @@ class LoweringToDatalogPass {
   // "X says blah(args)" into "says_blah(X, args)".
   Predicate PushOntoPredicate(absl::string_view modifier,
                               std::vector<std::string> new_args,
-                              const Predicate& predicate) {
-    std::string new_name = absl::StrCat(std::move(modifier), predicate.name());
-    // This seemingly pointless line is needed to help C++ figure out the type
-    // of predicate.args() when it is passed to MoveAppend:
-    std::vector<std::string> pred_args = std::move(predicate.args());
-    MoveAppend(new_args, std::move(pred_args));
-    Sign sign_copy = predicate.sign();
-    return Predicate(new_name, std::move(new_args), sign_copy);
-  }
+                              const Predicate& predicate);
 
   // This function is an abbreviation for `PushPrincipal` where:
   // - a modifier is added
@@ -170,9 +162,7 @@ class LoweringToDatalogPass {
   // principal name.
   Predicate PushPrincipal(absl::string_view modifier,
                           const Principal& principal,
-                          const Predicate& predicate) {
-    return PushOntoPredicate(modifier, {principal.name()}, predicate);
-  }
+                          const Predicate& predicate);
 
   Predicate AttributeToDLIR(const Attribute& attribute);
 
