@@ -28,8 +28,8 @@ cc_library(
     deps = [
         "//src/common/logging",
         "//src/utils:overloaded",
+        "@absl//absl/hash",
         "@absl//absl/strings:str_format",
-        "@absl//absl/hash:hash",
     ],
 )
 
@@ -73,7 +73,6 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
-
 
 cc_test(
     name = "ast_test",
