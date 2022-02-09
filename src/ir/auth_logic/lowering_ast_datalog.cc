@@ -203,41 +203,51 @@ LoweringToDatalogPass::FactToDLIR(const Principal& speaker, const Fact& fact) {
       fact.GetValue());
 }
 
+std::vector<DLIRAssertion>
+LoweringToDatalogPass::GenerateDLIRAssertions(const Principal& speaker,
+    const Fact& fact) {
+    auto [fact_predicate, generated_rules] = FactToDLIR(speaker, fact);
+    DLIRAssertion main_assertion =
+        DLIRAssertion(PushPrincipal("says_", speaker, fact_predicate));
+    generated_rules.push_back(main_assertion);
+    return generated_rules;
+}
+
+std::vector<DLIRAssertion>
+LoweringToDatalogPass::GenerateDLIRAssertions(const Principal& speaker,
+    const ConditionalAssertion& conditional_assertion) {
+    std::vector<Predicate> dlir_rhs = {};
+    for (auto ast_rhs : conditional_assertion.rhs()) {
+      // extra rule are only generated for facts on the LHS,
+      // so the rules that would be generated from this RHS fact are
+      // not used.
+      auto [dlir_translation, not_used] =
+          BaseFactToDLIR(speaker, ast_rhs);
+      dlir_rhs.push_back(
+          PushPrincipal("says_", speaker, dlir_translation));
+    }
+    auto [dlir_lhs, gen_rules] =
+        FactToDLIR(speaker, conditional_assertion.lhs());
+    auto dlir_lhs_prime = PushPrincipal("says_", speaker, dlir_lhs);
+    DLIRAssertion dlir_assertion(
+        DLIRCondAssertion(dlir_lhs_prime, dlir_rhs));
+    gen_rules.push_back(dlir_assertion);
+    return gen_rules;
+}
+
 std::vector<DLIRAssertion> LoweringToDatalogPass::SingleSaysAssertionToDLIR(
     const Principal& speaker, const Assertion& assertion) {
   return std::visit(
+      // I thought it would be possible to skip the overloaded (just like
+      // in BaseFactToDLIR, but I needed to give the types for each
+      // variant explicitly to avoid a type error).
       raksha::utils::overloaded{
-          // I'm not sure why this signature needs to be a const reference to
-          // make the typechecker happy when the visitor for BaseFactToDLIR
-          // did
-          // not need this.
-          [this, speaker](const Fact& fact) {
-            auto [fact_predicate, generated_rules] = FactToDLIR(speaker, fact);
-            DLIRAssertion main_assertion =
-                DLIRAssertion(PushPrincipal("says_", speaker, fact_predicate));
-            generated_rules.push_back(main_assertion);
-            return generated_rules;
-          },
-          [this, speaker](const ConditionalAssertion& conditional_assertion) {
-            std::vector<Predicate> dlir_rhs = {};
-            for (auto ast_rhs : conditional_assertion.rhs()) {
-              // extra rule are only generated for facts on the LHS,
-              // so the rules that would be generated from this RHS fact are
-              // not used.
-              auto [dlir_translation, not_used] =
-                  BaseFactToDLIR(speaker, ast_rhs);
-              dlir_rhs.push_back(
-                  PushPrincipal("says_", speaker, dlir_translation));
-            }
-            auto [dlir_lhs, gen_rules] =
-                FactToDLIR(speaker, conditional_assertion.lhs());
-            auto dlir_lhs_prime = PushPrincipal("says_", speaker, dlir_lhs);
-            DLIRAssertion dlir_assertion(
-                DLIRCondAssertion(dlir_lhs_prime, dlir_rhs));
-            gen_rules.push_back(dlir_assertion);
-            return gen_rules;
-          }},
-      assertion.GetValue());
+        [this, &speaker](const Fact& fact) {
+          return GenerateDLIRAssertions(speaker, fact);
+        },
+        [this, &speaker](const ConditionalAssertion& conditional_assertion) {
+          return GenerateDLIRAssertions(speaker, conditional_assertion);
+        }}, assertion.GetValue());
 }
 
 std::vector<DLIRAssertion> LoweringToDatalogPass::SaysAssertionToDLIR(
