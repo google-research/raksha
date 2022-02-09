@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ TEST_F(StorageTest, PropertyAccessorsReturnCorrectValues) {
   Storage output_storage("output", type_factory_.MakeEntityType(schema));
   EXPECT_EQ(output_storage.name(), "output");
   const types::TypeBase& type_base = output_storage.type().type_base();
-  EXPECT_EQ(type_base.kind(), types::TypeBase::Kind::kEntity);
+  ASSERT_EQ(type_base.kind(), types::TypeBase::Kind::kEntity);
   EXPECT_EQ(static_cast<const types::EntityType&>(type_base).schema().name(),
             "TestStruct");
 }
