@@ -39,6 +39,7 @@ cc_library(
         "ast.h",
         "datalog_ir.h",
         "lowering_ast_datalog.h",
+        "map_iter.h",
         "move_append.h",
     ],
     visibility = ["//test:__pkg__"],

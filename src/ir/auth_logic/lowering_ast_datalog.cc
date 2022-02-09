@@ -17,6 +17,7 @@
 #include "src/ir/auth_logic/lowering_ast_datalog.h"
 
 #include "src/ir/auth_logic/ast.h"
+#include "src/ir/auth_logic/map_iter.h"
 #include "src/ir/auth_logic/move_append.h"
 
 namespace raksha::ir::auth_logic {
@@ -273,17 +274,13 @@ std::vector<DLIRAssertion> LoweringToDatalogPass::SaysAssertionsToDLIR(
 
 std::vector<DLIRAssertion> LoweringToDatalogPass::QueriesToDLIR(
     const std::vector<Query>& queries) {
-  std::vector<DLIRAssertion> ret = {};
-  ret.reserve(queries.size());
-  for (const Query& query : queries) {
+  return MapIter<Query, DLIRAssertion>(queries, [this](const Query& query) {
     auto [main_pred, not_used] = FactToDLIR(query.principal(), query.fact());
     main_pred = PushPrincipal("says_", query.principal(), main_pred);
     Predicate lhs(query.name(), {"dummy_var"}, kPositive);
-    DLIRAssertion translated_query(DLIRCondAssertion(
+    return DLIRAssertion(DLIRCondAssertion(
           lhs, {main_pred, kDummyPredicate}));
-    ret.push_back(translated_query);
-  }
-  return ret;
+  });
 }
 
 DLIRProgram LoweringToDatalogPass::ProgToDLIR(const Program& program) {
