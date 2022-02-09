@@ -16,20 +16,31 @@
 #ifndef SRC_IR_STORAGE_H_
 #define SRC_IR_STORAGE_H_
 
+#include "absl/strings/str_format.h"
 #include "src/ir/types/type.h"
 
 namespace raksha::ir {
 
-// A class that represents a storage.
+// A class that represents a storage node.
 class Storage {
  public:
-  Storage(types::Type type) : type_(std::move(type)) {}
+  Storage(absl::string_view name, types::Type type)
+      : name_(name), type_(std::move(type)) {}
 
   // Disable copy (and move) semantics.
   Storage(const Storage&) = delete;
   Storage& operator=(const Storage&) = delete;
 
+  absl::string_view name() const { return name_; }
+  const types::Type& type() const { return type_; }
+
+  std::string ToString() const {
+    // TODD(#335): When types have a ToString use that to print types.
+    return absl::StrFormat("store:%s:type", name_);
+  }
+
  private:
+  std::string name_;
   types::Type type_;
   // TODO: We will add additional attributes like ttl, medium, etc.
 };

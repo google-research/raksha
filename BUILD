@@ -15,10 +15,10 @@
 #
 #-------------------------------------------------------------------------------
 
-licenses(["notice"])
-
 load("@buildtools//buildifier:def.bzl", "buildifier")
 load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
+
+licenses(["notice"])
 
 # Target to fix all bazel files in Raksha repo.
 buildifier(
@@ -40,5 +40,3 @@ refresh_compile_commands(
     # For more details, feel free to look into the following bzl file:
     #   `external/hedron_compile_commands/refresh_compile_commands.bzl`.
 )
-
-licenses(["notice"])

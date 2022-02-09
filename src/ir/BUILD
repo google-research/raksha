@@ -93,6 +93,24 @@ cc_test(
 )
 
 cc_library(
+    name = "storage",
+    hdrs = ["storage.h"],
+    deps = [
+        "//src/ir/types",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "storage_test",
+    srcs = ["storage_test.cc"],
+    deps = [
+        ":storage",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
     name = "ir",
     srcs = [
         "access_path_root.cc",
