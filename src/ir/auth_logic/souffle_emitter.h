@@ -94,11 +94,10 @@ class SouffleEmitter {
   }
 
   std::string EmitOutputs(const DLIRProgram& program) {
-    std::string ret;
-    for (auto out : program.outputs()) {
-      absl::StrAppend(&ret, absl::StrCat(".output ", out, "\n"));
-    }
-    return ret;
+    return absl::StrJoin(program.outputs(), "\n",
+        [](std::string *out, const std::string& prog_out){
+          return absl::StrAppend(out, absl::StrCat(".output ", prog_out));
+    });
   }
 
   std::string EmitDeclaration(const Predicate& predicate) {
@@ -111,11 +110,10 @@ class SouffleEmitter {
   }
 
   std::string EmitDeclarations() {
-    std::vector<std::string> ret;
-    for (auto decl : declarations_) {
-      ret.push_back(EmitDeclaration(decl));
-    }
-    return absl::StrJoin(ret, "\n");
+    return absl::StrJoin(declarations_, "\n",
+        [this](std::string *out, auto decl) {
+          return absl::StrAppend(out, EmitDeclaration(decl));
+        });
   }
 
   absl::btree_set<Predicate> declarations_;

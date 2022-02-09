@@ -242,7 +242,6 @@ grounded_dummy(dummy_var).
 R"(theTestQuery(dummy_var) :- says_anything(TestSpeaker, atAll), grounded_dummy(dummy_var).
 grounded_dummy(dummy_var).
 .output theTestQuery
-
 .decl grounded_dummy(x0: symbol)
 .decl says_anything(x0: symbol, x1: symbol)
 .decl theTestQuery(x0: symbol))";
