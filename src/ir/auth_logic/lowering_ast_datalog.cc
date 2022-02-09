@@ -271,21 +271,17 @@ std::vector<DLIRAssertion> LoweringToDatalogPass::SaysAssertionsToDLIR(
   return ret;
 }
 
-DLIRAssertion LoweringToDatalogPass::QueryToDLIR(const Query& query) {
-  // The assertions that are normally generated during the translation
-  // from facts to dlir facts are not used for queries.
-  auto [main_pred, not_used] = FactToDLIR(query.principal(), query.fact());
-  main_pred = PushPrincipal("says_", query.principal(), main_pred);
-  Predicate lhs(query.name(), {"dummy_var"}, kPositive);
-  return DLIRAssertion(DLIRCondAssertion(lhs, {main_pred, kDummyPredicate}));
-}
-
 std::vector<DLIRAssertion> LoweringToDatalogPass::QueriesToDLIR(
     const std::vector<Query>& queries) {
   std::vector<DLIRAssertion> ret = {};
   ret.reserve(queries.size());
   for (const Query& query : queries) {
-    ret.push_back(QueryToDLIR(query));
+    auto [main_pred, not_used] = FactToDLIR(query.principal(), query.fact());
+    main_pred = PushPrincipal("says_", query.principal(), main_pred);
+    Predicate lhs(query.name(), {"dummy_var"}, kPositive);
+    DLIRAssertion translated_query(DLIRCondAssertion(
+          lhs, {main_pred, kDummyPredicate}));
+    ret.push_back(translated_query);
   }
   return ret;
 }

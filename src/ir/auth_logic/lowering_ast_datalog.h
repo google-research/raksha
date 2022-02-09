@@ -232,8 +232,6 @@ class LoweringToDatalogPass {
   static inline Predicate kDummyPredicate =
       Predicate("grounded_dummy", {"dummy_var"}, kPositive);
 
-  DLIRAssertion QueryToDLIR(const Query& query);
-
   std::vector<DLIRAssertion> QueriesToDLIR(const std::vector<Query>& queries);
 
   DLIRProgram ProgToDLIR(const Program& program);
