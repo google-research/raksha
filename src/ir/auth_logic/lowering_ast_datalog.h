@@ -186,10 +186,10 @@ class LoweringToDatalogPass {
       const Principal& speaker, const Fact& fact);
 
   std::vector<DLIRAssertion> GenerateDLIRAssertions(const Principal& speaker,
-      const Fact& fact);
+                                                    const Fact& fact);
 
-  std::vector<DLIRAssertion>
-  GenerateDLIRAssertions(const Principal& speaker,
+  std::vector<DLIRAssertion> GenerateDLIRAssertions(
+      const Principal& speaker,
       const ConditionalAssertion& conditional_assertion);
 
   std::vector<DLIRAssertion> SingleSaysAssertionToDLIR(

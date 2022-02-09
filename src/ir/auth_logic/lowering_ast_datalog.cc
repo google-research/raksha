@@ -21,7 +21,7 @@
 #include "src/ir/auth_logic/move_append.h"
 
 namespace raksha::ir::auth_logic {
-  
+
 // This function takes a `predicate` and creates a new predicate as follows:
 //   - Prepend the `modifier` to the name of the given `predicate`.
 //   - Prepend the given `args` to the original list of arguments of
@@ -47,8 +47,7 @@ Predicate PushOntoPredicate(absl::string_view modifier,
 // This is a common case in this translation because it is used for
 // `x says blah(args)` and `x canActAs y` and other constructions involving a
 // principal name.
-Predicate PushPrincipal(absl::string_view modifier,
-                        const Principal& principal,
+Predicate PushPrincipal(absl::string_view modifier, const Principal& principal,
                         const Predicate& predicate) {
   return PushOntoPredicate(modifier, {principal.name()}, predicate);
 }
@@ -217,32 +216,28 @@ LoweringToDatalogPass::FactToDLIR(const Principal& speaker, const Fact& fact) {
       fact.GetValue());
 }
 
-std::vector<DLIRAssertion>
-LoweringToDatalogPass::GenerateDLIRAssertions(const Principal& speaker,
-    const Fact& fact) {
-    auto [fact_predicate, generated_rules] = FactToDLIR(speaker, fact);
-    DLIRAssertion main_assertion =
-        DLIRAssertion(PushPrincipal("says_", speaker, fact_predicate));
-    generated_rules.push_back(main_assertion);
-    return generated_rules;
+std::vector<DLIRAssertion> LoweringToDatalogPass::GenerateDLIRAssertions(
+    const Principal& speaker, const Fact& fact) {
+  auto [fact_predicate, generated_rules] = FactToDLIR(speaker, fact);
+  DLIRAssertion main_assertion =
+      DLIRAssertion(PushPrincipal("says_", speaker, fact_predicate));
+  generated_rules.push_back(main_assertion);
+  return generated_rules;
 }
 
-std::vector<DLIRAssertion>
-LoweringToDatalogPass::GenerateDLIRAssertions(const Principal& speaker,
+std::vector<DLIRAssertion> LoweringToDatalogPass::GenerateDLIRAssertions(
+    const Principal& speaker,
     const ConditionalAssertion& conditional_assertion) {
-    auto dlir_rhs = MapIter<BaseFact, Predicate>(conditional_assertion.rhs(),
-        [this, speaker](const BaseFact& base_fact) {
-          auto[dlir_translation, not_used] = 
-            BaseFactToDLIR(speaker, base_fact);
-          return PushPrincipal("says_", speaker, dlir_translation);
-        });
-    auto [dlir_lhs, gen_rules] =
-        FactToDLIR(speaker, conditional_assertion.lhs());
-    auto dlir_lhs_prime = PushPrincipal("says_", speaker, dlir_lhs);
-    DLIRAssertion dlir_assertion(
-        DLIRCondAssertion(dlir_lhs_prime, dlir_rhs));
-    gen_rules.push_back(dlir_assertion);
-    return gen_rules;
+  auto dlir_rhs = MapIter<BaseFact, Predicate>(
+      conditional_assertion.rhs(), [this, speaker](const BaseFact& base_fact) {
+        auto [dlir_translation, not_used] = BaseFactToDLIR(speaker, base_fact);
+        return PushPrincipal("says_", speaker, dlir_translation);
+      });
+  auto [dlir_lhs, gen_rules] = FactToDLIR(speaker, conditional_assertion.lhs());
+  auto dlir_lhs_prime = PushPrincipal("says_", speaker, dlir_lhs);
+  DLIRAssertion dlir_assertion(DLIRCondAssertion(dlir_lhs_prime, dlir_rhs));
+  gen_rules.push_back(dlir_assertion);
+  return gen_rules;
 }
 
 std::vector<DLIRAssertion> LoweringToDatalogPass::SingleSaysAssertionToDLIR(
@@ -252,12 +247,13 @@ std::vector<DLIRAssertion> LoweringToDatalogPass::SingleSaysAssertionToDLIR(
       // in BaseFactToDLIR, but I needed to give the types for each
       // variant explicitly to avoid a type error).
       raksha::utils::overloaded{
-        [this, &speaker](const Fact& fact) {
-          return GenerateDLIRAssertions(speaker, fact);
-        },
-        [this, &speaker](const ConditionalAssertion& conditional_assertion) {
-          return GenerateDLIRAssertions(speaker, conditional_assertion);
-        }}, assertion.GetValue());
+          [this, &speaker](const Fact& fact) {
+            return GenerateDLIRAssertions(speaker, fact);
+          },
+          [this, &speaker](const ConditionalAssertion& conditional_assertion) {
+            return GenerateDLIRAssertions(speaker, conditional_assertion);
+          }},
+      assertion.GetValue());
 }
 
 std::vector<DLIRAssertion> LoweringToDatalogPass::SaysAssertionToDLIR(
@@ -287,8 +283,7 @@ std::vector<DLIRAssertion> LoweringToDatalogPass::QueriesToDLIR(
     auto [main_pred, not_used] = FactToDLIR(query.principal(), query.fact());
     main_pred = PushPrincipal("says_", query.principal(), main_pred);
     Predicate lhs(query.name(), {"dummy_var"}, kPositive);
-    return DLIRAssertion(DLIRCondAssertion(
-          lhs, {main_pred, kDummyPredicate}));
+    return DLIRAssertion(DLIRCondAssertion(lhs, {main_pred, kDummyPredicate}));
   });
 }
 
@@ -301,8 +296,8 @@ DLIRProgram LoweringToDatalogPass::ProgToDLIR(const Program& program) {
   MoveAppend(dlir_assertions, std::move(dlir_queries));
   dlir_assertions.push_back(dummy_assertion);
 
-  auto outputs = MapIter<Query, std::string>(program.queries(),
-      [](const Query& query) { return query.name(); });
+  auto outputs = MapIter<Query, std::string>(
+      program.queries(), [](const Query& query) { return query.name(); });
   return DLIRProgram(dlir_assertions, outputs);
 }
 

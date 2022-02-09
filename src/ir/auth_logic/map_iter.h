@@ -21,16 +21,16 @@
 
 namespace raksha::ir::auth_logic {
 
-template <typename T, typename U, typename F> 
+template <typename T, typename U, typename F>
 std::vector<U> MapIter(const std::vector<T>& input, F f) {
   std::vector<U> result;
   result.reserve(input.size());
-  for(auto& entity: input) {
+  for (auto& entity : input) {
     result.push_back(f(entity));
   }
   return result;
 }
 
-} // namespace raksha::ir::auth_logic
+}  // namespace raksha::ir::auth_logic
 
-#endif // SRC_IR_AUTH_LOGIC_MAP_ITER_H_
+#endif  // SRC_IR_AUTH_LOGIC_MAP_ITER_H_
