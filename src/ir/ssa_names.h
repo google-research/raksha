@@ -26,35 +26,36 @@ class Operation;
 class SSANames {
  public:
   using ID = int;
-  SSANames() : next_block_id_(0), next_operation_id_(0) {}
-
+  SSANames() {}
   // Disable copy (and move) semantics.
   SSANames(const SSANames &) = delete;
   SSANames &operator=(const SSANames &) = delete;
 
   ID GetOrCreateID(const Operation &operation) {
-    return GetOrCreateIDHelper(operation_ids_, next_operation_id_, &operation);
+    return operation_ids_.GetOrCreateID(&operation);
   }
 
   ID GetOrCreateID(const Block &block) {
-    return GetOrCreateIDHelper(block_ids_, next_block_id_, &block);
+    return block_ids_.GetOrCreateID(&block);
   }
 
  private:
-  template <typename T, typename U>
-  static ID GetOrCreateIDHelper(T &ids_table, ID &next_id, U entity) {
-    auto find_result = ids_table.find(entity);
-    if (find_result == ids_table.end()) {
-      ID result = next_id++;
-      ids_table.insert({entity, result});
-      return result;
+  template <class T>
+  class IDManager {
+   public:
+    ID GetOrCreateID(const T *entity) {
+      auto insert_result = item_ids_.insert({entity, next_id_});
+      if (insert_result.second) ++next_id_;
+      return insert_result.first->second;
     }
-    return find_result->second;
-  }
-  ID next_block_id_;
-  absl::flat_hash_map<const Block *, ID> block_ids_;
-  ID next_operation_id_;
-  absl::flat_hash_map<const Operation *, ID> operation_ids_;
+
+   private:
+    ID next_id_;
+    absl::flat_hash_map<const T *, ID> item_ids_;
+  };
+
+  IDManager<Block> block_ids_;
+  IDManager<Operation> operation_ids_;
 };
 
 }  // namespace raksha::ir

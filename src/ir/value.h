@@ -126,8 +126,8 @@ class Any {};
 // A class that represents a data value.
 class Value {
  public:
-  Value(value::BlockArgument arg) : value_(std::move(arg)) {}
-  Value(value::BlockResult arg) : value_(std::move(arg)) {}
+  Value(value::BlockArgument arg): value_(std::move(arg)) {}
+  Value(value::BlockResult arg): value_(std::move(arg)) {}
   Value(value::OperationResult arg) : value_(std::move(arg)) {}
   Value(value::Field arg) : value_(std::move(arg)) {}
   Value(value::Constant arg) : value_(std::move(arg)) {}
