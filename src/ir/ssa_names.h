@@ -23,13 +23,13 @@ namespace raksha::ir {
 class Block;
 class Operation;
 
-class SSANames {
+class SsaNames {
  public:
   using ID = int;
-  SSANames() {}
+  SsaNames() {}
   // Disable copy (and move) semantics.
-  SSANames(const SSANames &) = delete;
-  SSANames &operator=(const SSANames &) = delete;
+  SsaNames(const SsaNames &) = delete;
+  SsaNames &operator=(const SsaNames &) = delete;
 
   ID GetOrCreateID(const Operation &operation) {
     return operation_ids_.GetOrCreateID(&operation);
@@ -44,13 +44,13 @@ class SSANames {
   class IDManager {
    public:
     ID GetOrCreateID(const T *entity) {
-      auto insert_result = item_ids_.insert({entity, next_id_});
-      if (insert_result.second) ++next_id_;
+      // Note that if `entity` is already in the map, the `insert` call below
+      // will return the existing entity. Otherwise, a new entity is added.
+      auto insert_result = item_ids_.insert({entity, item_ids_.size()});
       return insert_result.first->second;
     }
 
    private:
-    ID next_id_;
     absl::flat_hash_map<const T *, ID> item_ids_;
   };
 

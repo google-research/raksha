@@ -24,31 +24,31 @@
 namespace raksha::ir {
 namespace {
 
-class SSANamesTest : public ::testing::Test {
+class SsaNamesTest : public ::testing::Test {
  public:
-  SSANamesTest() : test_op_("test") {}
+  SsaNamesTest() : test_op_("test") {}
 
  protected:
   Operator test_op_;
 };
 
-TEST_F(SSANamesTest, GetOrCreateIDReturnsUniqueIDsForOperations) {
-  SSANames names;
+TEST_F(SsaNamesTest, GetOrCreateIDReturnsUniqueIDsForOperations) {
+  SsaNames names;
   Operation first_operation(nullptr, test_op_, {});
   Operation second_operation(nullptr, test_op_, {});
-  SSANames::ID first_operation_id = names.GetOrCreateID(first_operation);
-  SSANames::ID second_operation_id = names.GetOrCreateID(second_operation);
+  SsaNames::ID first_operation_id = names.GetOrCreateID(first_operation);
+  SsaNames::ID second_operation_id = names.GetOrCreateID(second_operation);
 
   EXPECT_NE(first_operation_id, second_operation_id);
   EXPECT_EQ(names.GetOrCreateID(first_operation), first_operation_id);
 }
 
-TEST_F(SSANamesTest, GetOrCreateIDReturnsUniqueIDsForBlocks) {
-  SSANames names;
+TEST_F(SsaNamesTest, GetOrCreateIDReturnsUniqueIDsForBlocks) {
+  SsaNames names;
   Block first_block;
   Block second_block;
-  SSANames::ID first_block_id = names.GetOrCreateID(first_block);
-  SSANames::ID second_block_id = names.GetOrCreateID(second_block);
+  SsaNames::ID first_block_id = names.GetOrCreateID(first_block);
+  SsaNames::ID second_block_id = names.GetOrCreateID(second_block);
 
   EXPECT_NE(first_block_id, second_block_id);
   EXPECT_EQ(names.GetOrCreateID(first_block), first_block_id);
