@@ -17,7 +17,7 @@
 #ifndef SRC_IR_AUTH_LOGIC_SOUFFLE_EMITTER_H_
 #define SRC_IR_AUTH_LOGIC_SOUFFLE_EMITTER_H_
 
-#include "absl/container/btree_set.h"
+#include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "src/ir/auth_logic/datalog_ir.h"
@@ -108,13 +108,17 @@ class SouffleEmitter {
   }
 
   std::string EmitDeclarations() {
-    return absl::StrJoin(declarations_, "\n",
+    std::vector elements_vec(
+        std::make_move_iterator(declarations_.begin()), 
+        std::make_move_iterator(declarations_.end()));
+    std::sort(elements_vec.begin(), elements_vec.end());
+    return absl::StrJoin(elements_vec, "\n",
                          [this](std::string* out, auto decl) {
                            return absl::StrAppend(out, EmitDeclaration(decl));
                          });
   }
 
-  absl::btree_set<Predicate> declarations_;
+  absl::flat_hash_set<Predicate> declarations_;
 };
 
 }  // namespace raksha::ir::auth_logic
