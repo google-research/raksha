@@ -28,7 +28,6 @@ cc_library(
         "data_decl.h",
         "operation.h",
         "operator.h",
-        "storage.h",
         "value.h",
     ],
     deps = [
@@ -88,6 +87,32 @@ cc_test(
     srcs = ["operator_test.cc"],
     deps = [
         ":operator",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
+    name = "ssa_names",
+    hdrs = ["ssa_names.h"],
+    deps = [
+        ":operator",
+        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_test(
+    name = "ssa_names_test",
+    srcs = [
+        # The headers will be removed by a subsequent PR.
+        "block.h",
+        "operation.h",
+        "value.h",
+        "ssa_names_test.cc",
+    ],
+    deps = [
+        ":data_decl",
+        ":ssa_names",
+        ":storage",
         "//src/common/testing:gtest",
     ],
 )

@@ -107,6 +107,8 @@ class StoredValue {
   StoredValue(const StoredValue&) = default;
   StoredValue& operator=(const StoredValue&) = default;
 
+  const Storage& storage() const { return *storage_; }
+
  private:
   const Storage* storage_;
 };
