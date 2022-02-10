@@ -36,7 +36,7 @@ class SouffleEmitter {
   }
 
  private:
-  SouffleEmitter() : declarations_(absl::btree_set<Predicate>()){};
+  SouffleEmitter() = default;
 
   // This function produces a normalized version of predicates to
   // be used when generating declarations of the predicates. It replaces
