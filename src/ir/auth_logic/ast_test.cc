@@ -14,8 +14,9 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
+#include "src/ir/auth_logic/ast.h"
+
 #include <iostream>
 #include <memory>
-#include "src/ir/auth_logic/ast.h"
-#include "src/common/testing/gtest.h"
 
+#include "src/common/testing/gtest.h"
