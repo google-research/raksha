@@ -34,7 +34,7 @@ Predicate PushOntoPredicate(absl::string_view modifier,
                             std::vector<std::string> new_args,
                             const Predicate& predicate) {
   std::string new_name = absl::StrCat(std::move(modifier), predicate.name());
-  MoveAppend(new_args, std::vector<std::string>(predicate.args()));
+  utils::MoveAppend(new_args, std::vector<std::string>(predicate.args()));
   Sign sign_copy = predicate.sign();
   return Predicate(new_name, std::move(new_args), sign_copy);
 }
@@ -223,7 +223,7 @@ std::vector<DLIRAssertion> LoweringToDatalogPass::GenerateDLIRAssertions(
 std::vector<DLIRAssertion> LoweringToDatalogPass::GenerateDLIRAssertions(
     const Principal& speaker,
     const ConditionalAssertion& conditional_assertion) {
-  auto dlir_rhs = MapIter<BaseFact, Predicate>(
+  auto dlir_rhs = utils::MapIter<BaseFact, Predicate>(
       conditional_assertion.rhs(), [this, speaker](const BaseFact& base_fact) {
         auto [dlir_translation, not_used] = BaseFactToDLIR(speaker, base_fact);
         return PushPrincipal("says_", speaker, dlir_translation);
@@ -257,7 +257,7 @@ std::vector<DLIRAssertion> LoweringToDatalogPass::SaysAssertionToDLIR(
   for (const Assertion& assertion : says_assertion.assertions()) {
     std::vector<DLIRAssertion> single_translation =
         SingleSaysAssertionToDLIR(says_assertion.principal(), assertion);
-    MoveAppend(ret, std::move(single_translation));
+    utils::MoveAppend(ret, std::move(single_translation));
   }
   return ret;
 }
@@ -267,14 +267,14 @@ std::vector<DLIRAssertion> LoweringToDatalogPass::SaysAssertionsToDLIR(
   std::vector<DLIRAssertion> ret = {};
   for (const SaysAssertion& says_assertion : says_assertions) {
     auto single_translation = SaysAssertionToDLIR(says_assertion);
-    MoveAppend(ret, std::move(single_translation));
+    utils::MoveAppend(ret, std::move(single_translation));
   }
   return ret;
 }
 
 std::vector<DLIRAssertion> LoweringToDatalogPass::QueriesToDLIR(
     const std::vector<Query>& queries) {
-  return MapIter<Query, DLIRAssertion>(queries, [this](const Query& query) {
+  return utils::MapIter<Query, DLIRAssertion>(queries, [this](const Query& query) {
     auto [main_pred, not_used] = FactToDLIR(query.principal(), query.fact());
     main_pred = PushPrincipal("says_", query.principal(), main_pred);
     Predicate lhs(query.name(), {"dummy_var"}, kPositive);
@@ -288,10 +288,10 @@ DLIRProgram LoweringToDatalogPass::ProgToDLIR(const Program& program) {
   // We need to add a fact that says the dummy variable used in queries is
   // grounded.
   DLIRAssertion dummy_assertion(kDummyPredicate);
-  MoveAppend(dlir_assertions, std::move(dlir_queries));
+  utils::MoveAppend(dlir_assertions, std::move(dlir_queries));
   dlir_assertions.push_back(dummy_assertion);
 
-  auto outputs = MapIter<Query, std::string>(
+  auto outputs = utils::MapIter<Query, std::string>(
       program.queries(), [](const Query& query) { return query.name(); });
   return DLIRProgram(dlir_assertions, outputs);
 }
