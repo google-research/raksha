@@ -39,13 +39,13 @@ cc_library(
         "ast.h",
         "datalog_ir.h",
         "lowering_ast_datalog.h",
-        "map_iter.h",
-        "move_append.h",
     ],
     visibility = ["//test:__pkg__"],
     deps = [
         "//src/common/logging",
         "//src/utils:overloaded",
+        "//src/utils:map_iter",
+        "//src/utils:move_append",
         "@absl//absl/strings:str_format",
     ],
 )

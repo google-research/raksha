@@ -16,21 +16,18 @@
 
 // This file contains the datalog IR (DLIR) which makes the translation from
 // this authorization logic into datalog simpler.
-#ifndef SRC_IR_AUTH_LOGIC_MAP_ITER_H_
-#define SRC_IR_AUTH_LOGIC_MAP_ITER_H_
+#ifndef SRC_UTILS_MOVE_APPEND_H_
+#define SRC_UTILS_MOVE_APPEND_H_
 
-namespace raksha::ir::auth_logic {
+namespace raksha::utils {
 
-template <typename T, typename U, typename F>
-std::vector<U> MapIter(const std::vector<T>& input, F f) {
-  std::vector<U> result;
-  result.reserve(input.size());
-  for (auto& entity : input) {
-    result.push_back(f(entity));
-  }
-  return result;
+// Appends the `src` vector to the `dst` vector. This modifies
+// the `dst` vector.
+template <typename T>
+void MoveAppend(std::vector<T>& dst, std::vector<T>&& src) {
+  dst.insert(dst.end(), std::make_move_iterator(src.begin()),
+             std::make_move_iterator(src.end()));
 }
 
-}  // namespace raksha::ir::auth_logic
-
-#endif  // SRC_IR_AUTH_LOGIC_MAP_ITER_H_
+}  // namespace raksha::utils
+#endif  // SRC_UTILS_MOVE_APPEND_H_

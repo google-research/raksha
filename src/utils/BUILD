@@ -107,3 +107,33 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
+
+cc_library(
+    name = "map_iter",
+    hdrs = ["map_iter.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "map_iter_test",
+    srcs = ["map_iter_test.cc"],
+    deps = [
+        ":map_iter",
+        "//src/common/testing:gtest"
+    ]
+)
+
+cc_library(
+    name = "move_append",
+    hdrs = ["move_append.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "move_append_test",
+    srcs = ["move_append_test.cc"],
+    deps = [
+        ":move_append",
+        "//src/common/testing:gtest"
+    ]
+)
