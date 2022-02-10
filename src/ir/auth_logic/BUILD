@@ -43,9 +43,9 @@ cc_library(
     visibility = ["//test:__pkg__"],
     deps = [
         "//src/common/logging",
-        "//src/utils:overloaded",
         "//src/utils:map_iter",
         "//src/utils:move_append",
+        "//src/utils:overloaded",
         "@absl//absl/strings:str_format",
     ],
 )

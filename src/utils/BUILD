@@ -119,8 +119,8 @@ cc_test(
     srcs = ["map_iter_test.cc"],
     deps = [
         ":map_iter",
-        "//src/common/testing:gtest"
-    ]
+        "//src/common/testing:gtest",
+    ],
 )
 
 cc_library(
@@ -134,6 +134,6 @@ cc_test(
     srcs = ["move_append_test.cc"],
     deps = [
         ":move_append",
-        "//src/common/testing:gtest"
-    ]
+        "//src/common/testing:gtest",
+    ],
 )
