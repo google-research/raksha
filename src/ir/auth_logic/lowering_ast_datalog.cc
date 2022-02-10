@@ -22,42 +22,49 @@
 
 namespace raksha::ir::auth_logic {
 
-// This function takes a `predicate` and creates a new predicate as follows:
-//   - Prepend the `modifier` to the name of the given `predicate`.
-//   - Prepend the given `args` to the original list of arguments of
-//   `predicate`.
-//
-// This is used in a few places in the translation, for example, to translate
-// "X says blah(args)" into "says_blah(X, args)".
-Predicate PushOntoPredicate(absl::string_view modifier,
-                            std::vector<std::string> new_args,
-                            const Predicate& predicate) {
-  std::string new_name = absl::StrCat(std::move(modifier), predicate.name());
-  // This seemingly pointless line is needed to help C++ figure out the type
-  // of predicate.args() when it is passed to MoveAppend:
-  std::vector<std::string> pred_args = std::move(predicate.args());
-  MoveAppend(new_args, std::move(pred_args));
-  Sign sign_copy = predicate.sign();
-  return Predicate(new_name, std::move(new_args), sign_copy);
+namespace {
+  // This function takes a `predicate` and creates a new predicate as follows:
+  //   - Prepend the `modifier` to the name of the given `predicate`.
+  //   - Prepend the given `args` to the original list of arguments of
+  //   `predicate`.
+  //
+  // This is used in a few places in the translation, for example, to translate
+  // "X says blah(args)" into "says_blah(X, args)".
+  Predicate PushOntoPredicate(absl::string_view modifier,
+                              std::vector<std::string> new_args,
+                              const Predicate& predicate) {
+    std::string new_name = absl::StrCat(std::move(modifier), predicate.name());
+    MoveAppend(new_args, std::vector<std::string>(predicate.args()));
+    Sign sign_copy = predicate.sign();
+    return Predicate(new_name, std::move(new_args), sign_copy);
+  }
+  
+  // This function is an abbreviation for `PushPrincipal` where:
+  // - a modifier is added
+  // - just one new principal is added as an argument.
+  // This is a common case in this translation because it is used for
+  // `x says blah(args)` and `x canActAs y` and other constructions involving a
+  // principal name.
+  Predicate PushPrincipal(absl::string_view modifier, const Principal& principal,
+                          const Predicate& predicate) {
+    return PushOntoPredicate(modifier, {principal.name()}, predicate);
+  }
+  
+  Predicate AttributeToDLIR(const Attribute& attribute) {
+    // If attribute is `X pred(args...)` the following predicate is
+    // `pred(X, args...)`
+    return PushPrincipal("", attribute.principal(),
+                         attribute.predicate());
+  }
+
+  Predicate CanActAsToDLIR(const CanActAs& can_act_as) {
+    return Predicate(
+        "canActAs",
+        {can_act_as.left_principal().name(), can_act_as.right_principal().name()},
+        kPositive);
+  }
 }
 
-// This function is an abbreviation for `PushPrincipal` where:
-// - a modifier is added
-// - just one new principal is added as an argument.
-// This is a common case in this translation because it is used for
-// `x says blah(args)` and `x canActAs y` and other constructions involving a
-// principal name.
-Predicate PushPrincipal(absl::string_view modifier, const Principal& principal,
-                        const Predicate& predicate) {
-  return PushOntoPredicate(modifier, {principal.name()}, predicate);
-}
-
-Predicate AttributeToDLIR(const Attribute& attribute) {
-  // If attribute is `X pred(args...)` the following predicate is
-  // `pred(X, args...)`
-  return PushPrincipal(std::string(""), attribute.principal(),
-                       attribute.predicate());
-}
 
 DLIRAssertion LoweringToDatalogPass::SpokenAttributeToDLIR(
     const Principal& speaker, const Attribute& attribute) {
@@ -92,13 +99,6 @@ DLIRAssertion LoweringToDatalogPass::SpokenAttributeToDLIR(
   return DLIRAssertion(
       DLIRCondAssertion(generated_lhs, {std::move(speaker_says_y_can_act_as_x),
                                         std::move(speaker_says_x_pred)}));
-}
-
-Predicate CanActAsToDLIR(const CanActAs& can_act_as) {
-  return Predicate(
-      "canActAs",
-      {can_act_as.left_principal().name(), can_act_as.right_principal().name()},
-      kPositive);
 }
 
 DLIRAssertion LoweringToDatalogPass::SpokenCanActAsToDLIR(
@@ -139,24 +139,21 @@ DLIRAssertion LoweringToDatalogPass::SpokenCanActAsToDLIR(
 std::pair<Predicate, std::vector<DLIRAssertion>>
 LoweringToDatalogPass::BaseFactToDLIRInner(const Principal& speaker,
                                            const Predicate& predicate) {
-  std::vector<DLIRAssertion> pred_list = {};
-  return std::make_pair(predicate, std::move(pred_list));
+  return std::make_pair(predicate, std::vector<DLIRAssertion>({}));
 }
 
 std::pair<Predicate, std::vector<DLIRAssertion>>
 LoweringToDatalogPass::BaseFactToDLIRInner(const Principal& speaker,
                                            const Attribute& attribute) {
-  std::vector<DLIRAssertion> pred_list = {
-      SpokenAttributeToDLIR(speaker, attribute)};
-  return std::make_pair(AttributeToDLIR(attribute), std::move(pred_list));
+  return std::make_pair(AttributeToDLIR(attribute), 
+      std::vector<DLIRAssertion>({SpokenAttributeToDLIR(speaker, attribute)}));
 }
 
 std::pair<Predicate, std::vector<DLIRAssertion>>
 LoweringToDatalogPass::BaseFactToDLIRInner(const Principal& speaker,
                                            const CanActAs& canActAs) {
-  std::vector<DLIRAssertion> pred_list = {
-      SpokenCanActAsToDLIR(speaker, canActAs)};
-  return std::make_pair(CanActAsToDLIR(canActAs), std::move(pred_list));
+  return std::make_pair(CanActAsToDLIR(canActAs), 
+      std::vector<DLIRAssertion>({SpokenCanActAsToDLIR(speaker, canActAs)}));
 }
 
 std::pair<Predicate, std::vector<DLIRAssertion>>
@@ -173,11 +170,9 @@ std::pair<Predicate, std::vector<DLIRAssertion>>
 LoweringToDatalogPass::FactToDLIR(const Principal& speaker, const Fact& fact) {
   return std::visit(
       raksha::utils::overloaded{
-          [this, speaker](BaseFact base_fact) {
+          [this, speaker](const BaseFact& base_fact) {
             return BaseFactToDLIR(speaker, base_fact);
           },
-          // To make the typechecker happy, this needs to be a const reference
-          // to a unique ptr... which is surprising to me.
           [this, speaker](const std::unique_ptr<CanSay>& can_say) {
             auto [inner_fact_dlir, gen_rules] =
                 FactToDLIR(speaker, *can_say->fact());
