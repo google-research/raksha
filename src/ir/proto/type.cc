@@ -29,8 +29,6 @@ Type Decode(types::TypeFactory& type_factory,
             const arcs::TypeProto& type_proto) {
   // Delegate to the various CreateFromProto implementations on the base types
   // depending upon which specific type is contained within the TypeProto.
-  CHECK(!type_proto.optional())
-      << "Optional types are currently unimplemented.";
   CHECK(!type_proto.has_refinement())
       << "Type refinements are currently unimplemented.";
   switch (type_proto.data_case()) {

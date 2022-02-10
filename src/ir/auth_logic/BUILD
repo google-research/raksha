@@ -25,6 +25,29 @@ cc_library(
         "ast.h",
     ],
     visibility = ["//test:__pkg__"],
+    deps = [
+        "//src/common/logging",
+        "//src/utils:overloaded",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_library(
+    name = "lowering_ast_datalog",
+    srcs = ["lowering_ast_datalog.cc"],
+    hdrs = [
+        "ast.h",
+        "datalog_ir.h",
+        "lowering_ast_datalog.h",
+        "map_iter.h",
+        "move_append.h",
+    ],
+    visibility = ["//test:__pkg__"],
+    deps = [
+        "//src/common/logging",
+        "//src/utils:overloaded",
+        "@absl//absl/strings:str_format",
+    ],
 )
 
 cc_test(

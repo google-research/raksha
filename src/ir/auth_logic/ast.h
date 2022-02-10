@@ -19,6 +19,7 @@
 #ifndef SRC_IR_AUTH_LOGIC_AST_H_
 #define SRC_IR_AUTH_LOGIC_AST_H_
 
+#include <memory>
 #include <string>
 #include <variant>
 #include <vector>
@@ -37,7 +38,7 @@ class Principal {
 // Used to represent whether a predicate is negated or not
 enum Sign { kNegated, kPositive };
 
-// Predicate corresponds to a predicate in of the form 
+// Predicate corresponds to a predicate of the form
 // <pred_name>(arg_1, ..., arg_n), and it may or may not be negated
 class Predicate {
  public:
@@ -50,7 +51,7 @@ class Predicate {
 
   const std::string& name() const { return name_; }
   const std::vector<std::string>& args() const { return args_; }
-  Sign sign() { return sign_; }
+  Sign sign() const { return sign_; }
 
  private:
   std::string name_;
@@ -63,9 +64,10 @@ class Predicate {
 class Attribute {
  public:
   explicit Attribute(Principal principal, Predicate predicate)
-    : principal_(principal), predicate_(predicate) {}
+      : principal_(principal), predicate_(predicate) {}
   const Principal& principal() const { return principal_; }
   const Predicate& predicate() const { return predicate_; }
+
  private:
   Principal principal_;
   Predicate predicate_;
@@ -76,34 +78,35 @@ class Attribute {
 class CanActAs {
  public:
   explicit CanActAs(Principal left_principal, Principal right_principal)
-    : left_principal_(std::move(left_principal)),
-      right_principal_(std::move(right_principal)) {}
+      : left_principal_(std::move(left_principal)),
+        right_principal_(std::move(right_principal)) {}
   const Principal& left_principal() const { return left_principal_; }
   const Principal& right_principal() const { return right_principal_; }
 
  private:
-   Principal left_principal_;
-   Principal right_principal_;
+  Principal left_principal_;
+  Principal right_principal_;
 };
 
-// BaseFact corresponds to a base-case fact that cannot recursively include other 
-// facts through "canSay". "Fact" includes the recursive case. It is necessary 
-// that BaseFact is a separate class from Fact because the RHS of conditional 
-// assertions can only contain BaseFacts.
+// BaseFact corresponds to a base-case fact that cannot recursively include
+// other facts through "canSay". "Fact" includes the recursive case. It is
+// necessary that BaseFact is a separate class from Fact because the RHS of
+// conditional assertions can only contain BaseFacts.
 // Base facts have three forms:
 //  - A predicate
 //  - An attribute
 //  - A canActAs expression
-// The particular choice of form is represented with a variant which is 
-// encapsulated.
 class BaseFact {
  public:
-  explicit BaseFact(Predicate predicate) : value_(std::move(predicate)) {};
-  explicit BaseFact(Attribute attribute) : value_(std::move(attribute)) {};
-  explicit BaseFact(CanActAs canActAs) : value_(std::move(canActAs)) {};
+  // BaseFactVariantType gives the different forms of BaseFacts. Client code
+  // should use this type to traverse these forms. This type may be changed in
+  // the future.
+  using BaseFactVariantType = std::variant<Predicate, Attribute, CanActAs>;
+  explicit BaseFact(BaseFactVariantType value) : value_(std::move(value)){};
+  const BaseFactVariantType& GetValue() const { return value_; }
 
  private:
-  std::variant<Predicate, Attribute, CanActAs> value_;
+  BaseFactVariantType value_;
 };
 
 // CanSay and Fact are forward-declared because they are mutually recursive.
@@ -112,40 +115,45 @@ class Fact;
 
 // CanSay corresponds to an expression of the form <principal> canSay Fact
 class CanSay {
-  public:
-    explicit CanSay(Principal principal, std::unique_ptr<Fact>& fact)
-      : principal_(principal), fact_(std::move(fact)) {}
-    const Principal& principal() const { return principal_; }
-    const Fact* fact() const { return fact_.get(); }
-  private:
-    Principal principal_;
-    std::unique_ptr<Fact> fact_;
-};
-
-// Fact corresponds to either a base fact or a an expression of the form 
-// <principal> canSay 
-class Fact {
  public:
-  explicit Fact(BaseFact base_fact) : value_(std::move(base_fact)) {}
-  explicit Fact(std::unique_ptr<CanSay> can_say)
-    : value_(std::move(can_say)) {}
+  explicit CanSay(Principal principal, std::unique_ptr<Fact>& fact)
+      : principal_(principal), fact_(std::move(fact)) {}
+  const Principal& principal() const { return principal_; }
+  const Fact* fact() const { return fact_.get(); }
 
  private:
-  std::variant<BaseFact, std::unique_ptr<CanSay>> value_;
+  Principal principal_;
+  std::unique_ptr<Fact> fact_;
 };
 
-// ConditionalAssertion the particular form of assertion that can have 
+// Fact corresponds to either a base fact or a an expression of the form
+// <principal> canSay <Fact>
+class Fact {
+ public:
+  // FactVariantType gives the different forms of Facts. Client code
+  // should use this type to traverse these forms. This type may be changed in
+  // the future.
+  using FactVariantType = std::variant<BaseFact, std::unique_ptr<CanSay>>;
+  explicit Fact(FactVariantType value) : value_(std::move(value)) {}
+  const FactVariantType& GetValue() const { return value_; }
+
+ private:
+  FactVariantType value_;
+};
+
+// ConditionalAssertion the particular form of assertion that can have
 // conditions which is:
 // <fact> :- <flat_fact_1> ... <flat_fact_n>
 class ConditionalAssertion {
-  public:
-    explicit ConditionalAssertion(Fact lhs, std::vector<BaseFact> rhs)
+ public:
+  explicit ConditionalAssertion(Fact lhs, std::vector<BaseFact> rhs)
       : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
-    const Fact& lhs() const { return lhs_; }
-    const std::vector<BaseFact>& rhs() const { return rhs_; }
-  private:
-    Fact lhs_;
-    std::vector<BaseFact> rhs_;
+  const Fact& lhs() const { return lhs_; }
+  const std::vector<BaseFact>& rhs() const { return rhs_; }
+
+ private:
+  Fact lhs_;
+  std::vector<BaseFact> rhs_;
 };
 
 // Assertions can have two forms:
@@ -153,20 +161,22 @@ class ConditionalAssertion {
 //  - Conditional assertions
 class Assertion {
  public:
-  explicit Assertion(Fact fact) : value_(std::move(fact)) {}
-  explicit Assertion(ConditionalAssertion conditional_assertion)
-    : value_(std::move(conditional_assertion)) {}
+  // AssertionVariantType gives the different forms of Facts. Client code
+  // should use this type to traverse these forms. This type may be changed in
+  // the future.
+  using AssertionVariantType = std::variant<Fact, ConditionalAssertion>;
+  explicit Assertion(AssertionVariantType value) : value_(std::move(value)) {}
+  const AssertionVariantType& GetValue() const { return value_; }
 
  private:
-  std::variant<Fact, ConditionalAssertion> value_;
+  AssertionVariantType value_;
 };
 
-// SaysAssertion prepends an assertion with <principal> says"
+// SaysAssertion prepends an assertion with "<principal> says"
 class SaysAssertion {
  public:
   explicit SaysAssertion(Principal principal, std::vector<Assertion> assertions)
-      : principal_(std::move(principal)),
-        assertions_(std::move(assertions)) {};
+      : principal_(std::move(principal)), assertions_(std::move(assertions)){};
   const Principal& principal() const { return principal_; }
   const std::vector<Assertion>& assertions() const { return assertions_; }
 
@@ -193,7 +203,7 @@ class Query {
   Fact fact_;
 };
 
-// This is a top-level program which can contain 
+// This is a top-level program.
 class Program {
  public:
   explicit Program(std::vector<SaysAssertion> says_assertions,
