@@ -47,7 +47,7 @@ class DataDeclCollection {
     return *(insertion_result.first)->second.get();
   }
 
-  const DataDecl* FindDecl(absl::string_view name) {
+  const DataDecl* FindDecl(absl::string_view name) const {
     auto find_result = decls_.find(name);
     return (find_result == decls_.end()) ? nullptr : find_result->second.get();
   }
