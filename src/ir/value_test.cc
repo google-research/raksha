@@ -59,7 +59,7 @@ struct TestData {
   value::OperationResult minus_operation_result;
   value::StoredValue input_stored_value;
   value::StoredValue output_stored_value;
-  SSANames ssa_names;
+  SsaNames ssa_names;
 };
 
 TestData test_data;

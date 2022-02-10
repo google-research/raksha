@@ -48,7 +48,7 @@ class NamedValue {
 
   const T& element() const { return *element_; }
   absl::string_view name() const { return name_; }
-  std::string ToString(SSANames& ssa_names) const {
+  std::string ToString(SsaNames& ssa_names) const {
     return absl::StrFormat("%%%d.%s", ssa_names.GetOrCreateID(*element_),
                            name_);
   }
@@ -82,7 +82,7 @@ class StoredValue {
 
   const Storage& storage() const { return *storage_; }
 
-  std::string ToString(const SSANames& ssa_names) const {
+  std::string ToString(const SsaNames& ssa_names) const {
     return storage_->ToString();
   }
 
@@ -93,7 +93,7 @@ class StoredValue {
 // A special value to indicate that it can be anything.
 class Any {
  public:
-  std::string ToString(const SSANames& ssa_names) const { return "<<ANY>>"; }
+  std::string ToString(const SsaNames& ssa_names) const { return "<<ANY>>"; }
 };
 
 }  // namespace value
@@ -106,7 +106,7 @@ class Value {
   Value(value::Any arg) : value_(std::move(arg)) {}
   Value(value::StoredValue arg) : value_(std::move(arg)) {}
 
-  std::string ToString(SSANames& ssa_names) const {
+  std::string ToString(SsaNames& ssa_names) const {
     return std::visit(
         [&ssa_names](const auto& variant) {
           return variant.ToString(ssa_names);

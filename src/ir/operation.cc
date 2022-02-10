@@ -23,9 +23,9 @@
 
 namespace raksha::ir {
 
-std::string Operation::ToString(SSANames& ssa_names) const {
+std::string Operation::ToString(SsaNames& ssa_names) const {
   constexpr absl::string_view kOperationFormat = "%%%d = %s [%s](%s)";
-  SSANames::ID this_ssa_name = ssa_names.GetOrCreateID(*this);
+  SsaNames::ID this_ssa_name = ssa_names.GetOrCreateID(*this);
   std::string attributes_string = absl::StrJoin(
       attributes_, ", ",
       [](std::string* out, const NamedAttributeMap::value_type& v) {

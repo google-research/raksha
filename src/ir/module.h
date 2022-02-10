@@ -49,7 +49,7 @@ class Operation {
   const NamedValueMap& inputs() const { return inputs_; }
   const NamedAttributeMap& attributes() const { return attributes_; }
 
-  std::string ToString(SSANames& ssa_names) const;
+  std::string ToString(SsaNames& ssa_names) const;
 
  private:
   // The parent block if any to which this operation belongs to.
