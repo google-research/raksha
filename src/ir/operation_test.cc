@@ -37,20 +37,17 @@ struct OperationTestData {
 class OperationTest : public testing::TestWithParam<OperationTestData> {
  public:
   static Block first_block_;
-  static Block second_block_;
   static Operator plus_op;
   static Operator minus_op;
-
- protected:
-  SSANames ssa_names_;
 };
 
 Block OperationTest::first_block_;
-Block OperationTest::second_block_;
 Operator OperationTest::plus_op("core.plus");
 Operator OperationTest::minus_op("core.minus");
 
 TEST_P(OperationTest, AccessorsAndToStringReturnCorrectValue) {
+  // Keeping it local so that the operation and first_block always get %0.
+  SsaNames ssa_names;
   const auto& [block, op, attributes, inputs, string_reps] = GetParam();
   Operation operation(block, *op, attributes, inputs);
   EXPECT_EQ(operation.parent(), block);
@@ -59,7 +56,7 @@ TEST_P(OperationTest, AccessorsAndToStringReturnCorrectValue) {
   // EXPECT_EQ(operation.attributes(), attributes);
   // TODO(337): Enable this when we have a comparator for values.
   // EXPECT_EQ(operation.inputs(), inputs);
-  EXPECT_THAT(string_reps, testing::Contains(operation.ToString(ssa_names_)));
+  EXPECT_THAT(string_reps, testing::Contains(operation.ToString(ssa_names)));
 }
 
 INSTANTIATE_TEST_SUITE_P(
