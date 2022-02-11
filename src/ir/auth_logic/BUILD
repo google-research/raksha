@@ -81,6 +81,7 @@ cc_test(
     deps = [
         ":souffle_emitter",
         "//src/common/testing:gtest",
+        "//src/utils:move_append",
     ],
 )
 
