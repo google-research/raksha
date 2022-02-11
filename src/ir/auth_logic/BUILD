@@ -35,7 +35,6 @@ cc_library(
 
 cc_test(
     name = "predicate_test",
-    srcs = ["predicate_test.cc"],
     deps = [
         ":ast",
         "//src/common/testing:gtest",
@@ -48,13 +47,13 @@ cc_library(
     hdrs = [
         "datalog_ir.h",
         "lowering_ast_datalog.h",
-        "map_iter.h",
-        "move_append.h",
     ],
     visibility = ["//test:__pkg__"],
     deps = [
+        ":ast",
         "//src/common/logging",
-        "//src/ir/auth_logic:ast",
+        "//src/utils:map_iter",
+        "//src/utils:move_append",
         "//src/utils:overloaded",
         "@absl//absl/strings:str_format",
     ],
@@ -69,6 +68,7 @@ cc_library(
     deps = [
         "//src/ir/auth_logic:ast",
         "//src/ir/auth_logic:lowering_ast_datalog",
+        "//src/utils:map_iter",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/strings",
     ],
@@ -80,6 +80,7 @@ cc_test(
     deps = [
         ":souffle_emitter",
         "//src/common/testing:gtest",
+        "//src/utils:move_append",
     ],
 )
 
