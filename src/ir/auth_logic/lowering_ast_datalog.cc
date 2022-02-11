@@ -66,8 +66,6 @@ Predicate CanActAsToDLIR(const CanActAs& can_act_as) {
 
 DLIRAssertion LoweringToDatalogPass::SpokenAttributeToDLIR(
     const Principal& speaker, const Attribute& attribute) {
-  Predicate main_predicate = AttributeToDLIR(attribute);
-
   // Attributes interact with "canActAs" because if "Y canActAs X"
   // then Y also picks up X's attributes. We need to generate
   // an additional rule to implement this behavior. If the attribute
@@ -78,16 +76,17 @@ DLIRAssertion LoweringToDatalogPass::SpokenAttributeToDLIR(
   Principal prin_y(FreshVar());
 
   // This is `speaker says Y PredX`
-  Predicate generated_lhs = PushPrincipal("says_", prin_y, main_predicate);
+  Predicate y_predX = AttributeToDLIR(Attribute(prin_y, attribute.predicate()));
+  Predicate generated_lhs = PushPrincipal("says_", speaker, y_predX);
 
-  Predicate y_can_act_as_x("canActAs",
-                           {prin_y.name(), attribute.principal().name()},
-                           Sign::kPositive);
-
+  // This is `speaker says Y canActAs X`
+  Predicate y_can_act_as_x =
+      CanActAsToDLIR(CanActAs(prin_y, attribute.principal()));
   Predicate speaker_says_y_can_act_as_x =
       PushPrincipal("says_", speaker, y_can_act_as_x);
 
   // This is `speaker says X PredX`
+  Predicate main_predicate = AttributeToDLIR(attribute);
   Predicate speaker_says_x_pred =
       PushPrincipal("says_", speaker, main_predicate);
 
@@ -101,28 +100,28 @@ DLIRAssertion LoweringToDatalogPass::SpokenAttributeToDLIR(
 
 DLIRAssertion LoweringToDatalogPass::SpokenCanActAsToDLIR(
     const Principal& speaker, const CanActAs& can_act_as) {
-  Predicate main_predicate = CanActAsToDLIR(can_act_as);
-
   // "canActAs" facts are passed to principals via other canActAs facts in
   // essentially the same way as attributes. This function adds extra
   // rules to pass these around. If the `canActAs` under translation
   // is `X canActAs Z`, then the rule we need to generate is:
-  // `speaker says Y PredX :-
-  //    speaker says Y canActAs X, speaker says X canActAsZ`
+  // `speaker says Y canActAs Z :-
+  //    speaker says Y canActAs X, speaker says X canActAs Z`
   // (Where Y is a fresh variable)
   Principal prin_y(FreshVar());
 
-  // This is `speaker says Y PredX`
-  Predicate generated_lhs = PushPrincipal("says_", prin_y, main_predicate);
+  // This is `speaker says Y canActAs Z`
+  Predicate y_can_act_as_z =
+      CanActAsToDLIR(CanActAs(prin_y, can_act_as.right_principal()));
+  Predicate generated_lhs = PushPrincipal("says_", speaker, y_can_act_as_z);
 
-  Predicate y_can_act_as_x("canActAs",
-                           {prin_y.name(), can_act_as.left_principal().name()},
-                           Sign::kPositive);
-
+  // This is `speaker says Y canActAs X`
+  Predicate y_can_act_as_x =
+      CanActAsToDLIR(CanActAs(prin_y, can_act_as.left_principal()));
   Predicate speaker_says_y_can_act_as_x =
       PushPrincipal("says_", speaker, y_can_act_as_x);
 
   // This is `speaker says X canActAs Z`
+  Predicate main_predicate = CanActAsToDLIR(can_act_as);
   Predicate speaker_says_x_can_act_as_z =
       PushPrincipal("says_", speaker, main_predicate);
 
