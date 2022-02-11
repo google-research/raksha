@@ -28,7 +28,6 @@ cc_library(
         "data_decl.h",
         "operation.h",
         "operator.h",
-        "storage.h",
         "value.h",
     ],
     deps = [
@@ -76,6 +75,25 @@ cc_test(
 )
 
 cc_library(
+    name = "ir_context",
+    hdrs = ["ir_context.h"],
+    deps = [
+        ":operator",
+        "//src/ir/types",
+        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_test(
+    name = "ir_context_test",
+    srcs = ["ir_context_test.cc"],
+    deps = [
+        ":ir_context",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
     name = "operator",
     hdrs = ["operator.h"],
     deps = [
@@ -88,6 +106,46 @@ cc_test(
     srcs = ["operator_test.cc"],
     deps = [
         ":operator",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_test(
+    name = "operation_test",
+    srcs = ["operation_test.cc"],
+    deps = [
+        ":module",
+        "//src/common/testing:gtest",
+        "@absl//absl/container:flat_hash_set",
+    ],
+)
+
+cc_library(
+    name = "module",
+    srcs = ["operation.cc"],
+    hdrs = ["module.h"],
+    deps = [
+        ":attribute",
+        ":data_decl",
+        ":operator",
+        ":value",
+    ],
+)
+
+cc_library(
+    name = "ssa_names",
+    hdrs = ["ssa_names.h"],
+    deps = [
+        ":operator",
+        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_test(
+    name = "ssa_names_test",
+    srcs = ["ssa_names_test.cc"],
+    deps = [
+        ":module",
         "//src/common/testing:gtest",
     ],
 )
@@ -107,6 +165,27 @@ cc_test(
     deps = [
         ":storage",
         "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
+    name = "value",
+    hdrs = ["value.h"],
+    deps = [
+        ":ssa_names",
+        ":storage",
+        "//src/ir/types",
+    ],
+)
+
+cc_test(
+    name = "value_test",
+    srcs = ["value_test.cc"],
+    deps = [
+        ":module",
+        ":value",
+        "//src/common/testing:gtest",
+        "//src/ir/types",
     ],
 )
 
