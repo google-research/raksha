@@ -21,10 +21,12 @@
 #include "src/common/testing/gtest.h"
 
 namespace raksha::utils {
+
 TEST(MoveAppendTestSuite, SimpleMoveAppendTest) {
   std::vector test_vec1({1, 2, 3, 4});
   std::vector test_vec2({5, 6, 7, 8});
   MoveAppend(test_vec1, std::move(test_vec2));
   EXPECT_EQ(test_vec1, std::vector({1, 2, 3, 4, 5, 6, 7, 8}));
 }
+
 }  // namespace raksha::utils

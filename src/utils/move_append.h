@@ -19,6 +19,8 @@
 #ifndef SRC_UTILS_MOVE_APPEND_H_
 #define SRC_UTILS_MOVE_APPEND_H_
 
+#include <vector>
+
 namespace raksha::utils {
 
 // Appends the `src` vector to the `dst` vector. This modifies

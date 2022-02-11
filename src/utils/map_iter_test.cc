@@ -18,9 +18,11 @@
 #include "src/common/testing/gtest.h"
 
 namespace raksha::utils {
+
 TEST(MapIterTestSuite, SimpleMapIterTest) {
   std::vector test_vec = MapIter<int, int>(std::vector({1, 5, 3, 9, 5}),
                                            [](const int& x) { return x + 3; });
   EXPECT_EQ(test_vec, std::vector({4, 8, 6, 12, 8}));
 }
+
 }  // namespace raksha::utils
