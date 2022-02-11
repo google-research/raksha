@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,43 +19,44 @@
 
 namespace raksha::ir::auth_logic {
 
-TEST(AstEqualityTestSuite, Test1) {
+TEST(PredicateTest, EqualReturnsForIdenticalPredicates) {
   Predicate p1("foo", {"bar", "baz"}, kPositive);
   Predicate p2("foo", {"bar", "baz"}, kPositive);
   EXPECT_TRUE(p1 == p2);
 }
 
-TEST(AstEqualityTestSuite, Test2) {
+TEST(PredicateTest, UnequalReturnsForDifferntPredicateNames) {
   Predicate p1("foo", {"bar", "baz"}, kPositive);
   Predicate p2("food", {"bar", "baz"}, kPositive);
   EXPECT_TRUE(!(p1 == p2));
 }
 
-TEST(AstEqualityTestSuite, Test3) {
+TEST(PredicateTest, UnequalReturnsForDifferentlyOrderedParameters) {
   Predicate p1("foo", {"bar", "baz"}, kPositive);
   Predicate p2("foo", {"baz", "bar"}, kPositive);
   EXPECT_TRUE(!(p1 == p2));
 }
 
-TEST(AstEqualityTestSuite, Test4) {
+TEST(PredicateTest, UnequalReturnsForDifferentParameterNames) {
   Predicate p1("foo", {"barrrrr", "baz"}, kPositive);
   Predicate p2("foo", {"bar", "baz"}, kPositive);
   EXPECT_TRUE(!(p1 == p2));
 }
 
-TEST(AstEqualityTestSuite, Test5) {
+TEST(PredicateTest,
+     UnequalReturnsForDifferentParameterNamesInDifferentPosition) {
   Predicate p1("foo", {"bar", "baz"}, kPositive);
   Predicate p2("foo", {"bar", "bas"}, kPositive);
   EXPECT_TRUE(!(p1 == p2));
 }
 
-TEST(AstEqualityTestSuite, Test6) {
+TEST(PredicateTest, UnequalReturnsForDifferentPolarity) {
   Predicate p1("foo", {"bar", "baz"}, kPositive);
   Predicate p2("foo", {"bar", "baz"}, kNegated);
   EXPECT_TRUE(!(p1 == p2));
 }
 
-TEST(AstEqualityTestSuite, Test7) {
+TEST(PredicateTest, UnequalReturnsForPrefixingUnequalParameterList) {
   Predicate p1("foo", {"bar", "baz"}, kPositive);
   Predicate p2("foo", {"bar", "baz", "beef"}, kPositive);
   EXPECT_TRUE(!(p1 == p2));

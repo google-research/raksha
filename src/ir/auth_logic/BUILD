@@ -34,8 +34,8 @@ cc_library(
 )
 
 cc_test(
-    name = "ast_equality_test",
-    srcs = ["ast_equality_test.cc"],
+    name = "predicate_test",
+    srcs = ["predicate_test.cc"],
     deps = [
         ":ast",
         "//src/common/testing:gtest",
