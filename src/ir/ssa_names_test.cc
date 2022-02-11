@@ -16,9 +16,7 @@
 #include "src/ir/ssa_names.h"
 
 #include "src/common/testing/gtest.h"
-#include "src/ir/block.h"
-#include "src/ir/data_decl.h"
-#include "src/ir/operation.h"
+#include "src/ir/module.h"
 #include "src/ir/operator.h"
 
 namespace raksha::ir {
@@ -34,8 +32,8 @@ class SsaNamesTest : public ::testing::Test {
 
 TEST_F(SsaNamesTest, GetOrCreateIDReturnsUniqueIDsForOperations) {
   SsaNames names;
-  Operation first_operation(nullptr, test_op_, {});
-  Operation second_operation(nullptr, test_op_, {});
+  Operation first_operation(nullptr, test_op_, {}, {});
+  Operation second_operation(nullptr, test_op_, {}, {});
   SsaNames::ID first_operation_id = names.GetOrCreateID(first_operation);
   SsaNames::ID second_operation_id = names.GetOrCreateID(second_operation);
 
