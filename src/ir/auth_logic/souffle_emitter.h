@@ -21,7 +21,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "src/ir/auth_logic/datalog_ir.h"
-#include "src/ir/auth_logic/map_iter.h"
+#include "src/utils/map_iter.h"
 
 namespace raksha::ir::auth_logic {
 
@@ -51,7 +51,7 @@ class SouffleEmitter {
   Predicate PredToDeclaration(const Predicate& predicate) {
     int i = 0;
     return Predicate(predicate.name(),
-                     MapIter<std::string, std::string>(
+                     utils::MapIter<std::string, std::string>(
                          predicate.args(),
                          [i](const std::string& arg) mutable {
                            return absl::StrCat("x", std::to_string(i++));
@@ -73,7 +73,7 @@ class SouffleEmitter {
   }
 
   std::string EmitAssertionInner(const DLIRCondAssertion& cond_assertion) {
-    std::vector rhs_translated = MapIter<Predicate, std::string>(
+    std::vector rhs_translated = utils::MapIter<Predicate, std::string>(
         cond_assertion.rhs(),
         [this](const Predicate& arg) { return EmitPredicate(arg); });
     return absl::StrCat(EmitPredicate(cond_assertion.lhs()), " :- ",
@@ -87,7 +87,7 @@ class SouffleEmitter {
 
   std::string EmitProgramBody(const DLIRProgram& program) {
     return absl::StrJoin(
-        MapIter<DLIRAssertion, std::string>(
+        utils::MapIter<DLIRAssertion, std::string>(
             program.assertions(),
             [this](const DLIRAssertion& astn) { return EmitAssertion(astn); }),
         "\n");

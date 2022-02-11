@@ -69,6 +69,7 @@ cc_library(
     deps = [
         "//src/ir/auth_logic:ast",
         "//src/ir/auth_logic:lowering_ast_datalog",
+        "//src/utils:map_iter",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/strings",
     ],
