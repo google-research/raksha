@@ -32,4 +32,5 @@ void MoveAppend(std::vector<T>& dst, std::vector<T>&& src) {
 }
 
 }  // namespace raksha::utils
+
 #endif  // SRC_UTILS_MOVE_APPEND_H_
