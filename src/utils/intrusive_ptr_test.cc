@@ -181,5 +181,21 @@ TEST(IntrusivePtrTest, DestructorReducesCount) {
   EXPECT_EQ(ptr->count(), 1);
 }
 
+TEST(IntrusivePtrTest, EqualReturnsForIdenticalPtr) {
+  RefCountedTypePtr ptr = make_intrusive_ptr<RefCountedType>();
+  
+  RefCountedTypePtr copy = ptr;
+  EXPECT_TRUE(ptr == copy);
+
+  RefCountedTypePtr newIntrPtr = intrusive_ptr<RefCountedType>(ptr);
+  EXPECT_TRUE(ptr == newIntrPtr);
+}
+
+TEST(IntrusivePtrTest, UnEqualReturnsForDifferentPtr) {
+  RefCountedTypePtr ptr = make_intrusive_ptr<RefCountedType>();
+  RefCountedTypePtr cmptr = make_intrusive_ptr<RefCountedType>();
+  EXPECT_TRUE(!(ptr == cmptr));
+}
+
 }  // namespace
 }  // namespace raksha

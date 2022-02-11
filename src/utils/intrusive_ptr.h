@@ -42,6 +42,10 @@ class intrusive_ptr {
     return *this;
   }
 
+  bool operator==(intrusive_ptr<T> other) {
+    return this->ptr_ == other.ptr_; 
+  }
+
   T& operator*() const {
     CHECK(ptr_ != nullptr) << "Dereferencing a nullptr!";
     return *ptr_;
