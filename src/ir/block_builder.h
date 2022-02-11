@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,11 +50,9 @@ class BlockBuilder {
   const Operation& AddOperation(const Operator& op,
                                 NamedAttributeMap attributes,
                                 NamedValueMap inputs) {
-    std::unique_ptr<Operation> operation(new Operation(
+    block_->operations_.push_back(std::make_unique<Operation>(
         block_.get(), op, std::move(attributes), std::move(inputs)));
-    const Operation* result = operation.get();
-    block_->operations_.push_back(std::move(operation));
-    return *result;
+    return *block_->operations_.back();
   }
 
   // Provides the ability to make multiple changes to the block through a
