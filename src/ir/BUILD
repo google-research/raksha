@@ -110,6 +110,16 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "operation_test",
+    srcs = ["operation_test.cc"],
+    deps = [
+        ":module",
+        "//src/common/testing:gtest",
+        "@absl//absl/container:flat_hash_set",
+    ],
+)
+
 cc_library(
     name = "module",
     srcs = ["operation.cc"],
