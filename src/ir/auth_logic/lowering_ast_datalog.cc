@@ -66,7 +66,6 @@ Predicate CanActAsToDLIR(const CanActAs& can_act_as) {
 
 DLIRAssertion LoweringToDatalogPass::SpokenAttributeToDLIR(
     const Principal& speaker, const Attribute& attribute) {
-
   // Attributes interact with "canActAs" because if "Y canActAs X"
   // then Y also picks up X's attributes. We need to generate
   // an additional rule to implement this behavior. If the attribute
@@ -81,8 +80,8 @@ DLIRAssertion LoweringToDatalogPass::SpokenAttributeToDLIR(
   Predicate generated_lhs = PushPrincipal("says_", speaker, y_predX);
 
   // This is `speaker says Y canActAs X`
-  Predicate y_can_act_as_x = CanActAsToDLIR(CanActAs(prin_y,
-        attribute.principal()));
+  Predicate y_can_act_as_x =
+      CanActAsToDLIR(CanActAs(prin_y, attribute.principal()));
   Predicate speaker_says_y_can_act_as_x =
       PushPrincipal("says_", speaker, y_can_act_as_x);
 
@@ -101,7 +100,6 @@ DLIRAssertion LoweringToDatalogPass::SpokenAttributeToDLIR(
 
 DLIRAssertion LoweringToDatalogPass::SpokenCanActAsToDLIR(
     const Principal& speaker, const CanActAs& can_act_as) {
-
   // "canActAs" facts are passed to principals via other canActAs facts in
   // essentially the same way as attributes. This function adds extra
   // rules to pass these around. If the `canActAs` under translation
@@ -112,13 +110,13 @@ DLIRAssertion LoweringToDatalogPass::SpokenCanActAsToDLIR(
   Principal prin_y(FreshVar());
 
   // This is `speaker says Y canActAs Z`
-  Predicate y_can_act_as_z = CanActAsToDLIR(CanActAs(prin_y,
-        can_act_as.right_principal()));
+  Predicate y_can_act_as_z =
+      CanActAsToDLIR(CanActAs(prin_y, can_act_as.right_principal()));
   Predicate generated_lhs = PushPrincipal("says_", speaker, y_can_act_as_z);
 
   // This is `speaker says Y canActAs X`
-  Predicate y_can_act_as_x = CanActAsToDLIR(CanActAs(prin_y,
-        can_act_as.left_principal()));
+  Predicate y_can_act_as_x =
+      CanActAsToDLIR(CanActAs(prin_y, can_act_as.left_principal()));
   Predicate speaker_says_y_can_act_as_x =
       PushPrincipal("says_", speaker, y_can_act_as_x);
 

@@ -33,6 +33,15 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "ast_equality_test",
+    srcs = ["ast_equality_test.cc"],
+    deps = [
+        ":ast",
+        "//src/common/testing:gtest",
+    ],
+)
+
 cc_library(
     name = "lowering_ast_datalog",
     srcs = ["lowering_ast_datalog.cc"],

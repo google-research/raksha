@@ -21,6 +21,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "src/ir/auth_logic/datalog_ir.h"
+#include "src/ir/auth_logic/map_iter.h"
 
 namespace raksha::ir::auth_logic {
 
@@ -48,11 +49,14 @@ class SouffleEmitter {
   // To prevent instances of negated and non-negated uses of the predicate
   // from generating two declarations, the sign here is always positive.
   Predicate PredToDeclaration(const Predicate& predicate) {
-    std::vector<std::string> decl_args;
-    for (int i = 0; i < predicate.args().size(); i++) {
-      decl_args.push_back(absl::StrCat("x", std::to_string(i)));
-    }
-    return Predicate(predicate.name(), decl_args, kPositive);
+    int i = 0;
+    return Predicate(predicate.name(),
+                     MapIter<std::string, std::string>(
+                         predicate.args(),
+                         [i](const std::string& arg) mutable {
+                           return absl::StrCat("x", std::to_string(i++));
+                         }),
+                     kPositive);
   }
 
   std::string EmitPredicate(const Predicate& predicate) {
@@ -69,12 +73,10 @@ class SouffleEmitter {
   }
 
   std::string EmitAssertionInner(const DLIRCondAssertion& cond_assertion) {
-    std::string lhs = EmitPredicate(cond_assertion.lhs());
-    std::vector<std::string> rhs_translated;
-    for (auto arg : cond_assertion.rhs()) {
-      rhs_translated.push_back(EmitPredicate(arg));
-    }
-    return absl::StrCat(std::move(lhs), " :- ",
+    std::vector rhs_translated = MapIter<Predicate, std::string>(
+        cond_assertion.rhs(),
+        [this](const Predicate& arg) { return EmitPredicate(arg); });
+    return absl::StrCat(EmitPredicate(cond_assertion.lhs()), " :- ",
                         absl::StrJoin(rhs_translated, ", "), ".");
   }
 
@@ -84,11 +86,11 @@ class SouffleEmitter {
   }
 
   std::string EmitProgramBody(const DLIRProgram& program) {
-    std::vector<std::string> body_translated;
-    for (auto assertion : program.assertions()) {
-      body_translated.push_back(EmitAssertion(assertion));
-    }
-    return absl::StrJoin(body_translated, "\n");
+    return absl::StrJoin(
+        MapIter<DLIRAssertion, std::string>(
+            program.assertions(),
+            [this](const DLIRAssertion& astn) { return EmitAssertion(astn); }),
+        "\n");
   }
 
   std::string EmitOutputs(const DLIRProgram& program) {
@@ -108,9 +110,8 @@ class SouffleEmitter {
   }
 
   std::string EmitDeclarations() {
-    std::vector elements_vec(
-        std::make_move_iterator(declarations_.begin()), 
-        std::make_move_iterator(declarations_.end()));
+    std::vector elements_vec(std::make_move_iterator(declarations_.begin()),
+                             std::make_move_iterator(declarations_.end()));
     std::sort(elements_vec.begin(), elements_vec.end());
     return absl::StrJoin(elements_vec, "\n",
                          [this](std::string* out, auto decl) {

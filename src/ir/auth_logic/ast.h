@@ -59,13 +59,13 @@ class Predicate {
   friend H AbslHashValue(H h, const Predicate& p) {
     return H::combine(std::move(h), p.name(), p.args(), p.sign());
   }
-    // Equality is also needed to use a Predicate in a flat_hash_set
+  // Equality is also needed to use a Predicate in a flat_hash_set
   bool operator==(const Predicate& otherPredicate) const {
     if (this->name() != otherPredicate.name()) {
-        return false;
+      return false;
     }
     if (this->sign() != otherPredicate.sign()) {
-        return false;
+      return false;
     }
     if (this->args().size() != otherPredicate.args().size()) {
       return false;
@@ -78,11 +78,11 @@ class Predicate {
 
   // < operator is needed for btree_set, which is only used for declarations.
   // Since declarations are uniquely defined by the name of the predicate,
-  // this implementation that just uses < on the predicate names should be 
+  // this implementation that just uses < on the predicate names should be
   // sufficent in the context where it is used.
-  bool operator< (const Predicate& otherPredicate) const {
+  bool operator<(const Predicate& otherPredicate) const {
     return this->name() < otherPredicate.name();
-  } 
+  }
 
  private:
   std::string name_;
