@@ -28,7 +28,16 @@ cc_library(
     deps = [
         "//src/common/logging",
         "//src/utils:overloaded",
+        "@absl//absl/hash",
         "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "predicate_test",
+    deps = [
+        ":ast",
+        "//src/common/testing:gtest",
     ],
 )
 
@@ -36,17 +45,42 @@ cc_library(
     name = "lowering_ast_datalog",
     srcs = ["lowering_ast_datalog.cc"],
     hdrs = [
-        "ast.h",
         "datalog_ir.h",
         "lowering_ast_datalog.h",
-        "map_iter.h",
-        "move_append.h",
     ],
     visibility = ["//test:__pkg__"],
     deps = [
+        ":ast",
         "//src/common/logging",
+        "//src/utils:map_iter",
+        "//src/utils:move_append",
         "//src/utils:overloaded",
         "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_library(
+    name = "souffle_emitter",
+    srcs = ["souffle_emitter_build_stub.cc"],
+    hdrs = [
+        "souffle_emitter.h",
+    ],
+    deps = [
+        "//src/ir/auth_logic:ast",
+        "//src/ir/auth_logic:lowering_ast_datalog",
+        "//src/utils:map_iter",
+        "@absl//absl/container:flat_hash_set",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "souffle_emitter_test",
+    srcs = ["souffle_emitter_test.cc"],
+    deps = [
+        ":souffle_emitter",
+        "//src/common/testing:gtest",
+        "//src/utils:move_append",
     ],
 )
 
