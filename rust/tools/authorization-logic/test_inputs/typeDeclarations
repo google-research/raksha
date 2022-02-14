@@ -1,0 +1,7 @@
+.decl someFact(x : symbol)
+.decl someOtherFact(x : symbol, y : number)
+.decl thirdFact(p : principal)
+
+"TestPrincipal" says someFact("some_argument").
+"TestPrincipal" says someOtherFact("abcde", 38).
+"TestPrincipal" says thirdFact("OtherPrincipal").

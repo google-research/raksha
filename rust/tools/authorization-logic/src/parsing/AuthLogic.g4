@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Raksha Authors
+ * Copyright 2021 Google LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,19 @@ importAssertion
     : IMPORT principal SAYS ID
     ;
 
+// The name "type" would cause name collisions in the code that antlr generates
+authLogicType
+    : NUMBERTYPE #numberType
+    | SYMBOLTYPE #symbolType
+    | PRINCIPALTYPE #principalType
+    ;
+
+typeDeclaration
+    : '.decl' ID '(' ID ':' authLogicType (',' ID ':' authLogicType)* ')'
+    ;
+
 program
-    : ((saysAssertion | query | keyBind | importAssertion))+
+    : ((saysAssertion | query | keyBind | importAssertion | typeDeclaration))+
     ;
 
 //-----------------------------------------------------------------------------
@@ -100,6 +111,9 @@ EXPORT: 'exportTo';
 IMPORT: 'import';
 BINDEX: 'BindPrivKey';
 BINDIM: 'BindPubKey';
+NUMBERTYPE: 'number';
+SYMBOLTYPE: 'symbol';
+PRINCIPALTYPE: 'principal';
 
 
 // Identifiers wrapped in quotes are constants whereas
