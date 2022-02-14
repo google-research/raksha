@@ -8,9 +8,6 @@ mod test {
     pub fn test_type_declarations() {
         let test_ast = source_file_to_ast_test_only("typeDeclarations",
                                                     "test_inputs");
-        println!("test_type type declarations");
-        println!("{:?}", test_ast.type_declarations);
-        println!("about to do assertion:");
         assert!(test_ast.type_declarations == vec![
                 AstTypeDeclaration {
                     predicate_name: "someFact".to_string(),
