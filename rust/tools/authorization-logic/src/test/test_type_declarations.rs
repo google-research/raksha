@@ -16,17 +16,17 @@ mod test {
                     predicate_name: "someFact".to_string(),
                     arg_typings: vec![("x".to_string(), AstType::SymbolType)]
                 },
-                // AstTypeDeclaration {
-                //     predicate_name: "someOtherFact".to_string(),
-                //     arg_typings: vec![
-                //         ("x".to_string(), AstType::SymbolType),
-                //         ("y".to_string(), AstType::NumberType)
-                //     ]
-                // },
-                // AstTypeDeclaration {
-                //     predicate_name: "thirdFact".to_string(),
-                //     arg_typings: vec![("p".to_string(), AstType::PrincipalType)]
-                // }
+                AstTypeDeclaration {
+                    predicate_name: "someOtherFact".to_string(),
+                    arg_typings: vec![
+                        ("x".to_string(), AstType::SymbolType),
+                        ("y".to_string(), AstType::NumberType)
+                    ]
+                },
+                AstTypeDeclaration {
+                    predicate_name: "thirdFact".to_string(),
+                    arg_typings: vec![("p".to_string(), AstType::PrincipalType)]
+                }
         ]);
     }
 
