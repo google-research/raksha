@@ -93,6 +93,7 @@ filegroup(
         "src/test/test_num_string_names.rs",
         "src/test/test_queries.rs",
         "src/test/test_signing.rs",
+        "src/test/test_type_declarations.rs",
     ],
 )
 
