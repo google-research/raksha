@@ -23,22 +23,43 @@
 
 namespace raksha::ir {
 
+// Note: I tried to make this only defined in terms of the type parameter T, but
+// the compiler was unhappy with me writing std::function<std::string(const T&)>
+// and I could not figure out how to placate it.
+template<class T, class U>
+static std::string PrintNamedMapInNameOrder(
+    const absl::flat_hash_map<std::string, T> &map_to_print,
+    U value_printing_fn) {
+  std::vector<absl::string_view> names;
+  names.reserve(map_to_print.size());
+  for (auto &key_value_pair : map_to_print) {
+    names.push_back(key_value_pair.first);
+  }
+  std::sort(names.begin(), names.end());
+  return absl::StrJoin(
+      names, ", ",
+      [&](std::string* out, const absl::string_view name) {
+        auto find_res = map_to_print.find(name);
+        CHECK(find_res != map_to_print.end())
+          << "Name " << name << " not found in map_to_print";
+        absl::StrAppend(out, name, ": ", value_printing_fn(find_res->second));
+      });
+}
+
 std::string Operation::ToString(SsaNames& ssa_names) const {
   constexpr absl::string_view kOperationFormat = "%%%d = %s [%s](%s)";
   SsaNames::ID this_ssa_name = ssa_names.GetOrCreateID(*this);
-  std::string attributes_string = absl::StrJoin(
-      attributes_, ", ",
-      [](std::string* out, const NamedAttributeMap::value_type& v) {
-        const auto& [name, attribute] = v;
-        absl::StrAppend(out, name, ": ", attribute->ToString());
-      });
 
-  std::string inputs_string = absl::StrJoin(
-      inputs_, ", ",
-      [&ssa_names](std::string* out, const NamedValueMap::value_type& v) {
-        const auto& [name, value] = v;
-        absl::StrAppend(out, name, ": ", value.ToString(ssa_names));
-      });
+  // We want the attribute names to print in a stable order. This means that
+  // we cannot just print from the attribute map directly. Gather the names
+  // into a vector and sort that, then use the order in that vector to print
+  // the attributes.
+  std::string attributes_string =
+      PrintNamedMapInNameOrder(attributes_,
+          [](const Attribute &attr){ return attr->ToString(); });
+
+  std::string inputs_string = PrintNamedMapInNameOrder(
+      inputs_, [&](const Value &val){ return val.ToString(ssa_names); });
 
   return absl::StrFormat(kOperationFormat, this_ssa_name, op_->name(),
                          attributes_string, inputs_string);
