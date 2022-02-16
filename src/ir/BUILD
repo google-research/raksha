@@ -100,6 +100,22 @@ cc_test(
 )
 
 cc_library(
+    name = "ir_traversing_visitor",
+    hdrs = ["ir_traversing_visitor.h"],
+    deps = [":module"],
+)
+
+cc_test(
+    name = "ir_traversing_visitor_test",
+    srcs = ["ir_traversing_visitor_test.cc"],
+    deps = [
+        ":block_builder",
+        ":ir_traversing_visitor",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
     name = "operator",
     hdrs = ["operator.h"],
     deps = [
@@ -129,7 +145,10 @@ cc_test(
 cc_library(
     name = "module",
     srcs = ["operation.cc"],
-    hdrs = ["module.h"],
+    hdrs = [
+        "ir_visitor.h",
+        "module.h",
+    ],
     deps = [
         ":attribute",
         ":data_decl",
