@@ -138,6 +138,15 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "module_test",
+    srcs = ["module_test.cc"],
+    deps = [
+        ":module",
+        "//src/common/testing:gtest",
+    ],
+)
+
 cc_library(
     name = "ssa_names",
     hdrs = ["ssa_names.h"],
