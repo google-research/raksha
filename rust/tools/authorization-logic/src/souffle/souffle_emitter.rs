@@ -18,7 +18,11 @@ use crate::{ast::*, souffle::datalog_ir::*};
 
 /// Produces Souffle code as a `String` when given a Datalog IR (DLIR) program.
 pub fn emit_program(p: &DLIRProgram, decl_skip: &Option<Vec<String>>) -> String {
-    vec![ emit_declarations(p), emit_program_body(p), emit_outputs(p)].join("\n")
+    vec![ 
+        emit_declarations(p, decl_skip.as_ref().unwrap_or(&Vec::new())),
+        emit_program_body(p),
+        emit_outputs(p)
+    ].join("\n")
 }
 
 fn emit_type(auth_logic_type: &AstType) -> String {
@@ -71,10 +75,11 @@ fn emit_program_body(p: &DLIRProgram) -> String {
         .join("\n")
 }
 
-fn emit_declarations(p: &DLIRProgram) -> String {
+fn emit_declarations(p: &DLIRProgram, decl_skip: &Vec<String>) -> String {
     let principal_type = String::from(".type principal <: symbol");
     let generated_declarations = p.type_declarations
         .iter()
+        .filter(|x| !decl_skip.contains(&x.predicate_name))
         .map(|x| emit_decl(x))
         .collect::<Vec<_>>()
         .join("\n");

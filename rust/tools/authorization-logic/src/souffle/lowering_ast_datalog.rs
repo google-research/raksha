@@ -391,7 +391,7 @@ impl LoweringToDatalogPass {
                 AstTypeDeclaration {
             match decl.is_attribute {
                 true => {
-                    let mut arg_typings_ = vec![("attrbuted_prin".to_string(),
+                    let mut arg_typings_ = vec![("attributed_prin".to_string(),
                                                  AstType::PrincipalType)];
                     arg_typings_.append(&mut decl.arg_typings.clone());
                     AstTypeDeclaration {
