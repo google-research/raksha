@@ -15,116 +15,76 @@
  */
 
 use crate::{ast::*, souffle::datalog_ir::*};
-use std::collections::HashSet;
 
-pub struct SouffleEmitter {
-    // This is a set of predicates that need to be declared. This set is
-    // populated by side effect while traversing the program body.
-    decls: HashSet<AstPredicate>,
+/// Produces Souffle code as a `String` when given a Datalog IR (DLIR) program.
+pub fn emit_program(p: &DLIRProgram, decl_skip: &Option<Vec<String>>) -> String {
+    vec![ emit_declarations(p), emit_program_body(p), emit_outputs(p)].join("\n")
 }
 
-impl SouffleEmitter {
-    /// Produces Souffle code as a `String` when given a Datalog IR (DLIR) program.
-    pub fn emit_program(p: &DLIRProgram, decl_skip: &Option<Vec<String>>) -> String {
-        let mut emitter = SouffleEmitter::new();
-        // It is important to generate the body first in this case
-        // because the declarations are populated by side-effect while
-        // generating the body.
-        let body = emitter.emit_program_body(p);
-        let outputs = emitter.emit_outputs(p);
-        let decls = emitter.emit_declarations(
-            decl_skip.as_ref().unwrap_or(&Vec::new()));
-        vec![decls, body, outputs].join("\n")
+fn emit_type(auth_logic_type: &AstType) -> String {
+    match auth_logic_type {
+        AstType::NumberType => "number".to_string(),
+        AstType::SymbolType => "symbol".to_string(),
+        AstType::PrincipalType => "principal".to_string()
     }
+}
 
-    fn new() -> SouffleEmitter {
-        SouffleEmitter {
-            decls: HashSet::new(),
-        }
-    }
-
-    // This function produces a normalized version of predicates to
-    // be used when generating declarations of the predicates. It replaces
-    // argument names with generic numbered ones. It is applied
-    // to predicates before they are added to the set of declarations so that
-    // there are no duplicate delcarations (which would otherwise happen
-    // whenever a predicate is referenced more than once with different
-    // arguments).
-    // To prevent instances of negated and non-negated uses of the predicate 
-    // from generating two declarations, the sign here is always true.
-    fn pred_to_declaration(p: &AstPredicate) -> AstPredicate {
-        AstPredicate {
-            sign: Sign::Positive,
-            name: p.name.clone(),
-            args: (0..p.args.len())
-                .map(|i| String::from("x") + &i.to_string())
-                .collect(),
-        }
-    }
-
-    fn emit_pred(&mut self, p: &AstPredicate) -> String {
-        let decl = SouffleEmitter::pred_to_declaration(p);
-        self.decls.insert(decl);
-        let neg = match p.sign {
-            Sign::Positive => "",
-            Negative => "!"
-        };
-        format!("{}{}({})", neg, &p.name, p.args.join(", "))
-    }
-
-    fn emit_assertion(&mut self, a: &DLIRAssertion) -> String {
-        match a {
-            DLIRAssertion::DLIRFactAssertion { p } => self.emit_pred(p) + ".",
-            DLIRAssertion::DLIRCondAssertion { lhs, rhs } => {
-                format!(
-                    "{} :- {}.",
-                    self.emit_pred(lhs),
-                    rhs.iter()
-                        .map(|ast_pred| self.emit_pred(ast_pred))
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                )
-            }
-        }
-    }
-
-    fn emit_program_body(&mut self, p: &DLIRProgram) -> String {
-        p.assertions
+fn emit_decl(type_declaration: &AstTypeDeclaration) -> String {
+    format!(".decl {}({})", type_declaration.predicate_name,
+        type_declaration.arg_typings
             .iter()
-            .map(|x| self.emit_assertion(&x))
+            .map(|(param, al_type)|
+                 format!("{}: {}", param, emit_type(al_type)))
             .collect::<Vec<_>>()
-            .join("\n")
-    }
+            .join(", "))
+}
 
-    fn emit_decl(pred: &AstPredicate) -> String {
-        format!(
-            ".decl {}({})",
-            &pred.name,
-            &pred
-                .args
-                .iter()
-                .map(|x| format!("{}: symbol", x))
-                .collect::<Vec<_>>()
-                .join(", ")
-        )
-    }
+fn emit_pred(p: &AstPredicate) -> String {
+    let neg = match p.sign {
+        Sign::Positive => "",
+        Negative => "!"
+    };
+    format!("{}{}({})", neg, &p.name, p.args.join(", "))
+}
 
-    fn emit_declarations(&self, decl_skip: &Vec<String>) -> String {
-        let mut decls = self.decls
-            .iter()
-            .map(|x| 
-                 if decl_skip.contains(&x.name)
-                { "".to_string() } else { SouffleEmitter::emit_decl(x) })
-            .collect::<Vec<_>>();
-        decls.sort();
-        decls.join("\n")
+fn emit_assertion(a: &DLIRAssertion) -> String {
+    match a {
+        DLIRAssertion::DLIRFactAssertion { p } => emit_pred(p) + ".",
+        DLIRAssertion::DLIRCondAssertion { lhs, rhs } => {
+            format!(
+                "{} :- {}.",
+                emit_pred(lhs),
+                rhs.iter()
+                    .map(|ast_pred| emit_pred(ast_pred))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+        }
     }
+}
 
-    fn emit_outputs(&self, p: &DLIRProgram) -> String {
-        p.outputs
-            .iter()
-            .map(|o| String::from(".output ") + &o)
-            .collect::<Vec<String>>()
-            .join("\n")
-    }
+fn emit_program_body(p: &DLIRProgram) -> String {
+    p.assertions
+        .iter()
+        .map(|x| emit_assertion(&x))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn emit_declarations(p: &DLIRProgram) -> String {
+    let principal_type = String::from(".type principal <: symbol");
+    let generated_declarations = p.type_declarations
+        .iter()
+        .map(|x| emit_decl(x))
+        .collect::<Vec<_>>()
+        .join("\n");
+    vec![principal_type, generated_declarations].join("\n")
+}
+
+fn emit_outputs(p: &DLIRProgram) -> String {
+    p.outputs
+        .iter()
+        .map(|o| String::from(".output ") + &o)
+        .collect::<Vec<String>>()
+        .join("\n")
 }

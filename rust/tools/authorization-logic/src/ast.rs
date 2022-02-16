@@ -111,6 +111,7 @@ pub enum AstType { NumberType, SymbolType, PrincipalType }
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AstTypeDeclaration {
     pub predicate_name: String,
+    pub is_attribute: bool,
     pub arg_typings: Vec<(String, AstType)>
 }
 

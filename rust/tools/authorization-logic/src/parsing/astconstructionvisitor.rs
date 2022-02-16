@@ -258,8 +258,13 @@ fn construct_type_declaration(ctx: &TypeDeclarationContext) -> AstTypeDeclaratio
         .iter()
         .map(|s| construct_type(s))
         .collect();
+    let is_attribute_ = match ctx.ATTRIBUTE() {
+        Some(_) => true,
+        None => false
+    };
     AstTypeDeclaration {
         predicate_name: predicate_name_,
+        is_attribute: is_attribute_,
         arg_typings: arg_names
             .into_iter()
             .zip(types.into_iter())

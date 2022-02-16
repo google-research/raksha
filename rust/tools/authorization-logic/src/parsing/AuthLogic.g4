@@ -89,7 +89,7 @@ authLogicType
     ;
 
 typeDeclaration
-    : '.decl' ID '(' ID ':' authLogicType (',' ID ':' authLogicType)* ')'
+    : '.decl' ATTRIBUTE? ID '(' ID ':' authLogicType (',' ID ':' authLogicType)* ')'
     ;
 
 program
@@ -111,10 +111,12 @@ EXPORT: 'exportTo';
 IMPORT: 'import';
 BINDEX: 'BindPrivKey';
 BINDIM: 'BindPubKey';
+
+// These are keywords arelated to type declarations
 NUMBERTYPE: 'number';
 SYMBOLTYPE: 'symbol';
 PRINCIPALTYPE: 'principal';
-
+ATTRIBUTE: 'attribute';
 
 // Identifiers wrapped in quotes are constants whereas
 // identifiers without quotes are variables.

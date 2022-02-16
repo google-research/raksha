@@ -100,6 +100,7 @@
 //! ```
 
 use crate::{ast::*, souffle::datalog_ir::*};
+use std::collections::HashMap;
 
 // Note that this puts args_ on the front of the list of arguments because
 // this is the conveninet way for it to work in the contexts in which it
@@ -132,6 +133,7 @@ fn push_prin(modifier: String, p: &AstPrincipal, pred: &AstPredicate) -> AstPred
 // This struct only contains a counter for generating new fresh variables.
 pub struct LoweringToDatalogPass {
     fresh_var_count: u32,
+    cansay_depth: HashMap<String, u32>,
 }
 
 impl LoweringToDatalogPass {
@@ -142,7 +144,10 @@ impl LoweringToDatalogPass {
     }
 
     fn new() -> LoweringToDatalogPass {
-        LoweringToDatalogPass { fresh_var_count: 0 }
+        LoweringToDatalogPass { 
+            fresh_var_count: 0,
+            cansay_depth: HashMap::new()
+        }
     }
 
     fn fresh_var(&mut self) -> String {
@@ -153,6 +158,17 @@ impl LoweringToDatalogPass {
         // write variable names with 3 underscores.
         self.fresh_var_count += 1;
         String::from("x___") + &self.fresh_var_count.to_string()
+    }
+
+    fn update_cansay_depth(&mut self, predicate_name: &str, depth: u32) {
+        match self.cansay_depth.get(predicate_name) {
+            None => { 
+                self.cansay_depth.insert(predicate_name.to_string(), depth);
+            },
+            Some(old_depth) => if depth > *old_depth { 
+                self.cansay_depth.insert(predicate_name.to_string(), depth);
+            }
+        }
     }
 
     fn verbphrase_to_dlir(&mut self, v: &AstVerbPhrase) -> AstPredicate {
@@ -217,19 +233,30 @@ impl LoweringToDatalogPass {
         }
     }
 
-    fn fact_to_dlir(
-        &mut self,
-        f: &AstFact,
-        p: &AstPrincipal,
-    ) -> (AstPredicate, Vec<DLIRAssertion>) {
+
+    // This is meant to to encapsulate the fact that the 
+    // recursion depth is tracked to do the translation of the type
+    // declarations. It can't be a nested function within fact_to_dlir
+    // though because it needs mutable access to self and this is not allowed
+    // within nested functions.
+    fn fact_to_dlir_inner(&mut self, f: &AstFact, p: &AstPrincipal,
+                      call_depth: u32) -> (AstPredicate, Vec<DLIRAssertion>) {
         match f {
             // When reading this, it may be useful to keep in mind that
             // facts (by contrast to flat facts) only appear on the LHS of assertions.
-            AstFact::AstFlatFactFact { f: flat } => self.flat_fact_to_dlir(flat, p),
+            AstFact::AstFlatFactFact { f: flat } => {
+                // Because this is the base case, we can now add the
+                // cansay depth to the environment that tracks this for
+                // the generated predicate
+                let (gen_pred, gen_rules) = self.flat_fact_to_dlir(flat, p);
+                self.update_cansay_depth(&gen_pred.name, call_depth);
+                (gen_pred, gen_rules)
+            }
             AstFact::AstCanSayFact { p: q, f: f_plus } => {
-                let (fact_plus_prime, mut collected) = self.fact_to_dlir(&*f_plus, p);
-
-                let f_prime = push_prin(String::from("canSay_"), q, &fact_plus_prime);
+                let (fact_plus_prime, mut collected) =
+                    self.fact_to_dlir_inner(&*f_plus, p, call_depth + 1);
+                let f_prime = push_prin(String::from("canSay_"), q,
+                    &fact_plus_prime);
                 let x = AstPrincipal {
                     name: self.fresh_var(),
                 };
@@ -246,9 +273,11 @@ impl LoweringToDatalogPass {
                 // where fpf is fact_plus_prime.
 
                 // This is `p says fact_plus_prime`.
-                let lhs = push_prin(String::from("says_"), p, &fact_plus_prime);
+                let lhs = push_prin(String::from("says_"), p,
+                    &fact_plus_prime);
                 // This is `x says fact_plus_prime`.
-                let x_says_term = push_prin(String::from("says_"), &x, &fact_plus_prime);
+                let x_says_term = push_prin(String::from("says_"), &x, 
+                                            &fact_plus_prime);
                 // This is `p says x canSay fact_plus_prime`.
                 let can_say_term = push_prin(
                     String::from("says_"),
@@ -265,6 +294,11 @@ impl LoweringToDatalogPass {
                 (f_prime, collected)
             }
         }
+    }
+
+    fn fact_to_dlir(&mut self, f: &AstFact,
+                    p: &AstPrincipal) -> (AstPredicate, Vec<DLIRAssertion>) {
+        self.fact_to_dlir_inner(f, p, 0)
     }
 
     fn says_assertion_to_dlir(&mut self, x: &AstSaysAssertion) -> Vec<DLIRAssertion> {
@@ -331,6 +365,124 @@ impl LoweringToDatalogPass {
         }
     }
 
+    // Note that the additional type declarations that are generated for
+    // (possibly nested) cansay expressions are based on an environment
+    // that tracks the maximum depth with which they appear. This environment is
+    // populated by side-effect while translating the program body. As a result, it
+    // is assumed that this function is called after the body is translated.
+    fn type_declarations_to_dlir(&mut self,
+         decls: &Vec<AstTypeDeclaration>) -> Vec<AstTypeDeclaration>{
+
+        // The base type declarations are the same as the ones from the 
+        // surface program plus another one for "canActAs"
+        let mut base_decls = decls.clone();
+        base_decls.push(AstTypeDeclaration {
+            predicate_name: "canActAs".to_string(),
+            is_attribute: false,
+            arg_typings: vec![
+                ("p1".to_string(), AstType::PrincipalType),
+                ("p2".to_string(), AstType::PrincipalType)
+            ]
+        });
+
+        // Attributes have a principal that the attribute is applied to
+        // as an additional parameter at the beginning of the param list.
+        fn handle_attribute_declaration(decl: &AstTypeDeclaration) -> 
+                AstTypeDeclaration {
+            match decl.is_attribute {
+                true => {
+                    let mut arg_typings_ = vec![("attrbuted_prin".to_string(),
+                                                 AstType::PrincipalType)];
+                    arg_typings_.append(&mut decl.arg_typings.clone());
+                    AstTypeDeclaration {
+                        predicate_name: decl.predicate_name.clone(),
+                        is_attribute: false,
+                        arg_typings: arg_typings_
+                    }
+                }
+                false => decl.clone()
+            }
+        }
+
+        // Transform the attributes
+        base_decls = base_decls.iter()
+            .map(|decl| handle_attribute_declaration(decl))
+            .collect();
+
+        // Produce a mapping from predicate names to predicate typings
+        // (where a predicate typing is the same as a predicate type declaration)
+        let type_environment :HashMap<_,_> = (&base_decls)
+            .iter()
+            .map(|decl| (decl.predicate_name.clone(), decl.clone()))
+            .collect();
+
+
+        // Prefix a type declaration with "P cansay ..." `delegation_depth`
+        // times.
+        fn prefix_with_cansay(t: &AstTypeDeclaration,
+                             delegation_depth: u32) -> AstTypeDeclaration {
+            match delegation_depth {
+                0 => t.clone(),
+                x => {
+                    let mut decl_less = prefix_with_cansay(t, x-1);
+                    let mut arg_typings_ = vec![(format!("delegatee{}", x),
+                                AstType::PrincipalType)];
+                    arg_typings_.append(&mut decl_less.arg_typings);
+                    AstTypeDeclaration {
+                        predicate_name: format!("canSay_{}", decl_less.predicate_name),
+                        is_attribute: false,
+                        arg_typings: arg_typings_
+                    }
+                }
+            }
+        }
+
+        // Generate type declarations for delegated predicates with
+        // each encountered delegation depth
+        println!("cansay_depth is: {:?}", self.cansay_depth);
+        println!("type_environment is: {:?}", type_environment);
+        let mut cansay_decls = self.cansay_depth.iter()
+            .filter(|(name, depth)| **depth > 0)
+            .map(|(name, depth)| { 
+                prefix_with_cansay(type_environment.get(name).unwrap(), *depth)
+            });
+        base_decls.extend(&mut cansay_decls);
+
+        // The translated declarations are all extended with "says_" and a speaker
+        // argument
+        base_decls.iter()
+            .map(|decl| {
+                let mut arg_typings_ = vec![("speaker".to_string(),
+                    AstType::PrincipalType)];
+                arg_typings_.extend(decl.arg_typings.clone());
+                AstTypeDeclaration {
+                    predicate_name: format!("says_{}", decl.predicate_name),
+                    is_attribute: false,
+                    arg_typings: arg_typings_
+                }
+            })
+            .collect()
+    }
+
+    fn type_declarations_for_queries(&mut self, queries: &Vec<AstQuery>) ->
+            Vec<AstTypeDeclaration> {
+        let mut query_decls: Vec<_> = queries.iter()
+            .map(|q| AstTypeDeclaration {
+                predicate_name: q.name.clone(),
+                is_attribute: false,
+                arg_typings: vec![("dummy_param".to_string(),
+                    AstType::SymbolType)]
+            })
+            .collect();
+        query_decls.push(AstTypeDeclaration {
+            predicate_name: "grounded_dummy".to_string(),
+            is_attribute: false,
+            arg_typings: vec![("dummy_param".to_string(),
+                AstType::SymbolType)]
+        });
+        query_decls
+    }
+
     fn prog_to_dlir(&mut self, prog: &AstProgram) -> DLIRProgram {
         let mut dlir_assertions: Vec<DLIRAssertion> = prog
             .assertions
@@ -349,7 +501,15 @@ impl LoweringToDatalogPass {
         };
         dlir_assertions.append(&mut dlir_queries);
         dlir_assertions.push(dummy_assertion);
+
+        // type declarations
+        let mut dlir_type_declarations = self.type_declarations_to_dlir(
+            &prog.type_declarations);
+        dlir_type_declarations.extend(
+            self.type_declarations_for_queries(&prog.queries));
+
         DLIRProgram {
+            type_declarations: dlir_type_declarations,
             assertions: dlir_assertions,
             outputs: outs,
         }
