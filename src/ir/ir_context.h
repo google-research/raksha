@@ -16,9 +16,13 @@
 #ifndef SRC_IR_IR_CONTEXT_H_
 #define SRC_IR_IR_CONTEXT_H_
 
+#include <memory>
+#include <vector>
+
 #include "absl/container/flat_hash_map.h"
 #include "src/ir/operator.h"
 #include "src/ir/types/type_factory.h"
+#include "src/ir/module.h"
 
 namespace raksha::ir {
 
@@ -33,29 +37,77 @@ class IRContext {
 
   // Register an operator and return the stored operator instances.
   const Operator &RegisterOperator(std::unique_ptr<Operator> op) {
-    auto ins_res = operators_.insert({std::string(op->name()), std::move(op)});
-    CHECK(ins_res.second) << "Cannot register duplicate operator with name '"
-                          << ins_res.first->first << "'.";
-    return *ins_res.first->second.get();
+    return operators_.RegisterNode(std::move(op), "operator");
   }
 
   // Returns the Operator with a particular name. If there is no
-  // operator with that name, returns nullptr.
+  // operator with that name, fail.
   const Operator &GetOperator(absl::string_view operators_name) const {
-    auto find_res = operators_.find(operators_name);
-    CHECK(find_res != operators_.end())
-        << "Looking up an unregistered operator '" << operators_name << "'.";
-    return *find_res->second;
+    return operators_.GetNode(operators_name, "operator");
   }
 
   // Returns true if the operator is registered with this context.
   bool IsRegisteredOperator(absl::string_view operators_name) const {
-    return operators_.find(operators_name) != operators_.end();
+    return operators_.IsRegisteredNode(operators_name);
+  }
+
+    // Register an operator and return the stored operator instances.
+  const Storage &RegisterStorage(std::unique_ptr<Storage> op) {
+    return storages_.RegisterNode(std::move(op), "storage");
+  }
+
+  // Returns the Storage with a particular name. If there is no
+  // operator with that name, fail.
+  const Storage &GetStorage(absl::string_view operators_name) const {
+    return storages_.GetNode(operators_name, "storage");
+  }
+
+  // Returns true if the operator is registered with this context.
+  bool IsRegisteredStorage(absl::string_view operators_name) const {
+    return storages_.IsRegisteredNode(operators_name);
   }
 
  private:
+  template<class NamedIrNode>
+  class NamedIrNodeRegistry {
+   public:
+      // Register a node and return the stored instance.
+    const NamedIrNode &RegisterNode(std::unique_ptr<NamedIrNode> node,
+                                    absl::string_view node_kind_name) {
+        // Note: using node->name() here is ok because C++ list initialization
+        // guarantees that evaluation of initializers earlier in the list
+        // are sequenced before initializers later in the list.
+        auto ins_res = nodes_.insert(
+            {std::string(node->name()), std::move(node)});
+        CHECK(ins_res.second)
+          << "Cannot register duplicate " << node_kind_name << " with name '"
+          << ins_res.first->first << "'.";
+        return *ins_res.first->second.get();
+    }
+
+    // Returns the node with a particular name. If there is no
+    // node with that name, fail.
+    const NamedIrNode &GetNode(
+        absl::string_view node_name, absl::string_view node_kind_name) const {
+      auto find_res = nodes_.find(node_name);
+      CHECK(find_res != nodes_.end())
+          << "Looking up an unregistered " << node_kind_name
+          <<  " '" << node_name << "'.";
+      return *find_res->second;
+    }
+
+    // Returns true if the node is registered with this context.
+    bool IsRegisteredNode(absl::string_view node_name) const {
+      return nodes_.find(node_name) != nodes_.end();
+    }
+   private:
+    absl::flat_hash_map<std::string, std::unique_ptr<NamedIrNode>> nodes_;
+  };
+
   // List of registered operators.
-  absl::flat_hash_map<std::string, std::unique_ptr<Operator>> operators_;
+  NamedIrNodeRegistry<Operator> operators_;
+  // List of registered storages.
+  NamedIrNodeRegistry<Storage> storages_;
   // TypeFactory for this context.
   types::TypeFactory type_factory_;
 };
