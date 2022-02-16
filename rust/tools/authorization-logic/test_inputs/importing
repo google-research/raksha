@@ -1,3 +1,7 @@
+.decl someProposition(x : symbol)
+.decl accessGranted(x : symbol, y : symbol)
+.decl otherProposition(x : symbol)
+
 // This imports the policy statement produced by
 // principal1e in test_inputs/exporting
 

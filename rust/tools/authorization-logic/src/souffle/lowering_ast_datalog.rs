@@ -106,12 +106,11 @@ use std::collections::HashMap;
 // this is the conveninet way for it to work in the contexts in which it
 // is used.
 fn push_onto_pred(modifier: String, mut args_: Vec<String>, pred: &AstPredicate) -> AstPredicate {
-    let universe_relations = ["isAccessPath", "isTag", "isPrincipal"];
-    // For the few relations recognized as universe relations, do not alter the predicate.
-    if universe_relations.contains(&pred.name.as_str()) {
-        pred.clone()
-    } else {
-
+    // let universe_relations = ["isAccessPath", "isTag", "isPrincipal"];
+    // // For the few relations recognized as universe relations, do not alter the predicate.
+    // if universe_relations.contains(&pred.name.as_str()) {
+    //     pred.clone()
+    // } else {
         let new_name = modifier + &pred.name;
         for a in &pred.args {
             args_.push(a.clone());
@@ -121,7 +120,7 @@ fn push_onto_pred(modifier: String, mut args_: Vec<String>, pred: &AstPredicate)
             name: new_name.clone(),
             args: args_.to_vec(),
         }
-    }
+    // }
 }
 
 fn push_prin(modifier: String, p: &AstPrincipal, pred: &AstPredicate) -> AstPredicate {
