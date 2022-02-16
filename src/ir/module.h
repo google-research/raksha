@@ -43,9 +43,9 @@ class Operation {
         inputs_(std::move(inputs)),
         impl_module_(std::move(impl_module)) {}
 
-  // Disable copy (and move) semantics.
+  // Disable copy semantics.
   Operation(const Operation&) = delete;
-  Operation& operator=(const Operation&) = delete;
+  Operation(Operation &&) = default;
 
   const Operator& op() const { return *op_; }
   const Block* parent() const { return parent_; }
@@ -83,7 +83,7 @@ class Block {
 
   Block() : module_(nullptr) {}
 
-  // Disable copy (and move) semantics.
+  // Disable copy semantics.
   Block(const Block&) = delete;
   Block& operator=(const Block&) = delete;
 
