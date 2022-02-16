@@ -165,7 +165,7 @@ TEST(IntrusivePtrTest, FactoryConstructionWorks) {
   // All objects will be destroyed when the intrusive_pointers go out of scope.
 }
 
-TEST(IntrusivePtrTest, CanConvertBetweenConvertablePtrs){
+TEST(IntrusivePtrTest, CanConvertBetweenConvertiblePtrs){
   auto derived_ptr = make_intrusive_ptr<RefCountedTypeDerived>();
   EXPECT_EQ(derived_ptr->count(), 1);
   intrusive_ptr<RefCountedType> base_ptr(derived_ptr);
