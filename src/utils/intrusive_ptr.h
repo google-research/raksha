@@ -75,10 +75,19 @@ class intrusive_ptr {
 
 // Factory function for creating instances of intrusive_ptr.
 template <typename T, typename... Args>
-intrusive_ptr<T> make_intrusive_ptr(Args&&... A) {
-  return intrusive_ptr<T>(new T(std::forward<Args>(A)...));
+intrusive_ptr<T> make_intrusive_ptr(Args&&... a) {
+  return intrusive_ptr<T>(new T(std::forward<Args>(a)...));
 }
 
+template <class T, class U>
+bool operator==(const intrusive_ptr<T> &lhs, const intrusive_ptr<U> &rhs) {
+  return lhs.get() == rhs.get();
+}
+
+template <class T, class U>
+bool operator!=(const intrusive_ptr<T> &lhs, const intrusive_ptr<U> &rhs) {
+  return !(lhs == rhs);
+}
 }  // namespace raksha
 
 #endif  // SRC_UTILS_INTRUSIVE_PTR_H_

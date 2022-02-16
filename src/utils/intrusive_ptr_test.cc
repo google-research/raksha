@@ -46,6 +46,8 @@ class RefCountedType {
   unsigned int count_;
 };
 
+class RefCountedTypeDerived: public RefCountedType {};
+
 using RefCountedTypePtr = intrusive_ptr<RefCountedType>;
 
 // We create a raw pointer for test. However, in practice, we should avoid
@@ -181,5 +183,26 @@ TEST(IntrusivePtrTest, DestructorReducesCount) {
   EXPECT_EQ(ptr->count(), 1);
 }
 
+TEST(IntrusivePtrTest, EqualReturnsTrueForIdenticalPtrs) {
+  RefCountedTypePtr ptr = make_intrusive_ptr<RefCountedType>();
+
+  RefCountedTypePtr copy = ptr;
+  EXPECT_EQ(ptr, copy);
+
+  RefCountedTypePtr another_copy = intrusive_ptr<RefCountedType>(ptr);
+  EXPECT_EQ(ptr, another_copy);
+}
+
+TEST(IntrusivePtrTest, ComparePtrsOfDifferentTypes) {
+  intrusive_ptr<RefCountedTypeDerived> derived_ptr = make_intrusive_ptr<RefCountedTypeDerived>();
+  intrusive_ptr<RefCountedType> base_ptr(derived_ptr.get());
+  EXPECT_EQ(base_ptr, derived_ptr);
+}
+
+TEST(IntrusivePtrTest, NotEqualReturnsTrueDifferentPtrs) {
+  RefCountedTypePtr ptr = make_intrusive_ptr<RefCountedType>();
+  RefCountedTypePtr another_ptr = make_intrusive_ptr<RefCountedType>();
+  EXPECT_NE(ptr, another_ptr);
+}
 }  // namespace
 }  // namespace raksha
