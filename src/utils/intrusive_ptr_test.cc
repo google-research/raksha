@@ -217,5 +217,25 @@ TEST(IntrusivePtrTest, NotEqualReturnsTrueDifferentPtrs) {
   RefCountedTypePtr another_ptr = make_intrusive_ptr<RefCountedType>();
   EXPECT_NE(ptr, another_ptr);
 }
+
+TEST(IntrusivePtrTest, ComparisionAgainstRawPtrs) {
+  auto raw_ptr = MakeRefCountedTypeInstance("NewValue");
+  RefCountedTypePtr ptr(raw_ptr);
+  EXPECT_EQ(ptr, raw_ptr);
+  EXPECT_EQ(raw_ptr, ptr);
+
+  auto another_raw_ptr = MakeRefCountedTypeInstance();
+  EXPECT_NE(ptr, another_raw_ptr);
+  EXPECT_NE(another_raw_ptr, ptr);
+}
+
+TEST(IntrusivePtrTest, ComparisionAgainstNullPtrs) {
+  RefCountedTypePtr ptr = make_intrusive_ptr<RefCountedType>();
+  RefCountedTypePtr null;
+  EXPECT_NE(nullptr, ptr);
+  EXPECT_NE(ptr, nullptr);
+  EXPECT_EQ(null, nullptr);
+  EXPECT_EQ(nullptr, null);
+}
 }  // namespace
 }  // namespace raksha

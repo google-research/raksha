@@ -92,6 +92,46 @@ template <class T, class U>
 bool operator!=(const intrusive_ptr<T> &lhs, const intrusive_ptr<U> &rhs) {
   return !(lhs == rhs);
 }
+
+template <class T, class U>
+bool operator==(const intrusive_ptr<T> &lhs, U *rhs) {
+  return lhs.get() == rhs;
+}
+
+template <class T, class U>
+bool operator!=(const intrusive_ptr<T> &lhs, U *rhs) {
+  return !(lhs.get() == rhs);
+}
+
+template <class T, class U>
+bool operator==(T *lhs, const intrusive_ptr<U> &rhs) {
+  return lhs == rhs.get();
+}
+
+template <class T, class U>
+bool operator!=(T *lhs, const intrusive_ptr<U> &rhs) {
+  return !(lhs == rhs.get());
+}
+
+template <class T>
+bool operator==(std::nullptr_t, const intrusive_ptr<T> &rhs) {
+  return !(rhs.get());
+}
+
+template <class T>
+bool operator==(const intrusive_ptr<T> &lhs, std::nullptr_t rhs) {
+  return rhs == lhs.get();
+}
+
+template <class T>
+bool operator!=(std::nullptr_t lhs, const intrusive_ptr<T> &rhs) {
+  return !(lhs == rhs.get());
+}
+
+template <class T>
+bool operator!=(const intrusive_ptr<T> &lhs, std::nullptr_t rhs) {
+  return !(lhs.get() == rhs);
+}
 }  // namespace raksha
 
 #endif  // SRC_UTILS_INTRUSIVE_PTR_H_
