@@ -22,6 +22,7 @@ namespace raksha::ir {
 
 class Block;
 class Operation;
+class Module;
 
 class SsaNames {
  public:
@@ -39,6 +40,10 @@ class SsaNames {
     return block_ids_.GetOrCreateID(&block);
   }
 
+  ID GetOrCreateID(const Module &module) {
+    return module_ids_.GetOrCreateID(std::addressof(module));
+  }
+
  private:
   template <class T>
   class IDManager {
@@ -54,6 +59,7 @@ class SsaNames {
     absl::flat_hash_map<const T *, ID> item_ids_;
   };
 
+  IDManager<Module> module_ids_;
   IDManager<Block> block_ids_;
   IDManager<Operation> operation_ids_;
 };

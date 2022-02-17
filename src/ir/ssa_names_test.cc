@@ -22,34 +22,35 @@
 namespace raksha::ir {
 namespace {
 
+template <typename T>
 class SsaNamesTest : public ::testing::Test {
  public:
   SsaNamesTest() : test_op_("test") {}
 
  protected:
   Operator test_op_;
+  T first_entity_;
+  T second_entity_;
 };
 
-TEST_F(SsaNamesTest, GetOrCreateIDReturnsUniqueIDsForOperations) {
+// Specialize constructor for Operation as it has no default constructor to
+// initialize `first_entity_` and `second_entity_`.
+template <>
+SsaNamesTest<Operation>::SsaNamesTest()
+    : test_op_("test"),
+      first_entity_(nullptr, test_op_, {}, {}),
+      second_entity_(nullptr, test_op_, {}, {}) {}
+
+using MyTypes = ::testing::Types<Operation, Block, Module>;
+TYPED_TEST_SUITE(SsaNamesTest, MyTypes);
+
+TYPED_TEST(SsaNamesTest, GetOrCreateIDReturnsUniqueIDs) {
   SsaNames names;
-  Operation first_operation(nullptr, test_op_, {}, {});
-  Operation second_operation(nullptr, test_op_, {}, {});
-  SsaNames::ID first_operation_id = names.GetOrCreateID(first_operation);
-  SsaNames::ID second_operation_id = names.GetOrCreateID(second_operation);
+  SsaNames::ID first_id = names.GetOrCreateID(this->first_entity_);
+  SsaNames::ID second_id = names.GetOrCreateID(this->second_entity_);
 
-  EXPECT_NE(first_operation_id, second_operation_id);
-  EXPECT_EQ(names.GetOrCreateID(first_operation), first_operation_id);
-}
-
-TEST_F(SsaNamesTest, GetOrCreateIDReturnsUniqueIDsForBlocks) {
-  SsaNames names;
-  Block first_block;
-  Block second_block;
-  SsaNames::ID first_block_id = names.GetOrCreateID(first_block);
-  SsaNames::ID second_block_id = names.GetOrCreateID(second_block);
-
-  EXPECT_NE(first_block_id, second_block_id);
-  EXPECT_EQ(names.GetOrCreateID(first_block), first_block_id);
+  EXPECT_NE(first_id, second_id);
+  EXPECT_EQ(names.GetOrCreateID(this->first_entity_), first_id);
 }
 
 }  // namespace
