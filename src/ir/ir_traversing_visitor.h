@@ -44,7 +44,7 @@ class IRTraversingVisitor : public IRVisitor<Derived> {
 
   void Visit(const Module& module) final override {
     PreVisit(module);
-    for (const auto& block : module.blocks()) {
+    for (const std::unique_ptr<Block>& block : module.blocks()) {
       block->Accept(*this);
     }
     PostVisit(module);
@@ -52,7 +52,7 @@ class IRTraversingVisitor : public IRVisitor<Derived> {
 
   void Visit(const Block& block) final override {
     PreVisit(block);
-    for (const auto& operation : block.operations()) {
+    for (const std::unique_ptr<Operation>& operation : block.operations()) {
       operation->Accept(*this);
     }
     PostVisit(block);
@@ -60,7 +60,7 @@ class IRTraversingVisitor : public IRVisitor<Derived> {
 
   void Visit(const Operation& operation) final override {
     PreVisit(operation);
-    const Module* module = operation.module();
+    const Module* module = operation.impl_module();
     if (module != nullptr) {
       module->Accept(*this);
     }

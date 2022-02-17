@@ -58,7 +58,7 @@ class CollectingVisitor : public IRTraversingVisitor<CollectingVisitor> {
     if (post_visits_) nodes_.push_back(std::addressof(operation));
   }
 
-  const std::vector<const void*> nodes() const { return nodes_; }
+  const std::vector<const void*>& nodes() const { return nodes_; }
 
  private:
   bool pre_visits_;
@@ -130,7 +130,7 @@ TEST(IRTraversingVisitorTest, TraversesOperationAsExpected) {
 
   Operation plus_op_instance(nullptr, *plus_op, {}, {},
                              std::make_unique<Module>());
-  auto plus_op_module = plus_op_instance.module();
+  auto plus_op_module = plus_op_instance.impl_module();
 
   CollectingVisitor preorder_visitor(CollectingVisitor::TraversalType::PRE);
   plus_op_instance.Accept(preorder_visitor);
