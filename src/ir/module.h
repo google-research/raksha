@@ -35,12 +35,12 @@ class Operation {
  public:
   Operation(const Block* parent, const Operator& op,
             NamedAttributeMap attributes, NamedValueMap inputs,
-            std::unique_ptr<Module> module = nullptr)
+            std::unique_ptr<Module> impl_module = nullptr)
       : parent_(parent),
         op_(std::addressof(op)),
         attributes_(std::move(attributes)),
         inputs_(std::move(inputs)),
-        module_(std::move(module)) {}
+        impl_module_(std::move(impl_module)) {}
 
   // Disable copy (and move) semantics.
   Operation(const Operation&) = delete;
@@ -50,7 +50,7 @@ class Operation {
   const Block* parent() const { return parent_; }
   const NamedValueMap& inputs() const { return inputs_; }
   const NamedAttributeMap& attributes() const { return attributes_; }
-  const Module* module() const { return module_.get(); }
+  const Module* impl_module() const { return impl_module_.get(); }
 
   std::string ToString(SsaNames& ssa_names) const;
 
@@ -66,7 +66,7 @@ class Operation {
   // If the operation can be broken down into other operations, it is
   // specified in the optional module. If `module_` is nullptr, then this is a
   // basic operator like `+`, `-`, etc., which cannot be broken down further.
-  std::unique_ptr<Module> module_;
+  std::unique_ptr<Module> impl_module_;
 };
 
 // A collection of operations.

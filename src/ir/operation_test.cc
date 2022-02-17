@@ -50,7 +50,7 @@ TEST(OperationTest, ConstructorSetsModuleCorrectly) {
   auto passed_in_module = module.get();
   Operation operation(nullptr, OperationTest::plus_op, {}, {},
                       std::move(module));
-  EXPECT_EQ(operation.module(), passed_in_module);
+  EXPECT_EQ(operation.impl_module(), passed_in_module);
 }
 
 TEST_P(OperationTest, AccessorsAndToStringReturnCorrectValue) {
@@ -58,7 +58,7 @@ TEST_P(OperationTest, AccessorsAndToStringReturnCorrectValue) {
   SsaNames ssa_names;
   const auto& [block, op, attributes, inputs, string_reps] = GetParam();
   Operation operation(block, *op, attributes, inputs);
-  EXPECT_EQ(operation.module(), nullptr);
+  EXPECT_EQ(operation.impl_module(), nullptr);
   EXPECT_EQ(operation.parent(), block);
   EXPECT_EQ(&operation.op(), op);
   // TODO(336): Enable this when we have a comparator for attributes.
