@@ -34,11 +34,13 @@ class Block;
 class Operation {
  public:
   Operation(const Block* parent, const Operator& op,
-            NamedAttributeMap attributes, NamedValueMap inputs)
+            NamedAttributeMap attributes, NamedValueMap inputs,
+            std::unique_ptr<Module> impl_module = nullptr)
       : parent_(parent),
-        op_(&op),
+        op_(std::addressof(op)),
         attributes_(std::move(attributes)),
-        inputs_(std::move(inputs)) {}
+        inputs_(std::move(inputs)),
+        impl_module_(std::move(impl_module)) {}
 
   // Disable copy (and move) semantics.
   Operation(const Operation&) = delete;
@@ -48,6 +50,7 @@ class Operation {
   const Block* parent() const { return parent_; }
   const NamedValueMap& inputs() const { return inputs_; }
   const NamedAttributeMap& attributes() const { return attributes_; }
+  const Module* impl_module() const { return impl_module_.get(); }
 
   std::string ToString(SsaNames& ssa_names) const;
 
@@ -63,7 +66,7 @@ class Operation {
   // If the operation can be broken down into other operations, it is
   // specified in the optional module. If `module_` is nullptr, then this is a
   // basic operator like `+`, `-`, etc., which cannot be broken down further.
-  std::unique_ptr<Module> module_;
+  std::unique_ptr<Module> impl_module_;
 };
 
 // A collection of operations.
@@ -104,20 +107,23 @@ class Block {
 // A class that contains a collection of blocks.
 class Module {
  public:
+  using BlockListType = std::vector<std::unique_ptr<Block>>;
+  Module() {}
+
   Module(const Module&) = delete;
   Module& operator=(const Module&) = delete;
   Module(Module&&) = default;
   Module& operator=(Module&&) = default;
 
   // Adds a block to the module and returns a pointer to it.
-  const Block* AddBlock(std::unique_ptr<Block> block) {
-    const Block* result = block.get();
+  const Block& AddBlock(std::unique_ptr<Block> block) {
     blocks_.push_back(std::move(block));
-    return result;
+    return *blocks_.back();
   }
 
+  const BlockListType& blocks() const { return blocks_; }
+
  private:
-  using BlockListType = std::vector<std::unique_ptr<Block>>;
   BlockListType blocks_;
 };
 
