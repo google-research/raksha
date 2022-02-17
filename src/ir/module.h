@@ -21,6 +21,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "src/ir/attribute.h"
 #include "src/ir/data_decl.h"
+#include "src/ir/ir_visitor.h"
 #include "src/ir/operator.h"
 #include "src/ir/types/type.h"
 #include "src/ir/value.h"
@@ -54,6 +55,11 @@ class Operation {
 
   std::string ToString(SsaNames& ssa_names) const;
 
+  template <typename Derived>
+  void Accept(IRVisitor<Derived>& visitor) const {
+    visitor.Visit(*this);
+  }
+
  private:
   // The parent block if any to which this operation belongs to.
   const Block* parent_;
@@ -86,6 +92,11 @@ class Block {
   const DataDeclCollection& outputs() const { return outputs_; }
   const NamedValueMap& results() const { return results_; }
   const Module* module() const { return module_; }
+
+  template <typename Derived>
+  void Accept(IRVisitor<Derived>& visitor) const {
+    visitor.Visit(*this);
+  }
 
   friend class BlockBuilder;
 
@@ -122,6 +133,11 @@ class Module {
   }
 
   const BlockListType& blocks() const { return blocks_; }
+
+  template <typename Derived>
+  void Accept(IRVisitor<Derived>& visitor) const {
+    visitor.Visit(*this);
+  }
 
  private:
   BlockListType blocks_;
