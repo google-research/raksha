@@ -46,6 +46,8 @@ class RefCountedType {
   unsigned int count_;
 };
 
+class RefCountedTypeDerived: public RefCountedType {};
+
 using RefCountedTypePtr = intrusive_ptr<RefCountedType>;
 
 // We create a raw pointer for test. However, in practice, we should avoid
@@ -163,6 +165,19 @@ TEST(IntrusivePtrTest, FactoryConstructionWorks) {
   // All objects will be destroyed when the intrusive_pointers go out of scope.
 }
 
+TEST(IntrusivePtrTest, CanConvertBetweenConvertiblePtrs){
+  auto derived_ptr = make_intrusive_ptr<RefCountedTypeDerived>();
+  EXPECT_EQ(derived_ptr->count(), 1);
+  intrusive_ptr<RefCountedType> base_ptr(derived_ptr);
+  EXPECT_EQ(derived_ptr.get(), base_ptr.get());
+  EXPECT_EQ(derived_ptr, base_ptr);
+  EXPECT_EQ(derived_ptr->count(), 2);
+  EXPECT_EQ(base_ptr->count(), 2);
+
+  intrusive_ptr<RefCountedType> another_base_ptr = derived_ptr;
+  EXPECT_EQ(derived_ptr, another_base_ptr);
+}
+
 TEST(IntrusivePtrTest, DestructorReducesCount) {
   RefCountedTypePtr ptr = make_intrusive_ptr<RefCountedType>();
   EXPECT_EQ(ptr->count(), 1);
@@ -181,5 +196,46 @@ TEST(IntrusivePtrTest, DestructorReducesCount) {
   EXPECT_EQ(ptr->count(), 1);
 }
 
+TEST(IntrusivePtrTest, EqualReturnsTrueForIdenticalPtrs) {
+  RefCountedTypePtr ptr = make_intrusive_ptr<RefCountedType>();
+
+  RefCountedTypePtr copy = ptr;
+  EXPECT_EQ(ptr, copy);
+
+  RefCountedTypePtr another_copy = intrusive_ptr<RefCountedType>(ptr);
+  EXPECT_EQ(ptr, another_copy);
+}
+
+TEST(IntrusivePtrTest, ComparePtrsOfDifferentTypes) {
+  intrusive_ptr<RefCountedTypeDerived> derived_ptr = make_intrusive_ptr<RefCountedTypeDerived>();
+  intrusive_ptr<RefCountedType> base_ptr(derived_ptr.get());
+  EXPECT_EQ(base_ptr, derived_ptr);
+}
+
+TEST(IntrusivePtrTest, NotEqualReturnsTrueDifferentPtrs) {
+  RefCountedTypePtr ptr = make_intrusive_ptr<RefCountedType>();
+  RefCountedTypePtr another_ptr = make_intrusive_ptr<RefCountedType>();
+  EXPECT_NE(ptr, another_ptr);
+}
+
+TEST(IntrusivePtrTest, ComparisionAgainstRawPtrs) {
+  auto raw_ptr = MakeRefCountedTypeInstance("NewValue");
+  RefCountedTypePtr ptr(raw_ptr);
+  EXPECT_EQ(ptr, raw_ptr);
+  EXPECT_EQ(raw_ptr, ptr);
+
+  auto another_raw_ptr = MakeRefCountedTypeInstance();
+  EXPECT_NE(ptr, another_raw_ptr);
+  EXPECT_NE(another_raw_ptr, ptr);
+}
+
+TEST(IntrusivePtrTest, ComparisionAgainstNullPtrs) {
+  RefCountedTypePtr ptr = make_intrusive_ptr<RefCountedType>();
+  RefCountedTypePtr null;
+  EXPECT_NE(nullptr, ptr);
+  EXPECT_NE(ptr, nullptr);
+  EXPECT_EQ(null, nullptr);
+  EXPECT_EQ(nullptr, null);
+}
 }  // namespace
 }  // namespace raksha

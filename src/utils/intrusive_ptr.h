@@ -33,6 +33,10 @@ class intrusive_ptr {
   intrusive_ptr(intrusive_ptr<T>&& other) : ptr_(other.ptr_) {
     other.ptr_ = nullptr;
   }
+  
+  template <class X, std::enable_if_t<std::is_convertible<X *, T *>::value, bool> = true>
+  intrusive_ptr(const intrusive_ptr<X>& other) : ptr_(Retain(other.get())) {}
+  
   ~intrusive_ptr() { Release(ptr_); }
 
   intrusive_ptr<T>& operator=(intrusive_ptr<T> other) {
@@ -75,10 +79,59 @@ class intrusive_ptr {
 
 // Factory function for creating instances of intrusive_ptr.
 template <typename T, typename... Args>
-intrusive_ptr<T> make_intrusive_ptr(Args&&... A) {
-  return intrusive_ptr<T>(new T(std::forward<Args>(A)...));
+intrusive_ptr<T> make_intrusive_ptr(Args&&... a) {
+  return intrusive_ptr<T>(new T(std::forward<Args>(a)...));
 }
 
+template <class T, class U>
+bool operator==(const intrusive_ptr<T> &lhs, const intrusive_ptr<U> &rhs) {
+  return lhs.get() == rhs.get();
+}
+
+template <class T, class U>
+bool operator!=(const intrusive_ptr<T> &lhs, const intrusive_ptr<U> &rhs) {
+  return !(lhs == rhs);
+}
+
+template <class T, class U>
+bool operator==(const intrusive_ptr<T> &lhs, U *rhs) {
+  return lhs.get() == rhs;
+}
+
+template <class T, class U>
+bool operator!=(const intrusive_ptr<T> &lhs, U *rhs) {
+  return !(lhs.get() == rhs);
+}
+
+template <class T, class U>
+bool operator==(T *lhs, const intrusive_ptr<U> &rhs) {
+  return lhs == rhs.get();
+}
+
+template <class T, class U>
+bool operator!=(T *lhs, const intrusive_ptr<U> &rhs) {
+  return !(lhs == rhs.get());
+}
+
+template <class T>
+bool operator==(std::nullptr_t, const intrusive_ptr<T> &rhs) {
+  return !(rhs.get());
+}
+
+template <class T>
+bool operator==(const intrusive_ptr<T> &lhs, std::nullptr_t rhs) {
+  return rhs == lhs.get();
+}
+
+template <class T>
+bool operator!=(std::nullptr_t lhs, const intrusive_ptr<T> &rhs) {
+  return !(lhs == rhs.get());
+}
+
+template <class T>
+bool operator!=(const intrusive_ptr<T> &lhs, std::nullptr_t rhs) {
+  return !(lhs.get() == rhs);
+}
 }  // namespace raksha
 
 #endif  // SRC_UTILS_INTRUSIVE_PTR_H_

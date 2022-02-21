@@ -22,21 +22,6 @@ licenses(["notice"])
 package(default_visibility = ["//src:__subpackages__"])
 
 cc_library(
-    name = "new_ir",
-    hdrs = [
-        "block.h",
-        "data_decl.h",
-        "operation.h",
-        "operator.h",
-        "value.h",
-    ],
-    deps = [
-        "//src/ir/types",
-        "@absl//absl/container:flat_hash_map",
-    ],
-)
-
-cc_library(
     name = "attribute",
     hdrs = ["attribute.h"],
     deps = [
@@ -115,6 +100,22 @@ cc_test(
 )
 
 cc_library(
+    name = "ir_traversing_visitor",
+    hdrs = ["ir_traversing_visitor.h"],
+    deps = [":module"],
+)
+
+cc_test(
+    name = "ir_traversing_visitor_test",
+    srcs = ["ir_traversing_visitor_test.cc"],
+    deps = [
+        ":block_builder",
+        ":ir_traversing_visitor",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
     name = "operator",
     hdrs = ["operator.h"],
     deps = [
@@ -144,12 +145,24 @@ cc_test(
 cc_library(
     name = "module",
     srcs = ["operation.cc"],
-    hdrs = ["module.h"],
+    hdrs = [
+        "ir_visitor.h",
+        "module.h",
+    ],
     deps = [
         ":attribute",
         ":data_decl",
         ":operator",
         ":value",
+    ],
+)
+
+cc_test(
+    name = "module_test",
+    srcs = ["module_test.cc"],
+    deps = [
+        ":module",
+        "//src/common/testing:gtest",
     ],
 )
 
