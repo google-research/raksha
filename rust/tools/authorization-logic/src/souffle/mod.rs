@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+mod universe_translation;
 mod datalog_ir;
 mod lowering_ast_datalog;
 mod souffle_emitter;
