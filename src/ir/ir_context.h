@@ -68,11 +68,11 @@ class IRContext {
   }
 
  private:
-  template<class NamedIRNode>
+  template<class Node>
   class NamedIRNodeRegistry {
    public:
       // Register a node and return the stored instance.
-    const NamedIRNode &RegisterNode(std::unique_ptr<NamedIRNode> node,
+    const Node &RegisterNode(std::unique_ptr<Node> node,
                                     absl::string_view node_kind_name) {
         // Note: using node->name() here is ok because C++ list initialization
         // guarantees that evaluation of initializers earlier in the list
@@ -87,7 +87,7 @@ class IRContext {
 
     // Returns the node with a particular name. If there is no
     // node with that name, fail.
-    const NamedIRNode &GetNode(
+    const Node &GetNode(
         absl::string_view node_name, absl::string_view node_kind_name) const {
       auto find_res = nodes_.find(node_name);
       CHECK(find_res != nodes_.end())
@@ -101,7 +101,7 @@ class IRContext {
       return nodes_.find(node_name) != nodes_.end();
     }
    private:
-    absl::flat_hash_map<std::string, std::unique_ptr<NamedIRNode>> nodes_;
+    absl::flat_hash_map<std::string, std::unique_ptr<Node>> nodes_;
   };
 
   // List of registered operators.
