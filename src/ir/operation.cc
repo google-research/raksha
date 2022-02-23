@@ -29,7 +29,7 @@ namespace raksha::ir {
 template<class T, class F>
 static std::string PrintNamedMapInNameOrder(
     const absl::flat_hash_map<std::string, T> &map_to_print,
-    F value_printing_fn) {
+    F value_pretty_printer) {
   std::vector<absl::string_view> names;
   names.reserve(map_to_print.size());
   for (auto &key_value_pair : map_to_print) {
@@ -40,7 +40,7 @@ static std::string PrintNamedMapInNameOrder(
       names, ", ",
       [&](std::string* out, const absl::string_view name) {
         absl::StrAppend(
-            out, name, ": ", value_printing_fn(map_to_print.at(name)));
+            out, name, ": ", value_pretty_printer(map_to_print.at(name)));
       });
 }
 
