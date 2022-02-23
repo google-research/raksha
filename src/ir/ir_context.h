@@ -68,11 +68,11 @@ class IRContext {
   }
 
  private:
-  template<class NamedIrNode>
-  class NamedIrNodeRegistry {
+  template<class NamedIRNode>
+  class NamedIRNodeRegistry {
    public:
       // Register a node and return the stored instance.
-    const NamedIrNode &RegisterNode(std::unique_ptr<NamedIrNode> node,
+    const NamedIRNode &RegisterNode(std::unique_ptr<NamedIRNode> node,
                                     absl::string_view node_kind_name) {
         // Note: using node->name() here is ok because C++ list initialization
         // guarantees that evaluation of initializers earlier in the list
@@ -87,7 +87,7 @@ class IRContext {
 
     // Returns the node with a particular name. If there is no
     // node with that name, fail.
-    const NamedIrNode &GetNode(
+    const NamedIRNode &GetNode(
         absl::string_view node_name, absl::string_view node_kind_name) const {
       auto find_res = nodes_.find(node_name);
       CHECK(find_res != nodes_.end())
@@ -101,13 +101,13 @@ class IRContext {
       return nodes_.find(node_name) != nodes_.end();
     }
    private:
-    absl::flat_hash_map<std::string, std::unique_ptr<NamedIrNode>> nodes_;
+    absl::flat_hash_map<std::string, std::unique_ptr<NamedIRNode>> nodes_;
   };
 
   // List of registered operators.
-  NamedIrNodeRegistry<Operator> operators_;
+  NamedIRNodeRegistry<Operator> operators_;
   // List of registered storages.
-  NamedIrNodeRegistry<Storage> storages_;
+  NamedIRNodeRegistry<Storage> storages_;
   // TypeFactory for this context.
   types::TypeFactory type_factory_;
 };
