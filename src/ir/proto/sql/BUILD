@@ -32,4 +32,3 @@ cc_proto_library(
         ":sql_ir_proto",
     ],
 )
-
