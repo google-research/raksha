@@ -29,12 +29,72 @@ message SourceTableColumn {
   // The fully-qualified path to the column, including table name and (if it
   // exists) schema name.
   string column_path = 1;
-
-  // The tags that the SQL verifier statically attaches to the column. The
-  // SQL verifier uses the policy it is given describing what columns have
-  // what tags to decide what columns exist (or, at least, exist in its
-  // model) of the input tables, so it makes a certain amount of sense to
-  // entangle those here as well.
   repeated string confidentiality_tags = 2;
   repeated string integrity_tags = 3;
 }
+
+// This `MergeOperation` is an all-purpose combination of inputs into a single
+// output. For the MVP, this is the only operation we will use to model our SQL
+// dataflow other than policy rule pieces.
+message MergeOperation {
+  // We may optionally associate merges with names to help with building
+  // AccessPaths. This name may include column and/or table aliases provided
+  // by the user.
+  string name = 1;
+  // Direct dataflow dependencies. Relevant for confidentiality and integrity
+  // tags.
+  repeated Value inputs = 2;
+  // Control dependencies. Confidentiality tags can flow from these inputs to
+  // the outputs. They are irrelevant to integrity tags.
+  repeated Value control_inputs = 3;
+  // Whether or not this merge actually transforms the data in some way or
+  // whether it just merges the data, keeping all possible integrity
+  // properties.
+  bool xforms_data = 4;
+  // A unique ID assigned to each MergeOperation. Allows PolicyTransform
+  // nodes to point at MergeOperations, as the need to be able to check the
+  // tag state of particular MergeOperations to decide whether to perform the
+  // transform.
+  uint64 id = 5;
+}
+
+// The action that is taken by a policy if all preconditions match.
+enum PolicyTransformAction {
+  NONE = 0;
+  ADD_INTEGRITY = 1;
+  REMOVE_CONFIDENTIALITY = 2;
+}
+
+// A value is one of a `SourceTableColumn`, which represents a column in one
+// of the input tables to the SQL query, or a `MergeOperation`, which is any
+// other operation that is performed upon data.
+message Value {
+  oneof value_variant {
+    SourceTableColumn source_table_column = 1;
+    MergeOperation merge_operation = 2;
+  }
+}
+
+// A transform upon the state of a program as dictated by a policy rule.
+//
+// A `PolicyTransform` refers to both the node that it will perform its
+// transform upon and the nodes that are considered inputs to the policy
+// transforms via ID rather than nesting the nodes directly underneath them.
+// This allows the SQL AST to be built where each AST node owns, and has
+// nested within it, its child node and the PolicyTransforms can be placed to
+// the side without altering that structure.
+message PolicyTransform {
+  // The MergeOperation that is having its tag state changed by the
+  // PolicyTransform.
+  uint64 transformed_node_id = 1;
+  // A map from the unique ID of a particular input `MergeOperation` to the
+  // integrity tag that is required to be present upon that operation for
+  // this transform to execute.
+  map<uint64, string> required_integrity_tags = 2;
+  // The action to be performed on the tag state of the node indicated by the
+  // `transformed_node_id` if all of the required integrity tags are present
+  // on the nodes indicated in the `required_integrity_tags` map.
+  PolicyTransformAction action = 3;
+  // The string form of the tag to add or remove.
+  string tag = 4;
+};

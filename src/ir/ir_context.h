@@ -37,13 +37,13 @@ class IRContext {
 
   // Register an operator and return the stored operator instances.
   const Operator &RegisterOperator(std::unique_ptr<Operator> op) {
-    return operators_.RegisterNode(std::move(op), "operator");
+    return operators_.RegisterNode(std::move(op));
   }
 
   // Returns the Operator with a particular name. If there is no
   // operator with that name, fail.
   const Operator &GetOperator(absl::string_view operators_name) const {
-    return operators_.GetNode(operators_name, "operator");
+    return operators_.GetNode(operators_name);
   }
 
   // Returns true if the operator is registered with this context.
@@ -53,13 +53,13 @@ class IRContext {
 
     // Register an operator and return the stored operator instances.
   const Storage &RegisterStorage(std::unique_ptr<Storage> op) {
-    return storages_.RegisterNode(std::move(op), "storage");
+    return storages_.RegisterNode(std::move(op));
   }
 
   // Returns the Storage with a particular name. If there is no
   // operator with that name, fail.
   const Storage &GetStorage(absl::string_view operators_name) const {
-    return storages_.GetNode(operators_name, "storage");
+    return storages_.GetNode(operators_name);
   }
 
   // Returns true if the operator is registered with this context.
@@ -68,30 +68,34 @@ class IRContext {
   }
 
  private:
-  template<class NamedIrNode>
-  class NamedIrNodeRegistry {
+  // Names for the kinds of nodes we will manage with `NamedIRNodeRegistry`.
+  // These constants are used to work around the fact that string literals
+  // cannot directly be used as template arguments.
+  static constexpr char kOperatorName[] = "operator";
+  static constexpr char kStorageName[] = "storage";
+
+  template<class Node, const char *kNodeKindName>
+  class NamedIRNodeRegistry {
    public:
       // Register a node and return the stored instance.
-    const NamedIrNode &RegisterNode(std::unique_ptr<NamedIrNode> node,
-                                    absl::string_view node_kind_name) {
+    const Node &RegisterNode(std::unique_ptr<Node> node) {
         // Note: using node->name() here is ok because C++ list initialization
         // guarantees that evaluation of initializers earlier in the list
         // are sequenced before initializers later in the list.
         auto ins_res = nodes_.insert(
             {std::string(node->name()), std::move(node)});
         CHECK(ins_res.second)
-          << "Cannot register duplicate " << node_kind_name << " with name '"
+          << "Cannot register duplicate " << kNodeKindName << " with name '"
           << ins_res.first->first << "'.";
         return *ins_res.first->second.get();
     }
 
     // Returns the node with a particular name. If there is no
     // node with that name, fail.
-    const NamedIrNode &GetNode(
-        absl::string_view node_name, absl::string_view node_kind_name) const {
+    const Node &GetNode(absl::string_view node_name) const {
       auto find_res = nodes_.find(node_name);
       CHECK(find_res != nodes_.end())
-          << "Looking up an unregistered " << node_kind_name
+          << "Looking up an unregistered " << kNodeKindName
           <<  " '" << node_name << "'.";
       return *find_res->second;
     }
@@ -101,13 +105,13 @@ class IRContext {
       return nodes_.find(node_name) != nodes_.end();
     }
    private:
-    absl::flat_hash_map<std::string, std::unique_ptr<NamedIrNode>> nodes_;
+    absl::flat_hash_map<std::string, std::unique_ptr<Node>> nodes_;
   };
 
   // List of registered operators.
-  NamedIrNodeRegistry<Operator> operators_;
+  NamedIRNodeRegistry<Operator, kOperatorName> operators_;
   // List of registered storages.
-  NamedIrNodeRegistry<Storage> storages_;
+  NamedIRNodeRegistry<Storage, kStorageName> storages_;
   // TypeFactory for this context.
   types::TypeFactory type_factory_;
 };
