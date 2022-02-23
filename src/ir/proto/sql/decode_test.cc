@@ -79,7 +79,7 @@ class ComparableSourceTableColumn {
 // parameter, but that would preclude using the `ASSERT` macros (which expect
 // to be in a function returning void).
 void GatherSourceColumnInfoFromValues(
-    const Value val, ComparableSourceTableColumn &result) {
+    const ir::Value val, ComparableSourceTableColumn &result) {
   if (const value::StoredValue *storage_val = val.If<value::StoredValue>()) {
     result.SetColumn(storage_val->storage().name());
   } else if (const value::OperationResult *op_val_ptr =

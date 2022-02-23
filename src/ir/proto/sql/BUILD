@@ -50,6 +50,7 @@ cc_library(
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:ssa_names",
+        "//src/ir:value",
         "@absl//absl/container:flat_hash_map",
     ],
 )
