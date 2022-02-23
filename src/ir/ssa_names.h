@@ -20,8 +20,8 @@
 
 namespace raksha::ir {
 
-class Block;
 class Operation;
+class Block;
 class Module;
 
 class SsaNames {
@@ -59,9 +59,9 @@ class SsaNames {
     absl::flat_hash_map<const T *, ID> item_ids_;
   };
 
-  IDManager<Module> module_ids_;
-  IDManager<Block> block_ids_;
   IDManager<Operation> operation_ids_;
+  IDManager<Block> block_ids_;
+  IDManager<Module> module_ids_;
 };
 
 }  // namespace raksha::ir

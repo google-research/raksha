@@ -41,8 +41,8 @@ SsaNamesTest<Operation>::SsaNamesTest()
       first_entity_(nullptr, test_op_, {}, {}),
       second_entity_(nullptr, test_op_, {}, {}) {}
 
-using MyTypes = ::testing::Types<Operation, Block, Module>;
-TYPED_TEST_SUITE(SsaNamesTest, MyTypes);
+using SsaNamesTestTypes = ::testing::Types<Operation, Block, Module>;
+TYPED_TEST_SUITE(SsaNamesTest, SsaNamesTestTypes);
 
 TYPED_TEST(SsaNamesTest, GetOrCreateIDReturnsUniqueIDs) {
   SsaNames names;
@@ -51,6 +51,7 @@ TYPED_TEST(SsaNamesTest, GetOrCreateIDReturnsUniqueIDs) {
 
   EXPECT_NE(first_id, second_id);
   EXPECT_EQ(names.GetOrCreateID(this->first_entity_), first_id);
+  EXPECT_EQ(names.GetOrCreateID(this->second_entity_), second_id);
 }
 
 }  // namespace
