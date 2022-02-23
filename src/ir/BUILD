@@ -84,6 +84,7 @@ cc_library(
     name = "ir_context",
     hdrs = ["ir_context.h"],
     deps = [
+        ":module",
         ":operator",
         "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
