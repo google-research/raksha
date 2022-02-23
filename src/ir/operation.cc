@@ -26,10 +26,10 @@ namespace raksha::ir {
 // Note: I tried to make this only defined in terms of the type parameter T, but
 // the compiler was unhappy with me writing std::function<std::string(const T&)>
 // and I could not figure out how to placate it.
-template<class T, class U>
+template<class T, class F>
 static std::string PrintNamedMapInNameOrder(
     const absl::flat_hash_map<std::string, T> &map_to_print,
-    U value_printing_fn) {
+    F value_printing_fn) {
   std::vector<absl::string_view> names;
   names.reserve(map_to_print.size());
   for (auto &key_value_pair : map_to_print) {
@@ -39,10 +39,8 @@ static std::string PrintNamedMapInNameOrder(
   return absl::StrJoin(
       names, ", ",
       [&](std::string* out, const absl::string_view name) {
-        auto find_res = map_to_print.find(name);
-        CHECK(find_res != map_to_print.end())
-          << "Name " << name << " not found in map_to_print";
-        absl::StrAppend(out, name, ": ", value_printing_fn(find_res->second));
+        absl::StrAppend(
+            out, name, ": ", value_printing_fn(map_to_print.at(name)));
       });
 }
 
