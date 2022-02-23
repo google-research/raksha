@@ -33,7 +33,6 @@
 //! and produces a new instance of the data structure in `ast.rs`.
 //! It should come before the translation in `lowering_ast_datalog.rs`.
 
-
 use crate::ast::*;
 use std::collections::HashMap;
 
@@ -53,8 +52,8 @@ fn push_option_to_vec<T>(vec: &mut Vec<T>, elt: Option<T>) {
     }
 }
 
-fn generate_universe_condition(principal: &AstPrincipal) -> Option<AstPredicate> {
-    if is_name_constant(&principal.name) {
+fn universe_condition_principal(principal: &AstPrincipal) -> Option<AstPredicate> {
+    if !is_name_constant(&principal.name) {
         Some(AstPredicate {
             sign: Sign::Positive,
             name: "isPrincipal".to_string(),
@@ -73,6 +72,19 @@ fn type_to_universe_name(ast_type: &AstType) -> String {
     }
 }
 
+fn universe_declarations() -> Vec<AstTypeDeclaration> {
+    [
+        ("isNumber", AstType::NumberType),
+        ("isSymbol", AstType::SymbolType),
+        ("isPrincipal", AstType::PrincipalType)
+    ].iter().map(|(rel, typ)| AstTypeDeclaration {
+        predicate_name: rel.to_string(),
+        is_attribute: false,
+        arg_typings: vec![("x".to_string(), typ.clone())]
+    })
+    .collect::<Vec<_>>()
+}
+
 pub struct UniverseHandlingPass {
     // mapping from predicate names to predicate typings
     type_environment: HashMap<String, AstTypeDeclaration>
@@ -82,7 +94,14 @@ impl UniverseHandlingPass {
 
     pub fn handle_universes(prog: &AstProgram) -> AstProgram {
         let universe_handling_pass = UniverseHandlingPass::new(prog);
-        prog.clone()
+        let mut new_prog = prog.clone();
+        new_prog.assertions = prog.assertions.iter()
+            .map(|x| {
+                universe_handling_pass.add_universe_conditions_says_assertion(x)
+            })
+            .collect();
+        new_prog.type_declarations.append(&mut universe_declarations());
+        new_prog
     }
 
     fn new(prog: &AstProgram) -> UniverseHandlingPass {
@@ -94,25 +113,52 @@ impl UniverseHandlingPass {
         }
     }
 
+    fn add_universe_conditions_says_assertion(&self,
+        says_assertion: &AstSaysAssertion)  -> AstSaysAssertion {
+        AstSaysAssertion {
+            prin: says_assertion.prin.clone(),
+            assertions: says_assertion.assertions.iter()
+                .map(|x| self.add_universe_conditions_assertion(x))
+                .collect(),
+            export_file: says_assertion.export_file.clone()
+        }
+    }
 
     // For ungrounded variables appearing in the LHS, extend the RHS
     // with prediates that put them in the universe relations
-    fn add_universe_conditions(assertion: &AstAssertion)
+    fn add_universe_conditions_assertion(&self, assertion: &AstAssertion)
         -> AstAssertion {
             match assertion {
-                AstAssertion::AstFactAssertion { f } => assertion.clone(),
+                AstAssertion::AstFactAssertion { f: fact } => {
+                    let new_rhs = self.universe_conditions_fact(&fact);
+                    AstAssertion::AstCondAssertion {
+                        lhs: fact.clone(),
+                        rhs: self.universe_conditions_fact(&fact)
+                            .iter()
+                            .map(|pred| AstFlatFact::AstPredFact{p: pred.clone()})
+                            .collect()
+                    }
+                }
                 AstAssertion::AstCondAssertion { lhs, rhs } => {
-                    // TODO
-                    assertion.clone()
+                    let mut new_rhs = rhs.clone();
+                    for x in self.universe_conditions_fact(lhs).iter() {
+                        new_rhs.push(
+                            AstFlatFact::AstPredFact {p: x.clone()});
+                    }
+                    AstAssertion::AstCondAssertion {
+                        lhs: lhs.clone(),
+                        rhs: new_rhs
+                    }
                 }
             }
     }
 
     // For an AstFact appearing on the LHS of a conditional assertion,
     // generate the set of universe predicates that should be added to the RHS
-    // from the variables that are subexprs of the AstFact. TODO: it would be
-    // more precise to instead do this translation for the variables that are
-    // genuinely ungrounded rather than all the variables on the LHS.
+    // from the variables that are subexprs of the AstFact. 
+    // TODO: it would be more precise to instead add universe conditions just
+    // for the variables that are genuinely ungrounded rather than all the
+    // variables on the LHS.
     fn universe_conditions_fact(&self, ast_fact: &AstFact) -> Vec<AstPredicate> {
         match ast_fact {
             AstFact::AstFlatFactFact { f: flat_fact } => {
@@ -121,7 +167,7 @@ impl UniverseHandlingPass {
             AstFact::AstCanSayFact { p: delegatee, f: fact } => {
                 let mut ret = self.universe_conditions_fact(fact);
                 push_option_to_vec(&mut ret,
-                                   generate_universe_condition(&delegatee));
+                                   universe_condition_principal(&delegatee));
                 ret
             }
         }
@@ -129,8 +175,42 @@ impl UniverseHandlingPass {
 
     fn universe_conditions_flat_fact(&self, ast_flat_fact: &AstFlatFact)
         -> Vec<AstPredicate> {
-            // TODO
-            vec![]
+            match ast_flat_fact {
+                AstFlatFact::AstPrinFact {p: principal, v: verb_phrase} => {
+                    let mut ret = self
+                        .universe_conditions_verb_phrase(verb_phrase);
+                    push_option_to_vec(&mut ret,
+                               universe_condition_principal(&principal));
+                    ret
+                }
+                AstFlatFact::AstPredFact { p: predicate } => {
+                    self.universe_conditions_predicate(predicate)
+                }
+            }
+    }
+
+    fn universe_conditions_verb_phrase(&self, verb_phrase: &AstVerbPhrase) 
+        -> Vec<AstPredicate> {
+            match verb_phrase {
+                AstVerbPhrase::AstPredPhrase { p: predicate } => {
+                    self.universe_conditions_predicate(&predicate)
+                }
+                AstVerbPhrase::AstCanActPhrase { p: principal } => {
+                    universe_condition_principal(&principal)
+                        .iter()
+                        // iter returns references so copying is needed
+                        .map(|x| x.clone())
+                        .collect::<Vec<_>>()
+                }
+            }
+    }
+
+    fn universe_conditions_predicate(&self, predicate: &AstPredicate)
+        -> Vec<AstPredicate> {
+            predicate.args.iter()
+                .map(|arg| self.universe_condition_arg(&predicate.name, arg))
+                .flatten()
+                .collect()
     }
 
     fn universe_condition_arg(&self, predicate_name: &String, argument: &String)
@@ -143,7 +223,7 @@ impl UniverseHandlingPass {
                 .into_iter()
                 .collect();
             let arg_type = arg_to_type_map.get(argument).unwrap();
-            if is_name_constant(argument) {
+            if !is_name_constant(argument) {
                 Some(AstPredicate {
                     sign: Sign::Positive,
                     name: type_to_universe_name(arg_type),
@@ -152,13 +232,5 @@ impl UniverseHandlingPass {
             } else {
                 None
             }
-    }
-
-    fn universe_conditions_predicate(&self, predicate: &AstPredicate)
-        -> Vec<AstPredicate> {
-            predicate.args.iter()
-                .map(|arg| self.universe_condition_arg(&predicate.name, arg))
-                .flatten()
-                .collect()
     }
 }
