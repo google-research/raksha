@@ -29,6 +29,12 @@ message SourceTableColumn {
   // The fully-qualified path to the column, including table name and (if it
   // exists) schema name.
   string column_path = 1;
+
+  // The tags that the SQL verifier statically attaches to the column. The
+  // SQL verifier uses the policy it is given describing what columns have
+  // what tags to decide what columns exist (or, at least, exist in its
+  // model) of the input tables, so it makes a certain amount of sense to
+  // entangle those here as well.
   repeated string confidentiality_tags = 2;
   repeated string integrity_tags = 3;
 }
