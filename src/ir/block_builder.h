@@ -49,9 +49,11 @@ class BlockBuilder {
   // Adds an operation to the block and returns the operation.
   const Operation& AddOperation(const Operator& op,
                                 NamedAttributeMap attributes,
-                                NamedValueMap inputs) {
-    block_->operations_.push_back(std::make_unique<Operation>(
-        block_.get(), op, std::move(attributes), std::move(inputs)));
+                                NamedValueMap inputs,
+                                std::unique_ptr<Module> impl_module = nullptr) {
+    block_->operations_.push_back(
+        std::make_unique<Operation>(block_.get(), op, std::move(attributes),
+                                    std::move(inputs), std::move(impl_module)));
     return *block_->operations_.back();
   }
 
