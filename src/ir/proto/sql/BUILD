@@ -32,3 +32,33 @@ cc_proto_library(
         ":sql_ir_proto",
     ],
 )
+
+cc_library(
+    name = "decode",
+    srcs = [
+        "decode.cc",
+    ],
+    hdrs = [
+        "decode.h",
+    ],
+    deps = [
+        ":sql_ir_cc_proto",
+        "//src/common/logging",
+        "//src/ir",
+        "//src/ir:attribute",
+        "//src/ir:block_builder",
+        "//src/ir:ir_context",
+        "//src/ir:ssa_names",
+        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_test(
+    name = "decode_test",
+    srcs = ["decode_test.cc"],
+    deps = [
+        ":decode",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)
