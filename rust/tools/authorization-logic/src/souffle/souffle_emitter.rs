@@ -15,11 +15,14 @@
  */
 
 use crate::{ast::*, souffle::datalog_ir::*};
+use std::collections::HashSet;
 
 /// Produces Souffle code as a `String` when given a Datalog IR (DLIR) program.
 pub fn emit_program(p: &DLIRProgram, decl_skip: &Option<Vec<String>>) -> String {
     vec![ 
-        emit_declarations(p, decl_skip.as_ref().unwrap_or(&Vec::new())),
+        emit_type_declarations(p),
+        emit_relation_declarations(p,
+                decl_skip.as_ref().unwrap_or(&Vec::new())),
         emit_program_body(p),
         emit_outputs(p)
     ].join("\n")
@@ -28,8 +31,8 @@ pub fn emit_program(p: &DLIRProgram, decl_skip: &Option<Vec<String>>) -> String 
 fn emit_type(auth_logic_type: &AstType) -> String {
     match auth_logic_type {
         AstType::NumberType => "number".to_string(),
-        AstType::SymbolType => "symbol".to_string(),
-        AstType::PrincipalType => "principal".to_string()
+        AstType::PrincipalType => "Principal".to_string(),
+        AstType::CustomType{ type_name } => type_name.clone()
     }
 }
 
@@ -75,15 +78,33 @@ fn emit_program_body(p: &DLIRProgram) -> String {
         .join("\n")
 }
 
-fn emit_declarations(p: &DLIRProgram, decl_skip: &Vec<String>) -> String {
-    let principal_type = String::from(".type principal <: symbol");
-    let generated_declarations = p.relation_declarations
+fn emit_type_declarations(p: &DLIRProgram) -> String {
+    let principal_type_declaration = String::from(".type Principal <: symbol");
+    let custom_types: HashSet<_> = p.relation_declarations.iter()
+        .map(|rel_decl| rel_decl.arg_typings.iter()
+             .map(|(parameter, type_)| type_))
+        .flatten()
+        .filter_map(|type_| match type_ {
+            AstType::CustomType { type_name } => Some(type_name),
+            _ => None
+        })
+        .filter(|type_name| !(**type_name == "symbol".to_string()))
+        .collect();
+    let custom_type_declarations = custom_types.iter()
+        .map(|type_| format!(".type {} <: symbol", type_))
+        .collect::<Vec<_>>()
+        .join("\n");
+    vec![principal_type_declaration, custom_type_declarations].join("\n")
+}
+
+fn emit_relation_declarations(p: &DLIRProgram, decl_skip: &Vec<String>)
+        -> String {
+    p.relation_declarations
         .iter()
         .filter(|x| !decl_skip.contains(&x.predicate_name))
         .map(|x| emit_decl(x))
         .collect::<Vec<_>>()
-        .join("\n");
-    vec![principal_type, generated_declarations].join("\n")
+        .join("\n")
 }
 
 fn emit_outputs(p: &DLIRProgram) -> String {

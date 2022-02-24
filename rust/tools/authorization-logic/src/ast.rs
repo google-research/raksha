@@ -105,8 +105,12 @@ pub struct AstImport {
     pub principal: AstPrincipal,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub enum AstType { NumberType, SymbolType, PrincipalType }
+#[derive(Debug, Hash, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum AstType { 
+    NumberType, 
+    PrincipalType, 
+    CustomType { type_name: String }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AstRelationDeclaration {

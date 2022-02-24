@@ -84,8 +84,8 @@ importAssertion
 // The name "type" would cause name collisions in the code that antlr generates
 authLogicType
     : NUMBERTYPE #numberType
-    | SYMBOLTYPE #symbolType
     | PRINCIPALTYPE #principalType
+    | ID #customType
     ;
 
 relationDeclaration
@@ -114,9 +114,8 @@ BINDIM: 'BindPubKey';
 
 // These are keywords are related to relation declarations
 // and types.
-NUMBERTYPE: 'number';
-SYMBOLTYPE: 'symbol';
-PRINCIPALTYPE: 'principal';
+NUMBERTYPE: 'Number';
+PRINCIPALTYPE: 'Principal';
 ATTRIBUTE: 'attribute';
 
 // Identifiers wrapped in quotes are constants whereas

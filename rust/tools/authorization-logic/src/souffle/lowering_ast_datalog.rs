@@ -422,7 +422,6 @@ impl LoweringToDatalogPass {
             .map(|decl| (decl.predicate_name.clone(), decl.clone()))
             .collect();
 
-
         // Prefix a relation declaration with "P cansay ..." `delegation_depth`
         // times.
         fn prefix_with_cansay(t: &AstRelationDeclaration,
@@ -475,14 +474,14 @@ impl LoweringToDatalogPass {
                 predicate_name: q.name.clone(),
                 is_attribute: false,
                 arg_typings: vec![("dummy_param".to_string(),
-                    AstType::SymbolType)]
+                    AstType::CustomType{type_name: "DummyType".to_string()})]
             })
             .collect();
         query_decls.push(AstRelationDeclaration {
             predicate_name: "grounded_dummy".to_string(),
             is_attribute: false,
             arg_typings: vec![("dummy_param".to_string(),
-                AstType::SymbolType)]
+                AstType::CustomType{type_name: "DummyType".to_string()})]
         });
         query_decls
     }

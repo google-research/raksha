@@ -232,10 +232,11 @@ fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
     match ctx {
         AuthLogicTypeContextAll::NumberTypeContext(ctx_prime) =>
             AstType::NumberType,
-        AuthLogicTypeContextAll::SymbolTypeContext(ctx_prime) =>
-            AstType::SymbolType,
         AuthLogicTypeContextAll::PrincipalTypeContext(ctx_prime) =>
             AstType::PrincipalType,
+        AuthLogicTypeContextAll::CustomTypeContext(ctx_prime) => {
+            AstType::CustomType { type_name: ctx_prime.ID().unwrap().get_text() }
+        }
         _ => {
             panic!("construct_type tried to build error");
         }

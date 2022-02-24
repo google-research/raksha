@@ -18,18 +18,18 @@ mod test {
         // Compile with declarations
         compile("testDeclSkip", "test_inputs", "test_outputs", "");
         let contents1 = file_line_list(&"test_outputs/testDeclSkip.dl");
-        assert!(contents1.contains(&".decl grounded_dummy(dummy_param: symbol)".to_string()));
+        assert!(contents1.contains(&".decl grounded_dummy(dummy_param: DummyType)".to_string()));
         assert!(contents1.contains(
-            &".decl says_isRelevantFor(speaker: principal, attributed_prin: principal, subject: symbol)"
+            &".decl says_isRelevantFor(speaker: Principal, attributed_prin: Principal, subject: symbol)"
             .to_string()));
         
         // Compile with some declarations removed
         compile("testDeclSkip", "test_inputs","test_outputs",
             "grounded_dummy,says_isRelevantFor");
         let contents2 = file_line_list(&"test_outputs/testDeclSkip.dl");
-        assert!(!contents2.contains(&".decl grounded_dummy(dummy_param: symbol)".to_string()));
+        assert!(!contents2.contains(&".decl grounded_dummy(dummy_param: DummyType)".to_string()));
         assert!(!contents2.contains(
-            &".decl says_isRelevantFor(speaker: principal, x1: symbol, x2: symbol)"
+            &".decl says_isRelevantFor(speaker: Principal, x1: symbol, x2: symbol)"
             .to_string()));
 
 
