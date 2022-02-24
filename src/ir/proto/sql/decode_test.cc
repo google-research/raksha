@@ -56,4 +56,36 @@ INSTANTIATE_TEST_SUITE_P(
     DecodeSourceTableColumnTest, DecodeSourceTableColumnTest,
     testing::ValuesIn(kSourceColumnPaths));
 
+class DecodeLiteralTest :
+    public testing::TestWithParam<absl::string_view> {};
+
+TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
+  absl::string_view literal_str = GetParam();
+  std::string textproto = absl::StrFormat(R"(literal_str: "%s")", literal_str);
+  Literal literal_proto;
+
+  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
+      textproto, &literal_proto))
+      << "Could not decode Literal";
+
+  IRContext ir_context;
+  ir::Value result = DecodeLiteral(literal_proto, ir_context);
+  value::StoredValue stored_value = result.As<value::StoredValue>();
+  const Storage &storage = stored_value.storage();
+  EXPECT_EQ(storage.name(), absl::StrCat("literal:", literal_str));
+  EXPECT_EQ(storage.type().type_base().kind(),
+            types::TypeBase::Kind::kPrimitive);
+}
+
+absl::string_view kLiteralStrs[] = {
+    "100",
+    "0",
+    "3.1415",
+    "hello world!",
+    "null",
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    DecodeLiteralTest, DecodeLiteralTest, testing::ValuesIn(kLiteralStrs));
+
 }  // namespace raksha::ir::proto::sql
