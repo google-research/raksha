@@ -18,9 +18,10 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/auth_logic/ast.h"
-#include "src/ir/auth_logic/datalog_ir.h"
+#include "src/ir/datalog/program.h"
 #include "src/ir/auth_logic/lowering_ast_datalog.h"
 #include "src/utils/move_append.h"
+
 
 namespace raksha::ir::auth_logic {
 
@@ -39,7 +40,7 @@ SaysAssertion BuildSingleSaysAssertion(Principal speaker, Assertion assertion) {
 Program BuildPredicateTestProgram() {
   return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
       Principal("TestPrincipal"),
-      Assertion(Fact(BaseFact(Predicate("foo", {"bar", "baz"}, kPositive))))));
+      Assertion(Fact(BaseFact(datalog::Predicate("foo", {"bar", "baz"}, datalog::kPositive))))));
 }
 
 TEST(EmitterTestSuite, SimpleTest) {
@@ -62,7 +63,7 @@ Program BuildAttributeTestProgram() {
       Principal("TestSpeaker"),
       Assertion(Fact(BaseFact(
           Attribute(Principal("OtherTestPrincipal"),
-                    Predicate("hasProperty", {"wellTested"}, kPositive)))))));
+                    datalog::Predicate("hasProperty", {"wellTested"}, datalog::kPositive)))))));
 }
 
 TEST(EmitterTestSuite, AttributeTest) {
@@ -107,7 +108,7 @@ grounded_dummy(dummy_var).
 
 Program BuildCanSayProgram() {
   std::unique_ptr<Fact> inner_fact = std::unique_ptr<Fact>(
-      new Fact(BaseFact(Predicate("grantAccess", {"secretFile"}, kPositive))));
+      new Fact(BaseFact(datalog::Predicate("grantAccess", {"secretFile"}, datalog::kPositive))));
   Fact::FactVariantType cansay_fact =
       std::unique_ptr<CanSay>(new CanSay(Principal("PrincipalA"), inner_fact));
   return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
@@ -134,7 +135,7 @@ grounded_dummy(dummy_var).
 Program BuildDoubleCanSayProgram() {
   // So much fun with unique pointers!
   std::unique_ptr<Fact> inner_fact = std::unique_ptr<Fact>(
-      new Fact(BaseFact(Predicate("grantAccess", {"secretFile"}, kPositive))));
+      new Fact(BaseFact(datalog::Predicate("grantAccess", {"secretFile"}, datalog::kPositive))));
   Fact::FactVariantType inner_cansay =
       std::unique_ptr<CanSay>(new CanSay(Principal("PrincipalA"), inner_fact));
   std::unique_ptr<Fact> inner_cansay_fact =
@@ -166,9 +167,9 @@ grounded_dummy(dummy_var).
 
 Program BuildConditionalProgram() {
   std::vector<BaseFact> rhs = {
-      BaseFact(Predicate("isEmployee", {"somePerson"}, kPositive))};
+      BaseFact(datalog::Predicate("isEmployee", {"somePerson"}, datalog::kPositive))};
   Fact lhs(
-      BaseFact(Predicate("canAccess", {"somePerson", "someFile"}, kPositive)));
+      BaseFact(datalog::Predicate("canAccess", {"somePerson", "someFile"}, datalog::kPositive)));
   return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
       Principal("TestSpeaker"),
       Assertion(ConditionalAssertion(std::move(lhs), std::move(rhs)))));
@@ -191,9 +192,9 @@ grounded_dummy(dummy_var).
 Program BuildMultiAssertionProgram() {
   // Conditional Assertion
   std::vector<BaseFact> rhs = {
-      BaseFact(Predicate("isEmployee", {"somePerson"}, kPositive))};
+      BaseFact(datalog::Predicate("isEmployee", {"somePerson"}, datalog::kPositive))};
   Fact lhs(
-      BaseFact(Predicate("canAccess", {"somePerson", "someFile"}, kPositive)));
+      BaseFact(datalog::Predicate("canAccess", {"somePerson", "someFile"}, datalog::kPositive)));
   SaysAssertion condAssertion = BuildSingleSaysAssertion(
       Principal("TestPrincipal"),
       Assertion(ConditionalAssertion(std::move(lhs), std::move(rhs))));
@@ -202,7 +203,7 @@ Program BuildMultiAssertionProgram() {
   SaysAssertion predicateAssertion = BuildSingleSaysAssertion(
       Principal("TestPrincipal"),
       Assertion(
-          Fact(BaseFact(Predicate("isEmployee", {"somePerson"}, kPositive)))));
+          Fact(BaseFact(datalog::Predicate("isEmployee", {"somePerson"}, datalog::kPositive)))));
 
   // I would love to just write this:
   // return Program({std::move(condAssertion),
@@ -231,7 +232,7 @@ grounded_dummy(dummy_var).
 
 Program BuildQueryProgram() {
   Query testQuery("theTestQuery", Principal("TestSpeaker"),
-                  Fact(BaseFact(Predicate("anything", {"atAll"}, kPositive))));
+                  Fact(BaseFact(datalog::Predicate("anything", {"atAll"}, datalog::kPositive))));
   std::vector<Query> query_list = {};
   query_list.push_back(std::move(testQuery));
   return Program({}, std::move(query_list));

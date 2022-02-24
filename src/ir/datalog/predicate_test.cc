@@ -15,9 +15,9 @@
 //----------------------------------------------------------------------------
 
 #include "src/common/testing/gtest.h"
-#include "src/ir/auth_logic/ast.h"
+#include "src/ir/datalog/program.h"
 
-namespace raksha::ir::auth_logic {
+namespace raksha::ir::datalog {
 
 TEST(PredicateTest, EqualReturnsForIdenticalPredicates) {
   Predicate p1("foo", {"bar", "baz"}, kPositive);
@@ -62,4 +62,4 @@ TEST(PredicateTest, UnequalReturnsForPrefixingUnequalParameterList) {
   EXPECT_TRUE(!(p1 == p2));
 }
 
-}  // namespace raksha::ir::auth_logic
+}  // namespace raksha::ir::datalog

@@ -1,6 +1,4 @@
-/*
- * Copyright 2022 Google LLC.
- *
+/* Copyright 2022 Google LLC.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +14,69 @@
 
 // This file contains the datalog IR (DLIR) which makes the translation from
 // this authorization logic into datalog simpler.
-#ifndef SRC_IR_AUTH_LOGIC_DATALOG_IR_H_
-#define SRC_IR_AUTH_LOGIC_DATALOG_IR_H_
 
+#ifndef SRC_IR_DATALOG_PROGRAM_H_
+#define SRC_IR_DATALOG_PROGRAM_H_
+
+#include <memory>
+#include <string>
+#include <variant>
 #include <vector>
 
-#include "src/ir/auth_logic/ast.h"
+namespace raksha::ir::datalog {
 
-namespace raksha::ir::auth_logic {
+// Used to represent whether a predicate is negated or not
+enum Sign { kNegated, kPositive };
+
+// Predicate corresponds to a predicate of the form
+// <pred_name>(arg_1, ..., arg_n), and it may or may not be negated
+class Predicate {
+ public:
+  Predicate(std::string name, std::vector<std::string> args, Sign sign)
+      : name_(std::move(name)),
+        args_(std::move(args)),
+        // TODO move surpresses an unused private field error about sign_
+        // for now, get rid of this eventually
+        sign_(std::move(sign)) {}
+
+  const std::string& name() const { return name_; }
+  const std::vector<std::string>& args() const { return args_; }
+  Sign sign() const { return sign_; }
+
+  template <typename H>
+  friend H AbslHashValue(H h, const Predicate& p) {
+    return H::combine(std::move(h), p.name(), p.args(), p.sign());
+  }
+  // Equality is also needed to use a Predicate in a flat_hash_set
+  bool operator==(const Predicate& otherPredicate) const {
+    if (this->name() != otherPredicate.name()) {
+      return false;
+    }
+    if (this->sign() != otherPredicate.sign()) {
+      return false;
+    }
+    if (this->args().size() != otherPredicate.args().size()) {
+      return false;
+    }
+    for (uint64_t i = 0; i < this->args().size(); i++) {
+      if (this->args().at(i) != otherPredicate.args().at(i)) return false;
+    }
+    return true;
+  }
+
+  // < operator is needed for btree_set, which is only used for declarations.
+  // Since declarations are uniquely defined by the name of the predicate,
+  // this implementation that just uses < on the predicate names should be
+  // sufficent in the context where it is used.
+  bool operator<(const Predicate& otherPredicate) const {
+    return this->name() < otherPredicate.name();
+  }
+
+ private:
+  std::string name_;
+  std::vector<std::string> args_;
+  Sign sign_;
+};
 
 // A conditional datalog assertion with a left hand side and a right hand
 // side.
@@ -69,6 +122,6 @@ class DLIRProgram {
   std::vector<std::string> outputs_;
 };
 
-}  // namespace raksha::ir::auth_logic
+}  // namespace raksha::ir::datalog
 
-#endif  // SRC_IR_AUTH_LOGIC_DATALOG_IR_H_
+#endif  // SRC_IR_DATALOG_PROGRAM_H_
