@@ -22,79 +22,87 @@ syntax = "proto3";
 package raksha.ir.proto.sql;
 
 // This value corresponds to some source table for the query being analyzed.
-// It may have some confidentiality tags or integrity tags annotated onto it.
-// We entangle the tag claim aspect and the column identification because
-// that fits well with the policy matching procedure in the SQL verifier.
 message SourceTableColumn {
   // The fully-qualified path to the column, including table name and (if it
   // exists) schema name.
   string column_path = 1;
-  repeated string confidentiality_tags = 2;
-  repeated string integrity_tags = 3;
+}
+
+// A literal. The SQL verifier currently just passes on the string form of the
+// literal as seen by the parser. For the MVP, we just continue passing this
+// along.
+message Literal {
+  string literal_str = 1;
 }
 
 // This `MergeOperation` is an all-purpose combination of inputs into a single
-// output. For the MVP, this is the only operation we will use to model our SQL
-// dataflow other than policy rule pieces.
+// output.
 message MergeOperation {
-  // We may optionally associate merges with names to help with building
-  // AccessPaths. This name may include column and/or table aliases provided
-  // by the user.
-  string name = 1;
   // Direct dataflow dependencies. Relevant for confidentiality and integrity
   // tags.
-  repeated Value inputs = 2;
+  repeated Expression inputs = 2;
   // Control dependencies. Confidentiality tags can flow from these inputs to
   // the outputs. They are irrelevant to integrity tags.
-  repeated Value control_inputs = 3;
-  // Whether or not this merge actually transforms the data in some way or
-  // whether it just merges the data, keeping all possible integrity
-  // properties.
-  bool xforms_data = 4;
-  // A unique ID assigned to each MergeOperation. Allows PolicyTransform
-  // nodes to point at MergeOperations, as the need to be able to check the
-  // tag state of particular MergeOperations to decide whether to perform the
-  // transform.
-  uint64 id = 5;
+  repeated Expression control_inputs = 3;
 }
 
-// The action that is taken by a policy if all preconditions match.
-enum PolicyTransformAction {
+// The kind of a tag.
+enum TagKind {
+  UNKNOWN = 0;
+  INTEGRITY = 1;
+  CONFIDENTIALITY = 2;
+}
+
+// The action that is taken upon a tag by a policy rule.
+enum TagAlteration {
   NONE = 0;
-  ADD_INTEGRITY = 1;
-  REMOVE_CONFIDENTIALITY = 2;
-}
-
-// A value is one of a `SourceTableColumn`, which represents a column in one
-// of the input tables to the SQL query, or a `MergeOperation`, which is any
-// other operation that is performed upon data.
-message Value {
-  oneof value_variant {
-    SourceTableColumn source_table_column = 1;
-    MergeOperation merge_operation = 2;
-  }
+  ADD = 1;
+  REMOVE = 2;
 }
 
 // A transform upon the state of a program as dictated by a policy rule.
 //
-// A `PolicyTransform` refers to both the node that it will perform its
-// transform upon and the nodes that are considered inputs to the policy
-// transforms via ID rather than nesting the nodes directly underneath them.
-// This allows the SQL AST to be built where each AST node owns, and has
-// nested within it, its child node and the PolicyTransforms can be placed to
-// the side without altering that structure.
+// A `PolicyTransform` is structured like a cast upon some `transformed_node`
+// `Expression`. The preconditions of this transform, however, are presented as
+// IDs rather than nesting the nodes directly underneath them. This is
+// necessary because these inputs may not be direct children of the
+// transformed node. Because protos only allow each structure to have a
+// single nesting parent, we need a different way of referring to them for
+// these additional references.
 message PolicyTransform {
-  // The MergeOperation that is having its tag state changed by the
-  // PolicyTransform.
-  uint64 transformed_node_id = 1;
+  // The `Expression` that is having its tag state changed by the
+  // `PolicyTransform`.
+  Expression transformed_node = 1;
   // A map from the unique ID of a particular input `MergeOperation` to the
   // integrity tag that is required to be present upon that operation for
   // this transform to execute.
   map<uint64, string> required_integrity_tags = 2;
   // The action to be performed on the tag state of the node indicated by the
   // `transformed_node_id` if all of the required integrity tags are present
-  // on the nodes indicated in the `required_integrity_tags` map.
-  PolicyTransformAction action = 3;
+  // on the nodes indicated in the `required_integrity_tags` map. Can be
+  // added or removed.
+  TagAlteration tag_alteration = 3;
+  // The kind of the tag given in tag that should be added or removed.
+  TagKind tag_kind = 4;
   // The string form of the tag to add or remove.
-  string tag = 4;
+  string tag = 5;
 };
+
+message Expression {
+  // A unique ID assigned to each Expression. Allows PolicyTransform nodes to
+  // point at Expression, as the need to be able to check the tag state of
+  // particular MergeOperations to decide whether to perform the
+  // transform.
+  uint64 id = 1;
+  // We may optionally associate expressions with names to help with building
+  // `AccessPaths`. This name may include column and/or table aliases provided
+  // by the user. It may also include our own auto-generated hints.
+  string name = 2;
+  // The specific kinds of expressions.
+  oneof expr_variant {
+    SourceTableColumn source_table_column = 3;
+    Literal literal = 4;
+    MergeOperation merge_operation = 5;
+    PolicyTransform policy_transform = 6;
+  }
+}
