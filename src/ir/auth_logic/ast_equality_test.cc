@@ -17,47 +17,48 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/auth_logic/ast.h"
 
+
 namespace raksha::ir::auth_logic {
 
 TEST(AstEqualityTestSuite, Test1) {
-  Predicate p1("foo", {"bar", "baz"}, kPositive);
-  Predicate p2("foo", {"bar", "baz"}, kPositive);
+  datalog::Predicate p1("foo", {"bar", "baz"}, datalog::kPositive);
+  datalog::Predicate p2("foo", {"bar", "baz"}, datalog::kPositive);
   EXPECT_TRUE(p1 == p2);
 }
 
 TEST(AstEqualityTestSuite, Test2) {
-  Predicate p1("foo", {"bar", "baz"}, kPositive);
-  Predicate p2("food", {"bar", "baz"}, kPositive);
+  datalog::Predicate p1("foo", {"bar", "baz"}, datalog::kPositive);
+  datalog::Predicate p2("food", {"bar", "baz"}, datalog::kPositive);
   EXPECT_TRUE(!(p1 == p2));
 }
 
 TEST(AstEqualityTestSuite, Test3) {
-  Predicate p1("foo", {"bar", "baz"}, kPositive);
-  Predicate p2("foo", {"baz", "bar"}, kPositive);
+  datalog::Predicate p1("foo", {"bar", "baz"}, datalog::kPositive);
+  datalog::Predicate p2("foo", {"baz", "bar"}, datalog::kPositive);
   EXPECT_TRUE(!(p1 == p2));
 }
 
 TEST(AstEqualityTestSuite, Test4) {
-  Predicate p1("foo", {"barrrrr", "baz"}, kPositive);
-  Predicate p2("foo", {"bar", "baz"}, kPositive);
+  datalog::Predicate p1("foo", {"barrrrr", "baz"}, datalog::kPositive);
+  datalog::Predicate p2("foo", {"bar", "baz"}, datalog::kPositive);
   EXPECT_TRUE(!(p1 == p2));
 }
 
 TEST(AstEqualityTestSuite, Test5) {
-  Predicate p1("foo", {"bar", "baz"}, kPositive);
-  Predicate p2("foo", {"bar", "bas"}, kPositive);
+  datalog::Predicate p1("foo", {"bar", "baz"}, datalog::kPositive);
+  datalog::Predicate p2("foo", {"bar", "bas"}, datalog::kPositive);
   EXPECT_TRUE(!(p1 == p2));
 }
 
 TEST(AstEqualityTestSuite, Test6) {
-  Predicate p1("foo", {"bar", "baz"}, kPositive);
-  Predicate p2("foo", {"bar", "baz"}, kNegated);
+  datalog::Predicate p1("foo", {"bar", "baz"}, datalog::kPositive);
+  datalog::Predicate p2("foo", {"bar", "baz"}, datalog::kNegated);
   EXPECT_TRUE(!(p1 == p2));
 }
 
 TEST(AstEqualityTestSuite, Test7) {
-  Predicate p1("foo", {"bar", "baz"}, kPositive);
-  Predicate p2("foo", {"bar", "baz", "beef"}, kPositive);
+  datalog::Predicate p1("foo", {"bar", "baz"}, datalog::kPositive);
+  datalog::Predicate p2("foo", {"bar", "baz", "beef"}, datalog::kPositive);
   EXPECT_TRUE(!(p1 == p2));
 }
 
