@@ -27,17 +27,10 @@ cc_library(
     visibility = ["//test:__pkg__"],
     deps = [
         "//src/common/logging",
+        "//src/ir/datalog:program",
         "//src/utils:overloaded",
         "@absl//absl/hash",
         "@absl//absl/strings:str_format",
-    ],
-)
-
-cc_test(
-    name = "predicate_test",
-    deps = [
-        ":ast",
-        "//src/common/testing:gtest",
     ],
 )
 
@@ -45,13 +38,13 @@ cc_library(
     name = "lowering_ast_datalog",
     srcs = ["lowering_ast_datalog.cc"],
     hdrs = [
-        "datalog_ir.h",
         "lowering_ast_datalog.h",
     ],
     visibility = ["//test:__pkg__"],
     deps = [
         ":ast",
         "//src/common/logging",
+        "//src/ir/datalog:program",
         "//src/utils:map_iter",
         "//src/utils:move_append",
         "//src/utils:overloaded",
@@ -68,6 +61,7 @@ cc_library(
     deps = [
         "//src/ir/auth_logic:ast",
         "//src/ir/auth_logic:lowering_ast_datalog",
+        "//src/ir/datalog:program",
         "//src/utils:map_iter",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/strings",
