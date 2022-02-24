@@ -114,6 +114,11 @@ class Value {
         value_);
   }
 
+  // Allows accepting a visitor that will visit the variants. Just delegates
+  // directly to std::visit on variants.
+  template<class T, class F>
+  const T Visit(F visitor) const { return std::visit(visitor, value_); }
+
   // A downcast operation. Just delegates directly to std::get on variants.
   template<class T>
   const T &As() const { return std::get<T>(value_); }

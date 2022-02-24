@@ -61,6 +61,7 @@ cc_test(
     deps = [
         ":decode",
         "//src/common/testing:gtest",
+        "//src/utils:overloaded",
         "@absl//absl/strings",
     ],
 )

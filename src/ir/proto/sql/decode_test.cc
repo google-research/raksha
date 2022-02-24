@@ -21,6 +21,7 @@
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/proto/sql/sql_ir.pb.h"
+#include "src/utils/overloaded.h"
 
 namespace raksha::ir::proto::sql {
 
@@ -78,37 +79,51 @@ class ComparableSourceTableColumn {
 // NOTE: It would be nicer to return the result rather than use an output
 // parameter, but that would preclude using the `ASSERT` macros (which expect
 // to be in a function returning void).
-void GatherSourceColumnInfoFromValues(
-    const ir::Value val, ComparableSourceTableColumn &result) {
-  if (const value::StoredValue *storage_val = val.If<value::StoredValue>()) {
-    result.SetColumn(storage_val->storage().name());
-  } else if (const value::OperationResult *op_val_ptr =
-      val.If<value::OperationResult>()) {
-    const Operation &op = op_val_ptr->operation();
-    EXPECT_EQ(op.op().name(), DecoderContext::kTagClaimOperatorName);
-    auto kind_find_res =
-        op.attributes().find(DecoderContext::kTagKindAttributeName);
-    std::string tag_kind_string = kind_find_res->second->ToString();
-    CHECK((tag_kind_string == DecoderContext::kIntegrityTagAttrValue) ||
-      (tag_kind_string == DecoderContext::kConfidentialityTagAttrValue));
-    bool is_integrity =
+static ComparableSourceTableColumn GatherSourceColumnInfoFromValues(
+    ir::Value val) {
+  return val.Visit<ComparableSourceTableColumn>(utils::overloaded{
+    [](const value::StoredValue &stored_val) {
+      ComparableSourceTableColumn result;
+      result.SetColumn(stored_val.storage().name());
+      return result;
+    },
+    [](const value::OperationResult &op_result) {
+      const Operation &op = op_result.operation();
+      EXPECT_EQ(op.op().name(), DecoderContext::kTagClaimOperatorName);
+      auto kind_find_res =
+          op.attributes().find(DecoderContext::kTagKindAttributeName);
+      std::string tag_kind_string = kind_find_res->second->ToString();
+      EXPECT_TRUE((tag_kind_string == DecoderContext::kIntegrityTagAttrValue) ||
+        (tag_kind_string == DecoderContext::kConfidentialityTagAttrValue));
+      bool is_integrity =
         (tag_kind_string == DecoderContext::kIntegrityTagAttrValue);
-    ASSERT_NE(kind_find_res, op.attributes().end());
-    auto tag_name_find_res =
+      EXPECT_NE(kind_find_res, op.attributes().end());
+      auto tag_name_find_res =
         op.attributes().find(DecoderContext::kAddedTagAttributeName);
-    ASSERT_NE(tag_name_find_res, op.attributes().end());
-    std::string tag_name_string = tag_name_find_res->second->ToString();
-    if (is_integrity) {
-      result.AddIntegrityTag(tag_name_string);
-    } else {
-      result.AddConfidentialityTag(tag_name_string);
-    }
+      EXPECT_NE(tag_name_find_res, op.attributes().end());
 
-    EXPECT_EQ(op.inputs().size(), 1);
-    auto find_res = op.inputs().find(DecoderContext::kTagClaimInputValueName);
-    ASSERT_NE(find_res, op.inputs().end());
-    GatherSourceColumnInfoFromValues(find_res->second, result);
-  }
+      EXPECT_EQ(op.inputs().size(), 1);
+      auto find_res = op.inputs().find(DecoderContext::kTagClaimInputValueName);
+      EXPECT_NE(find_res, op.inputs().end());
+
+      ComparableSourceTableColumn result =
+          GatherSourceColumnInfoFromValues(find_res->second);
+
+      std::string tag_name_string = tag_name_find_res->second->ToString();
+      if (is_integrity) {
+        result.AddIntegrityTag(tag_name_string);
+      } else {
+        result.AddConfidentialityTag(tag_name_string);
+      }
+      return result;
+    },
+    [](const value::BlockArgument &) -> ComparableSourceTableColumn {
+      CHECK(false) << "Unreachable!";
+    },
+    [](const value::Any &) -> ComparableSourceTableColumn {
+      CHECK(false) << "Unreachable!";
+    },
+  });
 }
 
 class DecodeSourceTableColumnTest :
@@ -126,8 +141,7 @@ TEST_P(DecodeSourceTableColumnTest, DecodeSourceTableColumnTest) {
   IRContext ir_context;
   DecoderContext ctxt(ir_context);
   ir::Value result = DecodeSourceTableColumn(col_proto, ctxt);
-  ComparableSourceTableColumn actual;
-  GatherSourceColumnInfoFromValues(result, actual);
+  ComparableSourceTableColumn actual = GatherSourceColumnInfoFromValues(result);
   actual.ExpectEq(expected);
 }
 
