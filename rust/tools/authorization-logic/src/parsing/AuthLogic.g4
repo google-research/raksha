@@ -88,12 +88,12 @@ authLogicType
     | PRINCIPALTYPE #principalType
     ;
 
-typeDeclaration
+relationDeclaration
     : '.decl' ATTRIBUTE? ID '(' ID ':' authLogicType (',' ID ':' authLogicType)* ')'
     ;
 
 program
-    : ((saysAssertion | query | keyBind | importAssertion | typeDeclaration))+
+    : ((saysAssertion | query | keyBind | importAssertion | relationDeclaration))+
     ;
 
 //-----------------------------------------------------------------------------
@@ -112,7 +112,8 @@ IMPORT: 'import';
 BINDEX: 'BindPrivKey';
 BINDIM: 'BindPubKey';
 
-// These are keywords arelated to type declarations
+// These are keywords are related to relation declarations
+// and types.
 NUMBERTYPE: 'number';
 SYMBOLTYPE: 'symbol';
 PRINCIPALTYPE: 'principal';

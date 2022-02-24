@@ -5,16 +5,16 @@ mod test {
     };
 
     #[test]
-    pub fn test_type_declarations() {
+    pub fn test_relation_declarations() {
         let test_ast = source_file_to_ast_test_only("typeDeclarations",
                                                     "test_inputs");
-        assert!(test_ast.type_declarations == vec![
-                AstTypeDeclaration {
+        assert!(test_ast.relation_declarations == vec![
+                AstRelationDeclaration {
                     predicate_name: "someFact".to_string(),
                     is_attribute: false,
                     arg_typings: vec![("x".to_string(), AstType::SymbolType)]
                 },
-                AstTypeDeclaration {
+                AstRelationDeclaration {
                     predicate_name: "someOtherFact".to_string(),
                     is_attribute: false,
                     arg_typings: vec![
@@ -22,7 +22,7 @@ mod test {
                         ("y".to_string(), AstType::NumberType)
                     ]
                 },
-                AstTypeDeclaration {
+                AstRelationDeclaration {
                     predicate_name: "thirdFact".to_string(),
                     is_attribute: false,
                     arg_typings: vec![("p".to_string(), AstType::PrincipalType)]

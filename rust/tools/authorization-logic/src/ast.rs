@@ -109,7 +109,7 @@ pub struct AstImport {
 pub enum AstType { NumberType, SymbolType, PrincipalType }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct AstTypeDeclaration {
+pub struct AstRelationDeclaration {
     pub predicate_name: String,
     pub is_attribute: bool,
     pub arg_typings: Vec<(String, AstType)>
@@ -117,7 +117,7 @@ pub struct AstTypeDeclaration {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AstProgram {
-    pub type_declarations: Vec<AstTypeDeclaration>,
+    pub relation_declarations: Vec<AstRelationDeclaration>,
     pub assertions: Vec<AstSaysAssertion>,
     pub queries: Vec<AstQuery>,
     pub imports: Vec<AstImport>,

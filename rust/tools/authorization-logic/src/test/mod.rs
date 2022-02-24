@@ -24,4 +24,4 @@ mod test_negation;
 mod test_multimic_no_overrides;
 mod test_multimic_overrides;
 mod test_num_string_names;
-mod test_type_declarations;
+mod test_relation_declarations;

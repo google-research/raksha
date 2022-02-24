@@ -33,9 +33,9 @@ fn emit_type(auth_logic_type: &AstType) -> String {
     }
 }
 
-fn emit_decl(type_declaration: &AstTypeDeclaration) -> String {
-    format!(".decl {}({})", type_declaration.predicate_name,
-        type_declaration.arg_typings
+fn emit_decl(relation_declaration: &AstRelationDeclaration) -> String {
+    format!(".decl {}({})", relation_declaration.predicate_name,
+        relation_declaration.arg_typings
             .iter()
             .map(|(param, al_type)|
                  format!("{}: {}", param, emit_type(al_type)))
@@ -77,7 +77,7 @@ fn emit_program_body(p: &DLIRProgram) -> String {
 
 fn emit_declarations(p: &DLIRProgram, decl_skip: &Vec<String>) -> String {
     let principal_type = String::from(".type principal <: symbol");
-    let generated_declarations = p.type_declarations
+    let generated_declarations = p.relation_declarations
         .iter()
         .filter(|x| !decl_skip.contains(&x.predicate_name))
         .map(|x| emit_decl(x))

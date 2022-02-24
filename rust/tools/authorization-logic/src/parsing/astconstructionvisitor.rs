@@ -242,7 +242,8 @@ fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
     }
 }
 
-fn construct_type_declaration(ctx: &TypeDeclarationContext) -> AstTypeDeclaration {
+fn construct_relation_declaration(ctx: &RelationDeclarationContext) -> 
+        AstRelationDeclaration {
     let predicate_name_ = ctx.ID(0).unwrap().get_text();
     // Note that ID_all() in the generated antlr-rust code is buggy,
     // (because all {LEX_RULE}_all() generations are buggy)
@@ -262,7 +263,7 @@ fn construct_type_declaration(ctx: &TypeDeclarationContext) -> AstTypeDeclaratio
         Some(_) => true,
         None => false
     };
-    AstTypeDeclaration {
+    AstRelationDeclaration {
         predicate_name: predicate_name_,
         is_attribute: is_attribute_,
         arg_typings: arg_names
@@ -274,10 +275,10 @@ fn construct_type_declaration(ctx: &TypeDeclarationContext) -> AstTypeDeclaratio
 
 fn construct_program(ctx: &ProgramContext) -> AstProgram {
     AstProgram {
-        type_declarations: ctx
-            .typeDeclaration_all()
+        relation_declarations: ctx
+            .relationDeclaration_all()
             .iter()
-            .map(|t| construct_type_declaration(t))
+            .map(|t| construct_relation_declaration(t))
             .collect(),
         assertions: ctx
             .saysAssertion_all()

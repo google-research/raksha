@@ -60,7 +60,7 @@ pub fn handle_imports(ast: &AstProgram) -> AstProgram {
         .map(|s| handle_one_import(&bind_env, s))
         .collect();
     AstProgram {
-        type_declarations: ast.type_declarations.clone(),
+        relation_declarations: ast.relation_declarations.clone(),
         assertions: [ast.assertions.clone(), imported_assertions].concat(),
         queries: ast.queries.clone(),
         imports: Vec::new(),
