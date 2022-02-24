@@ -20,7 +20,8 @@ use std::collections::HashSet;
 /// Produces Souffle code as a `String` when given a Datalog IR (DLIR) program.
 pub fn emit_program(p: &DLIRProgram, decl_skip: &Option<Vec<String>>) -> String {
     vec![ 
-        emit_type_declarations(p),
+        emit_type_declarations(p, 
+                decl_skip.as_ref().unwrap_or(&Vec::new())),
         emit_relation_declarations(p,
                 decl_skip.as_ref().unwrap_or(&Vec::new())),
         emit_program_body(p),
@@ -78,8 +79,16 @@ fn emit_program_body(p: &DLIRProgram) -> String {
         .join("\n")
 }
 
-fn emit_type_declarations(p: &DLIRProgram) -> String {
-    let principal_type_declaration = String::from(".type Principal <: symbol");
+fn emit_type_declarations(p: &DLIRProgram, decl_skip: &Vec<String>) -> String {
+    let principal_type_declaration = if decl_skip.is_empty() {
+        // This is done for fast compatibility with the rest of Raksha in
+        // which there is also a declaration of Principal. This is
+        // not the ideal way to implement this functionality, but this rust
+        // implementation is just a prototype.
+        String::from(".type Principal <: symbol")
+    } else {
+        String::from("")
+    };
     let custom_types: HashSet<_> = p.relation_declarations.iter()
         .map(|rel_decl| rel_decl.arg_typings.iter()
              .map(|(parameter, type_)| type_))
@@ -89,6 +98,10 @@ fn emit_type_declarations(p: &DLIRProgram) -> String {
             _ => None
         })
         .filter(|type_name| !(**type_name == "symbol".to_string()))
+        .filter(|type_name| if decl_skip.is_empty() { true } else {
+            !(**type_name == "AccessPath".to_string() ||
+              **type_name == "Tag".to_string())
+        })
         .collect();
     let custom_type_declarations = custom_types.iter()
         .map(|type_| format!(".type {} <: symbol", type_))

@@ -447,7 +447,8 @@ impl LoweringToDatalogPass {
         let mut cansay_decls = self.cansay_depth.iter()
             .filter(|(name, depth)| **depth > 0)
             .map(|(name, depth)| { 
-                prefix_with_cansay(type_environment.get(name).unwrap(), *depth)
+                prefix_with_cansay(type_environment.get(name).expect(
+                        &format!("couldnt find type named: {}", name)), *depth)
             });
         base_decls.extend(&mut cansay_decls);
 

@@ -23,16 +23,16 @@
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
-#include "src/xform_to_datalog/authorization_logic.h"
 #include "src/common/logging/logging.h"
+#include "src/xform_to_datalog/authorization_logic.h"
 
 namespace raksha::xform_to_datalog {
 
 std::optional<AuthorizationLogicDatalogFacts>
-AuthorizationLogicDatalogFacts::create(
-  const std::filesystem::path &program_dir, absl::string_view program) {
+AuthorizationLogicDatalogFacts::create(const std::filesystem::path &program_dir,
+                                       absl::string_view program) {
   const std::filesystem::path result_dir =
-    std::filesystem::temp_directory_path();
+      std::filesystem::temp_directory_path();
 
   // List of relations to not declare in the generated auth logic code
   // because we already have definitions within the Raksha dataflow files for
@@ -40,21 +40,12 @@ AuthorizationLogicDatalogFacts::create(
   // into the Rust code with StrJoin to make the code a bit more readable and to
   // prevent typos changing the interpretation of the list.
   const std::vector<absl::string_view> kRelationsToNotDeclare{
-      "says_ownsTag",
-      "says_ownsAccessPath",
-      "says_hasTag",
-      "says_canSay_hasTag",
-      "says_removeTag",
-      "says_canSay_removeTag",
-      "says_may",
-      "says_will",
-      "isAccessPath",
-      "isTag",
-      "isPrincipal"
-  };
+      "says_ownsTag", "says_ownsAccessPath", "says_hasTag",  "says_removeTag",
+      "says_may",     "says_will",           "isAccessPath", "isTag",
+      "isPrincipal"};
 
   int res = GenerateDatalogFactsFromAuthorizationLogic(
-    program, program_dir, result_dir, kRelationsToNotDeclare);
+      program, program_dir, result_dir, kRelationsToNotDeclare);
   if (res) {
     LOG(ERROR) << "Failure running the authorization logic compiler.\n";
     return std::nullopt;
@@ -81,7 +72,7 @@ AuthorizationLogicDatalogFacts::create(
   file_stream.seekg(0, std::ios::beg);
   file_stream.read(datalog_program.data(), datalog_program.size());
   CHECK(file_stream.gcount() == filesize)
-    << "Failure reading bytes from the result file.\n";
+      << "Failure reading bytes from the result file.\n";
 
   return AuthorizationLogicDatalogFacts(datalog_program);
 }
