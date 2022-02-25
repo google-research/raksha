@@ -94,7 +94,7 @@ fn emit_type_declarations(p: &DLIRProgram, decl_skip: &Vec<String>) -> String {
     let type_names_filtered = type_names.iter().filter(|type_name| {
         !decl_skip.contains(type_name) &&
         !(**type_name == "symbol".to_string())
-    }).collect::<Vec<_>>();
+    }).collect::<HashSet<_>>();
 
     type_names_filtered.iter()
         .map(|type_| format!(".type {} <: symbol", type_))
