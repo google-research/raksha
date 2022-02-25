@@ -34,23 +34,19 @@ AuthorizationLogicDatalogFacts::create(const std::filesystem::path &program_dir,
   const std::filesystem::path result_dir =
       std::filesystem::temp_directory_path();
 
-  // List of relations to not declare in the generated auth logic code
+  // List of types and relations to not declare in the generated auth logic code
   // because we already have definitions within the Raksha dataflow files for
   // this purpose. We use an vector here and create the composite string to pass
   // into the Rust code with StrJoin to make the code a bit more readable and to
   // prevent typos changing the interpretation of the list.
   const std::vector<absl::string_view> kRelationsToNotDeclare{
-      "says_isAccessPath",
-      "says_isTag",
-      "says_isPrincipal",
-      "says_ownsTag",
-      "says_ownsAccessPath",
-      "says_hasTag",
-      "says_removeTag",
-      "says_may",
-      "says_will",
-      "isAccessPath",
-      "isTag",
+      "Principal",    "Tag",
+      "AccessPath",   "says_isAccessPath",
+      "says_isTag",   "says_isPrincipal",
+      "says_ownsTag", "says_ownsAccessPath",
+      "says_hasTag",  "says_removeTag",
+      "says_may",     "says_will",
+      "isAccessPath", "isTag",
       "isPrincipal"};
 
   int res = GenerateDatalogFactsFromAuthorizationLogic(

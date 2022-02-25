@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Raksha Authors
+ * Copyright 2021 Google LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,34 +80,26 @@ fn emit_program_body(p: &DLIRProgram) -> String {
 }
 
 fn emit_type_declarations(p: &DLIRProgram, decl_skip: &Vec<String>) -> String {
-    let principal_type_declaration = if decl_skip.is_empty() {
-        // This is done for fast compatibility with the rest of Raksha in
-        // which there is also a declaration of Principal. This is
-        // not the ideal way to implement this functionality, but this rust
-        // implementation is just a prototype.
-        String::from(".type Principal <: symbol")
-    } else {
-        String::from("")
-    };
-    let custom_types: HashSet<_> = p.relation_declarations.iter()
+    let mut type_names : Vec<String> = p.relation_declarations.iter()
         .map(|rel_decl| rel_decl.arg_typings.iter()
              .map(|(parameter, type_)| type_))
         .flatten()
         .filter_map(|type_| match type_ {
-            AstType::CustomType { type_name } => Some(type_name),
+            AstType::CustomType { type_name } => Some(type_name.clone()),
             _ => None
         })
-        .filter(|type_name| !(**type_name == "symbol".to_string()))
-        .filter(|type_name| if decl_skip.is_empty() { true } else {
-            !(**type_name == "AccessPath".to_string() ||
-              **type_name == "Tag".to_string())
-        })
         .collect();
-    let custom_type_declarations = custom_types.iter()
+    type_names.push("Principal".to_string());
+
+    let type_names_filtered = type_names.iter().filter(|type_name| {
+        !decl_skip.contains(type_name) &&
+        !(**type_name == "symbol".to_string())
+    }).collect::<Vec<_>>();
+
+    type_names_filtered.iter()
         .map(|type_| format!(".type {} <: symbol", type_))
         .collect::<Vec<_>>()
-        .join("\n");
-    vec![principal_type_declaration, custom_type_declarations].join("\n")
+        .join("\n")
 }
 
 fn emit_relation_declarations(p: &DLIRProgram, decl_skip: &Vec<String>)
