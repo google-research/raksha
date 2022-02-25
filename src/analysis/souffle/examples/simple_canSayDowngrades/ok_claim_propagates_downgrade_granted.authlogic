@@ -1,3 +1,7 @@
+.decl ownsTag(principal : Principal, tag : Tag)
+.decl ownsAccessPath(principal : Principal, path : AccessPath)
+.decl hasTag(path : AccessPath, principal : Principal, tag : Tag)
+.decl removeTag(path : AccessPath, principal : Principal, tag : Tag)
 "EndUser" says ownsTag("EndUser", "userSelection").
 //TODO(#220): This should be at the level of handles which correspond to stores,
 // where ownership makes more sense.

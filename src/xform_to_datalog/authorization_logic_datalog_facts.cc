@@ -40,8 +40,17 @@ AuthorizationLogicDatalogFacts::create(const std::filesystem::path &program_dir,
   // into the Rust code with StrJoin to make the code a bit more readable and to
   // prevent typos changing the interpretation of the list.
   const std::vector<absl::string_view> kRelationsToNotDeclare{
-      "says_ownsTag", "says_ownsAccessPath", "says_hasTag",  "says_removeTag",
-      "says_may",     "says_will",           "isAccessPath", "isTag",
+      "says_isAccessPath",
+      "says_isTag",
+      "says_isPrincipal",
+      "says_ownsTag",
+      "says_ownsAccessPath",
+      "says_hasTag",
+      "says_removeTag",
+      "says_may",
+      "says_will",
+      "isAccessPath",
+      "isTag",
       "isPrincipal"};
 
   int res = GenerateDatalogFactsFromAuthorizationLogic(

@@ -1,3 +1,6 @@
+.decl ownsAccessPath(principal : Principal, path : AccessPath)
+.decl removeTag(path : AccessPath, principal : Principal, tag : Tag)
+.decl hasTag(path: AccessPath, principal : Principal, tag : Tag)
 "EndUser" says ownsAccessPath("EndUser", "R.P1#0.foo").
 "P1" says "P1" canSay hasTag(accessPathX,  "EndUser", "userSelection") :- isAccessPath(accessPathX).
 "P1" says "P2" canSay removeTag(accessPathX, "EndUser", "userSelection") :- isAccessPath(accessPathX).
