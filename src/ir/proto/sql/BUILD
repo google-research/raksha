@@ -40,8 +40,8 @@ cc_library(
         ":sql_ir_cc_proto",
         "//src/ir:ir_context",
         "//src/ir:value",
-        "@absl//absl/container:flat_hash_map"
-    ]
+        "@absl//absl/container:flat_hash_map",
+    ],
 )
 
 cc_library(
@@ -70,7 +70,7 @@ cc_test(
     deps = [
         ":decoder_context",
         "//src/common/testing:gtest",
-    ]
+    ],
 )
 
 cc_test(
