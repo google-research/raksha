@@ -19,12 +19,14 @@
 #ifndef SRC_IR_AUTH_LOGIC_AST_H_
 #define SRC_IR_AUTH_LOGIC_AST_H_
 
+
 #include <memory>
 #include <string>
 #include <variant>
 #include <vector>
 
 #include "absl/hash/hash.h"
+#include "src/ir/datalog/program.h"
 
 namespace raksha::ir::auth_logic {
 
@@ -37,71 +39,18 @@ class Principal {
   std::string name_;
 };
 
-// Used to represent whether a predicate is negated or not
-enum Sign { kNegated, kPositive };
-
-// Predicate corresponds to a predicate of the form
-// <pred_name>(arg_1, ..., arg_n), and it may or may not be negated
-class Predicate {
- public:
-  Predicate(std::string name, std::vector<std::string> args, Sign sign)
-      : name_(std::move(name)),
-        args_(std::move(args)),
-        // TODO move surpresses an unused private field error about sign_
-        // for now, get rid of this eventually
-        sign_(std::move(sign)) {}
-
-  const std::string& name() const { return name_; }
-  const std::vector<std::string>& args() const { return args_; }
-  Sign sign() const { return sign_; }
-
-  template <typename H>
-  friend H AbslHashValue(H h, const Predicate& p) {
-    return H::combine(std::move(h), p.name(), p.args(), p.sign());
-  }
-  // Equality is also needed to use a Predicate in a flat_hash_set
-  bool operator==(const Predicate& otherPredicate) const {
-    if (this->name() != otherPredicate.name()) {
-      return false;
-    }
-    if (this->sign() != otherPredicate.sign()) {
-      return false;
-    }
-    if (this->args().size() != otherPredicate.args().size()) {
-      return false;
-    }
-    for (int i = 0; i < this->args().size(); i++) {
-      if (this->args().at(i) != otherPredicate.args().at(i)) return false;
-    }
-    return true;
-  }
-
-  // < operator is needed for btree_set, which is only used for declarations.
-  // Since declarations are uniquely defined by the name of the predicate,
-  // this implementation that just uses < on the predicate names should be
-  // sufficent in the context where it is used.
-  bool operator<(const Predicate& otherPredicate) const {
-    return this->name() < otherPredicate.name();
-  }
-
- private:
-  std::string name_;
-  std::vector<std::string> args_;
-  Sign sign_;
-};
-
 // Attribute corresponds to an attribute of a principal with the form
 // <Principal> <pred_name>(arg_1, ..., arg_n)
 class Attribute {
  public:
-  explicit Attribute(Principal principal, Predicate predicate)
+  explicit Attribute(Principal principal, datalog::Predicate predicate)
       : principal_(principal), predicate_(predicate) {}
   const Principal& principal() const { return principal_; }
-  const Predicate& predicate() const { return predicate_; }
+  const datalog::Predicate& predicate() const { return predicate_; }
 
  private:
   Principal principal_;
-  Predicate predicate_;
+  datalog::Predicate predicate_;
 };
 
 // CanActAs corresponds to a canActAs expression of the form
@@ -132,7 +81,7 @@ class BaseFact {
   // BaseFactVariantType gives the different forms of BaseFacts. Client code
   // should use this type to traverse these forms. This type may be changed in
   // the future.
-  using BaseFactVariantType = std::variant<Predicate, Attribute, CanActAs>;
+  using BaseFactVariantType = std::variant<datalog::Predicate, Attribute, CanActAs>;
   explicit BaseFact(BaseFactVariantType value) : value_(std::move(value)){};
   const BaseFactVariantType& GetValue() const { return value_; }
 

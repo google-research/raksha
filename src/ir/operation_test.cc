@@ -27,11 +27,8 @@ struct OperationTestData {
   const Operator* op{};
   NamedAttributeMap attributes{};
   NamedValueMap values{};
-  // We don't have a particular order for attributes and arguments.
-  // For now, we keep all possible string representation for the tests
-  // and make sure the `ToString` method generates at least on of the
-  // given representations.
-  absl::flat_hash_set<absl::string_view> string_reps{};
+  // The expected string representation.
+  absl::string_view string_rep;
 };
 
 class OperationTest : public testing::TestWithParam<OperationTestData> {
@@ -45,18 +42,27 @@ Block OperationTest::first_block_;
 Operator OperationTest::plus_op("core.plus");
 Operator OperationTest::minus_op("core.minus");
 
+TEST(OperationTest, ConstructorSetsModuleCorrectly) {
+  auto module = std::unique_ptr<Module>();
+  auto passed_in_module = module.get();
+  Operation operation(nullptr, OperationTest::plus_op, {}, {},
+                      std::move(module));
+  EXPECT_EQ(operation.impl_module(), passed_in_module);
+}
+
 TEST_P(OperationTest, AccessorsAndToStringReturnCorrectValue) {
   // Keeping it local so that the operation and first_block always get %0.
   SsaNames ssa_names;
   const auto& [block, op, attributes, inputs, string_reps] = GetParam();
   Operation operation(block, *op, attributes, inputs);
+  EXPECT_EQ(operation.impl_module(), nullptr);
   EXPECT_EQ(operation.parent(), block);
   EXPECT_EQ(&operation.op(), op);
   // TODO(336): Enable this when we have a comparator for attributes.
   // EXPECT_EQ(operation.attributes(), attributes);
   // TODO(337): Enable this when we have a comparator for values.
   // EXPECT_EQ(operation.inputs(), inputs);
-  EXPECT_THAT(string_reps, testing::Contains(operation.ToString(ssa_names)));
+  EXPECT_THAT(string_reps, testing::Eq(operation.ToString(ssa_names)));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -66,29 +72,28 @@ INSTANTIATE_TEST_SUITE_P(
                            &OperationTest::plus_op,
                            {},
                            {},
-                           {"%0 = core.plus []()"}}),
+                           "%0 = core.plus []()"}),
         OperationTestData({nullptr,
                            &OperationTest::plus_op,
                            {{"const", Int64Attribute::Create(10)}},
                            {},
-                           {"%0 = core.plus [const: 10]()"}}),
+                           "%0 = core.plus [const: 10]()"}),
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"predicate", StringAttribute::Create("a && b")}},
                            {},
-                           {"%0 = core.minus [predicate: a && b]()"}}),
+                           "%0 = core.minus [predicate: a && b]()"}),
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"const1", StringAttribute::Create("a")},
                             {"const2", Int64Attribute::Create(42)}},
                            {},
-                           {"%0 = core.minus [const1: a, const2: 42]()",
-                            "%0 = core.minus [const2: 42, const1: a]()"}}),
+                           "%0 = core.minus [const1: a, const2: 42]()"}),
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"const", Int64Attribute::Create(10)}},
                            {{"arg", Value(value::Any())}},
-                           {"%0 = core.minus [const: 10](arg: <<ANY>>)"}}),
+                           "%0 = core.minus [const: 10](arg: <<ANY>>)"}),
         OperationTestData(
             {&OperationTest::first_block_,
              &OperationTest::minus_op,
@@ -97,8 +102,7 @@ INSTANTIATE_TEST_SUITE_P(
                                                "arg0"))},
               {"b", Value(value::BlockArgument(OperationTest::first_block_,
                                                "arg1"))}},
-             {"%0 = core.minus [const: 10](a: %0.arg0, b: %0.arg1)",
-              "%0 = core.minus [const: 10](b: %0.arg1, a: %0.arg0)"}})));
+             "%0 = core.minus [const: 10](a: %0.arg0, b: %0.arg1)"})));
 
 }  // namespace
 }  // namespace raksha::ir
