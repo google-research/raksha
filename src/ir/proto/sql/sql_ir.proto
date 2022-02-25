@@ -53,25 +53,25 @@ enum TagKind {
   CONFIDENTIALITY = 2;
 }
 
-// The action that is taken upon a tag by a policy rule.
+// The action that is taken upon a tag by a TagTransform expression.
 enum TagAlteration {
   NONE = 0;
   ADD = 1;
   REMOVE = 2;
 }
 
-// A transform upon the state of a program as dictated by a policy rule.
+// A transform upon the tag state of a program.
 //
-// A `PolicyTransform` is structured like a cast upon some `transformed_node`
+// A `TagTransform` is structured like a cast upon some `transformed_node`
 // `Expression`. The preconditions of this transform, however, are presented as
 // IDs rather than nesting the nodes directly underneath them. This is
 // necessary because these inputs may not be direct children of the
 // transformed node. Because protos only allow each structure to have a
 // single nesting parent, we need a different way of referring to them for
 // these additional references.
-message PolicyTransform {
+message TagTransform {
   // The `Expression` that is having its tag state changed by the
-  // `PolicyTransform`.
+  // `TagTransform`.
   Expression transformed_node = 1;
   // A map from the unique ID of a particular input `MergeOperation` to the
   // integrity tag that is required to be present upon that operation for
@@ -89,7 +89,7 @@ message PolicyTransform {
 };
 
 message Expression {
-  // A unique ID assigned to each Expression. Allows PolicyTransform nodes to
+  // A unique ID assigned to each Expression. Allows TagTransform nodes to
   // point at Expression, as the need to be able to check the tag state of
   // particular MergeOperations to decide whether to perform the
   // transform.
@@ -103,6 +103,6 @@ message Expression {
     SourceTableColumn source_table_column = 3;
     Literal literal = 4;
     MergeOperation merge_operation = 5;
-    PolicyTransform policy_transform = 6;
+    TagTransform tag_transform = 6;
   }
 }
