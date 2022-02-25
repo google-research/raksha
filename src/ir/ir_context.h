@@ -51,7 +51,12 @@ class IRContext {
     return operators_.IsRegisteredNode(operators_name);
   }
 
-    // Register an operator and return the stored operator instances.
+  const Operator &GetOrCreateOperator(absl::string_view operator_name,
+                                      std::unique_ptr<Operator> new_operator) {
+    return operators_.GetOrCreateNode(operator_name, std::move(new_operator));
+  }
+
+  // Register an operator and return the stored operator instances.
   const Storage &RegisterStorage(std::unique_ptr<Storage> op) {
     return storages_.RegisterNode(std::move(op));
   }
@@ -65,6 +70,11 @@ class IRContext {
   // Returns true if the operator is registered with this context.
   bool IsRegisteredStorage(absl::string_view operators_name) const {
     return storages_.IsRegisteredNode(operators_name);
+  }
+
+  const Storage &GetOrCreateStorage(absl::string_view storage_name,
+                                    std::unique_ptr<Storage> new_storage) {
+    return storages_.GetOrCreateNode(storage_name, std::move(new_storage));
   }
 
  private:
@@ -103,6 +113,19 @@ class IRContext {
     // Returns true if the node is registered with this context.
     bool IsRegisteredNode(absl::string_view node_name) const {
       return nodes_.find(node_name) != nodes_.end();
+    }
+
+    // Get the node with the given name, creating it if it is not already
+    // present.
+    const Node &GetOrCreateNode(
+        absl::string_view node_name, std::unique_ptr<Node> new_node) {
+        auto insert_result =
+            nodes_.insert({std::string(node_name), std::move(new_node)});
+        // If the insert succeeded, the new node was successfully placed in
+        // the map and the iterator to that new node is returned. If it did not
+        // succeed, it will return the previously-inserted node. Either way,
+        // the value of the returned iterator is what we want.
+        return *insert_result.first->second;
     }
    private:
     absl::flat_hash_map<std::string, std::unique_ptr<Node>> nodes_;

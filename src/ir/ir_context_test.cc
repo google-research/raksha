@@ -58,6 +58,22 @@ TEST(IRContextDeathTest, DuplicateOperatorRegistrationCausesFailure) {
       "Cannot register duplicate operator with name 'core.choose'.");
 }
 
+TEST(IRContextTest, GetOrCreateOperatorIdempotence) {
+  IRContext context;
+  const Operator &op1 = context.GetOrCreateOperator(
+      "core.choose", std::make_unique<Operator>("core.choose"));
+  const Operator &op2 = context.GetOrCreateOperator(
+      "core.merge", std::make_unique<Operator>("core.merge"));
+  const Operator &op1_again = context.GetOrCreateOperator(
+      "core.choose", std::make_unique<Operator>("core.choose"));
+  const Operator &op2_again = context.GetOrCreateOperator(
+      "core.merge", std::make_unique<Operator>("core.merge"));
+
+  EXPECT_EQ(&op1, &op1_again);
+  EXPECT_EQ(&op2, &op2_again);
+  EXPECT_NE(&op1, &op2);
+}
+
 TEST(IRContextTest, RegisterStorageReturnsRegisteredStorage) {
   IRContext context;
   types::TypeFactory &type_factory = context.type_factory();
@@ -107,6 +123,27 @@ TEST(IRContextDeathTest, DuplicateStorageRegistrationCausesFailure) {
       { context.RegisterStorage(std::make_unique<Storage>(
           "store", type_factory.MakePrimitiveType())); },
       "Cannot register duplicate storage with name 'store'.");
+}
+
+TEST(IRContextTest, GetOrCreateStorageIdempotence) {
+  IRContext context;
+  types::TypeFactory &type_factory = context.type_factory();
+  const Storage &store1 = context.GetOrCreateStorage(
+      "Table1",
+      std::make_unique<Storage>("Table1", type_factory.MakePrimitiveType()));
+  const Storage &store2 = context.GetOrCreateStorage(
+      "Disk1",
+      std::make_unique<Storage>("Disk1", type_factory.MakePrimitiveType()));
+  const Storage &store1_again = context.GetOrCreateStorage(
+      "Table1",
+      std::make_unique<Storage>("Table1", type_factory.MakePrimitiveType()));
+  const Storage &store2_again = context.GetOrCreateStorage(
+      "Disk1",
+      std::make_unique<Storage>("Disk1", type_factory.MakePrimitiveType()));
+
+  EXPECT_EQ(&store1, &store1_again);
+  EXPECT_EQ(&store2, &store2_again);
+  EXPECT_NE(&store1, &store2);
 }
 
 }  // namespace
