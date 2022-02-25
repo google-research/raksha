@@ -32,3 +32,23 @@ cc_proto_library(
         ":sql_ir_proto",
     ],
 )
+
+cc_library(
+    name = "decoder_context",
+    hdrs = ["decoder_context.h"],
+    deps = [
+        ":sql_ir_cc_proto",
+        "//src/ir:ir_context",
+        "//src/ir:value",
+        "@absl//absl/container:flat_hash_map"
+    ]
+)
+
+cc_test(
+    name = "decoder_context_test",
+    srcs = ["decoder_context_test.cc"],
+    deps = [
+        ":decoder_context",
+        "//src/common/testing:gtest",
+    ]
+)
