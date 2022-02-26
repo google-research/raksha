@@ -20,14 +20,14 @@
 #include <vector>
 
 #include "src/ir/value.h"
-#include "src/ir/ir_context.h"
+#include "src/ir/proto/sql/decoder_context.h"
 #include "src/ir/proto/sql/sql_ir.pb.h"
 
 namespace raksha::ir::proto::sql {
 
 ir::Value DecodeSourceTableColumn(
     const SourceTableColumn &source_table_column,
-    IRContext &ir_context);
+    DecoderContext &decoder_context);
 
 }  // namespace raksha::ir::proto::sql
 

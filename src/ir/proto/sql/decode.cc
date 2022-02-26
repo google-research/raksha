@@ -20,7 +20,7 @@ namespace raksha::ir::proto::sql {
 
 ir::Value DecodeSourceTableColumn(
     const SourceTableColumn &source_table_column,
-    IRContext &ir_context) {
+    DecoderContext &decoder_context) {
   const std::string &column_path = source_table_column.column_path();
   CHECK(!column_path.empty()) << "Required field column_path was empty.";
   // Note: In the future, we will probably want to make a `Storage` per table
@@ -32,11 +32,7 @@ ir::Value DecodeSourceTableColumn(
   // probably want to change that when we start handling types in a
   // non-trivial fashion.
   return ir::Value{value::StoredValue(
-      ir_context.GetOrCreateStorage(
-          column_path,
-          std::make_unique<Storage>(
-              column_path,
-              ir_context.type_factory().MakePrimitiveType())))};
+      decoder_context.GetOrCreateStorage(column_path))};
 }
 
 }  // namespace raksha::ir::proto::sql

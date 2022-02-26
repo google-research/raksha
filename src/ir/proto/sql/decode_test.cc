@@ -37,7 +37,8 @@ TEST_P(DecodeSourceTableColumnTest, DecodeSourceTableColumnTest) {
       << "Could not decode SourceTableColumn";
 
   IRContext ir_context;
-  ir::Value result = DecodeSourceTableColumn(col_proto, ir_context);
+  DecoderContext decoder_context(ir_context);
+  ir::Value result = DecodeSourceTableColumn(col_proto, decoder_context);
   value::StoredValue stored_value = result.As<value::StoredValue>();
   const Storage &storage = stored_value.storage();
   EXPECT_EQ(storage.name(), column_path);
