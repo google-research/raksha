@@ -48,6 +48,7 @@ cc_library(
         "//src/utils:map_iter",
         "//src/utils:move_append",
         "//src/utils:overloaded",
+        "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],
 )
@@ -72,8 +73,11 @@ cc_test(
     name = "souffle_emitter_test",
     srcs = ["souffle_emitter_test.cc"],
     deps = [
+        ":ast",
+        ":lowering_ast_datalog",
         ":souffle_emitter",
         "//src/common/testing:gtest",
+        "//src/ir/datalog:program",
         "//src/utils:move_append",
     ],
 )
