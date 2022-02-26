@@ -18,6 +18,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "src/ir/types/type.h"
+#include "src/utils/ranges.h"
 
 namespace raksha::ir {
 
@@ -50,6 +51,11 @@ class DataDeclCollection {
   const DataDecl* FindDecl(absl::string_view name) const {
     auto find_result = decls_.find(name);
     return (find_result == decls_.end()) ? nullptr : find_result->second.get();
+  }
+
+  const absl::flat_hash_map<std::string, std::unique_ptr<DataDecl>>& all()
+      const {
+    return decls_;
   }
 
  private:

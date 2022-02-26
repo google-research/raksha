@@ -61,6 +61,18 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
          << absl::StreamFormat("block b%d {\n",
                                ssa_names_.GetOrCreateID(block));
     IncreaseIndent();
+    if (!block.inputs().all().empty()) {
+      out << Indent() << "// Inputs:\n";
+    }
+    for (const auto& [name, _] : block.inputs().all()) {
+      out << Indent() << name << ": Type\n";
+    }
+    if (!block.inputs().all().empty()) {
+      out << Indent() << "// Outputs:\n";
+    }
+    for (const auto& [name, _] : block.outputs().all()) {
+      out << Indent() << name << ": Type\n";
+    }
   }
 
   void PostVisit(const Block& block) override {

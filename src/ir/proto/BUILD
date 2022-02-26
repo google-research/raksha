@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
+load("//build_defs:arcs.bzl", "arcs_manifest_proto")
+
 package(
     default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
@@ -105,18 +107,39 @@ cc_library(
 )
 
 cc_library(
+    name = "operators",
+    hdrs = ["operators.h"],
+)
+
+cc_library(
     name = "particle_spec",
     srcs = ["particle_spec.cc"],
     hdrs = ["particle_spec.h"],
     deps = [
         ":derives_from_claim",
         ":handle_connection_spec",
+        ":operators",
         ":predicate",
         ":tag_check",
         ":tag_claim",
         "//src/ir",
+        "//src/ir:block_builder",
+        "//src/ir:ir_context",
+        "//src/ir:module",
         "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "particle_spec_test",
+    srcs = ["particle_spec_test.cc"],
+    data = [":test_arcs_proto"],
+    deps = [
+        ":particle_spec",
+        "//src/common/testing:gtest",
+        "//src/ir:ir_printer",
+        "//src/test_utils:utils",
     ],
 )
 
@@ -186,4 +209,9 @@ cc_test(
         "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
+)
+
+arcs_manifest_proto(
+    name = "test_arcs_proto",
+    src = "test.arcs",
 )

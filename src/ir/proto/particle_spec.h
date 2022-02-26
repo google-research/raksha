@@ -19,7 +19,7 @@
 
 #include <memory>
 
-#include "src/ir/context.h"
+#include "src/ir/ir_context.h"
 #include "src/ir/module.h"
 #include "src/ir/particle_spec.h"
 #include "src/ir/types/type_factory.h"

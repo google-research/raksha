@@ -16,11 +16,17 @@
 
 #include "src/ir/proto/particle_spec.h"
 
+#include <memory>
+
+#include "src/ir/attribute.h"
+#include "src/ir/block_builder.h"
 #include "src/ir/handle_connection_spec.h"
 #include "src/ir/ir_context.h"
+#include "src/ir/module.h"
 #include "src/ir/particle_spec.h"
 #include "src/ir/proto/derives_from_claim.h"
 #include "src/ir/proto/handle_connection_spec.h"
+#include "src/ir/proto/operators.h"
 #include "src/ir/proto/predicate.h"
 #include "src/ir/proto/tag_check.h"
 #include "src/ir/proto/tag_claim.h"
@@ -77,6 +83,8 @@ std::unique_ptr<ParticleSpec> Decode(
 
 std::unique_ptr<Operation> Decode(
     IRContext &ir_context, const arcs::ParticleSpecProto &particle_spec_proto) {
+  const Operator &particle_spec_operator =
+      ir_context.GetOperator(arcs::operators::kParticleSpec);
   std::string name = particle_spec_proto.name();
   CHECK(!name.empty()) << "Expected particle spec to have a name.";
 
@@ -87,10 +95,21 @@ std::unique_ptr<Operation> Decode(
         proto::Decode(ir_context.type_factory(), hcs_proto));
   }
   BlockBuilder builder;
-  for (const auto &handle_spec : handle_connection_specs) {
+  for (const HandleConnectionSpec &spec : handle_connection_specs) {
+    // Add inputs and outputs
+    if (spec.reads()) {
+      builder.AddInput(spec.name(), spec.type());
+    }
+    if (spec.writes()) {
+      builder.AddOutput(spec.name(), spec.type());
+    }
   }
-
-  return nullptr;
+  auto module = std::make_unique<Module>();
+  module->AddBlock(builder.build());
+  return std::make_unique<Operation>(
+      nullptr, particle_spec_operator,
+      NamedAttributeMap({{"name", StringAttribute::Create(name)}}),
+      NamedValueMap({}), std::move(module));
 }
 
 }  // namespace raksha::ir::proto
