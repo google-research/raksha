@@ -36,7 +36,8 @@ message Literal {
 }
 
 // This `MergeOperation` is an all-purpose combination of inputs into a single
-// output.
+// output. Unless indicated by a `TagTransform`, this will always drop all
+// `IntegrityTag`s and propagate all `ConfidentialityTag`s.
 message MergeOperation {
   // Direct dataflow dependencies. Relevant for confidentiality and integrity
   // tags.
