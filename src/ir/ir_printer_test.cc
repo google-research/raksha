@@ -25,7 +25,16 @@
 namespace raksha::ir {
 namespace {
 
-class IRPrinterTest : public testing::Test {
+enum class ToStringVariant {
+  // Call IRPrinter::ToString(const Entity&)
+  kToString,
+  // Call IRPrinter::ToString(std::ostream&, const Entity&)
+  kToStringOstream,
+  // Call `out << entity`
+  kOperator,
+};
+
+class IRPrinterTest : public testing::TestWithParam<ToStringVariant> {
  public:
   IRPrinterTest() : plus_op_("core.plus"), minus_op_("core.minus") {
     BlockBuilder builder;
@@ -39,6 +48,24 @@ class IRPrinterTest : public testing::Test {
   const Block& block() const { return *block_; }
   const Module& global_module() const { return global_module_; }
 
+  template <typename T>
+  std::string ToString(const T& entity) {
+    switch (GetParam()) {
+      case ToStringVariant::kToString:
+        return IRPrinter::ToString(entity);
+      case ToStringVariant::kToStringOstream: {
+        std::ostringstream out;
+        IRPrinter::ToString(out, entity);
+        return out.str();
+      }
+      case ToStringVariant::kOperator: {
+        std::ostringstream out;
+        out << entity;
+        return out.str();
+      }
+    }
+  }
+
  private:
   Operator plus_op_;
   Operator minus_op_;
@@ -48,8 +75,13 @@ class IRPrinterTest : public testing::Test {
   const Block* block_;
 };
 
-TEST_F(IRPrinterTest, PrettyPrintsModuleWithProperIndentation) {
-  EXPECT_EQ(IRPrinter::ToString(global_module()), R"(module m0 {
+INSTANTIATE_TEST_SUITE_P(IRPrinterTest, IRPrinterTest,
+                         testing::Values(ToStringVariant::kToString,
+                                         ToStringVariant::kToStringOstream,
+                                         ToStringVariant::kOperator));
+
+TEST_P(IRPrinterTest, PrettyPrintsModuleWithProperIndentation) {
+  EXPECT_EQ(ToString(global_module()), R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -59,30 +91,30 @@ TEST_F(IRPrinterTest, PrettyPrintsModuleWithProperIndentation) {
 )");
 }
 
-TEST_F(IRPrinterTest, PrettyPrintsBlockWithProperIndentation) {
-  EXPECT_EQ(IRPrinter::ToString(block()), R"(block b0 {
+TEST_P(IRPrinterTest, PrettyPrintsBlockWithProperIndentation) {
+  EXPECT_EQ(ToString(block()), R"(block b0 {
   %0 = core.plus []()
 }  // block b0
 )");
 }
 
-TEST_F(IRPrinterTest, PrettyPrintsOperationWithProperIndentation) {
+TEST_P(IRPrinterTest, PrettyPrintsOperationWithProperIndentation) {
   Operation operation(nullptr, plus_op(), {}, {}, std::make_unique<Module>());
-  EXPECT_EQ(IRPrinter::ToString(operation), R"(%0 = core.plus []() {
+  EXPECT_EQ(ToString(operation), R"(%0 = core.plus []() {
   module m0 {
   }  // module m0
 }
 )");
 }
 
-TEST_F(IRPrinterTest, PrettyPrintAttributesAndArgsInSortedOrder) {
+TEST_P(IRPrinterTest, PrettyPrintAttributesAndArgsInSortedOrder) {
   Operation operation(
       nullptr, minus_op(),
       {{"access", StringAttribute::Create("private")},
        {"name", StringAttribute::Create("addition")}},
       {{"const", Value(value::Any())}, {"arg", Value(value::Any())}});
 
-  EXPECT_EQ(IRPrinter::ToString(operation),
+  EXPECT_EQ(ToString(operation),
             "%0 = core.minus [access: private, name: addition](arg: <<ANY>>, "
             "const: <<ANY>>)\n");
 }

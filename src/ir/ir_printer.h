@@ -30,10 +30,15 @@ namespace raksha::ir {
 class IRPrinter : public IRTraversingVisitor<IRPrinter> {
  public:
   template <typename T>
-  static std::string ToString(const T& entity) {
-    std::ostringstream out;
+  static void ToString(std::ostream& out, const T& entity) {
     IRPrinter printer(out);
     entity.Accept(printer);
+  }
+
+  template <typename T>
+  static std::string ToString(const T& entity) {
+    std::ostringstream out;
+    ToString(out, entity);
     return out.str();
   }
 
@@ -130,6 +135,19 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
   SsaNames ssa_names_;
 };
 
+inline std::ostream& operator<<(std::ostream& out, const Operation& operation) {
+  IRPrinter::ToString(out, operation);
+  return out;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const Block& block) {
+  IRPrinter::ToString(out, block);
+  return out;
+}
+inline std::ostream& operator<<(std::ostream& out, const Module& module) {
+  IRPrinter::ToString(out, module);
+  return out;
+}
 }  // namespace raksha::ir
 
 #endif  // SRC_IR_IR_PRINTER_H_
