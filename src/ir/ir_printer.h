@@ -31,36 +31,38 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
  public:
   template <typename T>
   static std::string ToString(const T& entity) {
-    IRPrinter printer;
+    std::ostringstream out;
+    IRPrinter printer(out);
     entity.Accept(printer);
-    return printer.out.str();
+    return out.str();
   }
 
   void PreVisit(const Module& module) override {
-    out << Indent()
-        << absl::StreamFormat("module m%d {\n",
-                              ssa_names_.GetOrCreateID(module));
+    out_ << Indent()
+         << absl::StreamFormat("module m%d {\n",
+                               ssa_names_.GetOrCreateID(module));
     IncreaseIndent();
   }
 
   void PostVisit(const Module& module) override {
     DecreaseIndent();
-    out << Indent()
-        << absl::StreamFormat("}  // module m%d\n",
-                              ssa_names_.GetOrCreateID(module));
+    out_ << Indent()
+         << absl::StreamFormat("}  // module m%d\n",
+                               ssa_names_.GetOrCreateID(module));
   }
 
   void PreVisit(const Block& block) override {
-    out << Indent()
-        << absl::StreamFormat("block b%d {\n", ssa_names_.GetOrCreateID(block));
+    out_ << Indent()
+         << absl::StreamFormat("block b%d {\n",
+                               ssa_names_.GetOrCreateID(block));
     IncreaseIndent();
   }
 
   void PostVisit(const Block& block) override {
     DecreaseIndent();
-    out << Indent()
-        << absl::StreamFormat("}  // block b%d\n",
-                              ssa_names_.GetOrCreateID(block));
+    out_ << Indent()
+         << absl::StreamFormat("}  // block b%d\n",
+                               ssa_names_.GetOrCreateID(block));
   }
 
   void PreVisit(const Operation& operation) override {
@@ -79,27 +81,27 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
         operation.inputs(),
         [&](const Value& val) { return val.ToString(ssa_names_); });
 
-    out << Indent()
-        << absl::StreamFormat(kOperationFormat, this_ssa_name,
-                              operation.op().name(), attributes_string,
-                              inputs_string);
+    out_ << Indent()
+         << absl::StreamFormat(kOperationFormat, this_ssa_name,
+                               operation.op().name(), attributes_string,
+                               inputs_string);
     if (operation.impl_module()) {
-      out << " {\n";
+      out_ << " {\n";
       IncreaseIndent();
     } else {
-      out << "\n";
+      out_ << "\n";
     }
   }
 
   void PostVisit(const Operation& operation) override {
     if (operation.impl_module()) {
       DecreaseIndent();
-      out << Indent() << "}\n";
+      out_ << Indent() << "}\n";
     }
   }
 
  private:
-  std::string Indent() { return std::string(indent_ << 1, ' '); }
+  std::string Indent() { return std::string(indent_ * 2, ' '); }
   void IncreaseIndent() { ++indent_; }
   void DecreaseIndent() { --indent_; }
 
@@ -121,9 +123,9 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
         });
   }
 
-  IRPrinter() : indent_(0) {}
+  IRPrinter(std::ostream& out) : out_(out), indent_(0) {}
 
-  std::ostringstream out;
+  std::ostream& out_;
   int indent_;
   SsaNames ssa_names_;
 };
