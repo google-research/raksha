@@ -15,6 +15,7 @@
 //----------------------------------------------------------------------------
 
 #include "src/ir/proto/sql/decode.h"
+#include "src/ir/proto/sql/decoder_context.h"
 
 namespace raksha::ir::proto::sql {
 
@@ -35,7 +36,8 @@ ir::Value DecodeSourceTableColumn(
       decoder_context.GetOrCreateStorage(column_path))};
 }
 
-ir::Value DecodeLiteral(const Literal &literal, IRContext &ir_context) {
+ir::Value DecodeLiteral(
+    const Literal &literal, DecoderContext &decoder_context) {
   const std::string &literal_str = literal.literal_str();
   CHECK(!literal_str.empty()) << "required field literal_str was empty.";
 
@@ -53,14 +55,8 @@ ir::Value DecodeLiteral(const Literal &literal, IRContext &ir_context) {
   //
   // Prefix the literal string with "literal:" to reduce the chance of a
   // collision.
-  std::string qualified_literal_str =
-      absl::StrCat("literal:", literal_str);
-  return ir::Value{value::StoredValue(
-      ir_context.GetOrCreateStorage(
-        qualified_literal_str,
-        std::make_unique<Storage>(
-            qualified_literal_str,
-            ir_context.type_factory().MakePrimitiveType())))};
+  return ir::Value{value::StoredValue(decoder_context.GetOrCreateStorage(
+      absl::StrCat("literal:", literal_str)))};
 }
 
 }  // namespace raksha::ir::proto::sql

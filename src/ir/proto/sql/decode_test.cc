@@ -70,7 +70,8 @@ TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
       << "Could not decode Literal";
 
   IRContext ir_context;
-  ir::Value result = DecodeLiteral(literal_proto, ir_context);
+  DecoderContext decoder_context(ir_context);
+  ir::Value result = DecodeLiteral(literal_proto, decoder_context);
   value::StoredValue stored_value = result.As<value::StoredValue>();
   const Storage &storage = stored_value.storage();
   EXPECT_EQ(storage.name(), absl::StrCat("literal:", literal_str));

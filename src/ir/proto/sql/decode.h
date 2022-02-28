@@ -29,7 +29,8 @@ ir::Value DecodeSourceTableColumn(
     const SourceTableColumn &source_table_column,
     DecoderContext &decoder_context);
 
-ir::Value DecodeLiteral(const Literal &literal, IRContext &ir_context);
+ir::Value DecodeLiteral(
+    const Literal &literal, DecoderContext &decoder_context);
 
 }  // namespace raksha::ir::proto::sql
 
