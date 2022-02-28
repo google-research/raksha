@@ -25,7 +25,7 @@
 
 namespace raksha::ir::proto::sql {
 
-ir::Value DecodeSourceTableColumn(
+Value DecodeSourceTableColumn(
     const SourceTableColumn &source_table_column,
     DecoderContext &decoder_context);
 

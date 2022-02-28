@@ -38,7 +38,7 @@ TEST_P(DecodeSourceTableColumnTest, DecodeSourceTableColumnTest) {
 
   IRContext ir_context;
   DecoderContext decoder_context(ir_context);
-  ir::Value result = DecodeSourceTableColumn(col_proto, decoder_context);
+  Value result = DecodeSourceTableColumn(col_proto, decoder_context);
   const value::StoredValue *stored_value = result.If<value::StoredValue>();
   EXPECT_THAT(stored_value, testing::NotNull());
   const Storage &storage = stored_value->storage();
