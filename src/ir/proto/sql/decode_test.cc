@@ -39,9 +39,10 @@ TEST_P(DecodeSourceTableColumnTest, DecodeSourceTableColumnTest) {
 
   IRContext ir_context;
   DecoderContext decoder_context(ir_context);
-  ir::Value result = DecodeSourceTableColumn(col_proto, decoder_context);
-  value::StoredValue stored_value = result.As<value::StoredValue>();
-  const Storage &storage = stored_value.storage();
+  Value result = DecodeSourceTableColumn(col_proto, decoder_context);
+  const value::StoredValue *stored_value = result.If<value::StoredValue>();
+  EXPECT_THAT(stored_value, testing::NotNull());
+  const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), column_path);
   EXPECT_EQ(storage.type().type_base().kind(),
             types::TypeBase::Kind::kPrimitive);
@@ -73,8 +74,9 @@ TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
   IRContext ir_context;
   DecoderContext decoder_context(ir_context);
   ir::Value result = DecodeLiteral(literal_proto, decoder_context);
-  value::StoredValue stored_value = result.As<value::StoredValue>();
-  const Storage &storage = stored_value.storage();
+  const value::StoredValue *stored_value = result.If<value::StoredValue>();
+  EXPECT_THAT(stored_value, testing::NotNull());
+  const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), absl::StrCat("literal:", literal_str));
   EXPECT_EQ(storage.type().type_base().kind(),
             types::TypeBase::Kind::kPrimitive);

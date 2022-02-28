@@ -20,7 +20,7 @@
 namespace raksha::ir::proto::sql {
 
 // A helper function to decode the specific subclass of the Expression.
-static ir::Value GetExprValue(
+static Value GetExprValue(
     const Expression &expr, DecoderContext &decoder_context) {
   switch (expr.expr_variant_case()) {
     case Expression::EXPR_VARIANT_NOT_SET: {
@@ -44,7 +44,7 @@ static ir::Value GetExprValue(
   CHECK(false) << "Unreachable!";
 }
 
-const ir::Value &DecodeExpression(
+const Value &DecodeExpression(
     const Expression &expr, DecoderContext &decoder_context) {
   uint64_t id = expr.id();
   CHECK(id != 0) << "Required field id was not present in Expression.";
@@ -52,7 +52,7 @@ const ir::Value &DecodeExpression(
   return decoder_context.RegisterValue(id, GetExprValue(expr, decoder_context));
 }
 
-ir::Value DecodeSourceTableColumn(
+Value DecodeSourceTableColumn(
     const SourceTableColumn &source_table_column,
     DecoderContext &decoder_context) {
   const std::string &column_path = source_table_column.column_path();
@@ -65,11 +65,11 @@ ir::Value DecodeSourceTableColumn(
   // Also, for now, we consider all storages to have primitive type. We will
   // probably want to change that when we start handling types in a
   // non-trivial fashion.
-  return ir::Value{value::StoredValue(
-      decoder_context.GetOrCreateStorage(column_path))};
+  return Value(value::StoredValue(
+      decoder_context.GetOrCreateStorage(column_path)));
 }
 
-ir::Value DecodeLiteral(
+Value DecodeLiteral(
     const Literal &literal, DecoderContext &decoder_context) {
   const std::string &literal_str = literal.literal_str();
   CHECK(!literal_str.empty()) << "required field literal_str was empty.";
@@ -88,8 +88,8 @@ ir::Value DecodeLiteral(
   //
   // Prefix the literal string with "literal:" to reduce the chance of a
   // collision.
-  return ir::Value{value::StoredValue(decoder_context.GetOrCreateStorage(
-      absl::StrCat("literal:", literal_str)))};
+  return Value(value::StoredValue(decoder_context.GetOrCreateStorage(
+      absl::StrCat("literal:", literal_str))));
 }
 
 }  // namespace raksha::ir::proto::sql

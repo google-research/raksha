@@ -25,14 +25,14 @@
 
 namespace raksha::ir::proto::sql {
 
-const ir::Value &DecodeExpression(
+const Value &DecodeExpression(
     const Expression &expr, DecoderContext &decoder_context);
 
-ir::Value DecodeSourceTableColumn(
+Value DecodeSourceTableColumn(
     const SourceTableColumn &source_table_column,
     DecoderContext &decoder_context);
 
-ir::Value DecodeLiteral(
+Value DecodeLiteral(
     const Literal &literal, DecoderContext &decoder_context);
 
 }  // namespace raksha::ir::proto::sql
