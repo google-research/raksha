@@ -52,8 +52,20 @@ class DecoderContext {
     // message. Use `find` and `CHECK` to get a better error message.
     auto find_result = id_to_value.find(id);
     CHECK(find_result != id_to_value.end())
-      << "Could not find a value with id " << id << ".";
+            << "Could not find a value with id " << id << ".";
     return *find_result->second;
+  }
+  // Get the `Storage` with the given name, create it otherwise. This is a
+  // bit of a hack that we use here because SQL buries its global context
+  // down at the bottom of its query expressions (unlike, say, LINQ which
+  // puts it right at the beginning). This allows us to create `Storage`s for
+  // columns as we see them. We will probably want to do something less lazy,
+  // like registering storages in advance, for the mature implementation.
+  const Storage &GetOrCreateStorage(absl::string_view storage_name) {
+    return (ir_context_.IsRegisteredStorage(storage_name))
+      ? ir_context_.GetStorage(storage_name)
+      : ir_context_.RegisterStorage(std::make_unique<Storage>(
+          storage_name, ir_context_.type_factory().MakePrimitiveType()));
   }
 
   IRContext &ir_context() { return ir_context_; }

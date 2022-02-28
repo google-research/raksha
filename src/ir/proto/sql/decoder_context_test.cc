@@ -21,11 +21,29 @@
 
 namespace raksha::ir::proto::sql {
 
+TEST(IRContextTest, GetOrCreateStorageIdempotence) {
+  IRContext context;
+  DecoderContext decoder_context(context);
+  const Storage &store1 = decoder_context.GetOrCreateStorage("Table1");
+  const Storage &store2 = decoder_context.GetOrCreateStorage("Disk1");
+  const Storage &store1_again = decoder_context.GetOrCreateStorage("Table1");
+  const Storage &store2_again = decoder_context.GetOrCreateStorage("Disk1");
+
+  EXPECT_EQ(&store1, &store1_again);
+  EXPECT_EQ(&store2, &store2_again);
+  EXPECT_NE(&store1, &store2);
+
+  EXPECT_EQ(store1.type().type_base().kind(),
+            types::TypeBase::Kind::kPrimitive);
+  EXPECT_EQ(store2.type().type_base().kind(),
+            types::TypeBase::Kind::kPrimitive);
+}
+
 TEST(DecoderContextTest, DecoderContextRegisterAndGetValueTest) {
   IRContext ir_context;
   DecoderContext decoder_context(ir_context);
 
-  Storage storage("storage1", ir_context .type_factory().MakePrimitiveType());
+  Storage storage("storage1", ir_context.type_factory().MakePrimitiveType());
 
   const Value &value1 = decoder_context.RegisterValue(1, Value(value::Any()));
   EXPECT_THAT(value1.If<value::Any>(), testing::NotNull());
@@ -40,10 +58,11 @@ TEST(DecoderContextTest, DecoderContextRegisterAndGetValueTest) {
                "id_to_value map has more than one value associated with the id "
                "1.");
   EXPECT_DEATH({ decoder_context.RegisterValue(2, Value(value::Any())); },
-             "id_to_value map has more than one value associated with the id "
-             "2.");
+               "id_to_value map has more than one value associated with the id "
+               "2.");
   EXPECT_DEATH({ decoder_context.GetValue(3); },
                "Could not find a value with id 3.");
 }
+
 
 }  // namespace raksha::ir::proto::sql

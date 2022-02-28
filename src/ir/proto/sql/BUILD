@@ -53,6 +53,7 @@ cc_library(
         "decode.h",
     ],
     deps = [
+        ":decoder_context",
         ":sql_ir_cc_proto",
         "//src/common/logging",
         "//src/ir",
@@ -60,7 +61,15 @@ cc_library(
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:ssa_names",
-        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_test(
+    name = "decoder_context_test",
+    srcs = ["decoder_context_test.cc"],
+    deps = [
+        ":decoder_context",
+        "//src/common/testing:gtest",
     ],
 )
 
