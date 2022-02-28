@@ -20,6 +20,7 @@
 #include "google/protobuf/util/message_differencer.h"
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/proto/sql/decoder_context.h"
 #include "src/ir/proto/sql/sql_ir.pb.h"
 
 namespace raksha::ir::proto::sql {
@@ -89,5 +90,83 @@ absl::string_view kLiteralStrs[] = {
 
 INSTANTIATE_TEST_SUITE_P(
     DecodeLiteralTest, DecodeLiteralTest, testing::ValuesIn(kLiteralStrs));
+
+TEST(DecodeSourceTableColumnExprTest, DecodeSourceTableColumnExprTest) {
+  const std::string kTextproto =
+      R"(id: 1 name: "alias" source_table_column: { column_path: "table1.col" })";
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+  Expression expr;
+  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(kTextproto, &expr))
+    << "Could not decode expr";
+  const ir::Value &result = DecodeExpression(expr, decoder_context);
+  const Storage &storage = result.As<value::StoredValue>().storage();
+  EXPECT_EQ(storage.name(), "table1.col");
+  EXPECT_EQ(storage.type().type_base().kind(),
+            types::TypeBase::Kind::kPrimitive);
+  EXPECT_EQ(&result, &decoder_context.GetValue(1));
+}
+
+TEST(DecodeLiteralExprTest, DecodeLiteralExprTest) {
+  const std::string kTextproto =
+      R"(id: 5 name: "alias" literal: { literal_str: "9" } )";
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+  Expression expr;
+  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(kTextproto, &expr))
+    << "Could not decode expr";
+  const ir::Value &result = DecodeExpression(expr, decoder_context);
+  const Storage &storage = result.As<value::StoredValue>().storage();
+  EXPECT_EQ(storage.name(), "literal:9");
+  EXPECT_EQ(storage.type().type_base().kind(),
+            types::TypeBase::Kind::kPrimitive);
+  EXPECT_EQ(&result, &decoder_context.GetValue(5));
+}
+
+TEST(DecodeExprIdCollisionDeathTest, DecodeExprIdCollisionDeathTest) {
+  const std::string kTextproto =
+      R"(id: 1 source_table_column: { column_path: "table1.col" } )";
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+  Expression expr;
+  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(kTextproto, &expr))
+    << "Could not decode expr";
+  DecodeExpression(expr, decoder_context);
+  EXPECT_DEATH(
+      { DecodeExpression(expr, decoder_context); },
+      "id_to_value map has more than one value associated with the id 1.");
+}
+
+struct TextprotoDeathMessagePair {
+  std::string textproto;
+  std::string death_message;
+};
+
+class DecodeExprDeathTest :
+    public testing::TestWithParam<TextprotoDeathMessagePair> {};
+
+TEST_P(DecodeExprDeathTest, DecodeExprDeathTest) {
+  const TextprotoDeathMessagePair &param = GetParam();
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+  Expression expr;
+  ASSERT_TRUE(
+      google::protobuf::TextFormat::ParseFromString(param.textproto, &expr))
+    << "Could not decode expr";
+  EXPECT_DEATH(
+    { DecodeExpression(expr, decoder_context); }, param.death_message);
+}
+
+const TextprotoDeathMessagePair kTextprotoDeathMessagePairs[] = {
+    { .textproto = R"(id: 0 source_table_column: { column_path: "table1.col" } )",
+      .death_message = "Required field id was not present in Expression." },
+    { .textproto = R"(source_table_column: { column_path: "table1.col" } )",
+      .death_message = "Required field id was not present in Expression." },
+    { .textproto = R"(id: 1)",
+      .death_message = "Required field expr_variant not set." },
+};
+
+INSTANTIATE_TEST_SUITE_P(DecodeExprDeathTest, DecodeExprDeathTest,
+                         testing::ValuesIn(kTextprotoDeathMessagePairs));
 
 }  // namespace raksha::ir::proto::sql

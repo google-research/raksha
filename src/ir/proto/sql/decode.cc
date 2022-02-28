@@ -19,6 +19,39 @@
 
 namespace raksha::ir::proto::sql {
 
+// A helper function to decode the specific subclass of the Expression.
+static ir::Value GetExprValue(
+    const Expression &expr, DecoderContext &decoder_context) {
+  switch (expr.expr_variant_case()) {
+    case Expression::EXPR_VARIANT_NOT_SET: {
+      CHECK(false) << "Required field expr_variant not set.";
+    }
+    case Expression::kSourceTableColumn: {
+      return DecodeSourceTableColumn(
+          expr.source_table_column(), decoder_context);
+    }
+    case Expression::kLiteral: {
+      return DecodeLiteral(expr.literal(), decoder_context);
+    }
+    case Expression::kMergeOperation: {
+      CHECK(false) << "Not yet implemented!";
+    }
+    case Expression::kTagTransform: {
+      CHECK(false) << "Not yet implemented!";
+    }
+  }
+  // Placate the compiler.
+  CHECK(false) << "Unreachable!";
+}
+
+const ir::Value &DecodeExpression(
+    const Expression &expr, DecoderContext &decoder_context) {
+  uint64_t id = expr.id();
+  CHECK(id != 0) << "Required field id was not present in Expression.";
+  // TODO: Figure out what to do with the optional name field.
+  return decoder_context.RegisterValue(id, GetExprValue(expr, decoder_context));
+}
+
 ir::Value DecodeSourceTableColumn(
     const SourceTableColumn &source_table_column,
     DecoderContext &decoder_context) {
