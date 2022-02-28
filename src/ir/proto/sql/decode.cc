@@ -19,7 +19,7 @@
 
 namespace raksha::ir::proto::sql {
 
-ir::Value DecodeSourceTableColumn(
+Value DecodeSourceTableColumn(
     const SourceTableColumn &source_table_column,
     DecoderContext &decoder_context) {
   const std::string &column_path = source_table_column.column_path();
@@ -32,11 +32,11 @@ ir::Value DecodeSourceTableColumn(
   // Also, for now, we consider all storages to have primitive type. We will
   // probably want to change that when we start handling types in a
   // non-trivial fashion.
-  return ir::Value{value::StoredValue(
-      decoder_context.GetOrCreateStorage(column_path))};
+  return Value(value::StoredValue(
+      decoder_context.GetOrCreateStorage(column_path)));
 }
 
-ir::Value DecodeLiteral(
+Value DecodeLiteral(
     const Literal &literal, DecoderContext &decoder_context) {
   const std::string &literal_str = literal.literal_str();
   CHECK(!literal_str.empty()) << "required field literal_str was empty.";
@@ -55,8 +55,8 @@ ir::Value DecodeLiteral(
   //
   // Prefix the literal string with "literal:" to reduce the chance of a
   // collision.
-  return ir::Value{value::StoredValue(decoder_context.GetOrCreateStorage(
-      absl::StrCat("literal:", literal_str)))};
+  return Value(value::StoredValue(decoder_context.GetOrCreateStorage(
+      absl::StrCat("literal:", literal_str))));
 }
 
 }  // namespace raksha::ir::proto::sql
