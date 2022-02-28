@@ -51,7 +51,7 @@ class IRContext {
     return operators_.IsRegisteredNode(operators_name);
   }
 
-    // Register an operator and return the stored operator instances.
+  // Register an operator and return the stored operator instances.
   const Storage &RegisterStorage(std::unique_ptr<Storage> op) {
     return storages_.RegisterNode(std::move(op));
   }
