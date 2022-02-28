@@ -53,6 +53,7 @@ cc_library(
         "decode.h",
     ],
     deps = [
+        ":decoder_context",
         ":sql_ir_cc_proto",
         "//src/common/logging",
         "//src/ir",
