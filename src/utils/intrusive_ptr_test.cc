@@ -225,6 +225,7 @@ TEST(IntrusivePtrTest, ComparisionAgainstRawPtrs) {
   EXPECT_EQ(raw_ptr, ptr);
 
   auto another_raw_ptr = MakeRefCountedTypeInstance();
+  RefCountedTypePtr another_ptr(another_raw_ptr);
   EXPECT_NE(ptr, another_raw_ptr);
   EXPECT_NE(another_raw_ptr, ptr);
 }
