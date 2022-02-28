@@ -21,6 +21,8 @@ load(
     "proto_library",
 )
 
+licenses(["notice"])
+
 proto_library(
     name = "sql_ir_proto",
     srcs = ["sql_ir.proto"],
