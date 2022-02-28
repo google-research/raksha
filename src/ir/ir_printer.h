@@ -58,25 +58,38 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
 
   void PreVisit(const Block& block) override {
     out_ << Indent()
-         << absl::StreamFormat("block b%d {\n",
-                               ssa_names_.GetOrCreateID(block));
+         << absl::StreamFormat("block b%d ", ssa_names_.GetOrCreateID(block));
+    // inputs
+    out_ << "("
+         << absl::StrJoin(block.inputs().all(), ", ",
+                          [&](std::string* out, const auto& input_type_entry) {
+                            const auto& [name, type] = input_type_entry;
+                            return absl::StrAppend(out, name, ": Type");
+                          })
+         << ")";
+    // outputs
+    out_ << " -> ("
+         << absl::StrJoin(block.outputs().all(), ", ",
+                          [&](std::string* out, const auto& input_type_entry) {
+                            const auto& [name, type] = input_type_entry;
+                            return absl::StrAppend(out, name, ": Type");
+                          })
+         << ")";
+    out_ << " {\n";
     IncreaseIndent();
-    if (!block.inputs().all().empty()) {
-      out << Indent() << "// Inputs:\n";
-    }
-    for (const auto& [name, _] : block.inputs().all()) {
-      out << Indent() << name << ": Type\n";
-    }
-    if (!block.inputs().all().empty()) {
-      out << Indent() << "// Outputs:\n";
-    }
-    for (const auto& [name, _] : block.outputs().all()) {
-      out << Indent() << name << ": Type\n";
-    }
   }
 
   void PostVisit(const Block& block) override {
+    out_ << Indent() << "return ("
+         << absl::StrJoin(block.results(), ", ",
+                          [&](std::string* out, const auto& input_type_entry) {
+                            const auto& [name, value] = input_type_entry;
+                            return absl::StrAppend(out, name, ": ",
+                                                   value.ToString(ssa_names_));
+                          })
+         << ")\n";
     DecreaseIndent();
+
     out_ << Indent()
          << absl::StreamFormat("}  // block b%d\n",
                                ssa_names_.GetOrCreateID(block));

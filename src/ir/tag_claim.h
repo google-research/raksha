@@ -29,16 +29,12 @@ namespace raksha::ir {
 // access path.
 class TagClaim {
  public:
-  explicit TagClaim(
-      std::string claiming_particle_name,
-      AccessPath access_path,
-      bool claim_tag_is_present,
-      std::string tag)
-    : claiming_particle_name_(std::move(claiming_particle_name)),
-      access_path_(std::move(access_path)),
-      claim_tag_is_present_(claim_tag_is_present),
-      tag_(std::move(tag))
-    {}
+  explicit TagClaim(std::string claiming_particle_name, AccessPath access_path,
+                    bool claim_tag_is_present, std::string tag)
+      : claiming_particle_name_(std::move(claiming_particle_name)),
+        access_path_(std::move(access_path)),
+        claim_tag_is_present_(claim_tag_is_present),
+        tag_(std::move(tag)) {}
 
   // Produce a string containing a datalog fact for this TagClaim.
   std::string ToDatalog(DatalogPrintContext &ctxt) const {
@@ -52,14 +48,15 @@ class TagClaim {
   }
 
   bool operator==(const TagClaim &other) const {
-    return
-      (claiming_particle_name_ == other.claiming_particle_name_) &&
-          (access_path_ == other.access_path_) &&
-          (claim_tag_is_present_ == other.claim_tag_is_present_) &&
-          (tag_ == other.tag_);
+    return (claiming_particle_name_ == other.claiming_particle_name_) &&
+           (access_path_ == other.access_path_) &&
+           (claim_tag_is_present_ == other.claim_tag_is_present_) &&
+           (tag_ == other.tag_);
   }
 
   const AccessPath &access_path() const { return access_path_; }
+  const std::string &tag() const { return tag_; }
+  bool claim_tag_is_present() const { return claim_tag_is_present_; }
 
  private:
   // The name of the particle performing this claim. Important for connecting

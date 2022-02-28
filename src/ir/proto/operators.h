@@ -18,5 +18,8 @@ namespace arcs::operators {
 constexpr absl::string_view kParticleSpec = "arcs.ParticleSpec";
 constexpr absl::string_view kClaim = "arcs.Claim";
 constexpr absl::string_view kCheck = "arcs.Check";
+constexpr absl::string_view kMerge = "arcs.Merge";
+constexpr absl::string_view kReadAccessPath = "arcs.ReadAccessPath";
+constexpr absl::string_view kUpdateAccessPath = "arcs.UpdateAccessPath";
 
 }  // namespace arcs::operators

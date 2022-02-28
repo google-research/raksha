@@ -45,8 +45,13 @@ class ParticleSpec {
 
   const std::string &name() const { return name_; }
   const std::vector<TagCheck> &checks() const { return checks_; }
-  const std::vector<TagClaim> &tag_claims() const {
-    return tag_claims_;
+  const std::vector<TagClaim> &tag_claims() const { return tag_claims_; }
+  const std::vector<DerivesFromClaim> &derives_from_claims() const {
+    return derives_from_claims_;
+  }
+  const absl::flat_hash_map<std::string, HandleConnectionSpec>
+      &handle_connection_specs() const {
+    return handle_connection_specs_;
   }
   const std::vector<Edge> &edges() const { return edges_; }
 
@@ -54,8 +59,8 @@ class ParticleSpec {
       const absl::string_view hcs_name) const {
     auto find_res = handle_connection_specs_.find(hcs_name);
     CHECK(find_res != handle_connection_specs_.end())
-      << "Could not find a HandleConnectionSpec with name " << hcs_name
-      << " in ParticleSpec " << name_ << ".";
+        << "Could not find a HandleConnectionSpec with name " << hcs_name
+        << " in ParticleSpec " << name_ << ".";
     return find_res->second;
   }
 
@@ -69,12 +74,12 @@ class ParticleSpec {
         tag_claims_(std::move(tag_claims)),
         derives_from_claims_(std::move(derives_from_claims)) {
     for (HandleConnectionSpec &handle_connection_spec :
-      handle_connection_specs) {
+         handle_connection_specs) {
       std::string hcs_name = handle_connection_spec.name();
-      auto ins_res = handle_connection_specs_.insert({
-        std::move(hcs_name), std::move(handle_connection_spec) });
+      auto ins_res = handle_connection_specs_.insert(
+          {std::move(hcs_name), std::move(handle_connection_spec)});
       CHECK(ins_res.second)
-        << "Found two HandleConnectionSpecs with same name.";
+          << "Found two HandleConnectionSpecs with same name.";
     }
     GenerateEdges();
   }
@@ -99,7 +104,7 @@ class ParticleSpec {
   std::vector<Edge> edges_;
   // A map of HandleConnectionSpec names to HandleConnectionSpecs.
   absl::flat_hash_map<std::string, HandleConnectionSpec>
-    handle_connection_specs_;
+      handle_connection_specs_;
 };
 
 }  // namespace raksha::ir

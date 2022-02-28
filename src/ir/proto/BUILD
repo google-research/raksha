@@ -127,6 +127,7 @@ cc_library(
         "//src/ir:ir_context",
         "//src/ir:module",
         "//src/ir/types",
+        "//src/utils:map_iter",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )

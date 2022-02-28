@@ -19,6 +19,7 @@
 
 #include <memory>
 
+#include "src/ir/block_builder.h"
 #include "src/ir/ir_context.h"
 #include "src/ir/module.h"
 #include "src/ir/particle_spec.h"
@@ -30,8 +31,8 @@ namespace raksha::ir::proto {
 std::unique_ptr<ParticleSpec> Decode(types::TypeFactory& type_factory,
                                      const arcs::ParticleSpecProto& proto);
 
-std::unique_ptr<Operation> Decode(IRContext& ir_context,
-                                  const arcs::ParticleSpecProto& proto);
+const Operation& Decode(IRContext& ir_context, BlockBuilder& block_builer,
+                        const arcs::ParticleSpecProto& proto);
 
 }  // namespace raksha::ir::proto
 

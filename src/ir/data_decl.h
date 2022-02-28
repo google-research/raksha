@@ -18,7 +18,6 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "src/ir/types/type.h"
-#include "src/utils/ranges.h"
 
 namespace raksha::ir {
 

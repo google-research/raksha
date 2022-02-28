@@ -44,12 +44,22 @@ TEST(ParticleSpecTest, TestSomething) {
       std::make_unique<Operator>(arcs::operators::kParticleSpec));
   context.RegisterOperator(std::make_unique<Operator>(arcs::operators::kClaim));
   context.RegisterOperator(std::make_unique<Operator>(arcs::operators::kCheck));
+  context.RegisterOperator(std::make_unique<Operator>(arcs::operators::kMerge));
+  context.RegisterOperator(
+      std::make_unique<Operator>(arcs::operators::kReadAccessPath));
+  context.RegisterOperator(
+      std::make_unique<Operator>(arcs::operators::kUpdateAccessPath));
 
-  for (const arcs::ParticleSpecProto &particle_spec_proto :
+  Module global_module;
+  BlockBuilder builder;
+  for (const arcs::ParticleSpecProto& particle_spec_proto :
        manifest_proto.particle_specs()) {
-    auto operation = ir::proto::Decode(context, particle_spec_proto);
-    LOG(WARNING) << IRPrinter::ToString(*operation);
+    const auto& operation =
+        ir::proto::Decode(context, builder, particle_spec_proto);
+    LOG(WARNING) << operation;
   }
+  global_module.AddBlock(builder.build());
+  LOG(WARNING) << global_module;
 }
 
 }  // namespace raksha::ir::proto
