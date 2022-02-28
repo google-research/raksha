@@ -14,23 +14,29 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#ifndef SRC_IR_PROTO_SQL_MVP_DECODE_H_
-#define SRC_IR_PROTO_SQL_MVP_DECODE_H_
-
-#include <vector>
-
-#include "src/ir/value.h"
 #include "src/ir/proto/sql/decoder_context.h"
-#include "src/ir/proto/sql/sql_ir.pb.h"
+
+#include "src/common/testing/gtest.h"
+#include "src/ir/value.h"
 
 namespace raksha::ir::proto::sql {
 
-ir::Value DecodeSourceTableColumn(
-    const SourceTableColumn &source_table_column,
-    DecoderContext &decoder_context);
+TEST(IRContextTest, GetOrCreateStorageIdempotence) {
+  IRContext context;
+  DecoderContext decoder_context(context);
+  const Storage &store1 = decoder_context.GetOrCreateStorage("Table1");
+  const Storage &store2 = decoder_context.GetOrCreateStorage("Disk1");
+  const Storage &store1_again = decoder_context.GetOrCreateStorage("Table1");
+  const Storage &store2_again = decoder_context.GetOrCreateStorage("Disk1");
 
-ir::Value DecodeLiteral(const Literal &literal, IRContext &ir_context);
+  EXPECT_EQ(&store1, &store1_again);
+  EXPECT_EQ(&store2, &store2_again);
+  EXPECT_NE(&store1, &store2);
+
+  EXPECT_EQ(store1.type().type_base().kind(),
+            types::TypeBase::Kind::kPrimitive);
+  EXPECT_EQ(store2.type().type_base().kind(),
+            types::TypeBase::Kind::kPrimitive);
+}
 
 }  // namespace raksha::ir::proto::sql
-
-#endif  // SRC_IR_PROTO_SQL_MVP_DECODE_H_
