@@ -74,15 +74,6 @@ cc_test(
 )
 
 cc_test(
-    name = "decoder_context_test",
-    srcs = ["decoder_context_test.cc"],
-    deps = [
-        ":decoder_context",
-        "//src/common/testing:gtest",
-    ],
-)
-
-cc_test(
     name = "decode_test",
     srcs = ["decode_test.cc"],
     deps = [
