@@ -102,7 +102,9 @@ TEST(DecodeSourceTableColumnExprTest, DecodeSourceTableColumnExprTest) {
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(kTextproto, &expr))
     << "Could not decode expr";
   const ir::Value &result = DecodeExpression(expr, decoder_context);
-  const Storage &storage = result.As<value::StoredValue>().storage();
+  const value::StoredValue *stored_value = result.If<value::StoredValue>();
+  EXPECT_THAT(stored_value, testing::NotNull());
+  const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), "table1.col");
   EXPECT_EQ(storage.type().type_base().kind(),
             types::TypeBase::Kind::kPrimitive);
@@ -118,7 +120,9 @@ TEST(DecodeLiteralExprTest, DecodeLiteralExprTest) {
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(kTextproto, &expr))
     << "Could not decode expr";
   const ir::Value &result = DecodeExpression(expr, decoder_context);
-  const Storage &storage = result.As<value::StoredValue>().storage();
+  const value::StoredValue *stored_value = result.If<value::StoredValue>();
+  EXPECT_THAT(stored_value, testing::NotNull());
+  const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), "literal:9");
   EXPECT_EQ(storage.type().type_base().kind(),
             types::TypeBase::Kind::kPrimitive);
