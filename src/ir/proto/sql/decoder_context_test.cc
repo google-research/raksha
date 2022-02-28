@@ -17,7 +17,6 @@
 #include "src/ir/proto/sql/decoder_context.h"
 
 #include "src/common/testing/gtest.h"
-#include "src/ir/value.h"
 
 namespace raksha::ir::proto::sql {
 
