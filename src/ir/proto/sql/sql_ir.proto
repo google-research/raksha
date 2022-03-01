@@ -49,16 +49,16 @@ message MergeOperation {
 
 // The kind of a tag.
 enum TagKind {
-  TK_UNKNOWN = 0;
-  TK_INTEGRITY = 1;
-  TK_CONFIDENTIALITY = 2;
+  TAG_KIND_UNKNOWN = 0;
+  TAG_KIND_INTEGRITY = 1;
+  TAG_KIND_CONFIDENTIALITY = 2;
 }
 
 // The action that is taken upon a tag by a TagTransform expression.
 enum TagAlteration {
-  TA_NONE = 0;
-  TA_ADD = 1;
-  TA_REMOVE = 2;
+  TAG_ALTERATION_NONE = 0;
+  TAG_ALTERATION_ADD = 1;
+  TAG_ALTERATION_REMOVE = 2;
 }
 
 // A pair of an Expression's unique ID and an integrity tag that must be
