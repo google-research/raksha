@@ -41,7 +41,8 @@ Value DecodeLiteral(
   const absl::string_view literal_str = literal.literal_str();
   CHECK(!literal_str.empty()) << "required field literal_str was empty.";
   return Value(value::OperationResult(
-      decoder_context.MakeLiteralOperation(literal_str), "out"));
+      decoder_context.MakeLiteralOperation(literal_str),
+      DecoderContext::kDefaultOutputName));
 }
 
 }  // namespace raksha::ir::proto::sql

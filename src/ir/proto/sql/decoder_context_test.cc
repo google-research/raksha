@@ -50,13 +50,13 @@ TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
   EXPECT_THAT(lit_op.parent(), testing::IsNull());
   EXPECT_THAT(lit_op.impl_module(), testing::IsNull());
   EXPECT_THAT(lit_op.inputs(), testing::IsEmpty());
-  EXPECT_EQ(lit_op.op().name(), "sql.literal");
+  EXPECT_EQ(lit_op.op().name(), DecoderContext::kSqlLiteralOpName);
 
   // Check that "attributes" is exactly "literal_str" associated with the
   // parameter value.
   const NamedAttributeMap &attributes = lit_op.attributes();
   EXPECT_EQ(attributes.size(), 1);
-  auto find_result = attributes.find("literal_str");
+  auto find_result = attributes.find(DecoderContext::kLiteralStrAttrName);
   EXPECT_NE(find_result, attributes.end());
   EXPECT_EQ(find_result->second->ToString(), literal_str);
 }
