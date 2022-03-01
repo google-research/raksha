@@ -28,6 +28,7 @@ cc_library(
         "//src/utils:intrusive_ptr",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
     ],
 )
 
@@ -45,6 +46,8 @@ cc_library(
     hdrs = ["block_builder.h"],
     deps = [
         ":module",
+        ":value",
+        "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
     ],
 )
@@ -55,9 +58,11 @@ cc_test(
         "block_builder_test.cc",
     ],
     deps = [
+        ":attribute",
         ":block_builder",
         ":ir_context",
         "//src/common/testing:gtest",
+        "//src/ir/types",
     ],
 )
 
@@ -66,7 +71,7 @@ cc_library(
     hdrs = ["data_decl.h"],
     deps = [
         "//src/ir/types",
-        "@absl//absl/strings",
+        "@absl//absl/container:flat_hash_map",
     ],
 )
 
@@ -97,6 +102,28 @@ cc_test(
     deps = [
         ":ir_context",
         "//src/common/testing:gtest",
+        "//src/ir/types",
+    ],
+)
+
+cc_library(
+    name = "ir_printer",
+    hdrs = ["ir_printer.h"],
+    deps = [
+        ":ir_traversing_visitor",
+        ":module",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "ir_printer_test",
+    srcs = ["ir_printer_test.cc"],
+    deps = [
+        ":block_builder",
+        ":ir_printer",
+        ":module",
+        "//src/common/testing:gtest",
     ],
 )
 
@@ -112,6 +139,7 @@ cc_test(
     deps = [
         ":block_builder",
         ":ir_traversing_visitor",
+        ":module",
         "//src/common/testing:gtest",
     ],
 )
@@ -137,7 +165,10 @@ cc_test(
     name = "operation_test",
     srcs = ["operation_test.cc"],
     deps = [
+        ":attribute",
+        ":ir_printer",
         ":module",
+        ":value",
         "//src/common/testing:gtest",
         "@absl//absl/container:flat_hash_set",
     ],
@@ -145,7 +176,6 @@ cc_test(
 
 cc_library(
     name = "module",
-    srcs = ["operation.cc"],
     hdrs = [
         "ir_visitor.h",
         "module.h",
@@ -154,7 +184,11 @@ cc_library(
         ":attribute",
         ":data_decl",
         ":operator",
+        ":ssa_names",
         ":value",
+        "//src/ir/types",
+        "@absl//absl/container:flat_hash_map",
+        "@absl//absl/strings",
     ],
 )
 
@@ -181,6 +215,8 @@ cc_test(
     srcs = ["ssa_names_test.cc"],
     deps = [
         ":module",
+        ":operator",
+        ":ssa_names",
         "//src/common/testing:gtest",
     ],
 )
@@ -191,6 +227,7 @@ cc_library(
     deps = [
         "//src/ir/types",
         "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
     ],
 )
 
@@ -200,6 +237,7 @@ cc_test(
     deps = [
         ":storage",
         "//src/common/testing:gtest",
+        "//src/ir/types",
     ],
 )
 
@@ -210,6 +248,8 @@ cc_library(
         ":ssa_names",
         ":storage",
         "//src/ir/types",
+        "@absl//absl/container:flat_hash_map",
+        "@absl//absl/strings:str_format",
     ],
 )
 

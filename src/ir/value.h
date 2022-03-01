@@ -114,6 +114,15 @@ class Value {
         value_);
   }
 
+  // A downcast operation. Just delegates directly to std::get on variants.
+  template<class T>
+  const T &As() const { return std::get<T>(value_); }
+
+  // A dynamic downcast operation. Just delegates directly to std::get_if on
+  // variants.
+  template<class T>
+  const T *If() const { return std::get_if<T>(&value_); }
+
  private:
   std::variant<value::BlockArgument, value::OperationResult, value::StoredValue,
                value::Any>
