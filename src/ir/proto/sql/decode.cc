@@ -14,28 +14,25 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/ir/proto/sql/decoder_context.h"
-
-#include "src/common/testing/gtest.h"
+#include "src/ir/proto/sql/decode.h"
 
 namespace raksha::ir::proto::sql {
 
-TEST(IRContextTest, GetOrCreateStorageIdempotence) {
-  IRContext context;
-  DecoderContext decoder_context(context);
-  const Storage &store1 = decoder_context.GetOrCreateStorage("Table1");
-  const Storage &store2 = decoder_context.GetOrCreateStorage("Disk1");
-  const Storage &store1_again = decoder_context.GetOrCreateStorage("Table1");
-  const Storage &store2_again = decoder_context.GetOrCreateStorage("Disk1");
-
-  EXPECT_EQ(&store1, &store1_again);
-  EXPECT_EQ(&store2, &store2_again);
-  EXPECT_NE(&store1, &store2);
-
-  EXPECT_EQ(store1.type().type_base().kind(),
-            types::TypeBase::Kind::kPrimitive);
-  EXPECT_EQ(store2.type().type_base().kind(),
-            types::TypeBase::Kind::kPrimitive);
+Value DecodeSourceTableColumn(
+    const SourceTableColumn &source_table_column,
+    DecoderContext &decoder_context) {
+  const std::string &column_path = source_table_column.column_path();
+  CHECK(!column_path.empty()) << "Required field column_path was empty.";
+  // Note: In the future, we will probably want to make a `Storage` per table
+  // and grab columns from that table using operators. For now, however,
+  // making each column an independent storage works for the MVP and is much
+  // simpler.
+  //
+  // Also, for now, we consider all storages to have primitive type. We will
+  // probably want to change that when we start handling types in a
+  // non-trivial fashion.
+  return Value(value::StoredValue(
+      decoder_context.GetOrCreateStorage(column_path)));
 }
 
 }  // namespace raksha::ir::proto::sql

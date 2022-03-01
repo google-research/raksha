@@ -130,11 +130,16 @@ TEST_F(BlockBuilderTest, AddOperationUpdatesOperationList) {
       builder.AddOperation(context_.GetOperator("core.minus"), {}, {}));
   const Operation* merge_op = std::addressof(
       builder.AddOperation(context_.GetOperator("core.merge"), {}, {}));
+  const Operation* merge_op_with_module = std::addressof(builder.AddOperation(
+      context_.GetOperator("core.merge"), {}, {}, std::make_unique<Module>()));
+
   auto block = builder.build();
   EXPECT_THAT(block->operations(),
-              testing::ElementsAre(testing::Pointer(testing::Eq(plus_op)),
-                                   testing::Pointer(testing::Eq(minus_op)),
-                                   testing::Pointer(testing::Eq(merge_op))));
+              testing::ElementsAre(
+                  testing::Pointer(testing::Eq(plus_op)),
+                  testing::Pointer(testing::Eq(minus_op)),
+                  testing::Pointer(testing::Eq(merge_op)),
+                  testing::Pointer(testing::Eq(merge_op_with_module))));
 }
 
 TEST_F(BlockBuilderTest, AddImplementationPassesSelfAndResultBlock) {
