@@ -21,6 +21,8 @@ load(
     "proto_library",
 )
 
+licenses(["notice"])
+
 proto_library(
     name = "sql_ir_proto",
     srcs = ["sql_ir.proto"],
@@ -44,11 +46,41 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "decode",
+    srcs = [
+        "decode.cc",
+    ],
+    hdrs = [
+        "decode.h",
+    ],
+    deps = [
+        ":decoder_context",
+        ":sql_ir_cc_proto",
+        "//src/common/logging",
+        "//src/ir",
+        "//src/ir:attribute",
+        "//src/ir:block_builder",
+        "//src/ir:ir_context",
+        "//src/ir:ssa_names",
+    ],
+)
+
 cc_test(
     name = "decoder_context_test",
     srcs = ["decoder_context_test.cc"],
     deps = [
         ":decoder_context",
         "//src/common/testing:gtest",
+    ],
+)
+
+cc_test(
+    name = "decode_test",
+    srcs = ["decode_test.cc"],
+    deps = [
+        ":decode",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
     ],
 )

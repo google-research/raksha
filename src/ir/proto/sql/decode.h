@@ -14,28 +14,21 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/ir/proto/sql/decoder_context.h"
+#ifndef SRC_IR_PROTO_SQL_MVP_DECODE_H_
+#define SRC_IR_PROTO_SQL_MVP_DECODE_H_
 
-#include "src/common/testing/gtest.h"
+#include <vector>
+
+#include "src/ir/value.h"
+#include "src/ir/proto/sql/decoder_context.h"
+#include "src/ir/proto/sql/sql_ir.pb.h"
 
 namespace raksha::ir::proto::sql {
 
-TEST(IRContextTest, GetOrCreateStorageIdempotence) {
-  IRContext context;
-  DecoderContext decoder_context(context);
-  const Storage &store1 = decoder_context.GetOrCreateStorage("Table1");
-  const Storage &store2 = decoder_context.GetOrCreateStorage("Disk1");
-  const Storage &store1_again = decoder_context.GetOrCreateStorage("Table1");
-  const Storage &store2_again = decoder_context.GetOrCreateStorage("Disk1");
-
-  EXPECT_EQ(&store1, &store1_again);
-  EXPECT_EQ(&store2, &store2_again);
-  EXPECT_NE(&store1, &store2);
-
-  EXPECT_EQ(store1.type().type_base().kind(),
-            types::TypeBase::Kind::kPrimitive);
-  EXPECT_EQ(store2.type().type_base().kind(),
-            types::TypeBase::Kind::kPrimitive);
-}
+Value DecodeSourceTableColumn(
+    const SourceTableColumn &source_table_column,
+    DecoderContext &decoder_context);
 
 }  // namespace raksha::ir::proto::sql
+
+#endif  // SRC_IR_PROTO_SQL_MVP_DECODE_H_
