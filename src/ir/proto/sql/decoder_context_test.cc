@@ -75,4 +75,37 @@ INSTANTIATE_TEST_SUITE_P(
     LiteralOpTest, LiteralOpTest,
     Values("val1", "1000", "3.1415", "true", ""));
 
+TEST(DecoderContextTest, DecoderContextRegisterAndGetValueTest) {
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+
+  Storage storage("storage1", ir_context.type_factory().MakePrimitiveType());
+
+  const Value &value1 = decoder_context.RegisterValue(1, Value(value::Any()));
+  EXPECT_THAT(value1.If<value::Any>(), testing::NotNull());
+  const Value &value2 =
+      decoder_context.RegisterValue(2, Value(value::StoredValue(storage)));
+  const Value &get_value1 = decoder_context.GetValue(1);
+  const Value &get_value2 = decoder_context.GetValue(2);
+  EXPECT_EQ(&get_value1, &value1);
+  EXPECT_EQ(&get_value2, &value2);
+}
+
+TEST(DecoderContextDeathTest, DecoderContextValueRegistryDeathTest) {
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+
+  decoder_context.RegisterValue(1, Value(value::Any()));
+  decoder_context.RegisterValue(2, Value(value::Any()));
+
+  EXPECT_DEATH({ decoder_context.RegisterValue(1, Value(value::Any())); },
+               "id_to_value map has more than one value associated with the id "
+               "1.");
+  EXPECT_DEATH({ decoder_context.RegisterValue(2, Value(value::Any())); },
+               "id_to_value map has more than one value associated with the id "
+               "2.");
+  EXPECT_DEATH({ decoder_context.GetValue(3); },
+               "Could not find a value with id 3.");
+}
+
 }  // namespace raksha::ir::proto::sql

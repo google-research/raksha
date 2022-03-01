@@ -40,6 +40,28 @@ class DecoderContext {
       literal_operator_(ir_context_.RegisterOperator(
           std::make_unique<Operator>(kSqlLiteralOpName))) { }
 
+  // Register a value as associated with a particular id. This stores that
+  // value and provides a reference to its canonical value.
+  const Value &RegisterValue(uint64_t id, Value value) {
+    auto insert_result =
+        id_to_value.insert({id, std::make_unique<Value>(std::move(value))});
+    CHECK(insert_result.second)
+      << "id_to_value map has more than one value associated with the id "
+      << insert_result.first->first << ".";
+    return *insert_result.first->second;
+  }
+
+  // Get a reference to the value associated with a particular id. Assumes that
+  // the ID is present; it will error if it is not.
+  const Value &GetValue(uint64_t id) const {
+    // We could use `at`, which would be more concise and would also fail if the
+    // id is not present in the map, but it will not provide a nice error
+    // message. Use `find` and `CHECK` to get a better error message.
+    auto find_result = id_to_value.find(id);
+    CHECK(find_result != id_to_value.end())
+            << "Could not find a value with id " << id << ".";
+    return *find_result->second;
+  }
   // Get the `Storage` with the given name, create it otherwise. This is a
   // bit of a hack that we use here because SQL buries its global context
   // down at the bottom of its query expressions (unlike, say, LINQ which
@@ -71,6 +93,7 @@ class DecoderContext {
 
  private:
   IRContext &ir_context_;
+  absl::flat_hash_map<uint64_t, std::unique_ptr<Value>> id_to_value;
   const Operator &literal_operator_;
   std::vector<std::unique_ptr<Operation>> operations_;
 };
