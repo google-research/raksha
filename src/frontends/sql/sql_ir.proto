@@ -19,7 +19,7 @@
 // language barrier.
 syntax = "proto3";
 
-package raksha.ir.proto.sql;
+package raksha.frontends.sql;
 
 // This value corresponds to some source table for the query being analyzed.
 message SourceTableColumn {

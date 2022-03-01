@@ -14,16 +14,16 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/ir/proto/sql/decode.h"
+#include "src/frontends/sql/decode.h"
 
 #include "google/protobuf/text_format.h"
 #include "google/protobuf/util/message_differencer.h"
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
-#include "src/ir/proto/sql/decoder_context.h"
-#include "src/ir/proto/sql/sql_ir.pb.h"
+#include "src/frontends/sql/decoder_context.h"
+#include "src/frontends/sql/sql_ir.pb.h"
 
-namespace raksha::ir::proto::sql {
+namespace raksha::frontends::sql {
 
 using testing::TestWithParam;
 using testing::Eq;
@@ -35,6 +35,17 @@ using testing::ResultOf;
 using testing::UnorderedElementsAre;
 using testing::Values;
 using testing::ValuesIn;
+
+using ir::types::TypeBase;
+
+using ir::Attribute;
+using ir::IRContext;
+using ir::Operation;
+using ir::Storage;
+using ir::Value;
+using ir::value::StoredValue;
+using ir::value::OperationResult;
+
 
 class DecodeSourceTableColumnTest :
     public TestWithParam<absl::string_view> {};
@@ -51,12 +62,11 @@ TEST_P(DecodeSourceTableColumnTest, DecodeSourceTableColumnTest) {
   IRContext ir_context;
   DecoderContext decoder_context(ir_context);
   Value result = DecodeSourceTableColumn(col_proto, decoder_context);
-  const value::StoredValue *stored_value = result.If<value::StoredValue>();
+  const StoredValue *stored_value = result.If<StoredValue>();
   EXPECT_THAT(stored_value, NotNull());
   const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), column_path);
-  EXPECT_EQ(storage.type().type_base().kind(),
-            types::TypeBase::Kind::kPrimitive);
+  EXPECT_EQ(storage.type().type_base().kind(), TypeBase::Kind::kPrimitive);
 }
 
 absl::string_view kSourceColumnPaths[] = {
@@ -85,7 +95,7 @@ TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
   IRContext ir_context;
   DecoderContext decoder_context(ir_context);
   ir::Value result = DecodeLiteral(literal_proto, decoder_context);
-  const value::OperationResult *op_result = result.If<value::OperationResult>();
+  const OperationResult *op_result = result.If<OperationResult>();
   EXPECT_THAT(op_result, NotNull());
   EXPECT_EQ(op_result->name(), "out");
   const Operation &operation = op_result->operation();
@@ -123,12 +133,11 @@ TEST(DecodeSourceTableColumnExprTest, DecodeSourceTableColumnExprTest) {
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(kTextproto, &expr))
     << "Could not decode expr";
   const ir::Value &result = DecodeExpression(expr, decoder_context);
-  const value::StoredValue *stored_value = result.If<value::StoredValue>();
+  const StoredValue *stored_value = result.If<StoredValue>();
   EXPECT_THAT(stored_value, testing::NotNull());
   const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), "table1.col");
-  EXPECT_EQ(storage.type().type_base().kind(),
-            types::TypeBase::Kind::kPrimitive);
+  EXPECT_EQ(storage.type().type_base().kind(), TypeBase::Kind::kPrimitive);
   EXPECT_EQ(&result, &decoder_context.GetValue(1));
 }
 
@@ -141,8 +150,8 @@ TEST(DecodeLiteralExprTest, DecodeLiteralExprTest) {
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(kTextproto, &expr))
     << "Could not decode expr";
   const ir::Value &result = DecodeExpression(expr, decoder_context);
-  const value::OperationResult *operation_result =
-      result.If<value::OperationResult>();
+  const OperationResult *operation_result =
+      result.If<OperationResult>();
   EXPECT_THAT(operation_result, testing::NotNull());
   const Operation &operation = operation_result->operation();
   EXPECT_THAT(operation.parent(), IsNull());
@@ -206,4 +215,4 @@ const TextprotoDeathMessagePair kTextprotoDeathMessagePairs[] = {
 INSTANTIATE_TEST_SUITE_P(DecodeExprDeathTest, DecodeExprDeathTest,
                          testing::ValuesIn(kTextprotoDeathMessagePairs));
 
-}  // namespace raksha::ir::proto::sql
+}  // namespace raksha::frontends::sql

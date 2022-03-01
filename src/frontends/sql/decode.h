@@ -14,27 +14,27 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#ifndef SRC_IR_PROTO_SQL_MVP_DECODE_H_
-#define SRC_IR_PROTO_SQL_MVP_DECODE_H_
+#ifndef SRC_FRONTENDS_SQL_DECODE_H_
+#define SRC_FRONTENDS_SQL_DECODE_H_
 
 #include <vector>
 
 #include "src/ir/value.h"
-#include "src/ir/proto/sql/decoder_context.h"
-#include "src/ir/proto/sql/sql_ir.pb.h"
+#include "src/frontends/sql/decoder_context.h"
+#include "src/frontends/sql/sql_ir.pb.h"
 
-namespace raksha::ir::proto::sql {
+namespace raksha::frontends::sql {
 
-const Value &DecodeExpression(
+const ir::Value &DecodeExpression(
     const Expression &expr, DecoderContext &decoder_context);
 
-Value DecodeSourceTableColumn(
+ir::Value DecodeSourceTableColumn(
     const SourceTableColumn &source_table_column,
     DecoderContext &decoder_context);
 
-Value DecodeLiteral(
+ir::Value DecodeLiteral(
     const Literal &literal, DecoderContext &decoder_context);
 
-}  // namespace raksha::ir::proto::sql
+}  // namespace raksha::frontends::sql
 
-#endif  // SRC_IR_PROTO_SQL_MVP_DECODE_H_
+#endif  // SRC_FRONTENDS_SQL_DECODE_H_
