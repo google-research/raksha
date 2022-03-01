@@ -44,9 +44,10 @@ edge("R.handle1", "R.P3#2.bar").
 
 
 // Authorization Logic
-
-.decl grounded_dummy(x0: symbol)
-.decl says_canSay_ownsTag(x0: symbol, x1: symbol, x2: symbol, x3: symbol)
+.type DummyType <: symbol
+.decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
+.decl says_canSay_ownsTag(speaker: Principal, delegatee1: Principal, prin: Principal, tag: Tag)
+.decl grounded_dummy(dummy_param: DummyType)
 says_ownsTag("EndUser", "P1", "userSelection") :- says_ownsTag(x___1, "P1", "userSelection"), says_canSay_ownsTag("EndUser", x___1, "P1", "userSelection").
 says_canSay_ownsTag("EndUser", "P1", "P1", "userSelection").
 says_ownsTag("P1", "P1", "userSelection").

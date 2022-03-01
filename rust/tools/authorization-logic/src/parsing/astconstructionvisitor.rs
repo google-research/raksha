@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Raksha Authors
+ * Copyright 2021 Google LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,11 +48,13 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
         Some(_) => Sign::Negated,
         None => Sign::Positive 
     };
+    // Note that ID_all() in the generated antlr-rust code is buggy
+    // (because all {LEX_RULE}_all() generations are buggy),
+    // so rather than using a more idomatic iterator, "while Some(...)" is
+    // used here.
     let name_ = ctx.ID(0).unwrap().get_text();
     let mut args_ = Vec::new();
     let mut idx = 1;
-    // Note that ID_all() in the generated antlr-rust code is buggy,
-    // so rather a more idomatic iterator, "while Some(...)" is used here.
     while let Some(id) = ctx.ID(idx) {
         args_.push(id.get_text());
         idx += 1;
@@ -226,8 +228,59 @@ fn construct_import(ctx: &ImportAssertionContext) -> AstImport {
     }
 }
 
+fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
+    match ctx {
+        AuthLogicTypeContextAll::NumberTypeContext(ctx_prime) =>
+            AstType::NumberType,
+        AuthLogicTypeContextAll::PrincipalTypeContext(ctx_prime) =>
+            AstType::PrincipalType,
+        AuthLogicTypeContextAll::CustomTypeContext(ctx_prime) => {
+            AstType::CustomType { type_name: ctx_prime.ID().unwrap().get_text() }
+        }
+        _ => {
+            panic!("construct_type tried to build error");
+        }
+    }
+}
+
+fn construct_relation_declaration(ctx: &RelationDeclarationContext) -> 
+        AstRelationDeclaration {
+    let predicate_name_ = ctx.ID(0).unwrap().get_text();
+    // Note that ID_all() in the generated antlr-rust code is buggy,
+    // (because all {LEX_RULE}_all() generations are buggy)
+    // so rather than using a more idomatic iterator, "while Some(...)" is
+    // used to populate this vector.
+    let mut arg_names = Vec::new();
+    let mut idx = 1;
+    while let Some(param_name) = ctx.ID(idx) {
+        arg_names.push(param_name.get_text());
+        idx += 1;
+    }
+    let types : Vec<AstType> = ctx.authLogicType_all()
+        .iter()
+        .map(|s| construct_type(s))
+        .collect();
+    let is_attribute_ = match ctx.ATTRIBUTE() {
+        Some(_) => true,
+        None => false
+    };
+    AstRelationDeclaration {
+        predicate_name: predicate_name_,
+        is_attribute: is_attribute_,
+        arg_typings: arg_names
+            .into_iter()
+            .zip(types.into_iter())
+            .collect()
+    }
+}
+
 fn construct_program(ctx: &ProgramContext) -> AstProgram {
     AstProgram {
+        relation_declarations: ctx
+            .relationDeclaration_all()
+            .iter()
+            .map(|t| construct_relation_declaration(t))
+            .collect(),
         assertions: ctx
             .saysAssertion_all()
             .iter()
