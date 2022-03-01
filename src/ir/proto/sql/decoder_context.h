@@ -31,7 +31,14 @@ namespace raksha::ir::proto::sql {
 // inappropriate to put in IRContext.
 class DecoderContext {
  public:
-  DecoderContext(IRContext &ir_context) : ir_context_(ir_context) {}
+  static constexpr absl::string_view kSqlLiteralOpName = "sql.literal";
+  static constexpr absl::string_view kLiteralStrAttrName = "literal_str";
+  static constexpr absl::string_view kDefaultOutputName = "out";
+
+  DecoderContext(IRContext &ir_context)
+    : ir_context_(ir_context),
+      literal_operator_(ir_context_.RegisterOperator(
+          std::make_unique<Operator>(kSqlLiteralOpName))) { }
 
   // Get the `Storage` with the given name, create it otherwise. This is a
   // bit of a hack that we use here because SQL buries its global context
@@ -46,10 +53,26 @@ class DecoderContext {
           storage_name, ir_context_.type_factory().MakePrimitiveType()));
   }
 
+  // Create an `Operation` providing the literal value indicated by
+  // `literal_str`. This shall create an `Operation` of `Operator` "sql.literal"
+  // and with the literal value indicated in a `literal_str` attribute.
+  const Operation &MakeLiteralOperation(absl::string_view literal_str) {
+    operations_.push_back(std::make_unique<Operation>(
+        /*parent=*/nullptr,
+        literal_operator_,
+        NamedAttributeMap{
+          {std::string(kLiteralStrAttrName),
+           StringAttribute::Create(literal_str)}},
+        NamedValueMap{}));
+    return *operations_.back();
+  }
+
   IRContext &ir_context() { return ir_context_; }
 
  private:
   IRContext &ir_context_;
+  const Operator &literal_operator_;
+  std::vector<std::unique_ptr<Operation>> operations_;
 };
 
 }  // namespace raksha::ir::proto::sql

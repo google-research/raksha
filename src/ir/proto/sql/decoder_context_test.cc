@@ -20,7 +20,16 @@
 
 namespace raksha::ir::proto::sql {
 
-TEST(IRContextTest, GetOrCreateStorageIdempotence) {
+using testing::Eq;
+using testing::IsNull;
+using testing::IsEmpty;
+using testing::Pair;
+using testing::ResultOf;
+using testing::TestWithParam;
+using testing::UnorderedElementsAre;
+using testing::Values;
+
+TEST(DecoderContextTest, GetOrCreateStorageIdempotence) {
   IRContext context;
   DecoderContext decoder_context(context);
   const Storage &store1 = decoder_context.GetOrCreateStorage("Table1");
@@ -37,5 +46,33 @@ TEST(IRContextTest, GetOrCreateStorageIdempotence) {
   EXPECT_EQ(store2.type().type_base().kind(),
             types::TypeBase::Kind::kPrimitive);
 }
+
+class LiteralOpTest : public TestWithParam<absl::string_view> {};
+
+TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
+  IRContext context;
+  DecoderContext decoder_context(context);
+
+  absl::string_view literal_str = GetParam();
+  const Operation &lit_op = decoder_context.MakeLiteralOperation(literal_str);
+
+  EXPECT_THAT(lit_op.parent(), IsNull());
+  EXPECT_THAT(lit_op.impl_module(), IsNull());
+  EXPECT_THAT(lit_op.inputs(), IsEmpty());
+  EXPECT_EQ(lit_op.op().name(), DecoderContext::kSqlLiteralOpName);
+
+  // Check that "attributes" is exactly "literal_str" associated with the
+  // parameter value.
+  EXPECT_THAT(
+     lit_op.attributes(),
+     UnorderedElementsAre(
+       Pair(DecoderContext::kLiteralStrAttrName,
+            ResultOf([](const Attribute &attr) { return attr->ToString(); },
+                     Eq(literal_str)))));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    LiteralOpTest, LiteralOpTest,
+    Values("val1", "1000", "3.1415", "true", ""));
 
 }  // namespace raksha::ir::proto::sql

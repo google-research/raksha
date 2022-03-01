@@ -15,6 +15,7 @@
 //----------------------------------------------------------------------------
 
 #include "src/ir/proto/sql/decode.h"
+#include "src/ir/proto/sql/decoder_context.h"
 
 namespace raksha::ir::proto::sql {
 
@@ -33,6 +34,15 @@ Value DecodeSourceTableColumn(
   // non-trivial fashion.
   return Value(value::StoredValue(
       decoder_context.GetOrCreateStorage(column_path)));
+}
+
+Value DecodeLiteral(
+    const Literal &literal, DecoderContext &decoder_context) {
+  const absl::string_view literal_str = literal.literal_str();
+  CHECK(!literal_str.empty()) << "required field literal_str was empty.";
+  return Value(value::OperationResult(
+      decoder_context.MakeLiteralOperation(literal_str),
+      DecoderContext::kDefaultOutputName));
 }
 
 }  // namespace raksha::ir::proto::sql
