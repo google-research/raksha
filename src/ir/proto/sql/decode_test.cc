@@ -91,7 +91,7 @@ TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
   const Operation &operation = op_result->operation();
   EXPECT_THAT(operation.parent(), IsNull());
   EXPECT_THAT(operation.impl_module(), IsNull());
-  EXPECT_EQ(operation.op().name(), "sql.literal");
+  EXPECT_EQ(operation.op().name(), DecoderContext::kLiteralStrAttrName);
   EXPECT_THAT(operation.inputs(), IsEmpty());
 
   // Check that attributes have exactly the name given.
@@ -113,49 +113,6 @@ absl::string_view kLiteralStrs[] = {
 
 INSTANTIATE_TEST_SUITE_P(
     DecodeLiteralTest, DecodeLiteralTest, ValuesIn(kLiteralStrs));
-
-class DecodeLiteralTest :
-    public testing::TestWithParam<absl::string_view> {};
-
-TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
-  absl::string_view literal_str = GetParam();
-  std::string textproto = absl::StrFormat(R"(literal_str: "%s")", literal_str);
-  Literal literal_proto;
-
-  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
-      textproto, &literal_proto))
-      << "Could not decode Literal";
-
-  IRContext ir_context;
-  DecoderContext decoder_context(ir_context);
-  ir::Value result = DecodeLiteral(literal_proto, decoder_context);
-  const value::OperationResult *op_result = result.If<value::OperationResult>();
-  EXPECT_THAT(op_result, testing::NotNull());
-  EXPECT_EQ(op_result->name(), "out");
-  const Operation &operation = op_result->operation();
-  EXPECT_THAT(operation.parent(), testing::IsNull());
-  EXPECT_THAT(operation.impl_module(), testing::IsNull());
-  EXPECT_EQ(operation.op().name(), "sql.literal");
-  EXPECT_THAT(operation.inputs(), testing::IsEmpty());
-
-  // Check that attributes have exactly the name given.
-  const NamedAttributeMap attributes = operation.attributes();
-  EXPECT_EQ(attributes.size(), 1);
-  auto find_result = attributes.find("literal_str");
-  EXPECT_NE(find_result, attributes.end());
-  EXPECT_EQ(find_result->second->ToString(), literal_str);
-}
-
-absl::string_view kLiteralStrs[] = {
-    "100",
-    "0",
-    "3.1415",
-    "hello world!",
-    "null",
-};
-
-INSTANTIATE_TEST_SUITE_P(
-    DecodeLiteralTest, DecodeLiteralTest, testing::ValuesIn(kLiteralStrs));
 
 TEST(DecodeSourceTableColumnExprTest, DecodeSourceTableColumnExprTest) {
   const std::string kTextproto =
