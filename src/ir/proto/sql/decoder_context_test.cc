@@ -67,7 +67,8 @@ TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
      lit_op.attributes(),
      UnorderedElementsAre(
        Pair(DecoderContext::kLiteralStrAttrName,
-            ResultOf(&StringAttribute::ToString, Eq(literal_str)))));
+            ResultOf([](const Attribute &attr) { return attr->ToString(); },
+                     Eq(literal_str)))));
 }
 
 INSTANTIATE_TEST_SUITE_P(

@@ -98,7 +98,8 @@ TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
    operation.attributes(),
    UnorderedElementsAre(
      Pair(DecoderContext::kLiteralStrAttrName,
-          ResultOf(&StringAttribute::ToString, Eq(literal_str)))));
+          ResultOf([](Attribute attr) { return attr->ToString(); },
+                   Eq(literal_str)))));
 }
 
 absl::string_view kLiteralStrs[] = {

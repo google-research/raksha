@@ -64,6 +64,8 @@ class IRPrinterTest : public testing::TestWithParam<ToStringVariant> {
         return out.str();
       }
     }
+    // Placate compiler by marking path as unreachable.
+    CHECK(false) << "Unreachable!";
   }
 
  private:
