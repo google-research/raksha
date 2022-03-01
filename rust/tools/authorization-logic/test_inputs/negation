@@ -1,3 +1,7 @@
+.decl foo(x : symbol)
+.decl bar(x : symbol)
+.decl baz(x : symbol)
+
 "TestPrin" says foo("x") :- !bar("x").
 "TestPrin" says foo("y") :- !bar("y").
 "TestPrin" says baz("x") :- bar("x").
