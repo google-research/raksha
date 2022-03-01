@@ -138,6 +138,7 @@ cc_test(
     data = [":test_arcs_proto"],
     deps = [
         ":particle_spec",
+        ":types",
         "//src/common/testing:gtest",
         "//src/ir:ir_printer",
         "//src/test_utils:utils",
