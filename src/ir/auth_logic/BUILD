@@ -19,6 +19,10 @@ licenses(["notice"])
 
 package(default_visibility = ["//src:__subpackages__"])
 
+load("@rules_antlr//antlr:antlr4.bzl", "antlr")
+
+load("//build_defs:antlr.bzl", "authorization_logic_datalog_generator", "antlr_cc_library")
+
 cc_library(
     name = "ast",
     hdrs = [
@@ -90,3 +94,58 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
+
+#antlr
+
+antlr(
+        name = "AuthLogic",
+        srcs = ["AuthLogic.g4"],
+        language = "Cpp",
+        listener = True,
+        visitor = True,
+        package = "",
+        
+    )
+    
+cc_library(
+        name =  "AuthLogic_cc_parser",
+        srcs = ["AuthLogic"],
+        copts = ["-fexceptions",],
+        linkopts = ["-fexceptions",],
+        features = ["-use_header_modules"],
+        deps = [
+            "AuthLogic",
+            "@antlr4_runtimes//:cpp",
+        ],
+        alwayslink = True,
+        linkstatic = 1,
+    )
+
+cc_library(
+    name = "ast_construction",
+    srcs = ["ast_construction.cc"],
+    copts = ["-fexceptions",],
+    deps = ["@antlr4_runtimes//:cpp",
+            "//src/ir/auth_logic:ast",
+            "//src/ir/auth_logic:AuthLogic_cc_parser",
+            "//src/ir/datalog:program",
+            "//src/utils:overloaded",
+            "//src/utils:map_iter",
+            "//src/utils:move_append",
+    ],
+    hdrs = ["ast_construction.h"]
+
+)
+
+# cc_binary(
+#     name = "generate_auth_datalog_program",
+#     srcs = ["generate_auth_datalog_program.cc"],
+#     deps = ["@absl//absl/flags:flag",
+#             "@absl//absl/flags:parse",
+#             "//src/common/logging",
+#             "//src/ir/auth_logic:ast_construction",
+#             "//src/ir/auth_logic:ast",
+#            ],
+# )
+
+# authorization_logic_datalog_generator() #default test for canActAs. 
