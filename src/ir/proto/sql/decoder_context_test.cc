@@ -79,6 +79,14 @@ TEST(DecoderContextTest, DecoderContextRegisterAndGetValueTest) {
   const Value &get_value2 = decoder_context.GetValue(2);
   EXPECT_EQ(&get_value1, &value1);
   EXPECT_EQ(&get_value2, &value2);
+}
+
+TEST(DecoderContextDeathTest, DecoderContextValueRegistryDeathTest) {
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+
+  decoder_context.RegisterValue(1, Value(value::Any()));
+  decoder_context.RegisterValue(2, Value(value::Any()));
 
   EXPECT_DEATH({ decoder_context.RegisterValue(1, Value(value::Any())); },
                "id_to_value map has more than one value associated with the id "
