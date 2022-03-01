@@ -30,6 +30,23 @@
 //     "stay_on" -- the microphone must stay on even if this goes agaist the 
 //     preferences of some users in the room
 
+.decl attribute hasPrivacyPreference(tag : Tag, preference : Preference)
+.decl attribute setsPrivacyResolution(tag : Tag, resolution : Resolution)
+.decl attribute ownsDevice(device : Device)
+
+.decl ownsTag(prin : Principal, tag : Tag)
+.decl may(prin : Principal, action : Action, tag : Tag)
+.decl will(action : Action, path : AccessPath)
+.decl downgrades(path : AccessPath, tag : Tag)
+.decl allowTranscription(user : Principal)
+.decl overridePreferences(tag : Tag)
+
+.decl isAction(action : Action)
+.decl isTag(tag : Tag)
+.decl isPrincipal(prin : Principal)
+.decl isPath(path : AccessPath)
+.decl isUserSpeech(speech : UserSpeech)
+
 "UserA" says {
   ownsTag("UserA", "UserA_userSpeech").
   ownsTag("UserA", "UserA_speechTranscript").

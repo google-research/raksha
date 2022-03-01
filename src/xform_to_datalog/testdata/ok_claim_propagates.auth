@@ -1,2 +1,3 @@
+.decl ownsTag(prin : Principal, tag : Tag)
 "EndUser" says "P1" canSay ownsTag("P1", "userSelection").
 "P1" says ownsTag("P1", "userSelection").

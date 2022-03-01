@@ -1,3 +1,10 @@
+.decl unconditionallyDelegatedFact(x : symbol)
+.decl conditionallyDelegated(x : symbol)
+.decl someCondition(x : symbol)
+.decl anotherCondition(x : symbol)
+.decl undelegatedFact(x : symbol)
+.decl grounded(x : symbol)
+
 // prin1 delegates to prin2 about uDF for any variable
 "prin1" says "prin2" canSay unconditionallyDelegatedFact(x) :-
     grounded(x).

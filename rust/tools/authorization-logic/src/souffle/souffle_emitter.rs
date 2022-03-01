@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Raksha Authors
+ * Copyright 2021 Google LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,114 +17,105 @@
 use crate::{ast::*, souffle::datalog_ir::*};
 use std::collections::HashSet;
 
-pub struct SouffleEmitter {
-    // This is a set of predicates that need to be declared. This set is
-    // populated by side effect while traversing the program body.
-    decls: HashSet<AstPredicate>,
+/// Produces Souffle code as a `String` when given a Datalog IR (DLIR) program.
+pub fn emit_program(p: &DLIRProgram, decl_skip: &Option<Vec<String>>) -> String {
+    vec![ 
+        emit_type_declarations(p, 
+                decl_skip.as_ref().unwrap_or(&Vec::new())),
+        emit_relation_declarations(p,
+                decl_skip.as_ref().unwrap_or(&Vec::new())),
+        emit_program_body(p),
+        emit_outputs(p)
+    ].join("\n")
 }
 
-impl SouffleEmitter {
-    /// Produces Souffle code as a `String` when given a Datalog IR (DLIR) program.
-    pub fn emit_program(p: &DLIRProgram, decl_skip: &Option<Vec<String>>) -> String {
-        let mut emitter = SouffleEmitter::new();
-        // It is important to generate the body first in this case
-        // because the declarations are populated by side-effect while
-        // generating the body.
-        let body = emitter.emit_program_body(p);
-        let outputs = emitter.emit_outputs(p);
-        let decls = emitter.emit_declarations(
-            decl_skip.as_ref().unwrap_or(&Vec::new()));
-        vec![decls, body, outputs].join("\n")
+fn emit_type(auth_logic_type: &AstType) -> String {
+    match auth_logic_type {
+        AstType::NumberType => "number".to_string(),
+        AstType::PrincipalType => "Principal".to_string(),
+        AstType::CustomType{ type_name } => type_name.clone()
     }
+}
 
-    fn new() -> SouffleEmitter {
-        SouffleEmitter {
-            decls: HashSet::new(),
-        }
-    }
-
-    // This function produces a normalized version of predicates to
-    // be used when generating declarations of the predicates. It replaces
-    // argument names with generic numbered ones. It is applied
-    // to predicates before they are added to the set of declarations so that
-    // there are no duplicate delcarations (which would otherwise happen
-    // whenever a predicate is referenced more than once with different
-    // arguments).
-    // To prevent instances of negated and non-negated uses of the predicate 
-    // from generating two declarations, the sign here is always true.
-    fn pred_to_declaration(p: &AstPredicate) -> AstPredicate {
-        AstPredicate {
-            sign: Sign::Positive,
-            name: p.name.clone(),
-            args: (0..p.args.len())
-                .map(|i| String::from("x") + &i.to_string())
-                .collect(),
-        }
-    }
-
-    fn emit_pred(&mut self, p: &AstPredicate) -> String {
-        let decl = SouffleEmitter::pred_to_declaration(p);
-        self.decls.insert(decl);
-        let neg = match p.sign {
-            Sign::Positive => "",
-            Negative => "!"
-        };
-        format!("{}{}({})", neg, &p.name, p.args.join(", "))
-    }
-
-    fn emit_assertion(&mut self, a: &DLIRAssertion) -> String {
-        match a {
-            DLIRAssertion::DLIRFactAssertion { p } => self.emit_pred(p) + ".",
-            DLIRAssertion::DLIRCondAssertion { lhs, rhs } => {
-                format!(
-                    "{} :- {}.",
-                    self.emit_pred(lhs),
-                    rhs.iter()
-                        .map(|ast_pred| self.emit_pred(ast_pred))
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                )
-            }
-        }
-    }
-
-    fn emit_program_body(&mut self, p: &DLIRProgram) -> String {
-        p.assertions
+fn emit_decl(relation_declaration: &AstRelationDeclaration) -> String {
+    format!(".decl {}({})", relation_declaration.predicate_name,
+        relation_declaration.arg_typings
             .iter()
-            .map(|x| self.emit_assertion(&x))
+            .map(|(param, al_type)|
+                 format!("{}: {}", param, emit_type(al_type)))
             .collect::<Vec<_>>()
-            .join("\n")
-    }
+            .join(", "))
+}
 
-    fn emit_decl(pred: &AstPredicate) -> String {
-        format!(
-            ".decl {}({})",
-            &pred.name,
-            &pred
-                .args
-                .iter()
-                .map(|x| format!("{}: symbol", x))
-                .collect::<Vec<_>>()
-                .join(", ")
-        )
-    }
+fn emit_pred(p: &AstPredicate) -> String {
+    let neg = match p.sign {
+        Sign::Positive => "",
+        Negative => "!"
+    };
+    format!("{}{}({})", neg, &p.name, p.args.join(", "))
+}
 
-    fn emit_declarations(&self, decl_skip: &Vec<String>) -> String {
-        let mut decls = self.decls
-            .iter()
-            .map(|x| 
-                 if decl_skip.contains(&x.name)
-                { "".to_string() } else { SouffleEmitter::emit_decl(x) })
-            .collect::<Vec<_>>();
-        decls.sort();
-        decls.join("\n")
+fn emit_assertion(a: &DLIRAssertion) -> String {
+    match a {
+        DLIRAssertion::DLIRFactAssertion { p } => emit_pred(p) + ".",
+        DLIRAssertion::DLIRCondAssertion { lhs, rhs } => {
+            format!(
+                "{} :- {}.",
+                emit_pred(lhs),
+                rhs.iter()
+                    .map(|ast_pred| emit_pred(ast_pred))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+        }
     }
+}
 
-    fn emit_outputs(&self, p: &DLIRProgram) -> String {
-        p.outputs
-            .iter()
-            .map(|o| String::from(".output ") + &o)
-            .collect::<Vec<String>>()
-            .join("\n")
-    }
+fn emit_program_body(p: &DLIRProgram) -> String {
+    p.assertions
+        .iter()
+        .map(|x| emit_assertion(&x))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn emit_type_declarations(p: &DLIRProgram, decl_skip: &Vec<String>) -> String {
+    let mut type_names : Vec<String> = p.relation_declarations.iter()
+        .map(|rel_decl| rel_decl.arg_typings.iter()
+             .map(|(parameter, type_)| type_))
+        .flatten()
+        .filter_map(|type_| match type_ {
+            AstType::CustomType { type_name } => Some(type_name.clone()),
+            _ => None
+        })
+        .collect();
+    type_names.push("Principal".to_string());
+
+    let type_names_filtered = type_names.iter().filter(|type_name| {
+        !decl_skip.contains(type_name) &&
+        !(**type_name == "symbol".to_string())
+    }).collect::<HashSet<_>>();
+
+    type_names_filtered.iter()
+        .map(|type_| format!(".type {} <: symbol", type_))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn emit_relation_declarations(p: &DLIRProgram, decl_skip: &Vec<String>)
+        -> String {
+    p.relation_declarations
+        .iter()
+        .filter(|x| !decl_skip.contains(&x.predicate_name))
+        .map(|x| emit_decl(x))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn emit_outputs(p: &DLIRProgram) -> String {
+    p.outputs
+        .iter()
+        .map(|o| String::from(".output ") + &o)
+        .collect::<Vec<String>>()
+        .join("\n")
 }

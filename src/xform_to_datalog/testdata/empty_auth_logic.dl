@@ -1,2 +1,4 @@
-.decl grounded_dummy(x0: symbol)
+.type DummyType <: symbol
+.decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
+.decl grounded_dummy(dummy_param: DummyType)
 grounded_dummy("dummy_var").
