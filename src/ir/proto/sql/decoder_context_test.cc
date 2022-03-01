@@ -20,7 +20,7 @@
 
 namespace raksha::ir::proto::sql {
 
-TEST(IRContextTest, GetOrCreateStorageIdempotence) {
+TEST(DecoderContextTest, GetOrCreateStorageIdempotence) {
   IRContext context;
   DecoderContext decoder_context(context);
   const Storage &store1 = decoder_context.GetOrCreateStorage("Table1");
@@ -38,6 +38,33 @@ TEST(IRContextTest, GetOrCreateStorageIdempotence) {
             types::TypeBase::Kind::kPrimitive);
 }
 
+class LiteralOpTest : public testing::TestWithParam<absl::string_view> {};
+
+TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
+  IRContext context;
+  DecoderContext decoder_context(context);
+
+  absl::string_view literal_str = GetParam();
+  const Operation &lit_op = decoder_context.MakeLiteralOperation(literal_str);
+
+  EXPECT_THAT(lit_op.parent(), testing::IsNull());
+  EXPECT_THAT(lit_op.impl_module(), testing::IsNull());
+  EXPECT_THAT(lit_op.inputs(), testing::IsEmpty());
+  EXPECT_EQ(lit_op.op().name(), "sql.literal");
+
+  // Check that "attributes" is exactly "literal_str" associated with the
+  // parameter value.
+  const NamedAttributeMap &attributes = lit_op.attributes();
+  EXPECT_EQ(attributes.size(), 1);
+  auto find_result = attributes.find("literal_str");
+  EXPECT_NE(find_result, attributes.end());
+  EXPECT_EQ(find_result->second->ToString(), literal_str);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    LiteralOpTest, LiteralOpTest,
+    testing::Values("val1", "1000", "3.1415", "true", ""));
+
 TEST(DecoderContextTest, DecoderContextRegisterAndGetValueTest) {
   IRContext ir_context;
   DecoderContext decoder_context(ir_context);
@@ -52,6 +79,14 @@ TEST(DecoderContextTest, DecoderContextRegisterAndGetValueTest) {
   const Value &get_value2 = decoder_context.GetValue(2);
   EXPECT_EQ(&get_value1, &value1);
   EXPECT_EQ(&get_value2, &value2);
+}
+
+TEST(DecoderContextDeathTest, DecoderContextValueRegistryDeathTest) {
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+
+  decoder_context.RegisterValue(1, Value(value::Any()));
+  decoder_context.RegisterValue(2, Value(value::Any()));
 
   EXPECT_DEATH({ decoder_context.RegisterValue(1, Value(value::Any())); },
                "id_to_value map has more than one value associated with the id "
@@ -62,6 +97,5 @@ TEST(DecoderContextTest, DecoderContextRegisterAndGetValueTest) {
   EXPECT_DEATH({ decoder_context.GetValue(3); },
                "Could not find a value with id 3.");
 }
-
 
 }  // namespace raksha::ir::proto::sql

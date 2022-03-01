@@ -107,6 +107,27 @@ cc_test(
 )
 
 cc_library(
+    name = "ir_printer",
+    hdrs = ["ir_printer.h"],
+    deps = [
+        ":ir_traversing_visitor",
+        ":module",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "ir_printer_test",
+    srcs = ["ir_printer_test.cc"],
+    deps = [
+        ":block_builder",
+        ":ir_printer",
+        ":module",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
     name = "ir_traversing_visitor",
     hdrs = ["ir_traversing_visitor.h"],
     deps = [":module"],
@@ -145,6 +166,7 @@ cc_test(
     srcs = ["operation_test.cc"],
     deps = [
         ":attribute",
+        ":ir_printer",
         ":module",
         ":value",
         "//src/common/testing:gtest",
@@ -154,7 +176,6 @@ cc_test(
 
 cc_library(
     name = "module",
-    srcs = ["operation.cc"],
     hdrs = [
         "ir_visitor.h",
         "module.h",
