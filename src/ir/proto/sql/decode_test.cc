@@ -91,7 +91,7 @@ TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
   const Operation &operation = op_result->operation();
   EXPECT_THAT(operation.parent(), IsNull());
   EXPECT_THAT(operation.impl_module(), IsNull());
-  EXPECT_EQ(operation.op().name(), DecoderContext::kLiteralStrAttrName);
+  EXPECT_EQ(operation.op().name(), DecoderContext::kSqlLiteralOpName);
   EXPECT_THAT(operation.inputs(), IsEmpty());
 
   // Check that attributes have exactly the name given.
@@ -141,12 +141,22 @@ TEST(DecodeLiteralExprTest, DecodeLiteralExprTest) {
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(kTextproto, &expr))
     << "Could not decode expr";
   const ir::Value &result = DecodeExpression(expr, decoder_context);
-  const value::StoredValue *stored_value = result.If<value::StoredValue>();
-  EXPECT_THAT(stored_value, testing::NotNull());
-  const Storage &storage = stored_value->storage();
-  EXPECT_EQ(storage.name(), "literal:9");
-  EXPECT_EQ(storage.type().type_base().kind(),
-            types::TypeBase::Kind::kPrimitive);
+  const value::OperationResult *operation_result =
+      result.If<value::OperationResult>();
+  EXPECT_THAT(operation_result, testing::NotNull());
+  const Operation &operation = operation_result->operation();
+  EXPECT_THAT(operation.parent(), IsNull());
+  EXPECT_THAT(operation.impl_module(), IsNull());
+  EXPECT_EQ(operation.op().name(), DecoderContext::kSqlLiteralOpName);
+  EXPECT_THAT(operation.inputs(), IsEmpty());
+
+  // Check that attributes have exactly the name given.
+  EXPECT_THAT(
+   operation.attributes(),
+   UnorderedElementsAre(
+     Pair(DecoderContext::kLiteralStrAttrName,
+          ResultOf([](Attribute attr) { return attr->ToString(); },
+                   Eq("9")))));
   EXPECT_EQ(&result, &decoder_context.GetValue(5));
 }
 
