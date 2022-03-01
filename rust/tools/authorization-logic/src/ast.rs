@@ -105,8 +105,23 @@ pub struct AstImport {
     pub principal: AstPrincipal,
 }
 
+#[derive(Debug, Hash, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum AstType { 
+    NumberType, 
+    PrincipalType, 
+    CustomType { type_name: String }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AstRelationDeclaration {
+    pub predicate_name: String,
+    pub is_attribute: bool,
+    pub arg_typings: Vec<(String, AstType)>
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AstProgram {
+    pub relation_declarations: Vec<AstRelationDeclaration>,
     pub assertions: Vec<AstSaysAssertion>,
     pub queries: Vec<AstQuery>,
     pub imports: Vec<AstImport>,

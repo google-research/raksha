@@ -48,6 +48,11 @@
 // a downgrade by making set of tags on the access path "lower" in the order.
 .decl removeTag(path: AccessPath, owner: Principal, tag: Tag)
 
+// These are needed for the raksha/auth-logic interface because the other parts 
+// of raksha populate these without speakers
+.decl says_isAccessPath(prin: Principal, path: AccessPath)
+.decl says_isTag(prin: Principal, tag: Tag)
+.decl says_isPrincipal(prin1: Principal, prin2: Principal)
 
 // Manifests can produce base facts of this form, where usually the principal
 // is a particle (and this fact is entered by a code reviewer with no knowledge
@@ -144,6 +149,13 @@ isAccessPath(path) :- says_hasTag(_, path, _, _).
 
 // Symbols used in hasTag or mayHaveTag are tags
 isTag(tag) :- says_hasTag(_, _, _, tag).
+
+// These are needed for the raksha/auth-logic interface because the other parts 
+// of raksha populate these without speakers
+says_isAccessPath(principal, path) :- isPrincipal(principal), isAccessPath(path).
+says_isTag(principal, tag) :- isPrincipal(principal), isTag(tag).
+says_isPrincipal(principal1, principal2) :- isPrincipal(principal1),
+                                              isPrincipal(principal2).
 
 // A pair of (base, member) is in this set if the base access path is a non-trivial subpath of the
 // member access path.

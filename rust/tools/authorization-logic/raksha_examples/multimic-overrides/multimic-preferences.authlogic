@@ -1,3 +1,25 @@
+.decl attribute hasPrivacyPreference(subject : symbol, pref : symbol)
+.decl attribute setsPrivacyResolution(subject : symbol, resolution_strategy : symbol)
+.decl attribute may(action : symbol, tag : symbol)
+.decl attribute ownsDevice(device_name : symbol)
+
+.decl overridePreferences(subject : symbol)
+.decl will(action : symbol, tag : symbol)
+.decl hasTag(x : symbol, y : symbol)
+.decl ownsTag(owner : Principal, y : symbol)
+.decl downgrades(path : symbol, tag : symbol)
+.decl allowTranscription(p : Principal)
+
+.decl isAction(action : symbol)
+.decl isPath(path : symbol)
+.decl isTag(tag : symbol)
+.decl isPrincipal(p : Principal)
+.decl isSpeechTranscript(x : symbol)
+.decl isUserTranscript(x : symbol)
+.decl isPrivacyPreference(pref : symbol)
+.decl isPrivacyResolution(resolution : symbol)
+.decl isUserSpeech(x : symbol)
+
 // When "UserX" enters the room, a runtime on the user's
 // mobile device sends a packet to the microphone which contains the following
 // facts serialized (and with relevant signatures):
