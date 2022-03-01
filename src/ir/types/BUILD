@@ -35,6 +35,7 @@ cc_library(
     deps = [
         "//src/common/logging",
         "//src/ir:access_path",
+        "//src/utils:intrusive_ptr",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/hash",

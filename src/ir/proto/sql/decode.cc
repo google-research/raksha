@@ -38,25 +38,10 @@ Value DecodeSourceTableColumn(
 
 Value DecodeLiteral(
     const Literal &literal, DecoderContext &decoder_context) {
-  const std::string &literal_str = literal.literal_str();
+  const absl::string_view literal_str = literal.literal_str();
   CHECK(!literal_str.empty()) << "required field literal_str was empty.";
-
-  // For now, we are abusing the `Storage` IR node to encode literals. This is
-  // not as crazy as it may initially look: just like a `Storage`, a `Literal`
-  // is a global name that should always return the same value if no
-  // modifications have been made to it. The only difference between a true
-  // `Storage` and a `Literal` is that it is illegal to modify a `Literal`.
-  // This difference is even less important for the SQL verifier we are
-  // currently trying to integrate with, as the SQL verifier considers a
-  // single query upon a table at a time. While this single query is running,
-  // the transactionality guarantees of the database should force the view onto
-  // the table to be constant through the life of that query, making the
-  // columns we are also capturing in `Storage`s constant anyway.
-  //
-  // Prefix the literal string with "literal:" to reduce the chance of a
-  // collision.
-  return Value(value::StoredValue(decoder_context.GetOrCreateStorage(
-      absl::StrCat("literal:", literal_str))));
+  return Value(value::OperationResult(
+      decoder_context.MakeLiteralOperation(literal_str), "out"));
 }
 
 }  // namespace raksha::ir::proto::sql
