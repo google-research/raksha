@@ -17,8 +17,8 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/datalog_print_context.h"
-#include "src/xform_to_datalog/authorization_logic_datalog_facts.h"
 #include "src/test_utils/utils.h"
+#include "src/xform_to_datalog/authorization_logic_datalog_facts.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
 
 namespace raksha::xform_to_datalog {
@@ -27,9 +27,7 @@ namespace raksha::xform_to_datalog {
 // test.
 #ifdef DISABLE_AUTHORIZATION_LOGIC
 
-TEST(Dummy, Dummy) {
-  ASSERT_EQ(1, 1);
-}
+TEST(Dummy, Dummy) { ASSERT_EQ(1, 1); }
 
 #else
 
@@ -37,7 +35,7 @@ const std::string path = "src/xform_to_datalog/testdata";
 
 class DatalogFactsTest
     : public testing::TestWithParam<std::tuple<
-          ManifestDatalogFacts, AuthorizationLogicDatalogFacts, std::string>> {
+          ManifestDatalogFacts, AuthorizationLogicDatalogFacts, std::string> > {
 };
 
 TEST_P(DatalogFactsTest, IncludesManifestFactsWithCorrectPrefixAndSuffix) {
@@ -106,7 +104,9 @@ saysWill(w, x, y) :- says_will(w, x, y).
 
 
 // Authorization Logic
-.decl grounded_dummy(x0: symbol)
+.type DummyType <: symbol
+.decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
+.decl grounded_dummy(dummy_param: DummyType)
 grounded_dummy("dummy_var").
 
 )"),
@@ -154,9 +154,12 @@ says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(o
 
 
 // Authorization Logic
-.decl grounded_dummy(x0: symbol)
-.decl says_cond1(x0: symbol, x1: symbol)
-.decl says_fact1(x0: symbol, x1: symbol)
+.type SomeType <: symbol
+.type DummyType <: symbol
+.decl says_fact1(speaker: Principal, someType: SomeType)
+.decl says_cond1(speaker: Principal, someType: SomeType)
+.decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
+.decl grounded_dummy(dummy_param: DummyType)
 says_fact1("prin1", thing_x) :- says_cond1("prin1", thing_x).
 says_cond1("prin1", "foo").
 grounded_dummy("dummy_var").
