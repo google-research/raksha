@@ -24,8 +24,19 @@
 
 namespace raksha::ir::proto::sql {
 
+using testing::TestWithParam;
+using testing::Eq;
+using testing::IsEmpty;
+using testing::IsNull;
+using testing::NotNull;
+using testing::Pair;
+using testing::ResultOf;
+using testing::UnorderedElementsAre;
+using testing::Values;
+using testing::ValuesIn;
+
 class DecodeSourceTableColumnTest :
-    public testing::TestWithParam<absl::string_view> {};
+    public TestWithParam<absl::string_view> {};
 
 TEST_P(DecodeSourceTableColumnTest, DecodeSourceTableColumnTest) {
   absl::string_view column_path = GetParam();
@@ -40,7 +51,7 @@ TEST_P(DecodeSourceTableColumnTest, DecodeSourceTableColumnTest) {
   DecoderContext decoder_context(ir_context);
   Value result = DecodeSourceTableColumn(col_proto, decoder_context);
   const value::StoredValue *stored_value = result.If<value::StoredValue>();
-  EXPECT_THAT(stored_value, testing::NotNull());
+  EXPECT_THAT(stored_value, NotNull());
   const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), column_path);
   EXPECT_EQ(storage.type().type_base().kind(),
@@ -56,7 +67,51 @@ absl::string_view kSourceColumnPaths[] = {
 
 INSTANTIATE_TEST_SUITE_P(
     DecodeSourceTableColumnTest, DecodeSourceTableColumnTest,
-    testing::ValuesIn(kSourceColumnPaths));
+    ValuesIn(kSourceColumnPaths));
+
+class DecodeLiteralTest :
+    public TestWithParam<absl::string_view> {};
+
+TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
+  absl::string_view literal_str = GetParam();
+  std::string textproto = absl::StrFormat(R"(literal_str: "%s")", literal_str);
+  Literal literal_proto;
+
+  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
+      textproto, &literal_proto))
+      << "Could not decode Literal";
+
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+  ir::Value result = DecodeLiteral(literal_proto, decoder_context);
+  const value::OperationResult *op_result = result.If<value::OperationResult>();
+  EXPECT_THAT(op_result, NotNull());
+  EXPECT_EQ(op_result->name(), "out");
+  const Operation &operation = op_result->operation();
+  EXPECT_THAT(operation.parent(), IsNull());
+  EXPECT_THAT(operation.impl_module(), IsNull());
+  EXPECT_EQ(operation.op().name(), "sql.literal");
+  EXPECT_THAT(operation.inputs(), IsEmpty());
+
+  // Check that attributes have exactly the name given.
+  EXPECT_THAT(
+   operation.attributes(),
+   UnorderedElementsAre(
+     Pair(DecoderContext::kLiteralStrAttrName,
+          ResultOf([](Attribute attr) { return attr->ToString(); },
+                   Eq(literal_str)))));
+}
+
+absl::string_view kLiteralStrs[] = {
+    "100",
+    "0",
+    "3.1415",
+    "hello world!",
+    "null",
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    DecodeLiteralTest, DecodeLiteralTest, ValuesIn(kLiteralStrs));
 
 class DecodeLiteralTest :
     public testing::TestWithParam<absl::string_view> {};

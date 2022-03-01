@@ -20,6 +20,18 @@
 
 namespace raksha::ir::proto::sql {
 
+<<<<<<< HEAD
+=======
+using testing::Eq;
+using testing::IsNull;
+using testing::IsEmpty;
+using testing::Pair;
+using testing::ResultOf;
+using testing::TestWithParam;
+using testing::UnorderedElementsAre;
+using testing::Values;
+
+>>>>>>> 2f4fdb047aa5fadad757889c5d558b079e7590d7
 TEST(DecoderContextTest, GetOrCreateStorageIdempotence) {
   IRContext context;
   DecoderContext decoder_context(context);
@@ -38,7 +50,11 @@ TEST(DecoderContextTest, GetOrCreateStorageIdempotence) {
             types::TypeBase::Kind::kPrimitive);
 }
 
+<<<<<<< HEAD
 class LiteralOpTest : public testing::TestWithParam<absl::string_view> {};
+=======
+class LiteralOpTest : public TestWithParam<absl::string_view> {};
+>>>>>>> 2f4fdb047aa5fadad757889c5d558b079e7590d7
 
 TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
   IRContext context;
@@ -47,6 +63,7 @@ TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
   absl::string_view literal_str = GetParam();
   const Operation &lit_op = decoder_context.MakeLiteralOperation(literal_str);
 
+<<<<<<< HEAD
   EXPECT_THAT(lit_op.parent(), testing::IsNull());
   EXPECT_THAT(lit_op.impl_module(), testing::IsNull());
   EXPECT_THAT(lit_op.inputs(), testing::IsEmpty());
@@ -59,10 +76,26 @@ TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
   auto find_result = attributes.find("literal_str");
   EXPECT_NE(find_result, attributes.end());
   EXPECT_EQ(find_result->second->ToString(), literal_str);
+=======
+  EXPECT_THAT(lit_op.parent(), IsNull());
+  EXPECT_THAT(lit_op.impl_module(), IsNull());
+  EXPECT_THAT(lit_op.inputs(), IsEmpty());
+  EXPECT_EQ(lit_op.op().name(), DecoderContext::kSqlLiteralOpName);
+
+  // Check that "attributes" is exactly "literal_str" associated with the
+  // parameter value.
+  EXPECT_THAT(
+     lit_op.attributes(),
+     UnorderedElementsAre(
+       Pair(DecoderContext::kLiteralStrAttrName,
+            ResultOf([](const Attribute &attr) { return attr->ToString(); },
+                     Eq(literal_str)))));
+>>>>>>> 2f4fdb047aa5fadad757889c5d558b079e7590d7
 }
 
 INSTANTIATE_TEST_SUITE_P(
     LiteralOpTest, LiteralOpTest,
+<<<<<<< HEAD
     testing::Values("val1", "1000", "3.1415", "true", ""));
 
 TEST(DecoderContextTest, DecoderContextRegisterAndGetValueTest) {
@@ -97,5 +130,8 @@ TEST(DecoderContextDeathTest, DecoderContextValueRegistryDeathTest) {
   EXPECT_DEATH({ decoder_context.GetValue(3); },
                "Could not find a value with id 3.");
 }
+=======
+    Values("val1", "1000", "3.1415", "true", ""));
+>>>>>>> 2f4fdb047aa5fadad757889c5d558b079e7590d7
 
 }  // namespace raksha::ir::proto::sql

@@ -15,6 +15,12 @@
 //
 //-------------------------------------------------------------------------------
 
+.decl ownsTag(prin : Principal, tag : Tag)
+.decl ownsAccessPath(prin : Principal, path : AccessPath)
+.decl hasTag(path : AccessPath, prin : Principal, tag : Tag)
+.decl isAccessPath(path : AccessPath)
+.decl will(action : Action, path : AccessPath)
+
 "EndUser" says {
     ownsTag("EndUser", "rawVideo").
     ownsAccessPath("EndUser", "R.P1#0.foo").

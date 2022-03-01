@@ -31,10 +31,14 @@ namespace raksha::ir::proto::sql {
 // inappropriate to put in IRContext.
 class DecoderContext {
  public:
+  static constexpr absl::string_view kSqlLiteralOpName = "sql.literal";
+  static constexpr absl::string_view kLiteralStrAttrName = "literal_str";
+  static constexpr absl::string_view kDefaultOutputName = "out";
+
   DecoderContext(IRContext &ir_context)
     : ir_context_(ir_context),
       literal_operator_(ir_context_.RegisterOperator(
-          std::make_unique<Operator>("sql.literal"))) { }
+          std::make_unique<Operator>(kSqlLiteralOpName))) { }
 
   // Register a value as associated with a particular id. This stores that
   // value and provides a reference to its canonical value.
@@ -79,7 +83,8 @@ class DecoderContext {
         /*parent=*/nullptr,
         literal_operator_,
         NamedAttributeMap{
-          {"literal_str", StringAttribute::Create(literal_str)}},
+          {std::string(kLiteralStrAttrName),
+           StringAttribute::Create(literal_str)}},
         NamedValueMap{}));
     return *operations_.back();
   }

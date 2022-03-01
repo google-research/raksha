@@ -38,6 +38,12 @@ fn source_file_to_ast(filename: &str, in_dir: &str) -> AstProgram {
     astconstructionvisitor::parse_program(&source[..])
 }
 
+// Make source_file_to_ast publicly visible only in tests
+#[cfg(test)]
+pub fn source_file_to_ast_test_only(filename: &str, in_dir: &str) -> AstProgram {
+    source_file_to_ast(filename, in_dir)
+}
+
 pub fn compile(filename: &str, in_dir: &str, out_dir: &str,
             decl_skip: &str) {
     let prog = source_file_to_ast(filename, in_dir);

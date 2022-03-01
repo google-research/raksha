@@ -1,6 +1,9 @@
-.decl says_cond1(x0: symbol, x1: symbol)
-.decl grounded_dummy(x0: symbol)
-.decl says_fact1(x0: symbol, x1: symbol)
+.type SomeType <: symbol
+.type DummyType <: symbol
+.decl says_cond1(speaker: Principal, someType: SomeType)
+.decl grounded_dummy(dummy_param: DummyType)
+.decl says_fact1(speaker: Principal, someType: SomeType)
+.decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
 says_fact1("prin1", thing_x) :- says_cond1("prin1", thing_x).
 says_cond1("prin1", "foo").
 grounded_dummy("dummy_var").
