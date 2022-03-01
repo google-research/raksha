@@ -24,8 +24,19 @@
 
 namespace raksha::ir::proto::sql {
 
+using testing::TestWithParam;
+using testing::Eq;
+using testing::IsEmpty;
+using testing::IsNull;
+using testing::NotNull;
+using testing::Pair;
+using testing::ResultOf;
+using testing::UnorderedElementsAre;
+using testing::Values;
+using testing::ValuesIn;
+
 class DecodeSourceTableColumnTest :
-    public testing::TestWithParam<absl::string_view> {};
+    public TestWithParam<absl::string_view> {};
 
 TEST_P(DecodeSourceTableColumnTest, DecodeSourceTableColumnTest) {
   absl::string_view column_path = GetParam();
@@ -40,7 +51,7 @@ TEST_P(DecodeSourceTableColumnTest, DecodeSourceTableColumnTest) {
   DecoderContext decoder_context(ir_context);
   Value result = DecodeSourceTableColumn(col_proto, decoder_context);
   const value::StoredValue *stored_value = result.If<value::StoredValue>();
-  EXPECT_THAT(stored_value, testing::NotNull());
+  EXPECT_THAT(stored_value, NotNull());
   const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), column_path);
   EXPECT_EQ(storage.type().type_base().kind(),
@@ -56,10 +67,10 @@ absl::string_view kSourceColumnPaths[] = {
 
 INSTANTIATE_TEST_SUITE_P(
     DecodeSourceTableColumnTest, DecodeSourceTableColumnTest,
-    testing::ValuesIn(kSourceColumnPaths));
+    ValuesIn(kSourceColumnPaths));
 
 class DecodeLiteralTest :
-    public testing::TestWithParam<absl::string_view> {};
+    public TestWithParam<absl::string_view> {};
 
 TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
   absl::string_view literal_str = GetParam();
@@ -74,20 +85,20 @@ TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
   DecoderContext decoder_context(ir_context);
   ir::Value result = DecodeLiteral(literal_proto, decoder_context);
   const value::OperationResult *op_result = result.If<value::OperationResult>();
-  EXPECT_THAT(op_result, testing::NotNull());
+  EXPECT_THAT(op_result, NotNull());
   EXPECT_EQ(op_result->name(), "out");
   const Operation &operation = op_result->operation();
-  EXPECT_THAT(operation.parent(), testing::IsNull());
-  EXPECT_THAT(operation.impl_module(), testing::IsNull());
+  EXPECT_THAT(operation.parent(), IsNull());
+  EXPECT_THAT(operation.impl_module(), IsNull());
   EXPECT_EQ(operation.op().name(), "sql.literal");
-  EXPECT_THAT(operation.inputs(), testing::IsEmpty());
+  EXPECT_THAT(operation.inputs(), IsEmpty());
 
   // Check that attributes have exactly the name given.
-  const NamedAttributeMap attributes = operation.attributes();
-  EXPECT_EQ(attributes.size(), 1);
-  auto find_result = attributes.find("literal_str");
-  EXPECT_NE(find_result, attributes.end());
-  EXPECT_EQ(find_result->second->ToString(), literal_str);
+  EXPECT_THAT(
+   operation.attributes(),
+   UnorderedElementsAre(
+     Pair(DecoderContext::kLiteralStrAttrName,
+          ResultOf(&StringAttribute::ToString, Eq(literal_str)))));
 }
 
 absl::string_view kLiteralStrs[] = {
@@ -99,6 +110,6 @@ absl::string_view kLiteralStrs[] = {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    DecodeLiteralTest, DecodeLiteralTest, testing::ValuesIn(kLiteralStrs));
+    DecodeLiteralTest, DecodeLiteralTest, ValuesIn(kLiteralStrs));
 
 }  // namespace raksha::ir::proto::sql
