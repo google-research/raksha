@@ -73,12 +73,21 @@ TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
   IRContext ir_context;
   DecoderContext decoder_context(ir_context);
   ir::Value result = DecodeLiteral(literal_proto, decoder_context);
-  const value::StoredValue *stored_value = result.If<value::StoredValue>();
-  EXPECT_THAT(stored_value, testing::NotNull());
-  const Storage &storage = stored_value->storage();
-  EXPECT_EQ(storage.name(), absl::StrCat("literal:", literal_str));
-  EXPECT_EQ(storage.type().type_base().kind(),
-            types::TypeBase::Kind::kPrimitive);
+  const value::OperationResult *op_result = result.If<value::OperationResult>();
+  EXPECT_THAT(op_result, testing::NotNull());
+  EXPECT_EQ(op_result->name(), "out");
+  const Operation &operation = op_result->operation();
+  EXPECT_THAT(operation.parent(), testing::IsNull());
+  EXPECT_THAT(operation.impl_module(), testing::IsNull());
+  EXPECT_EQ(operation.op().name(), "sql.literal");
+  EXPECT_THAT(operation.inputs(), testing::IsEmpty());
+
+  // Check that attributes have exactly the name given.
+  const NamedAttributeMap attributes = operation.attributes();
+  EXPECT_EQ(attributes.size(), 1);
+  auto find_result = attributes.find("literal_str");
+  EXPECT_NE(find_result, attributes.end());
+  EXPECT_EQ(find_result->second->ToString(), literal_str);
 }
 
 absl::string_view kLiteralStrs[] = {
