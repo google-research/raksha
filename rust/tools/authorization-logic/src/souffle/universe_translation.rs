@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2022 Google LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +33,7 @@
 //! and produces a new instance of the data structure in `ast.rs`.
 //! It should come before the translation in `lowering_ast_datalog.rs`.
 
+use itertools::Itertools;
 use crate::ast::*;
 use std::collections::{HashMap, HashSet};
 
@@ -49,6 +50,12 @@ fn is_name_constant(arg: &str) -> bool {
 fn push_option_to_vec<T>(vec: &mut Vec<T>, elt: Option<T>) {
     if let Some(x) = elt {
         vec.push(x);
+    }
+}
+
+fn push_if_constant(hash_set: &mut HashSet<String>, name: String) {
+    if is_name_constant(&name) {
+        hash_set.insert(name);
     }
 }
 
@@ -251,14 +258,32 @@ fn populate_constant_type_environment_predicate(
     relation_type_environment: &HashMap<String, AstRelationDeclaration>,
     constant_type_environment: &mut HashMap<String, AstType>,
     predicate: &AstPredicate) {
-    for (arg, typ) in (&relation_type_environment
-                       .get(&predicate.name)
-                       .expect(&format!("couldn't find type for {:#?} in {:#?}\n",
-                               &predicate.name,
-                               &relation_type_environment))
-                       .arg_typings) {
-        add_typing(constant_type_environment, arg, typ.clone());
+
+    let predicate_decl = relation_type_environment.get(&predicate.name).expect(
+        &format!("The relation \"{}\" was used but not declared",
+                &predicate.name));
+    // Creates a map from positions in the relation declaration to the
+    // type of the parameter at those positions. For example,
+    // `.decl foo(x: SomeThing, y: SomeOtherThing)`
+    // would yield the map
+    // `[(1, CustomType{ SomeThing }),
+    // (2, CustomType { SomeOtherThing })]`
+    let positional_arg_to_type_map: HashMap<_, _> = 
+        predicate_decl.arg_typings.clone()
+        .into_iter()
+        .map(|(param_name, typ)| typ)
+        .into_iter()
+        .enumerate()
+        .collect();
+
+    for (pos, arg_name) in predicate.args.iter().enumerate() {
+        add_typing(constant_type_environment, arg_name,
+                   positional_arg_to_type_map.get(&pos).expect(
+                       &format!("faling on predicate: {:?}\narg_name: {:?}\npos: {:?}\nrels{:?}",
+                                predicate, arg_name, pos, predicate_decl)
+                       ).clone());
     }
+
 }
 
 
@@ -281,7 +306,7 @@ impl UniverseHandlingPass {
             .collect();
         new_prog.relation_declarations.append(&mut universe_declarations(
                 &prog.relation_declarations));
-        new_prog
+        universe_handling_pass.add_universe_defining_says_assertions(&new_prog)
     }
 
     fn new(prog: &AstProgram) -> UniverseHandlingPass {
@@ -303,19 +328,27 @@ impl UniverseHandlingPass {
     //-----------------------------------------------------------------------------
     // These functions find all the constant principals, and all the constant predicate
     // arguments, and emits facts that populate the universes.
-    // fn add_universe_defining_says_assertions(self, prog: &AstProgram) -> AstProgram {
-    //     let constant_speakers = prog.assertions.iter()
-    //         .map(|says_assertion| says_assertion.prin)
-    //         .filter(|prin| is_name_constant(prin.name))
-    //         .collect();
-    //     let universe_defining_facts = !iproduct(constant_speakers(prog),
-    //         constant_subexpressions(prog)).iter()
-    //         .map(|(speaker, expr)|
-    //              self.universe_defining_says_relation(&speaker, &expr)
-    //         );
-    // }
+    fn add_universe_defining_says_assertions(&self, prog: &AstProgram) -> AstProgram {
+        let constant_speakers: Vec<AstPrincipal> = prog.assertions.clone()
+            .into_iter()
+            .map(|says_assertion| says_assertion.prin)
+            .filter(|prin| is_name_constant(&prin.name))
+            .collect();
+        let constant_subexpressions: Vec<&String> = 
+            self.constant_type_environment.keys()
+            .collect();
+        let universe_defining_says_assertions = constant_speakers.iter()
+            .cartesian_product(constant_subexpressions.iter()) 
+            .map(|(speaker, expr)|
+                 self.universe_defining_says_assertion(speaker, expr)
+            );
 
-    fn universe_defining_says_assertion(self, speaker: &AstPrincipal,
+        let mut ret = prog.clone();
+        ret.assertions.extend(universe_defining_says_assertions);
+        ret
+    }
+
+    fn universe_defining_says_assertion(&self, speaker: &AstPrincipal,
                                         expr: &str) -> AstSaysAssertion {
         AstSaysAssertion {
             prin: speaker.clone(),
@@ -334,55 +367,6 @@ impl UniverseHandlingPass {
             export_file: None
         }
     }
-
-    fn constant_subexpressions(prog: &AstProgram) -> HashSet<String> {
-        HashSet::new()
-        // prog.assertions.iter()
-        //     .map(|says_assertion| says_assertion.assertions)
-        //     .flatten()
-        //     .map(|assertion| constant_subexpressions(assertion))
-        //     .collect::<HashSet<_>>()
-    }
-
-    /*
-    fn constant_subexpressions_assertion(assertion: &AstAssertion) -> HashSet<String> {
-        match assertion {
-            AstAssertion::AstFactAssertion { f: fact } => 
-                constant_subexpressions_fact(&fact),
-            AstAssertion::AstCondAssertion { lhs, rhs } => {
-                let mut ret = constant_subexpressions_fact(&lhs);
-                ret.extend(
-                    rhs.iter()
-                    .map(|flat_fact| constant_subexpressions_flat_fact(flat_fact))
-                    .flatten());
-                ret
-            }
-        }
-    }
-
-    fn constant_subexpressions_fact(fact: &AstFact) -> HashSet<String> {
-        match fact {
-            AstFact::AstFlatFactFact { f: flat_fact } => {
-                constant_subexpressions_flat_fact(flat_fact)
-            },
-            AstFact::AstCanSayFact { p: speaker, f: fact } => {
-                // TODO
-            }
-        }
-    }
-    
-    fn constant_subexpressions_flat_fact(flat_fact: &AstFlatFact)
-        -> HashSet<String> {
-            // TODO
-            // match flat_fact {
-            //     AstFlatFact::AstPrinFact { p: principal, v: verb_prhase } => 
-            // }
-    }
-    */
-
-    //-----------------------------------------------------------------------------
-    // Add rules for delegating universe membership
-    //-----------------------------------------------------------------------------
 
     //-----------------------------------------------------------------------------
     // Add Grounding Conditions
@@ -500,7 +484,7 @@ impl UniverseHandlingPass {
     fn universe_condition_arg(&self, predicate_name: &str, argument: &str, position: usize)
         -> Option<AstPredicate> {
             let predicate_decl = self.relation_type_environment.get(predicate_name).expect(
-                &format!("UniverseHandlingPass couldn't find a declaration for {}",
+                &format!("The relation \"{}\" was used but not declared",
                         &predicate_name));
             // Creates a map from positions in the relation declaration to the
             // type of the parameter at those positions. For example,
