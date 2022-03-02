@@ -186,5 +186,13 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
             "%0.primitive_value");
 }
 
+TEST(BlockBuilderSimpleDeathTest, DoubleBuildBlockBuilder) {
+  BlockBuilder builder;
+  std::unique_ptr<Block> block1 = builder.build();
+  EXPECT_DEATH({ builder.build(); },
+               "Attempt to build a `BlockBuilder` that has already been"
+               " built.");
+}
+
 }  // namespace
 }  // namespace raksha::ir
