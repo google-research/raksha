@@ -14,20 +14,31 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/ir/proto/sql/decoder_context.h"
+#include "src/frontends/sql/decoder_context.h"
 
 #include "src/common/testing/gtest.h"
 
-namespace raksha::ir::proto::sql {
+namespace raksha::frontends::sql {
 
 using testing::Eq;
 using testing::IsNull;
 using testing::IsEmpty;
+using testing::NotNull;
 using testing::Pair;
 using testing::ResultOf;
 using testing::TestWithParam;
 using testing::UnorderedElementsAre;
 using testing::Values;
+
+using ir::Attribute;
+using ir::IRContext;
+using ir::Operation;
+using ir::Storage;
+using ir::Value;
+using ir::types::TypeBase;
+using ir::value::Any;
+using ir::value::StoredValue;
+using ir::value::OperationResult;
 
 TEST(DecoderContextTest, GetOrCreateStorageIdempotence) {
   IRContext context;
@@ -41,10 +52,8 @@ TEST(DecoderContextTest, GetOrCreateStorageIdempotence) {
   EXPECT_EQ(&store2, &store2_again);
   EXPECT_NE(&store1, &store2);
 
-  EXPECT_EQ(store1.type().type_base().kind(),
-            types::TypeBase::Kind::kPrimitive);
-  EXPECT_EQ(store2.type().type_base().kind(),
-            types::TypeBase::Kind::kPrimitive);
+  EXPECT_EQ(store1.type().type_base().kind(), TypeBase::Kind::kPrimitive);
+  EXPECT_EQ(store2.type().type_base().kind(), TypeBase::Kind::kPrimitive);
 }
 
 class LiteralOpTest : public TestWithParam<absl::string_view> {};
@@ -81,10 +90,10 @@ TEST(DecoderContextTest, DecoderContextRegisterAndGetValueTest) {
 
   Storage storage("storage1", ir_context.type_factory().MakePrimitiveType());
 
-  const Value &value1 = decoder_context.RegisterValue(1, Value(value::Any()));
-  EXPECT_THAT(value1.If<value::Any>(), testing::NotNull());
+  const Value &value1 = decoder_context.RegisterValue(1, Value(Any()));
+  EXPECT_THAT(value1.If<Any>(), NotNull());
   const Value &value2 =
-      decoder_context.RegisterValue(2, Value(value::StoredValue(storage)));
+      decoder_context.RegisterValue(2, Value(StoredValue(storage)));
   const Value &get_value1 = decoder_context.GetValue(1);
   const Value &get_value2 = decoder_context.GetValue(2);
   EXPECT_EQ(&get_value1, &value1);
@@ -95,17 +104,17 @@ TEST(DecoderContextDeathTest, DecoderContextValueRegistryDeathTest) {
   IRContext ir_context;
   DecoderContext decoder_context(ir_context);
 
-  decoder_context.RegisterValue(1, Value(value::Any()));
-  decoder_context.RegisterValue(2, Value(value::Any()));
+  decoder_context.RegisterValue(1, Value(Any()));
+  decoder_context.RegisterValue(2, Value(Any()));
 
-  EXPECT_DEATH({ decoder_context.RegisterValue(1, Value(value::Any())); },
+  EXPECT_DEATH({ decoder_context.RegisterValue(1, Value(Any())); },
                "id_to_value map has more than one value associated with the id "
                "1.");
-  EXPECT_DEATH({ decoder_context.RegisterValue(2, Value(value::Any())); },
+  EXPECT_DEATH({ decoder_context.RegisterValue(2, Value(Any())); },
                "id_to_value map has more than one value associated with the id "
                "2.");
   EXPECT_DEATH({ decoder_context.GetValue(3); },
                "Could not find a value with id 3.");
 }
 
-}  // namespace raksha::ir::proto::sql
+}  // namespace raksha::frontends::sql

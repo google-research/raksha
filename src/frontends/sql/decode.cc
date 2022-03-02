@@ -14,10 +14,15 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/ir/proto/sql/decode.h"
-#include "src/ir/proto/sql/decoder_context.h"
+#include "src/frontends/sql/decode.h"
 
-namespace raksha::ir::proto::sql {
+#include "src/frontends/sql/decoder_context.h"
+
+namespace raksha::frontends::sql {
+
+using ir::Value;
+using ir::value::OperationResult;
+using ir::value::StoredValue;
 
 static Value DecodeSourceTableColumn(
     const SourceTableColumn &source_table_column,
@@ -32,30 +37,28 @@ static Value DecodeSourceTableColumn(
   // Also, for now, we consider all storages to have primitive type. We will
   // probably want to change that when we start handling types in a
   // non-trivial fashion.
-  return Value(value::StoredValue(
-      decoder_context.GetOrCreateStorage(column_path)));
+  return Value(StoredValue(decoder_context.GetOrCreateStorage(column_path)));
 }
 
-static Value DecodeLiteral(
-    const Literal &literal, DecoderContext &decoder_context) {
+static Value DecodeLiteral(const Literal &literal,
+                           DecoderContext &decoder_context) {
   const absl::string_view literal_str = literal.literal_str();
   CHECK(!literal_str.empty()) << "required field literal_str was empty.";
-  return Value(value::OperationResult(
-      decoder_context.MakeLiteralOperation(literal_str),
-      DecoderContext::kDefaultOutputName));
+  return Value(
+      OperationResult(decoder_context.MakeLiteralOperation(literal_str),
+                      DecoderContext::kDefaultOutputName));
 }
 
-
 // A helper function to decode the specific subclass of the Expression.
-static Value GetExprValue(
-    const Expression &expr, DecoderContext &decoder_context) {
+static Value GetExprValue(const Expression &expr,
+                          DecoderContext &decoder_context) {
   switch (expr.expr_variant_case()) {
     case Expression::EXPR_VARIANT_NOT_SET: {
       CHECK(false) << "Required field expr_variant not set.";
     }
     case Expression::kSourceTableColumn: {
-      return DecodeSourceTableColumn(
-          expr.source_table_column(), decoder_context);
+      return DecodeSourceTableColumn(expr.source_table_column(),
+                                     decoder_context);
     }
     case Expression::kLiteral: {
       return DecodeLiteral(expr.literal(), decoder_context);
@@ -71,12 +74,12 @@ static Value GetExprValue(
   CHECK(false) << "Unreachable!";
 }
 
-const Value &DecodeExpression(
-    const Expression &expr, DecoderContext &decoder_context) {
+const Value &DecodeExpression(const Expression &expr,
+                              DecoderContext &decoder_context) {
   uint64_t id = expr.id();
   CHECK(id != 0) << "Required field id was not present in Expression.";
   // TODO(#413): Figure out what to do with the optional name field.
   return decoder_context.RegisterValue(id, GetExprValue(expr, decoder_context));
 }
 
-}  // namespace raksha::ir::proto::sql
+}  // namespace raksha::frontends::sql

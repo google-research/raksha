@@ -14,17 +14,17 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#ifndef SRC_IR_PROTO_SQL_DECODER_CONTEXT_H_
-#define SRC_IR_PROTO_SQL_DECODER_CONTEXT_H_
+#ifndef SRC_FRONTENDS_SQL_DECODER_CONTEXT_H_
+#define SRC_FRONTENDS_SQL_DECODER_CONTEXT_H_
 
 #include <memory>
 
 #include "absl/container/flat_hash_map.h"
 #include "src/ir/ir_context.h"
 #include "src/ir/value.h"
-#include "src/ir/proto/sql/sql_ir.pb.h"
+#include "src/frontends/sql/sql_ir.pb.h"
 
-namespace raksha::ir::proto::sql {
+namespace raksha::frontends::sql {
 
 // Context specifically for the SQL proto decoding. This keeps track of state
 // that is not required when building the IR in general, and thus would be
@@ -35,16 +35,16 @@ class DecoderContext {
   static constexpr absl::string_view kLiteralStrAttrName = "literal_str";
   static constexpr absl::string_view kDefaultOutputName = "out";
 
-  DecoderContext(IRContext &ir_context)
+  DecoderContext(ir::IRContext &ir_context)
     : ir_context_(ir_context),
       literal_operator_(ir_context_.RegisterOperator(
-          std::make_unique<Operator>(kSqlLiteralOpName))) { }
+          std::make_unique<ir::Operator>(kSqlLiteralOpName))) { }
 
   // Register a value as associated with a particular id. This stores that
   // value and provides a reference to its canonical value.
-  const Value &RegisterValue(uint64_t id, Value value) {
+  const ir::Value &RegisterValue(uint64_t id, ir::Value value) {
     auto insert_result =
-        id_to_value.insert({id, std::make_unique<Value>(std::move(value))});
+        id_to_value.insert({id, std::make_unique<ir::Value>(std::move(value))});
     CHECK(insert_result.second)
       << "id_to_value map has more than one value associated with the id "
       << insert_result.first->first << ".";
@@ -53,7 +53,7 @@ class DecoderContext {
 
   // Get a reference to the value associated with a particular id. Assumes that
   // the ID is present; it will error if it is not.
-  const Value &GetValue(uint64_t id) const {
+  const ir::Value &GetValue(uint64_t id) const {
     // We could use `at`, which would be more concise and would also fail if the
     // id is not present in the map, but it will not provide a nice error
     // message. Use `find` and `CHECK` to get a better error message.
@@ -68,36 +68,36 @@ class DecoderContext {
   // puts it right at the beginning). This allows us to create `Storage`s for
   // columns as we see them. We will probably want to do something less lazy,
   // like registering storages in advance, for the mature implementation.
-  const Storage &GetOrCreateStorage(absl::string_view storage_name) {
+  const ir::Storage &GetOrCreateStorage(absl::string_view storage_name) {
     return (ir_context_.IsRegisteredStorage(storage_name))
       ? ir_context_.GetStorage(storage_name)
-      : ir_context_.RegisterStorage(std::make_unique<Storage>(
+      : ir_context_.RegisterStorage(std::make_unique<ir::Storage>(
           storage_name, ir_context_.type_factory().MakePrimitiveType()));
   }
 
   // Create an `Operation` providing the literal value indicated by
   // `literal_str`. This shall create an `Operation` of `Operator` "sql.literal"
   // and with the literal value indicated in a `literal_str` attribute.
-  const Operation &MakeLiteralOperation(absl::string_view literal_str) {
-    operations_.push_back(std::make_unique<Operation>(
+  const ir::Operation &MakeLiteralOperation(absl::string_view literal_str) {
+    operations_.push_back(std::make_unique<ir::Operation>(
         /*parent=*/nullptr,
         literal_operator_,
-        NamedAttributeMap{
+        ir::NamedAttributeMap{
           {std::string(kLiteralStrAttrName),
-           StringAttribute::Create(literal_str)}},
-        NamedValueMap{}));
+           ir::StringAttribute::Create(literal_str)}},
+        ir::NamedValueMap{}));
     return *operations_.back();
   }
 
-  IRContext &ir_context() { return ir_context_; }
+  ir::IRContext &ir_context() { return ir_context_; }
 
  private:
-  IRContext &ir_context_;
-  absl::flat_hash_map<uint64_t, std::unique_ptr<Value>> id_to_value;
-  const Operator &literal_operator_;
-  std::vector<std::unique_ptr<Operation>> operations_;
+  ir::IRContext &ir_context_;
+  absl::flat_hash_map<uint64_t, std::unique_ptr<ir::Value>> id_to_value;
+  const ir::Operator &literal_operator_;
+  std::vector<std::unique_ptr<ir::Operation>> operations_;
 };
 
-}  // namespace raksha::ir::proto::sql
+}  // namespace raksha::frontends::sql
 
-#endif  // SRC_IR_PROTO_SQL_DECODER_CONTEXT_H_
+#endif  // SRC_FRONTENDS_SQL_DECODER_CONTEXT_H_

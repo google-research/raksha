@@ -14,17 +14,25 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/ir/proto/sql/decode.h"
+#include "src/frontends/sql/decode.h"
 
 #include "absl/strings/string_view.h"
 #include "google/protobuf/text_format.h"
 #include "google/protobuf/util/message_differencer.h"
 #include "src/common/testing/gtest.h"
-#include "src/ir/proto/sql/decoder_context.h"
-#include "src/ir/proto/sql/sql_ir.pb.h"
+#include "src/frontends/sql/decoder_context.h"
+#include "src/frontends/sql/sql_ir.pb.h"
 
-namespace raksha::ir::proto::sql {
+namespace raksha::frontends::sql {
 
+using ir::Attribute;
+using ir::IRContext;
+using ir::Operation;
+using ir::Storage;
+using ir::Value;
+using ir::types::TypeBase;
+using ir::value::OperationResult;
+using ir::value::StoredValue;
 using testing::Combine;
 using testing::Eq;
 using testing::IsEmpty;
@@ -36,13 +44,6 @@ using testing::TestWithParam;
 using testing::UnorderedElementsAre;
 using testing::Values;
 using testing::ValuesIn;
-
-// A struct used to parameterize the decoding tests.
-struct IdNameAndString {
-  uint64_t id;
-  std::optional<absl::string_view> name;
-  absl::string_view str;
-};
 
 // A value-parameterized test fixture used for both SourceTableColumns and
 // Literals. Both of these constructs are basically just expressions
@@ -100,13 +101,12 @@ absl::string_view kStrings[] = {"MyTable.col",
 
 TEST_P(DecodeSourceTableColumnExprTest, DecodeSourceTableColumnExprTest) {
   auto &[id, name, str] = GetParam();
-  const ir::Value &result = GetDecodedValue();
-  const value::StoredValue *stored_value = result.If<value::StoredValue>();
-  EXPECT_THAT(stored_value, testing::NotNull());
+  const Value &result = GetDecodedValue();
+  const StoredValue *stored_value = result.If<StoredValue>();
+  EXPECT_THAT(stored_value, NotNull());
   const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), str);
-  EXPECT_EQ(storage.type().type_base().kind(),
-            types::TypeBase::Kind::kPrimitive);
+  EXPECT_EQ(storage.type().type_base().kind(), TypeBase::Kind::kPrimitive);
   EXPECT_EQ(&result, &decoder_context_.GetValue(id));
 }
 
@@ -125,10 +125,9 @@ class DecodeLiteralExprTest : public IdNameAndStringTest {
 
 TEST_P(DecodeLiteralExprTest, DecodeLiteralExprTest) {
   auto &[id, name, str] = GetParam();
-  const ir::Value &result = GetDecodedValue();
-  const value::OperationResult *operation_result =
-      result.If<value::OperationResult>();
-  EXPECT_THAT(operation_result, testing::NotNull());
+  const Value &result = GetDecodedValue();
+  const OperationResult *operation_result = result.If<OperationResult>();
+  EXPECT_THAT(operation_result, NotNull());
   const Operation &operation = operation_result->operation();
   EXPECT_THAT(operation.parent(), IsNull());
   EXPECT_THAT(operation.impl_module(), IsNull());
@@ -204,6 +203,6 @@ const TextprotoDeathMessagePair kTextprotoDeathMessagePairs[] = {
 };
 
 INSTANTIATE_TEST_SUITE_P(DecodeExprDeathTest, DecodeExprDeathTest,
-                         testing::ValuesIn(kTextprotoDeathMessagePairs));
+                         ValuesIn(kTextprotoDeathMessagePairs));
 
-}  // namespace raksha::ir::proto::sql
+}  // namespace raksha::frontends::sql
