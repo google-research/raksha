@@ -19,6 +19,33 @@
 
 namespace raksha::ir::proto::sql {
 
+static Value DecodeSourceTableColumn(
+    const SourceTableColumn &source_table_column,
+    DecoderContext &decoder_context) {
+  const std::string &column_path = source_table_column.column_path();
+  CHECK(!column_path.empty()) << "Required field column_path was empty.";
+  // Note: In the future, we will probably want to make a `Storage` per table
+  // and grab columns from that table using operators. For now, however,
+  // making each column an independent storage works for the MVP and is much
+  // simpler.
+  //
+  // Also, for now, we consider all storages to have primitive type. We will
+  // probably want to change that when we start handling types in a
+  // non-trivial fashion.
+  return Value(value::StoredValue(
+      decoder_context.GetOrCreateStorage(column_path)));
+}
+
+static Value DecodeLiteral(
+    const Literal &literal, DecoderContext &decoder_context) {
+  const absl::string_view literal_str = literal.literal_str();
+  CHECK(!literal_str.empty()) << "required field literal_str was empty.";
+  return Value(value::OperationResult(
+      decoder_context.MakeLiteralOperation(literal_str),
+      DecoderContext::kDefaultOutputName));
+}
+
+
 // A helper function to decode the specific subclass of the Expression.
 static Value GetExprValue(
     const Expression &expr, DecoderContext &decoder_context) {
@@ -50,32 +77,6 @@ const Value &DecodeExpression(
   CHECK(id != 0) << "Required field id was not present in Expression.";
   // TODO(#413): Figure out what to do with the optional name field.
   return decoder_context.RegisterValue(id, GetExprValue(expr, decoder_context));
-}
-
-Value DecodeSourceTableColumn(
-    const SourceTableColumn &source_table_column,
-    DecoderContext &decoder_context) {
-  const std::string &column_path = source_table_column.column_path();
-  CHECK(!column_path.empty()) << "Required field column_path was empty.";
-  // Note: In the future, we will probably want to make a `Storage` per table
-  // and grab columns from that table using operators. For now, however,
-  // making each column an independent storage works for the MVP and is much
-  // simpler.
-  //
-  // Also, for now, we consider all storages to have primitive type. We will
-  // probably want to change that when we start handling types in a
-  // non-trivial fashion.
-  return Value(value::StoredValue(
-      decoder_context.GetOrCreateStorage(column_path)));
-}
-
-Value DecodeLiteral(
-    const Literal &literal, DecoderContext &decoder_context) {
-  const absl::string_view literal_str = literal.literal_str();
-  CHECK(!literal_str.empty()) << "required field literal_str was empty.";
-  return Value(value::OperationResult(
-      decoder_context.MakeLiteralOperation(literal_str),
-      DecoderContext::kDefaultOutputName));
 }
 
 }  // namespace raksha::ir::proto::sql
