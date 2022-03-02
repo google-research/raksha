@@ -73,7 +73,17 @@ class BlockBuilder {
     return *this;
   }
 
-  std::unique_ptr<Block> build() { return std::move(block_); }
+  std::unique_ptr<Block> build() {
+    // After we call `build` on a `BlockBuilder`, the `block_` field is moved
+    // from. This causes the pointer within the `block_` field to be stolen
+    // by `std::unique_ptr`'s move constructor, leaving a `nullptr` in its
+    // place. The following check makes sure that we don't attempt to call
+    // `build` twice on the same `BlockBuilder` by checking that `block_` is
+    // not `nullptr`.
+    CHECK(block_) << "Attempt to build a `BlockBuilder` that has already been"
+                     " built.";
+    return std::move(block_);
+  }
 
  private:
   std::unique_ptr<Block> block_;
