@@ -48,7 +48,7 @@ const Value &DecodeExpression(
     const Expression &expr, DecoderContext &decoder_context) {
   uint64_t id = expr.id();
   CHECK(id != 0) << "Required field id was not present in Expression.";
-  // TODO: Figure out what to do with the optional name field.
+  // TODO(#413): Figure out what to do with the optional name field.
   return decoder_context.RegisterValue(id, GetExprValue(expr, decoder_context));
 }
 
