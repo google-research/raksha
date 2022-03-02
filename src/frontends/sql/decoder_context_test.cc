@@ -21,8 +21,8 @@
 namespace raksha::frontends::sql {
 
 using testing::Eq;
-using testing::IsNull;
 using testing::IsEmpty;
+using testing::IsNull;
 using testing::NotNull;
 using testing::Pair;
 using testing::ResultOf;
@@ -32,13 +32,22 @@ using testing::Values;
 
 using ir::Attribute;
 using ir::IRContext;
+using ir::Block;
 using ir::Operation;
 using ir::Storage;
 using ir::Value;
 using ir::types::TypeBase;
 using ir::value::Any;
-using ir::value::StoredValue;
 using ir::value::OperationResult;
+using ir::value::StoredValue;
+
+TEST(DecoderContextTest, BuildTopLevelBlock) {
+  IRContext context;
+  DecoderContext decoder_context(context);
+
+  const Block &block = decoder_context.BuildTopLevelBlock();
+  EXPECT_EQ(block.module(), &decoder_context.global_module());
+}
 
 TEST(DecoderContextTest, GetOrCreateStorageIdempotence) {
   IRContext context;
@@ -65,7 +74,9 @@ TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
   absl::string_view literal_str = GetParam();
   const Operation &lit_op = decoder_context.MakeLiteralOperation(literal_str);
 
-  EXPECT_THAT(lit_op.parent(), IsNull());
+  const Block &top_level_block = decoder_context.BuildTopLevelBlock();
+
+  EXPECT_THAT(lit_op.parent(), &top_level_block);
   EXPECT_THAT(lit_op.impl_module(), IsNull());
   EXPECT_THAT(lit_op.inputs(), IsEmpty());
   EXPECT_EQ(lit_op.op().name(), DecoderContext::kSqlLiteralOpName);
@@ -73,16 +84,15 @@ TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
   // Check that "attributes" is exactly "literal_str" associated with the
   // parameter value.
   EXPECT_THAT(
-     lit_op.attributes(),
-     UnorderedElementsAre(
-       Pair(DecoderContext::kLiteralStrAttrName,
-            ResultOf([](const Attribute &attr) { return attr->ToString(); },
-                     Eq(literal_str)))));
+      lit_op.attributes(),
+      UnorderedElementsAre(
+          Pair(DecoderContext::kLiteralStrAttrName,
+               ResultOf([](const Attribute &attr) { return attr->ToString(); },
+                        Eq(literal_str)))));
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    LiteralOpTest, LiteralOpTest,
-    Values("val1", "1000", "3.1415", "true", ""));
+INSTANTIATE_TEST_SUITE_P(LiteralOpTest, LiteralOpTest,
+                         Values("val1", "1000", "3.1415", "true", ""));
 
 TEST(DecoderContextTest, DecoderContextRegisterAndGetValueTest) {
   IRContext ir_context;
