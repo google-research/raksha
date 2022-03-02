@@ -99,8 +99,13 @@ class Block {
   }
 
   friend class BlockBuilder;
+  friend class Module;
 
  private:
+  // Set the module to which this block belongs. This is private so that only
+  // the Module can set it via its `AddBlock` function.
+  void SetModule(const Module& module) { module_ = &module; }
+
   // Module to which this belongs to.
   const Module* module_;
   // The inputs to this block.
@@ -128,6 +133,12 @@ class Module {
 
   // Adds a block to the module and returns a pointer to it.
   const Block& AddBlock(std::unique_ptr<Block> block) {
+    // Note: this check should be impossible due to this function taking a
+    // `unique_ptr` to the `Block`. But it's a cheap thing to check, so might
+    // as well just do it.
+    CHECK(block->module() == nullptr) << "Attempt to add a Block to two "
+                                         "different Modules!";
+    block->SetModule(*this);
     blocks_.push_back(std::move(block));
     return *blocks_.back();
   }
