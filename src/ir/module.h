@@ -81,7 +81,7 @@ class Block {
   // The type for a collection of `Operation` instances.
   using OperationList = std::vector<std::unique_ptr<Operation>>;
 
-  Block() : module_(nullptr) {}
+  Block() : parent_module_(nullptr) {}
 
   // Disable copy (and move) semantics.
   Block(const Block&) = delete;
@@ -91,7 +91,7 @@ class Block {
   const DataDeclCollection& inputs() const { return inputs_; }
   const DataDeclCollection& outputs() const { return outputs_; }
   const NamedValueMap& results() const { return results_; }
-  const Module* module() const { return module_; }
+  const Module* module() const { return parent_module_; }
 
   template <typename Derived>
   void Accept(IRVisitor<Derived>& visitor) const {
@@ -104,10 +104,10 @@ class Block {
  private:
   // Set the module to which this block belongs. This is private so that only
   // the Module can set it via its `AddBlock` function.
-  void SetModule(const Module& module) { module_ = &module; }
+  void SetModule(const Module& module) { parent_module_ = &module; }
 
   // Module to which this belongs to.
-  const Module* module_;
+  const Module* parent_module_;
   // The inputs to this block.
   DataDeclCollection inputs_;
   // Outputs from this block.
