@@ -25,6 +25,17 @@
 
 namespace raksha::frontends::sql {
 
+using ir::Attribute;
+using ir::Block;
+using ir::IRContext;
+using ir::Module;
+using ir::Operation;
+using ir::Storage;
+using ir::Value;
+using ir::types::TypeBase;
+using ir::value::OperationResult;
+using ir::value::StoredValue;
+using testing::Combine;
 using testing::Eq;
 using testing::IsEmpty;
 using testing::IsNull;
@@ -36,118 +47,99 @@ using testing::UnorderedElementsAre;
 using testing::Values;
 using testing::ValuesIn;
 
-using ir::types::TypeBase;
-
-using ir::Attribute;
-using ir::IRContext;
-using ir::Operation;
-using ir::Storage;
-using ir::Value;
-using ir::value::OperationResult;
-using ir::value::StoredValue;
-
-class DecodeSourceTableColumnTest : public TestWithParam<absl::string_view> {};
-
-TEST_P(DecodeSourceTableColumnTest, DecodeSourceTableColumnTest) {
-  absl::string_view column_path = GetParam();
-  std::string textproto = absl::StrFormat(R"(column_path: "%s")", column_path);
-  SourceTableColumn col_proto;
-
-  ASSERT_TRUE(
-      google::protobuf::TextFormat::ParseFromString(textproto, &col_proto))
-      << "Could not decode SourceTableColumn";
-
-  IRContext ir_context;
-  DecoderContext decoder_context(ir_context);
-  Value result = DecodeSourceTableColumn(col_proto, decoder_context);
-  const StoredValue *stored_value = result.If<StoredValue>();
-  EXPECT_THAT(stored_value, NotNull());
-  const Storage &storage = stored_value->storage();
-  EXPECT_EQ(storage.name(), column_path);
-  EXPECT_EQ(storage.type().type_base().kind(), TypeBase::Kind::kPrimitive);
-}
-
-absl::string_view kSourceColumnPaths[] = {
-    "MyTable.col",
-    "UserAlias",
-    "MySchema.MyTable.col2",
-    "MySchema.JoinTable.Table1.col",
+// A struct used to parameterize the decoding tests.
+struct IdNameAndString {
+  uint64_t id;
+  std::optional<absl::string_view> name;
+  absl::string_view str;
 };
 
-INSTANTIATE_TEST_SUITE_P(DecodeSourceTableColumnTest,
-                         DecodeSourceTableColumnTest,
-                         ValuesIn(kSourceColumnPaths));
+// A value-parameterized test fixture used for both SourceTableColumns and
+// Literals. Both of these constructs are basically just expressions
+// containing a string value. However, the textproto that describes them is
+// slightly different, and the IR that is generated is different. This
+// superclass allows us to reuse the common logic while the virtual
+// `GetTexprotoFormat` allows us to construct the textproto as necessary for
+// each structure.
+class IdNameAndStringTest
+    : public TestWithParam<std::tuple<
+          uint64_t, std::optional<absl::string_view>, absl::string_view>> {
+ protected:
+  IdNameAndStringTest() : ir_context_(), decoder_context_(ir_context_) {}
 
-class DecodeLiteralTest : public TestWithParam<absl::string_view> {};
+  virtual absl::ParsedFormat<'u', 's', 's'> GetTextprotoFormat() const = 0;
 
-TEST_P(DecodeLiteralTest, DecodeLiteralTest) {
-  absl::string_view literal_str = GetParam();
-  std::string textproto = absl::StrFormat(R"(literal_str: "%s")", literal_str);
-  Literal literal_proto;
+  std::string GetTextproto() const {
+    auto &[id, name, str] = GetParam();
+    std::string name_str =
+        (name.has_value()) ? absl::StrFormat(R"(name: "%s")", *name) : "";
+    return absl::StrFormat(GetTextprotoFormat(), id, name_str, str);
+  }
 
-  ASSERT_TRUE(
-      google::protobuf::TextFormat::ParseFromString(textproto, &literal_proto))
-      << "Could not decode Literal";
+  const Value &GetDecodedValue() {
+    Expression expr;
+    EXPECT_TRUE(
+        google::protobuf::TextFormat::ParseFromString(GetTextproto(), &expr))
+        << "Could not decode expr";
+    return DecodeExpression(expr, decoder_context_);
+  }
 
-  IRContext ir_context;
-  DecoderContext decoder_context(ir_context);
-  ir::Value result = DecodeLiteral(literal_proto, decoder_context);
-  const OperationResult *op_result = result.If<OperationResult>();
-  const ir::Block &top_level_block = decoder_context.BuildTopLevelBlock();
-  EXPECT_THAT(op_result, NotNull());
-  EXPECT_EQ(op_result->name(), "out");
-  const Operation &operation = op_result->operation();
-  EXPECT_THAT(operation.parent(), &top_level_block);
-  EXPECT_THAT(operation.impl_module(), IsNull());
-  EXPECT_EQ(operation.op().name(), DecoderContext::kSqlLiteralOpName);
-  EXPECT_THAT(operation.inputs(), IsEmpty());
-
-  // Check that attributes have exactly the name given.
-  EXPECT_THAT(operation.attributes(),
-              UnorderedElementsAre(
-                  Pair(DecoderContext::kLiteralStrAttrName,
-                       ResultOf([](Attribute attr) { return attr->ToString(); },
-                                Eq(literal_str)))));
-}
-
-absl::string_view kLiteralStrs[] = {
-    "100", "0", "3.1415", "hello world!", "null",
+  IRContext ir_context_;
+  DecoderContext decoder_context_;
 };
 
-INSTANTIATE_TEST_SUITE_P(DecodeLiteralTest, DecodeLiteralTest,
-                         ValuesIn(kLiteralStrs));
+class DecodeSourceTableColumnExprTest : public IdNameAndStringTest {
+  absl::ParsedFormat<'u', 's', 's'> GetTextprotoFormat() const override {
+    return absl::ParsedFormat<'u', 's', 's'>(
+        R"(id: %u %s source_table_column: { column_path: "%s" })");
+  }
+};
 
-TEST(DecodeSourceTableColumnExprTest, DecodeSourceTableColumnExprTest) {
-  const std::string kTextproto =
-      R"(id: 1 name: "alias" source_table_column: { column_path: "table1.col" })";
-  IRContext ir_context;
-  DecoderContext decoder_context(ir_context);
-  Expression expr;
-  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(kTextproto, &expr))
-      << "Could not decode expr";
-  const ir::Value &result = DecodeExpression(expr, decoder_context);
+constexpr uint64_t kSampleIds[] = {1, 5, 1000};
+
+constexpr std::optional<absl::string_view> kSampleExprNames[] = {
+    {}, {"name1"}, {"another_name"}};
+
+absl::string_view kStrings[] = {"MyTable.col",
+                                "UserAlias",
+                                "MySchema.MyTable.col2",
+                                "MySchema.JoinTable.Table1.col",
+                                "9",
+                                "hello world!",
+                                "3.1415"};
+
+TEST_P(DecodeSourceTableColumnExprTest, DecodeSourceTableColumnExprTest) {
+  auto &[id, name, str] = GetParam();
+  const ir::Value &result = GetDecodedValue();
   const StoredValue *stored_value = result.If<StoredValue>();
   EXPECT_THAT(stored_value, testing::NotNull());
   const Storage &storage = stored_value->storage();
-  EXPECT_EQ(storage.name(), "table1.col");
+  EXPECT_EQ(storage.name(), str);
   EXPECT_EQ(storage.type().type_base().kind(), TypeBase::Kind::kPrimitive);
-  EXPECT_EQ(&result, &decoder_context.GetValue(1));
+  EXPECT_EQ(&result, &decoder_context_.GetValue(id));
 }
 
-TEST(DecodeLiteralExprTest, DecodeLiteralExprTest) {
-  const std::string kTextproto =
-      R"(id: 5 name: "alias" literal: { literal_str: "9" } )";
-  IRContext ir_context;
-  DecoderContext decoder_context(ir_context);
-  Expression expr;
-  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(kTextproto, &expr))
-      << "Could not decode expr";
-  const ir::Value &result = DecodeExpression(expr, decoder_context);
+INSTANTIATE_TEST_SUITE_P(DecodeSourceTableColumnExprTest,
+                         DecodeSourceTableColumnExprTest,
+                         Combine(ValuesIn(kSampleIds),
+                                 ValuesIn(kSampleExprNames),
+                                 ValuesIn(kStrings)));
+
+class DecodeLiteralExprTest : public IdNameAndStringTest {
+  absl::ParsedFormat<'u', 's', 's'> GetTextprotoFormat() const override {
+    return absl::ParsedFormat<'u', 's', 's'>(
+        R"(id: %u %s literal: { literal_str: "%s" })");
+  }
+};
+
+TEST_P(DecodeLiteralExprTest, DecodeLiteralExprTest) {
+  auto &[id, name, str] = GetParam();
+  const ir::Value &result = GetDecodedValue();
   const OperationResult *operation_result = result.If<OperationResult>();
   EXPECT_THAT(operation_result, testing::NotNull());
   const Operation &operation = operation_result->operation();
-  const ir::Block &top_level_block = decoder_context.BuildTopLevelBlock();
-  EXPECT_EQ(operation.parent(), &top_level_block);
+  const Block &top_block = decoder_context_.BuildTopLevelBlock();
+  EXPECT_EQ(operation.parent(), &top_block);
   EXPECT_THAT(operation.impl_module(), IsNull());
   EXPECT_EQ(operation.op().name(), DecoderContext::kSqlLiteralOpName);
   EXPECT_THAT(operation.inputs(), IsEmpty());
@@ -157,42 +149,57 @@ TEST(DecodeLiteralExprTest, DecodeLiteralExprTest) {
       operation.attributes(),
       UnorderedElementsAre(Pair(
           DecoderContext::kLiteralStrAttrName,
-          ResultOf([](Attribute attr) { return attr->ToString(); }, Eq("9")))));
-  EXPECT_EQ(&result, &decoder_context.GetValue(5));
+          ResultOf([](Attribute attr) { return attr->ToString(); }, Eq(str)))));
+  EXPECT_EQ(&result, &decoder_context_.GetValue(id));
 }
 
-TEST(DecodeExprIdCollisionDeathTest, DecodeExprIdCollisionDeathTest) {
-  const std::string kTextproto =
-      R"(id: 1 source_table_column: { column_path: "table1.col" } )";
-  IRContext ir_context;
-  DecoderContext decoder_context(ir_context);
-  Expression expr;
-  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(kTextproto, &expr))
-      << "Could not decode expr";
-  DecodeExpression(expr, decoder_context);
-  EXPECT_DEATH(
-      { DecodeExpression(expr, decoder_context); },
-      "id_to_value map has more than one value associated with the id 1.");
-}
+INSTANTIATE_TEST_SUITE_P(DecodeLiteralExprTest, DecodeLiteralExprTest,
+                         Combine(ValuesIn(kSampleIds),
+                                 ValuesIn(kSampleExprNames),
+                                 ValuesIn(kStrings)));
 
 struct TextprotoDeathMessagePair {
   std::string textproto;
   std::string death_message;
 };
 
-class DecodeExprDeathTest
-    : public testing::TestWithParam<TextprotoDeathMessagePair> {};
+class DecodeExprDeathTest : public TestWithParam<TextprotoDeathMessagePair> {
+ protected:
+  DecodeExprDeathTest() : ir_context_(), decoder_context_(ir_context_) {}
+
+  Expression GetExpr() {
+    Expression expr;
+    EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
+        GetParam().textproto, &expr))
+        << "Could not decode expr";
+    return expr;
+  }
+
+  IRContext ir_context_;
+  DecoderContext decoder_context_;
+};
+
+using DecodeExprIdCollisionDeathTest = DecodeExprDeathTest;
+
+TEST_P(DecodeExprIdCollisionDeathTest, DecodeExprIdCollisionDeathTest) {
+  Expression expr = GetExpr();
+  DecodeExpression(expr, decoder_context_);
+  EXPECT_DEATH({ DecodeExpression(expr, decoder_context_); },
+               GetParam().death_message);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    DecodeExprIdCollisionDeathTest, DecodeExprIdCollisionDeathTest,
+    Values(TextprotoDeathMessagePair{
+        .textproto =
+            R"(id: 1 source_table_column: { column_path: "table1.col" } )",
+        .death_message = "id_to_value map has more than one value associated "
+                         "with the id 1."}));
 
 TEST_P(DecodeExprDeathTest, DecodeExprDeathTest) {
-  const TextprotoDeathMessagePair &param = GetParam();
-  IRContext ir_context;
-  DecoderContext decoder_context(ir_context);
-  Expression expr;
-  ASSERT_TRUE(
-      google::protobuf::TextFormat::ParseFromString(param.textproto, &expr))
-      << "Could not decode expr";
-  EXPECT_DEATH({ DecodeExpression(expr, decoder_context); },
-               param.death_message);
+  Expression expr = GetExpr();
+  EXPECT_DEATH({ DecodeExpression(expr, decoder_context_); },
+               GetParam().death_message);
 }
 
 const TextprotoDeathMessagePair kTextprotoDeathMessagePairs[] = {

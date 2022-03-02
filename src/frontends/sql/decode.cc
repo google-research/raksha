@@ -15,20 +15,51 @@
 //----------------------------------------------------------------------------
 
 #include "src/frontends/sql/decode.h"
+
 #include "src/frontends/sql/decoder_context.h"
 
 namespace raksha::frontends::sql {
 
+using ir::Storage;
+using ir::Value;
+using ir::value::OperationResult;
+using ir::value::StoredValue;
+
+static Value DecodeSourceTableColumn(
+    const SourceTableColumn &source_table_column,
+    DecoderContext &decoder_context) {
+  const std::string &column_path = source_table_column.column_path();
+  CHECK(!column_path.empty()) << "Required field column_path was empty.";
+  // Note: In the future, we will probably want to make a `Storage` per table
+  // and grab columns from that table using operators. For now, however,
+  // making each column an independent storage works for the MVP and is much
+  // simpler.
+  //
+  // Also, for now, we consider all storages to have primitive type. We will
+  // probably want to change that when we start handling types in a
+  // non-trivial fashion.
+  return Value(StoredValue(decoder_context.GetOrCreateStorage(column_path)));
+}
+
+static Value DecodeLiteral(const Literal &literal,
+                           DecoderContext &decoder_context) {
+  const absl::string_view literal_str = literal.literal_str();
+  CHECK(!literal_str.empty()) << "required field literal_str was empty.";
+  return Value(
+      OperationResult(decoder_context.MakeLiteralOperation(literal_str),
+                      DecoderContext::kDefaultOutputName));
+}
+
 // A helper function to decode the specific subclass of the Expression.
-static ir::Value GetExprValue(
-    const Expression &expr, DecoderContext &decoder_context) {
+static Value GetExprValue(const Expression &expr,
+                          DecoderContext &decoder_context) {
   switch (expr.expr_variant_case()) {
     case Expression::EXPR_VARIANT_NOT_SET: {
       CHECK(false) << "Required field expr_variant not set.";
     }
     case Expression::kSourceTableColumn: {
-      return DecodeSourceTableColumn(
-          expr.source_table_column(), decoder_context);
+      return DecodeSourceTableColumn(expr.source_table_column(),
+                                     decoder_context);
     }
     case Expression::kLiteral: {
       return DecodeLiteral(expr.literal(), decoder_context);
@@ -44,38 +75,12 @@ static ir::Value GetExprValue(
   CHECK(false) << "Unreachable!";
 }
 
-const ir::Value &DecodeExpression(
-    const Expression &expr, DecoderContext &decoder_context) {
+const Value &DecodeExpression(const Expression &expr,
+                              DecoderContext &decoder_context) {
   uint64_t id = expr.id();
   CHECK(id != 0) << "Required field id was not present in Expression.";
-  // TODO: Figure out what to do with the optional name field.
+  // TODO(#413): Figure out what to do with the optional name field.
   return decoder_context.RegisterValue(id, GetExprValue(expr, decoder_context));
-}
-
-ir::Value DecodeSourceTableColumn(
-    const SourceTableColumn &source_table_column,
-    DecoderContext &decoder_context) {
-  const std::string &column_path = source_table_column.column_path();
-  CHECK(!column_path.empty()) << "Required field column_path was empty.";
-  // Note: In the future, we will probably want to make a `Storage` per table
-  // and grab columns from that table using operators. For now, however,
-  // making each column an independent storage works for the MVP and is much
-  // simpler.
-  //
-  // Also, for now, we consider all storages to have primitive type. We will
-  // probably want to change that when we start handling types in a
-  // non-trivial fashion.
-  return ir::Value(ir::value::StoredValue(
-      decoder_context.GetOrCreateStorage(column_path)));
-}
-
-ir::Value DecodeLiteral(
-    const Literal &literal, DecoderContext &decoder_context) {
-  const absl::string_view literal_str = literal.literal_str();
-  CHECK(!literal_str.empty()) << "required field literal_str was empty.";
-  return ir::Value(ir::value::OperationResult(
-      decoder_context.MakeLiteralOperation(literal_str),
-      DecoderContext::kDefaultOutputName));
 }
 
 }  // namespace raksha::frontends::sql
