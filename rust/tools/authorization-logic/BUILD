@@ -96,7 +96,7 @@ filegroup(
         "src/test/test_queries.rs",
         "src/test/test_relation_declarations.rs",
         "src/test/test_signing.rs",
-        "src/test/test_type_error.rs"
+        "src/test/test_type_error.rs",
     ],
 )
 
