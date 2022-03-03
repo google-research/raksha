@@ -165,10 +165,10 @@ says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(o
 .decl grounded_dummy(dummy_param: DummyType)
 says_fact1("prin1", thing_x) :- says_cond1("prin1", thing_x), says_isSomeType("prin1", thing_x).
 says_cond1("prin1", "foo").
-says_isSomeType("prin1", "foo").
-says_isPrincipal("prin1", "prin1").
-says_isSomeType("prin1", "foo").
-says_isPrincipal("prin1", "prin1").
+says_isPrincipal(\"prin1\", \"prin1\").
+says_isSomeType(\"prin1\", \"foo\").
+says_isPrincipal(\"prin1\", \"prin1\").
+says_isSomeType(\"prin1\", \"foo\").
 grounded_dummy("dummy_var").
 
 )")));
