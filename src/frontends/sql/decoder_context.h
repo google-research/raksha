@@ -26,7 +26,6 @@
 #include "src/ir/value.h"
 
 namespace raksha::frontends::sql {
-
 // Context specifically for the SQL proto decoding. This keeps track of state
 // that is not required when building the IR in general, and thus would be
 // inappropriate to put in IRContext.
@@ -54,11 +53,11 @@ class DecoderContext {
     return *insert_result.first->second;
   }
 
-  // Get a reference to the value associated with a particular id. Assumes that
-  // the ID is present; it will error if it is not.
+  // Get a reference to the value associated with a particular id. Assumes
+  // that the ID is present; it will error if it is not.
   const ir::Value &GetValue(uint64_t id) const {
-    // We could use `at`, which would be more concise and would also fail if the
-    // id is not present in the map, but it will not provide a nice error
+    // We could use `at`, which would be more concise and would also fail if
+    // the id is not present in the map, but it will not provide a nice error
     // message. Use `find` and `CHECK` to get a better error message.
     auto find_result = id_to_value.find(id);
     CHECK(find_result != id_to_value.end())
@@ -80,8 +79,9 @@ class DecoderContext {
   }
 
   // Create an `Operation` providing the literal value indicated by
-  // `literal_str`. This shall create an `Operation` of `Operator` "sql.literal"
-  // and with the literal value indicated in a `literal_str` attribute.
+  // `literal_str`. This shall create an `Operation` of `Operator`
+  // "sql.literal" and with the literal value indicated in a `literal_str`
+  // attribute.
   const ir::Operation &MakeLiteralOperation(absl::string_view literal_str) {
     return top_level_block_builder_.AddOperation(
         literal_operator_,
@@ -101,7 +101,7 @@ class DecoderContext {
 
  private:
   ir::IRContext &ir_context_;
-  absl::flat_hash_map<uint64_t, std::unique_ptr<ir::Value>> id_to_value;
+  absl::flat_hash_map<uint64_t, std::unique_ptr<ir::Value> > id_to_value;
   const ir::Operator &literal_operator_;
   // A global module to which we can add SQL IR nodes.
   ir::Module global_module_;

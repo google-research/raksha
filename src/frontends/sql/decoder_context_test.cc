@@ -31,8 +31,8 @@ using testing::UnorderedElementsAre;
 using testing::Values;
 
 using ir::Attribute;
-using ir::IRContext;
 using ir::Block;
+using ir::IRContext;
 using ir::Operation;
 using ir::Storage;
 using ir::Value;

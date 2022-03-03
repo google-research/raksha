@@ -26,9 +26,13 @@
 namespace raksha::frontends::sql {
 
 using ir::Attribute;
+<<<<<<< HEAD
 using ir::Block;
 using ir::IRContext;
 using ir::Module;
+=======
+using ir::IRContext;
+>>>>>>> main
 using ir::Operation;
 using ir::Storage;
 using ir::Value;
@@ -46,13 +50,6 @@ using testing::TestWithParam;
 using testing::UnorderedElementsAre;
 using testing::Values;
 using testing::ValuesIn;
-
-// A struct used to parameterize the decoding tests.
-struct IdNameAndString {
-  uint64_t id;
-  std::optional<absl::string_view> name;
-  absl::string_view str;
-};
 
 // A value-parameterized test fixture used for both SourceTableColumns and
 // Literals. Both of these constructs are basically just expressions
@@ -110,9 +107,15 @@ absl::string_view kStrings[] = {"MyTable.col",
 
 TEST_P(DecodeSourceTableColumnExprTest, DecodeSourceTableColumnExprTest) {
   auto &[id, name, str] = GetParam();
+<<<<<<< HEAD
   const ir::Value &result = GetDecodedValue();
   const StoredValue *stored_value = result.If<StoredValue>();
   EXPECT_THAT(stored_value, testing::NotNull());
+=======
+  const Value &result = GetDecodedValue();
+  const StoredValue *stored_value = result.If<StoredValue>();
+  EXPECT_THAT(stored_value, NotNull());
+>>>>>>> main
   const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), str);
   EXPECT_EQ(storage.type().type_base().kind(), TypeBase::Kind::kPrimitive);
@@ -134,9 +137,9 @@ class DecodeLiteralExprTest : public IdNameAndStringTest {
 
 TEST_P(DecodeLiteralExprTest, DecodeLiteralExprTest) {
   auto &[id, name, str] = GetParam();
-  const ir::Value &result = GetDecodedValue();
+  const Value &result = GetDecodedValue();
   const OperationResult *operation_result = result.If<OperationResult>();
-  EXPECT_THAT(operation_result, testing::NotNull());
+  EXPECT_THAT(operation_result, NotNull());
   const Operation &operation = operation_result->operation();
   const Block &top_block = decoder_context_.BuildTopLevelBlock();
   EXPECT_EQ(operation.parent(), &top_block);
@@ -213,6 +216,6 @@ const TextprotoDeathMessagePair kTextprotoDeathMessagePairs[] = {
 };
 
 INSTANTIATE_TEST_SUITE_P(DecodeExprDeathTest, DecodeExprDeathTest,
-                         testing::ValuesIn(kTextprotoDeathMessagePairs));
+                         ValuesIn(kTextprotoDeathMessagePairs));
 
 }  // namespace raksha::frontends::sql
