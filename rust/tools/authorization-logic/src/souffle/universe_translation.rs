@@ -497,15 +497,16 @@ impl UniverseHandlingPass {
 
     fn universe_condition_arg(&self, predicate_name: &str, argument: &str, position: usize)
         -> Option<AstPredicate> {
-            let predicate_decl = self.relation_type_environment.get(predicate_name).expect(
-                &format!("The relation \"{}\" was used but not declared",
-                        &predicate_name));
-            let arg_type = predicate_decl
-                .get(&position)
-                .unwrap();
             if is_name_constant(argument) {
                 None
             } else {
+                let predicate_decl = self.relation_type_environment
+                    .get(predicate_name).expect(
+                        &format!("The relation \"{}\" was used but not declared",
+                            &predicate_name));
+                let arg_type = predicate_decl
+                    .get(&position)
+                    .unwrap();
                 Some(AstPredicate {
                     sign: Sign::Positive,
                     name: type_to_universe_name(arg_type),
