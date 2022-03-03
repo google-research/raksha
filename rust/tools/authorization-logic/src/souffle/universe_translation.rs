@@ -43,7 +43,7 @@ use std::collections::{HashMap, HashSet};
 // way to represent this in the future might be to add an AST node for
 // arguments with varibales and constants as two possible forms.
 fn is_name_constant(arg: &str) -> bool {
-    return arg.contains("\"")
+    return arg.starts_with("\"")
 }
 
 fn push_option_to_vec<T>(vec: &mut Vec<T>, elt: Option<T>) {
@@ -59,14 +59,14 @@ fn push_if_constant(hash_set: &mut HashSet<String>, name: String) {
 }
 
 fn universe_condition_principal(principal: &AstPrincipal) -> Option<AstPredicate> {
-    if !is_name_constant(&principal.name) {
+    if is_name_constant(&principal.name) {
+        None
+    } else {
         Some(AstPredicate {
             sign: Sign::Positive,
-            name: "isPrincipal".to_string(),
+            name: type_to_universe_name(&AstType::PrincipalType),
             args: vec![principal.name.clone()]
         })
-    } else {
-        None
     }
 }
 
@@ -81,28 +81,20 @@ fn type_to_universe_name(ast_type: &AstType) -> String {
 fn universe_declarations(rel_decls: &Vec<AstRelationDeclaration>)
     -> Vec<AstRelationDeclaration> {
     // Set of all custom type names
-    let custom_type_names = rel_decls.iter()
+    let mut custom_types = rel_decls.iter()
         .map(|rel_decl| rel_decl.arg_typings.clone())
         .flatten()
         .map(|(name, typ)| typ)
-        .filter_map(|type_| match type_ {
-            AstType::CustomType { type_name } => Some(type_name.clone()),
-            _ => None
+        .filter(|type_| match type_ {
+            AstType::CustomType { type_name } => true,
+            _ => false
         })
         .collect::<HashSet<_>>();
+    custom_types.extend([AstType::NumberType, AstType::PrincipalType]);
+    let universe_type_pairs = custom_types.iter()
+        .map(|typ| (type_to_universe_name(typ), typ));
 
-    // Vector of pairs of the form (universe_relation_name, type of argument)
-    let mut universe_type_pairs = custom_type_names.iter()
-        .map(|type_name|
-             (format!("is{}", type_name),
-                 AstType::CustomType{ type_name: type_name.to_string() }))
-        .collect::<Vec<_>>();
-    universe_type_pairs.extend([
-        ("isNumber".to_string(), AstType::NumberType),
-        ("isPrincipal".to_string(), AstType::PrincipalType)
-    ]);
-    
-    universe_type_pairs.iter().map(|(rel_name, typ)| AstRelationDeclaration {
+    universe_type_pairs.map(|(rel_name, typ)| AstRelationDeclaration {
         predicate_name: rel_name.to_string(),
         is_attribute: false,
         arg_typings: vec![("x".to_string(), typ.clone())]
@@ -150,7 +142,7 @@ fn add_typing(constant_type_environment: &mut HashMap<String, AstType>,
 
 
 fn populate_constant_type_environment_prog(
-    relation_type_environment: &HashMap<String, AstRelationDeclaration>,
+    relation_type_environment: &RelationTypeEnv,
     prog: &AstProgram) -> HashMap<String, AstType> {
     let mut constant_type_environment = HashMap::new();
 
@@ -183,7 +175,7 @@ fn populate_constant_type_environment_prog(
 }
 
 fn populate_constant_type_environment_assertion(
-    relation_type_environment: &HashMap<String, AstRelationDeclaration>,
+    relation_type_environment: &RelationTypeEnv,
     constant_type_environment: &mut HashMap<String, AstType>,
     assertion: &AstAssertion) {
     match assertion {
@@ -209,7 +201,7 @@ fn populate_constant_type_environment_assertion(
 }
 
 fn populate_constant_type_environment_query(
-    relation_type_environment: &HashMap<String, AstRelationDeclaration>,
+    relation_type_environment: &RelationTypeEnv,
     constant_type_environment: &mut HashMap<String, AstType>,
     query: &AstQuery) {
 
@@ -221,7 +213,7 @@ fn populate_constant_type_environment_query(
 }
 
 fn populate_constant_type_environment_fact(
-    relation_type_environment: &HashMap<String, AstRelationDeclaration>,
+    relation_type_environment: &RelationTypeEnv,
     constant_type_environment: &mut HashMap<String, AstType>,
     fact: &AstFact) {
     match fact {
@@ -243,7 +235,7 @@ fn populate_constant_type_environment_fact(
 }
 
 fn populate_constant_type_environment_flat_fact(
-        relation_type_environment: &HashMap<String, AstRelationDeclaration>,
+        relation_type_environment: &RelationTypeEnv,
         constant_type_environment: &mut HashMap<String, AstType>,
         flat_fact: &AstFlatFact) {
         match flat_fact {
@@ -273,37 +265,34 @@ fn populate_constant_type_environment_flat_fact(
 }
     
 fn populate_constant_type_environment_predicate(
-    relation_type_environment: &HashMap<String, AstRelationDeclaration>,
+    relation_type_environment: &RelationTypeEnv,
     constant_type_environment: &mut HashMap<String, AstType>,
     predicate: &AstPredicate) {
 
     let predicate_decl = relation_type_environment.get(&predicate.name).expect(
         &format!("The relation \"{}\" was used but not declared",
                 &predicate.name));
-    // Creates a map from positions in the relation declaration to the
-    // type of the parameter at those positions. For example,
-    // `.decl foo(x: SomeThing, y: SomeOtherThing)`
-    // would yield the map
-    // `[(1, CustomType{ SomeThing }),
-    // (2, CustomType { SomeOtherThing })]`
-    let positional_arg_to_type_map: HashMap<_, _> = 
-        predicate_decl.arg_typings.clone()
-        .into_iter()
-        .map(|(param_name, typ)| typ)
-        .into_iter()
-        .enumerate()
-        .collect();
-
     for (pos, arg_name) in predicate.args.iter().enumerate() {
         add_typing(constant_type_environment, arg_name,
-                   positional_arg_to_type_map.get(&pos).unwrap().clone());
+                   predicate_decl.get(&pos).unwrap().clone());
     }
 
 }
 
+type RelationTypeEnv = HashMap<String, HashMap<usize, AstType>>;
 pub struct UniverseHandlingPass {
-    // mapping from relation names to relation typings
-    relation_type_environment: HashMap<String, AstRelationDeclaration>,
+    // mapping from relation names to relation typings. The relation
+    // typings map from positions in the relation declaration to types.
+    // A map from positions in the relation declarations to the
+    // type of the parameter at those positions. For example,
+    // `.decl foo(x: SomeThing, y: SomeOtherThing)`
+    // would yield the map
+    // ```
+    // (foo ->
+    //  (1 -> CustomType{ SomeThing },
+    //  2 -> CustomType { SomeOtherThing }))
+    //  ```
+    relation_type_environment: RelationTypeEnv,
     // maping from constant names to constant typings
     constant_type_environment: HashMap<String, AstType>
 }
@@ -326,7 +315,15 @@ impl UniverseHandlingPass {
     fn new(prog: &AstProgram) -> UniverseHandlingPass {
         let rel_typ_env = (&prog.relation_declarations)
                 .iter()
-                .map(|decl| (decl.predicate_name.clone(), decl.clone()))
+                .map(|decl| {
+                    let position_map = decl.arg_typings.clone()
+                        .into_iter()
+                        .map(|(param_name, typ)| typ)
+                        .into_iter()
+                        .enumerate()
+                        .collect::<HashMap<usize, AstType>>();
+                    (decl.predicate_name.clone(), position_map)
+                })
                 .collect();
 
         UniverseHandlingPass {
@@ -503,30 +500,17 @@ impl UniverseHandlingPass {
             let predicate_decl = self.relation_type_environment.get(predicate_name).expect(
                 &format!("The relation \"{}\" was used but not declared",
                         &predicate_name));
-            // Creates a map from positions in the relation declaration to the
-            // type of the parameter at those positions. For example,
-            // `.decl foo(x: SomeThing, y: SomeOtherThing)`
-            // would yield the map
-            // `[(1, CustomType{ SomeThing }),
-            // (2, CustomType { SomeOtherThing })]`
-            let positional_arg_to_type_map: HashMap<_, _> = 
-                predicate_decl.arg_typings
-                .iter()
-                .map(|(param_name, typ)| typ)
-                .into_iter()
-                .enumerate()
-                .collect();
-            let arg_type = positional_arg_to_type_map
+            let arg_type = predicate_decl
                 .get(&position)
                 .unwrap();
-            if !is_name_constant(argument) {
+            if is_name_constant(argument) {
+                None
+            } else {
                 Some(AstPredicate {
                     sign: Sign::Positive,
                     name: type_to_universe_name(arg_type),
                     args: vec![argument.to_string()]
                 })
-            } else {
-                None
             }
     }
 }
