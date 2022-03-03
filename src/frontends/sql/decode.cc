@@ -20,7 +20,6 @@
 
 namespace raksha::frontends::sql {
 
-using ir::Storage;
 using ir::Value;
 using ir::value::OperationResult;
 using ir::value::StoredValue;
