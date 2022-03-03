@@ -132,14 +132,14 @@ fn universe_declarations(rel_decls: &Vec<AstRelationDeclaration>)
 // environment, throw an error.
 fn add_typing(constant_type_environment: &mut HashMap<String, AstType>,
                    arg_name: &str, typ: AstType) {
-    if(is_name_constant(arg_name)) {
+    if is_name_constant(arg_name) {
         let arg_name_string = arg_name.to_string();
         match constant_type_environment.get(&arg_name_string) {
             None => {
                 constant_type_environment.insert(arg_name_string, typ);
             },
             Some(old_typ) => { 
-                if(old_typ != &typ) {
+                if old_typ != &typ {
                     // Type errors could be improved by getting line numbers.
                     panic!("type error: {} was used with distinct types {:?} and {:?}",
                            arg_name, old_typ, typ);
@@ -164,13 +164,20 @@ fn populate_constant_type_environment_prog(
     }
 
     // Add typings for constants appearing in assertions
-    for assertion in (prog.assertions.iter()
+    for assertion in prog.assertions.iter()
         .map(|says_assertion| &says_assertion.assertions)
-        .flatten()) {
+        .flatten() {
         populate_constant_type_environment_assertion(
             &relation_type_environment, 
             &mut constant_type_environment, 
             &assertion);
+    }
+
+    for query in prog.queries.iter() {
+        populate_constant_type_environment_query(
+            &relation_type_environment, 
+            &mut constant_type_environment, 
+            &query);
     }
 
     constant_type_environment
@@ -200,6 +207,18 @@ fn populate_constant_type_environment_assertion(
             }
         }
     }
+}
+
+fn populate_constant_type_environment_query(
+    relation_type_environment: &HashMap<String, AstRelationDeclaration>,
+    constant_type_environment: &mut HashMap<String, AstType>,
+    query: &AstQuery) {
+
+    add_typing(constant_type_environment, &query.principal.name,
+               AstType::PrincipalType);
+    populate_constant_type_environment_fact(relation_type_environment,
+                                            constant_type_environment,
+                                            &query.fact);
 }
 
 fn populate_constant_type_environment_fact(
@@ -278,14 +297,10 @@ fn populate_constant_type_environment_predicate(
 
     for (pos, arg_name) in predicate.args.iter().enumerate() {
         add_typing(constant_type_environment, arg_name,
-                   positional_arg_to_type_map.get(&pos).expect(
-                       &format!("faling on predicate: {:?}\narg_name: {:?}\npos: {:?}\nrels{:?}",
-                                predicate, arg_name, pos, predicate_decl)
-                       ).clone());
+                   positional_arg_to_type_map.get(&pos).unwrap().clone());
     }
 
 }
-
 
 pub struct UniverseHandlingPass {
     // mapping from relation names to relation typings
