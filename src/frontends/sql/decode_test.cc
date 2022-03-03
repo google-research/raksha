@@ -26,13 +26,9 @@
 namespace raksha::frontends::sql {
 
 using ir::Attribute;
-<<<<<<< HEAD
 using ir::Block;
 using ir::IRContext;
 using ir::Module;
-=======
-using ir::IRContext;
->>>>>>> main
 using ir::Operation;
 using ir::Storage;
 using ir::Value;
@@ -107,15 +103,9 @@ absl::string_view kStrings[] = {"MyTable.col",
 
 TEST_P(DecodeSourceTableColumnExprTest, DecodeSourceTableColumnExprTest) {
   auto &[id, name, str] = GetParam();
-<<<<<<< HEAD
-  const ir::Value &result = GetDecodedValue();
-  const StoredValue *stored_value = result.If<StoredValue>();
-  EXPECT_THAT(stored_value, testing::NotNull());
-=======
   const Value &result = GetDecodedValue();
   const StoredValue *stored_value = result.If<StoredValue>();
   EXPECT_THAT(stored_value, NotNull());
->>>>>>> main
   const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), str);
   EXPECT_EQ(storage.type().type_base().kind(), TypeBase::Kind::kPrimitive);
