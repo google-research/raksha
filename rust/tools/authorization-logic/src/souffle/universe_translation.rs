@@ -33,7 +33,6 @@
 //! and produces a new instance of the data structure in `ast.rs`.
 //! It should come before the translation in `lowering_ast_datalog.rs`.
 
-use itertools::Itertools;
 use crate::ast::*;
 use std::collections::{HashMap, HashSet};
 
@@ -352,11 +351,14 @@ impl UniverseHandlingPass {
         let constant_subexpressions: Vec<&String> = 
             self.constant_type_environment.keys()
             .collect();
-        let universe_defining_says_assertions = constant_speakers.iter()
-            .cartesian_product(constant_subexpressions.iter()) 
-            .map(|(speaker, expr)|
-                 self.universe_defining_says_assertion(speaker, expr)
-            );
+
+        let mut universe_defining_says_assertions = Vec::new();
+        for speaker in &constant_speakers {
+            for subexpr in &constant_subexpressions {
+                universe_defining_says_assertions.push(
+                    self.universe_defining_says_assertion(&speaker, subexpr));
+            }
+        }
 
         let mut ret = prog.clone();
         ret.assertions.extend(universe_defining_says_assertions);
