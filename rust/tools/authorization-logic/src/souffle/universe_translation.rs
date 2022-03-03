@@ -110,10 +110,10 @@ fn universe_declarations(rel_decls: &Vec<AstRelationDeclaration>)
 // This environment is needed to generate facts that put the constants into 
 // universe relations; we need to know which universe relation to put each one in.
 
-// TODO these functions should be refactored into a visitor. These are probably
+// TODO(#416): these functions should be refactored into a visitor. These are probably
 // the first really good use-case for a visitor since this is the first
 // functionality that traverses the AST in a way that is not highly order-dependent.
-// TODO it might also be useful to move this into its own separate pass.
+// TODO(#417) it might also be useful to move this into its own separate pass.
 
 // This attempts to add a typing for principals and predicate arguments if they
 // are constant. It does nothing if it is applied to an `arg_name` that is not
@@ -400,9 +400,9 @@ impl UniverseHandlingPass {
 
     // For ungrounded variables appearing in the LHS, extend the RHS
     // with prediates that put them in the universe relations.
-    // TODO at the moment, this conservatively adds a universe condition for all variables
-    // on the LHS rather than just the ungrounded ones. Extend this to
-    // capture just the ungrounded variables.
+    // TODO(#418) at the moment, this conservatively adds a universe condition
+    // for all variables on the LHS rather than just the ungrounded ones. Extend
+    // this to capture just the ungrounded variables.
     fn add_universe_conditions_assertion(&self, assertion: &AstAssertion)
         -> AstAssertion {
             match assertion {
@@ -437,9 +437,6 @@ impl UniverseHandlingPass {
     // For an AstFact appearing on the LHS of a conditional assertion,
     // generate the set of universe predicates that should be added to the RHS
     // from the variables that are subexprs of the AstFact. 
-    // TODO: it would be more precise to instead add universe conditions just
-    // for the variables that are genuinely ungrounded rather than all the
-    // variables on the LHS.
     fn universe_conditions_fact(&self, ast_fact: &AstFact) -> Vec<AstPredicate> {
         match ast_fact {
             AstFact::AstFlatFactFact { f: flat_fact } => {
