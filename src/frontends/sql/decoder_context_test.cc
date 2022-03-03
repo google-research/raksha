@@ -46,7 +46,7 @@ TEST(DecoderContextTest, BuildTopLevelBlock) {
   DecoderContext decoder_context(context);
 
   const Block &block = decoder_context.BuildTopLevelBlock();
-  EXPECT_EQ(block.module(), &decoder_context.global_module());
+  EXPECT_EQ(block.parent_module(), &decoder_context.global_module());
 }
 
 TEST(DecoderContextTest, GetOrCreateStorageIdempotence) {
