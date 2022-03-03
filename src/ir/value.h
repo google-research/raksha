@@ -55,7 +55,7 @@ class NamedValue {
 
  protected:
   // A helper that checks whether two `NamedValue`s are equal. We don't use
-  // `operator==` because this is not a base class and we don't want to deal
+  // `operator==` because this is not a leaf class and we don't want to deal
   // with weird shadowing effects.
   template <typename U>
   static bool NamedValuesEq(const NamedValue<U>& obj1,
@@ -73,7 +73,9 @@ class BlockArgument : public NamedValue<Block> {
  public:
   using NamedValue<Block>::NamedValue;
   const Block& block() const { return element(); }
-  bool operator==(const Value& other) const;
+  bool operator==(const BlockArgument& other) const {
+    return NamedValuesEq(*this, other);
+  }
 };
 
 // Indicates the result of an operation.
@@ -81,7 +83,9 @@ class OperationResult : public NamedValue<Operation> {
  public:
   using NamedValue<Operation>::NamedValue;
   const Operation& operation() const { return element(); }
-  bool operator==(const Value& other) const;
+  bool operator==(const OperationResult& other) const {
+    return NamedValuesEq(*this, other);
+  }
 };
 
 // Indicates the value in a storage.
@@ -98,7 +102,9 @@ class StoredValue {
     return storage_->ToString();
   }
 
-  bool operator==(const Value& other) const;
+  bool operator==(const StoredValue& other) const {
+    return storage_ == other.storage_;
+  }
 
  private:
   const Storage* storage_;
@@ -109,7 +115,9 @@ class Any {
  public:
   std::string ToString(const SsaNames& ssa_names) const { return "<<ANY>>"; }
 
-  bool operator==(const Value& other) const;
+  // Two `Any`s are always the same, as `Any` has no internal structure to
+  // differ.
+  bool operator==(const Any& other) const { return true; }
 };
 
 }  // namespace value
@@ -146,14 +154,7 @@ class Value {
   // Return whether the two `Value`s are identical representations. If they
   // are different, this does not necessarily mean that they do not
   // *evaluate* to the same value.
-  bool operator==(const Value& other) const {
-    // If the two `Value`s do not hold the same variant kind, they are not
-    // equal.
-    if (value_.index() != other.value_.index()) {
-      return false;
-    }
-    return std::visit([&](const auto& val) { return val == other; }, value_);
-  }
+  bool operator==(const Value& other) const { return value_ == other.value_; }
 
  private:
   std::variant<value::BlockArgument, value::OperationResult, value::StoredValue,

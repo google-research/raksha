@@ -243,7 +243,6 @@ cc_test(
 
 cc_library(
     name = "value",
-    srcs = ["value.cc"],
     hdrs = ["value.h"],
     deps = [
         ":ssa_names",
