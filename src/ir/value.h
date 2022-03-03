@@ -101,10 +101,11 @@ class Any {
 // A class that represents a data value.
 class Value {
  public:
-  Value(value::BlockArgument arg) : value_(std::move(arg)) {}
-  Value(value::OperationResult arg) : value_(std::move(arg)) {}
-  Value(value::Any arg) : value_(std::move(arg)) {}
-  Value(value::StoredValue arg) : value_(std::move(arg)) {}
+  using ValueVariants =
+      std::variant<value::BlockArgument, value::OperationResult,
+                   value::StoredValue, value::Any>;
+
+  explicit Value(ValueVariants value) : value_(std::move(value)) {}
 
   std::string ToString(SsaNames& ssa_names) const {
     return std::visit(
@@ -124,9 +125,7 @@ class Value {
   const T *If() const { return std::get_if<T>(&value_); }
 
  private:
-  std::variant<value::BlockArgument, value::OperationResult, value::StoredValue,
-               value::Any>
-      value_;
+  ValueVariants value_;
 };
 
 using ValueList = std::vector<Value>;
