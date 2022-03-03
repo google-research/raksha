@@ -53,6 +53,16 @@ class NamedValue {
                            name_);
   }
 
+ protected:
+  // A helper that checks whether two `NamedValue`s are equal. We don't use
+  // `operator==` because this is not a base class and we don't want to deal
+  // with weird shadowing effects.
+  template <typename U>
+  static bool NamedValuesEq(const NamedValue<U>& obj1,
+                            const NamedValue<U>& obj2) {
+    return (obj1.element_ == obj2.element_) && (obj1.name_ == obj2.name_);
+  }
+
  private:
   const T* element_;
   std::string name_;
@@ -63,6 +73,7 @@ class BlockArgument : public NamedValue<Block> {
  public:
   using NamedValue<Block>::NamedValue;
   const Block& block() const { return element(); }
+  bool operator==(const Value& other) const;
 };
 
 // Indicates the result of an operation.
@@ -70,6 +81,7 @@ class OperationResult : public NamedValue<Operation> {
  public:
   using NamedValue<Operation>::NamedValue;
   const Operation& operation() const { return element(); }
+  bool operator==(const Value& other) const;
 };
 
 // Indicates the value in a storage.
@@ -86,6 +98,8 @@ class StoredValue {
     return storage_->ToString();
   }
 
+  bool operator==(const Value& other) const;
+
  private:
   const Storage* storage_;
 };
@@ -94,6 +108,8 @@ class StoredValue {
 class Any {
  public:
   std::string ToString(const SsaNames& ssa_names) const { return "<<ANY>>"; }
+
+  bool operator==(const Value& other) const;
 };
 
 }  // namespace value
@@ -115,13 +131,29 @@ class Value {
   }
 
   // A downcast operation. Just delegates directly to std::get on variants.
-  template<class T>
-  const T &As() const { return std::get<T>(value_); }
+  template <class T>
+  const T& As() const {
+    return std::get<T>(value_);
+  }
 
   // A dynamic downcast operation. Just delegates directly to std::get_if on
   // variants.
-  template<class T>
-  const T *If() const { return std::get_if<T>(&value_); }
+  template <class T>
+  const T* If() const {
+    return std::get_if<T>(&value_);
+  }
+
+  // Return whether the two `Value`s are identical representations. If they
+  // are different, this does not necessarily mean that they do not
+  // *evaluate* to the same value.
+  bool operator==(const Value& other) const {
+    // If the two `Value`s do not hold the same variant kind, they are not
+    // equal.
+    if (value_.index() != other.value_.index()) {
+      return false;
+    }
+    return std::visit([&](const auto& val) { return val == other; }, value_);
+  }
 
  private:
   std::variant<value::BlockArgument, value::OperationResult, value::StoredValue,
