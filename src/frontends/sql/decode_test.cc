@@ -26,7 +26,9 @@
 namespace raksha::frontends::sql {
 
 using ir::Attribute;
+using ir::Block;
 using ir::IRContext;
+using ir::Module;
 using ir::Operation;
 using ir::Storage;
 using ir::Value;
@@ -129,7 +131,8 @@ TEST_P(DecodeLiteralExprTest, DecodeLiteralExprTest) {
   const OperationResult *operation_result = result.If<OperationResult>();
   EXPECT_THAT(operation_result, NotNull());
   const Operation &operation = operation_result->operation();
-  EXPECT_THAT(operation.parent(), IsNull());
+  const Block &top_block = decoder_context_.BuildTopLevelBlock();
+  EXPECT_EQ(operation.parent(), &top_block);
   EXPECT_THAT(operation.impl_module(), IsNull());
   EXPECT_EQ(operation.op().name(), DecoderContext::kSqlLiteralOpName);
   EXPECT_THAT(operation.inputs(), IsEmpty());
