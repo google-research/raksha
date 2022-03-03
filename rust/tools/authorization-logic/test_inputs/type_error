@@ -1,0 +1,5 @@
+.decl foo(a : OneThing)
+.decl bar(a : AnotherThing)
+
+"PrincipalA" says foo("x").
+"PrincipalA" says bar("x").
