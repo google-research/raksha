@@ -105,9 +105,9 @@ saysWill(w, x, y) :- says_will(w, x, y).
 
 // Authorization Logic
 .type DummyType <: symbol
-.decl says_isNumber(speaker: Principal, x: number)
-.decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
 .decl grounded_dummy(dummy_param: DummyType)
+.decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
+.decl says_isNumber(speaker: Principal, x: number)
 grounded_dummy("dummy_var").
 
 )"),
@@ -155,21 +155,21 @@ says_hasTag("particle", "recipe.particle.out", owner, "tag") :- ownsAccessPath(o
 
 
 // Authorization Logic
-.type SomeType <: symbol
 .type DummyType <: symbol
-.decl says_fact1(speaker: Principal, someType: SomeType)
-.decl says_cond1(speaker: Principal, someType: SomeType)
-.decl says_isSomeType(speaker: Principal, x: SomeType)
-.decl says_isNumber(speaker: Principal, x: number)
-.decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
+.type SomeType <: symbol
 .decl grounded_dummy(dummy_param: DummyType)
-says_fact1("prin1", thing_x) :- says_cond1("prin1", thing_x), says_isSomeType("prin1", thing_x).
-says_cond1("prin1", "foo").
-says_isPrincipal(\"prin1\", \"prin1\").
-says_isSomeType(\"prin1\", \"foo\").
-says_isPrincipal(\"prin1\", \"prin1\").
-says_isSomeType(\"prin1\", \"foo\").
+.decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
+.decl says_cond1(speaker: Principal, someType: SomeType)
+.decl says_fact1(speaker: Principal, someType: SomeType)
+.decl says_isNumber(speaker: Principal, x: number)
+.decl says_isSomeType(speaker: Principal, x: SomeType)
 grounded_dummy("dummy_var").
+says_cond1("prin1", "foo").
+says_fact1("prin1", thing_x) :- says_cond1("prin1", thing_x), says_isSomeType("prin1", thing_x).
+says_isPrincipal("prin1", "prin1").
+says_isPrincipal("prin1", "prin1").
+says_isSomeType("prin1", "foo").
+says_isSomeType("prin1", "foo").
 
 )")));
 
