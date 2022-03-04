@@ -98,15 +98,14 @@ class SouffleEmitter {
   std::string EmitOutputs(const datalog::DLIRProgram& program) {
     return absl::StrJoin(program.outputs(), "\n",
                          [](std::string* out, const std::string& prog_out) {
-                           return absl::StrAppend(
-                               out, absl::StrCat(".output ", prog_out));
+                           return absl::StrAppend(out, ".output ", prog_out);
                          });
   }
 
   std::string EmitDeclaration(const datalog::Predicate& predicate) {
     std::string arguments = absl::StrJoin(
         predicate.args(), ", ", [](std::string* out, const std::string& arg) {
-          return absl::StrAppend(out, absl::StrCat(arg, ": symbol"));
+          return absl::StrAppend(out, arg, ": symbol");
         });
     return absl::StrCat(".decl ", predicate.name(), "(", arguments, ")");
   }
