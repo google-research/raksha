@@ -112,7 +112,9 @@ cc_library(
     deps = [
         ":ir_traversing_visitor",
         ":module",
+        ":value",
         "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
     ],
 )
 
@@ -120,10 +122,13 @@ cc_test(
     name = "ir_printer_test",
     srcs = ["ir_printer_test.cc"],
     deps = [
+        ":attribute",
         ":block_builder",
         ":ir_printer",
         ":module",
+        ":value",
         "//src/common/testing:gtest",
+        "@absl//absl/container:flat_hash_set",
     ],
 )
 
