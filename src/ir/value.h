@@ -53,6 +53,11 @@ class NamedValue {
                            name_);
   }
 
+ protected:
+  bool operator==(const NamedValue<T> &other) const {
+    return (element_ == other.element_) && (name_ == other.name_);
+  }
+
  private:
   const T* element_;
   std::string name_;
@@ -63,6 +68,7 @@ class BlockArgument : public NamedValue<Block> {
  public:
   using NamedValue<Block>::NamedValue;
   const Block& block() const { return element(); }
+  using NamedValue<Block>::operator==;
 };
 
 // Indicates the result of an operation.
@@ -70,6 +76,7 @@ class OperationResult : public NamedValue<Operation> {
  public:
   using NamedValue<Operation>::NamedValue;
   const Operation& operation() const { return element(); }
+  using NamedValue<Operation>::operator==;
 };
 
 // Indicates the value in a storage.
@@ -86,6 +93,10 @@ class StoredValue {
     return storage_->ToString();
   }
 
+  bool operator==(const StoredValue& other) const {
+    return storage_ == other.storage_;
+  }
+
  private:
   const Storage* storage_;
 };
@@ -94,6 +105,10 @@ class StoredValue {
 class Any {
  public:
   std::string ToString(const SsaNames& ssa_names) const { return "<<ANY>>"; }
+
+  // Two `Any`s are always the same, as `Any` has no internal structure to
+  // differ.
+  bool operator==(const Any& other) const { return true; }
 };
 
 }  // namespace value
@@ -126,6 +141,11 @@ class Value {
   const T* If() const {
     return std::get_if<T>(&value_);
   }
+
+  // Return whether the two `Value`s are identical representations. If they
+  // are different, this does not necessarily mean that they do not
+  // *evaluate* to the same value.
+  bool operator==(const Value& other) const { return value_ == other.value_; }
 
  private:
   Variants value_;
