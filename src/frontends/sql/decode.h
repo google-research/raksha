@@ -19,14 +19,14 @@
 
 #include <vector>
 
-#include "src/ir/value.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/sql_ir.pb.h"
+#include "src/ir/value.h"
 
 namespace raksha::frontends::sql {
 
-const ir::Value &DecodeExpression(
-    const Expression &expr, DecoderContext &decoder_context);
+ir::Value DecodeExpression(const Expression &expr,
+                           DecoderContext &decoder_context);
 
 }  // namespace raksha::frontends::sql
 

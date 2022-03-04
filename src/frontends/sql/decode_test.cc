@@ -69,7 +69,7 @@ class IdNameAndStringTest
     return absl::StrFormat(GetTextprotoFormat(), id, name_str, str);
   }
 
-  const Value &GetDecodedValue() {
+  Value GetDecodedValue() {
     Expression expr;
     EXPECT_TRUE(
         google::protobuf::TextFormat::ParseFromString(GetTextproto(), &expr))
@@ -103,13 +103,13 @@ absl::string_view kStrings[] = {"MyTable.col",
 
 TEST_P(DecodeSourceTableColumnExprTest, DecodeSourceTableColumnExprTest) {
   auto &[id, name, str] = GetParam();
-  const Value &result = GetDecodedValue();
+  Value result = GetDecodedValue();
   const StoredValue *stored_value = result.If<StoredValue>();
   EXPECT_THAT(stored_value, NotNull());
   const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), str);
   EXPECT_EQ(storage.type().type_base().kind(), TypeBase::Kind::kPrimitive);
-  EXPECT_EQ(&result, &decoder_context_.GetValue(id));
+  EXPECT_EQ(result, decoder_context_.GetValue(id));
 }
 
 INSTANTIATE_TEST_SUITE_P(DecodeSourceTableColumnExprTest,
@@ -143,7 +143,7 @@ TEST_P(DecodeLiteralExprTest, DecodeLiteralExprTest) {
       UnorderedElementsAre(Pair(
           DecoderContext::kLiteralStrAttrName,
           ResultOf([](Attribute attr) { return attr->ToString(); }, Eq(str)))));
-  EXPECT_EQ(&result, &decoder_context_.GetValue(id));
+  EXPECT_EQ(result, decoder_context_.GetValue(id));
 }
 
 INSTANTIATE_TEST_SUITE_P(DecodeLiteralExprTest, DecodeLiteralExprTest,
