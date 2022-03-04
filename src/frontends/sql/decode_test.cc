@@ -28,7 +28,6 @@ namespace raksha::frontends::sql {
 using ir::Attribute;
 using ir::Block;
 using ir::IRContext;
-using ir::Module;
 using ir::Operation;
 using ir::Storage;
 using ir::Value;
