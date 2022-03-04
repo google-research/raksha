@@ -20,8 +20,6 @@
 #include "src/ir/types/type.h"
 #include "src/ir/types/type_factory.h"
 
-// This is a test for DataDecl.
-
 namespace raksha::ir {
 namespace {
 
