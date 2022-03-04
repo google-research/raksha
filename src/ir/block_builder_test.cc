@@ -53,7 +53,7 @@ using BlockBuilderDeathTest = BlockBuilderTest;
 
 TEST_F(BlockBuilderTest, DefaultConstructorInitilizesModuleToNullptr) {
   Block block;
-  EXPECT_EQ(block.module(), nullptr);
+  EXPECT_EQ(block.parent_module(), nullptr);
 }
 
 void CheckExpectedDecls(const DataDeclCollection& decls,

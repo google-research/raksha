@@ -54,13 +54,8 @@ class NamedValue {
   }
 
  protected:
-  // A helper that checks whether two `NamedValue`s are equal. We don't use
-  // `operator==` because this is not a leaf class and we don't want to deal
-  // with weird shadowing effects.
-  template <typename U>
-  static bool NamedValuesEq(const NamedValue<U>& obj1,
-                            const NamedValue<U>& obj2) {
-    return (obj1.element_ == obj2.element_) && (obj1.name_ == obj2.name_);
+  bool operator==(const NamedValue<T> &other) const {
+    return (element_ == other.element_) && (name_ == other.name_);
   }
 
  private:
@@ -73,9 +68,7 @@ class BlockArgument : public NamedValue<Block> {
  public:
   using NamedValue<Block>::NamedValue;
   const Block& block() const { return element(); }
-  bool operator==(const BlockArgument& other) const {
-    return NamedValuesEq(*this, other);
-  }
+  using NamedValue<Block>::operator==;
 };
 
 // Indicates the result of an operation.
@@ -83,9 +76,7 @@ class OperationResult : public NamedValue<Operation> {
  public:
   using NamedValue<Operation>::NamedValue;
   const Operation& operation() const { return element(); }
-  bool operator==(const OperationResult& other) const {
-    return NamedValuesEq(*this, other);
-  }
+  using NamedValue<Operation>::operator==;
 };
 
 // Indicates the value in a storage.
@@ -125,10 +116,10 @@ class Any {
 // A class that represents a data value.
 class Value {
  public:
-  Value(value::BlockArgument arg) : value_(std::move(arg)) {}
-  Value(value::OperationResult arg) : value_(std::move(arg)) {}
-  Value(value::Any arg) : value_(std::move(arg)) {}
-  Value(value::StoredValue arg) : value_(std::move(arg)) {}
+  using Variants = std::variant<value::BlockArgument, value::OperationResult,
+                                value::StoredValue, value::Any>;
+
+  explicit Value(Variants value) : value_(std::move(value)) {}
 
   std::string ToString(SsaNames& ssa_names) const {
     return std::visit(
@@ -157,9 +148,7 @@ class Value {
   bool operator==(const Value& other) const { return value_ == other.value_; }
 
  private:
-  std::variant<value::BlockArgument, value::OperationResult, value::StoredValue,
-               value::Any>
-      value_;
+  Variants value_;
 };
 
 using ValueList = std::vector<Value>;

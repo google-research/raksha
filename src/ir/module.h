@@ -91,7 +91,7 @@ class Block {
   const DataDeclCollection& inputs() const { return inputs_; }
   const DataDeclCollection& outputs() const { return outputs_; }
   const NamedValueMap& results() const { return results_; }
-  const Module* module() const { return parent_module_; }
+  const Module* parent_module() const { return parent_module_; }
 
   template <typename Derived>
   void Accept(IRVisitor<Derived>& visitor) const {
@@ -104,7 +104,7 @@ class Block {
  private:
   // Set the module to which this block belongs. This is private so that only
   // the Module can set it via its `AddBlock` function.
-  void SetModule(const Module& module) { parent_module_ = &module; }
+  void set_parent_module(const Module& module) { parent_module_ = &module; }
 
   // Module to which this belongs to.
   const Module* parent_module_;
@@ -136,9 +136,9 @@ class Module {
     // Note: this check should be impossible due to this function taking a
     // `unique_ptr` to the `Block`. But it's a cheap thing to check, so might
     // as well just do it.
-    CHECK(block->module() == nullptr) << "Attempt to add a Block to two "
-                                         "different Modules!";
-    block->SetModule(*this);
+    CHECK(block->parent_module() == nullptr) << "Attempt to add a Block to two "
+                                                "different Modules!";
+    block->set_parent_module(*this);
     blocks_.push_back(std::move(block));
     return *blocks_.back();
   }
