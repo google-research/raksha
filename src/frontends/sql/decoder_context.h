@@ -42,27 +42,24 @@ class DecoderContext {
         global_module_(),
         top_level_block_builder_() {}
 
-  // Register a value as associated with a particular id. This stores that
-  // value and provides a reference to its canonical value.
-  const ir::Value &RegisterValue(uint64_t id, ir::Value value) {
-    auto insert_result =
-        id_to_value.insert({id, std::make_unique<ir::Value>(std::move(value))});
+  // Register a value as associated with a particular id.
+  void RegisterValue(uint64_t id, ir::Value value) {
+    auto insert_result = id_to_value.insert({id, std::move(value)});
     CHECK(insert_result.second)
         << "id_to_value map has more than one value associated with the id "
         << insert_result.first->first << ".";
-    return *insert_result.first->second;
   }
 
-  // Get a reference to the value associated with a particular id. Assumes
-  // that the ID is present; it will error if it is not.
-  const ir::Value &GetValue(uint64_t id) const {
-    // We could use `at`, which would be more concise and would also fail if
-    // the id is not present in the map, but it will not provide a nice error
+  // Get a copy of the value associated with a particular id. Assumes that the
+  // ID is present; it will error if it is not.
+  ir::Value GetValue(uint64_t id) const {
+    // We could use `at`, which would be more concise and would also fail if the
+    // id is not present in the map, but it will not provide a nice error
     // message. Use `find` and `CHECK` to get a better error message.
     auto find_result = id_to_value.find(id);
     CHECK(find_result != id_to_value.end())
         << "Could not find a value with id " << id << ".";
-    return *find_result->second;
+    return find_result->second;
   }
   // Get the `Storage` with the given name, create it otherwise. This is a
   // bit of a hack that we use here because SQL buries its global context
@@ -101,7 +98,11 @@ class DecoderContext {
 
  private:
   ir::IRContext &ir_context_;
-  absl::flat_hash_map<uint64_t, std::unique_ptr<ir::Value> > id_to_value;
+  // A mapping from an `id` to the value associated with that `id`. We store
+  // `id`s as values because we will be returning copies of them, not
+  // pointers to them.
+  absl::flat_hash_map<uint64_t, ir::Value> id_to_value;
+  // An `Operator` that provides the value of a literal.
   const ir::Operator &literal_operator_;
   // A global module to which we can add SQL IR nodes.
   ir::Module global_module_;
