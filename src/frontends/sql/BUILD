@@ -64,6 +64,7 @@ cc_library(
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:ssa_names",
+        "//src/ir:value",
     ],
 )
 
@@ -81,7 +82,9 @@ cc_test(
     srcs = ["decode_test.cc"],
     deps = [
         ":decode",
+        ":decoder_context",
         "//src/common/testing:gtest",
+        "//src/frontends/sql:sql_ir_cc_proto",
         "@absl//absl/strings",
     ],
 )
