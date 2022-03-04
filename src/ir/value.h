@@ -101,11 +101,10 @@ class Any {
 // A class that represents a data value.
 class Value {
  public:
-  using ValueVariants =
-      std::variant<value::BlockArgument, value::OperationResult,
-                   value::StoredValue, value::Any>;
+  using Variants = std::variant<value::BlockArgument, value::OperationResult,
+                                value::StoredValue, value::Any>;
 
-  explicit Value(ValueVariants value) : value_(std::move(value)) {}
+  explicit Value(Variants value) : value_(std::move(value)) {}
 
   std::string ToString(SsaNames& ssa_names) const {
     return std::visit(
@@ -116,16 +115,20 @@ class Value {
   }
 
   // A downcast operation. Just delegates directly to std::get on variants.
-  template<class T>
-  const T &As() const { return std::get<T>(value_); }
+  template <class T>
+  const T& As() const {
+    return std::get<T>(value_);
+  }
 
   // A dynamic downcast operation. Just delegates directly to std::get_if on
   // variants.
-  template<class T>
-  const T *If() const { return std::get_if<T>(&value_); }
+  template <class T>
+  const T* If() const {
+    return std::get_if<T>(&value_);
+  }
 
  private:
-  ValueVariants value_;
+  Variants value_;
 };
 
 using ValueList = std::vector<Value>;
