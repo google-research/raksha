@@ -136,6 +136,34 @@ fn construct_can_say_fact(ctx: &CanSayFactContext) -> AstFact {
     }
 }
 
+fn construct_binop(ctx: &BinopContextAll) -> AstBinop {
+    match ctx {
+        BinopContextAll::LtbinopContext(_) => AstBinop::LessThan,
+        BinopContextAll::GrbinopContext(_) => AstBinop::GreaterThan,
+        BinopContextAll::EqbinopContext(_) => AstBinop::Equals,
+        BinopContextAll::NebinopContext(_) => AstBinop::NotEquals,
+        BinopContextAll::LeqbinopContext(_) => AstBinop::LessOrEquals,
+        BinopContextAll::GeqbinopContext(_) => AstBinop::GreaterOrEquals,
+    }
+}
+
+fn construct_rvalue(ctx: &RvalueContextAll) -> AstRValue {
+    match ctx {
+        RvalueContextAll::FlatFactRvalueContext(ffctx) => {
+            AstRValue::FlatFactRValue { 
+                flat_fact: construct_flat_fact(&ffctx.flatFact().unwrap())
+            }
+        },
+        RvalueContextAll::BinopRvalueContext(bctx) => {
+            AstRValue::BinopRValue {
+                lnum: bctx.NUMLITERAL(0).unwrap().get_text().parse().unwrap(),
+                binop: construct_binop(&bctx.binop().unwrap()),
+                rnum: bctx.NUMLITERAL(1).unwrap().get_text().parse().unwrap()
+            }
+        }
+    }
+}
+
 fn construct_assertion(ctx: &AssertionContextAll) -> AstAssertion {
     match ctx {
         AssertionContextAll::FactAssertionContext(fctx) => construct_fact_assertion(fctx),
@@ -154,8 +182,8 @@ fn construct_fact_assertion(ctx: &FactAssertionContext) -> AstAssertion {
 fn construct_hornclause(ctx: &HornClauseAssertionContext) -> AstAssertion {
     let lhs = construct_fact(&ctx.fact().unwrap());
     let mut rhs = Vec::new();
-    for flat_fact_ctx in ctx.flatFact_all() {
-        rhs.push(construct_flat_fact(&flat_fact_ctx));
+    for rvalue_ctx in ctx.rvalue_all() {
+        rhs.push(construct_rvalue(&rvalue_ctx));
     }
     AstAssertion::AstCondAssertion { lhs, rhs }
 }

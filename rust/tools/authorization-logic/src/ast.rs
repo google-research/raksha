@@ -73,9 +73,25 @@ pub enum AstFact {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum AstBinop {
+    LessThan,
+    GreaterThan,
+    Equals,
+    NotEquals,
+    LessOrEquals,
+    GreaterOrEquals
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum AstRValue {
+    FlatFactRValue { flat_fact: AstFlatFact},
+    BinopRValue { lnum: usize, binop: AstBinop, rnum: usize }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AstAssertion {
     AstFactAssertion { f: AstFact },
-    AstCondAssertion { lhs: AstFact, rhs: Vec<AstFlatFact> },
+    AstCondAssertion { lhs: AstFact, rhs: Vec<AstRValue> },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
