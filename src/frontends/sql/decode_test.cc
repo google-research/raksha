@@ -204,6 +204,9 @@ const TextprotoDeathMessagePair kTextprotoDeathMessagePairs[] = {
      .death_message = "Required field id was not present in Expression."},
     {.textproto = R"(id: 1)",
      .death_message = "Required field expr_variant not set."},
+    {.textproto = R"(id: 1 merge_operation: { })",
+     .death_message = "Each MergeOperation is expected to have at least one "
+                      "non-control input."},
 };
 
 INSTANTIATE_TEST_SUITE_P(DecodeExprDeathTest, DecodeExprDeathTest,
