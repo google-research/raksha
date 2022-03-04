@@ -38,7 +38,6 @@ using ir::Storage;
 using ir::Value;
 using ir::types::TypeBase;
 using ir::value::Any;
-using ir::value::OperationResult;
 using ir::value::StoredValue;
 
 TEST(DecoderContextTest, BuildTopLevelBlock) {
