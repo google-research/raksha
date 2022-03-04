@@ -53,7 +53,7 @@ using BlockBuilderDeathTest = BlockBuilderTest;
 
 TEST_F(BlockBuilderTest, DefaultConstructorInitilizesModuleToNullptr) {
   Block block;
-  EXPECT_EQ(block.module(), nullptr);
+  EXPECT_EQ(block.parent_module(), nullptr);
 }
 
 void CheckExpectedDecls(const DataDeclCollection& decls,
@@ -130,11 +130,16 @@ TEST_F(BlockBuilderTest, AddOperationUpdatesOperationList) {
       builder.AddOperation(context_.GetOperator("core.minus"), {}, {}));
   const Operation* merge_op = std::addressof(
       builder.AddOperation(context_.GetOperator("core.merge"), {}, {}));
+  const Operation* merge_op_with_module = std::addressof(builder.AddOperation(
+      context_.GetOperator("core.merge"), {}, {}, std::make_unique<Module>()));
+
   auto block = builder.build();
   EXPECT_THAT(block->operations(),
-              testing::ElementsAre(testing::Pointer(testing::Eq(plus_op)),
-                                   testing::Pointer(testing::Eq(minus_op)),
-                                   testing::Pointer(testing::Eq(merge_op))));
+              testing::ElementsAre(
+                  testing::Pointer(testing::Eq(plus_op)),
+                  testing::Pointer(testing::Eq(minus_op)),
+                  testing::Pointer(testing::Eq(merge_op)),
+                  testing::Pointer(testing::Eq(merge_op_with_module))));
 }
 
 TEST_F(BlockBuilderTest, AddImplementationPassesSelfAndResultBlock) {
@@ -179,6 +184,14 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
   ASSERT_EQ(results.count("primitive_output"), 1);
   EXPECT_EQ(results.at("primitive_output").ToString(ssa_names),
             "%0.primitive_value");
+}
+
+TEST(BlockBuilderSimpleDeathTest, DoubleBuildBlockBuilder) {
+  BlockBuilder builder;
+  std::unique_ptr<Block> block1 = builder.build();
+  EXPECT_DEATH({ builder.build(); },
+               "Attempt to build a `BlockBuilder` that has already been"
+               " built.");
 }
 
 }  // namespace

@@ -30,6 +30,7 @@ TEST(ModuleTest, AddBlockReturnsPassedInBlock) {
   const Block* passed_in_block = block.get();
   const Block& returned_block = module.AddBlock(std::move(block));
   EXPECT_EQ(std::addressof(returned_block), passed_in_block);
+  EXPECT_EQ(returned_block.parent_module(), &module);
 }
 
 TEST(ModuleTest, AddBlockUpdatesBlockList) {

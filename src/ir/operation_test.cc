@@ -16,6 +16,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/attribute.h"
+#include "src/ir/ir_printer.h"
 #include "src/ir/module.h"
 #include "src/ir/value.h"
 
@@ -62,7 +63,7 @@ TEST_P(OperationTest, AccessorsAndToStringReturnCorrectValue) {
   // EXPECT_EQ(operation.attributes(), attributes);
   // TODO(337): Enable this when we have a comparator for values.
   // EXPECT_EQ(operation.inputs(), inputs);
-  EXPECT_THAT(string_reps, testing::Eq(operation.ToString(ssa_names)));
+  EXPECT_THAT(string_reps, testing::Eq(IRPrinter::ToString(operation)));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -72,28 +73,28 @@ INSTANTIATE_TEST_SUITE_P(
                            &OperationTest::plus_op,
                            {},
                            {},
-                           "%0 = core.plus []()"}),
+                           "%0 = core.plus []()\n"}),
         OperationTestData({nullptr,
                            &OperationTest::plus_op,
                            {{"const", Int64Attribute::Create(10)}},
                            {},
-                           "%0 = core.plus [const: 10]()"}),
+                           "%0 = core.plus [const: 10]()\n"}),
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"predicate", StringAttribute::Create("a && b")}},
                            {},
-                           "%0 = core.minus [predicate: a && b]()"}),
+                           "%0 = core.minus [predicate: a && b]()\n"}),
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"const1", StringAttribute::Create("a")},
                             {"const2", Int64Attribute::Create(42)}},
                            {},
-                           "%0 = core.minus [const1: a, const2: 42]()"}),
+                           "%0 = core.minus [const1: a, const2: 42]()\n"}),
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"const", Int64Attribute::Create(10)}},
                            {{"arg", Value(value::Any())}},
-                           "%0 = core.minus [const: 10](arg: <<ANY>>)"}),
+                           "%0 = core.minus [const: 10](arg: <<ANY>>)\n"}),
         OperationTestData(
             {&OperationTest::first_block_,
              &OperationTest::minus_op,
@@ -102,7 +103,7 @@ INSTANTIATE_TEST_SUITE_P(
                                                "arg0"))},
               {"b", Value(value::BlockArgument(OperationTest::first_block_,
                                                "arg1"))}},
-             "%0 = core.minus [const: 10](a: %0.arg0, b: %0.arg1)"})));
+             "%0 = core.minus [const: 10](a: %0.arg0, b: %0.arg1)\n"})));
 
 }  // namespace
 }  // namespace raksha::ir

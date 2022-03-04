@@ -1,0 +1,118 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//----------------------------------------------------------------------------
+
+// This is a minimal proto targeted at the MVP integration with a Google SQL
+// verifier. It's just to push a limited set of constructs across the
+// language barrier.
+syntax = "proto3";
+
+package raksha.frontends.sql;
+
+// This value corresponds to some source table for the query being analyzed.
+message SourceTableColumn {
+  // The fully-qualified path to the column, including table name and (if it
+  // exists) schema name.
+  string column_path = 1;
+}
+
+// A literal. The SQL verifier currently just passes on the string form of the
+// literal as seen by the parser. For the MVP, we just continue passing this
+// along.
+message Literal {
+  string literal_str = 1;
+}
+
+// This `MergeOperation` is an all-purpose combination of inputs into a single
+// output. Unless indicated by a `TagTransform`, this will always drop all
+// `IntegrityTag`s and propagate all `ConfidentialityTag`s.
+message MergeOperation {
+  // Direct dataflow dependencies. Relevant for confidentiality and integrity
+  // tags.
+  repeated Expression inputs = 2;
+  // Control dependencies. Confidentiality tags can flow from these inputs to
+  // the outputs. They are irrelevant to integrity tags.
+  repeated Expression control_inputs = 3;
+}
+
+// The kind of a tag.
+enum TagKind {
+  TAG_KIND_UNKNOWN = 0;
+  TAG_KIND_INTEGRITY = 1;
+  TAG_KIND_CONFIDENTIALITY = 2;
+}
+
+// The action that is taken upon a tag by a TagTransform expression.
+enum TagAlteration {
+  TAG_ALTERATION_NONE = 0;
+  TAG_ALTERATION_ADD = 1;
+  TAG_ALTERATION_REMOVE = 2;
+}
+
+// A pair of an Expression's unique ID and an integrity tag that must be
+// present upon that expression for this precondition to hold.
+message ExprTagPrecondition {
+  uint64 expr_id = 1;
+  string integrity_tag = 2;
+}
+
+// A transform upon the tag state of a program.
+//
+// A `TagTransform` is structured like a cast upon some `transformed_node`
+// `Expression`. The preconditions of this transform, however, are presented as
+// IDs rather than nesting the nodes directly underneath them. This is
+// necessary because these inputs may not be direct children of the
+// transformed node. Because protos only allow each structure to have a
+// single nesting parent, we need a different way of referring to them for
+// these additional references.
+message TagTransform {
+  // The `Expression` that is having its tag state changed by the
+  // `TagTransform`.
+  Expression transformed_node = 1;
+  // A "map" from the unique ID of a particular input `Expression` to the
+  // integrity tags that are required to be present upon that operation for
+  // this transform to execute. Because it is possible that a `TagTransform`
+  // could require a single expression to have multiple integrity tag values,
+  // we express this `map` as a list of pairs.
+  repeated ExprTagPrecondition tag_preconditions = 2;
+  // The action to be performed on the tag state of the node indicated by the
+  // `transformed_node_id` if all of the required integrity tags are present
+  // on the nodes indicated in the `required_integrity_tags` map. Can be
+  // added or removed.
+  TagAlteration tag_alteration = 3;
+  // The kind of the tag given in tag that should be added or removed.
+  TagKind tag_kind = 4;
+  // The string form of the tag to add or remove.
+  string tag = 5;
+};
+
+message Expression {
+  // A unique ID assigned to each Expression. Allows TagTransform nodes to
+  // point at Expression, as the need to be able to check the tag state of
+  // particular MergeOperations to decide whether to perform the
+  // transform.
+  uint64 id = 1;
+  // We may optionally associate expressions with names to help with building
+  // `AccessPaths`. This name may include column and/or table aliases provided
+  // by the user. It may also include our own auto-generated hints.
+  string name = 2;
+  // The specific kinds of expressions.
+  oneof expr_variant {
+    SourceTableColumn source_table_column = 3;
+    Literal literal = 4;
+    MergeOperation merge_operation = 5;
+    TagTransform tag_transform = 6;
+  }
+}
