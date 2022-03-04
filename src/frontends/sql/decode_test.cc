@@ -44,6 +44,7 @@ using testing::Pair;
 using testing::ResultOf;
 using testing::TestWithParam;
 using testing::UnorderedElementsAre;
+using testing::UnorderedElementsAreArray;
 using testing::Values;
 using testing::ValuesIn;
 
@@ -207,5 +208,97 @@ const TextprotoDeathMessagePair kTextprotoDeathMessagePairs[] = {
 
 INSTANTIATE_TEST_SUITE_P(DecodeExprDeathTest, DecodeExprDeathTest,
                          ValuesIn(kTextprotoDeathMessagePairs));
+
+// We test the decoding of the child `Operation`s in other tests. We also
+// ensure that we can correctly make a `MergeOperation` from two vectors of
+// inputs in another test. Therefore, this is strictly about whether we can
+// decode the `MergeOperation` proto. This test accepts 4 parameters: the id,
+// the name, the number of direct inputs, and the number of control inputs.
+// We will generate the given number of `Literal` values on the input proto.
+class DecodeMergeOpTest
+    : public TestWithParam<
+          std::tuple<std::optional<absl::string_view>, uint64_t, uint64_t>> {
+ protected:
+  DecodeMergeOpTest() : ir_context_(), decoder_context_(ir_context_) {}
+
+  std::string GenerateLiteralListContentsProto(uint64_t len,
+                                               uint64_t id_start) const {
+    std::vector<std::string> literal_vec;
+    for (uint64_t id = id_start; id < id_start + len; ++id) {
+      literal_vec.push_back(
+          absl::StrFormat(R"({ id: %u literal: { literal_str: "lit" } })", id));
+    }
+    return absl::StrJoin(literal_vec, ",");
+  }
+
+  std::string GetTextproto() const {
+    auto &[name, direct_size, control_size] = GetParam();
+    std::string name_str =
+        (name.has_value()) ? absl::StrFormat(R"(name: "%s")", *name) : "";
+    // Start from 2 so that we can assign 1 to the top level MergeOperation.
+    std::string direct_input_list_contents =
+        GenerateLiteralListContentsProto(direct_size, 2);
+    std::string control_input_list_contents =
+        GenerateLiteralListContentsProto(control_size, 2 + direct_size);
+    return absl::StrFormat(
+        "id: 1 %s merge_operation: { inputs: [ %s ] control_inputs: [ %s ] }",
+        name_str, direct_input_list_contents, control_input_list_contents);
+  }
+
+  Value GetDecodedValue() {
+    Expression expr;
+    EXPECT_TRUE(
+        google::protobuf::TextFormat::ParseFromString(GetTextproto(), &expr))
+        << "Could not decode expr";
+    return DecodeExpression(expr, decoder_context_);
+  }
+
+  IRContext ir_context_;
+  DecoderContext decoder_context_;
+};
+
+TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
+  auto &[opt_name, direct_size, control_size] = GetParam();
+
+  Expression expr;
+  EXPECT_TRUE(
+      google::protobuf::TextFormat::ParseFromString(GetTextproto(), &expr))
+      << "Could not decode expr";
+  Value value = DecodeExpression(expr, decoder_context_);
+  EXPECT_EQ(value, decoder_context_.GetValue(1));
+  const Block &top_level_block = decoder_context_.BuildTopLevelBlock();
+  const OperationResult *op_result = value.If<OperationResult>();
+  EXPECT_THAT(op_result, NotNull());
+  EXPECT_EQ(op_result->name(), DecoderContext::kDefaultOutputName);
+  const Operation &op = op_result->operation();
+  EXPECT_EQ(op.op().name(), DecoderContext::kSqlMergeOpName);
+  EXPECT_EQ(op.parent(), &top_level_block);
+  EXPECT_THAT(op.attributes(), IsEmpty());
+  std::vector<std::string> expected_keys;
+  for (uint64_t i = 0; i < direct_size; ++i) {
+    expected_keys.push_back(
+        absl::StrCat(DecoderContext::kMergeOpDirectInputPrefix, i));
+  }
+  for (uint64_t i = 0; i < control_size; ++i) {
+    expected_keys.push_back(
+        absl::StrCat(DecoderContext::kMergeOpControlInputPrefix, i));
+  }
+
+  std::vector<std::string> seen_keys;
+  for (auto &[key, val] : op.inputs()) {
+    seen_keys.push_back(key);
+  }
+  EXPECT_THAT(seen_keys, UnorderedElementsAreArray(expected_keys));
+}
+
+static constexpr uint64_t kSampleControlInputLengths[] = {0, 1, 5, 10};
+// 0 is not allowed for direct input lengths. Array is otherwise the same as
+// the control input lengths.
+static constexpr uint64_t kSampleDirectInputLengths[] = {1, 5, 10};
+
+INSTANTIATE_TEST_SUITE_P(DecodeMergeOpTest, DecodeMergeOpTest,
+                         Combine(ValuesIn(kSampleExprNames),
+                                 ValuesIn(kSampleDirectInputLengths),
+                                 ValuesIn(kSampleControlInputLengths)));
 
 }  // namespace raksha::frontends::sql

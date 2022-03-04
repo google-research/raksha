@@ -38,6 +38,7 @@ cc_proto_library(
 cc_library(
     name = "decoder_context",
     hdrs = ["decoder_context.h"],
+    srcs = ["decoder_context.cc"],
     deps = [
         ":sql_ir_cc_proto",
         "//src/ir:block_builder",
@@ -70,6 +71,7 @@ cc_library(
 cc_test(
     name = "decoder_context_test",
     srcs = ["decoder_context_test.cc"],
+    copts = ["-fexceptions"],
     deps = [
         ":decoder_context",
         "//src/common/testing:gtest",
