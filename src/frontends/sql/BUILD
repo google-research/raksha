@@ -37,8 +37,8 @@ cc_proto_library(
 
 cc_library(
     name = "decoder_context",
-    hdrs = ["decoder_context.h"],
     srcs = ["decoder_context.cc"],
+    hdrs = ["decoder_context.h"],
     deps = [
         ":sql_ir_cc_proto",
         "//src/ir:block_builder",
