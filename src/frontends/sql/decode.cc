@@ -74,12 +74,14 @@ static Value GetExprValue(const Expression &expr,
   CHECK(false) << "Unreachable!";
 }
 
-const Value &DecodeExpression(const Expression &expr,
-                              DecoderContext &decoder_context) {
+Value DecodeExpression(const Expression &expr,
+                       DecoderContext &decoder_context) {
   uint64_t id = expr.id();
   CHECK(id != 0) << "Required field id was not present in Expression.";
   // TODO(#413): Figure out what to do with the optional name field.
-  return decoder_context.RegisterValue(id, GetExprValue(expr, decoder_context));
+  Value value = GetExprValue(expr, decoder_context);
+  decoder_context.RegisterValue(id, value);
+  return value;
 }
 
 }  // namespace raksha::frontends::sql

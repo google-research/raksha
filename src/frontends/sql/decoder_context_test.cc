@@ -46,7 +46,7 @@ TEST(DecoderContextTest, BuildTopLevelBlock) {
   DecoderContext decoder_context(context);
 
   const Block &block = decoder_context.BuildTopLevelBlock();
-  EXPECT_EQ(block.module(), &decoder_context.global_module());
+  EXPECT_EQ(block.parent_module(), &decoder_context.global_module());
 }
 
 TEST(DecoderContextTest, GetOrCreateStorageIdempotence) {
@@ -100,14 +100,15 @@ TEST(DecoderContextTest, DecoderContextRegisterAndGetValueTest) {
 
   Storage storage("storage1", ir_context.type_factory().MakePrimitiveType());
 
-  const Value &value1 = decoder_context.RegisterValue(1, Value(Any()));
+  Value value1{Any()};
+  decoder_context.RegisterValue(1, value1);
   EXPECT_THAT(value1.If<Any>(), NotNull());
-  const Value &value2 =
-      decoder_context.RegisterValue(2, Value(StoredValue(storage)));
-  const Value &get_value1 = decoder_context.GetValue(1);
-  const Value &get_value2 = decoder_context.GetValue(2);
-  EXPECT_EQ(&get_value1, &value1);
-  EXPECT_EQ(&get_value2, &value2);
+  Value value2{StoredValue(storage)};
+  decoder_context.RegisterValue(2, value2);
+  Value get_value1 = decoder_context.GetValue(1);
+  Value get_value2 = decoder_context.GetValue(2);
+  EXPECT_EQ(get_value1, value1);
+  EXPECT_EQ(get_value2, value2);
 }
 
 TEST(DecoderContextDeathTest, DecoderContextValueRegistryDeathTest) {
