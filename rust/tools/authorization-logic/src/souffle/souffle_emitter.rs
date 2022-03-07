@@ -55,6 +55,26 @@ fn emit_pred(p: &AstPredicate) -> String {
     format!("{}{}({})", neg, &p.name, p.args.join(", "))
 }
 
+fn emit_binop(binop: &AstBinop) -> String {
+    match binop {
+        AstBinop::LessThan => "<",
+        AstBinop::GreaterThan => ">",
+        AstBinop::Equals => "=",
+        AstBinop::NotEquals =>  "!=",
+        AstBinop::LessOrEquals => "<=",
+        AstBinop::GreaterOrEquals => ">="
+    }.to_string()
+}
+
+fn emit_rvalue(rvalue: &DLIRRvalue) -> String {
+    match rvalue {
+        DLIRRvalue::PredicateRvalue { predicate } => emit_pred(predicate),
+        DLIRRvalue::BinopRValue { lnum, binop, rnum } => 
+            format!("{} {} {}", lnum.to_string(), emit_binop(binop),
+                rnum.to_string())
+    }
+}
+
 fn emit_assertion(a: &DLIRAssertion) -> String {
     match a {
         DLIRAssertion::DLIRFactAssertion { p } => emit_pred(p) + ".",
@@ -63,7 +83,7 @@ fn emit_assertion(a: &DLIRAssertion) -> String {
                 "{} :- {}.",
                 emit_pred(lhs),
                 rhs.iter()
-                    .map(|ast_pred| emit_pred(ast_pred))
+                    .map(|dlir_rvalue| emit_rvalue(dlir_rvalue))
                     .collect::<Vec<_>>()
                     .join(", ")
             )

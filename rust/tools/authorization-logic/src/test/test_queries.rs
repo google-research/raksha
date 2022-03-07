@@ -58,7 +58,11 @@ pub mod test {
         );
         for (qname, intended_result) in t.query_expects {
             let queryfile = format!("test_outputs/{}.csv", qname);
-            assert!(is_file_empty(&queryfile) != intended_result);
+            if(!(is_file_empty(&queryfile) != intended_result)) {
+                panic!(format!(
+                    "failure: query {} in file {} did not have intended result: {}",
+                        qname, &t.filename, intended_result));
+            }
         }
     }
 

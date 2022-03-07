@@ -102,6 +102,10 @@
 use crate::{ast::*, souffle::datalog_ir::*};
 use std::collections::HashMap;
 
+fn pred_to_dlir_rvalue(pred: &AstPredicate) -> DLIRRvalue {
+    DLIRRvalue::PredicateRvalue { predicate: pred.clone() }
+}
+
 // Note that this puts args_ on the front of the list of arguments because
 // this is the conveninet way for it to work in the contexts in which it
 // is used.
@@ -230,7 +234,10 @@ impl LoweringToDatalogPass {
 
                 let gen = DLIRAssertion::DLIRCondAssertion {
                     lhs: gen_lhs,
-                    rhs: [s_says_x_as_p, s_says_p_v].to_vec(),
+                    rhs: [s_says_x_as_p, s_says_p_v]
+                        .into_iter()
+                        .map(|pred| pred_to_dlir_rvalue(pred))
+                        .collect(),
                 };
 
                 (pred, [gen].to_vec())
@@ -291,9 +298,10 @@ impl LoweringToDatalogPass {
                     &push_prin(String::from("canSay_"), &x, &fact_plus_prime),
                 );
                 // This is `p says fpf :- x says fpf, p says x canSay fpf`.
-                let mut rhs = Vec::new();
-                rhs.push(x_says_term);
-                rhs.push(can_say_term);
+                let rhs = [x_says_term, can_say_term]
+                    .into_iter()
+                    .map(|pred| pred_to_dlir_rvalue(pred))
+                    .collect();
                 let gen = DLIRAssertion::DLIRCondAssertion { lhs, rhs };
 
                 collected.push(gen);
@@ -314,6 +322,26 @@ impl LoweringToDatalogPass {
             .flatten()
             .collect()
     }
+    
+    fn rvalue_to_dlir(
+        &mut self,
+        speaker: &AstPrincipal,
+        rvalue: &AstRValue) -> DLIRRvalue {
+        match rvalue {
+            AstRValue::FlatFactRValue { flat_fact } => {
+                let (flat_pred, _) = self.flat_fact_to_dlir(&flat_fact, &speaker);
+                pred_to_dlir_rvalue(&push_prin(String::from("says_"),
+                    &speaker, &flat_pred))
+            }
+            AstRValue::BinopRValue { lnum, binop, rnum } => {
+                DLIRRvalue::BinopRValue { 
+                    lnum: *lnum, 
+                    binop: *binop, 
+                    rnum: *rnum 
+                }
+            }
+        }
+    }
 
     fn says_assertion_to_dlir_inner(
         &mut self,
@@ -328,16 +356,16 @@ impl LoweringToDatalogPass {
                 gen_assert
             }
             AstAssertion::AstCondAssertion { lhs, rhs } => {
-                let mut dlir_rhs = Vec::new();
-                for f in rhs {
-                    let (flat, _) = self.flat_fact_to_dlir(&f, &speaker);
-                    dlir_rhs.push(push_prin(String::from("says_"), &speaker, &flat));
-                }
                 let (lhs_prime, mut assertions) = self.fact_to_dlir(&lhs, &speaker);
-                let dlir_lhs = push_prin(String::from("says_"), &speaker, &lhs_prime);
+                let dlir_lhs = 
+                    push_prin(String::from("says_"), &speaker, &lhs_prime);
                 let this_assertion = DLIRAssertion::DLIRCondAssertion {
                     lhs: dlir_lhs,
-                    rhs: dlir_rhs,
+                    rhs: rhs.clone()
+                        .into_iter()
+                        .map(|ast_rvalue| self.rvalue_to_dlir(
+                                &speaker, &ast_rvalue))
+                        .collect()
                 };
                 assertions.push(this_assertion);
                 assertions
@@ -367,7 +395,10 @@ impl LoweringToDatalogPass {
         };
         DLIRAssertion::DLIRCondAssertion {
             lhs: lhs,
-            rhs: vec![main_fact, LoweringToDatalogPass::dummy_fact()],
+            rhs: [main_fact, LoweringToDatalogPass::dummy_fact()]
+                .into_iter()
+                .map(|pred| pred_to_dlir_rvalue(pred))
+                .collect()
         }
     }
 

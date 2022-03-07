@@ -19,13 +19,19 @@
 use crate::ast::*;
 
 #[derive(Clone)]
+pub enum DLIRRvalue {
+    PredicateRvalue { predicate: AstPredicate },
+    BinopRValue { lnum: usize, binop: AstBinop, rnum: usize }
+}
+
+#[derive(Clone)]
 pub enum DLIRAssertion {
     DLIRFactAssertion {
         p: AstPredicate,
     },
     DLIRCondAssertion {
         lhs: AstPredicate,
-        rhs: Vec<AstPredicate>,
+        rhs: Vec<DLIRRvalue>,
     },
 }
 

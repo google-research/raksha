@@ -32,8 +32,13 @@ principal
     : ID
     ;
 
+pred_arg
+    : ID
+    | NUMLITERAL
+    ;
+
 predicate
-    : (NEG)? ID '(' ID (',' ID)* ')'
+    : (NEG)? ID '(' pred_arg (',' pred_arg )* ')'
     ;
 
 verbphrase
