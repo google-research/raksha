@@ -37,13 +37,26 @@ use crate::ast::*;
 use std::collections::{HashMap, HashSet};
 
 // Determine if a function argument or principal name is a constant or 
-// return false if this name is a variable. In the ast, all arguments are
-// represented as strings, and
-// they are constants if and only if they are wrapped in quotes. A better
+// return false if this name is a variable. Principals are constants if
+// they are wrapped in quotes and arguments are constants if they are in quotes
+// or are numbers. A better
 // way to represent this in the future might be to add an AST node for
 // arguments with varibales and constants as two possible forms.
 fn is_name_constant(arg: &str) -> bool {
-    return arg.starts_with("\"")
+    // Anything in quotes is a constant
+    if arg.starts_with("\"") {
+        return true
+    } else {
+        // Numberic literals are constants
+
+        // A better way to do this would be to just use a regex, but
+        // regexes are not in the standard library and adding new crates
+        // takes too long to integrate with the C++ side of Raksha.
+        for c in arg.chars() {
+            if !c.is_numeric() { return false }
+        }
+        return true
+    }
 }
 
 fn push_option_to_vec<T>(vec: &mut Vec<T>, elt: Option<T>) {
@@ -174,6 +187,22 @@ fn populate_constant_type_environment_prog(
     constant_type_environment
 }
 
+fn populate_constant_type_environment_rvalue(
+    relation_type_environment: &RelationTypeEnv,
+    constant_type_environment: &mut HashMap<String, AstType>,
+    rvalue: &AstRValue) {
+    match rvalue {
+        AstRValue::FlatFactRValue { flat_fact } => {
+            populate_constant_type_environment_flat_fact(
+                relation_type_environment,
+                constant_type_environment,
+                flat_fact);
+        },
+        _ => { (); }
+    }
+}
+
+
 fn populate_constant_type_environment_assertion(
     relation_type_environment: &RelationTypeEnv,
     constant_type_environment: &mut HashMap<String, AstType>,
@@ -190,11 +219,11 @@ fn populate_constant_type_environment_assertion(
                 &relation_type_environment,
                 constant_type_environment,
                 lhs);
-            for flat_fact in rhs {
-                populate_constant_type_environment_flat_fact(
+            for rvalue in rhs {
+                populate_constant_type_environment_rvalue(
                     &relation_type_environment,
                     constant_type_environment,
-                    flat_fact);
+                    rvalue);
             }
         }
     }
@@ -413,7 +442,9 @@ impl UniverseHandlingPass {
                             lhs: fact.clone(),
                             rhs: new_rhs_predicates
                                 .iter()
-                                .map(|pred| AstFlatFact::AstPredFact{p: pred.clone()})
+                                .map(|pred| AstRValue::FlatFactRValue {
+                                     flat_fact: AstFlatFact::AstPredFact{p: pred.clone()}
+                                })
                                 .collect()
                         }
                     } else {
@@ -424,7 +455,10 @@ impl UniverseHandlingPass {
                     let mut new_rhs = rhs.clone();
                     for x in self.universe_conditions_fact(lhs).iter() {
                         new_rhs.push(
-                            AstFlatFact::AstPredFact {p: x.clone()});
+                            AstRValue::FlatFactRValue {
+                                flat_fact: AstFlatFact::AstPredFact {p: x.clone()}
+                            }
+                        );
                     }
                     AstAssertion::AstCondAssertion {
                         lhs: lhs.clone(),

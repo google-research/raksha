@@ -49,14 +49,15 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
         None => Sign::Positive 
     };
     // Note that ID_all() in the generated antlr-rust code is buggy
-    // (because all {LEX_RULE}_all() generations are buggy),
+    // (because all {LEX_RULE}_all() generations are buggy
+    // by contrast to {PARSE_RULE}_all() generations which are fine),
     // so rather than using a more idomatic iterator, "while Some(...)" is
     // used here.
-    let name_ = ctx.ID(0).unwrap().get_text();
+    let name_ = ctx.ID().unwrap().get_text();
     let mut args_ = Vec::new();
-    let mut idx = 1;
-    while let Some(id) = ctx.ID(idx) {
-        args_.push(id.get_text());
+    let mut idx = 0;
+    while let Some(arg) = ctx.pred_arg(idx) {
+        args_.push(arg.get_text());
         idx += 1;
     }
     AstPredicate {
@@ -70,9 +71,7 @@ fn construct_verbphrase(ctx: &VerbphraseContextAll) -> AstVerbPhrase {
     match ctx {
         VerbphraseContextAll::PredphraseContext(pctx) => construct_predphrase(pctx),
         VerbphraseContextAll::ActsAsPhraseContext(actx) => construct_actsasphrase(actx),
-        _ => {
-            panic!("construct_verbphrase tried to build error");
-        }
+        _ => { panic!("construct_verbphrase tried to build error"); }
     }
 }
 
@@ -92,9 +91,7 @@ fn construct_flat_fact(ctx: &FlatFactContextAll) -> AstFlatFact {
     match ctx {
         FlatFactContextAll::PrinFactContext(fctx) => construct_prin_fact(fctx),
         FlatFactContextAll::PredFactContext(pctx) => construct_pred_fact(pctx),
-        _ => {
-            panic!("construct_flat_fact tried to build error");
-        }
+        _ => { panic!("construct_flat_fact tried to build error"); }
     }
 }
 
@@ -116,9 +113,7 @@ fn construct_fact(ctx: &FactContextAll) -> AstFact {
     match ctx {
         FactContextAll::FlatFactFactContext(fctx) => construct_flat_fact_fact(fctx),
         FactContextAll::CanSayFactContext(sctx) => construct_can_say_fact(sctx),
-        _ => {
-            panic!("construct_fact tried to build error");
-        }
+        _ => { panic!("construct_fact tried to build error"); }
     }
 }
 
@@ -144,6 +139,7 @@ fn construct_binop(ctx: &BinopContextAll) -> AstBinop {
         BinopContextAll::NebinopContext(_) => AstBinop::NotEquals,
         BinopContextAll::LeqbinopContext(_) => AstBinop::LessOrEquals,
         BinopContextAll::GeqbinopContext(_) => AstBinop::GreaterOrEquals,
+        _ => { panic!("construct_binop tried to build error"); }
     }
 }
 
@@ -161,6 +157,7 @@ fn construct_rvalue(ctx: &RvalueContextAll) -> AstRValue {
                 rnum: bctx.NUMLITERAL(1).unwrap().get_text().parse().unwrap()
             }
         }
+        _ => { panic!("construct_rvalue tried to build error"); }
     }
 }
 
@@ -168,9 +165,7 @@ fn construct_assertion(ctx: &AssertionContextAll) -> AstAssertion {
     match ctx {
         AssertionContextAll::FactAssertionContext(fctx) => construct_fact_assertion(fctx),
         AssertionContextAll::HornClauseAssertionContext(hctx) => construct_hornclause(hctx),
-        _ => {
-            panic!("construct_assertion tried to build error");
-        }
+        _ => { panic!("construct_assertion tried to build error"); }
     }
 }
 
@@ -214,9 +209,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
                 export_file,
             }
         }
-        _ => {
-            panic!("construct_says_assertion tried to build Error()");
-        }
+        _ => { panic!("construct_says_assertion tried to build Error()"); }
     }
 }
 
@@ -243,9 +236,7 @@ fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: true,
         },
-        _ => {
-            panic!("construct_keybinding tried to build Error()");
-        }
+        _ => { panic!("construct_keybinding tried to build Error()"); }
     }
 }
 
@@ -265,9 +256,7 @@ fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
         AuthLogicTypeContextAll::CustomTypeContext(ctx_prime) => {
             AstType::CustomType { type_name: ctx_prime.ID().unwrap().get_text() }
         }
-        _ => {
-            panic!("construct_type tried to build error");
-        }
+        _ => { panic!("construct_type tried to build error"); }
     }
 }
 

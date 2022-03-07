@@ -72,7 +72,7 @@ pub enum AstFact {
     AstCanSayFact { p: AstPrincipal, f: Box<AstFact> },
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Copy, Debug, Clone, Serialize, Deserialize)]
 pub enum AstBinop {
     LessThan,
     GreaterThan,

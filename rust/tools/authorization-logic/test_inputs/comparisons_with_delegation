@@ -1,0 +1,29 @@
+.decl expected_hash(object : Object, hash : Sha256Hash)
+.decl isRealTime(time : UnixEpochTime)
+
+// This one is valid (and has not expired).
+"EndorsementFile_OakFunctionsLoader" says {
+    expected_hash("OakFunctionsLoader", "sha256:cafed00d") :-
+      RealTimeIs(real_time), real_time > 42, real_time < 31337.
+    "VerifierSystemClock" cansay RealTimeIs(real_time).
+}
+
+// This one has expired
+"EndorsementFile_OakFunctionsLoader" says {
+  expected_hash("OakFunctionsLoader", "sha256:deadbeef") :-
+    RealTimeIs(real_time), real_time > 42, real_time < 1337.
+}
+
+"VerifierSystemClock" says {
+  RealTimeIs(1776).
+}
+
+"Verifier_OakFunctionsLoader" says {
+  "EndorsementFile_OakFunctionsLoader" canSay 
+    expected_hash("OakFunctionsLoader", any_hash).
+}
+
+q1 = query "Verifier_OakFunctionsLoader" says 
+  expected_hash("OakFunctionsLoader", "sha256:cafed00d")?
+q2 = query "Verifier_OakFunctionsLoader" says 
+  expected_hash("OakFunctionsLoader", "sha256:deadbeef")?
