@@ -28,6 +28,7 @@ use crate::{
     parsing::astconstructionvisitor,
     signing::{export_assertions, import_assertions},
     souffle::souffle_interface,
+    utils::*,
 };
 
 use std::fs;
@@ -41,18 +42,21 @@ fn source_file_to_ast(filename: &str, in_dir: &str) -> AstProgram {
 // Make source_file_to_ast publicly visible only in tests
 #[cfg(test)]
 pub fn source_file_to_ast_test_only(filename: &str, in_dir: &str) -> AstProgram {
-    source_file_to_ast(filename, in_dir)
+    let resolved_in_dir = utils::get_resolved_path(&in_dir);
+    source_file_to_ast(filename, &resolved_in_dir)
 }
 
 pub fn compile(filename: &str, in_dir: &str, out_dir: &str,
-            decl_skip: &str) {
-    let prog = source_file_to_ast(filename, in_dir);
+              decl_skip: &str) {
+    let resolved_in_dir = utils::get_resolved_path(&in_dir);
+    let resolved_out_dir = utils::get_or_create_output_dir(&out_dir);
+    let prog = source_file_to_ast(filename, &resolved_in_dir);
     let prog_with_imports = import_assertions::handle_imports(&prog);
     let decl_skip_vec = Some(decl_skip
                              .split(',')
                              .map(|s| s.to_string())
                              .collect());
     souffle_interface::ast_to_souffle_file(&prog_with_imports, filename,
-                                           out_dir, &decl_skip_vec);
+                                           &resolved_out_dir, &decl_skip_vec);
     export_assertions::export_assertions(&prog_with_imports);
 }

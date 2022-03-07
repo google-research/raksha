@@ -78,6 +78,8 @@ filegroup(
         "src/souffle/souffle_emitter.rs",
         "src/souffle/souffle_interface.rs",
         "src/souffle/universe_translation.rs",
+        "src/utils/mod.rs",
+        "src/utils/utils.rs",
     ],
 )
 
@@ -121,24 +123,25 @@ rust_library(
     ],
 )
 
+filegroup(
+    name = "test_inputs",
+    srcs = glob(["test_inputs/**"]),
+)
+
+filegroup(
+    name = "raksha_examples",
+    srcs = glob(["raksha_examples/**"]),
+)
+
 rust_test(
     name = "authorization_logic_test",
-    srcs = [
-        "src/main.rs",
-        ":lib_sources",
-        ":test_sources",
+    crate = ":authorization_logic_lib",
+    data = [
+        ":raksha_examples",
+        ":test_inputs",
     ],
-    # crate = ":authorization_logic_lib",
     rustc_flags = [
         "--cfg=feature=\"bazel_build\"",
-    ],
-    deps = [
-        ":antlr_gen",
-        "//rust/tools/authorization-logic/cargo:antlr_rust",
-        "//rust/tools/authorization-logic/cargo:bincode",
-        "//rust/tools/authorization-logic/cargo:serde",
-        "//rust/tools/authorization-logic/cargo:tink_core",
-        "//rust/tools/authorization-logic/cargo:tink_signature",
     ],
 )
 

@@ -24,6 +24,7 @@
 
 use crate::ast::*;
 use crate::signing::tink_interface::*;
+use crate::utils::*;
 use std::collections::HashMap;
 
 type BindingEnv = HashMap<AstPrincipal, String>;
@@ -36,9 +37,10 @@ fn collect_pub_bindings(prog: &AstProgram) -> BindingEnv {
 }
 
 fn handle_one_import(kbenv: &BindingEnv, imp: &AstImport) -> AstSaysAssertion {
-    let pubkey = kbenv.get(&imp.principal).unwrap();
-    let signature_file = imp.filename.clone() + ".sig";
-    let assertion = deserialize_from_file(&(imp.filename.clone() + ".obj")).unwrap();
+    let pubkey = utils::get_resolved_output_path(kbenv.get(&imp.principal).unwrap());
+    let signature_file = utils::get_resolved_output_path(&(imp.filename.clone() + ".sig"));
+    let full_import_path = utils::get_resolved_output_path(&(imp.filename.clone() + ".obj"));
+    let assertion = deserialize_from_file(&full_import_path).unwrap();
 
     // TODO: A better error message is needed, potentially.
     verify_claim(&pubkey, &signature_file, &assertion).unwrap();

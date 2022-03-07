@@ -16,14 +16,18 @@
 
 #[cfg(test)]
 mod test {
-    use crate::{ast::*, signing::tink_interface::*};
-
+    use crate::{ast::*, signing::tink_interface::*, utils::*};
+  
+    fn get_output_path(out_dir: &str, file: &str) -> String {
+      format!("{}/{}", &utils::get_or_create_output_dir(out_dir), file)
+    }
+  
     #[test]
     fn test_sig_checking() {
         // Generate a keypair.
         store_new_keypair_cleartext(
-            &"test_keys/andrew_pub.json".to_string(),
-            &"test_keys/andrew_priv.json".to_string(),
+            &get_output_path("test_keys", "andrew_pub.json"),
+            &get_output_path("test_keys", "andrew_priv.json"),
         );
 
         let test_claim1 = vec![AstAssertion::AstFactAssertion {
@@ -39,15 +43,15 @@ mod test {
         }];
 
         sign_claim(
-            &"test_keys/andrew_priv.json".to_string(),
-            &"test_outputs/claim1.sig".to_string(),
+            &get_output_path("test_keys", "andrew_priv.json"),
+            &get_output_path("test_outputs", "claim1.sig"),
             &test_claim1,
         );
 
         // The signature check should pass.
         assert!(verify_claim(
-            &"test_keys/andrew_pub.json".to_string(),
-            &"test_outputs/claim1.sig".to_string(),
+            &get_output_path("test_keys", "andrew_pub.json"),
+            &get_output_path("test_outputs", "claim1.sig"),
             &test_claim1
         )
         .is_ok());
@@ -66,8 +70,8 @@ mod test {
 
         // The signature check should fail.
         assert!(!verify_claim(
-            &"test_keys/andrew_pub.json".to_string(),
-            &"test_outputs/claim1.sig".to_string(),
+            &get_output_path("test_keys", "andrew_pub.json"),
+            &get_output_path("test_outputs", "claim1.sig"),
             &test_claim2
         )
         .is_ok());
@@ -76,8 +80,8 @@ mod test {
     #[test]
     fn test_sig_checking_w_serialization() {
         store_new_keypair_cleartext(
-            &"test_keys/andrew_pub2.json".to_string(),
-            &"test_keys/andrew_priv2.json".to_string(),
+            &get_output_path("test_keys", "andrew_pub2.json"),
+            &get_output_path("test_keys", "andrew_priv2.json"),
         );
 
         let test_claim2 = vec![AstAssertion::AstFactAssertion {
@@ -95,19 +99,22 @@ mod test {
         // This code sets up the files as though a claim
         // has been sent already so that the receiving side can be tested.
         sign_claim(
-            &"test_keys/andrew_priv2.json".to_string(),
-            &"test_outputs/claim2.sig".to_string(),
+            &get_output_path("test_keys", "andrew_priv2.json"),
+            &get_output_path("test_outputs", "claim2.sig"),
             &test_claim2,
         );
 
-        serialize_to_file(&test_claim2, &"test_outputs/claim2.obj".to_string()).unwrap();
+        serialize_to_file(
+            &test_claim2,
+            &get_output_path("test_outputs", "claim2.obj")).unwrap();
 
         // This code models the recipient side by deserializing the sent claims.
-        let deser_claim = deserialize_from_file(&"test_outputs/claim2.obj".to_string()).unwrap();
+        let deser_claim = deserialize_from_file(
+            &get_output_path("test_outputs", "claim2.obj")).unwrap();
 
         assert!(verify_claim(
-            &"test_keys/andrew_pub2.json".to_string(),
-            &"test_outputs/claim2.sig".to_string(),
+            &get_output_path("test_keys", "andrew_pub2.json"),
+            &get_output_path("test_outputs", "claim2.sig"),
             &deser_claim
         )
         .is_ok());

@@ -22,6 +22,8 @@ mod compilation_top_level;
 mod parsing;
 mod signing;
 mod souffle;
+mod utils;
+mod test;
 
 use std::os::raw::c_char;
 use std::os::raw::c_int;

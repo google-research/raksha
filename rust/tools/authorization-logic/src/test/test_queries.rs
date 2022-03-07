@@ -18,6 +18,7 @@
 pub mod test {
     use crate::souffle::souffle_interface::*;
     use std::process::Command;
+    use crate::utils::*;
 
     /// This struct gives the name of an authorization logic program in
     /// test_inputs, and a vector that relates the names of queries
@@ -47,17 +48,20 @@ pub mod test {
     }
 
     pub fn run_query_test(t: QueryTest) {
+        let resolved_in_dir = utils::get_resolved_path(&t.input_dir.to_string());
+        let resolved_out_dir = utils::get_or_create_output_dir(&t.output_dir.to_string());
+        let resolved_test_outputs_dir = utils::get_or_create_output_dir("test_outputs");
         input_to_souffle_file(
             &t.filename.to_string(),
-            &t.input_dir.to_string(),
-            &t.output_dir.to_string(),
+            &resolved_in_dir,
+            &resolved_out_dir,
         );
         run_souffle(
-            &format!("{}/{}.dl", t.output_dir, t.filename),
-            &"test_outputs".to_string(),
+            &format!("{}/{}.dl", resolved_out_dir, t.filename),
+            &resolved_test_outputs_dir,
         );
         for (qname, intended_result) in t.query_expects {
-            let queryfile = format!("test_outputs/{}.csv", qname);
+            let queryfile = format!("{}/{}.csv", &resolved_test_outputs_dir, qname);
             assert!(is_file_empty(&queryfile) != intended_result);
         }
     }

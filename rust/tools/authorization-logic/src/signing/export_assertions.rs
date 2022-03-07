@@ -24,7 +24,7 @@
 /// occurances of the same principal within a program will not
 /// create multiple entries in this HashMap.
 
-use crate::{ast::*, signing::tink_interface::*};
+use crate::{ast::*, signing::tink_interface::*, utils::*};
 use std::collections::HashMap;
 
 type BindingEnv = HashMap<AstPrincipal, String>;
@@ -40,9 +40,10 @@ fn export_says_assertion(says_assertion: &AstSaysAssertion, priv_env: &BindingEn
     match &says_assertion.export_file {
         None => {}
         Some(filename) => {
-            let obj_file = filename.clone() + ".obj";
-            let sig_file = filename.clone() + ".sig";
-            let priv_key_file = priv_env.get(&says_assertion.prin).unwrap();
+            let obj_file = utils::get_resolved_output_path(&(filename.clone() + ".obj"));
+            let sig_file = utils::get_resolved_output_path(&(filename.clone() + ".sig"));
+            let priv_key_file = utils::get_resolved_output_path(
+                &priv_env.get(&says_assertion.prin).unwrap());
             serialize_to_file(&says_assertion.assertions, &obj_file).unwrap();
             sign_claim(&priv_key_file, &sig_file, &says_assertion.assertions);
         }
