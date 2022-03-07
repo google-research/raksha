@@ -271,6 +271,9 @@ TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
   const Block &top_level_block = decoder_context_.BuildTopLevelBlock();
 
   // Set up is finished, now check our expectations.
+
+  // We always have the value of the `MergeOp` that we are decoding be 1 to
+  // prevent collisions with child values.
   EXPECT_EQ(value, decoder_context_.GetValue(1));
   const OperationResult *op_result = value.If<OperationResult>();
   EXPECT_THAT(op_result, NotNull());
