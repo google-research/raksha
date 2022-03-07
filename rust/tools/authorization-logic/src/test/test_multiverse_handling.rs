@@ -23,15 +23,15 @@ mod test {
     use std::fs;
 
     #[test]
-    fn test_negation() {
+    fn test_multiverse_handling() {
         run_query_test(QueryTest {
-            filename: "negation",
+            filename: "multiverse_handling",
+            input_dir: "test_inputs",
+            output_dir: "test_outputs",
             query_expects: vec![
-                ("q1", true),
-                ("q2", false),
-                ("q3", false),
-            ],
-            ..Default::default()
-        });
+                ("test_query1_true", true),
+                ("test_query2_false", false)
+            ]
+        })
     }
 }

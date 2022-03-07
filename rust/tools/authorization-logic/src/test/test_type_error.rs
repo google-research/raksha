@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Raksha Authors
+ * Copyright 2021 Google LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-mod universe_translation;
-mod datalog_ir;
-mod lowering_ast_datalog;
-mod souffle_emitter;
-pub mod souffle_interface;
+#[cfg(test)]
+mod test {
+    use crate::{ast::*, compilation_top_level::*, souffle::souffle_interface::*};
+    use std::fs;
+
+    #[test]
+    #[should_panic]
+    fn test_type_error() {
+        compile("type_error", "test_inputs", "test_outputs", "");
+    }
+}

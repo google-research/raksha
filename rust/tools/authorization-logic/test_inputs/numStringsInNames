@@ -1,2 +1,5 @@
+.decl numbersAre(words : Words)
+.decl semicolonsAre(words : Words)
+
 "123" says numbersAre("perfectlyFinePrincipalNames").
 "sha256:deadbeef" says semicolonsAre("alsoFineNames").

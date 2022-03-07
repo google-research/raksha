@@ -3,4 +3,4 @@
 .decl hasTag(path : AccessPath, principal : Principal, tag : Tag)
 "EndUser" says ownsTag("EndUser", "userSelection").
 "EndUser" says ownsAccessPath("EndUser", "R.P1#0.foo").
-"EndUser" says "P1" canSay hasTag(accessPathX, "EndUser", "userSelection") :- isAccessPath(accessPathX).
+"EndUser" says "P1" canSay hasTag(accessPathX, "EndUser", "userSelection").

@@ -76,6 +76,7 @@ filegroup(
         "src/souffle/mod.rs",
         "src/souffle/souffle_emitter.rs",
         "src/souffle/souffle_interface.rs",
+        "src/souffle/universe_translation.rs",
     ],
 )
 
@@ -89,11 +90,13 @@ filegroup(
         "src/test/test_export_signatures.rs",
         "src/test/test_multimic_no_overrides.rs",
         "src/test/test_multimic_overrides.rs",
+        "src/test/test_multiverse_handling.rs",
         "src/test/test_negation.rs",
         "src/test/test_num_string_names.rs",
         "src/test/test_queries.rs",
         "src/test/test_relation_declarations.rs",
         "src/test/test_signing.rs",
+        "src/test/test_type_error.rs",
     ],
 )
 

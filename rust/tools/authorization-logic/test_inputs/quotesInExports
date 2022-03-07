@@ -2,6 +2,9 @@
 BindPrivKey "p1_noq" test_keys/p1_noq_priv.json
 BindPubKey "p1_noq" test_keys/p1_noq_pub.json
 
+.decl someProposition(words : Words)
+.decl otherProposition(words : Words)
+
 "p1_noq" says {
     someProposition("these_args").
     otherProposition("these_other_args").

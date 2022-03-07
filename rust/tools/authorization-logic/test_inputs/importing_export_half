@@ -5,6 +5,9 @@
 BindPrivKey "principal1e" test_keys/principal1e_priv.json
 BindPubKey "principal1e" test_keys/principal1e_pub.json
 
+.decl someProposition(words : Words)
+.decl otherProposition(words : Words)
+
 "principal1e" says {
     someProposition("these_args").
     otherProposition("these_other_args").
