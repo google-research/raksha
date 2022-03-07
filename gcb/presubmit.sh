@@ -106,3 +106,6 @@ bazel_run build \
 
 # Run all the bazel tests (not cargo).
 bazel_run test //src/...
+
+# Run all the bazel tests for rust authorization logic
+bazel_run test //rust/tools/authorization-logic/...
