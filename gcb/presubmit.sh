@@ -101,11 +101,9 @@ bazel_run build \
   //third_party/arcs/examples:consume \
   //third_party/arcs/proto:manifest_cc_proto \
   //src/analysis/souffle/tests/arcs_manifest_tests_todo/... \
-  //src/analysis/souffle/examples/... \
-  //rust/tools/authorization-logic:authorization_logic
+  //src/analysis/souffle/examples/...
 
 # Run all the bazel tests (not cargo).
-bazel_run test //src/...
-
-# Run all the bazel tests for rust authorization logic
-bazel_run test //rust/tools/authorization-logic/...
+bazel_run test \
+  //src/... \
+  //rust/tools/authorization-logic/...
