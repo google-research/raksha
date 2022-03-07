@@ -72,10 +72,10 @@ cc_library(
 cc_test(
     name = "decoder_context_test",
     srcs = ["decoder_context_test.cc"],
-    copts = ["-fexceptions"],
     deps = [
         ":decoder_context",
         "//src/common/testing:gtest",
+        "@absl//absl/strings",
     ],
 )
 

@@ -16,8 +16,8 @@
 
 #include "src/frontends/sql/decoder_context.h"
 
-#include <string>
-
+#include "absl/strings/match.h"
+#include "absl/strings/numbers.h"
 #include "src/common/testing/gtest.h"
 
 namespace raksha::frontends::sql {
@@ -139,17 +139,12 @@ class DecodeMergeOpTest
     : public TestWithParam<std::tuple<std::vector<Value>, std::vector<Value>>> {
 };
 
-static bool BeginsWith(absl::string_view str1, absl::string_view str2) {
-  if (str2.size() > str1.size()) return false;
-  return str1.substr(0, str2.size()) == str2;
-}
-
 static std::optional<uint64_t> ExtractIdxAfterPrefix(absl::string_view str,
                                                      absl::string_view prefix) {
-  if (!BeginsWith(str, prefix)) return std::nullopt;
+  if (!absl::StartsWith(str, prefix)) return std::nullopt;
   uint64_t result = 0;
   std::string index_str(str.substr(prefix.size()));
-  EXPECT_NO_THROW({ result = std::stoul(index_str); });
+  EXPECT_TRUE(absl::SimpleAtoi(index_str, &result));
   return result;
 }
 
