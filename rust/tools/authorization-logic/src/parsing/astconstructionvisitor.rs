@@ -48,18 +48,11 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
         Some(_) => Sign::Negated,
         None => Sign::Positive 
     };
-    // Note that ID_all() in the generated antlr-rust code is buggy
-    // (because all {LEX_RULE}_all() generations are buggy
-    // by contrast to {PARSE_RULE}_all() generations which are fine),
-    // so rather than using a more idomatic iterator, "while Some(...)" is
-    // used here.
     let name_ = ctx.ID().unwrap().get_text();
-    let mut args_ = Vec::new();
-    let mut idx = 0;
-    while let Some(arg) = ctx.pred_arg(idx) {
-        args_.push(arg.get_text());
-        idx += 1;
-    }
+    let args_ = (&ctx).pred_arg_all()
+        .iter()
+        .map(|arg_ctx| arg_ctx.get_text())
+        .collect();
     AstPredicate {
         sign: sign_,
         name: name_,
@@ -176,10 +169,10 @@ fn construct_fact_assertion(ctx: &FactAssertionContext) -> AstAssertion {
 
 fn construct_hornclause(ctx: &HornClauseAssertionContext) -> AstAssertion {
     let lhs = construct_fact(&ctx.fact().unwrap());
-    let mut rhs = Vec::new();
-    for rvalue_ctx in ctx.rvalue_all() {
-        rhs.push(construct_rvalue(&rvalue_ctx));
-    }
+    let rhs = ctx.rvalue_all()
+        .iter()
+        .map(|rvalue_ctx| construct_rvalue(&rvalue_ctx))
+        .collect();
     AstAssertion::AstCondAssertion { lhs, rhs }
 }
 
