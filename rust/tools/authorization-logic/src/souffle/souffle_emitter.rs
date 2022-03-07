@@ -70,8 +70,7 @@ fn emit_rvalue(rvalue: &DLIRRvalue) -> String {
     match rvalue {
         DLIRRvalue::PredicateRvalue { predicate } => emit_pred(predicate),
         DLIRRvalue::BinopRValue { lnum, binop, rnum } => 
-            format!("{} {} {}", lnum.to_string(), emit_binop(binop),
-                rnum.to_string())
+            format!("{} {} {}", lnum, emit_binop(binop), rnum)
     }
 }
 

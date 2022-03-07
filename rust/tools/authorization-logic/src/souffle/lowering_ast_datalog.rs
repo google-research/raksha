@@ -335,9 +335,9 @@ impl LoweringToDatalogPass {
             }
             AstRValue::BinopRValue { lnum, binop, rnum } => {
                 DLIRRvalue::BinopRValue { 
-                    lnum: *lnum, 
+                    lnum: lnum.clone(), 
                     binop: *binop, 
-                    rnum: *rnum 
+                    rnum: rnum.clone() 
                 }
             }
         }

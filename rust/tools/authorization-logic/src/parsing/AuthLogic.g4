@@ -66,7 +66,7 @@ binop
 
 rvalue
   : flatFact #flatFactRvalue
-  | NUMLITERAL binop NUMLITERAL #binopRvalue
+  | pred_arg binop pred_arg #binopRvalue
   ;
 
 fact
