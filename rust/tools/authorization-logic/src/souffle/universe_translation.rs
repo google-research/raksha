@@ -198,7 +198,10 @@ fn populate_constant_type_environment_rvalue(
                 constant_type_environment,
                 flat_fact);
         },
-        _ => { (); }
+        AstRValue::BinopRValue{lnum, binop, rnum} => {
+            add_typing(constant_type_environment, lnum, AstType::NumberType);
+            add_typing(constant_type_environment, rnum, AstType::NumberType);
+        }
     }
 }
 

@@ -21,7 +21,7 @@ use crate::ast::*;
 #[derive(Clone)]
 pub enum DLIRRvalue {
     PredicateRvalue { predicate: AstPredicate },
-    BinopRValue { lnum: usize, binop: AstBinop, rnum: usize }
+    BinopRValue { lnum: String, binop: AstBinop, rnum: String }
 }
 
 #[derive(Clone)]

@@ -152,9 +152,9 @@ fn construct_rvalue(ctx: &RvalueContextAll) -> AstRValue {
         },
         RvalueContextAll::BinopRvalueContext(bctx) => {
             AstRValue::BinopRValue {
-                lnum: bctx.NUMLITERAL(0).unwrap().get_text().parse().unwrap(),
+                lnum: bctx.pred_arg(0).unwrap().get_text(),
                 binop: construct_binop(&bctx.binop().unwrap()),
-                rnum: bctx.NUMLITERAL(1).unwrap().get_text().parse().unwrap()
+                rnum: bctx.pred_arg(1).unwrap().get_text()
             }
         }
         _ => { panic!("construct_rvalue tried to build error"); }

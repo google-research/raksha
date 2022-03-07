@@ -85,7 +85,7 @@ pub enum AstBinop {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AstRValue {
     FlatFactRValue { flat_fact: AstFlatFact},
-    BinopRValue { lnum: usize, binop: AstBinop, rnum: usize }
+    BinopRValue { lnum: String , binop: AstBinop, rnum: String }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
