@@ -261,8 +261,6 @@ class DecodeMergeOpTest
 };
 
 TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
-  auto &[opt_name, direct_size, control_size] = GetParam();
-
   Expression expr;
   EXPECT_TRUE(
       google::protobuf::TextFormat::ParseFromString(GetTextproto(), &expr))
@@ -278,6 +276,8 @@ TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
 
   testing::MergeOperationView merge_operation_view(op);
 
+
+  auto &[optional_name, direct_size, control_size] = GetParam();
   EXPECT_THAT(merge_operation_view.GetDirectInputs().size(), direct_size);
   EXPECT_THAT(merge_operation_view.GetControlInputs().size(), control_size);
 }
