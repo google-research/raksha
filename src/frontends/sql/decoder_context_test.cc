@@ -146,6 +146,7 @@ TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
   const Operation &op =
       decoder_context.MakeMergeOperation(direct_inputs, control_inputs);
   const Block &top_block = decoder_context.BuildTopLevelBlock();
+
   EXPECT_EQ(op.parent(), &top_block);
 
   testing::MergeOperationView merge_op_view(op);

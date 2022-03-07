@@ -129,10 +129,12 @@ class DecodeLiteralExprTest : public IdNameAndStringTest {
 TEST_P(DecodeLiteralExprTest, DecodeLiteralExprTest) {
   auto &[id, name, str] = GetParam();
   const Value &result = GetDecodedValue();
+  const Block &top_block = decoder_context_.BuildTopLevelBlock();
+
+  // Set up finished, now check expectations.
   const OperationResult *operation_result = result.If<OperationResult>();
   EXPECT_THAT(operation_result, NotNull());
   const Operation &operation = operation_result->operation();
-  const Block &top_block = decoder_context_.BuildTopLevelBlock();
   EXPECT_EQ(operation.parent(), &top_block);
   EXPECT_THAT(operation.impl_module(), IsNull());
   EXPECT_EQ(operation.op().name(), DecoderContext::kSqlLiteralOpName);
@@ -266,8 +268,10 @@ TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
       google::protobuf::TextFormat::ParseFromString(GetTextproto(), &expr))
       << "Could not decode expr";
   Value value = DecodeExpression(expr, decoder_context_);
-  EXPECT_EQ(value, decoder_context_.GetValue(1));
   const Block &top_level_block = decoder_context_.BuildTopLevelBlock();
+
+  // Set up is finished, now check our expectations.
+  EXPECT_EQ(value, decoder_context_.GetValue(1));
   const OperationResult *op_result = value.If<OperationResult>();
   EXPECT_THAT(op_result, NotNull());
   EXPECT_EQ(op_result->name(), DecoderContext::kDefaultOutputName);
