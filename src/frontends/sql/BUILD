@@ -39,6 +39,7 @@ cc_library(
     name = "decoder_context",
     srcs = ["decoder_context.cc"],
     hdrs = ["decoder_context.h"],
+    visibility = [":__subpackages__"],
     deps = [
         ":sql_ir_cc_proto",
         "//src/ir:block_builder",
@@ -75,6 +76,7 @@ cc_test(
     deps = [
         ":decoder_context",
         "//src/common/testing:gtest",
+        "//src/frontends/sql/testing:merge_operation_view",
         "@absl//absl/strings",
     ],
 )
@@ -87,6 +89,7 @@ cc_test(
         ":decoder_context",
         "//src/common/testing:gtest",
         "//src/frontends/sql:sql_ir_cc_proto",
+        "//src/frontends/sql/testing:merge_operation_view",
         "@absl//absl/strings",
     ],
 )

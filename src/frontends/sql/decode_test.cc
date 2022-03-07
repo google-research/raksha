@@ -22,6 +22,7 @@
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/sql_ir.pb.h"
+#include "src/frontends/sql/testing/merge_operation_view.h"
 
 namespace raksha::frontends::sql {
 
@@ -34,18 +35,18 @@ using ir::Value;
 using ir::types::TypeBase;
 using ir::value::OperationResult;
 using ir::value::StoredValue;
-using testing::Combine;
-using testing::Eq;
-using testing::IsEmpty;
-using testing::IsNull;
-using testing::NotNull;
-using testing::Pair;
-using testing::ResultOf;
-using testing::TestWithParam;
-using testing::UnorderedElementsAre;
-using testing::UnorderedElementsAreArray;
-using testing::Values;
-using testing::ValuesIn;
+using ::testing::Combine;
+using ::testing::Eq;
+using ::testing::IsEmpty;
+using ::testing::IsNull;
+using ::testing::NotNull;
+using ::testing::Pair;
+using ::testing::ResultOf;
+using ::testing::TestWithParam;
+using ::testing::UnorderedElementsAre;
+using ::testing::UnorderedElementsAreArray;
+using ::testing::Values;
+using ::testing::ValuesIn;
 
 // A value-parameterized test fixture used for both SourceTableColumns and
 // Literals. Both of these constructs are basically just expressions
@@ -273,24 +274,12 @@ TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
   EXPECT_THAT(op_result, NotNull());
   EXPECT_EQ(op_result->name(), DecoderContext::kDefaultOutputName);
   const Operation &op = op_result->operation();
-  EXPECT_EQ(op.op().name(), DecoderContext::kSqlMergeOpName);
   EXPECT_EQ(op.parent(), &top_level_block);
-  EXPECT_THAT(op.attributes(), IsEmpty());
-  std::vector<std::string> expected_keys;
-  for (uint64_t i = 0; i < direct_size; ++i) {
-    expected_keys.push_back(
-        absl::StrCat(DecoderContext::kMergeOpDirectInputPrefix, i));
-  }
-  for (uint64_t i = 0; i < control_size; ++i) {
-    expected_keys.push_back(
-        absl::StrCat(DecoderContext::kMergeOpControlInputPrefix, i));
-  }
 
-  std::vector<std::string> seen_keys;
-  for (auto &[key, val] : op.inputs()) {
-    seen_keys.push_back(key);
-  }
-  EXPECT_THAT(seen_keys, UnorderedElementsAreArray(expected_keys));
+  testing::MergeOperationView merge_operation_view(op);
+
+  EXPECT_THAT(merge_operation_view.GetDirectInputs().size(), direct_size);
+  EXPECT_THAT(merge_operation_view.GetControlInputs().size(), control_size);
 }
 
 static constexpr uint64_t kSampleControlInputLengths[] = {0, 1, 5, 10};
