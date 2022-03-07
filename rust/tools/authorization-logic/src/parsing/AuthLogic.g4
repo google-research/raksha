@@ -139,7 +139,7 @@ ATTRIBUTE: 'attribute';
 
 // Identifiers wrapped in quotes are constants whereas
 // identifiers without quotes are variables.
-ID : ('"')? [_a-zA-Z]+ [_a-zA-Z0-9/.#:]* ('"')?;
+ID : ('"')? [_a-zA-Z][_a-zA-Z0-9/.#:]* ('"')?;
 NUMLITERAL : [0-9]+;
 
 NEG: '!';
