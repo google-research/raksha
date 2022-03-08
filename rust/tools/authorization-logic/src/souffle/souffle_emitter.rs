@@ -50,7 +50,7 @@ fn emit_decl(relation_declaration: &AstRelationDeclaration) -> String {
 fn emit_pred(p: &AstPredicate) -> String {
     let neg = match p.sign {
         Sign::Positive => "",
-        Negative => "!"
+        Sign::Negated => "!"
     };
     format!("{}{}({})", neg, &p.name, p.args.join(", "))
 }
