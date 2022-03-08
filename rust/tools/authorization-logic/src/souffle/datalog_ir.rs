@@ -19,9 +19,9 @@
 use crate::ast::*;
 
 #[derive(Clone)]
-pub enum DLIRRvalue {
-    PredicateRvalue { predicate: AstPredicate },
-    BinopRValue { lnum: String, binop: AstBinop, rnum: String }
+pub enum DLIRRValue {
+    PredicateRValue { predicate: AstPredicate },
+    BinopRValue { binop: AstBinaryOperation }
 }
 
 #[derive(Clone)]
@@ -31,7 +31,7 @@ pub enum DLIRAssertion {
     },
     DLIRCondAssertion {
         lhs: AstPredicate,
-        rhs: Vec<DLIRRvalue>,
+        rhs: Vec<DLIRRValue>,
     },
 }
 

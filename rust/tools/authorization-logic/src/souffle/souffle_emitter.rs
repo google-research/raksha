@@ -55,22 +55,22 @@ fn emit_pred(p: &AstPredicate) -> String {
     format!("{}{}({})", neg, &p.name, p.args.join(", "))
 }
 
-fn emit_binop(binop: &AstBinop) -> String {
-    match binop {
-        AstBinop::LessThan => "<",
-        AstBinop::GreaterThan => ">",
-        AstBinop::Equals => "=",
-        AstBinop::NotEquals =>  "!=",
-        AstBinop::LessOrEquals => "<=",
-        AstBinop::GreaterOrEquals => ">="
+fn emit_op(operator: &AstOperator) -> String {
+    match operator {
+        AstOperator::LessThan => "<",
+        AstOperator::GreaterThan => ">",
+        AstOperator::Equals => "=",
+        AstOperator::NotEquals =>  "!=",
+        AstOperator::LessOrEquals => "<=",
+        AstOperator::GreaterOrEquals => ">="
     }.to_string()
 }
 
-fn emit_rvalue(rvalue: &DLIRRvalue) -> String {
+fn emit_rvalue(rvalue: &DLIRRValue) -> String {
     match rvalue {
-        DLIRRvalue::PredicateRvalue { predicate } => emit_pred(predicate),
-        DLIRRvalue::BinopRValue { lnum, binop, rnum } => 
-            format!("{} {} {}", lnum, emit_binop(binop), rnum)
+        DLIRRValue::PredicateRValue { predicate } => emit_pred(predicate),
+        DLIRRValue::BinopRValue { binop } => 
+            format!("{} {} {}", &binop.lnum, emit_op(&binop.op), &binop.rnum)
     }
 }
 

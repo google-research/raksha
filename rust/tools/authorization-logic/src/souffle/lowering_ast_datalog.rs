@@ -102,8 +102,8 @@
 use crate::{ast::*, souffle::datalog_ir::*};
 use std::collections::HashMap;
 
-fn pred_to_dlir_rvalue(pred: &AstPredicate) -> DLIRRvalue {
-    DLIRRvalue::PredicateRvalue { predicate: pred.clone() }
+fn pred_to_dlir_rvalue(pred: &AstPredicate) -> DLIRRValue {
+    DLIRRValue::PredicateRValue { predicate: pred.clone() }
 }
 
 // Note that this puts args_ on the front of the list of arguments because
@@ -326,19 +326,15 @@ impl LoweringToDatalogPass {
     fn rvalue_to_dlir(
         &mut self,
         speaker: &AstPrincipal,
-        rvalue: &AstRValue) -> DLIRRvalue {
+        rvalue: &AstRValue) -> DLIRRValue {
         match rvalue {
             AstRValue::FlatFactRValue { flat_fact } => {
                 let (flat_pred, _) = self.flat_fact_to_dlir(&flat_fact, &speaker);
                 pred_to_dlir_rvalue(&push_prin(String::from("says_"),
                     &speaker, &flat_pred))
             }
-            AstRValue::BinopRValue { lnum, binop, rnum } => {
-                DLIRRvalue::BinopRValue { 
-                    lnum: lnum.clone(), 
-                    binop: *binop, 
-                    rnum: rnum.clone() 
-                }
+            AstRValue::BinopRValue { binop } => {
+                DLIRRValue::BinopRValue { binop: binop.clone() }
             }
         }
     }
