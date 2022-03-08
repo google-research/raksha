@@ -17,6 +17,8 @@
 
 package(default_visibility = ["//src:__subpackages__"])
 
+licenses(["notice"])
+
 # These files contain dummy marker libraries for indicating a dependency upon
 # protobuf libraries. We have to use them because Bazel cannot be configured
 # to just force explicit inclusion of protobuf dependencies. This causes
