@@ -23,25 +23,23 @@ mod test {
     // This dependency is used for generating keypairs.
     use crate::signing::tink_interface::*;
 
-    fn get_output_path(out_dir: &str, file: &str) -> String {
-      format!("{}/{}", &utils::get_or_create_output_dir(out_dir), file)
-    }
 
     #[test]
-    fn test_signature_exporting() {
+  fn test_signature_exporting() {
+        utils::create_bazeltest_output_paths(vec!["test_keys", "test_outputs"]);
         store_new_keypair_cleartext(
-            &get_output_path("test_keys", "principal1_pub.json"),
-            &get_output_path("test_keys", "principal1_priv.json"),
+            &utils::get_resolved_path("test_keys/principal1_pub.json"),
+            &utils::get_resolved_path("test_keys/principal1_priv.json"),
         );
 
         compile("exporting", "test_inputs", "test_outputs", "");
 
         let deser_claim = deserialize_from_file(
-            &utils::get_resolved_output_path("test_outputs/prin1_statement1.obj")).unwrap();
+            &utils::get_resolved_path("test_outputs/prin1_statement1.obj")).unwrap();
 
         assert!(verify_claim(
-            &utils::get_resolved_output_path("test_keys/principal1_pub.json"),
-            &utils::get_resolved_output_path("test_outputs/prin1_statement1.sig"),
+            &utils::get_resolved_path("test_keys/principal1_pub.json"),
+            &utils::get_resolved_path("test_outputs/prin1_statement1.sig"),
             &deser_claim
         )
         .is_ok());

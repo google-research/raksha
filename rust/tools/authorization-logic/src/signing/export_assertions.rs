@@ -40,9 +40,9 @@ fn export_says_assertion(says_assertion: &AstSaysAssertion, priv_env: &BindingEn
     match &says_assertion.export_file {
         None => {}
         Some(filename) => {
-            let obj_file = utils::get_resolved_output_path(&(filename.clone() + ".obj"));
-            let sig_file = utils::get_resolved_output_path(&(filename.clone() + ".sig"));
-            let priv_key_file = utils::get_resolved_output_path(
+            let obj_file = utils::get_resolved_path(&(filename.clone() + ".obj"));
+            let sig_file = utils::get_resolved_path(&(filename.clone() + ".sig"));
+            let priv_key_file = utils::get_resolved_path(
                 &priv_env.get(&says_assertion.prin).unwrap());
             serialize_to_file(&says_assertion.assertions, &obj_file).unwrap();
             sign_claim(&priv_key_file, &sig_file, &says_assertion.assertions);

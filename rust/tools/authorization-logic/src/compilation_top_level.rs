@@ -49,7 +49,7 @@ pub fn source_file_to_ast_test_only(filename: &str, in_dir: &str) -> AstProgram 
 pub fn compile(filename: &str, in_dir: &str, out_dir: &str,
               decl_skip: &str) {
     let resolved_in_dir = utils::get_resolved_path(&in_dir);
-    let resolved_out_dir = utils::get_or_create_output_dir(&out_dir);
+    let resolved_out_dir = utils::get_resolved_path(&out_dir);
     let prog = source_file_to_ast(filename, &resolved_in_dir);
     let prog_with_imports = import_assertions::handle_imports(&prog);
     let decl_skip_vec = Some(decl_skip

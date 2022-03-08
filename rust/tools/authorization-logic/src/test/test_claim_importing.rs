@@ -25,27 +25,25 @@ mod test {
     // This dependency is used for generating keypairs.
     use crate::signing::tink_interface::*;
 
-    fn get_output_path(out_dir: &str, file: &str) -> String {
-      format!("{}/{}", &utils::get_or_create_output_dir(out_dir), file)
-    }
-
     fn query_test_with_imports(t: QueryTest) {
+        utils::setup_directories_for_bazeltest(vec![t.input_dir], vec![t.output_dir]);     
         compile(t.filename, t.input_dir, t.output_dir, "");
         run_souffle(
-            &utils::get_resolved_output_path(&format!("test_outputs/{}.dl", t.filename)),
-            &utils::get_resolved_output_path("test_outputs")
+            &utils::get_resolved_path(&format!("test_outputs/{}.dl", t.filename)),
+            &utils::get_resolved_path("test_outputs")
         );
         for (qname, intended_result) in t.query_expects {
-            let queryfile = utils::get_resolved_output_path(&format!("test_outputs/{}.csv", qname));
+            let queryfile = utils::get_resolved_path(&format!("test_outputs/{}.csv", qname));
             assert!(is_file_empty(&queryfile) != intended_result);
         }
     }
 
     #[test]
     fn test_signature_importing() {
+        utils::setup_directories_for_bazeltest(vec!["test_inputs"], vec!["test_keys", "test_outputs"]);     
         store_new_keypair_cleartext(
-            &get_output_path("test_keys", "principal1e_pub.json"),
-            &get_output_path("test_keys", "principal1e_priv.json"),
+            &utils::get_resolved_path("test_keys/principal1e_pub.json"),
+            &utils::get_resolved_path("test_keys/principal1e_priv.json"),
         );
 
         // This code generates exported statements from test_inputs/exporting.

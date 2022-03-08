@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-use std::fs::File;
-
 // Returns true if we are in the context of a `bazel test`.
 pub fn is_bazel_test() -> bool {
   cfg!(test) && cfg!(feature = "bazel_build")
 }
 
-/* Returns a path by appending bazel WORKSPACE root as needed. */
+// If invoked within `bazel test` Returns a path by appending bazel TEST_TMPDIR.
+// Otherwise, returns it unchanged.
 pub fn get_resolved_path(path: &str) -> String {
     if is_bazel_test() {
         let tmp_dir = std::env::var("TEST_TMPDIR").unwrap();
@@ -30,31 +29,6 @@ pub fn get_resolved_path(path: &str) -> String {
         path
     } else {
         format!("{}", path)
-    }
-}
-
-pub fn get_or_create_output_dir(path: &str) -> String {
-    if is_bazel_test() {
-        // let full_path = format!("{}/{}", std::env::temp_dir().display(), path);
-        // if !std::path::Path::new(&full_path).is_dir() {
-        //     println!("Full path is {}", full_path);
-        //     std::fs::create_dir_all(&full_path);
-        // }
-        // full_path
-        let tmp_dir = std::env::var("TEST_TMPDIR").unwrap();
-        format!("{}/{}", tmp_dir, path)
-    } else {
-        (*path).to_string()
-    }
-}
-
-pub fn get_resolved_output_path(path: &str) -> String {
-    if is_bazel_test() {
-        // format!("{}/{}", std::env::temp_dir().display(), path)
-        let tmp_dir = std::env::var("TEST_TMPDIR").unwrap();
-        format!("{}/{}", tmp_dir, path)
-    } else {
-        (*path).to_string()
     }
 }
 
@@ -107,13 +81,3 @@ pub fn setup_directories_for_bazeltest(input_paths: Vec<&str>, output_paths: Vec
     setup_bazeltest_data_paths(input_paths);
     create_bazeltest_output_paths(output_paths);
 }
-
-// pub fn create_output_file(path: &str) -> Result<File, std::io::Error> {
-//     File::create(&get_resolved_output_path(path))
-// }
-
-// pub fn open_input_file(path: &str) -> Result<File, std::io::Error> {
-//     println!("Opening {} for input", get_resolved_path(path).to_string());
-//     File::open(&get_resolved_path(path))
-// }
-

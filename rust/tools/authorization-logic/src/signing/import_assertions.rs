@@ -37,9 +37,9 @@ fn collect_pub_bindings(prog: &AstProgram) -> BindingEnv {
 }
 
 fn handle_one_import(kbenv: &BindingEnv, imp: &AstImport) -> AstSaysAssertion {
-    let pubkey = utils::get_resolved_output_path(kbenv.get(&imp.principal).unwrap());
-    let signature_file = utils::get_resolved_output_path(&(imp.filename.clone() + ".sig"));
-    let full_import_path = utils::get_resolved_output_path(&(imp.filename.clone() + ".obj"));
+    let pubkey = utils::get_resolved_path(kbenv.get(&imp.principal).unwrap());
+    let signature_file = utils::get_resolved_path(&(imp.filename.clone() + ".sig"));
+    let full_import_path = utils::get_resolved_path(&(imp.filename.clone() + ".obj"));
     let assertion = deserialize_from_file(&full_import_path).unwrap();
 
     // TODO: A better error message is needed, potentially.
