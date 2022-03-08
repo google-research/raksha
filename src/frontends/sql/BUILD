@@ -87,6 +87,7 @@ cc_test(
     deps = [
         ":decode",
         ":decoder_context",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/frontends/sql:sql_ir_cc_proto",
         "//src/frontends/sql/testing:merge_operation_view",

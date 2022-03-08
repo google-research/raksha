@@ -136,6 +136,7 @@ cc_test(
     srcs = ["access_path_test.cc"],
     deps = [
         ":access_path",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
     ],
 )
@@ -145,6 +146,8 @@ cc_test(
     srcs = ["access_path_root_test.cc"],
     deps = [
         ":access_path",
+        "//src/common/proto:proto_message_differencer",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
     ],
 )
@@ -154,6 +157,8 @@ cc_test(
     srcs = ["access_path_selector_test.cc"],
     deps = [
         ":access_path",
+        "//src/common/proto:proto_message_differencer",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
     ],
 )
@@ -163,6 +168,8 @@ cc_test(
     srcs = ["entity_type_test.cc"],
     deps = [
         "types",
+        "//src/common/proto:proto_message_differencer",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir/types",
         "//third_party/arcs/proto:manifest_cc_proto",

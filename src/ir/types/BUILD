@@ -58,6 +58,7 @@ cc_test(
     deps = [
         ":types",
         "//src/common/logging",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir:access_path",
         "//src/ir/proto:types",
