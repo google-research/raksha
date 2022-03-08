@@ -83,7 +83,7 @@ fn emit_program_body(p: &DLIRProgram) -> String {
 fn emit_type_declarations(p: &DLIRProgram, decl_skip: &Vec<String>) -> String {
     let mut type_names : Vec<String> = p.relation_declarations.iter()
         .map(|rel_decl| rel_decl.arg_typings.iter()
-             .map(|(parameter, type_)| type_))
+             .map(|(_parameter, type_)| type_))
         .flatten()
         .filter_map(|type_| match type_ {
             AstType::CustomType { type_name } => Some(type_name.clone()),
