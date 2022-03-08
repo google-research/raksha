@@ -1,18 +1,10 @@
-.decl attribute may(action : symbol, tag : symbol)
+.decl may(prin : Principal, action : symbol, tag : symbol)
 
 .decl overridePreferences(subject : symbol)
 .decl will(action : symbol, tag : symbol)
 .decl hasTag(x : symbol, y : symbol)
 .decl ownsTag(owner : Principal, y : symbol)
 .decl downgrades(path : symbol, tag : symbol)
-
-.decl isAction(action : symbol)
-.decl isPath(path : symbol)
-.decl isTag(tag : symbol)
-.decl isPrincipal(p : Principal)
-.decl isSpeechTranscript(x : symbol)
-.decl isUserTranscript(x : symbol)
-.decl isUserSpeech(x : symbol)
 
 // When "UserX" enters the room, a runtime on the user's
 // mobile device sends a packet to the microphone which contains the following
@@ -37,27 +29,11 @@
   // The user allows the userSpeech tag to just be dropped, or for any
   // action to be done with data owned by UserA. UserA grants permission for 
   // TrustedCompany to give any particle (PrincipalX) these permissions.
-  "TrustedCompany" canSay downgrades(pathX, "UserA_userSpeech") :-
-    isPath(pathX).
+  "TrustedCompany" canSay downgrades(pathX, "UserA_userSpeech").
   
   // This says any tag, but because of how Raksha works internally, only 
   // permissions UserA gives about its own tags matter
-  "TrustedCompany" canSay may(PrincipalX, anyActionX, userATagX) :-
-    isAction(anyActionX), isPrincipal(PrincipalX), isTag(userATagX).
-
-  // This is stuff that needs to be generated behind the scenes
-  // (Clearly A's policy should have no knowledge of this)
-  isAction("deliver_privacy_notifications").
-  isAction("local_computation").
-  isAction("store").
-  isPrincipal("Notifier").
-  isPrincipal("MicCompute").
-  isPrincipal("SpeechToTextStorageSink").
-  isPath("audioIn").
-  isPath("asrStorageConn").
-  isPath("speechToTextIn").
-  isTag("UserA_userSpeech").
-  isTag("UserA_speechTranscript").
+  "TrustedCompany" canSay may(PrincipalX, anyActionX, userATagX).
 }
 
 // UserB is a guest user. UserB is somewhat privacy sensitive. They want their
@@ -76,33 +52,20 @@
   // (In practice, PrincipalX is going to be any software module of 
   // "TrustedCompany"'s choosing).
   "TrustedCompany" canSay
-    may(PrincipalX, "local_computation", "UserB_userSpeech") :- isPrincipal(PrincipalX).
+    may(PrincipalX, "local_computation", "UserB_userSpeech").
   "TrustedCompany" canSay
-    may(PrincipalX, "store", "UserB_speechTranscript") :- isPrincipal(PrincipalX).
+    may(PrincipalX, "store", "UserB_speechTranscript").
   // UserB trusts TrustedCompany to properly transform userSpeech into just 
   // transcripts.
   "TrustedCompany" canSay downgrades(pathX, "UserB_userSpeech") :-
     hasTag(pathX, "UserB_speechTranscript").
-  "TrustedCompany" canSay hasTag(PathX, "UserB_speechTranscript") :-
-    isPath(PathX).
+  "TrustedCompany" canSay hasTag(PathX, "UserB_speechTranscript").
 
   // Audio can also be used to deliver notifications about the fact that there is a 
   // microphone in the room
   "TrustedCompany" canSay
-    may(PrincipalX, "deliver_privacy_notifications", "UserB_userSpeech") :- 
-        isPrincipal(PrincipalX).
+    may(PrincipalX, "deliver_privacy_notifications", "UserB_userSpeech").
   
-  // This is stuff that needs to be generated behind the scenes
-  // (Clearly B's policy should have no knowledge of this)
-  isAction("deliver_privacy_notifications").
-  isAction("local_computation").
-  isAction("store").
-  isPrincipal("Notifier").
-  isPrincipal("MicCompute").
-  isPrincipal("SpeechToTextStorageSink").
-  isPath("audioIn").
-  isPath("asrStorageConn").
-  isPath("speechToTextIn").
 }
 
 // UserC is a very privacy sensitive user. They do not trust anyone to store
@@ -114,39 +77,23 @@
   ownsTag("UserC", "UserC_userSpeech").
   ownsTag("UserC", "UserC_speechTranscript").
   "TrustedCompany" canSay
-    may(PrincipalX, "deliver_privacy_notifications", "UserC_userSpeech") :-
-        isPrincipal(PrincipalX).
+    may(PrincipalX, "deliver_privacy_notifications", "UserC_userSpeech").
 
   // Unlike UserB, UserC does NOT give any additional permissions for data
   // that has been transformed into a transcript.
-  isPrincipal("Notifier").
 }
 
 // TrustedCompany delegates the needed permissions to the specific particles 
 // after having done review of the code in those particles.
 "TrustedCompany" says {
-  may("Notifier", "deliver_privacy_notifications", UserX_userSpeech) :-
+  may("Notifier", "deliver_privacy_notifications", UserX_userSpeech).
     // ideally, the "UserX_" Prefix would be a feature that allows us to just 
     // refer to the second part of the name and the "isUserSpeech" predicate would 
     // not be needed
-    isUserSpeech(UserX_userSpeech).
-  may("MicCompute", "local_computation", UserX_userSpeech) :-
-    isUserSpeech(UserX_userSpeech).
-  "MicCompute" canSay downgrades("asrStorageConn", UserX_userSpeech) :-
-    isUserSpeech(UserX_userSpeech).
-  "MicCompute" canSay hasTag("asrStorageConn", UserX_speechTranscript) :-
-    isSpeechTranscript(UserX_speechTranscript).
-  may("SpeechToTextStorageSink", "store", UserX_speechTranscript) :-
-    isSpeechTranscript(UserX_speechTranscript).
-
-  // something like this needs to be generated "behind the scenes" for this to 
-  // work
-  isUserSpeech("UserA_userSpeech").
-  isUserSpeech("UserB_userSpeech").
-  isUserSpeech("UserC_userSpeech").
-  isSpeechTranscript("UserA_speechTranscript").
-  isSpeechTranscript("UserB_speechTranscript").
-  isSpeechTranscript("UserC_speechTranscript").
+  may("MicCompute", "local_computation", UserX_userSpeech).
+  "MicCompute" canSay downgrades("asrStorageConn", UserX_userSpeech).
+  "MicCompute" canSay hasTag("asrStorageConn", UserX_speechTranscript).
+  may("SpeechToTextStorageSink", "store", UserX_speechTranscript).
 }
 
 //-----------------------------------------------------------------------------
@@ -162,20 +109,8 @@
 "MicCompute" says {
     will("local_computation", "audioIn"). 
     // Assumes we can figure out tags with namespaces like this:
-    downgrades("asrStorageConn", UserX_userSpeech) :- 
-      // ideally this predicate would be added behind the scenes:
-      isUserSpeech(UserX_userSpeech).
-    hasTag("asrStorageConn", UserX_userTranscript) :- 
-      // should be added behind the scenes    
-      isSpeechTranscript(UserX_userTranscript).
-
-    // should be added behind the scenes:
-    isUserSpeech("UserA_userSpeech").
-    isUserSpeech("UserB_userSpeech").
-    isUserSpeech("UserC_userSpeech").
-    isSpeechTranscript("UserA_speechTranscript").
-    isSpeechTranscript("UserB_speechTranscript").
-    isSpeechTranscript("UserA_speechTranscript").
+    downgrades("asrStorageConn", UserX_userSpeech).
+    hasTag("asrStorageConn", UserX_userTranscript).
 }
     
 "SpeechToTextStorageSink" says {

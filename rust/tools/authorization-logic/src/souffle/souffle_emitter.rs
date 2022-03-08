@@ -50,7 +50,7 @@ fn emit_decl(relation_declaration: &AstRelationDeclaration) -> String {
 fn emit_pred(p: &AstPredicate) -> String {
     let neg = match p.sign {
         Sign::Positive => "",
-        Negative => "!"
+        Sign::Negated => "!"
     };
     format!("{}{}({})", neg, &p.name, p.args.join(", "))
 }
@@ -72,17 +72,18 @@ fn emit_assertion(a: &DLIRAssertion) -> String {
 }
 
 fn emit_program_body(p: &DLIRProgram) -> String {
-    p.assertions
+    let mut body_vec = p.assertions
         .iter()
         .map(|x| emit_assertion(&x))
-        .collect::<Vec<_>>()
-        .join("\n")
+        .collect::<Vec<_>>();
+    body_vec.sort();
+    body_vec.join("\n")
 }
 
 fn emit_type_declarations(p: &DLIRProgram, decl_skip: &Vec<String>) -> String {
     let mut type_names : Vec<String> = p.relation_declarations.iter()
         .map(|rel_decl| rel_decl.arg_typings.iter()
-             .map(|(parameter, type_)| type_))
+             .map(|(_parameter, type_)| type_))
         .flatten()
         .filter_map(|type_| match type_ {
             AstType::CustomType { type_name } => Some(type_name.clone()),
@@ -96,26 +97,29 @@ fn emit_type_declarations(p: &DLIRProgram, decl_skip: &Vec<String>) -> String {
         !(**type_name == "symbol".to_string())
     }).collect::<HashSet<_>>();
 
-    type_names_filtered.iter()
+    let mut ret_vec = type_names_filtered.iter()
         .map(|type_| format!(".type {} <: symbol", type_))
-        .collect::<Vec<_>>()
-        .join("\n")
+        .collect::<Vec<_>>();
+    ret_vec.sort();
+    ret_vec.join("\n")
 }
 
 fn emit_relation_declarations(p: &DLIRProgram, decl_skip: &Vec<String>)
         -> String {
-    p.relation_declarations
+    let mut ret_vec = p.relation_declarations
         .iter()
         .filter(|x| !decl_skip.contains(&x.predicate_name))
         .map(|x| emit_decl(x))
-        .collect::<Vec<_>>()
-        .join("\n")
+        .collect::<Vec<_>>();
+    ret_vec.sort();
+    ret_vec.join("\n")
 }
 
 fn emit_outputs(p: &DLIRProgram) -> String {
-    p.outputs
+    let mut ret_vec = p.outputs
         .iter()
         .map(|o| String::from(".output ") + &o)
-        .collect::<Vec<String>>()
-        .join("\n")
+        .collect::<Vec<String>>();
+    ret_vec.sort();
+    ret_vec.join("\n")
 }

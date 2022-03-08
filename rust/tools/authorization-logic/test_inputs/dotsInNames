@@ -1,3 +1,8 @@
+.decl are(words : Words)
+.decl areConditionally(words : Words)
+.decl evenIf(words : Words)
+.decl areAlso(words : Words)
+
 "TheTestPrincipal" says "names.with.dots.in.them" are("prefectly.cromulent").
 
 "TheTestPrincipal" says "names.with.dots.in.them" areConditionally("cromulent") :-

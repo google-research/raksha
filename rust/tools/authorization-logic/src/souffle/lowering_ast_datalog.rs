@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Raksha Authors
+ * Copyright 2021 Google LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -445,7 +445,7 @@ impl LoweringToDatalogPass {
         // Generate relation declarations for delegated predicates with
         // each encountered delegation depth
         let mut cansay_decls = self.cansay_depth.iter()
-            .filter(|(name, depth)| **depth > 0)
+            .filter(|(_name, depth)| **depth > 0)
             .map(|(name, depth)| { 
                 prefix_with_cansay(type_environment.get(name).expect(
                         &format!("couldnt find type named: {}", name)), *depth)
