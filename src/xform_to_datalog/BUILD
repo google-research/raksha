@@ -110,6 +110,7 @@ cc_test(
     deps = [
         ":manifest_datalog_facts",
         "//src/common/testing:gtest",
+        "//src/common/proto:protobuf",
         "//src/ir",
         "//src/ir/proto:system_spec",
         "//src/ir/types",
