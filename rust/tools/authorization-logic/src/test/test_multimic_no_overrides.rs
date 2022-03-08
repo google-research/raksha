@@ -24,13 +24,15 @@ mod test {
 
     // This dependency is used for generating keypairs.
     use crate::signing::tink_interface::*;
+    use crate::utils::*;
 
     #[test]
     fn test_multimic_no_overrides_scenario1() {
+        utils::setup_directories_for_bazeltest(vec!["raksha_examples"], vec!["test_outputs"]);
         run_query_test(QueryTest {
             filename: "multimic.authlogic",
             input_dir: "raksha_examples/multimic-no-overrides",
-            output_dir: "raksha_examples/multimic-no-overrides",
+            output_dir: "test_outputs",
             query_expects: vec![
                 ("may_notifierA", true),
                 ("may_notifierB", true),
@@ -46,10 +48,11 @@ mod test {
 
     #[test]
     fn test_multimic_no_overrides_scenario2() {
-        run_query_test(QueryTest {
+          utils::setup_directories_for_bazeltest(vec!["raksha_examples"], vec!["test_outputs"]);
+          run_query_test(QueryTest {
             filename: "multimic.authlogic",
             input_dir: "raksha_examples/multimic-no-overrides",
-            output_dir: "raksha_examples/multimic-no-overrides",
+            output_dir: "test_outputs",
             query_expects: vec![
                 ("may_notifierC", true),
                 ("may_micComputeC", false),

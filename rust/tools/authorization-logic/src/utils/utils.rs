@@ -24,20 +24,25 @@ pub fn is_bazel_test() -> bool {
 /* Returns a path by appending bazel WORKSPACE root as needed. */
 pub fn get_resolved_path(path: &str) -> String {
     if is_bazel_test() {
-        format!("rust/tools/authorization-logic/{}", path)
-     } else {
+        let tmp_dir = std::env::var("TEST_TMPDIR").unwrap();
+        let path = format!("{}/{}", tmp_dir, path);
+        println!("Path is {}", path);
+        path
+    } else {
         format!("{}", path)
-     }
+    }
 }
 
 pub fn get_or_create_output_dir(path: &str) -> String {
     if is_bazel_test() {
-        let full_path = format!("{}/{}", std::env::temp_dir().display(), path);
-        if !std::path::Path::new(&full_path).is_dir() {
-            println!("Full path is {}", full_path);
-            std::fs::create_dir_all(&full_path);
-        }
-        full_path
+        // let full_path = format!("{}/{}", std::env::temp_dir().display(), path);
+        // if !std::path::Path::new(&full_path).is_dir() {
+        //     println!("Full path is {}", full_path);
+        //     std::fs::create_dir_all(&full_path);
+        // }
+        // full_path
+        let tmp_dir = std::env::var("TEST_TMPDIR").unwrap();
+        format!("{}/{}", tmp_dir, path)
     } else {
         (*path).to_string()
     }
@@ -45,28 +50,29 @@ pub fn get_or_create_output_dir(path: &str) -> String {
 
 pub fn get_resolved_output_path(path: &str) -> String {
     if is_bazel_test() {
-        format!("{}/{}", std::env::temp_dir().display(), path)
+        // format!("{}/{}", std::env::temp_dir().display(), path)
+        let tmp_dir = std::env::var("TEST_TMPDIR").unwrap();
+        format!("{}/{}", tmp_dir, path)
     } else {
         (*path).to_string()
     }
 }
 
 // Creates soft links to the data directories used in tests within the temporary workspace.
-#[cfg(feature = "bazel_build")]
+// This is a no-op if cfg!(not(feature = "bazel_build")).
 #[cfg(test)]
-pub fn setup_test_data_paths(input_paths: Vec<&str>) {
-    assert!(is_bazel_test(), "Not supported outside bazel tests.");
+pub fn setup_bazeltest_data_paths(input_paths: Vec<&str>) {
+    if !is_bazel_test() { return }
     let tmp_dir = std::env::var("TEST_TMPDIR").unwrap();
+    let src_dir = std::env::var("TEST_SRCDIR").unwrap();
+    let workspace_dir = std::env::var("TEST_WORKSPACE").unwrap();
     for input_path in input_paths {
         let resolved_input_path = format!(
             "{}/{}/rust/tools/authorization-logic/{}",
-            tmp_dir,
-            std::env::var("TEST_WORKSPACE").unwrap(),
-            input_path);
+            src_dir, workspace_dir, input_path);
         let resolved_link_path = format!(
-            "{}/{}",
-            tmp_dir,
-            input_path);
+            "{}/{}", tmp_dir, input_path);
+        println!("Linking {} as {}", resolved_input_path, resolved_link_path);
         std::process::Command::new("ln")
             .arg("-s")
             .arg(resolved_input_path)

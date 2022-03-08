@@ -24,7 +24,7 @@ mod test {
 
     #[test]
     fn test_negation() {
-        run_query_test(QueryTest {
+        setup_dirs_and_run_query_test(QueryTest {
             filename: "negation",
             query_expects: vec![
                 ("q1", true),

@@ -15,6 +15,7 @@ mod test {
 
     #[test]
     pub fn test_decl_skip() {
+        utils::setup_directories_for_bazeltest(vec!["test_inputs"], vec!["test_outputs"]);
         // Compile with declarations
         compile("testDeclSkip", "test_inputs", "test_outputs", "");
         let contents1 = file_line_list(&utils::get_resolved_output_path("test_outputs/testDeclSkip.dl"));

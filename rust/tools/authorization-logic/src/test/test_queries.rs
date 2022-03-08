@@ -49,8 +49,7 @@ pub mod test {
 
     pub fn run_query_test(t: QueryTest) {
         let resolved_in_dir = utils::get_resolved_path(&t.input_dir.to_string());
-        let resolved_out_dir = utils::get_or_create_output_dir(&t.output_dir.to_string());
-        let resolved_test_outputs_dir = utils::get_or_create_output_dir("test_outputs");
+        let resolved_out_dir = utils::get_resolved_path(&t.output_dir.to_string());
         input_to_souffle_file(
             &t.filename.to_string(),
             &resolved_in_dir,
@@ -58,12 +57,17 @@ pub mod test {
         );
         run_souffle(
             &format!("{}/{}.dl", resolved_out_dir, t.filename),
-            &resolved_test_outputs_dir,
+            &resolved_out_dir,
         );
         for (qname, intended_result) in t.query_expects {
-            let queryfile = format!("{}/{}.csv", &resolved_test_outputs_dir, qname);
+            let queryfile = format!("{}/{}.csv", &resolved_out_dir, qname);
             assert!(is_file_empty(&queryfile) != intended_result);
         }
+    }
+
+    pub fn setup_dirs_and_run_query_test(t: QueryTest) {
+        utils::setup_directories_for_bazeltest(vec![&t.input_dir], vec![&t.output_dir]);
+        run_query_test(t)
     }
 
     pub fn clean_test_dir() {
@@ -78,7 +82,7 @@ pub mod test {
 
     #[test]
     fn test_conditions() {
-        run_query_test(QueryTest {
+        setup_dirs_and_run_query_test(QueryTest {
             filename: "conditions",
             query_expects: vec![
                 ("q_prin1_fact1", true),
@@ -91,7 +95,7 @@ pub mod test {
 
     #[test]
     fn test_delegations() {
-        run_query_test(QueryTest {
+        setup_dirs_and_run_query_test(QueryTest {
             filename: "delegations",
             query_expects: vec![
                 ("q_uncond1_t", true),
@@ -107,7 +111,7 @@ pub mod test {
 
     #[test]
     fn test_canactas() {
-        run_query_test(QueryTest {
+        setup_dirs_and_run_query_test(QueryTest {
             filename: "canActAs",
             query_expects: vec![("q_chicken", true), ("q_ketchup", false)],
             ..Default::default()
