@@ -84,9 +84,9 @@ fn universe_declarations(rel_decls: &Vec<AstRelationDeclaration>)
     let mut custom_types = rel_decls.iter()
         .map(|rel_decl| rel_decl.arg_typings.clone())
         .flatten()
-        .map(|(name, typ)| typ)
+        .map(|(_name, typ)| typ)
         .filter(|type_| match type_ {
-            AstType::CustomType { type_name } => true,
+            AstType::CustomType { type_name: _ } => true,
             _ => false
         })
         .collect::<HashSet<_>>();
@@ -318,7 +318,7 @@ impl UniverseHandlingPass {
                 .map(|decl| {
                     let position_map = decl.arg_typings.clone()
                         .into_iter()
-                        .map(|(param_name, typ)| typ)
+                        .map(|(_param_name, typ)| typ)
                         .into_iter()
                         .enumerate()
                         .collect::<HashMap<usize, AstType>>();
