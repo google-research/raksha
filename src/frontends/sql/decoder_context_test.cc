@@ -17,27 +17,34 @@
 #include "src/frontends/sql/decoder_context.h"
 
 #include "src/common/testing/gtest.h"
+#include "src/frontends/sql/testing/merge_operation_view.h"
 
 namespace raksha::frontends::sql {
 
-using testing::Eq;
-using testing::IsEmpty;
-using testing::IsNull;
-using testing::NotNull;
-using testing::Pair;
-using testing::ResultOf;
-using testing::TestWithParam;
-using testing::UnorderedElementsAre;
-using testing::Values;
+using ::testing::Combine;
+using ::testing::Eq;
+using ::testing::IsEmpty;
+using ::testing::IsNull;
+using ::testing::NotNull;
+using ::testing::Pair;
+using ::testing::ResultOf;
+using ::testing::TestWithParam;
+using ::testing::UnorderedElementsAre;
+using ::testing::Values;
+using ::testing::ValuesIn;
 
 using ir::Attribute;
 using ir::Block;
 using ir::IRContext;
+using ir::NamedValueMap;
 using ir::Operation;
+using ir::Operator;
 using ir::Storage;
 using ir::Value;
 using ir::types::TypeBase;
 using ir::value::Any;
+using ir::value::BlockArgument;
+using ir::value::OperationResult;
 using ir::value::StoredValue;
 
 TEST(DecoderContextTest, BuildTopLevelBlock) {
@@ -126,5 +133,45 @@ TEST(DecoderContextDeathTest, DecoderContextValueRegistryDeathTest) {
   EXPECT_DEATH({ decoder_context.GetValue(3); },
                "Could not find a value with id 3.");
 }
+
+class DecodeMergeOpTest
+    : public TestWithParam<std::tuple<std::vector<Value>, std::vector<Value>>> {
+};
+
+TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
+  auto &[direct_inputs, control_inputs] = GetParam();
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+
+  const Operation &op =
+      decoder_context.MakeMergeOperation(direct_inputs, control_inputs);
+  const Block &top_block = decoder_context.BuildTopLevelBlock();
+
+  EXPECT_EQ(op.parent(), &top_block);
+
+  testing::MergeOperationView merge_op_view(op);
+
+  // Test the vectors for equivalence.
+  EXPECT_EQ(merge_op_view.GetDirectInputs(), direct_inputs);
+  EXPECT_EQ(merge_op_view.GetControlInputs(), control_inputs);
+}
+
+// Create some example values for use in test inputs. Skip `StoredValue`
+// because it's hard to construct and the actual kinds of values aren't
+// as important as their indices for this test anyway.
+static const Operator kExampleOp("example");
+static const Operation kExampleOperation(nullptr, kExampleOp, {}, {});
+
+static const Block kExampleBlock;
+
+static const std::vector<Value> kSampleInputVectors[] = {
+    std::vector<Value>{},
+    {Value(Any())},
+    {Value(OperationResult(kExampleOperation, "out")),
+     Value(BlockArgument(kExampleBlock, "arg0")), Value(Any())}};
+
+INSTANTIATE_TEST_SUITE_P(DecodeMergeOpTest, DecodeMergeOpTest,
+                         Combine(ValuesIn(kSampleInputVectors),
+                                 ValuesIn(kSampleInputVectors)));
 
 }  // namespace raksha::frontends::sql

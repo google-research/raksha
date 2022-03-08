@@ -32,6 +32,11 @@ namespace raksha::frontends::sql {
 class DecoderContext {
  public:
   static constexpr absl::string_view kSqlLiteralOpName = "sql.literal";
+  static constexpr absl::string_view kSqlMergeOpName = "sql.merge";
+  static constexpr absl::string_view kMergeOpDirectInputPrefix =
+      "direct_input_";
+  static constexpr absl::string_view kMergeOpControlInputPrefix =
+      "control_input_";
   static constexpr absl::string_view kLiteralStrAttrName = "literal_str";
   static constexpr absl::string_view kDefaultOutputName = "out";
 
@@ -39,6 +44,8 @@ class DecoderContext {
       : ir_context_(ir_context),
         literal_operator_(ir_context_.RegisterOperator(
             std::make_unique<ir::Operator>(kSqlLiteralOpName))),
+        merge_operator_(ir_context_.RegisterOperator(
+            std::make_unique<ir::Operator>(kSqlMergeOpName))),
         global_module_(),
         top_level_block_builder_() {}
 
@@ -87,6 +94,10 @@ class DecoderContext {
         ir::NamedValueMap{});
   }
 
+  const ir::Operation &MakeMergeOperation(
+      std::vector<ir::Value> direct_inputs,
+      std::vector<ir::Value> control_inputs);
+
   // Finish building the top level block and
   const ir::Block &BuildTopLevelBlock() {
     return global_module_.AddBlock(top_level_block_builder_.build());
@@ -104,6 +115,10 @@ class DecoderContext {
   absl::flat_hash_map<uint64_t, ir::Value> id_to_value;
   // An `Operator` that provides the value of a literal.
   const ir::Operator &literal_operator_;
+  // An `Operator` that just merges values together. This will cause the
+  // sets of incoming confidentiality tags to be unioned and all integrity
+  // tags to be dropped.
+  const ir::Operator &merge_operator_;
   // A global module to which we can add SQL IR nodes.
   ir::Module global_module_;
   // A BlockBuilder for building the top-level block.

@@ -49,6 +49,34 @@ static Value DecodeLiteral(const Literal &literal,
                       DecoderContext::kDefaultOutputName));
 }
 
+static Value DecodeMergeOperation(const MergeOperation &merge_operation,
+                                  DecoderContext &decoder_context) {
+  // Although the proto separates the inputs and the control inputs, we can't
+  // really take advantage of that yet. We do, however, expect that at least one
+  // regular input is provided.
+  CHECK(merge_operation.inputs_size() >= 1)
+      << "Each MergeOperation is expected to have at least one non-control "
+         "input.";
+  std::vector<Value> direct_input_values;
+  direct_input_values.reserve(merge_operation.inputs_size());
+  for (Expression input_expr : merge_operation.inputs()) {
+    direct_input_values.push_back(
+        DecodeExpression(input_expr, decoder_context));
+  }
+
+  std::vector<Value> control_input_values;
+  control_input_values.reserve(merge_operation.control_inputs_size());
+  for (Expression control_expr : merge_operation.control_inputs()) {
+    control_input_values.push_back(
+        DecodeExpression(control_expr, decoder_context));
+  }
+
+  return Value(OperationResult(
+      decoder_context.MakeMergeOperation(std::move(direct_input_values),
+                                         std::move(control_input_values)),
+      DecoderContext::kDefaultOutputName));
+}
+
 // A helper function to decode the specific subclass of the Expression.
 static Value GetExprValue(const Expression &expr,
                           DecoderContext &decoder_context) {
@@ -64,7 +92,7 @@ static Value GetExprValue(const Expression &expr,
       return DecodeLiteral(expr.literal(), decoder_context);
     }
     case Expression::kMergeOperation: {
-      CHECK(false) << "Not yet implemented!";
+      return DecodeMergeOperation(expr.merge_operation(), decoder_context);
     }
     case Expression::kTagTransform: {
       CHECK(false) << "Not yet implemented!";
