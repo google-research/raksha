@@ -24,6 +24,8 @@
 
 namespace raksha::frontends::sql {
 
+namespace {
+
 using ir::Attribute;
 using ir::Block;
 using ir::IRContext;
@@ -45,19 +47,6 @@ using ::testing::UnorderedElementsAre;
 using ::testing::UnorderedElementsAreArray;
 using ::testing::Values;
 using ::testing::ValuesIn;
-
-constexpr uint64_t kSampleIds[] = {1, 5, 1000};
-
-constexpr std::optional<absl::string_view> kSampleExprNames[] = {
-    {}, {"name1"}, {"another_name"}};
-
-absl::string_view kStrings[] = {"MyTable.col",
-                                "UserAlias",
-                                "MySchema.MyTable.col2",
-                                "MySchema.JoinTable.Table1.col",
-                                "9",
-                                "hello world!",
-                                "3.1415"};
 
 struct TextprotoDeathMessagePair {
   std::string textproto;
@@ -118,5 +107,7 @@ const TextprotoDeathMessagePair kTextprotoDeathMessagePairs[] = {
 
 INSTANTIATE_TEST_SUITE_P(DecodeExprDeathTest, DecodeExprDeathTest,
                          ValuesIn(kTextprotoDeathMessagePairs));
+
+}  // anonymous namespace
 
 }  // namespace raksha::frontends::sql

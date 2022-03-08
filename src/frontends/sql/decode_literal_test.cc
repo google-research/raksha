@@ -24,6 +24,8 @@
 
 namespace raksha::frontends::sql {
 
+namespace {
+
 using ir::Attribute;
 using ir::Block;
 using ir::IRContext;
@@ -93,5 +95,7 @@ INSTANTIATE_TEST_SUITE_P(DecodeLiteralExprTest, DecodeLiteralExprTest,
                          Combine(ValuesIn(kSampleIds),
                                  ValuesIn(kSampleExprNames),
                                  ValuesIn(kStrings)));
+
+}  // anonymous namespace
 
 }  // namespace raksha::frontends::sql

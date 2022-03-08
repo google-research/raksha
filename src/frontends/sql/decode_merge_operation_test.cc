@@ -25,6 +25,8 @@
 
 namespace raksha::frontends::sql {
 
+namespace {
+
 using ir::Attribute;
 using ir::Block;
 using ir::IRContext;
@@ -133,5 +135,7 @@ INSTANTIATE_TEST_SUITE_P(DecodeMergeOpTest, DecodeMergeOpTest,
                          Combine(ValuesIn(kSampleExprNames),
                                  ValuesIn(kSampleDirectInputLengths),
                                  ValuesIn(kSampleControlInputLengths)));
+
+}  // anonymous namespace
 
 }  // namespace raksha::frontends::sql
