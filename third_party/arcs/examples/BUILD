@@ -15,9 +15,11 @@
 #
 #-------------------------------------------------------------------------------
 
-licenses(["notice"])
-
 load("//build_defs:arcs.bzl", "arcs_manifest_proto")
+
+package(
+    licenses = ["notice"],
+)
 
 arcs_manifest_proto(
     name = "consume",

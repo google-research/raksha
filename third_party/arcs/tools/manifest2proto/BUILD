@@ -14,11 +14,12 @@
 # limitations under the License.
 #-----------------------------------------------------------------------------
 
-licenses(["notice"])
-
 load("@build_bazel_rules_nodejs//:index.bzl", "nodejs_binary")
 
-package(default_visibility = ["//visibility:public"])
+package(
+    default_visibility = ["//visibility:public"],
+    licenses = ["notice"],
+)
 
 # tool for converting an .arcs file to binary proto
 nodejs_binary(

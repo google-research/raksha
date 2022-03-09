@@ -14,10 +14,11 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-
-package(default_visibility = ["//src:__subpackages__"])
-
-licenses(["notice"])
+package(
+    default_visibility = ["//src:__subpackages__"],
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
 # These files contain dummy marker libraries for indicating a dependency upon
 # protobuf libraries. We have to use them because Bazel cannot be configured

@@ -4,9 +4,10 @@ load(
     "proto_library",
 )
 
-licenses(["notice"])
-
-package(default_visibility = ["//visibility:public"])
+package(
+    default_visibility = ["//visibility:public"],
+    licenses = ["notice"],
+)
 
 filegroup(
     name = "proto_files",

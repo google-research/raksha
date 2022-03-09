@@ -14,8 +14,10 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-
-licenses(["notice"])
+package(
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
 cc_library(
     name = "merge_operation_view",

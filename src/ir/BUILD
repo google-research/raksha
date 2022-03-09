@@ -17,9 +17,11 @@
 
 load("//build_defs:test_helpers.bzl", "extracted_datalog_string_test")
 
-licenses(["notice"])
-
-package(default_visibility = ["//src:__subpackages__"])
+package(
+    default_visibility = ["//src:__subpackages__"],
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
 cc_library(
     name = "attribute",

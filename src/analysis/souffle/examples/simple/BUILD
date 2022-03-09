@@ -15,7 +15,10 @@
 #-------------------------------------------------------------------------------
 load("//build_defs:raksha.bzl", "raksha_policy_check")
 
-licenses(["notice"])
+package(
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
 # To invoke policy engine, `bazel test :ok_claim_propagates_check`.
 raksha_policy_check(

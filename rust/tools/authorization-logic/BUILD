@@ -14,11 +14,13 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-package(default_visibility = ["//visibility:public"])
 
 load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_library")
 
-licenses(["notice"])
+package(
+    default_visibility = ["//visibility:public"],
+    licenses = ["notice"],
+)
 
 filegroup(
     name = "antlr_gen_mod_rs",

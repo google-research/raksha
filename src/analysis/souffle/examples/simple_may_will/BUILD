@@ -15,7 +15,10 @@
 #-------------------------------------------------------------------------------
 load("//build_defs:raksha.bzl", "policy_check")
 
-licenses(["notice"])
+package(
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
 policy_check(
     name = "may_will_pass",

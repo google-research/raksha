@@ -14,10 +14,12 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-
-licenses(["notice"])
-
 load("//build_defs:arcs.bzl", "arcs_manifest_proto")
+
+package(
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
 # TODO(Issue #61): Enable translating these manifests to proto once manifest2proto can parse them.
 BUILD_ERROR_ARCS_MANIFEST_PATTERNS = [

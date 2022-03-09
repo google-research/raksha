@@ -14,10 +14,12 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-
-licenses(["notice"])
-
 load("//build_defs:raksha.bzl", "policy_check")
+
+package(
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
 policy_check(
     name = "check_multimic_userc_tag_fail",
