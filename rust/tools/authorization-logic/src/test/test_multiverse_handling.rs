@@ -24,7 +24,7 @@ mod test {
 
     #[test]
     fn test_multiverse_handling() {
-        run_query_test(QueryTest {
+        setup_dirs_and_run_query_test(QueryTest {
             filename: "multiverse_handling",
             input_dir: "test_inputs",
             output_dir: "test_outputs",

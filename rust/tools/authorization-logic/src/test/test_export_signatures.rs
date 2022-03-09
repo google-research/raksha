@@ -18,25 +18,28 @@
 mod test {
     use crate::{ast::*, compilation_top_level::*, souffle::souffle_interface::*};
     use std::fs;
+    use crate::utils::*;
 
     // This dependency is used for generating keypairs.
     use crate::signing::tink_interface::*;
 
+
     #[test]
-    fn test_signature_exporting() {
+  fn test_signature_exporting() {
+        utils::create_bazeltest_output_paths(vec!["test_keys", "test_outputs"]);
         store_new_keypair_cleartext(
-            "test_keys/principal1_pub.json",
-            "test_keys/principal1_priv.json",
+            &utils::get_resolved_path("test_keys/principal1_pub.json"),
+            &utils::get_resolved_path("test_keys/principal1_priv.json"),
         );
 
         compile("exporting", "test_inputs", "test_outputs", "");
 
-        let deser_claim =
-            deserialize_from_file(&"test_outputs/prin1_statement1.obj".to_string()).unwrap();
+        let deser_claim = deserialize_from_file(
+            &utils::get_resolved_path("test_outputs/prin1_statement1.obj")).unwrap();
 
         assert!(verify_claim(
-            &"test_keys/principal1_pub.json".to_string(),
-            &"test_outputs/prin1_statement1.sig".to_string(),
+            &utils::get_resolved_path("test_keys/principal1_pub.json"),
+            &utils::get_resolved_path("test_outputs/prin1_statement1.sig"),
             &deser_claim
         )
         .is_ok());

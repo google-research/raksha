@@ -17,13 +17,14 @@
 #[cfg(test)]
 mod test {
     use crate::{ast::*, compilation_top_level::*, souffle::souffle_interface::*};
-    use std::fs;
+    use crate::{utils::*};
 
     // This dependency is used for generating keypairs.
     use crate::signing::tink_interface::*;
 
     #[test]
     fn test_dots_in_ids() {
+        utils::setup_directories_for_bazeltest(vec!["test_inputs"], vec!["test_outputs"]);
         compile("dotsInNames", "test_inputs", "test_outputs", "");
         // this test is just about not having syntax errors
         assert!(true);
@@ -31,13 +32,14 @@ mod test {
 
     #[test]
     fn test_quotes_in_paths() {
+        utils::create_bazeltest_output_paths(vec!["test_keys"]);
         store_new_keypair_cleartext(
-            "test_keys/p1_noq_pub.json",
-            "test_keys/p1_noq_priv.json"
+            &utils::get_resolved_path("test_keys/p1_noq_pub.json"),
+            &utils::get_resolved_path("test_keys/p1_noq_priv.json")
         );
         store_new_keypair_cleartext(
-            "test_keys/p1q_pub.json",
-            "test_keys/p1q_priv.json"
+            &utils::get_resolved_path("test_keys/p1q_pub.json"),
+            &utils::get_resolved_path("test_keys/p1q_priv.json")
         );
         compile("quotesInExports", "test_inputs", "test_outputs", "");
 
