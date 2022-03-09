@@ -198,10 +198,10 @@ fn populate_constant_type_environment_rvalue(
                 constant_type_environment,
                 flat_fact);
         },
-        AstRValue::BinopRValue{ binop } => {
-            add_typing(constant_type_environment, &binop.lnum,
+        AstRValue::ArithCompareRValue{ arith_comp } => {
+            add_typing(constant_type_environment, &arith_comp.lnum,
                        AstType::NumberType);
-            add_typing(constant_type_environment, &binop.rnum,
+            add_typing(constant_type_environment, &arith_comp.rnum,
                        AstType::NumberType);
         }
     }

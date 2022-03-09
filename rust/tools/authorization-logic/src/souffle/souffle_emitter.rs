@@ -55,22 +55,23 @@ fn emit_pred(p: &AstPredicate) -> String {
     format!("{}{}({})", neg, &p.name, p.args.join(", "))
 }
 
-fn emit_op(operator: &AstOperator) -> String {
+fn emit_op(operator: &AstComparisonOperator) -> String {
     match operator {
-        AstOperator::LessThan => "<",
-        AstOperator::GreaterThan => ">",
-        AstOperator::Equals => "=",
-        AstOperator::NotEquals =>  "!=",
-        AstOperator::LessOrEquals => "<=",
-        AstOperator::GreaterOrEquals => ">="
+        AstComparisonOperator::LessThan => "<",
+        AstComparisonOperator::GreaterThan => ">",
+        AstComparisonOperator::Equals => "=",
+        AstComparisonOperator::NotEquals =>  "!=",
+        AstComparisonOperator::LessOrEquals => "<=",
+        AstComparisonOperator::GreaterOrEquals => ">="
     }.to_string()
 }
 
 fn emit_rvalue(rvalue: &DLIRRValue) -> String {
     match rvalue {
         DLIRRValue::PredicateRValue { predicate } => emit_pred(predicate),
-        DLIRRValue::BinopRValue { binop } => 
-            format!("{} {} {}", &binop.lnum, emit_op(&binop.op), &binop.rnum)
+        DLIRRValue::ArithCompareRValue { arith_comp } => 
+            format!("{} {} {}", &arith_comp.lnum,
+                    emit_op(&arith_comp.op), &arith_comp.rnum)
     }
 }
 

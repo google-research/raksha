@@ -55,9 +55,9 @@ impl PartialEq for AstPredicate {
 impl Eq for AstPredicate {}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AstBinaryOperation { 
+pub struct AstArithmeticComparison { 
     pub lnum: String , 
-    pub op: AstOperator,
+    pub op: AstComparisonOperator,
     pub rnum: String
 }
 
@@ -80,7 +80,7 @@ pub enum AstFact {
 }
 
 #[derive(Copy, Debug, Clone, Serialize, Deserialize)]
-pub enum AstOperator {
+pub enum AstComparisonOperator {
     LessThan,
     GreaterThan,
     Equals,
@@ -92,7 +92,7 @@ pub enum AstOperator {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AstRValue {
     FlatFactRValue { flat_fact: AstFlatFact},
-    BinopRValue { binop: AstBinaryOperation }
+    ArithCompareRValue { arith_comp: AstArithmeticComparison }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

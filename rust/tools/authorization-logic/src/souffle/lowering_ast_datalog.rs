@@ -333,8 +333,8 @@ impl LoweringToDatalogPass {
                 pred_to_dlir_rvalue(&push_prin(String::from("says_"),
                     &speaker, &flat_pred))
             }
-            AstRValue::BinopRValue { binop } => {
-                DLIRRValue::BinopRValue { binop: binop.clone() }
+            AstRValue::ArithCompareRValue { arith_comp } => {
+                DLIRRValue::ArithCompareRValue { arith_comp: arith_comp.clone() }
             }
         }
     }

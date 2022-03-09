@@ -21,7 +21,7 @@ use crate::ast::*;
 #[derive(Clone)]
 pub enum DLIRRValue {
     PredicateRValue { predicate: AstPredicate },
-    BinopRValue { binop: AstBinaryOperation }
+    ArithCompareRValue { arith_comp: AstArithmeticComparison }
 }
 
 #[derive(Clone)]

@@ -124,14 +124,14 @@ fn construct_can_say_fact(ctx: &CanSayFactContext) -> AstFact {
     }
 }
 
-fn construct_binop(ctx: &BinopContextAll) -> AstOperator {
+fn construct_binop(ctx: &BinopContextAll) -> AstComparisonOperator {
     match ctx {
-        BinopContextAll::LtbinopContext(_) => AstOperator::LessThan,
-        BinopContextAll::GrbinopContext(_) => AstOperator::GreaterThan,
-        BinopContextAll::EqbinopContext(_) => AstOperator::Equals,
-        BinopContextAll::NebinopContext(_) => AstOperator::NotEquals,
-        BinopContextAll::LeqbinopContext(_) => AstOperator::LessOrEquals,
-        BinopContextAll::GeqbinopContext(_) => AstOperator::GreaterOrEquals,
+        BinopContextAll::LtbinopContext(_) => AstComparisonOperator::LessThan,
+        BinopContextAll::GrbinopContext(_) => AstComparisonOperator::GreaterThan,
+        BinopContextAll::EqbinopContext(_) => AstComparisonOperator::Equals,
+        BinopContextAll::NebinopContext(_) => AstComparisonOperator::NotEquals,
+        BinopContextAll::LeqbinopContext(_) => AstComparisonOperator::LessOrEquals,
+        BinopContextAll::GeqbinopContext(_) => AstComparisonOperator::GreaterOrEquals,
         _ => { panic!("construct_binop tried to build error"); }
     }
 }
@@ -144,8 +144,8 @@ fn construct_rvalue(ctx: &RvalueContextAll) -> AstRValue {
             }
         },
         RvalueContextAll::BinopRvalueContext(bctx) => {
-            AstRValue::BinopRValue {
-                binop: AstBinaryOperation {
+            AstRValue::ArithCompareRValue {
+                arith_comp: AstArithmeticComparison {
                     lnum: bctx.pred_arg(0).unwrap().get_text(),
                     op: construct_binop(&bctx.binop().unwrap()),
                     rnum: bctx.pred_arg(1).unwrap().get_text()
