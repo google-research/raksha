@@ -15,7 +15,6 @@
 //----------------------------------------------------------------------------
 
 #include "absl/strings/string_view.h"
-#include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/decoder_context.h"
