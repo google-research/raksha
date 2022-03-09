@@ -52,9 +52,9 @@ pub fn setup_bazeltest_data_paths(input_paths: Vec<&str>) {
             .arg(resolved_input_path)
             .arg(resolved_link_path)
             .spawn()
-            .expect("had an error when trying to start ls")
+            .expect("had an error when trying to start `ln`")
             .wait_with_output()
-            .expect("had an error in output of ls");
+            .expect("had an error in output of `ln`");
     }
 }
 
@@ -73,7 +73,7 @@ pub fn create_bazeltest_output_paths(output_paths: Vec<&str>) {
     }
 }
 
-// Setup the necessary direcotires for tests.
+// Setup the necessary directories for tests.
 // This is a no-op if cfg!(not(feature = "bazel_build")).
 #[cfg(test)]
 pub fn setup_directories_for_bazeltest(input_paths: Vec<&str>, output_paths: Vec<&str>) {
