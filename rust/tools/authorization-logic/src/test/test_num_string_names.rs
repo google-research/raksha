@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test {
     use crate::{
-        ast::*, compilation_top_level::*, souffle::souffle_interface::*, utils::*,
+        compilation_top_level::*, utils::*,
     };
 
     #[test]
