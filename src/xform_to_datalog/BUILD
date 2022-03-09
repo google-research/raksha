@@ -109,6 +109,7 @@ cc_test(
     srcs = ["manifest_datalog_facts_test.cc"],
     deps = [
         ":manifest_datalog_facts",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir",
         "//src/ir/proto:system_spec",

@@ -5,17 +5,14 @@
 #include <optional>
 
 #include "absl/container/flat_hash_map.h"
-#include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "google/protobuf/text_format.h"
-#include "google/protobuf/util/message_differencer.h"
 #include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/access_path_selectors.h"
 #include "src/ir/access_path_selectors_set.h"
 #include "src/ir/proto/type.h"
 #include "src/ir/types/entity_type.h"
-#include "src/ir/types/primitive_type.h"
 #include "src/ir/types/schema.h"
 
 namespace raksha::ir::types {

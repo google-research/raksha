@@ -18,7 +18,6 @@
 
 #include "absl/strings/string_view.h"
 #include "google/protobuf/text_format.h"
-#include "google/protobuf/util/message_differencer.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/sql_ir.pb.h"
