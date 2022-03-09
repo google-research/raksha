@@ -121,8 +121,8 @@ const Operation &Decode(IRContext &ir_context, BlockBuilder &parent_builder,
     for (const auto &output : outputs) {
       const Operation &output_operation = builder.AddOperation(
           ir_context.GetOperator(arcs::operators::kMerge), {}, input_values);
-      results.insert(
-          {output, Value(value::OperationResult(output_operation, "result"))});
+      results.insert({output, Value(value::OperationResult(
+                                  output_operation, arcs::kDefaultResult))});
     }
     // Handle derives from claims.
     for (const auto &derives_from_claim :
@@ -133,8 +133,9 @@ const Operation &Decode(IRContext &ir_context, BlockBuilder &parent_builder,
       const Operation &read_source = builder.AddOperation(
           ir_context.GetOperator(arcs::operators::kReadAccessPath),
           {{"path", StringAttribute::Create(source.selectors().ToString())}},
-          {{"input", Value(value::BlockArgument(
-                         block, source_root->handle_connection_spec_name()))}});
+          {{std::string(arcs::kDefaultInput),
+            Value(value::BlockArgument(
+                block, source_root->handle_connection_spec_name()))}});
       const AccessPath &target = derives_from_claim.target();
       const auto *target_root = CHECK_NOTNULL(
           target.root().GetIf<HandleConnectionSpecAccessPathRoot>());
@@ -146,9 +147,11 @@ const Operation &Decode(IRContext &ir_context, BlockBuilder &parent_builder,
       const Operation &write_target = builder.AddOperation(
           ir_context.GetOperator(arcs::operators::kUpdateAccessPath),
           {{"path", StringAttribute::Create(target.selectors().ToString())}},
-          {{"input", previous_value},
-           {"value", Value(value::OperationResult(read_source, "result"))}});
-      Value result = Value(value::OperationResult(write_target, "result"));
+          {{std::string(arcs::kDefaultInput), previous_value},
+           {"value",
+            Value(value::OperationResult(read_source, arcs::kDefaultResult))}});
+      Value result =
+          Value(value::OperationResult(write_target, arcs::kDefaultResult));
       results.emplace(target_root->handle_connection_spec_name(), result)
           .first->second = result;
     }
@@ -165,8 +168,9 @@ const Operation &Decode(IRContext &ir_context, BlockBuilder &parent_builder,
            {"tag", StringAttribute::Create(claim.tag())},
            {"is_present",
             Int64Attribute::Create(claim.claim_tag_is_present())}},
-          {{"input", previous_value}});
-      Value result = Value(value::OperationResult(claim_operation, "result"));
+          {{std::string(arcs::kDefaultInput), previous_value}});
+      Value result =
+          Value(value::OperationResult(claim_operation, arcs::kDefaultResult));
       results.emplace(target_root->handle_connection_spec_name(), result)
           .first->second = result;
     }

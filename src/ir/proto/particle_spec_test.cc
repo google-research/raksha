@@ -16,18 +16,132 @@
 
 #include "src/ir/proto/particle_spec.h"
 
+#include <ostream>
+#include <sstream>
+
 #include "src/common/testing/gtest.h"
 #include "src/ir/ir_printer.h"
 #include "src/ir/ir_visitor.h"
 #include "src/ir/proto/operators.h"
 #include "src/ir/proto/type.h"
+#include "src/ir/value.h"
 #include "src/test_utils/utils.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::proto {
 namespace {
 
-class DatalogPrinter : public IRVisitor<DatalogPrinter> {};
+class ParticleDatalogPrinter {
+ public:
+  static void ToDatalog(std::ostream &out, SsaNames &ssa_names,
+                        const Block &particle_spec, const Operation &particle) {
+    ParticleDatalogPrinter printer(out, ssa_names, particle_spec, particle);
+    for (const auto &operation : particle_spec.operations()) {
+      printer.ProcessOperation(*operation);
+    }
+    for (const auto &[_, result] : particle_spec.results()) {
+      printer.ProcessResult(result);
+    }
+  }
+
+  void ProcessOperation(const Operation &operation) {
+    if (operation.op().name() == arcs::operators::kMerge) {
+      PrintMergeOperation(operation);
+    }
+  }
+
+  void ProcessResult(Value value) {
+    if (auto any = value.If<value::Any>()) return;
+    out_ << "edge(";
+    PrintValue();
+    out_ << ", "
+         << ").\n";
+  }
+
+ private:
+  void PrintMergeOperation(const Operation &merge_op) {
+    std::string merge_result_name =
+        absl::StrFormat("b%d", ssa_names_.GetOrCreateID(merge_op));
+    for (const auto &[_, value] : merge_op.inputs()) {
+      if (auto any = value.If<value::Any>()) continue;
+      out_ << "edge(";
+      PrintValue(value);
+      out_ << ", " << merge_result_name << ").\n";
+    }
+    for (const auto &[_, value] : merge_op.inputs()) {
+      if (auto any = value.If<value::Any>()) continue;
+      out_ << "edge(";
+      PrintValue(value);
+      out_ << ", " << merge_result_name << ").\n";
+    }
+  }
+
+  void PrintValue(const Value &value) {
+    if (const auto *arg = value.If<value::BlockArgument>()) {
+      // CHECK(&arg->block() == &block)
+      //     << "particle referring to blocks outside of its module";
+      auto find_result = particle_->inputs().find(arg->name());
+      CHECK(find_result != particle_->inputs().end());
+      PrintValue(find_result->second);
+    } else if (const auto *res = value.If<value::OperationResult>()) {
+      out_ << absl::StreamFormat(
+          "%%%d.%s", ssa_names_.GetOrCreateID(res->operation()), res->name());
+
+    } else if (const auto *store = value.If<value::StoredValue>()) {
+      out_ << store->storage().name();
+    } else if (const auto *any = value.If<value::Any>()) {
+      // Ignore this.
+    }
+  }
+
+  ParticleDatalogPrinter(std::ostream &out, SsaNames &ssa_names,
+                         const Block &particle_spec, const Operation &particle)
+      : out_(out), ssa_names_(ssa_names), particle_(&particle) {}
+
+  std::ostream &out_;
+  SsaNames &ssa_names_;
+  const Operation *particle_;
+};
+
+class DatalogPrinter : public IRVisitor<DatalogPrinter> {
+ public:
+  template <typename T>
+  static void ToDatalog(std::ostream &out, const T &entity) {
+    DatalogPrinter printer(out);
+    entity.Accept(printer);
+  }
+
+  void Visit(const Module &module) override {
+    for (const auto &block : module.blocks()) {
+      block->Accept(*this);
+    }
+  }
+  void Visit(const Block &block) override {
+    for (const auto &operation : block.operations()) {
+      operation->Accept(*this);
+    }
+  }
+  void Visit(const Operation &operation) override {
+    if (operation.op().name() == arcs::operators::kParticle) {
+      Attribute attr = operation.attributes().at(arcs::kParticleNameAttribute);
+      const Block *particle_spec = particle_specs_.at(attr->ToString());
+      ParticleDatalogPrinter::ToDatalog(out_, ssa_names_, *particle_spec,
+                                        operation);
+    } else if (operation.op().name() == arcs::operators::kParticleSpec) {
+      const Module &module = *CHECK_NOTNULL(operation.impl_module());
+      CHECK(module.blocks().size() == 1);
+      const Block &block = *module.blocks().front();
+      Attribute attr = operation.attributes().at(arcs::kParticleNameAttribute);
+      particle_specs_[attr->ToString()] = &block;
+    }
+  }
+
+ private:
+  DatalogPrinter(std::ostream &out) : out_(out) {}
+  SsaNames ssa_names_;
+  std::ostream &out_;
+  absl::flat_hash_map<std::string, const Block *> particle_specs_;
+};
 
 TEST(ParticleSpecTest, TestSomething) {
   auto test_data =
@@ -97,6 +211,9 @@ TEST(ParticleSpecTest, TestSomething) {
     global_module.AddBlock(builder.build());
   }
   LOG(WARNING) << global_module;
+  std::ostringstream str_stream;
+  DatalogPrinter::ToDatalog(str_stream, global_module);
+  LOG(WARNING) << str_stream.str();
 }
 
 }  // namespace

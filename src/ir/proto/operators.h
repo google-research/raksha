@@ -13,8 +13,12 @@
  */
 #include "absl/strings/string_view.h"
 
-namespace arcs::operators {
+namespace arcs {
+constexpr absl::string_view kDefaultInput = "input";
+constexpr absl::string_view kDefaultResult = "result";
+constexpr absl::string_view kParticleNameAttribute = "name";
 
+namespace operators {
 constexpr absl::string_view kParticleSpec = "arcs.ParticleSpec";
 constexpr absl::string_view kClaim = "arcs.Claim";
 constexpr absl::string_view kCheck = "arcs.Check";
@@ -22,5 +26,6 @@ constexpr absl::string_view kMerge = "arcs.Merge";
 constexpr absl::string_view kReadAccessPath = "arcs.ReadAccessPath";
 constexpr absl::string_view kUpdateAccessPath = "arcs.UpdateAccessPath";
 constexpr absl::string_view kParticle = "arcs.Particle";
+}  // namespace operators
 
-}  // namespace arcs::operators
+}  // namespace arcs
