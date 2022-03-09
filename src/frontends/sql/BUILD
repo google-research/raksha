@@ -41,7 +41,6 @@ cc_library(
     hdrs = ["decoder_context.h"],
     visibility = [":__subpackages__"],
     deps = [
-        ":sql_ir_cc_proto",
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:value",
