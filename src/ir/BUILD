@@ -397,6 +397,7 @@ cc_test(
     deps = [
         ":access_path",
         ":ir",
+        "//src/common/proto:proto_message_differencer",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir/proto:tag_claim",
@@ -410,6 +411,7 @@ cc_test(
     deps = [
         ":access_path",
         ":ir",
+        "//src/common/proto:proto_message_differencer",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir/proto:predicate",

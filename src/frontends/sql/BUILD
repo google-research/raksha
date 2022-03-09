@@ -87,6 +87,7 @@ cc_test(
     deps = [
         ":decode",
         ":decoder_context",
+        "//src/common/proto:proto_message_differencer",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/frontends/sql:sql_ir_cc_proto",
