@@ -92,6 +92,7 @@ cc_library(
         "//src/ir:ir_context",
         "//src/ir:value",
         "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
     ],
 )
 
