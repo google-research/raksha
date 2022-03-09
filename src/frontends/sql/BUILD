@@ -80,9 +80,59 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "id_name_and_string_test",
+    testonly = True,
+    hdrs = ["id_name_and_string_test.h"],
+    deps = [
+        ":decoder_context",
+        "//src/common/testing:gtest",
+        "//src/frontends/sql:sql_ir_cc_proto",
+        "//src/ir:ir_context",
+        "//src/ir:value",
+        "@absl//absl/strings",
+    ],
+)
+
 cc_test(
-    name = "decode_test",
-    srcs = ["decode_test.cc"],
+    name = "decode_expr_death_test",
+    srcs = ["decode_expr_death_test.cc"],
+    deps = [
+        ":decode",
+        ":decoder_context",
+        "//src/common/testing:gtest",
+        "//src/frontends/sql:sql_ir_cc_proto",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "decode_literal_test",
+    srcs = ["decode_literal_test.cc"],
+    deps = [
+        ":decode",
+        ":decoder_context",
+        ":id_name_and_string_test",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "decode_source_column_test",
+    srcs = ["decode_source_column_test.cc"],
+    deps = [
+        ":decode",
+        ":decoder_context",
+        ":id_name_and_string_test",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "decode_merge_operation_test",
+    srcs = ["decode_merge_operation_test.cc"],
     deps = [
         ":decode",
         ":decoder_context",
