@@ -85,6 +85,7 @@ cc_library(
     testonly = True,
     hdrs = ["id_name_and_string_test.h"],
     deps = [
+        ":decode",
         ":decoder_context",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
@@ -113,7 +114,6 @@ cc_test(
     name = "decode_literal_test",
     srcs = ["decode_literal_test.cc"],
     deps = [
-        ":decode",
         ":decoder_context",
         ":id_name_and_string_test",
         "//src/common/testing:gtest",
@@ -125,7 +125,6 @@ cc_test(
     name = "decode_source_column_test",
     srcs = ["decode_source_column_test.cc"],
     deps = [
-        ":decode",
         ":decoder_context",
         ":id_name_and_string_test",
         "//src/common/testing:gtest",

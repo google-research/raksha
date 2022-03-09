@@ -16,7 +16,6 @@
 
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
-#include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/id_name_and_string_test.h"
 
