@@ -16,7 +16,6 @@
 
 #include "absl/strings/string_view.h"
 #include "google/protobuf/text_format.h"
-#include "google/protobuf/util/message_differencer.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/decoder_context.h"
@@ -81,7 +80,6 @@ TEST_P(DecodeLiteralExprTest, DecodeLiteralExprTest) {
   EXPECT_THAT(operation.impl_module(), IsNull());
   EXPECT_EQ(operation.op().name(), DecoderContext::kSqlLiteralOpName);
   EXPECT_THAT(operation.inputs(), IsEmpty());
-
   // Check that attributes have exactly the name given.
   EXPECT_THAT(
       operation.attributes(),

@@ -86,6 +86,7 @@ cc_library(
     hdrs = ["id_name_and_string_test.h"],
     deps = [
         ":decoder_context",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/frontends/sql:sql_ir_cc_proto",
         "//src/ir:ir_context",
@@ -100,6 +101,7 @@ cc_test(
     deps = [
         ":decode",
         ":decoder_context",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/frontends/sql:sql_ir_cc_proto",
         "@absl//absl/strings",
