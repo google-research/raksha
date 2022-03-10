@@ -21,7 +21,10 @@ load(
     "proto_library",
 )
 
-licenses(["notice"])
+package(
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
 proto_library(
     name = "sql_ir_proto",

@@ -14,19 +14,22 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-
-package(default_visibility = ["//src:__subpackages__"])
-
-licenses(["notice"])
-
-# These files contain dummy marker libraries for indicating a dependency upon
-# protobuf libraries. We have to use them because Bazel cannot be configured
-# to just force explicit inclusion of protobuf dependencies. This causes
-# problems when we try to import Raksha into Google's internal repository.
-cc_library(
-    name = "protobuf",
+package(
+    default_visibility = ["//src:__subpackages__"],
+    features = ["layering_check"],
+    licenses = ["notice"],
 )
 
-cc_library(
+# These files contain marker libraries for indicating a dependency upon
+# protobuf libraries. We have to use them because the external protobuf
+# library provides a single BUILD target that encompasses all protobuf
+# headers. However, the Google-intern targets are much more fine grained.
+alias(
+    name = "protobuf",
+    actual = "@com_google_protobuf//:protobuf_headers",
+)
+
+alias(
     name = "proto_message_differencer",
+    actual = "@com_google_protobuf//:protobuf_headers",
 )

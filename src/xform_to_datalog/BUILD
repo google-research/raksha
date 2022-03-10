@@ -13,9 +13,11 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-package(default_visibility = ["//src:__subpackages__"])
-
-licenses(["notice"])
+package(
+    default_visibility = ["//src:__subpackages__"],
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
 cc_library(
     name = "authorization_logic",

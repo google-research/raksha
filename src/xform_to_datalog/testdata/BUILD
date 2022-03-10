@@ -15,9 +15,11 @@
 #-------------------------------------------------------------------------------
 load("//build_defs:arcs.bzl", "arcs_manifest_proto")
 
-package(default_visibility = ["//src:__subpackages__"])
-
-licenses(["notice"])
+package(
+    default_visibility = ["//src:__subpackages__"],
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
 filegroup(
     name = "auth_logic",

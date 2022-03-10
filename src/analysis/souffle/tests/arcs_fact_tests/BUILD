@@ -4,7 +4,10 @@ load(
     "souffle_cc_library",
 )
 
-licenses(["notice"])
+package(
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
 FAILURE_DL_TEST_FILES = glob(["*_expect_fails.dl"])
 

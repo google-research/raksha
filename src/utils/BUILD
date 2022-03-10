@@ -14,10 +14,11 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-
-licenses(["notice"])
-
-package(default_visibility = ["//src:__subpackages__"])
+package(
+    default_visibility = ["//src:__subpackages__"],
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
 cc_library(
     name = "intrusive_ptr",

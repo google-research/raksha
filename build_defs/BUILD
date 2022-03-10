@@ -1,1 +1,3 @@
-licenses(["notice"])
+package(
+    licenses = ["notice"],
+)

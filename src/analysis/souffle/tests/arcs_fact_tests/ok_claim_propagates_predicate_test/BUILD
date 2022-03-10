@@ -15,11 +15,14 @@
 #
 #-------------------------------------------------------------------------------
 
-licenses(["notice"])
-
 load(
     "//build_defs:test_helpers.bzl",
     "run_taint_exec_compare_check_results",
+)
+
+package(
+    features = ["layering_check"],
+    licenses = ["notice"],
 )
 
 run_taint_exec_compare_check_results(
