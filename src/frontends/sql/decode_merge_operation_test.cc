@@ -21,6 +21,7 @@
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/sql_ir.pb.h"
 #include "src/frontends/sql/testing/merge_operation_view.h"
+#include "src/frontends/sql/testing/utils.h"
 
 namespace raksha::frontends::sql {
 
@@ -112,10 +113,7 @@ TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
   // We always have the value of the `MergeOp` that we are decoding be 1 to
   // prevent collisions with child values.
   EXPECT_EQ(value, decoder_context_.GetValue(1));
-  const OperationResult *op_result = value.If<OperationResult>();
-  EXPECT_THAT(op_result, NotNull());
-  EXPECT_EQ(op_result->name(), DecoderContext::kDefaultOutputName);
-  const Operation &op = op_result->operation();
+  const Operation &op = testing::UnwrapDefaultOperationResult(value);
   EXPECT_EQ(op.parent(), &top_level_block);
 
   testing::MergeOperationView merge_operation_view(op);

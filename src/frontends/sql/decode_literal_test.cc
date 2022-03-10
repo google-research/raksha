@@ -18,6 +18,7 @@
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/id_name_and_string_test.h"
+#include "src/frontends/sql/testing/utils.h"
 
 namespace raksha::frontends::sql {
 
@@ -71,9 +72,7 @@ TEST_P(DecodeLiteralExprTest, DecodeLiteralExprTest) {
   const Block &top_block = decoder_context_.BuildTopLevelBlock();
 
   // Set up finished, now check expectations.
-  const OperationResult *operation_result = result.If<OperationResult>();
-  EXPECT_THAT(operation_result, NotNull());
-  const Operation &operation = operation_result->operation();
+  const Operation &operation = testing::UnwrapDefaultOperationResult(result);
   EXPECT_EQ(operation.parent(), &top_block);
   EXPECT_THAT(operation.impl_module(), IsNull());
   EXPECT_EQ(operation.op().name(), DecoderContext::kSqlLiteralOpName);
