@@ -17,6 +17,7 @@
 #include "src/frontends/sql/decode.h"
 
 #include "src/frontends/sql/decoder_context.h"
+#include "src/utils/map_iter.h"
 
 namespace raksha::frontends::sql {
 
@@ -57,23 +58,18 @@ static Value DecodeMergeOperation(const MergeOperation &merge_operation,
   CHECK(merge_operation.inputs_size() >= 1)
       << "Each MergeOperation is expected to have at least one non-control "
          "input.";
-  std::vector<Value> direct_input_values;
-  direct_input_values.reserve(merge_operation.inputs_size());
-  for (Expression input_expr : merge_operation.inputs()) {
-    direct_input_values.push_back(
-        DecodeExpression(input_expr, decoder_context));
-  }
 
-  std::vector<Value> control_input_values;
-  control_input_values.reserve(merge_operation.control_inputs_size());
-  for (Expression control_expr : merge_operation.control_inputs()) {
-    control_input_values.push_back(
-        DecodeExpression(control_expr, decoder_context));
-  }
+  // A lambda that just decodes the expression it is provided.
+  auto decode_expr_lambda = [&](const Expression &input_expr) {
+    return DecodeExpression(input_expr, decoder_context);
+  };
 
   return Value(OperationResult(
-      decoder_context.MakeMergeOperation(std::move(direct_input_values),
-                                         std::move(control_input_values)),
+      decoder_context.MakeMergeOperation(
+          utils::MapIterRef<std::vector<Value>>(merge_operation.inputs(),
+                                                decode_expr_lambda),
+          utils::MapIterRef<std::vector<Value>>(
+              merge_operation.control_inputs(), decode_expr_lambda)),
       DecoderContext::kDefaultOutputName));
 }
 

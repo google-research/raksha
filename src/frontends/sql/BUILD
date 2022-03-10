@@ -47,6 +47,7 @@ cc_library(
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:value",
+        "//src/utils:map_iter",
         "@absl//absl/container:flat_hash_map",
     ],
 )

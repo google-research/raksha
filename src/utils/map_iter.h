@@ -21,14 +21,60 @@
 
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
+#include "absl/container/flat_hash_set.h"
+#include "src/common/logging/logging.h"
+
 namespace raksha::utils {
 
-template <typename T, typename U, typename F>
-std::vector<U> MapIter(const std::vector<T>& input, F f) {
-  std::vector<U> result;
+enum class CollisionPolicy {
+  kError,
+  kIgnore,
+};
+
+// A version of `Map` that iterates over a reference to a container to
+// populate a resultant container. The input container is taken as a const
+// reference here.
+template <typename ResultT, typename InputT, typename F>
+ResultT MapIterRef(const InputT& input, F f,
+                   CollisionPolicy collision_policy = CollisionPolicy::kError) {
+  ResultT result;
   result.reserve(input.size());
   for (auto& entity : input) {
-    result.push_back(f(entity));
+    uint64_t pre_insert_size = result.size();
+    result.insert(result.end(), f(entity));
+    // The usual way to check whether an insert succeeded or not would be to
+    // check the return value of `insert`. Unfortunately, this has different
+    // forms for `std::vector` versus maps or sets. Therefore, we just check
+    // that the size of the resultant collection has increased to ensure that
+    // the insert succeeded.
+    CHECK((collision_policy != CollisionPolicy::kError) ||
+          (pre_insert_size < result.size()))
+        << "Found collision when mapping a container.";
+  }
+  return result;
+}
+
+// A version of `Map` that iterates over a reference to a container to
+// populate a resultant container. The input container is taken as a value
+// here, which is better for if the input can be moved or is a temporary.
+template <typename ResultT, typename InputT, typename F>
+ResultT MapIterVal(InputT input, F f,
+                   CollisionPolicy collision_policy = CollisionPolicy::kError) {
+  ResultT result;
+  result.reserve(input.size());
+  for (auto iter = std::make_move_iterator(input.begin());
+       iter != std::make_move_iterator(input.end()); ++iter) {
+    uint64_t pre_insert_size = result.size();
+    result.insert(result.end(), f(*iter));
+    // The usual way to check whether an insert succeeded or not would be to
+    // check the return value of `insert`. Unfortunately, this has different
+    // forms for `std::vector` versus maps or sets. Therefore, we just check
+    // that the size of the resultant collection has increased to ensure that
+    // the insert succeeded.
+    CHECK((collision_policy != CollisionPolicy::kError) ||
+          (pre_insert_size < result.size()))
+        << "Found collision when mapping a container.";
   }
   return result;
 }

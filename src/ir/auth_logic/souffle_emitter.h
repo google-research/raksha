@@ -53,7 +53,7 @@ class SouffleEmitter {
   datalog::Predicate PredToDeclaration(const datalog::Predicate& predicate) {
     int i = 0;
     return datalog::Predicate(predicate.name(),
-                     utils::MapIter<std::string, std::string>(
+                     utils::MapIterRef<std::vector<std::string>>(
                          predicate.args(),
                          [i](const std::string& arg) mutable {
                            return absl::StrCat("x", std::to_string(i++));
@@ -75,7 +75,7 @@ class SouffleEmitter {
   }
 
   std::string EmitAssertionInner(const datalog::DLIRCondAssertion& cond_assertion) {
-    std::vector rhs_translated = utils::MapIter<datalog::Predicate, std::string>(
+    std::vector rhs_translated = utils::MapIterRef<std::vector<std::string>>(
         cond_assertion.rhs(),
         [this](const datalog::Predicate& arg) { return EmitPredicate(arg); });
     return absl::StrCat(EmitPredicate(cond_assertion.lhs()), " :- ",
@@ -89,7 +89,7 @@ class SouffleEmitter {
 
   std::string EmitProgramBody(const datalog::DLIRProgram& program) {
     return absl::StrJoin(
-        utils::MapIter<datalog::DLIRAssertion, std::string>(
+        utils::MapIterRef<std::vector<std::string>>(
             program.assertions(),
             [this](const datalog::DLIRAssertion& astn) { return EmitAssertion(astn); }),
         "\n");

@@ -112,7 +112,11 @@ cc_test(
 cc_library(
     name = "map_iter",
     hdrs = ["map_iter.h"],
-    deps = [],
+    deps = [
+        "//src/common/logging",
+        "@absl//absl/container:flat_hash_map",
+        "@absl//absl/container:flat_hash_set",
+    ],
 )
 
 cc_test(
@@ -121,6 +125,8 @@ cc_test(
     deps = [
         ":map_iter",
         "//src/common/testing:gtest",
+        "@absl//absl/container:flat_hash_map",
+        "@absl//absl/container:flat_hash_set",
     ],
 )
 
