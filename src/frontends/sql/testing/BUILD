@@ -30,3 +30,16 @@ cc_library(
         "@absl//absl/strings",
     ],
 )
+
+cc_library(
+    name = "utils",
+    testonly = True,
+    hdrs = ["utils.h"],
+    visibility = ["//src/frontends/sql:__subpackages__"],
+    deps = [
+        "//src/common/logging",
+        "//src/frontends/sql:decoder_context",
+        "//src/ir:module",
+        "//src/ir:value",
+    ]
+)

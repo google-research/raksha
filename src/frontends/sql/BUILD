@@ -117,6 +117,7 @@ cc_test(
         ":decoder_context",
         ":id_name_and_string_test",
         "//src/common/testing:gtest",
+        "//src/frontends/sql/testing:utils",
         "@absl//absl/strings",
     ],
 )
@@ -142,6 +143,7 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/frontends/sql:sql_ir_cc_proto",
         "//src/frontends/sql/testing:merge_operation_view",
+        "//src/frontends/sql/testing:utils",
         "@absl//absl/strings",
     ],
 )
