@@ -89,6 +89,9 @@ pub enum AstComparisonOperator {
     GreaterOrEquals
 }
 
+// RValues are the expressions that can appear on the right hand side of a
+// conditional assertion. At the time of writing these include either
+// AstFlatFacts or AstArithmeticComparisons.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AstRValue {
     FlatFactRValue { flat_fact: AstFlatFact},
