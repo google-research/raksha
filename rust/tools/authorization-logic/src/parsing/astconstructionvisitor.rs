@@ -244,9 +244,9 @@ fn construct_import(ctx: &ImportAssertionContext) -> AstImport {
 
 fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
     match ctx {
-        AuthLogicTypeContextAll::NumberTypeContext(ctx_prime) =>
+        AuthLogicTypeContextAll::NumberTypeContext(_ctx_prime) =>
             AstType::NumberType,
-        AuthLogicTypeContextAll::PrincipalTypeContext(ctx_prime) =>
+        AuthLogicTypeContextAll::PrincipalTypeContext(_ctx_prime) =>
             AstType::PrincipalType,
         AuthLogicTypeContextAll::CustomTypeContext(ctx_prime) => {
             AstType::CustomType { type_name: ctx_prime.ID().unwrap().get_text() }

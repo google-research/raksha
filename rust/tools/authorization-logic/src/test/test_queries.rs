@@ -18,6 +18,7 @@
 pub mod test {
     use crate::souffle::souffle_interface::*;
     use std::process::Command;
+    use crate::utils::*;
 
     /// This struct gives the name of an authorization logic program in
     /// test_inputs, and a vector that relates the names of queries
@@ -47,23 +48,26 @@ pub mod test {
     }
 
     pub fn run_query_test(t: QueryTest) {
+        let resolved_in_dir = utils::get_resolved_path(&t.input_dir.to_string());
+        let resolved_out_dir = utils::get_resolved_path(&t.output_dir.to_string());
         input_to_souffle_file(
             &t.filename.to_string(),
-            &t.input_dir.to_string(),
-            &t.output_dir.to_string(),
+            &resolved_in_dir,
+            &resolved_out_dir,
         );
         run_souffle(
-            &format!("{}/{}.dl", t.output_dir, t.filename),
-            &"test_outputs".to_string(),
+            &format!("{}/{}.dl", resolved_out_dir, t.filename),
+            &resolved_out_dir,
         );
         for (qname, intended_result) in t.query_expects {
-            let queryfile = format!("test_outputs/{}.csv", qname);
-            if(!(is_file_empty(&queryfile) != intended_result)) {
-                panic!(format!(
-                    "failure: query {} in file {} did not have intended result: {}",
-                        qname, &t.filename, intended_result));
-            }
+            let queryfile = format!("{}/{}.csv", &resolved_out_dir, qname);
+            assert!(is_file_empty(&queryfile) != intended_result);
         }
+    }
+
+    pub fn setup_dirs_and_run_query_test(t: QueryTest) {
+        utils::setup_directories_for_bazeltest(vec![&t.input_dir], vec![&t.output_dir]);
+        run_query_test(t)
     }
 
     pub fn clean_test_dir() {
@@ -78,7 +82,7 @@ pub mod test {
 
     #[test]
     fn test_conditions() {
-        run_query_test(QueryTest {
+        setup_dirs_and_run_query_test(QueryTest {
             filename: "conditions",
             query_expects: vec![
                 ("q_prin1_fact1", true),
@@ -91,7 +95,7 @@ pub mod test {
 
     #[test]
     fn test_delegations() {
-        run_query_test(QueryTest {
+        setup_dirs_and_run_query_test(QueryTest {
             filename: "delegations",
             query_expects: vec![
                 ("q_uncond1_t", true),
@@ -107,7 +111,7 @@ pub mod test {
 
     #[test]
     fn test_canactas() {
-        run_query_test(QueryTest {
+        setup_dirs_and_run_query_test(QueryTest {
             filename: "canActAs",
             query_expects: vec![("q_chicken", true), ("q_ketchup", false)],
             ..Default::default()

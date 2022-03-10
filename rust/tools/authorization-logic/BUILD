@@ -16,7 +16,7 @@
 #-------------------------------------------------------------------------------
 package(default_visibility = ["//visibility:public"])
 
-load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_library")
+load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_library", "rust_test")
 
 licenses(["notice"])
 
@@ -77,6 +77,8 @@ filegroup(
         "src/souffle/souffle_emitter.rs",
         "src/souffle/souffle_interface.rs",
         "src/souffle/universe_translation.rs",
+        "src/utils/mod.rs",
+        "src/utils/utils.rs",
     ],
 )
 
@@ -103,7 +105,10 @@ filegroup(
 
 rust_library(
     name = "authorization_logic_lib",
-    srcs = [":lib_sources"],
+    srcs = [
+        ":lib_sources",
+        ":test_sources",
+    ],
     crate_type = "staticlib",
     rustc_flags = [
         "--cfg=feature=\"bazel_build\"",
@@ -115,6 +120,28 @@ rust_library(
         "//rust/tools/authorization-logic/cargo:serde",
         "//rust/tools/authorization-logic/cargo:tink_core",
         "//rust/tools/authorization-logic/cargo:tink_signature",
+    ],
+)
+
+filegroup(
+    name = "test_inputs",
+    srcs = glob(["test_inputs/**"]),
+)
+
+filegroup(
+    name = "raksha_examples",
+    srcs = glob(["raksha_examples/**"]),
+)
+
+rust_test(
+    name = "authorization_logic_test",
+    crate = ":authorization_logic_lib",
+    data = [
+        ":raksha_examples",
+        ":test_inputs",
+    ],
+    rustc_flags = [
+        "--cfg=feature=\"bazel_build\"",
     ],
 )
 

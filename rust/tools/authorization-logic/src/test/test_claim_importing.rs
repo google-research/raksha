@@ -18,7 +18,7 @@
 mod test {
     use crate::{
         ast::*, compilation_top_level::*, souffle::souffle_interface::*,
-        test::test_queries::test::QueryTest,
+        test::test_queries::test::QueryTest, utils::*,
     };
     use std::fs;
 
@@ -26,22 +26,24 @@ mod test {
     use crate::signing::tink_interface::*;
 
     fn query_test_with_imports(t: QueryTest) {
+        utils::setup_directories_for_bazeltest(vec![t.input_dir], vec![t.output_dir]);     
         compile(t.filename, t.input_dir, t.output_dir, "");
         run_souffle(
-            &format!("test_outputs/{}.dl", t.filename),
-            &"test_outputs".to_string(),
+            &utils::get_resolved_path(&format!("test_outputs/{}.dl", t.filename)),
+            &utils::get_resolved_path("test_outputs")
         );
         for (qname, intended_result) in t.query_expects {
-            let queryfile = format!("test_outputs/{}.csv", qname);
+            let queryfile = utils::get_resolved_path(&format!("test_outputs/{}.csv", qname));
             assert!(is_file_empty(&queryfile) != intended_result);
         }
     }
 
     #[test]
     fn test_signature_importing() {
+        utils::setup_directories_for_bazeltest(vec!["test_inputs"], vec!["test_keys", "test_outputs"]);     
         store_new_keypair_cleartext(
-            &"test_keys/principal1e_pub.json".to_string(),
-            &"test_keys/principal1e_priv.json".to_string(),
+            &utils::get_resolved_path("test_keys/principal1e_pub.json"),
+            &utils::get_resolved_path("test_keys/principal1e_priv.json"),
         );
 
         // This code generates exported statements from test_inputs/exporting.

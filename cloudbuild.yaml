@@ -39,13 +39,6 @@ steps:
     - 'REPO_NAME=${REPO_NAME}'
     - 'COMMIT_SHA=${COMMIT_SHA}'
 
-# Run authorization logic tests 
-- id: 'auth_logic_tests'
-  waitFor: ['pull-image']
-  name: '${_DOCKER_IMAGE}'
-  entrypoint: 'bash'
-  args: ['./gcb/auth_logic.sh']
-
 timeout: 3600s # 60 mins, just in case.
 
 substitutions:

@@ -397,6 +397,7 @@ cc_test(
     deps = [
         ":access_path",
         ":ir",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir/proto:tag_claim",
         "@absl//absl/strings:str_format",
@@ -409,6 +410,7 @@ cc_test(
     deps = [
         ":access_path",
         ":ir",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir/proto:predicate",
         "//src/ir/proto:tag_check",
@@ -432,6 +434,7 @@ cc_test(
     srcs = ["derives_from_claim_test.cc"],
     deps = [
         ":ir",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir/proto:access_path",
         "//src/ir/proto:derives_from_claim",
@@ -457,6 +460,7 @@ cc_test(
     deps = [
         ":ir",
         ":predicate_textproto_to_rule_body_testdata",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir/proto:predicate",
         "//third_party/arcs/proto:manifest_cc_proto",
@@ -469,6 +473,8 @@ cc_test(
     srcs = ["handle_connection_spec_test.cc"],
     deps = [
         ":ir",
+        "//src/common/proto:proto_message_differencer",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir/proto:handle_connection_spec",
         "//src/ir/types",
@@ -482,6 +488,7 @@ cc_test(
     deps = [
         ":ir",
         "//src/common/logging",
+        "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir/proto:particle_spec",
         "//src/ir/types",

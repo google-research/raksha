@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Google LLC.
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-#[cfg(test)]
-mod test {
-    use crate::{
-        ast::*, compilation_top_level::*, souffle::souffle_interface::*,
-        test::test_queries::test::*,
-    };
-    use std::fs;
+pub mod utils;
 
-    #[test]
-    fn test_negation() {
-        setup_dirs_and_run_query_test(QueryTest {
-            filename: "negation",
-            query_expects: vec![
-                ("q1", true),
-                ("q2", false),
-                ("q3", false),
-            ],
-            ..Default::default()
-        });
-    }
-}
+
