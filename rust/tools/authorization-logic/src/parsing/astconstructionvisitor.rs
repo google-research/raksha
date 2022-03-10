@@ -48,17 +48,11 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
         Some(_) => Sign::Negated,
         None => Sign::Positive 
     };
-    // Note that ID_all() in the generated antlr-rust code is buggy
-    // (because all {LEX_RULE}_all() generations are buggy),
-    // so rather than using a more idomatic iterator, "while Some(...)" is
-    // used here.
-    let name_ = ctx.ID(0).unwrap().get_text();
-    let mut args_ = Vec::new();
-    let mut idx = 1;
-    while let Some(id) = ctx.ID(idx) {
-        args_.push(id.get_text());
-        idx += 1;
-    }
+    let name_ = ctx.ID().unwrap().get_text();
+    let args_ = (&ctx).pred_arg_all()
+        .iter()
+        .map(|arg_ctx| arg_ctx.get_text())
+        .collect();
     AstPredicate {
         sign: sign_,
         name: name_,
@@ -70,9 +64,7 @@ fn construct_verbphrase(ctx: &VerbphraseContextAll) -> AstVerbPhrase {
     match ctx {
         VerbphraseContextAll::PredphraseContext(pctx) => construct_predphrase(pctx),
         VerbphraseContextAll::ActsAsPhraseContext(actx) => construct_actsasphrase(actx),
-        _ => {
-            panic!("construct_verbphrase tried to build error");
-        }
+        _ => { panic!("construct_verbphrase tried to build error"); }
     }
 }
 
@@ -92,9 +84,7 @@ fn construct_flat_fact(ctx: &FlatFactContextAll) -> AstFlatFact {
     match ctx {
         FlatFactContextAll::PrinFactContext(fctx) => construct_prin_fact(fctx),
         FlatFactContextAll::PredFactContext(pctx) => construct_pred_fact(pctx),
-        _ => {
-            panic!("construct_flat_fact tried to build error");
-        }
+        _ => { panic!("construct_flat_fact tried to build error"); }
     }
 }
 
@@ -116,9 +106,7 @@ fn construct_fact(ctx: &FactContextAll) -> AstFact {
     match ctx {
         FactContextAll::FlatFactFactContext(fctx) => construct_flat_fact_fact(fctx),
         FactContextAll::CanSayFactContext(sctx) => construct_can_say_fact(sctx),
-        _ => {
-            panic!("construct_fact tried to build error");
-        }
+        _ => { panic!("construct_fact tried to build error"); }
     }
 }
 
@@ -136,13 +124,43 @@ fn construct_can_say_fact(ctx: &CanSayFactContext) -> AstFact {
     }
 }
 
+fn construct_binop(ctx: &BinopContextAll) -> AstComparisonOperator {
+    match ctx {
+        BinopContextAll::LtbinopContext(_) => AstComparisonOperator::LessThan,
+        BinopContextAll::GrbinopContext(_) => AstComparisonOperator::GreaterThan,
+        BinopContextAll::EqbinopContext(_) => AstComparisonOperator::Equals,
+        BinopContextAll::NebinopContext(_) => AstComparisonOperator::NotEquals,
+        BinopContextAll::LeqbinopContext(_) => AstComparisonOperator::LessOrEquals,
+        BinopContextAll::GeqbinopContext(_) => AstComparisonOperator::GreaterOrEquals,
+        _ => { panic!("construct_binop tried to build error"); }
+    }
+}
+
+fn construct_rvalue(ctx: &RvalueContextAll) -> AstRValue {
+    match ctx {
+        RvalueContextAll::FlatFactRvalueContext(ffctx) => {
+            AstRValue::FlatFactRValue { 
+                flat_fact: construct_flat_fact(&ffctx.flatFact().unwrap())
+            }
+        },
+        RvalueContextAll::BinopRvalueContext(bctx) => {
+            AstRValue::ArithCompareRValue {
+                arith_comp: AstArithmeticComparison {
+                    lnum: bctx.pred_arg(0).unwrap().get_text(),
+                    op: construct_binop(&bctx.binop().unwrap()),
+                    rnum: bctx.pred_arg(1).unwrap().get_text()
+                }
+            }
+        }
+        _ => { panic!("construct_rvalue tried to build error"); }
+    }
+}
+
 fn construct_assertion(ctx: &AssertionContextAll) -> AstAssertion {
     match ctx {
         AssertionContextAll::FactAssertionContext(fctx) => construct_fact_assertion(fctx),
         AssertionContextAll::HornClauseAssertionContext(hctx) => construct_hornclause(hctx),
-        _ => {
-            panic!("construct_assertion tried to build error");
-        }
+        _ => { panic!("construct_assertion tried to build error"); }
     }
 }
 
@@ -153,10 +171,10 @@ fn construct_fact_assertion(ctx: &FactAssertionContext) -> AstAssertion {
 
 fn construct_hornclause(ctx: &HornClauseAssertionContext) -> AstAssertion {
     let lhs = construct_fact(&ctx.fact().unwrap());
-    let mut rhs = Vec::new();
-    for flat_fact_ctx in ctx.flatFact_all() {
-        rhs.push(construct_flat_fact(&flat_fact_ctx));
-    }
+    let rhs = ctx.rvalue_all()
+        .iter()
+        .map(|rvalue_ctx| construct_rvalue(&rvalue_ctx))
+        .collect();
     AstAssertion::AstCondAssertion { lhs, rhs }
 }
 
@@ -186,9 +204,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
                 export_file,
             }
         }
-        _ => {
-            panic!("construct_says_assertion tried to build Error()");
-        }
+        _ => { panic!("construct_says_assertion tried to build Error()"); }
     }
 }
 
@@ -215,9 +231,7 @@ fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: true,
         },
-        _ => {
-            panic!("construct_keybinding tried to build Error()");
-        }
+        _ => { panic!("construct_keybinding tried to build Error()"); }
     }
 }
 
@@ -237,9 +251,7 @@ fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
         AuthLogicTypeContextAll::CustomTypeContext(ctx_prime) => {
             AstType::CustomType { type_name: ctx_prime.ID().unwrap().get_text() }
         }
-        _ => {
-            panic!("construct_type tried to build error");
-        }
+        _ => { panic!("construct_type tried to build error"); }
     }
 }
 

@@ -55,6 +55,26 @@ fn emit_pred(p: &AstPredicate) -> String {
     format!("{}{}({})", neg, &p.name, p.args.join(", "))
 }
 
+fn emit_op(operator: &AstComparisonOperator) -> String {
+    match operator {
+        AstComparisonOperator::LessThan => "<",
+        AstComparisonOperator::GreaterThan => ">",
+        AstComparisonOperator::Equals => "=",
+        AstComparisonOperator::NotEquals =>  "!=",
+        AstComparisonOperator::LessOrEquals => "<=",
+        AstComparisonOperator::GreaterOrEquals => ">="
+    }.to_string()
+}
+
+fn emit_rvalue(rvalue: &DLIRRValue) -> String {
+    match rvalue {
+        DLIRRValue::PredicateRValue { predicate } => emit_pred(predicate),
+        DLIRRValue::ArithCompareRValue { arith_comp } => 
+            format!("{} {} {}", &arith_comp.lnum,
+                    emit_op(&arith_comp.op), &arith_comp.rnum)
+    }
+}
+
 fn emit_assertion(a: &DLIRAssertion) -> String {
     match a {
         DLIRAssertion::DLIRFactAssertion { p } => emit_pred(p) + ".",
@@ -63,7 +83,7 @@ fn emit_assertion(a: &DLIRAssertion) -> String {
                 "{} :- {}.",
                 emit_pred(lhs),
                 rhs.iter()
-                    .map(|ast_pred| emit_pred(ast_pred))
+                    .map(|dlir_rvalue| emit_rvalue(dlir_rvalue))
                     .collect::<Vec<_>>()
                     .join(", ")
             )

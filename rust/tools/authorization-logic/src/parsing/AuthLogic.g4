@@ -32,8 +32,13 @@ principal
     : ID
     ;
 
+pred_arg
+    : ID
+    | NUMLITERAL
+    ;
+
 predicate
-    : (NEG)? ID '(' ID (',' ID)* ')'
+    : (NEG)? ID '(' pred_arg (',' pred_arg )* ')'
     ;
 
 verbphrase
@@ -50,6 +55,20 @@ flatFact
     | predicate #predFact
     ;
 
+binop
+  : LESSTHAN #ltbinop
+  | GRTHAN #grbinop
+  | EQUALS #eqbinop
+  | NEQUALS #nebinop
+  | LEQ #leqbinop
+  | GEQ #geqbinop
+  ;
+
+rvalue
+  : flatFact #flatFactRvalue
+  | pred_arg binop pred_arg #binopRvalue
+  ;
+
 fact
     : flatFact #flatFactFact
     | principal CANSAY fact #canSayFact
@@ -57,7 +76,7 @@ fact
 
 assertion
     : fact '.' #factAssertion
-    | fact ':-' flatFact (',' flatFact )* '.' #hornClauseAssertion
+    | fact ':-' rvalue (',' rvalue )* '.' #hornClauseAssertion
     ;
 
 // The IDs following "Export" are path names where JSON files containing
@@ -120,9 +139,18 @@ ATTRIBUTE: 'attribute';
 
 // Identifiers wrapped in quotes are constants whereas
 // identifiers without quotes are variables.
-ID : ('"')? [_a-zA-Z0-9/.#:]* ('"')?;
+ID : ('"')? [_a-zA-Z][_a-zA-Z0-9/.#:]* ('"')?;
+NUMLITERAL : [0-9]+;
 
 NEG: '!';
+
+// BINOPS
+LESSTHAN: '<';
+GRTHAN: '>';
+EQUALS: '=';
+NEQUALS: '!=';
+LEQ: '<=';
+GEQ: '>=';
 
 WHITESPACE_IGNORE
     : [ \r\t\n]+ -> skip

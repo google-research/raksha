@@ -18,6 +18,15 @@
 //! this authorization logic into datalog simpler.
 use crate::ast::*;
 
+// RValues are the expressions that can appear on the right hand side of a
+// conditional assertion. At the time of writing these include either
+// Predicates or AstArithmeticComparisons.
+#[derive(Clone)]
+pub enum DLIRRValue {
+    PredicateRValue { predicate: AstPredicate },
+    ArithCompareRValue { arith_comp: AstArithmeticComparison }
+}
+
 #[derive(Clone)]
 pub enum DLIRAssertion {
     DLIRFactAssertion {
@@ -25,7 +34,7 @@ pub enum DLIRAssertion {
     },
     DLIRCondAssertion {
         lhs: AstPredicate,
-        rhs: Vec<AstPredicate>,
+        rhs: Vec<DLIRRValue>,
     },
 }
 

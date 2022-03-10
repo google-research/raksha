@@ -55,6 +55,13 @@ impl PartialEq for AstPredicate {
 impl Eq for AstPredicate {}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AstArithmeticComparison { 
+    pub lnum: String , 
+    pub op: AstComparisonOperator,
+    pub rnum: String
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AstVerbPhrase {
     AstPredPhrase { p: AstPredicate },
     AstCanActPhrase { p: AstPrincipal },
@@ -72,10 +79,29 @@ pub enum AstFact {
     AstCanSayFact { p: AstPrincipal, f: Box<AstFact> },
 }
 
+#[derive(Copy, Debug, Clone, Serialize, Deserialize)]
+pub enum AstComparisonOperator {
+    LessThan,
+    GreaterThan,
+    Equals,
+    NotEquals,
+    LessOrEquals,
+    GreaterOrEquals
+}
+
+// RValues are the expressions that can appear on the right hand side of a
+// conditional assertion. At the time of writing these include either
+// AstFlatFacts or AstArithmeticComparisons.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum AstRValue {
+    FlatFactRValue { flat_fact: AstFlatFact},
+    ArithCompareRValue { arith_comp: AstArithmeticComparison }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AstAssertion {
     AstFactAssertion { f: AstFact },
-    AstCondAssertion { lhs: AstFact, rhs: Vec<AstFlatFact> },
+    AstCondAssertion { lhs: AstFact, rhs: Vec<AstRValue> },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
