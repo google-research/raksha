@@ -41,5 +41,5 @@ cc_library(
         "//src/frontends/sql:decoder_context",
         "//src/ir:module",
         "//src/ir:value",
-    ]
+    ],
 )
