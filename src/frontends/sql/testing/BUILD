@@ -25,6 +25,7 @@ cc_library(
     hdrs = ["merge_operation_view.h"],
     visibility = ["//src/frontends/sql:__subpackages__"],
     deps = [
+        ":operation_view_utils",
         "//src/common/logging",
         "//src/frontends/sql:decoder_context",
         "//src/ir:module",
@@ -43,5 +44,16 @@ cc_library(
         "//src/frontends/sql:decoder_context",
         "//src/ir:module",
         "//src/ir:value",
+    ],
+)
+
+cc_library(
+    name = "operation_view_utils",
+    testonly = True,
+    srcs = ["operation_view_utils.cc"],
+    hdrs = ["operation_view_utils.h"],
+    deps = [
+        "//src/ir:value",
+        "@absl//absl/strings",
     ],
 )
