@@ -51,9 +51,7 @@ pub fn setup_bazeltest_data_paths(input_paths: Vec<&str>) {
             .arg("-s")
             .arg(resolved_input_path)
             .arg(resolved_link_path)
-            .spawn()
-            .expect("had an error when trying to start `ln`")
-            .wait_with_output()
+            .output()
             .expect("had an error in output of `ln`");
     }
 }
