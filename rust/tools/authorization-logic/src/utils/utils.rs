@@ -25,7 +25,6 @@ pub fn get_resolved_path(path: &str) -> String {
     if is_bazel_test() {
         let tmp_dir = std::env::var("TEST_TMPDIR").unwrap();
         let path = format!("{}/{}", tmp_dir, path);
-        println!("Path is {}", path);
         path
     } else {
         format!("{}", path)
@@ -46,7 +45,6 @@ pub fn setup_bazeltest_data_paths(input_paths: Vec<&str>) {
             src_dir, workspace_dir, input_path);
         let resolved_link_path = format!(
             "{}/{}", tmp_dir, input_path);
-        println!("Linking {} as {}", resolved_input_path, resolved_link_path);
         std::process::Command::new("ln")
             .arg("-s")
             .arg(resolved_input_path)
@@ -67,7 +65,6 @@ pub fn create_bazeltest_output_paths(output_paths: Vec<&str>) {
     for output_path in output_paths {
         let full_path = format!("{}/{}", tmp_dir, output_path);
         if !std::path::Path::new(&full_path).is_dir() {
-            println!("Creating output path is {}", full_path);
             std::fs::create_dir_all(&full_path);
         }
     }
