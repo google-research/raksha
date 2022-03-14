@@ -14,8 +14,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#ifndef SRC_TEST_UTILS_DL_STRING_EXTRACTOR_DATALOG_STRING_H_
-#define SRC_TEST_UTILS_DL_STRING_EXTRACTOR_DATALOG_STRING_H_
+#ifndef SRC_COMMON_UTILS_TEST_DL_STRING_EXTRACTOR_DATALOG_STRING_H_
+#define SRC_COMMON_UTILS_TEST_DL_STRING_EXTRACTOR_DATALOG_STRING_H_
 
 #include "absl/strings/string_view.h"
 
@@ -42,4 +42,4 @@ class DatalogString {
 
 }  // namespace raksha::test_utils::dl_string_extractor
 
-#endif  // SRC_TEST_UTILS_DL_STRING_EXTRACTOR_DATALOG_STRING_H_
+#endif  // SRC_COMMON_UTILS_TEST_DL_STRING_EXTRACTOR_DATALOG_STRING_H_

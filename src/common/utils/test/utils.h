@@ -19,17 +19,16 @@
 #include <fstream>
 #include <vector>
 
-#ifndef SRC_TEST_UTILS_UTILS_H_
-#define SRC_TEST_UTILS_UTILS_H_
+#ifndef SRC_COMMON_UTILS_TEST_UTILS_H_
+#define SRC_COMMON_UTILS_TEST_UTILS_H_
 
 namespace raksha::test_utils {
-// Typically used to get ROOT DiRECTORY for testing. 
+// Typically used to get ROOT DiRECTORY for testing.
 // Takes path string as parameter and returns $TEST_SRCDIR/$TEST_WORKSPACE/path
 std::filesystem::path GetTestDataDir(std::string path);
 // Reads file line by line, stores in a vector and returns it.
-std::vector<std::string> ReadFileLines(const std::filesystem::path& file); 
+std::vector<std::string> ReadFileLines(const std::filesystem::path& file);
 
-} //namespace raksha::test_utils
+}  // namespace raksha::test_utils
 
-#endif //SRC_TEST_UTILS_UTILS_H_
-
+#endif  // SRC_COMMON_UTILS_TEST_UTILS_H_
