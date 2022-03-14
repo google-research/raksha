@@ -451,7 +451,7 @@ cc_library(
     srcs = ["predicate_textproto_to_rule_body_testdata.cc"],
     hdrs = ["predicate_textproto_to_rule_body_testdata.h"],
     deps = [
-        "//src/test_utils/dl_string_extractor:datalog_string",
+        "//src/common/utils/test/dl_string_extractor:datalog_string",
         "@absl//absl/strings",
     ],
 )
