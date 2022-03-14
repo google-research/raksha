@@ -19,7 +19,7 @@
 
 #include "absl/strings/string_view.h"
 
-namespace raksha::test_utils::dl_string_extractor {
+namespace raksha::utils::test::dl_string_extractor {
 
 enum DatalogStringKind {
   kDlRuleBody,
@@ -40,6 +40,6 @@ class DatalogString {
   std::string dl_string_;
 };
 
-}  // namespace raksha::test_utils::dl_string_extractor
+}  // namespace raksha::utils::test::dl_string_extractor
 
 #endif  // SRC_COMMON_UTILS_TEST_DL_STRING_EXTRACTOR_DATALOG_STRING_H_

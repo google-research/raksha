@@ -47,7 +47,7 @@ class AuthorizationLogicDatalogFactsTest :
 
 TEST_P(AuthorizationLogicDatalogFactsTest, InvokesRustToolAndGeneratesOutput) {
     absl::string_view param = GetParam();
-    fs::path test_data_dir = test_utils::GetTestDataDir("src/xform_to_datalog/testdata");
+    fs::path test_data_dir = utils::test::GetTestDataDir("src/xform_to_datalog/testdata");
     auto auth_facts =
         AuthorizationLogicDatalogFacts::create(test_data_dir.c_str(), param);
     ASSERT_TRUE(auth_facts.has_value());
@@ -55,7 +55,7 @@ TEST_P(AuthorizationLogicDatalogFactsTest, InvokesRustToolAndGeneratesOutput) {
     std::vector<std::string> actual_datalog =
       absl::StrSplit(auth_facts->ToDatalog(), "\n", absl::SkipEmpty());
     std::vector<std::string> expected_datalog =
-        test_utils::ReadFileLines(test_data_dir / absl::StrCat(param, ".dl"));
+        utils::test::ReadFileLines(test_data_dir / absl::StrCat(param, ".dl"));
 
     // Need to compare individual lines as the output order is
     // non-deterministic.

@@ -23,7 +23,7 @@
 #include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"
 
-namespace raksha::test_utils {
+namespace raksha::utils::test {
 
 std::filesystem::path GetTestDataDir(std::string path) {
     absl::string_view test_srcdir_env = std::getenv("TEST_SRCDIR");
@@ -47,5 +47,5 @@ std::vector<std::string> ReadFileLines(const std::filesystem::path& file) {
 }
 
 
-}  // namespace raksha::test_utils
+}  // namespace raksha::utils::test
 

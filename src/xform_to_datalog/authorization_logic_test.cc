@@ -55,7 +55,7 @@ TEST(AuthorizationLogicTest, InvokesRustToolAndGeneratesOutput) {
       "isPrincipal"};
 
   const fs::path& test_data_dir =
-      test_utils::GetTestDataDir("src/xform_to_datalog/testdata");
+      utils::test::GetTestDataDir("src/xform_to_datalog/testdata");
   fs::path output_dir = fs::temp_directory_path();
   int res = GenerateDatalogFactsFromAuthorizationLogic(
       "simple_auth_logic", test_data_dir.c_str(), output_dir.c_str(),
@@ -64,9 +64,9 @@ TEST(AuthorizationLogicTest, InvokesRustToolAndGeneratesOutput) {
   ASSERT_EQ(res, 0) << "Invoking authorization logic compiler failed.";
 
   std::vector<std::string> actual_datalog =
-      test_utils::ReadFileLines(output_dir / "simple_auth_logic.dl");
+      utils::test::ReadFileLines(output_dir / "simple_auth_logic.dl");
   std::vector<std::string> expected_datalog =
-      test_utils::ReadFileLines(test_data_dir / "simple_auth_logic.dl");
+      utils::test::ReadFileLines(test_data_dir / "simple_auth_logic.dl");
 
   // Need to compare individual lines as the output order is non-deterministic.
   ASSERT_THAT(actual_datalog,
