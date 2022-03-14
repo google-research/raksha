@@ -133,13 +133,29 @@ filegroup(
     srcs = glob(["raksha_examples/**"]),
 )
 
+# Specifing `@souffle` as part of `data` in the `authorization_logic_test` target
+# triggers a build of souffle with `-fno-exceptions`, which causes the build
+# to fail. Instead, we extract the souffle binary using a genrule by making
+# it part of the `tools` (which does not trigger a rebuild) and use it when
+# running the authorization logic tests via `authorization_logic_test`.
+genrule(
+    name = "souffle",
+    outs = ["souffle"],
+    cmd = "cp $(location @souffle) $@ && chmod a+x $@",
+    tools = ["@souffle"],
+)
+
 rust_test(
     name = "authorization_logic_test",
     crate = ":authorization_logic_lib",
     data = [
         ":raksha_examples",
+        ":souffle",
         ":test_inputs",
     ],
+    env = {
+        "SOUFFLE_BIN": "$(rootpath :souffle)",
+    },
     rustc_flags = [
         "--cfg=feature=\"bazel_build\"",
     ],
