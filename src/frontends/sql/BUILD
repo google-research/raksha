@@ -121,8 +121,8 @@ cc_test(
         ":decoder_context",
         ":id_name_and_string_test",
         "//src/common/testing:gtest",
-        "//src/frontends/sql/testing:utils",
         "//src/frontends/sql/testing:literal_operation_view",
+        "//src/frontends/sql/testing:utils",
         "@absl//absl/strings",
     ],
 )
