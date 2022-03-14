@@ -34,7 +34,7 @@ def extracted_datalog_string_test(
     native.cc_binary(
         name = "dl_string_test_file_generator_for_" + name,
         testonly = True,
-        srcs = ["//src/test_utils/dl_string_extractor:dl_string_test_file_generator.cc"],
+        srcs = ["//src/common/utils/test/dl_string_extractor:dl_string_test_file_generator.cc"],
         copts = [
             "-std=c++17",
             "-fexceptions",
@@ -47,7 +47,7 @@ def extracted_datalog_string_test(
         deps = [
             dl_string_lib,
             "//src/common/logging:logging",
-            "//src/test_utils/dl_string_extractor:datalog_string",
+            "//src/common/utils/test/dl_string_extractor:datalog_string",
         ],
     )
 
@@ -84,7 +84,7 @@ def extracted_datalog_string_test(
 
     native.cc_test(
         name = name,
-        srcs = ["//src/test_utils/dl_string_extractor:dl_string_parsing_test_driver.cc"],
+        srcs = ["//src/common/utils/test/dl_string_extractor:dl_string_parsing_test_driver.cc"],
         args = [
             name + "_cxx",
         ],
