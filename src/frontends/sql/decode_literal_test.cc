@@ -18,6 +18,7 @@
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/id_name_and_string_test.h"
+#include "src/frontends/sql/testing/literal_operation_view.h"
 #include "src/frontends/sql/testing/utils.h"
 
 namespace raksha::frontends::sql {
@@ -75,15 +76,10 @@ TEST_P(DecodeLiteralExprTest, DecodeLiteralExprTest) {
   const Operation &operation = testing::UnwrapDefaultOperationResult(result);
   EXPECT_EQ(operation.parent(), &top_block);
   EXPECT_THAT(operation.impl_module(), IsNull());
-  EXPECT_EQ(operation.op().name(), DecoderContext::kSqlLiteralOpName);
-  EXPECT_THAT(operation.inputs(), IsEmpty());
-  // Check that attributes have exactly the name given.
-  EXPECT_THAT(
-      operation.attributes(),
-      UnorderedElementsAre(Pair(
-          DecoderContext::kLiteralStrAttrName,
-          ResultOf([](Attribute attr) { return attr->ToString(); }, Eq(str)))));
   EXPECT_EQ(result, decoder_context_.GetValue(id));
+
+  testing::LiteralOperationView literal_operation_view(operation);
+  EXPECT_EQ(literal_operation_view.GetLiteralStr(), str);
 }
 
 INSTANTIATE_TEST_SUITE_P(DecodeLiteralExprTest, DecodeLiteralExprTest,

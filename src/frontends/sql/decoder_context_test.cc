@@ -17,6 +17,7 @@
 #include "src/frontends/sql/decoder_context.h"
 
 #include "src/common/testing/gtest.h"
+#include "src/frontends/sql/testing/literal_operation_view.h"
 #include "src/frontends/sql/testing/merge_operation_view.h"
 
 namespace raksha::frontends::sql {
@@ -84,17 +85,8 @@ TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
 
   EXPECT_THAT(lit_op.parent(), &top_level_block);
   EXPECT_THAT(lit_op.impl_module(), IsNull());
-  EXPECT_THAT(lit_op.inputs(), IsEmpty());
-  EXPECT_EQ(lit_op.op().name(), DecoderContext::kSqlLiteralOpName);
-
-  // Check that "attributes" is exactly "literal_str" associated with the
-  // parameter value.
-  EXPECT_THAT(
-      lit_op.attributes(),
-      UnorderedElementsAre(
-          Pair(DecoderContext::kLiteralStrAttrName,
-               ResultOf([](const Attribute &attr) { return attr->ToString(); },
-                        Eq(literal_str)))));
+  testing::LiteralOperationView literal_operation_view(lit_op);
+  EXPECT_EQ(literal_operation_view.GetLiteralStr(), literal_str);
 }
 
 INSTANTIATE_TEST_SUITE_P(LiteralOpTest, LiteralOpTest,
