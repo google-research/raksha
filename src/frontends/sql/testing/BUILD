@@ -48,6 +48,21 @@ cc_library(
 )
 
 cc_library(
+    name = "literal_operation_view",
+    testonly = True,
+    hdrs = ["literal_operation_view.h"],
+    visibility = ["//src/frontends/sql:__subpackages__"],
+    deps = [
+        ":operation_view_utils",
+        "//src/common/logging",
+        "//src/frontends/sql:decoder_context",
+        "//src/ir:module",
+        "//src/ir:operator",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "operation_view_utils",
     testonly = True,
     srcs = ["operation_view_utils.cc"],

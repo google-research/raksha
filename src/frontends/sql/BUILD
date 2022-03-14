@@ -78,6 +78,7 @@ cc_test(
     deps = [
         ":decoder_context",
         "//src/common/testing:gtest",
+        "//src/frontends/sql/testing:literal_operation_view",
         "//src/frontends/sql/testing:merge_operation_view",
         "@absl//absl/strings",
     ],
@@ -120,6 +121,7 @@ cc_test(
         ":decoder_context",
         ":id_name_and_string_test",
         "//src/common/testing:gtest",
+        "//src/frontends/sql/testing:literal_operation_view",
         "//src/frontends/sql/testing:utils",
         "@absl//absl/strings",
     ],
