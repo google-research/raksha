@@ -20,7 +20,7 @@
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/datalog/program.h"
 #include "src/ir/auth_logic/lowering_ast_datalog.h"
-#include "src/utils/move_append.h"
+#include "src/common/utils/move_append.h"
 
 
 namespace raksha::ir::auth_logic {

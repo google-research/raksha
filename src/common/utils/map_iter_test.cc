@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#include "src/utils/map_iter.h"
+#include "src/common/utils/map_iter.h"
 
 #include "src/common/testing/gtest.h"
 

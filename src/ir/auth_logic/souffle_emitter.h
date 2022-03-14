@@ -21,7 +21,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "src/ir/datalog/program.h"
-#include "src/utils/map_iter.h"
+#include "src/common/utils/map_iter.h"
 
 
 namespace raksha::ir::auth_logic {

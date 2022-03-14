@@ -27,7 +27,7 @@ cc_library(
     name = "attribute",
     hdrs = ["attribute.h"],
     deps = [
-        "//src/utils:intrusive_ptr",
+        "//src/common/utils:intrusive_ptr",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",

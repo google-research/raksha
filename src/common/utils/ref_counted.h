@@ -13,12 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_UTILS_REF_COUNTED_H_
-#define SRC_UTILS_REF_COUNTED_H_
+#ifndef SRC_COMMON_UTILS_REF_COUNTED_H_
+#define SRC_COMMON_UTILS_REF_COUNTED_H_
 
 #include <iostream>
 
-#include "src/utils/ref_counter.h"
+#include "src/common/utils/ref_counter.h"
 
 namespace raksha {
 
@@ -69,4 +69,4 @@ class RefCounted {
 
 }  // namespace raksha
 
-#endif  // SRC_UTILS_REF_COUNTED_H_
+#endif  // SRC_COMMON_UTILS_REF_COUNTED_H_

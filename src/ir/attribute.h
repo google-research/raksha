@@ -19,7 +19,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
-#include "src/utils/intrusive_ptr.h"
+#include "src/common/utils/intrusive_ptr.h"
 
 namespace raksha::ir {
 

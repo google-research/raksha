@@ -28,8 +28,8 @@ cc_library(
     visibility = ["//test:__pkg__"],
     deps = [
         "//src/common/logging",
+        "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
-        "//src/utils:overloaded",
         "@absl//absl/hash",
         "@absl//absl/strings:str_format",
     ],
@@ -45,10 +45,10 @@ cc_library(
     deps = [
         ":ast",
         "//src/common/logging",
+        "//src/common/utils:map_iter",
+        "//src/common/utils:move_append",
+        "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
-        "//src/utils:map_iter",
-        "//src/utils:move_append",
-        "//src/utils:overloaded",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],
@@ -61,10 +61,10 @@ cc_library(
         "souffle_emitter.h",
     ],
     deps = [
+        "//src/common/utils:map_iter",
         "//src/ir/auth_logic:ast",
         "//src/ir/auth_logic:lowering_ast_datalog",
         "//src/ir/datalog:program",
-        "//src/utils:map_iter",
         "@absl//absl/container:flat_hash_set",
         "@absl//absl/strings",
     ],
@@ -78,8 +78,8 @@ cc_test(
         ":lowering_ast_datalog",
         ":souffle_emitter",
         "//src/common/testing:gtest",
+        "//src/common/utils:move_append",
         "//src/ir/datalog:program",
-        "//src/utils:move_append",
     ],
 )
 

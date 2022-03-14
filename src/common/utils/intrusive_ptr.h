@@ -13,10 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_UTILS_INTRUSIVE_PTR_H_
-#define SRC_UTILS_INTRUSIVE_PTR_H_
+#ifndef SRC_COMMON_UTILS_INTRUSIVE_PTR_H_
+#define SRC_COMMON_UTILS_INTRUSIVE_PTR_H_
 
-#include "src/utils/ref_counted.h"
+#include "src/common/utils/ref_counted.h"
 
 namespace raksha {
 
@@ -134,4 +134,4 @@ bool operator!=(const intrusive_ptr<T> &lhs, std::nullptr_t rhs) {
 }
 }  // namespace raksha
 
-#endif  // SRC_UTILS_INTRUSIVE_PTR_H_
+#endif  // SRC_COMMON_UTILS_INTRUSIVE_PTR_H_

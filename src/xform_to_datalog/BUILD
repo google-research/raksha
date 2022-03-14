@@ -113,10 +113,10 @@ cc_test(
         ":manifest_datalog_facts",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
+        "//src/common/utils:ranges",
         "//src/ir",
         "//src/ir/proto:system_spec",
         "//src/ir/types",
-        "//src/utils:ranges",
         "@absl//absl/strings",
     ],
 )

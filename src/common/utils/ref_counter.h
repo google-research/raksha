@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_UTILS_REF_COUNTER_H_
-#define SRC_UTILS_REF_COUNTER_H_
+#ifndef SRC_COMMON_UTILS_REF_COUNTER_H_
+#define SRC_COMMON_UTILS_REF_COUNTER_H_
 
 #include <cstddef>
 
@@ -51,4 +51,4 @@ class RefCounter {
 
 }  // namespace raksha
 
-#endif  // SRC_UTILS_REF_COUNTER_H_
+#endif  // SRC_COMMON_UTILS_REF_COUNTER_H_
