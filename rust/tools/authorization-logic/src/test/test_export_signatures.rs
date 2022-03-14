@@ -26,7 +26,8 @@ mod test {
 
     #[test]
   fn test_signature_exporting() {
-        utils::create_bazeltest_output_paths(vec!["test_keys", "test_outputs"]);
+        utils::setup_directories_for_bazeltest(
+            vec!["test_inputs"], vec!["test_keys", "test_outputs"]);
         store_new_keypair_cleartext(
             &utils::get_resolved_path("test_keys/principal1_pub.json"),
             &utils::get_resolved_path("test_keys/principal1_priv.json"),
