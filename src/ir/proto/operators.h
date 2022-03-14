@@ -26,6 +26,8 @@ constexpr absl::string_view kMerge = "arcs.Merge";
 constexpr absl::string_view kReadAccessPath = "arcs.ReadAccessPath";
 constexpr absl::string_view kUpdateAccessPath = "arcs.UpdateAccessPath";
 constexpr absl::string_view kParticle = "arcs.Particle";
+constexpr absl::string_view kWriteStorage = "arcs.WriteStorage";
+constexpr absl::string_view kReadStorage = "arcs.ReadStorage";
 }  // namespace operators
 
 }  // namespace arcs

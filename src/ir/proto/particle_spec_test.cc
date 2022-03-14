@@ -16,6 +16,8 @@
 
 #include "src/ir/proto/particle_spec.h"
 
+#include <memory>
+#include <optional>
 #include <ostream>
 #include <sstream>
 
@@ -30,6 +32,13 @@
 
 namespace raksha::ir::proto {
 namespace {
+
+template <typename C>
+const typename C::mapped_type *FindOrNull(const C &c,
+                                          const typename C::key_type &key) {
+  auto find_result = c.find(key);
+  return find_result == c.end() ? nullptr : std::addressof(find_result->second);
+}
 
 class ParticleDatalogPrinter {
  public:
@@ -47,19 +56,23 @@ class ParticleDatalogPrinter {
   void ProcessOperation(const Operation &operation) {
     if (operation.op().name() == arcs::operators::kMerge) {
       PrintMergeOperation(operation);
+    } else if (operation.op().name() == arcs::operators::kWriteStorage) {
+      PrintWriteStorage(operation);
     }
   }
 
   void ProcessResult(Value value) {
     if (auto any = value.If<value::Any>()) return;
     out_ << "edge(";
-    PrintValue();
+    PrintValue(value);
     out_ << ", "
          << ").\n";
   }
 
  private:
+  void PrintWriteStorage(const Operation &write_storage) {}
   void PrintMergeOperation(const Operation &merge_op) {
+    LOG(WARNING) << "Merge operation " << IRPrinter::ToString(merge_op);
     std::string merge_result_name =
         absl::StrFormat("b%d", ssa_names_.GetOrCreateID(merge_op));
     for (const auto &[_, value] : merge_op.inputs()) {
@@ -81,7 +94,9 @@ class ParticleDatalogPrinter {
       // CHECK(&arg->block() == &block)
       //     << "particle referring to blocks outside of its module";
       auto find_result = particle_->inputs().find(arg->name());
-      CHECK(find_result != particle_->inputs().end());
+
+      CHECK(find_result != particle_->inputs().end())
+          << "Unable to find input " << arg->name();
       PrintValue(find_result->second);
     } else if (const auto *res = value.If<value::OperationResult>()) {
       out_ << absl::StreamFormat(
@@ -170,13 +185,20 @@ TEST(ParticleSpecTest, TestSomething) {
       std::make_unique<Operator>(arcs::operators::kUpdateAccessPath));
   context.RegisterOperator(
       std::make_unique<Operator>(arcs::operators::kParticle));
+  context.RegisterOperator(
+      std::make_unique<Operator>(arcs::operators::kWriteStorage));
+  context.RegisterOperator(
+      std::make_unique<Operator>(arcs::operators::kReadStorage));
 
   Module global_module;
   BlockBuilder builder;
+  absl::flat_hash_map<std::string, const Operation *> particle_specs_;
   for (const arcs::ParticleSpecProto &particle_spec_proto :
        manifest_proto.particle_specs()) {
     const auto &operation =
         ir::proto::Decode(context, builder, particle_spec_proto);
+    particle_specs_.insert(
+        {particle_spec_proto.name(), std::addressof(operation)});
     LOG(WARNING) << operation;
   }
   for (const arcs::RecipeProto &recipe_proto : manifest_proto.recipes()) {
@@ -196,24 +218,49 @@ TEST(ParticleSpecTest, TestSomething) {
       context.RegisterStorage(
           std::make_unique<Storage>(handle_proto.name(), type));
     }
+
     for (const arcs::ParticleProto &particle_proto : recipe_proto.particles()) {
+      const Operation *particle_spec = *CHECK_NOTNULL(
+          FindOrNull(particle_specs_, particle_proto.spec_name()));
+
+      const Module *module = CHECK_NOTNULL(particle_spec->impl_module());
+      CHECK(module->blocks().size() == 1);
+      const Block &impl = *module->blocks().front();
       NamedValueMap inputs;
       for (const auto &handle_connection_proto : particle_proto.connections()) {
+        if (impl.inputs().FindDecl(handle_connection_proto.name()) == nullptr) {
+          LOG(WARNING) << "Skipping " << handle_connection_proto.name();
+          continue;
+        }
         inputs.insert({handle_connection_proto.name(),
                        Value(value::StoredValue(context.GetStorage(
                            handle_connection_proto.handle())))});
       }
-      builder.AddOperation(
+      const Operation &invocation = builder.AddOperation(
           context.GetOperator(arcs::operators::kParticle),
           {{"name", StringAttribute::Create(particle_proto.spec_name())}},
           inputs);
+      for (const auto &handle_connection_proto : particle_proto.connections()) {
+        if (impl.outputs().FindDecl(handle_connection_proto.name()) ==
+            nullptr) {
+          LOG(WARNING) << "Skipping output" << handle_connection_proto.name();
+          continue;
+        }
+        builder.AddOperation(
+            context.GetOperator(arcs::operators::kWriteStorage),
+            {{"name", StringAttribute::Create(
+                          context.GetStorage(handle_connection_proto.handle())
+                              .name())}},
+            {{"input", Value(value::OperationResult(
+                           invocation, handle_connection_proto.name()))}});
+      }
     }
     global_module.AddBlock(builder.build());
+    LOG(WARNING) << global_module;
+    std::ostringstream str_stream;
+    DatalogPrinter::ToDatalog(str_stream, global_module);
+    LOG(WARNING) << str_stream.str();
   }
-  LOG(WARNING) << global_module;
-  std::ostringstream str_stream;
-  DatalogPrinter::ToDatalog(str_stream, global_module);
-  LOG(WARNING) << str_stream.str();
 }
 
 }  // namespace
