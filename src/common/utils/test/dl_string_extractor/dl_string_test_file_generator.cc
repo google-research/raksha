@@ -19,7 +19,7 @@
 #include <iostream>
 
 #include "src/common/logging/logging.h"
-#include "src/test_utils/dl_string_extractor/datalog_string.h"
+#include "src/common/utils/test/dl_string_extractor/datalog_string.h"
 
 namespace extract = raksha::test_utils::dl_string_extractor;
 

@@ -24,7 +24,7 @@
 #include "absl/strings/string_view.h"
 #include "absl/strings/str_cat.h"
 #include "src/common/testing/gtest.h"
-#include "src/test_utils/utils.h"
+#include "src/common/utils/test/utils.h"
 
 namespace fs = std::filesystem;
 

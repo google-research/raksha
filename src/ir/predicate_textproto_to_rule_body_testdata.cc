@@ -16,7 +16,7 @@
 
 #include "src/ir/predicate_textproto_to_rule_body_testdata.h"
 
-#include "src/test_utils/dl_string_extractor/datalog_string.h"
+#include "src/common/utils/test/dl_string_extractor/datalog_string.h"
 
 // This is not in a namespace matching the directory tree nor in the related
 // header for a reason. We are using this to perform linking magic to fill in

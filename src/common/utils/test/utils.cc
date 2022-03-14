@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#include "src/test_utils/utils.h"
+#include "src/common/utils/test/utils.h"
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>

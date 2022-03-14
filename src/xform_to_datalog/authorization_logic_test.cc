@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "src/common/testing/gtest.h"
-#include "src/test_utils/utils.h"
+#include "src/common/utils/test/utils.h"
 
 namespace raksha::xform_to_datalog {
 

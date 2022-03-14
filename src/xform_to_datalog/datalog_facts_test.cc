@@ -17,7 +17,7 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/datalog_print_context.h"
-#include "src/test_utils/utils.h"
+#include "src/common/utils/test/utils.h"
 #include "src/xform_to_datalog/authorization_logic_datalog_facts.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
 
