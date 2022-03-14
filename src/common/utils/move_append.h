@@ -16,8 +16,8 @@
 
 // This file contains the datalog IR (DLIR) which makes the translation from
 // this authorization logic into datalog simpler.
-#ifndef SRC_UTILS_MOVE_APPEND_H_
-#define SRC_UTILS_MOVE_APPEND_H_
+#ifndef SRC_COMMON_UTILS_MOVE_APPEND_H_
+#define SRC_COMMON_UTILS_MOVE_APPEND_H_
 
 #include <vector>
 
@@ -33,4 +33,4 @@ void MoveAppend(std::vector<T>& dst, std::vector<T>&& src) {
 
 }  // namespace raksha::utils
 
-#endif  // SRC_UTILS_MOVE_APPEND_H_
+#endif  // SRC_COMMON_UTILS_MOVE_APPEND_H_

@@ -28,8 +28,8 @@
 #include "src/common/logging/logging.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/datalog/program.h"
-#include "src/utils/move_append.h"
-#include "src/utils/overloaded.h"
+#include "src/common/utils/move_append.h"
+#include "src/common/utils/overloaded.h"
 
 namespace raksha::ir::auth_logic {
 

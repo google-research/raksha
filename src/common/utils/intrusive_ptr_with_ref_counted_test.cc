@@ -13,12 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#include "src/utils/ref_counted.h"
-
 #include <iostream>
 #include <string>
 
 #include "src/common/testing/gtest.h"
+#include "src/common/utils/intrusive_ptr.h"
+#include "src/common/utils/ref_counted.h"
 
 namespace raksha {
 
@@ -35,40 +35,33 @@ class RefCountedType : public RefCounted<RefCountedType> {
 
 unsigned RefCountedType::destructor_calls_ = 0;
 
-template <>
-class RefCountManager<RefCountedType> {
- public:
-  static void Retain(RefCountedType* ptr) { ptr->Retain(); }
-  static void Release(RefCountedType* ptr) { ptr->Release(); }
-};
+template <typename T>
+class IntrusivePtrWithRefCountedTest : public ::testing::Test {};
+
+// We are also testing for `const RefCountedType` to make sure we can hold onto
+// `const T*` and still manage ref counts.
+using MyTypes = ::testing::Types<RefCountedType, const RefCountedType>;
+TYPED_TEST_SUITE(IntrusivePtrWithRefCountedTest, MyTypes);
 
 namespace {
 
-TEST(RefCountedTest, CallsDestructorOnlyWhenRefCountIsZero) {
-  RefCountedType* x = new RefCountedType();
-  RefCountedType::ResetDestructorCalls();
-  EXPECT_EQ(RefCountedType::GetDestructorCalls(), 0);
-  RefCountManager<RefCountedType>::Retain(x);
-  EXPECT_EQ(RefCountedType::GetDestructorCalls(), 0);
-  RefCountManager<RefCountedType>::Retain(x);
-  EXPECT_EQ(RefCountedType::GetDestructorCalls(), 0);
-  RefCountManager<RefCountedType>::Release(x);
-  EXPECT_EQ(RefCountedType::GetDestructorCalls(), 0);
-  RefCountManager<RefCountedType>::Retain(x);
-  EXPECT_EQ(RefCountedType::GetDestructorCalls(), 0);
-  RefCountManager<RefCountedType>::Release(x);
-  EXPECT_EQ(RefCountedType::GetDestructorCalls(), 0);
-  RefCountManager<RefCountedType>::Release(x);
-  EXPECT_EQ(RefCountedType::GetDestructorCalls(), 1);
-}
-
-TEST(RefCountedTest, FailsWhenReleaseCalledOnZeroRefCount) {
-  EXPECT_DEATH(
-      {
-        RefCountedType x;
-        RefCountManager<RefCountedType>::Release(&x);
-      },
-      "FetchSub can decrement below zero.");
+TYPED_TEST(IntrusivePtrWithRefCountedTest,
+           CallsDestructorOnlyWhenRefCountIsZero) {
+  TypeParam::ResetDestructorCalls();
+  EXPECT_EQ(TypeParam::GetDestructorCalls(), 0);
+  {
+    intrusive_ptr<TypeParam> copy;
+    EXPECT_EQ(TypeParam::GetDestructorCalls(), 0);
+    {
+      intrusive_ptr<TypeParam> ptr = make_intrusive_ptr<TypeParam>();
+      EXPECT_EQ(TypeParam::GetDestructorCalls(), 0);
+      copy = ptr;
+      // `ptr` is destroyed at the end of this scope, but `copy` is alive.
+    }
+    // `copy` is destroyed at the end of this scope.
+    EXPECT_EQ(TypeParam::GetDestructorCalls(), 0);
+  }
+  EXPECT_EQ(TypeParam::GetDestructorCalls(), 1);
 }
 
 }  // namespace

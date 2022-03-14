@@ -18,7 +18,7 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "src/ir/access_path_selectors_set.h"
-#include "src/utils/intrusive_ptr.h"
+#include "src/common/utils/intrusive_ptr.h"
 
 namespace raksha::ir::types {
 

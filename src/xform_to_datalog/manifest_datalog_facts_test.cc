@@ -24,7 +24,7 @@
 #include "src/ir/particle_spec.h"
 #include "src/ir/proto/system_spec.h"
 #include "src/ir/types/primitive_type.h"
-#include "src/utils/ranges.h"
+#include "src/common/utils/ranges.h"
 
 namespace raksha::xform_to_datalog {
 
