@@ -16,8 +16,8 @@
 
 #include "src/ir/auth_logic/lowering_ast_datalog.h"
 
+#include "absl/algorithm/container.h"
 #include "src/common/utils/map_iter.h"
-#include "src/common/utils/move_append.h"
 #include "src/ir/auth_logic/ast.h"
 
 namespace raksha::ir::auth_logic {
@@ -34,7 +34,7 @@ datalog::Predicate PushOntoPredicate(absl::string_view modifier,
                                      std::vector<std::string> new_args,
                                      const datalog::Predicate& predicate) {
   std::string new_name = absl::StrCat(std::move(modifier), predicate.name());
-  utils::MoveAppend(new_args, std::vector<std::string>(predicate.args()));
+  absl::c_copy(predicate.args(), std::back_inserter(new_args));
   datalog::Sign sign_copy = predicate.sign();
   return datalog::Predicate(new_name, std::move(new_args), sign_copy);
 }
@@ -262,9 +262,9 @@ std::vector<datalog::DLIRAssertion> LoweringToDatalogPass::SaysAssertionToDLIR(
     const SaysAssertion& says_assertion) {
   std::vector<datalog::DLIRAssertion> ret = {};
   for (const Assertion& assertion : says_assertion.assertions()) {
-    std::vector<datalog::DLIRAssertion> single_translation =
-        SingleSaysAssertionToDLIR(says_assertion.principal(), assertion);
-    utils::MoveAppend(ret, std::move(single_translation));
+    absl::c_move(
+        SingleSaysAssertionToDLIR(says_assertion.principal(), assertion),
+        std::back_inserter(ret));
   }
   return ret;
 }
@@ -273,8 +273,7 @@ std::vector<datalog::DLIRAssertion> LoweringToDatalogPass::SaysAssertionsToDLIR(
     const std::vector<SaysAssertion>& says_assertions) {
   std::vector<datalog::DLIRAssertion> ret = {};
   for (const SaysAssertion& says_assertion : says_assertions) {
-    auto single_translation = SaysAssertionToDLIR(says_assertion);
-    utils::MoveAppend(ret, std::move(single_translation));
+    absl::c_move(SaysAssertionToDLIR(says_assertion), std::back_inserter(ret));
   }
   return ret;
 }
@@ -298,7 +297,8 @@ datalog::DLIRProgram LoweringToDatalogPass::ProgToDLIR(const Program& program) {
   // We need to add a fact that says the dummy variable used in queries is
   // grounded.
   datalog::DLIRAssertion dummy_assertion(kDummyPredicate);
-  utils::MoveAppend(dlir_assertions, std::move(dlir_queries));
+  absl::c_move(QueriesToDLIR(program.queries()),
+               std::back_inserter(dlir_assertions));
   dlir_assertions.push_back(dummy_assertion);
 
   auto outputs = utils::MapIter<Query, std::string>(

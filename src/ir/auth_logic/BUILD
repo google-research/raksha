@@ -49,6 +49,7 @@ cc_library(
         "//src/common/utils:move_append",
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
+        "@absl//absl/algorithm:container",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],
