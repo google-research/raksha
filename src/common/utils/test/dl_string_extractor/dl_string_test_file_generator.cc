@@ -19,9 +19,9 @@
 #include <iostream>
 
 #include "src/common/logging/logging.h"
-#include "src/test_utils/dl_string_extractor/datalog_string.h"
+#include "src/common/utils/test/dl_string_extractor/datalog_string.h"
 
-namespace extract = raksha::test_utils::dl_string_extractor;
+namespace extract = raksha::utils::test::dl_string_extractor;
 
 // This extern declaration of GatherDatalogStrings allows us to link with the
 // GatherDatalogStrings definition for a single test without resorting to
@@ -29,7 +29,7 @@ namespace extract = raksha::test_utils::dl_string_extractor;
 // the test file. We just link against the library containing the Datalog
 // expected outputs and call its version of GatherDatalogStrings. If there
 // are multiple definitions or no definitions, there will be a linker error.
-namespace raksha::test_utils::dl_string_extractor {
+namespace raksha::utils::test::dl_string_extractor {
 extern std::vector<extract::DatalogString> GatherDatalogStrings();
 }
 
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
   // Get our datalog strings from the linked test and output the rules that
   // will check these snippets.
   std::vector datalog_strings =
-      raksha::test_utils::dl_string_extractor::GatherDatalogStrings();
+      raksha::utils::test::dl_string_extractor::GatherDatalogStrings();
   uint64_t dummy_num = 0;
   for (const extract::DatalogString &dl_string : datalog_strings) {
     // Have only implemented rule bodies at this time.

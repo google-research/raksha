@@ -17,7 +17,7 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/datalog_print_context.h"
-#include "src/test_utils/utils.h"
+#include "src/common/utils/test/utils.h"
 #include "src/xform_to_datalog/authorization_logic_datalog_facts.h"
 #include "src/xform_to_datalog/manifest_datalog_facts.h"
 
@@ -64,7 +64,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         std::make_tuple(ManifestDatalogFacts(),
                         *(AuthorizationLogicDatalogFacts::create(
-                            test_utils::GetTestDataDir(path),
+                            utils::test::GetTestDataDir(path),
                             "empty_auth_logic")),
                         R"(// GENERATED FILE, DO NOT EDIT!
 
@@ -114,7 +114,7 @@ grounded_dummy("dummy_var").
         std::make_tuple(ManifestDatalogFacts({ManifestDatalogFacts::Particle(
                             particle_spec.get(), {}, {})}),
                         *(AuthorizationLogicDatalogFacts::create(
-                            test_utils::GetTestDataDir(path),
+                            utils::test::GetTestDataDir(path),
                             "simple_auth_logic")),
                         R"(// GENERATED FILE, DO NOT EDIT!
 

@@ -37,7 +37,7 @@ cc_test(
     deps = [
         ":authorization_logic",
         "//src/common/testing:gtest",
-        "//src/test_utils:utils",
+        "//src/common/utils/test:utils",
     ],
 )
 
@@ -60,7 +60,7 @@ cc_test(
     deps = [
         ":authorization_logic_datalog_facts",
         "//src/common/testing:gtest",
-        "//src/test_utils:utils",
+        "//src/common/utils/test:utils",
         "@absl//absl/strings",
     ],
 )
@@ -86,8 +86,8 @@ cc_test(
         ":datalog_facts",
         ":manifest_datalog_facts",
         "//src/common/testing:gtest",
+        "//src/common/utils/test:utils",
         "//src/ir",
-        "//src/test_utils:utils",
     ],
 )
 
