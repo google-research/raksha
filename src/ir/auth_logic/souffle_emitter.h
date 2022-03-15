@@ -20,12 +20,10 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
-#include "src/ir/datalog/program.h"
 #include "src/common/utils/map_iter.h"
-
+#include "src/ir/datalog/program.h"
 
 namespace raksha::ir::auth_logic {
-
 
 class SouffleEmitter {
  public:
@@ -53,12 +51,13 @@ class SouffleEmitter {
   datalog::Predicate PredToDeclaration(const datalog::Predicate& predicate) {
     int i = 0;
     return datalog::Predicate(predicate.name(),
-                     utils::MapIter<std::string, std::string>(
-                         predicate.args(),
-                         [i](const std::string& arg) mutable {
-                           return absl::StrCat("x", std::to_string(i++));
-                         }),
-                     datalog::kPositive);
+                              utils::MapIter<std::string, std::string>(
+                                  predicate.args(),
+                                  [i](const std::string& arg) mutable {
+                                    return absl::StrCat("x",
+                                                        std::to_string(i++));
+                                  }),
+                              datalog::kPositive);
   }
 
   std::string EmitPredicate(const datalog::Predicate& predicate) {
@@ -74,10 +73,13 @@ class SouffleEmitter {
     return absl::StrCat(EmitPredicate(predicate), ".");
   }
 
-  std::string EmitAssertionInner(const datalog::DLIRCondAssertion& cond_assertion) {
-    std::vector rhs_translated = utils::MapIter<datalog::Predicate, std::string>(
-        cond_assertion.rhs(),
-        [this](const datalog::Predicate& arg) { return EmitPredicate(arg); });
+  std::string EmitAssertionInner(
+      const datalog::DLIRCondAssertion& cond_assertion) {
+    std::vector rhs_translated =
+        utils::MapIter<datalog::Predicate, std::string>(
+            cond_assertion.rhs(), [this](const datalog::Predicate& arg) {
+              return EmitPredicate(arg);
+            });
     return absl::StrCat(EmitPredicate(cond_assertion.lhs()), " :- ",
                         absl::StrJoin(rhs_translated, ", "), ".");
   }
@@ -88,11 +90,12 @@ class SouffleEmitter {
   }
 
   std::string EmitProgramBody(const datalog::DLIRProgram& program) {
-    return absl::StrJoin(
-        utils::MapIter<datalog::DLIRAssertion, std::string>(
-            program.assertions(),
-            [this](const datalog::DLIRAssertion& astn) { return EmitAssertion(astn); }),
-        "\n");
+    return absl::StrJoin(utils::MapIter<datalog::DLIRAssertion, std::string>(
+                             program.assertions(),
+                             [this](const datalog::DLIRAssertion& astn) {
+                               return EmitAssertion(astn);
+                             }),
+                         "\n");
   }
 
   std::string EmitOutputs(const datalog::DLIRProgram& program) {

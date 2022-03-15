@@ -17,7 +17,6 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/auth_logic/ast.h"
 
-
 namespace raksha::ir::auth_logic {
 
 TEST(AstEqualityTestSuite, Test1) {

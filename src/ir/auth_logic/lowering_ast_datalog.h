@@ -26,10 +26,10 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "src/common/logging/logging.h"
-#include "src/ir/auth_logic/ast.h"
-#include "src/ir/datalog/program.h"
 #include "src/common/utils/move_append.h"
 #include "src/common/utils/overloaded.h"
+#include "src/ir/auth_logic/ast.h"
+#include "src/ir/datalog/program.h"
 
 namespace raksha::ir::auth_logic {
 
@@ -154,7 +154,7 @@ class LoweringToDatalogPass {
   // - If it appears on the RHS of an assertion, it behaves semantically
   // like it has the same speaker as the head of the assertion.
   datalog::DLIRAssertion SpokenAttributeToDLIR(const Principal& speaker,
-                                      const Attribute& attribute);
+                                               const Attribute& attribute);
 
   // In the same way that attributes are passed around with "CanActAs", so
   // are other "CanActAs" facts. To implement this, the translation of
@@ -162,31 +162,32 @@ class LoweringToDatalogPass {
   // these facts around. This function is for generating the extra rule and
   // it works similarly to "SpokenAttributeToDLIR".
   datalog::DLIRAssertion SpokenCanActAsToDLIR(const Principal& speaker,
-                                     const CanActAs& can_act_as);
+                                              const CanActAs& can_act_as);
 
-  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>> BaseFactToDLIRInner(
-      const Principal& speaker, const datalog::Predicate& predicate);
+  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+  BaseFactToDLIRInner(const Principal& speaker,
+                      const datalog::Predicate& predicate);
 
-  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>> BaseFactToDLIRInner(
-      const Principal& speaker, const Attribute& attribute);
+  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+  BaseFactToDLIRInner(const Principal& speaker, const Attribute& attribute);
 
-  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>> BaseFactToDLIRInner(
-      const Principal& speaker, const CanActAs& canActAs);
+  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+  BaseFactToDLIRInner(const Principal& speaker, const CanActAs& canActAs);
 
   // The second return value represents 0 or 1 newly generated rules, so an
   // option might seem more intuitive. However, the interface that consumes
   // this needs to construct a vector anyway, so a vector is used in the
   // return type.
-  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>> BaseFactToDLIR(
-      const Principal& speaker, const BaseFact& base_fact);
+  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+  BaseFactToDLIR(const Principal& speaker, const BaseFact& base_fact);
 
   // This can result in 0 or more new rules because the translation of
   // nested canSayFacts might result in more than 1 rule.
   std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>> FactToDLIR(
       const Principal& speaker, const Fact& fact);
 
-  std::vector<datalog::DLIRAssertion> GenerateDLIRAssertions(const Principal& speaker,
-                                                    const Fact& fact);
+  std::vector<datalog::DLIRAssertion> GenerateDLIRAssertions(
+      const Principal& speaker, const Fact& fact);
 
   std::vector<datalog::DLIRAssertion> GenerateDLIRAssertions(
       const Principal& speaker,
@@ -207,7 +208,8 @@ class LoweringToDatalogPass {
   static inline datalog::Predicate kDummyPredicate =
       datalog::Predicate("grounded_dummy", {"dummy_var"}, datalog::kPositive);
 
-  std::vector<datalog::DLIRAssertion> QueriesToDLIR(const std::vector<Query>& queries);
+  std::vector<datalog::DLIRAssertion> QueriesToDLIR(
+      const std::vector<Query>& queries);
 
   datalog::DLIRProgram ProgToDLIR(const Program& program);
 

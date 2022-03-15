@@ -19,7 +19,6 @@
 #ifndef SRC_IR_AUTH_LOGIC_AST_H_
 #define SRC_IR_AUTH_LOGIC_AST_H_
 
-
 #include <memory>
 #include <string>
 #include <variant>
@@ -81,7 +80,8 @@ class BaseFact {
   // BaseFactVariantType gives the different forms of BaseFacts. Client code
   // should use this type to traverse these forms. This type may be changed in
   // the future.
-  using BaseFactVariantType = std::variant<datalog::Predicate, Attribute, CanActAs>;
+  using BaseFactVariantType =
+      std::variant<datalog::Predicate, Attribute, CanActAs>;
   explicit BaseFact(BaseFactVariantType value) : value_(std::move(value)){};
   const BaseFactVariantType& GetValue() const { return value_; }
 
