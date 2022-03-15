@@ -58,7 +58,7 @@ class Predicate {
     if (this->args().size() != otherPredicate.args().size()) {
       return false;
     }
-    for (uint64_t i = 0; i < this->args().size(); i++) {
+    for (uint64_t i = 0; i < this->args().size(); ++i) {
       if (this->args().at(i) != otherPredicate.args().at(i)) return false;
     }
     return true;
