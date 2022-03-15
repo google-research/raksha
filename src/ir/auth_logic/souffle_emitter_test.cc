@@ -17,7 +17,6 @@
 #include "src/ir/auth_logic/souffle_emitter.h"
 
 #include "src/common/testing/gtest.h"
-#include "src/common/utils/move_append.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/auth_logic/lowering_ast_datalog.h"
 #include "src/ir/datalog/program.h"

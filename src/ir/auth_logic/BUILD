@@ -46,9 +46,9 @@ cc_library(
         ":ast",
         "//src/common/logging",
         "//src/common/utils:map_iter",
-        "//src/common/utils:move_append",
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
+        "@absl//absl/algorithm:container",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],
@@ -78,7 +78,6 @@ cc_test(
         ":lowering_ast_datalog",
         ":souffle_emitter",
         "//src/common/testing:gtest",
-        "//src/common/utils:move_append",
         "//src/ir/datalog:program",
     ],
 )

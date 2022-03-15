@@ -123,18 +123,3 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
-
-cc_library(
-    name = "move_append",
-    hdrs = ["move_append.h"],
-    deps = [],
-)
-
-cc_test(
-    name = "move_append_test",
-    srcs = ["move_append_test.cc"],
-    deps = [
-        ":move_append",
-        "//src/common/testing:gtest",
-    ],
-)
