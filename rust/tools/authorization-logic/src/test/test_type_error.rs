@@ -16,8 +16,7 @@
 
 #[cfg(test)]
 mod test {
-    use crate::{ast::*, compilation_top_level::*, souffle::souffle_interface::*};
-    use std::fs;
+    use crate::{compilation_top_level::*};
 
     #[test]
     #[should_panic]

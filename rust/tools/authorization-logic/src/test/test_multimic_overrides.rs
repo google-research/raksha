@@ -16,14 +16,7 @@
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        ast::*, compilation_top_level::*, souffle::souffle_interface::*,
-        test::test_queries::test::*,
-    };
-    use std::fs;
-
-    // This dependency is used for generating keypairs.
-    use crate::signing::tink_interface::*;
+    use crate::{test::test_queries::test::*};
     use crate::utils::*;
 
     #[test]
