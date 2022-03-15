@@ -122,6 +122,7 @@ cc_library(
         ":predicate",
         ":tag_check",
         ":tag_claim",
+        "//src/common/utils:map_iter",
         "//src/ir",
         "//src/ir:access_path",
         "//src/ir:attribute",
@@ -130,7 +131,6 @@ cc_library(
         "//src/ir:module",
         "//src/ir:value",
         "//src/ir/types",
-        "//src/utils:map_iter",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )

@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "src/common/utils/map_iter.h"
 #include "src/ir/access_path_root.h"
 #include "src/ir/attribute.h"
 #include "src/ir/block_builder.h"
@@ -32,7 +33,6 @@
 #include "src/ir/proto/tag_check.h"
 #include "src/ir/proto/tag_claim.h"
 #include "src/ir/value.h"
-#include "src/utils/map_iter.h"
 
 namespace raksha::ir::proto {
 
