@@ -22,12 +22,12 @@
 #include <sstream>
 
 #include "src/common/testing/gtest.h"
+#include "src/common/utils/test/utils.h"
 #include "src/ir/ir_printer.h"
 #include "src/ir/ir_visitor.h"
 #include "src/ir/proto/operators.h"
 #include "src/ir/proto/type.h"
 #include "src/ir/value.h"
-#include "src/test_utils/utils.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::proto {
@@ -48,8 +48,8 @@ class ParticleDatalogPrinter {
     for (const auto &operation : particle_spec.operations()) {
       printer.ProcessOperation(*operation);
     }
-    for (const auto &[_, result] : particle_spec.results()) {
-      printer.ProcessResult(result);
+    for (const auto &[name, result] : particle_spec.results()) {
+      printer.ProcessResult(name, result);
     }
   }
 
@@ -61,26 +61,21 @@ class ParticleDatalogPrinter {
     }
   }
 
-  void ProcessResult(Value value) {
+  void ProcessResult(absl::string_view name, Value value) {
     if (auto any = value.If<value::Any>()) return;
     out_ << "edge(";
     PrintValue(value);
-    out_ << ", "
-         << ").\n";
+    out_ << ", " << name << ").\n";
   }
 
  private:
   void PrintWriteStorage(const Operation &write_storage) {}
+
   void PrintMergeOperation(const Operation &merge_op) {
     LOG(WARNING) << "Merge operation " << IRPrinter::ToString(merge_op);
     std::string merge_result_name =
-        absl::StrFormat("b%d", ssa_names_.GetOrCreateID(merge_op));
-    for (const auto &[_, value] : merge_op.inputs()) {
-      if (auto any = value.If<value::Any>()) continue;
-      out_ << "edge(";
-      PrintValue(value);
-      out_ << ", " << merge_result_name << ").\n";
-    }
+        absl::StrFormat("b%d.%%%d", ssa_names_.GetOrCreateID(*particle_spec_),
+                        ssa_names_.GetOrCreateID(merge_op));
     for (const auto &[_, value] : merge_op.inputs()) {
       if (auto any = value.If<value::Any>()) continue;
       out_ << "edge(";
@@ -111,10 +106,14 @@ class ParticleDatalogPrinter {
 
   ParticleDatalogPrinter(std::ostream &out, SsaNames &ssa_names,
                          const Block &particle_spec, const Operation &particle)
-      : out_(out), ssa_names_(ssa_names), particle_(&particle) {}
+      : out_(out),
+        ssa_names_(ssa_names),
+        particle_spec_(&particle_spec),
+        particle_(&particle) {}
 
   std::ostream &out_;
   SsaNames &ssa_names_;
+  const Block *particle_spec_;
   const Operation *particle_;
 };
 
@@ -160,7 +159,7 @@ class DatalogPrinter : public IRVisitor<DatalogPrinter> {
 
 TEST(ParticleSpecTest, TestSomething) {
   auto test_data =
-      test_utils::GetTestDataDir("src/ir/proto/test_arcs_proto.binarypb");
+      utils::test::GetTestDataDir("src/ir/proto/test_arcs_proto.binarypb");
   // Parse manifest stream and dump as datalog program.
   std::ifstream manifest_proto_stream(test_data);
   if (!manifest_proto_stream) {

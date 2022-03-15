@@ -144,10 +144,10 @@ cc_test(
         ":particle_spec",
         ":types",
         "//src/common/testing:gtest",
+        "//src/common/utils/test:utils",
         "//src/ir:ir_printer",
         "//src/ir:module",
         "//src/ir:value",
-        "//src/test_utils:utils",
         "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
