@@ -164,7 +164,11 @@ cc_test(
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/frontends/sql:sql_ir_cc_proto",
+        "//src/frontends/sql/testing:literal_operation_view",
+        "//src/frontends/sql/testing:merge_operation_view",
         "//src/frontends/sql/testing:tag_transform_operation_view",
+        "//src/frontends/sql/testing:utils",
         "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
     ],
 )
