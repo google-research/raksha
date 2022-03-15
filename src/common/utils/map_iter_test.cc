@@ -15,14 +15,23 @@
 //-----------------------------------------------------------------------------
 #include "src/common/utils/map_iter.h"
 
+#include <deque>
+#include <vector>
+
 #include "src/common/testing/gtest.h"
 
 namespace raksha::utils {
 
 TEST(MapIterTestSuite, SimpleMapIterTest) {
-  std::vector test_vec = MapIter<int, int>(std::vector({1, 5, 3, 9, 5}),
-                                           [](const int& x) { return x + 3; });
-  EXPECT_EQ(test_vec, std::vector({4, 8, 6, 12, 8}));
+  std::vector test_vec = MapIter<int>(std::vector({1, 5, 3, 9, 5}),
+                                      [](const int& x) { return x + 3; });
+  EXPECT_THAT(test_vec, testing::ElementsAre(4, 8, 6, 12, 8));
+}
+
+TEST(MapIterTestSuite, SimpleMapIterOnDequeTest) {
+  std::vector test_vec = MapIter<int>(std::deque({1, 5, 3, 9, 5}),
+                                      [](const int& x) { return x + 4; });
+  EXPECT_THAT(test_vec, testing::ElementsAre(5, 9, 7, 13, 9));
 }
 
 }  // namespace raksha::utils

@@ -23,13 +23,12 @@
 
 namespace raksha::utils {
 
-template <typename T, typename U, typename F>
-std::vector<U> MapIter(const std::vector<T>& input, F f) {
+template <typename U, typename C, typename F>
+std::vector<U> MapIter(const C& input, F map_fn) {
   std::vector<U> result;
   result.reserve(input.size());
-  for (auto& entity : input) {
-    result.push_back(f(entity));
-  }
+  std::transform(std::begin(input), std::end(input), std::back_inserter(result),
+                 map_fn);
   return result;
 }
 
