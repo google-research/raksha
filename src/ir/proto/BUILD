@@ -123,9 +123,12 @@ cc_library(
         ":tag_check",
         ":tag_claim",
         "//src/ir",
+        "//src/ir:access_path",
+        "//src/ir:attribute",
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:module",
+        "//src/ir:value",
         "//src/ir/types",
         "//src/utils:map_iter",
         "//third_party/arcs/proto:manifest_cc_proto",
@@ -137,11 +140,15 @@ cc_test(
     srcs = ["particle_spec_test.cc"],
     data = [":test_arcs_proto"],
     deps = [
+        ":operators",
         ":particle_spec",
         ":types",
         "//src/common/testing:gtest",
         "//src/ir:ir_printer",
+        "//src/ir:module",
+        "//src/ir:value",
         "//src/test_utils:utils",
+        "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
 
