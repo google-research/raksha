@@ -47,6 +47,7 @@ cc_library(
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:value",
+        "//src/utils:map_iter",
         "@absl//absl/container:flat_hash_map",
     ],
 )
@@ -80,6 +81,7 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/frontends/sql/testing:literal_operation_view",
         "//src/frontends/sql/testing:merge_operation_view",
+        "//src/frontends/sql/testing:tag_transform_operation_view",
         "@absl//absl/strings",
     ],
 )
@@ -149,6 +151,20 @@ cc_test(
         "//src/frontends/sql:sql_ir_cc_proto",
         "//src/frontends/sql/testing:merge_operation_view",
         "//src/frontends/sql/testing:utils",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "decode_tag_transform_operation_test",
+    srcs = ["decode_tag_transform_operation_test.cc"],
+    deps = [
+        ":decode",
+        ":decoder_context",
+        "//src/common/proto:protobuf",
+        "//src/common/testing:gtest",
+        "//src/frontends/sql:sql_ir_cc_proto",
+        "//src/frontends/sql/testing:tag_transform_operation_view",
         "@absl//absl/strings",
     ],
 )

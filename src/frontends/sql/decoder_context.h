@@ -36,6 +36,12 @@ class DecoderContext {
       "direct_input_";
   static constexpr absl::string_view kMergeOpControlInputPrefix =
       "control_input_";
+  static constexpr absl::string_view kTagTransformOpName = "sql.tag_transform";
+  static constexpr absl::string_view kTagTransformTransformedValueInputName =
+      "transformed_value";
+  static constexpr absl::string_view kTagTransformPreconditionInputPrefix =
+      "precondition_";
+  static constexpr absl::string_view kTagTransformRuleAttributeName = "rule";
   static constexpr absl::string_view kLiteralStrAttrName = "literal_str";
   static constexpr absl::string_view kDefaultOutputName = "out";
 
@@ -45,6 +51,8 @@ class DecoderContext {
             std::make_unique<ir::Operator>(kSqlLiteralOpName))),
         merge_operator_(ir_context_.RegisterOperator(
             std::make_unique<ir::Operator>(kSqlMergeOpName))),
+        tag_transform_operator_(ir_context_.RegisterOperator(
+            std::make_unique<ir::Operator>(kTagTransformOpName))),
         global_module_(),
         top_level_block_builder_() {}
 
@@ -97,6 +105,10 @@ class DecoderContext {
       std::vector<ir::Value> direct_inputs,
       std::vector<ir::Value> control_inputs);
 
+  const ir::Operation &MakeTagTransformOperation(
+      ir::Value transformed_value, absl::string_view rule_name,
+      std::vector<uint64_t> preconditions);
+
   // Finish building the top level block and
   const ir::Block &BuildTopLevelBlock() {
     return global_module_.AddBlock(top_level_block_builder_.build());
@@ -118,6 +130,9 @@ class DecoderContext {
   // sets of incoming confidentiality tags to be unioned and all integrity
   // tags to be dropped.
   const ir::Operator &merge_operator_;
+  // An `Operator` that may perform some transformation upon the tag state if
+  // some indicated policy rule fires.
+  const ir::Operator &tag_transform_operator_;
   // A global module to which we can add SQL IR nodes.
   ir::Module global_module_;
   // A BlockBuilder for building the top-level block.

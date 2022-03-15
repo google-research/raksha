@@ -19,6 +19,7 @@
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/testing/literal_operation_view.h"
 #include "src/frontends/sql/testing/merge_operation_view.h"
+#include "src/frontends/sql/testing/tag_transform_operation_view.h"
 
 namespace raksha::frontends::sql {
 
@@ -165,5 +166,56 @@ static const std::vector<Value> kSampleInputVectors[] = {
 INSTANTIATE_TEST_SUITE_P(DecodeMergeOpTest, DecodeMergeOpTest,
                          Combine(ValuesIn(kSampleInputVectors),
                                  ValuesIn(kSampleInputVectors)));
+
+class DecodeTagTransformTest
+    : public TestWithParam<
+          std::tuple<ir::Value, absl::string_view, std::vector<ir::Value>,
+                     std::vector<uint64_t>>> {};
+
+TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
+  auto [xformed_value, policy_rule_name, value_vec, id_sequence_vec] =
+      GetParam();
+
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+
+  id_sequence_vec.resize(value_vec.size());
+  // There is no need for the preconditions to be in any particular
+  // order. Assign IDs in the order described by the id_sequence_vec.
+  for (uint64_t idx = 0; idx < value_vec.size(); ++idx) {
+    decoder_context.RegisterValue(id_sequence_vec.at(idx), value_vec.at(idx));
+  }
+  const Operation &tag_xform_operation =
+      decoder_context.MakeTagTransformOperation(xformed_value, policy_rule_name,
+                                                id_sequence_vec);
+  testing::TagTransformOperationView tag_xform_view(tag_xform_operation);
+
+  EXPECT_EQ(tag_xform_view.GetRuleName(), policy_rule_name);
+  EXPECT_EQ(tag_xform_view.GetTransformedValue(), xformed_value);
+  EXPECT_EQ(tag_xform_view.GetPreconditions(), value_vec);
+}
+
+static const Value kSampleValues[] = {
+    Value(Any()),
+    Value(OperationResult(kExampleOperation, "out")),
+    Value(OperationResult(kExampleOperation, "out2")),
+    Value(BlockArgument(kExampleBlock, "arg0")),
+    Value(BlockArgument(kExampleBlock, "arg1")),
+};
+
+static const absl::string_view kSampleRuleNames[] = {
+    "clear_milliseconds",
+    "SSN",
+    "ApprovedWindow",
+};
+
+static const std::vector<uint64_t> kSampleIdSequences[] = {
+    {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {3, 90, 25, 7, 33, 49, 51, 2, 17, 400}};
+
+INSTANTIATE_TEST_SUITE_P(DecodeTagTransformTest, DecodeTagTransformTest,
+                         Combine(ValuesIn(kSampleValues),
+                                 ValuesIn(kSampleRuleNames),
+                                 ValuesIn(kSampleInputVectors),
+                                 ValuesIn(kSampleIdSequences)));
 
 }  // namespace raksha::frontends::sql

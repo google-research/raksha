@@ -20,9 +20,14 @@
 
 namespace raksha::frontends::sql {
 
+using ir::Operation;
 using ir::Value;
 using ir::value::OperationResult;
 using ir::value::StoredValue;
+
+static Value WrapOperationResultValue(const Operation &operation) {
+  return Value(OperationResult(operation, DecoderContext::kDefaultOutputName));
+}
 
 static Value DecodeSourceTableColumn(
     const SourceTableColumn &source_table_column,
@@ -44,9 +49,8 @@ static Value DecodeLiteral(const Literal &literal,
                            DecoderContext &decoder_context) {
   const absl::string_view literal_str = literal.literal_str();
   CHECK(!literal_str.empty()) << "required field literal_str was empty.";
-  return Value(
-      OperationResult(decoder_context.MakeLiteralOperation(literal_str),
-                      DecoderContext::kDefaultOutputName));
+  return WrapOperationResultValue(
+      decoder_context.MakeLiteralOperation(literal_str));
 }
 
 static Value DecodeMergeOperation(const MergeOperation &merge_operation,
@@ -71,10 +75,26 @@ static Value DecodeMergeOperation(const MergeOperation &merge_operation,
         DecodeExpression(control_expr, decoder_context));
   }
 
-  return Value(OperationResult(
-      decoder_context.MakeMergeOperation(std::move(direct_input_values),
-                                         std::move(control_input_values)),
-      DecoderContext::kDefaultOutputName));
+  return WrapOperationResultValue(decoder_context.MakeMergeOperation(
+      std::move(direct_input_values), std::move(control_input_values)));
+}
+
+static Value DecodeTagTransform(const TagTransform &tag_transform,
+                                DecoderContext &decoder_context) {
+  CHECK(tag_transform.has_transformed_node())
+      << "Required TagTransform field transformed_node not present.";
+  ir::Value transformed_value =
+      DecodeExpression(tag_transform.transformed_node(), decoder_context);
+  std::string transform_rule_name = tag_transform.transform_rule_name();
+  CHECK(!transform_rule_name.empty())
+      << "Required TagTransform field transform_rule_name not present.";
+  std::vector<uint64_t> precondition_ids;
+  for (uint64_t id : tag_transform.tag_precondition_ids()) {
+    precondition_ids.push_back(id);
+  }
+  return WrapOperationResultValue(decoder_context.MakeTagTransformOperation(
+      std::move(transformed_value), transform_rule_name,
+      std::move(precondition_ids)));
 }
 
 // A helper function to decode the specific subclass of the Expression.
@@ -95,7 +115,7 @@ static Value GetExprValue(const Expression &expr,
       return DecodeMergeOperation(expr.merge_operation(), decoder_context);
     }
     case Expression::kTagTransform: {
-      CHECK(false) << "Not yet implemented!";
+      return DecodeTagTransform(expr.tag_transform(), decoder_context);
     }
   }
   // Placate the compiler.
