@@ -26,7 +26,6 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "src/common/logging/logging.h"
-#include "src/common/utils/move_append.h"
 #include "src/common/utils/overloaded.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/datalog/program.h"
