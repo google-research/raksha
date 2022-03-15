@@ -23,9 +23,6 @@ package(
 cc_library(
     name = "program",
     hdrs = ["program.h"],
-    deps = [
-        "@absl//absl/algorithm:container",
-    ],
 )
 
 cc_test(

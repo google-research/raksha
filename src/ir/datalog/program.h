@@ -23,8 +23,6 @@
 #include <variant>
 #include <vector>
 
-#include "absl/algorithm/container.h"
-
 namespace raksha::ir::datalog {
 
 // Used to represent whether a predicate is negated or not
@@ -53,7 +51,7 @@ class Predicate {
   bool operator==(const Predicate& otherPredicate) const {
     return this->name() == otherPredicate.name() &&
            this->sign() == otherPredicate.sign() &&
-           absl::c_equal(this->args(), otherPredicate.args());
+           this->args() == otherPredicate.args();
   }
 
   // < operator is needed for btree_set, which is only used for declarations.
