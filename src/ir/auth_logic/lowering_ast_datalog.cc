@@ -293,7 +293,6 @@ std::vector<datalog::DLIRAssertion> LoweringToDatalogPass::QueriesToDLIR(
 
 datalog::DLIRProgram LoweringToDatalogPass::ProgToDLIR(const Program& program) {
   auto dlir_assertions = SaysAssertionsToDLIR(program.says_assertions());
-  auto dlir_queries = QueriesToDLIR(program.queries());
   // We need to add a fact that says the dummy variable used in queries is
   // grounded.
   datalog::DLIRAssertion dummy_assertion(kDummyPredicate);
