@@ -113,7 +113,7 @@ rust_library(
     rustc_flags = [
         "--cfg=feature=\"bazel_build\"",
         "-C",
-        "target-feature=+crt-static"
+        "target-feature=+crt-static",
     ],
     deps = [
         ":antlr_gen",
@@ -157,7 +157,7 @@ rust_binary(
     rustc_flags = [
         "--cfg=feature=\"bazel_build\"",
         "-C",
-        "target-feature=+crt-static"
+        "target-feature=+crt-static",
     ],
     deps = [
         ":antlr_gen",
