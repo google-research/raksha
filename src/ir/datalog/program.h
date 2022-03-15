@@ -23,6 +23,8 @@
 #include <variant>
 #include <vector>
 
+#include "absl/algorithm/container.h"
+
 namespace raksha::ir::datalog {
 
 // Used to represent whether a predicate is negated or not
@@ -49,19 +51,9 @@ class Predicate {
   }
   // Equality is also needed to use a Predicate in a flat_hash_set
   bool operator==(const Predicate& otherPredicate) const {
-    if (this->name() != otherPredicate.name()) {
-      return false;
-    }
-    if (this->sign() != otherPredicate.sign()) {
-      return false;
-    }
-    if (this->args().size() != otherPredicate.args().size()) {
-      return false;
-    }
-    for (uint64_t i = 0; i < this->args().size(); ++i) {
-      if (this->args().at(i) != otherPredicate.args().at(i)) return false;
-    }
-    return true;
+    return this->name() == otherPredicate.name() &&
+           this->sign() == otherPredicate.sign() &&
+           absl::c_equal(this->args(), otherPredicate.args());
   }
 
   // < operator is needed for btree_set, which is only used for declarations.

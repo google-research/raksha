@@ -23,11 +23,14 @@ package(
 cc_library(
     name = "program",
     hdrs = ["program.h"],
-    deps = [],
+    deps = [
+        "@absl//absl/algorithm:container",
+    ],
 )
 
 cc_test(
     name = "predicate_test",
+    srcs = ["predicate_test.cc"],
     deps = [
         ":program",
         "//src/common/testing:gtest",
