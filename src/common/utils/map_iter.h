@@ -19,10 +19,13 @@
 #ifndef SRC_COMMON_UTILS_MAP_ITER_H_
 #define SRC_COMMON_UTILS_MAP_ITER_H_
 
+#include <algorithm>
 #include <vector>
 
 namespace raksha::utils {
 
+// Returns a vector that is generating by applying `map_fn: (C::value_type ->
+// U)` to every elemnent of the input container `C`.
 template <typename U, typename C, typename F>
 std::vector<U> MapIter(const C& input, F map_fn) {
   std::vector<U> result;
