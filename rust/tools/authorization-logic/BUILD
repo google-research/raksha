@@ -31,6 +31,11 @@ java_binary(
     runtime_deps = ["third_party/antlr4-rust/antlr4rust.jar"],
 )
 
+filegroup(
+    name = "authlogic_grammar",
+    srcs = ["src/parsing/AuthLogic.g4"],
+)
+
 # Generate the parsing-related files using antlr4rust
 genrule(
     name = "antlr_gen_srcs",

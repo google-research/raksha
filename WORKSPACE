@@ -246,3 +246,25 @@ http_archive(
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 
 hedron_compile_commands_setup()
+
+#Antlr
+
+http_archive(
+    name = "rules_antlr",
+    sha256 = "26e6a83c665cf6c1093b628b3a749071322f0f70305d12ede30909695ed85591",
+    strip_prefix = "rules_antlr-0.5.0",
+    urls = ["https://github.com/marcohu/rules_antlr/archive/0.5.0.tar.gz"],
+)
+
+load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
+load("@rules_antlr//antlr:lang.bzl", "CPP")
+
+rules_antlr_dependencies("4.8")
+
+http_archive(
+    name = "antlr4_runtimes",
+    build_file = "@//third_party/antlr:antlr.BUILD",
+    sha256 = "992d52444b81ed75e52ea62f9f38ecb7652d5ce2a2130af143912b3042a6d77e",
+    strip_prefix = "antlr4-4.8",
+    urls = ["https://github.com/antlr/antlr4/archive/4.8.tar.gz"],
+)
