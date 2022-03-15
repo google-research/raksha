@@ -89,40 +89,6 @@ class BaseFact {
   BaseFactVariantType value_;
 };
 
-// class VerbPhrase {
-//   public:
-//     explicit VerbPhrase(Principal principal, datalog::Predicate predicate)
-//         : principal_(principal), predicate_(predicate)) {}
-//     const Principal& principal() const { return principal_; }
-//     const datalog::Predicate& predicate() const { return predicate_; }
-//   private:
-//     Principal principal_;
-//     datalog::Predicate predicate_;
-// };
-
-// class PrinFact {
-//   public:
-//     explicit PrinFact(Principal principal, VerbPhrase verbphrase)
-//         : principal_(principal), verbphrase_(verbphrase)) {}
-//     const Principal& principal() const { return principal_; }
-//     const VerbPhrase& verbphrase () const {return verbphrase_;}
-//   private:
-//     Principal principal_;
-//     VerbPhrase verbphrase_;
-// };
-
-// class FlatFact {
-//   public:
-//     using FlatFactVariantType = std::variant<datalog::Predicate, PrinFact>;
-//     explicit FlatFact(FlatFactVariantType value) : value_(std::move(value)){};
-//     const FlatFactVariantType& GetValue() const { return value_; }
-
-//   private:
-//     FlatFactVariantType value_;
-// };
-
-  
-
 // CanSay and Fact are forward-declared because they are mutually recursive.
 class CanSay;
 class Fact;
