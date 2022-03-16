@@ -26,6 +26,7 @@ mod utils;
 mod test;
 
 use std::env;
+use structopt::StructOpt;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
