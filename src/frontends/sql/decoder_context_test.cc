@@ -170,41 +170,37 @@ INSTANTIATE_TEST_SUITE_P(DecodeMergeOpTest, DecodeMergeOpTest,
 class DecodeTagTransformTest
     : public TestWithParam<
           std::tuple<ir::Value, absl::string_view, std::vector<ir::Value>,
-                     std::vector<uint64_t>>> {
- protected:
-  DecodeTagTransformTest() : ir_context_(), decoder_context_(ir_context_),
-  value_vec_(std::get<2>(GetParam())) {
-    // The id_sequence_vec is an id sequence that may have more IDs than we
-    // need for giving each value an ID. We will put a value_vec.size()
-    // prefix of it into input_id_vec_ so input_id_vec_ contains only those IDs
-    // associated with a value.
-    const std::vector<uint64_t> &id_sequence_vec = std::get<3>(GetParam());
-
-    input_id_vec_.reserve(value_vec_.size());
-    for (uint64_t idx = 0; idx < value_vec_.size(); ++idx) {
-      uint64_t id = id_sequence_vec.at(idx);
-      decoder_context_.RegisterValue(id, value_vec_.at(idx));
-      input_id_vec_.push_back(id);
-    }
-  }
-
-  IRContext ir_context_;
-  DecoderContext decoder_context_;
-  const std::vector<Value> &value_vec_;
-  std::vector<uint64_t> input_id_vec_;
-};
+                     std::vector<uint64_t>>> {};
 
 TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
-  Value xformed_value = std::get<0>(GetParam());
-  absl::string_view policy_rule_name = std::get<1>(GetParam());
+  const auto &[xformed_value, policy_rule_name, precondition_values,
+               id_sequence] = GetParam();
+
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+
+  // The id_sequence_vec is an id sequence that may have more IDs than we
+  // need for giving each value an ID. We will put a value_vec.size()
+  // prefix of it into precondition_value_ids, which then will contain only
+  // those IDs associated with a value.
+  std::vector<uint64_t> precondition_value_ids;
+  precondition_value_ids.reserve(precondition_values.size());
+  for (uint64_t idx = 0; idx < precondition_values.size(); ++idx) {
+    uint64_t id = id_sequence.at(idx);
+    decoder_context.RegisterValue(id, precondition_values.at(idx));
+    precondition_value_ids.push_back(id);
+  }
+
+  // Setup has finished. Create the tag transform operation and check its
+  // properties.
   const Operation &tag_xform_operation =
-      decoder_context_.MakeTagTransformOperation(
-          xformed_value, policy_rule_name, input_id_vec_);
+      decoder_context.MakeTagTransformOperation(
+          xformed_value, policy_rule_name, precondition_value_ids);
   testing::TagTransformOperationView tag_xform_view(tag_xform_operation);
 
   EXPECT_EQ(tag_xform_view.GetRuleName(), policy_rule_name);
   EXPECT_EQ(tag_xform_view.GetTransformedValue(), xformed_value);
-  EXPECT_EQ(tag_xform_view.GetPreconditions(), value_vec_);
+  EXPECT_EQ(tag_xform_view.GetPreconditions(), precondition_values);
 }
 
 static const Value kSampleValues[] = {
