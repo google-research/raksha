@@ -25,7 +25,7 @@ mod test {
     #[test]
     fn test_dots_in_ids() {
         utils::setup_directories_for_bazeltest(vec!["test_inputs"], vec!["test_outputs"]);
-        compile("dotsInNames", "test_inputs", "test_outputs", "");
+        compile("dotsInNames", "test_inputs", "test_outputs", &Vec::new());
         // this test is just about not having syntax errors
         assert!(true);
     }
@@ -41,7 +41,7 @@ mod test {
             &utils::get_resolved_path("test_keys/p1q_pub.json"),
             &utils::get_resolved_path("test_keys/p1q_priv.json")
         );
-        compile("quotesInExports", "test_inputs", "test_outputs", "");
+        compile("quotesInExports", "test_inputs", "test_outputs", &Vec::new());
 
         // this test is just about not having syntax errors
         assert!(true);
