@@ -118,9 +118,9 @@ rust_library(
         "//rust/tools/authorization-logic/cargo:antlr_rust",
         "//rust/tools/authorization-logic/cargo:bincode",
         "//rust/tools/authorization-logic/cargo:serde",
+        "//rust/tools/authorization-logic/cargo:structopt",
         "//rust/tools/authorization-logic/cargo:tink_core",
         "//rust/tools/authorization-logic/cargo:tink_signature",
-        "//rust/tools/authorization-logic/cargo:structopt"
     ],
 )
 
@@ -177,8 +177,8 @@ rust_binary(
         "//rust/tools/authorization-logic/cargo:antlr_rust",
         "//rust/tools/authorization-logic/cargo:bincode",
         "//rust/tools/authorization-logic/cargo:serde",
+        "//rust/tools/authorization-logic/cargo:structopt",
         "//rust/tools/authorization-logic/cargo:tink_core",
         "//rust/tools/authorization-logic/cargo:tink_signature",
-        "//rust/tools/authorization-logic/cargo:structopt"
     ],
 )
