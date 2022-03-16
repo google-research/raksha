@@ -56,93 +56,77 @@ using testing::UnwrapDefaultOperationResult;
 using ::testing::Values;
 using ::testing::ValuesIn;
 
-// This struct carries a textproto string describing a value and a lambda
-// that, given that value, verifies that its properties are as expected. This
-// allows us to combine the various pieces of a `TagTransform` and flexibly
-// verify that the value to which the transform is applied is as we expect.
-struct ValueTextprotoAndDeconstruction {
-  absl::string_view textproto;
-  std::function<void(Value)> deconstruction;
-};
-
 class DecodeTagTransformTest
-    : public ::testing::TestWithParam<std::tuple<
-          uint64_t, absl::string_view, ValueTextprotoAndDeconstruction>> {
+    : public ::testing::TestWithParam<
+          std::tuple<uint64_t, absl::string_view,
+                     std::pair<absl::string_view, std::vector<uint64_t>>>> {
  protected:
-  DecodeTagTransformTest() : ir_context_(), decoder_context_(ir_context_) {}
-
-  static absl::ParsedFormat<'u', 's', 's'> GetProtoFormat() {
-    return absl::ParsedFormat<'u', 's', 's'>(R"(
+  DecodeTagTransformTest()
+      : ir_context_(),
+        decoder_context_(ir_context_),
+        // A placeholder until we decode the value later in the ctor.
+        decoded_value_(Value(ir::value::Any())) {
+    constexpr absl::string_view kTagTransformTextprotoFormat = R"(
 id: %u
-tag_transform : { transform_rule_name: "%s" transformed_node: { %s } })");
-  }
-
-  std::string GetTextproto() const {
-    const auto &[id, rule_name, value_textproto_and_deconstruction] =
-        GetParam();
-    return absl::StrFormat(GetProtoFormat(), id, rule_name,
-                           value_textproto_and_deconstruction.textproto);
-  }
-
-  Value GetValue() {
+tag_transform : {
+  transform_rule_name: "%s"
+  tag_precondition_ids: [ %s ]
+  transformed_node: { %s } })";
+    const auto &[id, rule_name, value_textproto_and_ids] = GetParam();
+    const auto &[value_textproto, value_ids] = value_textproto_and_ids;
     Expression expr;
-    EXPECT_TRUE(
-        google::protobuf::TextFormat::ParseFromString(GetTextproto(), &expr));
-    return DecodeExpression(expr, decoder_context_);
+    EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
+        absl::StrFormat(kTagTransformTextprotoFormat, id, rule_name,
+                        absl::StrJoin(value_ids, ", "), value_textproto),
+        &expr));
+    decoded_value_ = DecodeExpression(expr, decoder_context_);
   }
 
-  std::function<void(Value)> GetDeconstructionFunction() const {
-    return std::get<2>(GetParam()).deconstruction;
+  std::vector<Value> GetExpectedPreconditionValues() {
+    const std::vector<uint64_t> &ids = std::get<1>(std::get<2>(GetParam()));
+    std::vector<Value> expected_values;
+    expected_values.reserve(ids.size());
+    for (uint64_t id : ids) {
+      expected_values.push_back(decoder_context_.GetValue(id));
+    }
+    return expected_values;
   }
 
   IRContext ir_context_;
   DecoderContext decoder_context_;
+  Value decoded_value_;
 };
 
 TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
-  const auto &[id, rule_name, value_textproto_and_deconstruction] = GetParam();
+  EXPECT_EQ(decoded_value_, decoder_context_.GetValue(std::get<0>(GetParam())));
 
-  Value value = GetValue();
-
-  EXPECT_EQ(value, decoder_context_.GetValue(id));
-
-  TagTransformOperationView tag_xform_view(UnwrapDefaultOperationResult(value));
-  EXPECT_EQ(tag_xform_view.GetRuleName(), rule_name);
-  value_textproto_and_deconstruction.deconstruction(
-      tag_xform_view.GetTransformedValue());
+  TagTransformOperationView tag_xform_view(
+      UnwrapDefaultOperationResult(decoded_value_));
+  EXPECT_EQ(tag_xform_view.GetRuleName(), std::get<1>(GetParam()));
+  // Dealing with the internal structure of the sub-value is the job of
+  // another test, so we don't inspect it here. What does matter is ensuring
+  // that the value vec that we got corresponds to the ID vec that we took
+  // from the textproto.
+  EXPECT_EQ(tag_xform_view.GetPreconditions(), GetExpectedPreconditionValues());
 }
 
-static const ValueTextprotoAndDeconstruction kValuesAndDeconstructions[] = {
-    {.textproto = R"(id: 4 literal: { literal_str: "foo" })",
-     .deconstruction =
-         [](Value val) {
-           const LiteralOperationView literal_operation_view(
-               UnwrapDefaultOperationResult(val));
-           EXPECT_EQ(literal_operation_view.GetLiteralStr(), "foo");
-         }},
-    {.textproto =
-         R"(id: 6 merge_operation: { inputs: { id: 3 literal: { literal_str: "5" } } })",
-     .deconstruction = [](Value val) {
-       const MergeOperationView merge_operation_view(
-           UnwrapDefaultOperationResult(val));
-       EXPECT_THAT(merge_operation_view.GetControlInputs(), IsEmpty());
-       const std::vector<Value> merged_values =
-           merge_operation_view.GetDirectInputs();
-       EXPECT_EQ(merged_values.size(), 1);
-       Value merged_val = merged_values.at(0);
-       const LiteralOperationView literal(
-           UnwrapDefaultOperationResult(merged_val));
-       EXPECT_EQ(literal.GetLiteralStr(), "5");
-     }}};
+static const std::pair<absl::string_view, std::vector<uint64_t>>
+    kValueTextprotoAndPreconditionIdVecs[] = {
+        {R"(id: 4 literal: { literal_str: "foo" })", {4}},
+        {R"(id: 6 merge_operation: { inputs: { id: 3 literal: { literal_str: "5" } } })",
+         {6, 3}},
+        {R"(id: 100 source_table_column: { column_path: "Table1.col" })",
+         {100}},
+};
 
 static const uint64_t kExampleIds[] = {7, 108, 300};
 static const absl::string_view kExampleRuleNames[] = {"rule1", "clearLowBits",
                                                       "SQL.Identity"};
 
-INSTANTIATE_TEST_SUITE_P(DecodeTagTransformTest, DecodeTagTransformTest,
-                         Combine(ValuesIn(kExampleIds),
-                                 ValuesIn(kExampleRuleNames),
-                                 ValuesIn(kValuesAndDeconstructions)));
+INSTANTIATE_TEST_SUITE_P(
+    DecodeTagTransformTest, DecodeTagTransformTest,
+    Combine(ValuesIn(kExampleIds), ValuesIn(kExampleRuleNames),
+            ValuesIn(kValueTextprotoAndPreconditionIdVecs)));
 
 }  // namespace
 
