@@ -89,6 +89,7 @@ static Value DecodeTagTransform(const TagTransform &tag_transform,
   CHECK(!transform_rule_name.empty())
       << "Required TagTransform field transform_rule_name not present.";
   std::vector<uint64_t> precondition_ids;
+  precondition_ids.reserve(tag_transform.tag_precondition_ids_size());
   for (uint64_t id : tag_transform.tag_precondition_ids()) {
     precondition_ids.push_back(id);
   }
