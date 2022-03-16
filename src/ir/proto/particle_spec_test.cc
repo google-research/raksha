@@ -59,10 +59,29 @@ class ParticleDatalogPrinter {
   void ProcessOperation(const Operation &operation) {
     if (operation.op().name() == arcs::operators::kMerge) {
       PrintMergeOperation(operation);
+    } else if (operation.op().name() == arcs::operators::kClaim) {
+      PrintClaim(operation);
     }
-    // else if (operation.op().name() == arcs::operators::kWriteStorage) {
-    //   PrintWriteStorage(operation);
-    // }
+  }
+
+  void PrintClaim(const Operation &operation) {
+    CHECK(operation.inputs().count("input") != 0);
+    CHECK(operation.attributes().count("is_present") != 0);
+    CHECK(operation.attributes().count("tag") != 0);
+    Attribute attr = operation.attributes().at("is_present");
+    CHECK(attr->kind() == AttributeBase::Kind::kInt64);
+    bool is_present =
+        static_cast<const Int64Attribute *>(attr.get())->value() ? true : false;
+    auto input = *CHECK_NOTNULL(FindOrNull(operation.inputs(), "input"));
+    out_ << (is_present ? "hasTag(" : "removeTag(");
+    PrintValue(input);
+    out_ << ", " << operation.attributes().at("tag")->ToString();
+    out_ << ").\n";
+    out_ << "edge(";
+    PrintValue(input);
+    out_ << ", ";
+    PrintValue(Value(value::OperationResult(operation, "result")));
+    out_ << ").\n";
   }
 
   void ProcessResult(absl::string_view name, Value value) {
@@ -110,7 +129,6 @@ class ParticleDatalogPrinter {
   void PrintValue(const Value &value) {
     if (value.If<value::Any>() != nullptr) return;
     out_ << particle_prefix_ << value.ToString(ir_printer_.ssa_names());
-    CHECK(particle_->inputs().size() >= 0);
     // if (const auto *arg = value.If<value::BlockArgument>()) {
     //   // CHECK(&arg->block() == &block)
     //   //     << "particle referring to blocks outside of its module";
