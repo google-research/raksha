@@ -44,6 +44,7 @@ cc_library(
     hdrs = ["decoder_context.h"],
     visibility = [":__subpackages__"],
     deps = [
+        "//src/common/utils:map_iter",
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:value",
@@ -80,6 +81,7 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/frontends/sql/testing:literal_operation_view",
         "//src/frontends/sql/testing:merge_operation_view",
+        "//src/frontends/sql/testing:tag_transform_operation_view",
         "@absl//absl/strings",
     ],
 )
@@ -150,5 +152,24 @@ cc_test(
         "//src/frontends/sql/testing:merge_operation_view",
         "//src/frontends/sql/testing:utils",
         "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "decode_tag_transform_operation_test",
+    srcs = ["decode_tag_transform_operation_test.cc"],
+    deps = [
+        ":decode",
+        ":decoder_context",
+        "//src/common/proto:protobuf",
+        "//src/common/testing:gtest",
+        "//src/common/utils:map_iter",
+        "//src/frontends/sql:sql_ir_cc_proto",
+        "//src/frontends/sql/testing:literal_operation_view",
+        "//src/frontends/sql/testing:merge_operation_view",
+        "//src/frontends/sql/testing:tag_transform_operation_view",
+        "//src/frontends/sql/testing:utils",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
     ],
 )
