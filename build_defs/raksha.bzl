@@ -95,6 +95,7 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
         name = datalog_cxx_source_target_name,
         src = datalog_source_target,
         included_dl_scripts = [
+            "//src/analysis/souffle:attributes.dl",
             "//src/analysis/souffle:authorization_logic.dl",
             "//src/analysis/souffle:check_predicate.dl",
             "//src/analysis/souffle:dataflow_graph.dl",

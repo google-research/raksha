@@ -85,14 +85,14 @@
 //-----------------------------------------------------------------------------
 
 // Draw an edge from any operation's operand to its result.
-resolvedEdge(owner, src, tgt) :- operationToOperands(owner, _, tgt, src).
+resolvedEdge(owner, src, tgt) :- operationToOperands([owner, _, tgt, _, _], src).
 
 // For all operations other than `=`, draw an edge from the special
 // "ArbitraryComputation" `AccessPath` to the result. This prevents default
 // propagation of `IntegrityTag`s through the operation.
 isAccessPath("ArbitraryComputation").
 resolvedEdge(owner, "ArbitraryComputation", tgt) :-
-  operationToOperands(owner, operand, tgt, _), operand != "=".
+  isOperation([owner, operator, tgt, _, _]), operator != "=".
 
 ownsAccessPath(principal, path) :- says_ownsAccessPath(principal, principal, path).
 ownsAccessPath(principal, tgt) :-
