@@ -51,7 +51,7 @@ const ir::Operation &DecoderContext::MakeTagTransformOperation(
   // Look up each precondition ID to get the corresponding Value.
   std::vector<ir::Value> precondition_values_vec =
       utils::MapIter<uint64_t, ir::Value>(
-          std::move(preconditions), [&](uint64_t id) { return GetValue(id); });
+          preconditions, [&](uint64_t id) { return GetValue(id); });
 
   // Each precondition is given the same input name prefix plus an incrementing
   // number in the same order as in the original ID list.
