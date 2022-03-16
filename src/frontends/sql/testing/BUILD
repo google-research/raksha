@@ -70,6 +70,7 @@ cc_library(
     deps = [
         ":operation_view_utils",
         "//src/common/logging",
+        "//src/common/utils:map_iter",
         "//src/frontends/sql:decoder_context",
         "//src/frontends/sql/testing:literal_operation_view",
         "//src/frontends/sql/testing:merge_operation_view",

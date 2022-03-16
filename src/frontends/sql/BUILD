@@ -44,10 +44,10 @@ cc_library(
     hdrs = ["decoder_context.h"],
     visibility = [":__subpackages__"],
     deps = [
+        "//src/common/utils:map_iter",
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:value",
-        "//src/utils:map_iter",
         "@absl//absl/container:flat_hash_map",
     ],
 )
@@ -163,6 +163,7 @@ cc_test(
         ":decoder_context",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
+        "//src/common/utils:map_iter",
         "//src/frontends/sql:sql_ir_cc_proto",
         "//src/frontends/sql/testing:literal_operation_view",
         "//src/frontends/sql/testing:merge_operation_view",

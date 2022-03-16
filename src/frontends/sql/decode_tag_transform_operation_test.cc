@@ -25,6 +25,7 @@
 #include "src/frontends/sql/testing/merge_operation_view.h"
 #include "src/frontends/sql/testing/tag_transform_operation_view.h"
 #include "src/frontends/sql/testing/utils.h"
+#include "src/common/utils/map_iter.h"
 
 namespace raksha::frontends::sql {
 
@@ -55,59 +56,48 @@ using ::testing::UnorderedElementsAreArray;
 using testing::UnwrapDefaultOperationResult;
 using ::testing::Values;
 using ::testing::ValuesIn;
+using utils::MapIter;
 
 class DecodeTagTransformTest
     : public ::testing::TestWithParam<
           std::tuple<uint64_t, absl::string_view,
-                     std::pair<absl::string_view, std::vector<uint64_t>>>> {
- protected:
-  DecodeTagTransformTest()
-      : ir_context_(),
-        decoder_context_(ir_context_),
-        // A placeholder until we decode the value later in the ctor.
-        decoded_value_(Value(ir::value::Any())) {
-    constexpr absl::string_view kTagTransformTextprotoFormat = R"(
+                     std::pair<absl::string_view, std::vector<uint64_t>>>> {};
+
+TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
+  IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+
+  // Construct the test textproto and parse it.
+  constexpr absl::string_view kTagTransformTextprotoFormat = R"(
 id: %u
 tag_transform : {
   transform_rule_name: "%s"
   tag_precondition_ids: [ %s ]
   transformed_node: { %s } })";
-    const auto &[id, rule_name, value_textproto_and_ids] = GetParam();
-    const auto &[value_textproto, value_ids] = value_textproto_and_ids;
-    Expression expr;
-    EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
-        absl::StrFormat(kTagTransformTextprotoFormat, id, rule_name,
-                        absl::StrJoin(value_ids, ", "), value_textproto),
-        &expr));
-    decoded_value_ = DecodeExpression(expr, decoder_context_);
-  }
+  const auto &[id, rule_name, value_textproto_and_ids] = GetParam();
+  const auto &[value_textproto, value_ids] = value_textproto_and_ids;
 
-  std::vector<Value> GetExpectedPreconditionValues() {
-    const std::vector<uint64_t> &ids = std::get<1>(std::get<2>(GetParam()));
-    std::vector<Value> expected_values;
-    expected_values.reserve(ids.size());
-    for (uint64_t id : ids) {
-      expected_values.push_back(decoder_context_.GetValue(id));
-    }
-    return expected_values;
-  }
+  Expression expr;
+  EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
+      absl::StrFormat(kTagTransformTextprotoFormat, id, rule_name,
+                      absl::StrJoin(value_ids, ", "), value_textproto),
+      &expr));
+  Value decoded_value = DecodeExpression(expr, decoder_context);
 
-  IRContext ir_context_;
-  DecoderContext decoder_context_;
-  Value decoded_value_;
-};
+  std::vector<Value> expected_values =
+      MapIter<Value>(value_ids, [&decoder_context](uint64_t current_id) {
+        return decoder_context.GetValue(current_id);
+      });
 
-TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
-  EXPECT_EQ(decoded_value_, decoder_context_.GetValue(std::get<0>(GetParam())));
-
+  EXPECT_EQ(decoded_value, decoder_context.GetValue(std::get<0>(GetParam())));
   TagTransformOperationView tag_xform_view(
-      UnwrapDefaultOperationResult(decoded_value_));
+      UnwrapDefaultOperationResult(decoded_value));
   EXPECT_EQ(tag_xform_view.GetRuleName(), std::get<1>(GetParam()));
   // Dealing with the internal structure of the sub-value is the job of
   // another test, so we don't inspect it here. What does matter is ensuring
   // that the value vec that we got corresponds to the ID vec that we took
   // from the textproto.
-  EXPECT_EQ(tag_xform_view.GetPreconditions(), GetExpectedPreconditionValues());
+  EXPECT_EQ(tag_xform_view.GetPreconditions(), expected_values);
 }
 
 static const std::pair<absl::string_view, std::vector<uint64_t>>

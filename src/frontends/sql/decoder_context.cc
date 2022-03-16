@@ -1,6 +1,6 @@
 #include "src/frontends/sql/decoder_context.h"
 
-#include "src/utils/map_iter.h"
+#include "src/common/utils/map_iter.h"
 
 namespace raksha::frontends::sql {
 
@@ -49,9 +49,8 @@ const ir::Operation &DecoderContext::MakeTagTransformOperation(
       {std::string(kTagTransformTransformedValueInputName), transformed_value});
 
   // Look up each precondition ID to get the corresponding Value.
-  std::vector<ir::Value> precondition_values_vec =
-      utils::MapIter<uint64_t, ir::Value>(
-          preconditions, [&](uint64_t id) { return GetValue(id); });
+  std::vector<ir::Value> precondition_values_vec = utils::MapIter<ir::Value>(
+      preconditions, [&](uint64_t id) { return GetValue(id); });
 
   // Each precondition is given the same input name prefix plus an incrementing
   // number in the same order as in the original ID list.
