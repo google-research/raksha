@@ -18,6 +18,7 @@
 #include "absl/strings/string_view.h"
 #include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
+#include "src/common/utils/map_iter.h"
 #include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/sql_ir.pb.h"
@@ -25,7 +26,6 @@
 #include "src/frontends/sql/testing/merge_operation_view.h"
 #include "src/frontends/sql/testing/tag_transform_operation_view.h"
 #include "src/frontends/sql/testing/utils.h"
-#include "src/common/utils/map_iter.h"
 
 namespace raksha::frontends::sql {
 
@@ -89,10 +89,10 @@ tag_transform : {
         return decoder_context.GetValue(current_id);
       });
 
-  EXPECT_EQ(decoded_value, decoder_context.GetValue(std::get<0>(GetParam())));
+  EXPECT_EQ(decoded_value, decoder_context.GetValue(id));
   TagTransformOperationView tag_xform_view(
       UnwrapDefaultOperationResult(decoded_value));
-  EXPECT_EQ(tag_xform_view.GetRuleName(), std::get<1>(GetParam()));
+  EXPECT_EQ(tag_xform_view.GetRuleName(), rule_name);
   // Dealing with the internal structure of the sub-value is the job of
   // another test, so we don't inspect it here. What does matter is ensuring
   // that the value vec that we got corresponds to the ID vec that we took
