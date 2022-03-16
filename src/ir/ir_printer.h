@@ -22,6 +22,7 @@
 #include "absl/strings/str_join.h"
 #include "src/ir/ir_traversing_visitor.h"
 #include "src/ir/module.h"
+#include "src/ir/ssa_names.h"
 #include "src/ir/value.h"
 
 namespace raksha::ir {
@@ -29,6 +30,8 @@ namespace raksha::ir {
 // A visitor that prints the IR.
 class IRPrinter : public IRTraversingVisitor<IRPrinter> {
  public:
+  IRPrinter(std::ostream& out) : out_(out), indent_(0) {}
+
   template <typename T>
   static void ToString(std::ostream& out, const T& entity) {
     IRPrinter printer(out);
@@ -41,6 +44,8 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     ToString(out, entity);
     return out.str();
   }
+
+  SsaNames& ssa_names() { return ssa_names_; }
 
   void PreVisit(const Module& module) override {
     out_ << Indent()
@@ -154,8 +159,6 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
         });
   }
 
-  IRPrinter(std::ostream& out) : out_(out), indent_(0) {}
-
   std::ostream& out_;
   int indent_;
   SsaNames ssa_names_;
@@ -174,6 +177,21 @@ inline std::ostream& operator<<(std::ostream& out, const Module& module) {
   IRPrinter::ToString(out, module);
   return out;
 }
+
+inline IRPrinter& operator<<(IRPrinter& printer, const Operation& operation) {
+  operation.Accept(printer);
+  return printer;
+}
+
+inline IRPrinter& operator<<(IRPrinter& printer, const Block& block) {
+  block.Accept(printer);
+  return printer;
+}
+inline IRPrinter& operator<<(IRPrinter& printer, const Module& module) {
+  module.Accept(printer);
+  return printer;
+}
+
 }  // namespace raksha::ir
 
 #endif  // SRC_IR_IR_PRINTER_H_

@@ -42,40 +42,63 @@ const typename C::mapped_type *FindOrNull(const C &c,
 
 class ParticleDatalogPrinter {
  public:
-  static void ToDatalog(std::ostream &out, SsaNames &ssa_names,
+  static void ToDatalog(std::ostream &out, IRPrinter &ir_printer,
                         const Block &particle_spec, const Operation &particle) {
-    ParticleDatalogPrinter printer(out, ssa_names, particle_spec, particle);
+    ParticleDatalogPrinter printer(out, ir_printer, particle_spec, particle);
     for (const auto &operation : particle_spec.operations()) {
       printer.ProcessOperation(*operation);
     }
     for (const auto &[name, result] : particle_spec.results()) {
       printer.ProcessResult(name, result);
     }
+    for (const auto &[name, input] : particle.inputs()) {
+      printer.ProcessInput(name, input);
+    }
   }
 
   void ProcessOperation(const Operation &operation) {
     if (operation.op().name() == arcs::operators::kMerge) {
       PrintMergeOperation(operation);
-    } else if (operation.op().name() == arcs::operators::kWriteStorage) {
-      PrintWriteStorage(operation);
     }
+    // else if (operation.op().name() == arcs::operators::kWriteStorage) {
+    //   PrintWriteStorage(operation);
+    // }
   }
 
   void ProcessResult(absl::string_view name, Value value) {
     if (auto any = value.If<value::Any>()) return;
     out_ << "edge(";
     PrintValue(value);
-    out_ << ", " << name << ").\n";
+    out_ << ", " << particle_->attributes().at("name")->ToString() << "_"
+         << ssa_names_.GetOrCreateID(*particle_) << "." << name << ").\n";
+  }
+
+  void ProcessInput(absl::string_view name, Value value) {
+    if (particle_spec_->inputs().FindDecl(name) != 0) {
+      out_ << "edge(";
+      if (const auto *store = value.If<value::StoredValue>()) {
+        out_ << store->storage().name();
+      } else {
+        out_ << value.ToString(ir_printer_.ssa_names());
+      }
+      out_ << ", " << particle_prefix_ << name << ").\n";
+    }
+    if (particle_spec_->outputs().FindDecl(name) != 0) {
+      out_ << "edge(" << particle_prefix_ << name << ", ";
+      if (const auto *store = value.If<value::StoredValue>()) {
+        out_ << store->storage().name();
+      } else {
+        out_ << value.ToString(ir_printer_.ssa_names());
+      }
+      out_ << ").\n";
+    }
   }
 
  private:
-  void PrintWriteStorage(const Operation &write_storage) {}
-
   void PrintMergeOperation(const Operation &merge_op) {
     LOG(WARNING) << "Merge operation " << IRPrinter::ToString(merge_op);
-    std::string merge_result_name =
-        absl::StrFormat("b%d.%%%d", ssa_names_.GetOrCreateID(*particle_spec_),
-                        ssa_names_.GetOrCreateID(merge_op));
+    std::string merge_result_name = absl::StrFormat(
+        "%s%%%d.result", particle_prefix_, ssa_names_.GetOrCreateID(merge_op));
     for (const auto &[_, value] : merge_op.inputs()) {
       if (auto any = value.If<value::Any>()) continue;
       out_ << "edge(";
@@ -85,36 +108,49 @@ class ParticleDatalogPrinter {
   }
 
   void PrintValue(const Value &value) {
-    if (const auto *arg = value.If<value::BlockArgument>()) {
-      // CHECK(&arg->block() == &block)
-      //     << "particle referring to blocks outside of its module";
-      auto find_result = particle_->inputs().find(arg->name());
+    if (value.If<value::Any>() != nullptr) return;
+    out_ << particle_prefix_ << value.ToString(ir_printer_.ssa_names());
+    CHECK(particle_->inputs().size() >= 0);
+    // if (const auto *arg = value.If<value::BlockArgument>()) {
+    //   // CHECK(&arg->block() == &block)
+    //   //     << "particle referring to blocks outside of its module";
+    //   auto find_result = particle_->inputs().find(arg->name());
 
-      CHECK(find_result != particle_->inputs().end())
-          << "Unable to find input " << arg->name();
-      PrintValue(find_result->second);
-    } else if (const auto *res = value.If<value::OperationResult>()) {
-      out_ << absl::StreamFormat(
-          "%%%d.%s", ssa_names_.GetOrCreateID(res->operation()), res->name());
+    //   CHECK(find_result != particle_->inputs().end())
+    //       << "Unable to find input " << arg->name();
+    //   PrintValue(find_result->second);
+    // } else if (const auto *res = value.If<value::OperationResult>()) {
+    //   out_ << absl::StreamFormat(
+    //       "%%%d.%s", ssa_names_.GetOrCreateID(res->operation()),
+    //       res->name());
 
-    } else if (const auto *store = value.If<value::StoredValue>()) {
-      out_ << store->storage().name();
-    } else if (const auto *any = value.If<value::Any>()) {
-      // Ignore this.
-    }
+    // } else if (const auto *store = value.If<value::StoredValue>()) {
+    //   out_ << store->storage().name();
+    // } else if (const auto *any = value.If<value::Any>()) {
+    //   // Ignore this.
+    // }
   }
 
-  ParticleDatalogPrinter(std::ostream &out, SsaNames &ssa_names,
+  ParticleDatalogPrinter(std::ostream &out, IRPrinter &ir_printer,
                          const Block &particle_spec, const Operation &particle)
       : out_(out),
-        ssa_names_(ssa_names),
+        ir_printer_(ir_printer),
+        ssa_names_(ir_printer.ssa_names()),
         particle_spec_(&particle_spec),
-        particle_(&particle) {}
+        particle_(&particle) {
+    CHECK(particle_spec_ != nullptr);
+    particle_prefix_ = absl::StrFormat(
+        "%s_%d.", particle_->attributes().at("name")->ToString(),
+        ssa_names_.GetOrCreateID(*particle_));
+  }
 
   std::ostream &out_;
+
+  IRPrinter &ir_printer_;
   SsaNames &ssa_names_;
   const Block *particle_spec_;
   const Operation *particle_;
+  std::string particle_prefix_;
 };
 
 class DatalogPrinter : public IRVisitor<DatalogPrinter> {
@@ -139,7 +175,7 @@ class DatalogPrinter : public IRVisitor<DatalogPrinter> {
     if (operation.op().name() == arcs::operators::kParticle) {
       Attribute attr = operation.attributes().at(arcs::kParticleNameAttribute);
       const Block *particle_spec = particle_specs_.at(attr->ToString());
-      ParticleDatalogPrinter::ToDatalog(out_, ssa_names_, *particle_spec,
+      ParticleDatalogPrinter::ToDatalog(out_, ir_printer_, *particle_spec,
                                         operation);
     } else if (operation.op().name() == arcs::operators::kParticleSpec) {
       const Module &module = *CHECK_NOTNULL(operation.impl_module());
@@ -151,9 +187,11 @@ class DatalogPrinter : public IRVisitor<DatalogPrinter> {
   }
 
  private:
-  DatalogPrinter(std::ostream &out) : out_(out) {}
-  SsaNames ssa_names_;
+  DatalogPrinter(std::ostream &out)
+      : ir_printer_(out), out_(out), ssa_names_(ir_printer_.ssa_names()) {}
+  IRPrinter ir_printer_;
   std::ostream &out_;
+  SsaNames &ssa_names_;
   absl::flat_hash_map<std::string, const Block *> particle_specs_;
 };
 
@@ -219,40 +257,43 @@ TEST(ParticleSpecTest, TestSomething) {
     }
 
     for (const arcs::ParticleProto &particle_proto : recipe_proto.particles()) {
-      const Operation *particle_spec = *CHECK_NOTNULL(
-          FindOrNull(particle_specs_, particle_proto.spec_name()));
+      // const Operation *particle_spec = *CHECK_NOTNULL(
+      //     FindOrNull(particle_specs_, particle_proto.spec_name()));
 
-      const Module *module = CHECK_NOTNULL(particle_spec->impl_module());
-      CHECK(module->blocks().size() == 1);
-      const Block &impl = *module->blocks().front();
+      // const Module *module = CHECK_NOTNULL(particle_spec->impl_module());
+      // CHECK(module->blocks().size() == 1);
+      // const Block &impl = *module->blocks().front();
       NamedValueMap inputs;
       for (const auto &handle_connection_proto : particle_proto.connections()) {
-        if (impl.inputs().FindDecl(handle_connection_proto.name()) == nullptr) {
-          LOG(WARNING) << "Skipping " << handle_connection_proto.name();
-          continue;
-        }
+        // if (impl.inputs().FindDecl(handle_connection_proto.name()) ==
+        // nullptr) {
+        //   LOG(WARNING) << "Skipping " << handle_connection_proto.name();
+        //   continue;
+        // }
         inputs.insert({handle_connection_proto.name(),
                        Value(value::StoredValue(context.GetStorage(
                            handle_connection_proto.handle())))});
       }
-      const Operation &invocation = builder.AddOperation(
+      // const Operation &invocation =
+      builder.AddOperation(
           context.GetOperator(arcs::operators::kParticle),
           {{"name", StringAttribute::Create(particle_proto.spec_name())}},
           inputs);
-      for (const auto &handle_connection_proto : particle_proto.connections()) {
-        if (impl.outputs().FindDecl(handle_connection_proto.name()) ==
-            nullptr) {
-          LOG(WARNING) << "Skipping output" << handle_connection_proto.name();
-          continue;
-        }
-        builder.AddOperation(
-            context.GetOperator(arcs::operators::kWriteStorage),
-            {{"name", StringAttribute::Create(
-                          context.GetStorage(handle_connection_proto.handle())
-                              .name())}},
-            {{"input", Value(value::OperationResult(
-                           invocation, handle_connection_proto.name()))}});
-      }
+      // for (const auto &handle_connection_proto :
+      // particle_proto.connections()) {
+      //   if (impl.outputs().FindDecl(handle_connection_proto.name()) ==
+      //       nullptr) {
+      //     LOG(WARNING) << "Skipping output" <<
+      //     handle_connection_proto.name(); continue;
+      //   }
+      //   builder.AddOperation(
+      //       context.GetOperator(arcs::operators::kWriteStorage),
+      //       {{"name", StringAttribute::Create(
+      //                     context.GetStorage(handle_connection_proto.handle())
+      //                         .name())}},
+      //       {{"input", Value(value::OperationResult(
+      //                      invocation, handle_connection_proto.name()))}});
+      // }
     }
     global_module.AddBlock(builder.build());
     LOG(WARNING) << global_module;
