@@ -19,6 +19,7 @@
 
 #include "src/common/logging/logging.h"
 #include "src/frontends/sql/decoder_context.h"
+#include "src/frontends/sql/testing/operation_view_utils.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
 
