@@ -228,7 +228,7 @@ std::vector<datalog::DLIRAssertion>
 LoweringToDatalogPass::GenerateDLIRAssertions(
     const Principal& speaker,
     const ConditionalAssertion& conditional_assertion) {
-  auto dlir_rhs = utils::MapIter<BaseFact, datalog::Predicate>(
+  auto dlir_rhs = utils::MapIter<datalog::Predicate>(
       conditional_assertion.rhs(), [this, speaker](const BaseFact& base_fact) {
         auto [dlir_translation, not_used] = BaseFactToDLIR(speaker, base_fact);
         return PushPrincipal("says_", speaker, dlir_translation);
@@ -280,7 +280,7 @@ std::vector<datalog::DLIRAssertion> LoweringToDatalogPass::SaysAssertionsToDLIR(
 
 std::vector<datalog::DLIRAssertion> LoweringToDatalogPass::QueriesToDLIR(
     const std::vector<Query>& queries) {
-  return utils::MapIter<Query, datalog::DLIRAssertion>(
+  return utils::MapIter<datalog::DLIRAssertion>(
       queries, [this](const Query& query) {
         auto [main_pred, not_used] =
             FactToDLIR(query.principal(), query.fact());
@@ -300,7 +300,7 @@ datalog::DLIRProgram LoweringToDatalogPass::ProgToDLIR(const Program& program) {
                std::back_inserter(dlir_assertions));
   dlir_assertions.push_back(dummy_assertion);
 
-  auto outputs = utils::MapIter<Query, std::string>(
+  auto outputs = utils::MapIter<std::string>(
       program.queries(), [](const Query& query) { return query.name(); });
   return datalog::DLIRProgram(dlir_assertions, outputs);
 }
