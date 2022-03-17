@@ -14,11 +14,22 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
+load("//build_defs:antlr.bzl", "antlr4_cc_combined")
+
 package(
     licenses = ["notice"],
 )
 
 exports_files(
     ["AuthLogic.g4"],
-    visibility = ["//rust/tools/authorization-logic:__pkg__"],
+    visibility = [
+        "//rust/tools/authorization-logic:__pkg__",
+        "//src/ir/auth_logic:__pkg__",
+    ],
+)
+
+#antlr
+antlr4_cc_combined(
+    name = "auth_logic_cc_generator",
+    src = "//src/policy/auth_logic:AuthLogic.g4",
 )

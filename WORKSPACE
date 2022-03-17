@@ -264,7 +264,7 @@ rules_antlr_dependencies("4.8")
 http_archive(
     name = "antlr4_runtimes",
     build_file = "@//third_party/antlr:antlr.BUILD",
-    sha256 = "992d52444b81ed75e52ea62f9f38ecb7652d5ce2a2130af143912b3042a6d77e",
-    strip_prefix = "antlr4-4.8",
-    urls = ["https://github.com/antlr/antlr4/archive/4.8.tar.gz"],
+    sha256 = "efe4057d75ab48145d4683100fec7f77d7f87fa258707330cadd1f8e6f7eecae",
+    strip_prefix = "antlr4-4.9.3",
+    urls = ["https://github.com/antlr/antlr4/archive/4.9.3.tar.gz"],
 )

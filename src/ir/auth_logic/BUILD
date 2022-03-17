@@ -14,7 +14,6 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-load("@rules_antlr//antlr:antlr4.bzl", "antlr")
 
 package(
     default_visibility = ["//src:__subpackages__"],
@@ -90,28 +89,5 @@ cc_test(
     deps = [
         ":ast",
         "//src/common/testing:gtest",
-    ],
-)
-
-#antlr
-
-antlr(
-    name = "auth_logic_antlr",
-    srcs = ["//rust/tools/authorization-logic:authlogic_grammar"],
-    language = "Cpp",
-    listener = False,
-    package = "",
-    visitor = True,
-)
-
-cc_library(
-    name = "auth_logic_cc_parser",
-    srcs = [":auth_logic_antlr"],
-    copts = ["-fexceptions"],
-    features = ["-use_header_modules"],
-    linkopts = ["-fexceptions"],
-    deps = [
-        "auth_logic_antlr",
-        "@antlr4_runtimes//:antlr_runtime_build",
     ],
 )
