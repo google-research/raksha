@@ -19,6 +19,7 @@ pub mod test {
     use crate::souffle::souffle_interface::*;
     use std::process::Command;
     use crate::utils::*;
+    use crate::compilation_top_level::*;
 
     /// This struct gives the name of an authorization logic program in
     /// test_inputs, and a vector that relates the names of queries
@@ -51,9 +52,8 @@ pub mod test {
         let resolved_in_dir = utils::get_resolved_path(&t.input_dir.to_string());
         let resolved_out_dir = utils::get_resolved_path(&t.output_dir.to_string());
         input_to_souffle_file(
-            &t.filename.to_string(),
-            &resolved_in_dir,
-            &resolved_out_dir,
+            &format!("{}/{}", &resolved_in_dir, &t.filename.to_string()),
+            &format!("{}/{}.dl", &resolved_out_dir, &t.filename.to_string())
         );
         run_souffle(
             &format!("{}/{}.dl", resolved_out_dir, t.filename),

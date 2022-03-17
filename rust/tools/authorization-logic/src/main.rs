@@ -31,22 +31,21 @@ use structopt::StructOpt;
 #[derive(StructOpt)]
 #[structopt(name = "auth-logic", about = "An authorization logic compiler.")]
 struct Opt {
-    /// The name of the auth logic program to compile
+    /// The path of the input auth logic program to compile
     // First positional argument (should be passed as a raw value, not --filename=...)
     #[structopt(required = true)]
-    filename: String,
+    input_filename: String,
 
-    /// Input directory where the auth logic program lives.
-    /// If unspecified, it will be the current working directory.
-    // Can be passed as -i or --in-dir
-    #[structopt(short, long, env("PWD"))]
-    in_dir: String,
+    /// Output file path where compiled souffle program will be saved.
+    // Can be passed as -o or --souffle_output_file
+    #[structopt(short = "o", long)]
+    souffle_output_file: String,
 
-    /// Output directory, where the compiled datalog program will be saved.
-    /// If unspecified, it will be the current working directory.
+    /// Output directory, where the CSVs containing the results of evaluating
+    /// queries will be saved.
     // Can be passed as -o or --out-dir
-    #[structopt(short, long, env("PWD"))]
-    out_dir: String,
+    #[structopt(short="q", long="output_queries_directory", env("PWD"))]
+    output_queries_directory: String,
 
     /// List of declarations to skip when generating Souffle code
     // Can be passed as -s or --skip. Passed as a comma-separated list.
@@ -61,11 +60,13 @@ struct Opt {
 
 fn main() {
     let opt = Opt::from_args();
-    compilation_top_level::compile(&opt.filename, &opt.in_dir, &opt.out_dir, &opt.decl_skip);
+    compilation_top_level::compile(&opt.input_filename,
+                                   &opt.souffle_output_file,
+                                   &opt.decl_skip);
     if (!opt.skip_souffle) {
         souffle::souffle_interface::run_souffle(
-            &format!("{}/{}.dl", &opt.out_dir, &opt.filename),
-            &opt.out_dir,
+            &opt.souffle_output_file,
+            &opt.output_queries_directory,
         );
     };
 }
