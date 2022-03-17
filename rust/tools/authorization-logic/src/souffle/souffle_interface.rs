@@ -61,7 +61,7 @@ pub fn ast_to_souffle_file(prog: &AstProgram, filename: &str,
     let dlir_prog = LoweringToDatalogPass::lower(&universe_handled_prog);
     let souffle_code = souffle_emitter::emit_program(&dlir_prog, decl_skip);
     fs::write(&format!("{}/{}.dl", out_dir, filename), souffle_code)
-        .expect("failed to write output to file");
+        .expect("failed to write output to file")
 }
 
 /// The function this function calls the souffle command on a .dl file. CSVs

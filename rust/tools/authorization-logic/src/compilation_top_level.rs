@@ -54,7 +54,7 @@ pub fn compile(filename: &str, in_dir: &str, out_dir: &str, decl_skip: &Vec<Stri
     souffle_interface::ast_to_souffle_file(
         &prog_with_imports,
         filename,
-        out_dir,
+        &resolved_out_dir,
         &Some(decl_skip.to_vec()));
     export_assertions::export_assertions(&prog_with_imports);
 }
