@@ -24,6 +24,7 @@ mod signing;
 mod souffle;
 mod utils;
 mod test;
+mod merge_multiprogram;
 
 use std::env;
 use structopt::StructOpt;

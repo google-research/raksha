@@ -154,3 +154,9 @@ pub struct AstProgram {
     pub priv_binds: Vec<AstKeybind>,
     pub pub_binds: Vec<AstKeybind>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AstMultiProgram {
+    pub programs: Vec<AstProgram>
+}
+
