@@ -35,7 +35,7 @@ use std::fs;
 
 fn source_file_to_ast(input_file_path: &str) -> AstProgram {
     let source = fs::read_to_string(input_file_path)
-        .expect("failed to read input in input_to_souffle_file");
+        .expect(&format!("failed to read {}",input_file_path));
     astconstructionvisitor::parse_program(&source[..])
 }
 

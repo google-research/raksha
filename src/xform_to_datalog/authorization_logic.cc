@@ -25,8 +25,8 @@
 
 #include <filesystem>
 
-#include "absl/strings/string_view.h"
 #include "absl/strings/str_join.h"
+#include "absl/strings/string_view.h"
 #include "src/common/logging/logging.h"
 
 // For now, we need to be able to disable authorization logic to smooth the
@@ -35,48 +35,47 @@
 
 // Generates datalog facts from the given program.
 extern "C" int generate_datalog_facts_from_authorization_logic(
-  const char* program, const char* program_path,
-  const char* out_dir, const char* decl_skip_vec);
+    const char* input_program, const char* output_file,
+    const char* decl_skip_vec);
 
 #endif
 
 namespace raksha::xform_to_datalog {
 
 int GenerateDatalogFactsFromAuthorizationLogic(
-    absl::string_view program,
-    const std::filesystem::path &program_dir,
-    const std::filesystem::path &result_dir,
-    const std::vector<absl::string_view> &relations_to_not_declare) {
-
+    absl::string_view program, const std::filesystem::path& program_dir,
+    const std::filesystem::path& result_dir,
+    const std::vector<absl::string_view>& relations_to_not_declare) {
   const std::string relations_to_not_declare_str =
-    absl::StrJoin(relations_to_not_declare, ",");
+      absl::StrJoin(relations_to_not_declare, ",");
 
   // Turn the macro DISABLE_AUTHORIZATION_LOGIC into an expression the compiler
   // understands so we can put it into the CHECK.
   constexpr bool auth_logic_enabled =
 #ifdef DISABLE_AUTHORIZATION_LOGIC
-    false
+      false
 #else
-    true
+      true
 #endif
-  ;
+      ;
 
-  CHECK(auth_logic_enabled)
-    << "Attempted to use authorization logic compiler when it has been disabled"
-   << " using DISABLE_AUTHORIZATION_LOGIC.";
+  CHECK(auth_logic_enabled) << "Attempted to use authorization logic compiler "
+                               "when it has been disabled"
+                            << " using DISABLE_AUTHORIZATION_LOGIC.";
 
-  return 
+  return
 #ifdef DISABLE_AUTHORIZATION_LOGIC
-// If authorization logic has been disabled, return an exit code as if it
-// always failed. This should be unreachable due to the CHECK, and acts only as
-// a way to keep the compiler happy.
-  1
+      // If authorization logic has been disabled, return an exit code as if it
+      // always failed. This should be unreachable due to the CHECK, and acts
+      // only as a way to keep the compiler happy.
+      1
 #else
-  generate_datalog_facts_from_authorization_logic(
-      program.data(), program_dir.c_str(), result_dir.c_str(),
-      relations_to_not_declare_str.data())
+      generate_datalog_facts_from_authorization_logic(
+          absl::StrCat(program_dir.c_str(), "/", program).c_str(),
+          absl::StrCat(result_dir.c_str(), "/", program, ".dl").c_str(),
+          relations_to_not_declare_str.data())
 #endif
-  ;
+      ;
 }
 
-}
+}  // namespace raksha::xform_to_datalog
