@@ -49,6 +49,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=tink-core",
         "manual",
     ],
     version = "0.2.0",

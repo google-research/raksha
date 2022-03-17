@@ -76,6 +76,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=prost-build",
         "manual",
     ],
     version = "0.7.0",

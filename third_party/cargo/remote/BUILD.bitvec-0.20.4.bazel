@@ -54,6 +54,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=bitvec",
         "manual",
     ],
     version = "0.20.4",
