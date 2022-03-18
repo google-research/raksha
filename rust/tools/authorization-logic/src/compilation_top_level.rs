@@ -33,6 +33,41 @@ use crate::{
 
 use std::fs;
 
+fn merge_multiprogram(multiprog: Vec<AstProgram>) -> AstProgram {
+    AstProgram {
+        relation_declarations: multiprog
+            .iter()
+            .map(|prog| prog.relation_declarations.clone())
+            .flatten()
+            .collect(),
+        assertions: multiprog
+            .iter()
+            .map(|prog| prog.assertions.clone())
+            .flatten()
+            .collect(),
+        queries: multiprog
+            .iter()
+            .map(|prog| prog.queries.clone())
+            .flatten()
+            .collect(),
+        imports: multiprog
+            .iter()
+            .map(|prog| prog.imports.clone())
+            .flatten()
+            .collect(),
+        priv_binds: multiprog
+            .iter()
+            .map(|prog| prog.priv_binds.clone())
+            .flatten()
+            .collect(),
+        pub_binds: multiprog
+            .iter()
+            .map(|prog| prog.pub_binds.clone())
+            .flatten()
+            .collect(),
+    }
+}
+
 fn source_file_to_ast(input_file_path: &str) -> AstProgram {
     let source = fs::read_to_string(input_file_path)
         .expect(&format!("failed to read {}", input_file_path));
@@ -46,11 +81,21 @@ pub fn source_file_to_ast_test_only(input_file_path: &str) -> AstProgram {
     source_file_to_ast(&resolved_in_file_path)
 }
 
-pub fn compile(input_file_path: &str, output_file_path: &str, decl_skip: &Vec<String>){
-    let resolved_in_file = utils::get_resolved_path(&input_file_path);
+pub fn compile_one_program(input_file_path: &str, output_file_path: &str,
+                           decl_skip: &Vec<String>) {
+    compile(&vec![input_file_path.to_string()], output_file_path,
+        decl_skip);
+}
+
+pub fn compile(input_file_paths: &Vec<String>, output_file_path: &str, decl_skip: &Vec<String>){
+    let resolved_in_files = input_file_paths.into_iter()
+        .map(|f| utils::get_resolved_path(f));
     let resolved_out_file = utils::get_resolved_path(&output_file_path);
-    let prog = source_file_to_ast(&resolved_in_file);
-    let prog_with_imports = import_assertions::handle_imports(&prog);
+    let progs = resolved_in_files
+        .map(|f| source_file_to_ast(&f))
+        .collect();
+    let merged_prog = merge_multiprogram(progs);
+    let prog_with_imports = import_assertions::handle_imports(&merged_prog);
     souffle_interface::ast_to_souffle_file(
         &prog_with_imports,
         &resolved_out_file,

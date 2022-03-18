@@ -41,7 +41,12 @@ pub extern "C" fn generate_datalog_facts_from_authorization_logic(
     let decl_skip_vec = unsafe {
         CStr::from_ptr(c_decl_skip)
     }.to_str().unwrap().split(',').map(|s| s.to_string()).collect();
-    compilation_top_level::compile(input_filename,
+    // The CLI interface has been extended to take multiple files as inputs, but the C library does 
+    // not make use of this because it is not needed, yet. Doing so would just entail changing this 
+    // interface and the code that consumes it; the internals of the auth logic compiler should not 
+    // need to change -- the following line can just call compile(...)
+    // instead of compile_one_prgram(...)
+    compilation_top_level::compile_one_program(input_filename,
                                    output_filename, &decl_skip_vec);
   });
   if result.is_err() {

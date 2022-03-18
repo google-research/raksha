@@ -26,7 +26,7 @@ mod test {
 
     fn query_test_with_imports(t: QueryTest) {
         utils::setup_directories_for_bazeltest(vec![t.input_dir], vec![t.output_dir]);     
-        compile(&format!("{}/{}", t.input_dir, t.filename),
+        compile_one_program(&format!("{}/{}", t.input_dir, t.filename),
             &format!("{}/{}.dl", t.output_dir, t.filename),
             &Vec::new());
         run_souffle(
@@ -48,7 +48,7 @@ mod test {
         );
 
         // This code generates exported statements from test_inputs/exporting.
-        compile("test_inputs/importing_export_half", "test_outputs/importing_export_half.dl",
+        compile_one_program("test_inputs/importing_export_half", "test_outputs/importing_export_half.dl",
                 &Vec::new());
 
         // This code imports statements into test_inputs/importing

@@ -28,3 +28,4 @@ mod test_num_compare;
 mod test_relation_declarations;
 mod test_type_error;
 mod test_multiverse_handling;
+mod test_multiprogram;

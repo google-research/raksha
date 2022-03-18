@@ -32,7 +32,8 @@ mod test {
             &utils::get_resolved_path("test_keys/principal1_priv.json"),
         );
 
-        compile("test_inputs/exporting", "test_outputs/exporting.dl", &Vec::new());
+        compile_one_program("test_inputs/exporting",
+                            "test_outputs/exporting.dl", &Vec::new());
 
         let deser_claim = deserialize_from_file(
             &utils::get_resolved_path("test_outputs/prin1_statement1.obj")).unwrap();

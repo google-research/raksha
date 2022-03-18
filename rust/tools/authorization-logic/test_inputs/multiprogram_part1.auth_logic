@@ -1,0 +1,8 @@
+.decl theSkyIs(word : Word)
+.decl locationCantBe(location : Location)
+
+"PrincipalA" says "PrincipalB" canSay theSkyIs(descriptionX).
+
+"PrincipalA" says locationCantBe("London") :- theSkyIs("blue").
+
+multiprog_test_query = query "PrincipalA" says locationCantBe("London")?

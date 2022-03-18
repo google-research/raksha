@@ -24,7 +24,6 @@ mod signing;
 mod souffle;
 mod utils;
 mod test;
-mod merge_multiprogram;
 
 use std::env;
 use structopt::StructOpt;
@@ -33,9 +32,9 @@ use structopt::StructOpt;
 #[structopt(name = "auth-logic", about = "An authorization logic compiler.")]
 struct Opt {
     /// The path of the input auth logic program to compile
-    // First positional argument (should be passed as a raw value, not --filename=...)
+    // First positional argument (should be passed as a raw value, not --filename=...). Passed as a space separated list
     #[structopt(required = true)]
-    input_filename: String,
+    input_filenames: Vec<String>,
 
     /// Output file path where compiled souffle program will be saved.
     // Can be passed as -o or --souffle_output_file
@@ -61,7 +60,7 @@ struct Opt {
 
 fn main() {
     let opt = Opt::from_args();
-    compilation_top_level::compile(&opt.input_filename,
+    compilation_top_level::compile(&opt.input_filenames,
                                    &opt.souffle_output_file,
                                    &opt.decl_skip);
     if (!opt.skip_souffle) {
