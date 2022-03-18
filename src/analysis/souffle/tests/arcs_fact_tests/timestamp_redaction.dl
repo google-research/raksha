@@ -39,7 +39,7 @@ removeTag(result, owner, "SensitiveTimestamp") :-
 // An AST matching policy that says that "TimestampSeconds", multiplied by
 // 1000, is now a "TimestampMillisecondsRedacted".
 mustHaveIntegrityTag(result, owner, "TimestampMillisecondsRedacted") :-
-  BINARY_OPERATION(owner, "*", result, nil,op1, op2),
+  BINARY_OPERATION(owner, "*", result, nil, op1, op2),
   mustHaveIntegrityTag(op1, owner, "TimestampSeconds"),
   mustHaveIntegrityTag(op2, owner, "Constant_1000").
 
