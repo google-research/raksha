@@ -41,7 +41,7 @@ alias(
 
 alias(
     name = "structopt",
-    actual = "@raze__structopt__0_3_25//:structopt",
+    actual = "@raze__structopt__0_3_26//:structopt",
     tags = [
         "cargo-raze",
         "manual",
@@ -68,8 +68,18 @@ alias(
 
 # Export file for Stardoc support
 exports_files(
-    [
-        "crates.bzl",
-    ],
+    glob([
+        "**/*.bazel",
+        "**/*.bzl",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "srcs",
+    srcs = glob([
+        "**/*.bazel",
+        "**/*.bzl",
+    ]),
     visibility = ["//visibility:public"],
 )
