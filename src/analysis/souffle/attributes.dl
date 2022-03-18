@@ -16,8 +16,6 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_ATTRIBUTES_DL_
 #define SRC_ANALYSIS_SOUFFLE_ATTRIBUTES_DL_
 
-.type AttributeKind <: symbol
-.type AttributePayloadId <: number
 .type AttributeName <: symbol
 .type AttributePayload =
   StringAttributePayload { str: symbol } | NumberAttributePayload { num: number }
