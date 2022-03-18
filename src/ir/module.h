@@ -47,6 +47,8 @@ class Operation {
   Operation(const Operation&) = delete;
   Operation& operator=(const Operation&) = delete;
 
+  virtual ~Operation() {}
+
   const Operator& op() const { return *op_; }
   const Block* parent() const { return parent_; }
   const NamedValueMap& inputs() const { return inputs_; }
