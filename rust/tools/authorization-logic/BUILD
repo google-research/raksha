@@ -34,7 +34,7 @@ java_binary(
 # Generate the parsing-related files using antlr4rust
 genrule(
     name = "antlr_gen_srcs",
-    srcs = ["src/parsing/AuthLogic.g4"],
+    srcs = ["//src/policy/auth_logic:AuthLogic.g4"],
     outs = [
         "antlr_gen/authlogiclexer.rs",
         "antlr_gen/authlogiclistener.rs",
