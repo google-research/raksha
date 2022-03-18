@@ -34,6 +34,7 @@ gen_souffle_cxx_code(
     name = "taint_cxx",
     src = "taint.dl",
     included_dl_scripts = [
+        "attributes.dl",
         "authorization_logic.dl",
         "check_predicate.dl",
         "dataflow_graph.dl",
@@ -47,6 +48,7 @@ gen_souffle_cxx_code(
     src = "taint.dl",
     for_test = True,
     included_dl_scripts = [
+        "attributes.dl",
         "authorization_logic.dl",
         "check_predicate.dl",
         "dataflow_graph.dl",
@@ -67,6 +69,7 @@ souffle_cc_binary(
 )
 
 exports_files([
+    "attributes.dl",
     "authorization_logic.dl",
     "check_predicate.dl",
     "dataflow_graph.dl",

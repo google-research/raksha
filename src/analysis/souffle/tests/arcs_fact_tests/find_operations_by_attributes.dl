@@ -1,0 +1,87 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/fact_test_helper.dl"
+
+isAccessPath("result1").
+isAccessPath("result2").
+isAccessPath("result3").
+isAccessPath("result4").
+isAccessPath("result5").
+isAccessPath("result6").
+isAccessPath("result7").
+
+#define PAYLOAD1 $StringAttributePayload("payload1")
+#define PAYLOAD2 $NumberAttributePayload(2)
+#define PAYLOAD3 $StringAttributePayload("payload3")
+#define PAYLOAD4 $NumberAttributePayload(4)
+
+isAttributePayload(PAYLOAD1).
+isAttributePayload(PAYLOAD2).
+isAttributePayload(PAYLOAD3).
+isAttributePayload(PAYLOAD4).
+
+// Create some operations with some attributes.
+isOperation(["owner", "op1", "result1", nil, nil]).
+isOperation(["owner", "op1", "result2", nil, [["attr1", PAYLOAD1], nil]]).
+isOperation(["owner", "op1", "result3", nil, [["attr2", PAYLOAD2], nil]]).
+
+isOperation(["owner", "op1", "result4", nil, [["attr1", PAYLOAD1], [["attr2", PAYLOAD2], nil]]]).
+
+isOperation(["owner", "op1", "result5", nil, [["attr1", PAYLOAD3], nil]]).
+isOperation(["owner", "op1", "result6", nil, [["attr2", PAYLOAD4], nil]]).
+isOperation(["owner", "op1", "result7", nil, [["attr3", PAYLOAD2], nil]]).
+
+.decl resultToAttrNameAndPayload(
+  result: AccessPath, attrName: AttributeName, payload: AttributePayload)
+
+resultToAttrNameAndPayload(result, attrName, payload) :-
+  operationToAttribute([_, _, result, _, _], [attrName, payload]).
+
+.decl expectedResultToAttrNameAndPayload(
+  result: AccessPath, attrName: AttributeName, payload: AttributePayload)
+
+expectedResultToAttrNameAndPayload("result2", "attr1", PAYLOAD1).
+expectedResultToAttrNameAndPayload("result3", "attr2", PAYLOAD2).
+expectedResultToAttrNameAndPayload("result4", "attr1", PAYLOAD1).
+expectedResultToAttrNameAndPayload("result4", "attr2", PAYLOAD2).
+expectedResultToAttrNameAndPayload("result5", "attr1", PAYLOAD3).
+expectedResultToAttrNameAndPayload("result6", "attr2", PAYLOAD4).
+expectedResultToAttrNameAndPayload("result7", "attr3", PAYLOAD2).
+
+.decl entryInExpectedAndNotInActual(
+  result: AccessPath, attrName: AttributeName, payload: AttributePayload)
+entryInExpectedAndNotInActual(result, attrName, payload) :-
+  expectedResultToAttrNameAndPayload(result, attrName, payload),
+  !resultToAttrNameAndPayload(result, attrName, payload).
+
+.decl entryInActualAndNotInExpected(
+  result: AccessPath, attrName: AttributeName, payload: AttributePayload)
+entryInActualAndNotInExpected(result, attrName, payload) :-
+  resultToAttrNameAndPayload(result, attrName, payload),
+  !expectedResultToAttrNameAndPayload(result, attrName, payload).
+
+TEST_CASE("expected_and_actual_same_size_and_not_zero") :-
+  expectedSize = count : { resultToAttrNameAndPayload(_, _, _) },
+  actualSize = count : { expectedResultToAttrNameAndPayload(_, _, _) },
+  expectedSize = actualSize,
+  expectedSize != 0.
+
+TEST_CASE("expected_not_in_actual_empty") :-
+  count : { entryInExpectedAndNotInActual(_, _, _) } = 0.
+TEST_CASE("actual_not_in_expected_empty") :-
+  count : { entryInActualAndNotInExpected(_, _, _) } = 0.

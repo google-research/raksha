@@ -31,6 +31,7 @@ exports_files([
     included_dl_scripts = [
         ":integrity_tag_prop_helper.dl",
         ":confidentiality_tag_prop_helper.dl",
+        "//src/analysis/souffle:attributes.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:check_predicate.dl",
         "//src/analysis/souffle:dataflow_graph.dl",
@@ -76,6 +77,7 @@ exports_files([
     for_test = True,
     included_dl_scripts = [
         ":integrity_tag_prop_helper.dl",
+        "//src/analysis/souffle:attributes.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:check_predicate.dl",
         "//src/analysis/souffle:dataflow_graph.dl",

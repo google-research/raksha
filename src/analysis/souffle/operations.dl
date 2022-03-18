@@ -16,6 +16,7 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_
 #define SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_
 
+#include "src/analysis/souffle/attributes.dl"
 #include "src/analysis/souffle/dataflow_graph.dl"
 
 // The symbol representing the operator. For operations commonly represented by
@@ -27,28 +28,42 @@
 // regardless of arity. Useful for rules that apply to any operation.
 .type OperandList = [ operand: AccessPath, next: OperandList ]
 
-// Operations of any arity go in this relation.
-.decl operation(owner: Principal, operator: Operator, result: AccessPath, operandList: OperandList)
+// An Operation.
+.type Operation = [owner: Principal, operator: Operator, result: AccessPath,
+                   operandList: OperandList, attributes: AttributeList]
+
+// Operation universe.
+.decl isOperation(operation: Operation)
 
 // BINARY_OPERATION is a convenience macro for the very-common-case of binary operations.
-#define BINARY_OPERATION(owner, operator, result, input1, input2) \
-operation(owner, operator, result, [input1, [input2, nil]])
+#define BINARY_OPERATION(owner, operator, result, attrs, input1, input2) \
+isOperation([owner, operator, result, [input1, [input2, nil]], attrs])
 
 // Explode the operand lists so that we can extract the heads of each sublist
 // to get a mapping from operations to their operands.
-.decl operationToPartialOperandLists(
-  owner: Principal, operator: Operator, result: AccessPath, partialList: OperandList)
+.decl operationToPartialOperandLists(operation: Operation, partialList: OperandList)
 
-operationToPartialOperandLists(owner, operator, result, operandList) :-
-  operation(owner, operator, result, operandList).
-operationToPartialOperandLists(owner, operator, result, tail) :-
-  operationToPartialOperandLists(owner, operator, result, [_, tail]).
+operationToPartialOperandLists([owner, op, result, operandList, attrs], operandList) :-
+  isOperation([owner, op, result, operandList, attrs]).
+operationToPartialOperandLists(operation, tail) :-
+  operationToPartialOperandLists(operation, [_, tail]).
 
 // Map full operations to operands.
-.decl operationToOperands(
-  owner: Principal, operator: Operator, result: AccessPath, operand: AccessPath)
+.decl operationToOperands(operation:Operation, operand: AccessPath)
 
-operationToOperands(owner, operator, result, operand) :-
-  operationToPartialOperandLists(owner, operator, result, [operand, _]).
+operationToOperands(operation, operand) :-
+  isOperation(operation), operationToPartialOperandLists(operation, [operand, _]).
+
+// A helper relation that produces all partial attribute lists of an
+// `Operation`.
+.decl operationToPartialAttributeLists(operation: Operation, attributes: AttributeList)
+operationToPartialAttributeLists([owner, op, result, operandList, attrs], attrs) :-
+  isOperation([owner, op, result, operandList, attrs]).
+operationToPartialAttributeLists(op, tail) :- operationToPartialAttributeLists(op, [_, tail]).
+
+// A mapping from an `Operation` to each individual `Attribute` on that
+// `Operation`.
+.decl operationToAttribute(op: Operation, attr: Attribute)
+operationToAttribute(op, attr) :- operationToPartialAttributeLists(op, [attr, _]).
 
 #endif // SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_

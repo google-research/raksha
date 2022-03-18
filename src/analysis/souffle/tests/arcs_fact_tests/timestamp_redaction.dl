@@ -13,8 +13,8 @@ isAccessPath("div_result").
 isAccessPath("c").
 isAccessPath("final_result").
 
-BINARY_OPERATION("owner", "/", "div_result", "a", "b").
-BINARY_OPERATION("owner", "*", "final_result", "div_result", "c").
+BINARY_OPERATION("owner", "/", "div_result", nil, "a", "b").
+BINARY_OPERATION("owner", "*", "final_result", nil, "div_result", "c").
 
 // "a" contains a millsecond-granularity timestamp.
 hasAppliedIntegrityTag("a", "owner", "TimestampMilliseconds").
@@ -32,14 +32,14 @@ hasAppliedIntegrityTag("c", "owner", "Constant_1000").
 // "TimestampMilliseconds" confidentiality tag.
 mustHaveIntegrityTag(result, owner, "TimestampSeconds"),
 removeTag(result, owner, "SensitiveTimestamp") :-
-  BINARY_OPERATION(owner, "/", result, op1, op2),
+  BINARY_OPERATION(owner, "/", result, nil, op1, op2),
   mustHaveIntegrityTag(op1, owner, "TimestampMilliseconds"),
   mustHaveIntegrityTag(op2, owner, "Constant_1000").
 
 // An AST matching policy that says that "TimestampSeconds", multiplied by
 // 1000, is now a "TimestampMillisecondsRedacted".
 mustHaveIntegrityTag(result, owner, "TimestampMillisecondsRedacted") :-
-  BINARY_OPERATION(owner, "*", result, op1, op2),
+  BINARY_OPERATION(owner, "*", result, nil, op1, op2),
   mustHaveIntegrityTag(op1, owner, "TimestampSeconds"),
   mustHaveIntegrityTag(op2, owner, "Constant_1000").
 
