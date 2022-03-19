@@ -20,6 +20,33 @@ package(
 )
 
 cc_library(
+    name = "literal_op",
+    srcs = ["literal_op.cc"],
+    hdrs = ["literal_op.h"],
+    deps = [
+        ":sql_op",
+        "//src/ir:ir_context",
+        "//src/ir:module",
+        "//src/ir:value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:string_attribute",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "literal_op_test",
+    srcs = ["literal_op_test.cc"],
+    deps = [
+        ":literal_op",
+        ":sql_op",
+        "//src/common/testing:gtest",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:string_attribute",
+    ],
+)
+
+cc_library(
     name = "sql_op",
     hdrs = ["sql_op.h"],
     deps = [
