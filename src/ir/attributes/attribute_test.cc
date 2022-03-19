@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#include "src/ir/attribute.h"
+#include "src/ir/attributes/attribute.h"
 
 #include "src/common/testing/gtest.h"
 

@@ -65,11 +65,11 @@ cc_library(
         ":sql_ir_cc_proto",
         "//src/common/logging",
         "//src/ir",
-        "//src/ir:attribute",
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:ssa_names",
         "//src/ir:value",
+        "//src/ir/attributes:attribute",
     ],
 )
 

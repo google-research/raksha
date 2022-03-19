@@ -15,7 +15,7 @@
 //----------------------------------------------------------------------------
 #include "absl/container/flat_hash_set.h"
 #include "src/common/testing/gtest.h"
-#include "src/ir/attribute.h"
+#include "src/ir/attributes/attribute.h"
 #include "src/ir/ir_printer.h"
 #include "src/ir/module.h"
 #include "src/ir/value.h"

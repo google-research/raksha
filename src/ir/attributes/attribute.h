@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_IR_ATTRIBUTE_H_
-#define SRC_IR_ATTRIBUTE_H_
+#ifndef SRC_IR_ATTRIBUTES_ATTRIBUTE_H_
+#define SRC_IR_ATTRIBUTES_ATTRIBUTE_H_
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"
@@ -77,4 +77,4 @@ using NamedAttributeMap = absl::flat_hash_map<std::string, Attribute>;
 
 }  // namespace raksha::ir
 
-#endif  // SRC_IR_ATTRIBUTE_H_
+#endif  // SRC_IR_ATTRIBUTES_ATTRIBUTE_H_
