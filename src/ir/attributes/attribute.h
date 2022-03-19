@@ -37,7 +37,31 @@ class AttributeBase : public RefCounted<AttributeBase> {
   Kind kind_;
 };
 
-using Attribute = intrusive_ptr<const AttributeBase>;
+class Attribute {
+ public:
+  // Allows an `Attribute` instance  to be constructed from any intrusive_ptr
+  // that is convertible to `intrusive_ptr<const AttributeBase*>`.
+  template <class T,
+            std::enable_if_t<std::is_convertible<T*, AttributeBase*>::value,
+                             bool> = true>
+  Attribute(const intrusive_ptr<const T>& value) : value_(value) {}
+
+  // Use default copy, move, and assignments.
+  Attribute(const Attribute&) = default;
+  Attribute(Attribute&&) = default;
+  Attribute& operator=(const Attribute&) = default;
+  Attribute& operator=(Attribute&&) = default;
+
+  // Returns the attribute kind.
+  AttributeBase::Kind kind() const { return value_->kind(); }
+
+  // Returns a string representation of the attribute.
+  std::string ToString() const { return value_->ToString(); }
+
+ private:
+  intrusive_ptr<const AttributeBase> value_;
+};
+
 using NamedAttributeMap = absl::flat_hash_map<std::string, Attribute>;
 
 }  // namespace raksha::ir

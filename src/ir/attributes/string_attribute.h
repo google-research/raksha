@@ -17,13 +17,14 @@
 #define SRC_IR_ATTRIBUTES_STRING_ATTRIBUTE_H_
 
 #include "absl/strings/string_view.h"
+#include "src/common/utils/intrusive_ptr.h"
 #include "src/ir/attributes/attribute.h"
 
 namespace raksha::ir {
 class StringAttribute : public AttributeBase {
  public:
-  static Attribute Create(absl::string_view value) {
-    return Attribute(new StringAttribute(value));
+  static intrusive_ptr<const StringAttribute> Create(absl::string_view value) {
+    return intrusive_ptr<const StringAttribute>(new StringAttribute(value));
   }
 
   absl::string_view value() const { return value_; }

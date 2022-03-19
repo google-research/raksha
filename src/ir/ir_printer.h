@@ -80,7 +80,7 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     // the attributes.
     std::string attributes_string = PrintNamedMapInNameOrder(
         operation.attributes(),
-        [](const Attribute& attr) { return attr->ToString(); });
+        [](const Attribute& attr) { return attr.ToString(); });
 
     std::string inputs_string = PrintNamedMapInNameOrder(
         operation.inputs(),

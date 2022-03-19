@@ -40,7 +40,7 @@ class LiteralOperationView {
     const ir::NamedAttributeMap &attrs = literal_operation_->attributes();
     auto find_result = attrs.find(DecoderContext::kLiteralStrAttrName);
     CHECK(find_result != attrs.end());
-    return find_result->second->ToString();
+    return find_result->second.ToString();
   }
 
  private:

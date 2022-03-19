@@ -57,7 +57,7 @@ class TagTransformOperationView {
     auto find_result =
         attributes.find(DecoderContext::kTagTransformRuleAttributeName);
     CHECK(find_result != attributes.end());
-    return find_result->second->ToString();
+    return find_result->second.ToString();
   }
 
  private:
