@@ -13,33 +13,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_IR_ATTRIBUTES_ATTRIBUTE_H_
-#define SRC_IR_ATTRIBUTES_ATTRIBUTE_H_
+#ifndef SRC_IR_ATTRIBUTES_INT_ATTRIBUTE_H_
+#define SRC_IR_ATTRIBUTES_INT_ATTRIBUTE_H_
 
-#include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"
-#include "absl/strings/string_view.h"
-#include "src/common/utils/intrusive_ptr.h"
+#include "src/ir/attributes/attribute.h"
 
 namespace raksha::ir {
 
-// Base class for attributes associated with IR elements.
-class AttributeBase : public RefCounted<AttributeBase> {
+class Int64Attribute : public AttributeBase {
  public:
-  enum class Kind { kInt64, kString };
-  AttributeBase(Kind kind) : kind_(kind) {}
-  virtual ~AttributeBase() {}
+  static Attribute Create(int value) {
+    return Attribute(new Int64Attribute(value));
+  }
 
-  virtual Kind kind() const { return kind_; }
-  virtual std::string ToString() const = 0;
+  int value() const { return value_; }
+
+  std::string ToString() const override {
+    return absl::StrFormat("%d", value_);
+  }
 
  private:
-  Kind kind_;
-};
+  Int64Attribute(int64_t value) : AttributeBase(Kind::kInt64), value_(value) {}
 
-using Attribute = intrusive_ptr<const AttributeBase>;
-using NamedAttributeMap = absl::flat_hash_map<std::string, Attribute>;
+  int64_t value_;
+};
 
 }  // namespace raksha::ir
 
-#endif  // SRC_IR_ATTRIBUTES_ATTRIBUTE_H_
+#endif  // SRC_IR_ATTRIBUTES_INT_ATTRIBUTE_H_

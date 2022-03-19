@@ -31,11 +31,39 @@ cc_library(
     ],
 )
 
-cc_test(
-    name = "attribute_test",
-    srcs = ["attribute_test.cc"],
+cc_library(
+    name = "int_attribute",
+    hdrs = ["int_attribute.h"],
     deps = [
         ":attribute",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "int_attribute_test",
+    srcs = ["int_attribute_test.cc"],
+    deps = [
+        ":int_attribute",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
+    name = "string_attribute",
+    hdrs = ["string_attribute.h"],
+    deps = [
+        ":attribute",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "string_attribute_test",
+    srcs = ["string_attribute_test.cc"],
+    deps = [
+        ":string_attribute",
         "//src/common/testing:gtest",
     ],
 )

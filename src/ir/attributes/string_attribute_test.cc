@@ -13,27 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#include "src/ir/attributes/attribute.h"
+#include "src/ir/attributes/string_attribute.h"
 
 #include "src/common/testing/gtest.h"
 
 namespace raksha::ir {
 namespace {
-
-class IntAttributeTest
-    : public testing::TestWithParam<std::pair<int64_t, absl::string_view>> {};
-
-TEST_P(IntAttributeTest, KindAndToStringWorks) {
-  const auto& [value, string_rep] = GetParam();
-  auto int_attribute = Int64Attribute::Create(value);
-  EXPECT_EQ(int_attribute->kind(), AttributeBase::Kind::kInt64);
-  EXPECT_EQ(int_attribute->ToString(), string_rep);
-}
-
-INSTANTIATE_TEST_SUITE_P(IntAttributeTest, IntAttributeTest,
-                         testing::Values(std::make_pair(10, "10"),
-                                         std::make_pair(-30, "-30"),
-                                         std::make_pair(0, "0")));
 
 class StringAttributeTest : public testing::TestWithParam<absl::string_view> {};
 
