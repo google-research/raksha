@@ -43,6 +43,10 @@ class Int64Attribute : public AttributeBase {
   int64_t value_;
 };
 
+inline bool operator==(const Int64Attribute& lhs, const Int64Attribute& rhs) {
+  return lhs.value() == rhs.value();
+}
+
 }  // namespace raksha::ir
 
 #endif  // SRC_IR_ATTRIBUTES_INT_ATTRIBUTE_H_
