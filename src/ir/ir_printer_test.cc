@@ -112,8 +112,8 @@ TEST_P(IRPrinterTest, PrettyPrintsOperationWithProperIndentation) {
 TEST_P(IRPrinterTest, PrettyPrintAttributesAndArgsInSortedOrder) {
   Operation operation(
       nullptr, minus_op(),
-      {{"access", StringAttribute::Create("private")},
-       {"name", StringAttribute::Create("addition")}},
+      {{"access", Attribute::Create<StringAttribute>("private")},
+       {"name", Attribute::Create<StringAttribute>("addition")}},
       {{"const", Value(value::Any())}, {"arg", Value(value::Any())}});
 
   EXPECT_EQ(ToString(operation),

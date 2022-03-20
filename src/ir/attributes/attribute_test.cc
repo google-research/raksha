@@ -23,31 +23,30 @@
 namespace raksha::ir {
 namespace {
 
-// Constructor for different attribute types.
-template <typename A>
-intrusive_ptr<const A> MakeAttribute();
+struct TestData {
+  TestData(Attribute attribute, AttributeBase::Kind kind,
+           absl::string_view string_rep)
+      : attribute(attribute), kind(kind), string_rep(string_rep) {}
 
-template <>
-intrusive_ptr<const StringAttribute> MakeAttribute() {
-  return StringAttribute::Create("Hello");
+  Attribute attribute;
+  AttributeBase::Kind kind;
+  absl::string_view string_rep;
+};
+
+class AttributeTest : public testing::TestWithParam<TestData> {};
+
+TEST_P(AttributeTest, ConstructedAttributeReturnsCorrectProperties) {
+  TestData p = GetParam();
+  EXPECT_EQ(p.attribute.kind(), p.kind);
+  EXPECT_EQ(p.attribute.ToString(), p.string_rep);
 }
-template <>
-intrusive_ptr<const Int64Attribute> MakeAttribute() {
-  return Int64Attribute::Create(10);
-}
 
-template <typename T>
-class AttributeTest : public testing::Test {};
-
-using AttributeTypes = testing::Types<Int64Attribute, StringAttribute>;
-TYPED_TEST_SUITE(AttributeTest, AttributeTypes);
-
-TYPED_TEST(AttributeTest, ConstructedAttributeReturnsTheCorrectProperties) {
-  intrusive_ptr<const TypeParam> typed_attribute = MakeAttribute<TypeParam>();
-  Attribute attribute = typed_attribute;
-  EXPECT_EQ(attribute.kind(), typed_attribute->kind());
-  EXPECT_EQ(attribute.ToString(), typed_attribute->ToString());
-}
+INSTANTIATE_TEST_SUITE_P(
+    AttributeTest, AttributeTest,
+    testing::Values(TestData(Attribute::Create<Int64Attribute>(10),
+                             AttributeBase::Kind::kInt64, "10"),
+                    TestData(Attribute::Create<StringAttribute>("Hello World!"),
+                             AttributeBase::Kind::kString, "Hello World!")));
 
 }  // namespace
 }  // namespace raksha::ir

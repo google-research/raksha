@@ -39,12 +39,12 @@ class AttributeBase : public RefCounted<AttributeBase> {
 
 class Attribute {
  public:
-  // Allows an `Attribute` instance  to be constructed from any intrusive_ptr
-  // that is convertible to `intrusive_ptr<const AttributeBase*>`.
-  template <class T,
+  template <typename T, typename... Args,
             std::enable_if_t<std::is_convertible<T*, AttributeBase*>::value,
                              bool> = true>
-  Attribute(const intrusive_ptr<const T>& value) : value_(value) {}
+  static Attribute Create(Args&&... a) {
+    return T::Create(std::forward<Args>(a)...);
+  }
 
   // Use default copy, move, and assignments.
   Attribute(const Attribute&) = default;
@@ -59,6 +59,13 @@ class Attribute {
   std::string ToString() const { return value_->ToString(); }
 
  private:
+  // Allows an `Attribute` instance  to be constructed from any intrusive_ptr
+  // that is convertible to `intrusive_ptr<const AttributeBase*>`.
+  template <class T,
+            std::enable_if_t<std::is_convertible<T*, AttributeBase*>::value,
+                             bool> = true>
+  Attribute(const intrusive_ptr<const T>& value) : value_(value) {}
+
   intrusive_ptr<const AttributeBase> value_;
 };
 

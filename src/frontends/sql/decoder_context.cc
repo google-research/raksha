@@ -64,8 +64,9 @@ const ir::Operation &DecoderContext::MakeTagTransformOperation(
 
   return top_level_block_builder_.AddOperation(
       tag_transform_operator_,
-      NamedAttributeMap{{std::string(kTagTransformRuleAttributeName),
-                         ir::StringAttribute::Create(rule_name)}},
+      NamedAttributeMap{
+          {std::string(kTagTransformRuleAttributeName),
+           ir::Attribute::Create<ir::StringAttribute>(rule_name)}},
       std::move(values_map));
 }
 
