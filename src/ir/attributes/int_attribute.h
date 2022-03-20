@@ -22,6 +22,9 @@
 
 namespace raksha::ir {
 
+class Int64Attribute;
+bool operator==(const Int64Attribute& lhs, const Int64Attribute& rhs);
+
 class Int64Attribute : public AttributeBase {
  public:
   static constexpr Kind kAttributeKind = Kind::kInt64;
@@ -31,6 +34,11 @@ class Int64Attribute : public AttributeBase {
   }
 
   int64_t value() const { return value_; }
+
+  bool IsEqual(const AttributeBase& other) const override {
+    if (this->kind() != other.kind()) return false;
+    return *this == static_cast<const Int64Attribute&>(other);
+  }
 
   std::string ToString() const override {
     return absl::StrFormat("%d", value_);

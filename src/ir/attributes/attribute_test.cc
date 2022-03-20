@@ -53,6 +53,33 @@ CreateTestAttribute() {
   return std::make_pair(Attribute::Create<StringAttribute>("Hello World!"),
                         StringAttribute::Create("Hello World!"));
 }
+struct AttributeWithId {
+  AttributeWithId(int id, Attribute attribute) : id(id), attribute(attribute) {}
+  int id;
+  Attribute attribute;
+};
+
+class AttributeEqualityTest
+    : public testing::TestWithParam<
+          std::tuple<AttributeWithId, AttributeWithId>> {};
+
+TEST_P(AttributeEqualityTest, EqualityReturnsCorrectValue) {
+  const auto& [lhs, rhs] = GetParam();
+  EXPECT_EQ(lhs.id == rhs.id, lhs.attribute == rhs.attribute);
+}
+
+AttributeWithId kExampleAttributes[] = {
+    AttributeWithId(0, Attribute::Create<StringAttribute>("Hello")),
+    AttributeWithId(0, Attribute::Create<StringAttribute>("Hello")),
+    AttributeWithId(1, Attribute::Create<Int64Attribute>(10)),
+    AttributeWithId(1, Attribute::Create<Int64Attribute>(10)),
+    AttributeWithId(2, Attribute::Create<StringAttribute>("World")),
+    AttributeWithId(3, Attribute::Create<Int64Attribute>(30))};
+
+INSTANTIATE_TEST_SUITE_P(
+    AttributeEqualityTest, AttributeEqualityTest,
+    testing::Combine(testing::ValuesIn(kExampleAttributes),
+                     testing::ValuesIn(kExampleAttributes)));
 
 TYPED_TEST(AttributeTest, ConstructorAndAsConversionWorksCorrectly) {
   const auto& [attr, typed_attribute] = CreateTestAttribute<TypeParam>();
