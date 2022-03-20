@@ -73,7 +73,9 @@ class Attribute {
   template <class T,
             std::enable_if_t<std::is_convertible<T*, AttributeBase*>::value,
                              bool> = true>
-  Attribute(intrusive_ptr<const T> value) : value_(std::move(value)) {}
+  Attribute(intrusive_ptr<const T> value) : value_(std::move(value)) {
+    CHECK(value_ != nullptr);
+  }
 
   intrusive_ptr<const AttributeBase> value_;
 };
