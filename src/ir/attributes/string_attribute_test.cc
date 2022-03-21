@@ -23,6 +23,8 @@ namespace {
 TEST(StringAttributeKindTest, ConstantkAttributeKindIsString) {
   EXPECT_EQ(StringAttribute::kAttributeKind, AttributeBase::Kind::kString);
 }
+constexpr absl::string_view kExampleStrings[] = {"good", "bad", "ugly",
+                                                 "3242e323"};
 
 class StringAttributeTest : public testing::TestWithParam<absl::string_view> {};
 
@@ -34,7 +36,23 @@ TEST_P(StringAttributeTest, KindAndToStringWorks) {
 }
 
 INSTANTIATE_TEST_SUITE_P(StringAttributeTest, StringAttributeTest,
-                         testing::Values("good", "bad", "ugly", "3242e323"));
+                         testing::ValuesIn(kExampleStrings));
+
+class StringAttributeComparatorTest
+    : public testing::TestWithParam<
+          std::tuple<absl::string_view, absl::string_view>> {};
+
+TEST_P(StringAttributeComparatorTest, EqualityWorksAsExpected) {
+  const auto& [lhs, rhs] = GetParam();
+  auto lhs_attribute = StringAttribute::Create(lhs);
+  auto rhs_attribute = StringAttribute::Create(rhs);
+  EXPECT_EQ(*lhs_attribute == *rhs_attribute, lhs == rhs);
+}
+
+INSTANTIATE_TEST_SUITE_P(StringAttributeComparatorTest,
+                         StringAttributeComparatorTest,
+                         testing::Combine(testing::ValuesIn(kExampleStrings),
+                                          testing::ValuesIn(kExampleStrings)));
 
 }  // namespace
 }  // namespace raksha::ir

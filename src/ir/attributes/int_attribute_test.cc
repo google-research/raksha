@@ -39,5 +39,21 @@ INSTANTIATE_TEST_SUITE_P(IntAttributeTest, IntAttributeTest,
                                          std::make_pair(-30, "-30"),
                                          std::make_pair(0, "0")));
 
+constexpr int kExampleInts[] = {10, -30, 0};
+
+class IntAttributeComparatorTest
+    : public testing::TestWithParam<std::tuple<int, int>> {};
+
+TEST_P(IntAttributeComparatorTest, EqualityWorksAsExpected) {
+  const auto& [lhs, rhs] = GetParam();
+  auto lhs_attribute = Int64Attribute::Create(lhs);
+  auto rhs_attribute = Int64Attribute::Create(rhs);
+  EXPECT_EQ(*lhs_attribute == *rhs_attribute, lhs == rhs);
+}
+
+INSTANTIATE_TEST_SUITE_P(IntAttributeComparatorTest, IntAttributeComparatorTest,
+                         testing::Combine(testing::ValuesIn(kExampleInts),
+                                          testing::ValuesIn(kExampleInts)));
+
 }  // namespace
 }  // namespace raksha::ir

@@ -30,7 +30,9 @@ class AttributeBase : public RefCounted<AttributeBase> {
   AttributeBase(Kind kind) : kind_(kind) {}
   virtual ~AttributeBase() {}
 
-  virtual Kind kind() const { return kind_; }
+  Kind kind() const { return kind_; }
+
+  virtual bool IsEqual(const AttributeBase& other) const = 0;
   virtual std::string ToString() const = 0;
 
  private:
@@ -67,16 +69,28 @@ class Attribute {
   // Returns a string representation of the attribute.
   std::string ToString() const { return value_->ToString(); }
 
+  friend bool operator==(const Attribute& lhs, const Attribute& rhs);
+
  private:
   // Private constructor that allows us to construct an attribute from an
   // intrusive_ptr to any derived type of `AttributeBase`.
   template <class T,
             std::enable_if_t<std::is_convertible<T*, AttributeBase*>::value,
                              bool> = true>
-  Attribute(intrusive_ptr<const T> value) : value_(std::move(value)) {}
+  Attribute(intrusive_ptr<const T> value) : value_(std::move(value)) {
+    CHECK(value_ != nullptr);
+  }
 
   intrusive_ptr<const AttributeBase> value_;
 };
+
+// TODO(#336): This will simply become a pointer comparison when we canonicalize
+// the attributes.
+inline bool operator==(const Attribute& lhs, const Attribute& rhs) {
+  CHECK(lhs.value_ != nullptr && rhs.value_ != nullptr);
+  if (lhs.value_ == rhs.value_) return true;
+  return lhs.value_->IsEqual(*rhs.value_);
+}
 
 using NamedAttributeMap = absl::flat_hash_map<std::string, Attribute>;
 

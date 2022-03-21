@@ -21,6 +21,10 @@
 #include "src/ir/attributes/attribute.h"
 
 namespace raksha::ir {
+
+class StringAttribute;
+bool operator==(const StringAttribute& lhs, const StringAttribute& rhs);
+
 class StringAttribute : public AttributeBase {
  public:
   static constexpr Kind kAttributeKind = Kind::kString;
@@ -30,6 +34,12 @@ class StringAttribute : public AttributeBase {
   }
 
   absl::string_view value() const { return value_; }
+
+  bool IsEqual(const AttributeBase& other) const override {
+    if (this->kind() != other.kind()) return false;
+    return *this == static_cast<const StringAttribute&>(other);
+  }
+
   std::string ToString() const override { return value_; }
 
  private:
@@ -38,6 +48,10 @@ class StringAttribute : public AttributeBase {
 
   std::string value_;
 };
+
+inline bool operator==(const StringAttribute& lhs, const StringAttribute& rhs) {
+  return lhs.value() == rhs.value();
+}
 
 }  // namespace raksha::ir
 
