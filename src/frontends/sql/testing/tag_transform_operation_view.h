@@ -20,6 +20,7 @@
 #include "src/common/logging/logging.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/testing/operation_view_utils.h"
+#include "src/ir/attributes/string_attribute.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
 
@@ -51,13 +52,15 @@ class TagTransformOperationView {
         DecoderContext::kTagTransformPreconditionInputPrefix);
   }
 
-  std::string GetRuleName() const {
+  absl::string_view GetRuleName() const {
     const ir::NamedAttributeMap &attributes =
         tag_transform_operation_->attributes();
     auto find_result =
         attributes.find(DecoderContext::kTagTransformRuleAttributeName);
     CHECK(find_result != attributes.end());
-    return find_result->second.ToString();
+    const auto &rule_name_attribute =
+        CHECK_NOTNULL(find_result->second.GetIf<ir::StringAttribute>());
+    return rule_name_attribute->value();
   }
 
  private:

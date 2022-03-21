@@ -58,7 +58,7 @@ class Attribute {
   // If this is of type `T` as identified by the `kind`, this method returns a
   // non-null value to the underlying attribute. Otherwise, returns nullptr.
   template <typename T>
-  intrusive_ptr<const T> As() const {
+  intrusive_ptr<const T> GetIf() const {
     return (T::kAttributeKind != value_->kind())
                ? nullptr
                : static_cast<const T*>(value_.get());
@@ -73,7 +73,7 @@ class Attribute {
   template <class T,
             std::enable_if_t<std::is_convertible<T*, AttributeBase*>::value,
                              bool> = true>
-  Attribute(const intrusive_ptr<const T>& value) : value_(value) {}
+  Attribute(intrusive_ptr<const T> value) : value_(std::move(value)) {}
 
   intrusive_ptr<const AttributeBase> value_;
 };

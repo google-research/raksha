@@ -57,7 +57,7 @@ CreateTestAttribute() {
 TYPED_TEST(AttributeTest, ConstructorAndAsConversionWorksCorrectly) {
   const auto& [attr, typed_attribute] = CreateTestAttribute<TypeParam>();
   intrusive_ptr<const TypeParam> expected_typed_attribute =
-      attr.template As<TypeParam>();
+      attr.template GetIf<TypeParam>();
   ASSERT_NE(expected_typed_attribute, nullptr);
   // TODO(#336): Replace `ToString` with comparator.
   EXPECT_EQ(expected_typed_attribute->ToString(), typed_attribute->ToString());
@@ -65,7 +65,7 @@ TYPED_TEST(AttributeTest, ConstructorAndAsConversionWorksCorrectly) {
 
 TEST(AttributeAsMethodTest, IncorrectTypeReturnsNullptr) {
   auto [int_attribute, _] = CreateTestAttribute<Int64Attribute>();
-  EXPECT_EQ(int_attribute.As<StringAttribute>(), nullptr);
+  EXPECT_EQ(int_attribute.GetIf<StringAttribute>(), nullptr);
 }
 
 }  // namespace
