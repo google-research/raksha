@@ -28,7 +28,7 @@ struct OpTraits {};
   template <>                                           \
   struct OpTraits<CLASS> {                              \
     static constexpr absl::string_view kName = OP_NAME; \
-  };
+  }
 
 DEFINE_OP_TRAITS(LiteralOp, "sql.literal");
 
