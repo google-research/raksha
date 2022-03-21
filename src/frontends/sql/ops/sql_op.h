@@ -41,6 +41,15 @@ class SqlOp : public ir::Operation {
         std::make_unique<ir::Operator>(OpTraits<T>::kName));
   }
 
+  // If the `operation` is of `SqlOp` type `T`, downcasts and returns an
+  // instance of `const T*`. Otherwise, returns nullptr.
+  template <typename T>
+  static const T* GetIf(const ir::Operation& operation) {
+    return OpTraits<T>::kName != operation.op().name()
+               ? nullptr
+               : static_cast<const T*>(std::addressof(operation));
+  }
+
   // Inherit constructors.
   using ir::Operation::Operation;
 
