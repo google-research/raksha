@@ -20,12 +20,16 @@
 namespace raksha::ir {
 namespace {
 
+TEST(StringAttributeKindTest, ConstantkAttributeKindIsString) {
+  EXPECT_EQ(StringAttribute::kAttributeKind, AttributeBase::Kind::kString);
+}
+
 class StringAttributeTest : public testing::TestWithParam<absl::string_view> {};
 
 TEST_P(StringAttributeTest, KindAndToStringWorks) {
   absl::string_view value = GetParam();
   auto string_attribute = StringAttribute::Create(value);
-  EXPECT_EQ(string_attribute->kind(), AttributeBase::Kind::kString);
+  EXPECT_EQ(string_attribute->kind(), StringAttribute::kAttributeKind);
   EXPECT_EQ(string_attribute->ToString(), value);
 }
 

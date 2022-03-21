@@ -20,13 +20,17 @@
 namespace raksha::ir {
 namespace {
 
+TEST(IntAttributeKindTest, ConstantkAttributeKindIsInt64) {
+  EXPECT_EQ(Int64Attribute::kAttributeKind, AttributeBase::Kind::kInt64);
+}
+
 class IntAttributeTest
     : public testing::TestWithParam<std::pair<int64_t, absl::string_view>> {};
 
 TEST_P(IntAttributeTest, KindAndToStringWorks) {
   const auto& [value, string_rep] = GetParam();
   auto int_attribute = Int64Attribute::Create(value);
-  EXPECT_EQ(int_attribute->kind(), AttributeBase::Kind::kInt64);
+  EXPECT_EQ(int_attribute->kind(), Int64Attribute::kAttributeKind);
   EXPECT_EQ(int_attribute->ToString(), string_rep);
 }
 

@@ -23,6 +23,8 @@
 namespace raksha::ir {
 class StringAttribute : public AttributeBase {
  public:
+  static constexpr Kind kAttributeKind = Kind::kString;
+
   static intrusive_ptr<const StringAttribute> Create(absl::string_view value) {
     return intrusive_ptr<const StringAttribute>(new StringAttribute(value));
   }
@@ -32,7 +34,7 @@ class StringAttribute : public AttributeBase {
 
  private:
   StringAttribute(absl::string_view value)
-      : AttributeBase(Kind::kString), value_(value) {}
+      : AttributeBase(kAttributeKind), value_(value) {}
 
   std::string value_;
 };

@@ -23,30 +23,37 @@
 namespace raksha::ir {
 namespace {
 
-struct TestData {
-  TestData(Attribute attribute, AttributeBase::Kind kind,
-           absl::string_view string_rep)
-      : attribute(attribute), kind(kind), string_rep(string_rep) {}
+template <typename T>
+std::pair<Attribute, intrusive_ptr<const T>> CreateTestAttribute();
 
-  Attribute attribute;
-  AttributeBase::Kind kind;
-  absl::string_view string_rep;
-};
-
-class AttributeTest : public testing::TestWithParam<TestData> {};
-
-TEST_P(AttributeTest, ConstructedAttributeReturnsCorrectProperties) {
-  TestData p = GetParam();
-  EXPECT_EQ(p.attribute.kind(), p.kind);
-  EXPECT_EQ(p.attribute.ToString(), p.string_rep);
+template <>
+std::pair<Attribute, intrusive_ptr<const Int64Attribute>>
+CreateTestAttribute() {
+  return std::make_pair(Attribute::Create<Int64Attribute>(10),
+                        Int64Attribute::Create(10));
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    AttributeTest, AttributeTest,
-    testing::Values(TestData(Attribute::Create<Int64Attribute>(10),
-                             AttributeBase::Kind::kInt64, "10"),
-                    TestData(Attribute::Create<StringAttribute>("Hello World!"),
-                             AttributeBase::Kind::kString, "Hello World!")));
+template <>
+std::pair<Attribute, intrusive_ptr<const StringAttribute>>
+CreateTestAttribute() {
+  return std::make_pair(Attribute::Create<StringAttribute>("Hello World!"),
+                        StringAttribute::Create("Hello World!"));
+}
+
+template <typename T>
+class AttributeTest : public testing::Test {};
+
+using AttributeTypes = ::testing::Types<Int64Attribute, StringAttribute>;
+TYPED_TEST_SUITE(AttributeTest, AttributeTypes);
+
+TYPED_TEST(AttributeTest, ConstructorAndAsConversionWorksCorrectly) {
+  const auto& [attr, typed_attribute] = CreateTestAttribute<TypeParam>();
+  intrusive_ptr<const TypeParam> expected_typed_attribute =
+      attr.template As<TypeParam>();
+  ASSERT_NE(expected_typed_attribute, nullptr);
+  // TODO(#336): Replace `ToString` with comparator.
+  EXPECT_EQ(expected_typed_attribute->ToString(), typed_attribute->ToString());
+}
 
 }  // namespace
 }  // namespace raksha::ir

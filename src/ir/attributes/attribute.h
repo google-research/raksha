@@ -52,8 +52,14 @@ class Attribute {
   Attribute& operator=(const Attribute&) = default;
   Attribute& operator=(Attribute&&) = default;
 
-  // Returns the attribute kind.
-  AttributeBase::Kind kind() const { return value_->kind(); }
+  // If this attribute is of type `T`, returns a non-null value to the
+  // underlying attribute. Otherwise, returns nullptr.
+  template <typename T>
+  intrusive_ptr<const T> As() const {
+    return (T::kAttributeKind != value_->kind())
+               ? nullptr
+               : static_cast<const T*>(value_.get());
+  }
 
   // Returns a string representation of the attribute.
   std::string ToString() const { return value_->ToString(); }
