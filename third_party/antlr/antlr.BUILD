@@ -1,4 +1,3 @@
-#-------------------------------------------------------------------------------
 # Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,24 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-#-------------------------------------------------------------------------------
-load("//build_defs:antlr.bzl", "antlr4_cc_combined")
 
 package(
+    default_visibility = ["//visibility:public"],
     licenses = ["notice"],
 )
 
-exports_files(
-    ["AuthLogic.g4"],
-    visibility = [
-        "//rust/tools/authorization-logic:__pkg__",
-        "//src/ir/auth_logic:__pkg__",
-    ],
-)
-
-#antlr
-antlr4_cc_combined(
-    name = "auth_logic_cc_generator",
-    src = "//src/policy/auth_logic:AuthLogic.g4",
+cc_library(
+    name = "antlr_runtime_build",
+    srcs = glob(["runtime/Cpp/runtime/src/**/*.cpp"]),
+    hdrs = glob(["runtime/Cpp/runtime/src/**/*.h"]),
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    includes = ["runtime/Cpp/runtime/src"],
 )
