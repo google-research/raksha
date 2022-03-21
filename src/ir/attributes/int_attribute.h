@@ -17,14 +17,17 @@
 #define SRC_IR_ATTRIBUTES_INT_ATTRIBUTE_H_
 
 #include "absl/strings/str_format.h"
+#include "src/common/utils/intrusive_ptr.h"
 #include "src/ir/attributes/attribute.h"
 
 namespace raksha::ir {
 
 class Int64Attribute : public AttributeBase {
  public:
-  static Attribute Create(int64_t value) {
-    return Attribute(new Int64Attribute(value));
+  static constexpr Kind kAttributeKind = Kind::kInt64;
+
+  static intrusive_ptr<const Int64Attribute> Create(int64_t value) {
+    return intrusive_ptr<const Int64Attribute>(new Int64Attribute(value));
   }
 
   int64_t value() const { return value_; }
@@ -34,7 +37,8 @@ class Int64Attribute : public AttributeBase {
   }
 
  private:
-  Int64Attribute(int64_t value) : AttributeBase(Kind::kInt64), value_(value) {}
+  Int64Attribute(int64_t value)
+      : AttributeBase(kAttributeKind), value_(value) {}
 
   int64_t value_;
 };

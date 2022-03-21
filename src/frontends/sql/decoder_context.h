@@ -97,8 +97,9 @@ class DecoderContext {
   const ir::Operation &MakeLiteralOperation(absl::string_view literal_str) {
     return top_level_block_builder_.AddOperation(
         literal_operator_,
-        ir::NamedAttributeMap{{std::string(kLiteralStrAttrName),
-                               ir::StringAttribute::Create(literal_str)}},
+        ir::NamedAttributeMap{
+            {std::string(kLiteralStrAttrName),
+             ir::Attribute::Create<ir::StringAttribute>(literal_str)}},
         ir::NamedValueMap{});
   }
 

@@ -36,11 +36,13 @@ class LiteralOperationView {
     CHECK(literal_operation.inputs().size() == 0);
   }
 
-  std::string GetLiteralStr() const {
+  absl::string_view GetLiteralStr() const {
     const ir::NamedAttributeMap &attrs = literal_operation_->attributes();
     auto find_result = attrs.find(DecoderContext::kLiteralStrAttrName);
     CHECK(find_result != attrs.end());
-    return find_result->second->ToString();
+    const auto &string_attribute =
+        CHECK_NOTNULL(find_result->second.GetIf<ir::StringAttribute>());
+    return string_attribute->value();
   }
 
  private:

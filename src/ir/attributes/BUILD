@@ -31,11 +31,24 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "attribute_test",
+    srcs = ["attribute_test.cc"],
+    deps = [
+        ":attribute",
+        ":int_attribute",
+        ":string_attribute",
+        "//src/common/testing:gtest",
+        "//src/common/utils:intrusive_ptr",
+    ],
+)
+
 cc_library(
     name = "int_attribute",
     hdrs = ["int_attribute.h"],
     deps = [
         ":attribute",
+        "//src/common/utils:intrusive_ptr",
         "@absl//absl/strings:str_format",
     ],
 )
@@ -54,6 +67,7 @@ cc_library(
     hdrs = ["string_attribute.h"],
     deps = [
         ":attribute",
+        "//src/common/utils:intrusive_ptr",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],

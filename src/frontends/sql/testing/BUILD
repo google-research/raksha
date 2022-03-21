@@ -77,6 +77,7 @@ cc_library(
         "//src/frontends/sql/testing:utils",
         "//src/ir:module",
         "//src/ir:operator",
+        "//src/ir/attributes:string_attribute",
         "@absl//absl/strings",
     ],
 )

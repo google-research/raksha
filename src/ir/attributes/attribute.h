@@ -37,7 +37,47 @@ class AttributeBase : public RefCounted<AttributeBase> {
   Kind kind_;
 };
 
-using Attribute = intrusive_ptr<const AttributeBase>;
+class Attribute {
+ public:
+  // Factory method to create attributes of the appropriate kind. This
+  // forwards the arguments to the corresponding T::create method to
+  // create the correct attribute.
+  template <typename T, typename... Args,
+            std::enable_if_t<std::is_convertible<T*, AttributeBase*>::value,
+                             bool> = true>
+  static Attribute Create(Args&&... a) {
+    return T::Create(std::forward<Args>(a)...);
+  }
+
+  // Use default copy, move, and assignments.
+  Attribute(const Attribute&) = default;
+  Attribute(Attribute&&) = default;
+  Attribute& operator=(const Attribute&) = default;
+  Attribute& operator=(Attribute&&) = default;
+
+  // If this is of type `T` as identified by the `kind`, this method returns a
+  // non-null value to the underlying attribute. Otherwise, returns nullptr.
+  template <typename T>
+  intrusive_ptr<const T> GetIf() const {
+    return (T::kAttributeKind != value_->kind())
+               ? nullptr
+               : static_cast<const T*>(value_.get());
+  }
+
+  // Returns a string representation of the attribute.
+  std::string ToString() const { return value_->ToString(); }
+
+ private:
+  // Private constructor that allows us to construct an attribute from an
+  // intrusive_ptr to any derived type of `AttributeBase`.
+  template <class T,
+            std::enable_if_t<std::is_convertible<T*, AttributeBase*>::value,
+                             bool> = true>
+  Attribute(intrusive_ptr<const T> value) : value_(std::move(value)) {}
+
+  intrusive_ptr<const AttributeBase> value_;
+};
+
 using NamedAttributeMap = absl::flat_hash_map<std::string, Attribute>;
 
 }  // namespace raksha::ir
