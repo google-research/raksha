@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ namespace {
 class StringAttributeTest : public testing::TestWithParam<absl::string_view> {};
 
 TEST_P(StringAttributeTest, KindAndToStringWorks) {
-  const auto& value = GetParam();
+  absl::string_view value = GetParam();
   auto string_attribute = StringAttribute::Create(value);
   EXPECT_EQ(string_attribute->kind(), AttributeBase::Kind::kString);
   EXPECT_EQ(string_attribute->ToString(), value);

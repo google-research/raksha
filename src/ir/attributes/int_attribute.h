@@ -23,11 +23,11 @@ namespace raksha::ir {
 
 class Int64Attribute : public AttributeBase {
  public:
-  static Attribute Create(int value) {
+  static Attribute Create(int64_t value) {
     return Attribute(new Int64Attribute(value));
   }
 
-  int value() const { return value_; }
+  int64_t value() const { return value_; }
 
   std::string ToString() const override {
     return absl::StrFormat("%d", value_);
