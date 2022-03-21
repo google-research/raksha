@@ -18,7 +18,7 @@
 #include <memory>
 
 #include "src/common/testing/gtest.h"
-#include "src/ir/attribute.h"
+#include "src/ir/attributes/attribute.h"
 #include "src/ir/ir_context.h"
 #include "src/ir/types/entity_type.h"
 #include "src/ir/types/type.h"

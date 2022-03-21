@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "absl/container/flat_hash_map.h"
+#include "src/ir/attributes/string_attribute.h"
 #include "src/ir/block_builder.h"
 #include "src/ir/ir_context.h"
 #include "src/ir/value.h"

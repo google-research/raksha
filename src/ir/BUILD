@@ -24,26 +24,6 @@ package(
 )
 
 cc_library(
-    name = "attribute",
-    hdrs = ["attribute.h"],
-    deps = [
-        "//src/common/utils:intrusive_ptr",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/strings",
-        "@absl//absl/strings:str_format",
-    ],
-)
-
-cc_test(
-    name = "attribute_test",
-    srcs = ["attribute_test.cc"],
-    deps = [
-        ":attribute",
-        "//src/common/testing:gtest",
-    ],
-)
-
-cc_library(
     name = "block_builder",
     hdrs = ["block_builder.h"],
     deps = [
@@ -60,10 +40,10 @@ cc_test(
         "block_builder_test.cc",
     ],
     deps = [
-        ":attribute",
         ":block_builder",
         ":ir_context",
         "//src/common/testing:gtest",
+        "//src/ir/attributes:attribute",
         "//src/ir/types",
     ],
 )
@@ -124,12 +104,12 @@ cc_test(
     name = "ir_printer_test",
     srcs = ["ir_printer_test.cc"],
     deps = [
-        ":attribute",
         ":block_builder",
         ":ir_printer",
         ":module",
         ":value",
         "//src/common/testing:gtest",
+        "//src/ir/attributes:string_attribute",
         "@absl//absl/container:flat_hash_set",
     ],
 )
@@ -172,11 +152,12 @@ cc_test(
     name = "operation_test",
     srcs = ["operation_test.cc"],
     deps = [
-        ":attribute",
         ":ir_printer",
         ":module",
         ":value",
         "//src/common/testing:gtest",
+        "//src/ir/attributes:int_attribute",
+        "//src/ir/attributes:string_attribute",
         "@absl//absl/container:flat_hash_set",
     ],
 )
@@ -188,11 +169,11 @@ cc_library(
         "module.h",
     ],
     deps = [
-        ":attribute",
         ":data_decl",
         ":operator",
         ":ssa_names",
         ":value",
+        "//src/ir/attributes:attribute",
         "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings",
