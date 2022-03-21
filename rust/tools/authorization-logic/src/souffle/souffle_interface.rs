@@ -41,14 +41,16 @@ pub fn emit_souffle(filename: &str) {
 /// translates it to datalogIR, and emits souffle code to a new file with the
 /// same name as the input but with the .dl extension in the out_dir
 pub fn input_to_souffle_file(filename: &str, in_dir: &str, out_dir: &str) {
-    let source = fs::read_to_string(&format!("{}/{}", in_dir, filename))
-        .expect("failed to read input in input_to_souffle_file");
+    let in_path = format!("{}/{}", in_dir, filename);
+    let source = fs::read_to_string(&in_path)
+        .unwrap_or_else(|err|panic!("failed to read input in input_to_souffle_file: {}\n{}", &in_path, err));
     let prog = astconstructionvisitor::parse_program(&source[..]);
     let universe_handled_prog = UniverseHandlingPass::handle_universes(&prog);
     let dlir_prog = LoweringToDatalogPass::lower(&universe_handled_prog);
     let souffle_code = souffle_emitter::emit_program(&dlir_prog, &None);
-    fs::write(&format!("{}/{}.dl", out_dir, filename), souffle_code)
-        .expect("failed to write output to file");
+    let out_path = format!("{}/{}.dl", out_dir, filename);
+    fs::write(&out_path, souffle_code)
+        .unwrap_or_else(|err|panic!("failed to read output in input_to_souffle_file: {}\n{}", &out_path, err));
 }
 
 /// Given a parsed AstProgram, this function emits souffle code to a file.
