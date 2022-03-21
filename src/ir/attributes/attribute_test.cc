@@ -53,6 +53,7 @@ CreateTestAttribute() {
   return std::make_pair(Attribute::Create<StringAttribute>("Hello World!"),
                         StringAttribute::Create("Hello World!"));
 }
+
 struct AttributeWithId {
   AttributeWithId(int id, Attribute attribute) : id(id), attribute(attribute) {}
   int id;

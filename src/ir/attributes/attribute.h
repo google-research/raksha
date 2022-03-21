@@ -88,6 +88,7 @@ class Attribute {
 // the attributes.
 inline bool operator==(const Attribute& lhs, const Attribute& rhs) {
   CHECK(lhs.value_ != nullptr && rhs.value_ != nullptr);
+  if (lhs.value_ == rhs.value_) return true;
   return lhs.value_->IsEqual(*rhs.value_);
 }
 
