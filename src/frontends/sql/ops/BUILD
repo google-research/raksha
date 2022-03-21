@@ -20,6 +20,28 @@ package(
 )
 
 cc_library(
+    name = "sql_op",
+    hdrs = ["sql_op.h"],
+    deps = [
+        ":op_traits",
+        "//src/ir:ir_context",
+        "//src/ir:module",
+        "//src/ir:operator",
+    ],
+)
+
+cc_test(
+    name = "sql_op_test",
+    srcs = ["sql_op_test.cc"],
+    deps = [
+        ":op_traits",
+        ":sql_op",
+        "//src/common/testing:gtest",
+        "//src/ir:ir_context",
+    ],
+)
+
+cc_library(
     name = "op_traits",
     hdrs = ["op_traits.h"],
     deps = [
