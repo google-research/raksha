@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,10 +22,24 @@
 
 namespace raksha::ir {
 namespace {
-
+// A method to construct a test attribute of a specific attribute type. This
+// method is specialized below for every attribute type that we want to test.
 template <typename T>
 std::pair<Attribute, intrusive_ptr<const T>> CreateTestAttribute();
 
+template <typename T>
+class AttributeTest : public testing::Test {};
+
+using AttributeTypes = ::testing::Types<Int64Attribute, StringAttribute>;
+TYPED_TEST_SUITE(AttributeTest, AttributeTypes);
+
+// Example attributes for tests.
+//
+// All specializations return a pair consisting of the following:
+//   - An `Attribute` that wraps the underlying `intrusive_ptr<T>`.
+//   - A directly created instance of `intrusive_ptr<T>`, which is used to
+//     compare against the value returned by Attribute::As<T>().
+//
 template <>
 std::pair<Attribute, intrusive_ptr<const Int64Attribute>>
 CreateTestAttribute() {
@@ -40,12 +54,6 @@ CreateTestAttribute() {
                         StringAttribute::Create("Hello World!"));
 }
 
-template <typename T>
-class AttributeTest : public testing::Test {};
-
-using AttributeTypes = ::testing::Types<Int64Attribute, StringAttribute>;
-TYPED_TEST_SUITE(AttributeTest, AttributeTypes);
-
 TYPED_TEST(AttributeTest, ConstructorAndAsConversionWorksCorrectly) {
   const auto& [attr, typed_attribute] = CreateTestAttribute<TypeParam>();
   intrusive_ptr<const TypeParam> expected_typed_attribute =
@@ -53,6 +61,11 @@ TYPED_TEST(AttributeTest, ConstructorAndAsConversionWorksCorrectly) {
   ASSERT_NE(expected_typed_attribute, nullptr);
   // TODO(#336): Replace `ToString` with comparator.
   EXPECT_EQ(expected_typed_attribute->ToString(), typed_attribute->ToString());
+}
+
+TEST(AttributeAsMethodTest, IncorrectTypeReturnsNullptr) {
+  auto [int_attribute, _] = CreateTestAttribute<Int64Attribute>();
+  EXPECT_EQ(int_attribute.As<StringAttribute>(), nullptr);
 }
 
 }  // namespace

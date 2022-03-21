@@ -39,6 +39,9 @@ class AttributeBase : public RefCounted<AttributeBase> {
 
 class Attribute {
  public:
+  // Factory method to create attributes of the appropriate kind. This
+  // forwards the arguments to the corresponding T::create method to
+  // create the correct attribute.
   template <typename T, typename... Args,
             std::enable_if_t<std::is_convertible<T*, AttributeBase*>::value,
                              bool> = true>
@@ -52,8 +55,8 @@ class Attribute {
   Attribute& operator=(const Attribute&) = default;
   Attribute& operator=(Attribute&&) = default;
 
-  // If this attribute is of type `T`, returns a non-null value to the
-  // underlying attribute. Otherwise, returns nullptr.
+  // If this is of type `T` as identified by the `kind`, this method returns a
+  // non-null value to the underlying attribute. Otherwise, returns nullptr.
   template <typename T>
   intrusive_ptr<const T> As() const {
     return (T::kAttributeKind != value_->kind())
@@ -65,8 +68,8 @@ class Attribute {
   std::string ToString() const { return value_->ToString(); }
 
  private:
-  // Allows an `Attribute` instance  to be constructed from any intrusive_ptr
-  // that is convertible to `intrusive_ptr<const AttributeBase*>`.
+  // Private constructor that allows us to construct an attribute from an
+  // intrusive_ptr to any derived type of `AttributeBase`.
   template <class T,
             std::enable_if_t<std::is_convertible<T*, AttributeBase*>::value,
                              bool> = true>
