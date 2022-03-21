@@ -48,6 +48,7 @@ cc_library(
     hdrs = ["int_attribute.h"],
     deps = [
         ":attribute",
+        "//src/common/utils:intrusive_ptr",
         "@absl//absl/strings:str_format",
     ],
 )
@@ -66,6 +67,7 @@ cc_library(
     hdrs = ["string_attribute.h"],
     deps = [
         ":attribute",
+        "//src/common/utils:intrusive_ptr",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],
