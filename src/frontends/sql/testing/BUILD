@@ -48,21 +48,6 @@ cc_library(
 )
 
 cc_library(
-    name = "literal_operation_view",
-    testonly = True,
-    hdrs = ["literal_operation_view.h"],
-    visibility = ["//src/frontends/sql:__subpackages__"],
-    deps = [
-        ":operation_view_utils",
-        "//src/common/logging",
-        "//src/frontends/sql:decoder_context",
-        "//src/ir:module",
-        "//src/ir:operator",
-        "@absl//absl/strings",
-    ],
-)
-
-cc_library(
     name = "tag_transform_operation_view",
     testonly = True,
     hdrs = ["tag_transform_operation_view.h"],
@@ -72,7 +57,6 @@ cc_library(
         "//src/common/logging",
         "//src/common/utils:map_iter",
         "//src/frontends/sql:decoder_context",
-        "//src/frontends/sql/testing:literal_operation_view",
         "//src/frontends/sql/testing:merge_operation_view",
         "//src/frontends/sql/testing:utils",
         "//src/ir:module",

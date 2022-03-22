@@ -43,7 +43,6 @@ class DecoderContext {
   static constexpr absl::string_view kTagTransformPreconditionInputPrefix =
       "precondition_";
   static constexpr absl::string_view kTagTransformRuleAttributeName = "rule";
-  static constexpr absl::string_view kLiteralStrAttrName = "literal_string";
   static constexpr absl::string_view kDefaultOutputName = "out";
 
   DecoderContext(ir::IRContext &ir_context)
