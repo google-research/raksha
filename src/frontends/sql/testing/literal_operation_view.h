@@ -19,6 +19,7 @@
 
 #include "src/common/logging/logging.h"
 #include "src/frontends/sql/decoder_context.h"
+#include "src/frontends/sql/ops/op_traits.h"
 #include "src/frontends/sql/testing/operation_view_utils.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
@@ -31,7 +32,7 @@ class LiteralOperationView {
  public:
   LiteralOperationView(const ir::Operation &literal_operation)
       : literal_operation_(&literal_operation) {
-    CHECK(literal_operation.op().name() == DecoderContext::kSqlLiteralOpName);
+    CHECK(literal_operation.op().name() == OpTraits<LiteralOp>::kName);
     CHECK(literal_operation.attributes().size() == 1);
     CHECK(literal_operation.inputs().size() == 0);
   }

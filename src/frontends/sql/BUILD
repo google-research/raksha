@@ -49,6 +49,8 @@ cc_library(
     visibility = [":__subpackages__"],
     deps = [
         "//src/common/utils:map_iter",
+        "//src/frontends/sql/ops:literal_op",
+        "//src/frontends/sql/ops:op_traits",
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:value",
