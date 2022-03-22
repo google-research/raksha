@@ -30,11 +30,8 @@ class SqlOp : public ir::Operation {
  public:
   // Returns the operator associated with this type `T`.
   template <typename T>
-  static const ir::Operator& GetOperator(const ir::IRContext& context) {
-    absl::string_view operator_name = OpTraits<T>::kName;
-    CHECK(context.IsRegisteredOperator(operator_name))
-        << "SqlOp '" << operator_name << "' is not registered.";
-    return context.GetOperator(operator_name);
+  static const ir::Operator* GetOperator(const ir::IRContext& context) {
+    return context.GetOperator(OpTraits<T>::kName);
   }
 
   // Registers the operator for this type.
