@@ -113,10 +113,11 @@ TEST_F(SqlOpGetIfTest, GetIfReturnsNonNullIfCorrectOpType) {
 }
 
 TEST_F(SqlOpGetIfTest, GetIfReturnsNullIfIncorrectOpType) {
-  const auto* test_op = SqlOp::GetIf<AnotherTestOp>(*test_operation_);
+  const AnotherTestOp* test_op = SqlOp::GetIf<AnotherTestOp>(*test_operation_);
   EXPECT_EQ(test_op, nullptr);
 
-  const auto* another_test_op = SqlOp::GetIf<TestOp>(*another_test_operation_);
+  const TestOp* another_test_op =
+      SqlOp::GetIf<TestOp>(*another_test_operation_);
   EXPECT_EQ(another_test_op, nullptr);
 }
 
