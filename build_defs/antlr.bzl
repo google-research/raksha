@@ -44,6 +44,8 @@ def antlr4_cc_combined(name, src, listener = False, visitor = True):
         copts = ["-fexceptions"],
         linkopts = ["-fexceptions"],
         features = ["-use_header_modules"],
+        alwayslink = True,
+        linkstatic = 1,
         deps = [
             generated,
             "@antlr4_runtimes//:antlr_runtime_build",
