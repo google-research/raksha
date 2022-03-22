@@ -19,9 +19,12 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/ops/op_traits.h"
+#include "src/ir/attributes/attribute.h"
 #include "src/ir/ir_context.h"
+#include "src/ir/value.h"
 
 namespace raksha::frontends::sql {
+
 namespace {
 
 TEST(SqlOpTest, RegisterOperatorRegistersInContext) {
@@ -56,4 +59,68 @@ TEST(SqlOpTest, GettingUnregisteredReturnsNullptr) {
 }
 
 }  // namespace
+
+// Define some ops for testing.
+
+class TestOp : public SqlOp {
+ public:
+  absl::string_view value() const { return "TestOp"; }
+};
+template <>
+struct OpTraits<TestOp> {
+  static constexpr absl::string_view kName = "sql.this_is_a_test_op";
+};
+
+class AnotherTestOp : public SqlOp {
+ public:
+  absl::string_view value() const { return "AnotherTestOp"; }
+};
+template <>
+struct OpTraits<AnotherTestOp> {
+  static constexpr absl::string_view kName = "sql.this_is_another_test_op";
+};
+
+namespace {
+
+class SqlOpGetIfTest : public testing::Test {
+ public:
+  SqlOpGetIfTest() {
+    SqlOp::RegisterOperator<TestOp>(context_);
+    SqlOp::RegisterOperator<AnotherTestOp>(context_);
+    test_operation_ = std::make_unique<ir::Operation>(
+        nullptr, *CHECK_NOTNULL(SqlOp::GetOperator<TestOp>(context_)),
+        ir::NamedAttributeMap({}), ir::NamedValueMap({}));
+    another_test_operation_ = std::make_unique<ir::Operation>(
+        nullptr, *CHECK_NOTNULL(SqlOp::GetOperator<AnotherTestOp>(context_)),
+        ir::NamedAttributeMap({}), ir::NamedValueMap({}));
+  }
+
+ protected:
+  ir::IRContext context_;
+  std::unique_ptr<ir::Operation> test_operation_;
+  std::unique_ptr<ir::Operation> another_test_operation_;
+};
+
+TEST_F(SqlOpGetIfTest, GetIfReturnsNonNullIfCorrectOpType) {
+  const TestOp* test_operation = SqlOp::GetIf<TestOp>(*test_operation_);
+  EXPECT_NE(test_operation, nullptr);
+  EXPECT_EQ(test_operation->value(), "TestOp");
+
+  const AnotherTestOp* another_test_operation =
+      SqlOp::GetIf<AnotherTestOp>(*another_test_operation_);
+  EXPECT_NE(another_test_operation, nullptr);
+  EXPECT_EQ(another_test_operation->value(), "AnotherTestOp");
+}
+
+TEST_F(SqlOpGetIfTest, GetIfReturnsNullIfIncorrectOpType) {
+  const AnotherTestOp* test_op = SqlOp::GetIf<AnotherTestOp>(*test_operation_);
+  EXPECT_EQ(test_op, nullptr);
+
+  const TestOp* another_test_op =
+      SqlOp::GetIf<TestOp>(*another_test_operation_);
+  EXPECT_EQ(another_test_op, nullptr);
+}
+
+}  // namespace
+
 }  // namespace raksha::frontends::sql

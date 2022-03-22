@@ -38,6 +38,8 @@ cc_test(
         ":sql_op",
         "//src/common/testing:gtest",
         "//src/ir:ir_context",
+        "//src/ir:value",
+        "//src/ir/attributes:attribute",
     ],
 )
 
