@@ -33,11 +33,12 @@ class LiteralOp : public SqlOp {
                                            const ir::IRContext& context,
                                            absl::string_view literal);
 
-  // Inherit constructors.
-  using SqlOp::SqlOp;
-
   // Returns the literal string associated with the operation.
   absl::string_view GetLiteralString() const;
+
+ private:
+  // Inherit constructors.
+  using SqlOp::SqlOp;
 };
 
 }  // namespace raksha::frontends::sql

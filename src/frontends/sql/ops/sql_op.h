@@ -50,10 +50,11 @@ class SqlOp : public ir::Operation {
                : static_cast<const T*>(std::addressof(operation));
   }
 
+  virtual ~SqlOp() {}
+
+ protected:
   // Inherit constructors.
   using ir::Operation::Operation;
-
-  virtual ~SqlOp() {}
 };
 
 }  // namespace raksha::frontends::sql
