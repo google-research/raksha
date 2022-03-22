@@ -192,7 +192,51 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
             "%0.primitive_value");
 }
 
-TEST(BlockBuilderSimpleDeathTest, DoubleBuildBlockBuilder) {
+// A class to test `AddOperation`  with custom create methods.
+class TestOperation : public Operation {
+ public:
+  static std::unique_ptr<Operation> Create(const Block* parent_block,
+                                           IRContext& context,
+                                           absl::string_view op_name) {
+    if (!context.IsRegisteredOperator(op_name)) return nullptr;
+    // `parent_block` is  nullptr if op_name is `core.merge` for death tests.
+    return std::make_unique<Operation>(
+        op_name == "core.merge" ? nullptr : parent_block,
+        *CHECK_NOTNULL(context.GetOperator(op_name)), NamedAttributeMap({}),
+        NamedValueMap({}));
+  }
+};
+
+TEST_F(BlockBuilderTest, AllowsAdditionOfOperationWithCustomCreateMethod) {
+  BlockBuilder builder;
+  const Operation* plus_op = std::addressof(
+      builder.AddOperation<TestOperation>(context_, "core.plus"));
+  const Operation* minus_op = std::addressof(
+      builder.AddOperation<TestOperation>(context_, "core.minus"));
+  auto block = builder.build();
+  EXPECT_THAT(block->operations(),
+              testing::ElementsAre(testing::Pointer(testing::Eq(plus_op)),
+                                   testing::Pointer(testing::Eq(minus_op))));
+}
+
+using BlockBuilderDeathTest = BlockBuilderTest;
+
+TEST_F(BlockBuilderDeathTest, AddOperationFailsIfCustomCreateReturnsNullptr) {
+  BlockBuilder builder;
+  EXPECT_DEATH(
+      {
+        builder.AddOperation<TestOperation>(context_, "some.unknown.operator");
+      },
+      "`T::Create` returned a nullptr when adding an operation.");
+}
+
+TEST_F(BlockBuilderDeathTest, AddOperationFailsIfCustomCreateSetsWrongBlock) {
+  BlockBuilder builder;
+  EXPECT_DEATH({ builder.AddOperation<TestOperation>(context_, "core.merge"); },
+               "`T::Create` did not set the correct parent block.");
+}
+
+TEST_F(BlockBuilderDeathTest, InvokingBuildMoreThanOnceFails) {
   BlockBuilder builder;
   std::unique_ptr<Block> block1 = builder.build();
   EXPECT_DEATH({ builder.build(); },
