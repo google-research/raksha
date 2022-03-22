@@ -17,7 +17,6 @@
 #include "src/frontends/sql/decoder_context.h"
 
 #include "src/common/testing/gtest.h"
-#include "src/frontends/sql/testing/literal_operation_view.h"
 #include "src/frontends/sql/testing/merge_operation_view.h"
 #include "src/frontends/sql/testing/tag_transform_operation_view.h"
 
@@ -80,14 +79,16 @@ TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
   DecoderContext decoder_context(context);
 
   absl::string_view literal_str = GetParam();
-  const Operation &lit_op = decoder_context.MakeLiteralOperation(literal_str);
+  const Operation &op = decoder_context.MakeLiteralOperation(literal_str);
 
   const Block &top_level_block = decoder_context.BuildTopLevelBlock();
 
-  EXPECT_THAT(lit_op.parent(), &top_level_block);
-  EXPECT_THAT(lit_op.impl_module(), IsNull());
-  testing::LiteralOperationView literal_operation_view(lit_op);
-  EXPECT_EQ(literal_operation_view.GetLiteralStr(), literal_str);
+  EXPECT_THAT(op.parent(), &top_level_block);
+  EXPECT_THAT(op.impl_module(), IsNull());
+
+  const LiteralOp *literal_op = SqlOp::GetIf<LiteralOp>(op);
+  ASSERT_NE(literal_op, nullptr);
+  EXPECT_EQ(literal_op->GetLiteralString(), literal_str);
 }
 
 INSTANTIATE_TEST_SUITE_P(LiteralOpTest, LiteralOpTest,
@@ -194,8 +195,8 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
   // Setup has finished. Create the tag transform operation and check its
   // properties.
   const Operation &tag_xform_operation =
-      decoder_context.MakeTagTransformOperation(
-          xformed_value, policy_rule_name, precondition_value_ids);
+      decoder_context.MakeTagTransformOperation(xformed_value, policy_rule_name,
+                                                precondition_value_ids);
   testing::TagTransformOperationView tag_xform_view(tag_xform_operation);
 
   EXPECT_EQ(tag_xform_view.GetRuleName(), policy_rule_name);

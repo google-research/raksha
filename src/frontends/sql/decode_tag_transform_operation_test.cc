@@ -22,7 +22,6 @@
 #include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/sql_ir.pb.h"
-#include "src/frontends/sql/testing/literal_operation_view.h"
 #include "src/frontends/sql/testing/merge_operation_view.h"
 #include "src/frontends/sql/testing/tag_transform_operation_view.h"
 #include "src/frontends/sql/testing/utils.h"
@@ -44,7 +43,6 @@ using ::testing::Combine;
 using ::testing::Eq;
 using ::testing::IsEmpty;
 using ::testing::IsNull;
-using testing::LiteralOperationView;
 using testing::MergeOperationView;
 using ::testing::NotNull;
 using ::testing::Pair;
