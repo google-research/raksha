@@ -46,7 +46,6 @@ cc_library(
     name = "decoder_context",
     srcs = ["decoder_context.cc"],
     hdrs = ["decoder_context.h"],
-    visibility = [":__subpackages__"],
     deps = [
         "//src/common/utils:map_iter",
         "//src/ir:block_builder",
