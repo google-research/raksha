@@ -32,9 +32,10 @@ TEST(IRContextTest, GetOperatorReturnsRegisteredOperator) {
   IRContext context;
   const Operator& registered_op =
       context.RegisterOperator(std::make_unique<Operator>("core.choose"));
-  const Operator& op = context.GetOperator("core.choose");
-  EXPECT_EQ(op.name(), "core.choose");
-  EXPECT_EQ(&op, &registered_op);
+  const Operator* op = context.GetOperator("core.choose");
+  ASSERT_NE(op, nullptr);
+  EXPECT_EQ(op->name(), "core.choose");
+  EXPECT_EQ(op, std::addressof(registered_op));
 }
 
 TEST(IRContextTest, IsRegisteredOperatorReturnsCorrectValues) {
@@ -44,10 +45,9 @@ TEST(IRContextTest, IsRegisteredOperatorReturnsCorrectValues) {
   EXPECT_FALSE(context.IsRegisteredOperator("core.nose"));
 }
 
-TEST(IRContextDeathTest, GetOperatorFailsForUnregisteredOperator) {
+TEST(IRContextTest, GetOperatorReturnsNullptrForUnregisteredOperator) {
   IRContext context;
-  EXPECT_DEATH({ context.GetOperator("core.choose"); },
-               "Looking up an unregistered operator 'core.choose'.");
+  EXPECT_EQ(context.GetOperator("core.choose"), nullptr);
 }
 
 TEST(IRContextDeathTest, DuplicateOperatorRegistrationCausesFailure) {
@@ -60,52 +60,52 @@ TEST(IRContextDeathTest, DuplicateOperatorRegistrationCausesFailure) {
 
 TEST(IRContextTest, RegisterStorageReturnsRegisteredStorage) {
   IRContext context;
-  types::TypeFactory &type_factory = context.type_factory();
+  types::TypeFactory& type_factory = context.type_factory();
 
-  const Storage& store =
-      context.RegisterStorage(std::make_unique<Storage>(
-          "store1", type_factory.MakePrimitiveType()));
+  const Storage& store = context.RegisterStorage(
+      std::make_unique<Storage>("store1", type_factory.MakePrimitiveType()));
   EXPECT_EQ(store.name(), "store1");
   EXPECT_EQ(store.type().type_base().kind(), types::TypeBase::Kind::kPrimitive);
 }
 
 TEST(IRContextTest, GetStorageReturnsRegisteredStorage) {
   IRContext context;
-  types::TypeFactory &type_factory = context.type_factory();
+  types::TypeFactory& type_factory = context.type_factory();
 
-  const Storage& registered_storage =
-      context.RegisterStorage(std::make_unique<Storage>(
-          "storage1", type_factory.MakePrimitiveType()));
-  const Storage& storage = context.GetStorage("storage1");
-  EXPECT_EQ(storage.name(), "storage1");
-  EXPECT_EQ(storage.type().type_base().kind(),
+  const Storage& registered_storage = context.RegisterStorage(
+      std::make_unique<Storage>("storage1", type_factory.MakePrimitiveType()));
+  const Storage* storage = context.GetStorage("storage1");
+  ASSERT_NE(storage, nullptr);
+  EXPECT_EQ(storage->name(), "storage1");
+  EXPECT_EQ(storage->type().type_base().kind(),
             types::TypeBase::Kind::kPrimitive);
-  EXPECT_EQ(&storage, &registered_storage);
+  EXPECT_EQ(storage, std::addressof(registered_storage));
 }
 
 TEST(IRContextTest, IsRegisteredStorageReturnsCorrectValues) {
   IRContext context;
-  types::TypeFactory &type_factory = context.type_factory();
-  context.RegisterStorage(std::make_unique<Storage>(
-      "storage1", type_factory.MakePrimitiveType()));
+  types::TypeFactory& type_factory = context.type_factory();
+  context.RegisterStorage(
+      std::make_unique<Storage>("storage1", type_factory.MakePrimitiveType()));
   EXPECT_TRUE(context.IsRegisteredStorage("storage1"));
   EXPECT_FALSE(context.IsRegisteredStorage("storage2"));
 }
 
-TEST(IRContextDeathTest, GetStorageFailsForUnregisteredStorage) {
+TEST(IRContextDeathTest, GetStorageReturnsNullptrForUnregisteredStorage) {
   IRContext context;
-  EXPECT_DEATH({ context.GetStorage("not_a_store"); },
-               "Looking up an unregistered storage 'not_a_store'.");
+  EXPECT_EQ(context.GetStorage("not_a_store"), nullptr);
 }
 
 TEST(IRContextDeathTest, DuplicateStorageRegistrationCausesFailure) {
   IRContext context;
-  types::TypeFactory &type_factory = context.type_factory();
+  types::TypeFactory& type_factory = context.type_factory();
   context.RegisterStorage(
       std::make_unique<Storage>("store", type_factory.MakePrimitiveType()));
   EXPECT_DEATH(
-      { context.RegisterStorage(std::make_unique<Storage>(
-          "store", type_factory.MakePrimitiveType())); },
+      {
+        context.RegisterStorage(std::make_unique<Storage>(
+            "store", type_factory.MakePrimitiveType()));
+      },
       "Cannot register duplicate storage with name 'store'.");
 }
 

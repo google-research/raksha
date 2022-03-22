@@ -84,7 +84,7 @@ class DecoderContext {
   // like registering storages in advance, for the mature implementation.
   const ir::Storage &GetOrCreateStorage(absl::string_view storage_name) {
     return (ir_context_.IsRegisteredStorage(storage_name))
-               ? ir_context_.GetStorage(storage_name)
+               ? *CHECK_NOTNULL(ir_context_.GetStorage(storage_name))
                : ir_context_.RegisterStorage(std::make_unique<ir::Storage>(
                      storage_name,
                      ir_context_.type_factory().MakePrimitiveType()));

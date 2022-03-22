@@ -32,8 +32,9 @@ TEST(SqlOpTest, RegisterOperatorRegistersInContext) {
   SqlOp::RegisterOperator<LiteralOp>(context);
   EXPECT_TRUE(context.IsRegisteredOperator(literal_op_name));
 
-  const ir::Operator& op = context.GetOperator(literal_op_name);
-  EXPECT_EQ(op.name(), literal_op_name);
+  const ir::Operator* op = context.GetOperator(literal_op_name);
+  ASSERT_NE(op, nullptr);
+  EXPECT_EQ(op->name(), literal_op_name);
 }
 
 TEST(SqlOpTest, GetOperatorReturnsRegisteredOperatorInContext) {
@@ -44,17 +45,14 @@ TEST(SqlOpTest, GetOperatorReturnsRegisteredOperatorInContext) {
   context.RegisterOperator(std::make_unique<ir::Operator>(literal_op_name));
   EXPECT_TRUE(context.IsRegisteredOperator(literal_op_name));
 
-  const ir::Operator& op = SqlOp::GetOperator<LiteralOp>(context);
-  EXPECT_EQ(op.name(), literal_op_name);
+  const ir::Operator* op = SqlOp::GetOperator<LiteralOp>(context);
+  ASSERT_NE(op, nullptr);
+  EXPECT_EQ(op->name(), literal_op_name);
 }
 
-TEST(SqlOpDeathTest, GettingUnregisteredOperatorFails) {
-  EXPECT_DEATH(
-      {
-        ir::IRContext context;
-        SqlOp::GetOperator<LiteralOp>(context);
-      },
-      "SqlOp 'sql.literal' is not registered.");
+TEST(SqlOpTest, GettingUnregisteredReturnsNullptr) {
+  ir::IRContext context;
+  EXPECT_EQ(SqlOp::GetOperator<LiteralOp>(context), nullptr);
 }
 
 }  // namespace

@@ -123,15 +123,20 @@ TEST_F(BlockBuilderDeathTest, AddResultsVerifiesOutputIsDeclared) {
 
 TEST_F(BlockBuilderTest, AddOperationUpdatesOperationList) {
   BlockBuilder builder;
+  const Operator& core_plus = *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+  const Operator& core_minus =
+      *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+  const Operator& core_merge =
+      *CHECK_NOTNULL(context_.GetOperator("core.merge"));
   // std::vector<const Operator*> operations;
-  const Operation* plus_op = std::addressof(
-      builder.AddOperation(context_.GetOperator("core.plus"), {}, {}));
-  const Operation* minus_op = std::addressof(
-      builder.AddOperation(context_.GetOperator("core.minus"), {}, {}));
-  const Operation* merge_op = std::addressof(
-      builder.AddOperation(context_.GetOperator("core.merge"), {}, {}));
-  const Operation* merge_op_with_module = std::addressof(builder.AddOperation(
-      context_.GetOperator("core.merge"), {}, {}, std::make_unique<Module>()));
+  const Operation* plus_op =
+      std::addressof(builder.AddOperation(core_plus, {}, {}));
+  const Operation* minus_op =
+      std::addressof(builder.AddOperation(core_minus, {}, {}));
+  const Operation* merge_op =
+      std::addressof(builder.AddOperation(core_merge, {}, {}));
+  const Operation* merge_op_with_module = std::addressof(
+      builder.AddOperation(core_merge, {}, {}, std::make_unique<Module>()));
 
   auto block = builder.build();
   EXPECT_THAT(block->operations(),
@@ -162,8 +167,9 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
     builder.AddInput("entity_input", MakeTestEntityType("InputTensor"));
     builder.AddOutput("primitive_output", MakePrimitiveType());
     builder.AddOutput("entity_output", MakeTestEntityType("OutputTensor"));
-    const Operation& op =
-        builder.AddOperation(context_.GetOperator("core.plus"), {}, {});
+    const Operator& core_plus =
+        *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+    const Operation& op = builder.AddOperation(core_plus, {}, {});
     builder.AddResult("primitive_output",
                       Value(value::OperationResult(op, "primitive_value")));
     builder.AddResult("entity_output",

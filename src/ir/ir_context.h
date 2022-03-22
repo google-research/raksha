@@ -20,9 +20,9 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "src/ir/module.h"
 #include "src/ir/operator.h"
 #include "src/ir/types/type_factory.h"
-#include "src/ir/module.h"
 
 namespace raksha::ir {
 
@@ -42,7 +42,7 @@ class IRContext {
 
   // Returns the Operator with a particular name. If there is no
   // operator with that name, fail.
-  const Operator &GetOperator(absl::string_view operators_name) const {
+  const Operator *GetOperator(absl::string_view operators_name) const {
     return operators_.GetNode(operators_name);
   }
 
@@ -58,7 +58,7 @@ class IRContext {
 
   // Returns the Storage with a particular name. If there is no
   // operator with that name, fail.
-  const Storage &GetStorage(absl::string_view operators_name) const {
+  const Storage *GetStorage(absl::string_view operators_name) const {
     return storages_.GetNode(operators_name);
   }
 
@@ -74,36 +74,33 @@ class IRContext {
   static constexpr char kOperatorName[] = "operator";
   static constexpr char kStorageName[] = "storage";
 
-  template<class Node, const char *kNodeKindName>
+  template <class Node, const char *kNodeKindName>
   class NamedIRNodeRegistry {
    public:
-      // Register a node and return the stored instance.
+    // Register a node and return the stored instance.
     const Node &RegisterNode(std::unique_ptr<Node> node) {
-        // Note: using node->name() here is ok because C++ list initialization
-        // guarantees that evaluation of initializers earlier in the list
-        // are sequenced before initializers later in the list.
-        auto ins_res = nodes_.insert(
-            {std::string(node->name()), std::move(node)});
-        CHECK(ins_res.second)
-          << "Cannot register duplicate " << kNodeKindName << " with name '"
-          << ins_res.first->first << "'.";
-        return *ins_res.first->second.get();
+      // Note: using node->name() here is ok because C++ list initialization
+      // guarantees that evaluation of initializers earlier in the list
+      // are sequenced before initializers later in the list.
+      auto ins_res =
+          nodes_.insert({std::string(node->name()), std::move(node)});
+      CHECK(ins_res.second) << "Cannot register duplicate " << kNodeKindName
+                            << " with name '" << ins_res.first->first << "'.";
+      return *ins_res.first->second.get();
     }
 
     // Returns the node with a particular name. If there is no
-    // node with that name, fail.
-    const Node &GetNode(absl::string_view node_name) const {
+    // node with that name returns nullptr
+    const Node *GetNode(absl::string_view node_name) const {
       auto find_res = nodes_.find(node_name);
-      CHECK(find_res != nodes_.end())
-          << "Looking up an unregistered " << kNodeKindName
-          <<  " '" << node_name << "'.";
-      return *find_res->second;
+      return find_res == nodes_.end() ? nullptr : find_res->second.get();
     }
 
     // Returns true if the node is registered with this context.
     bool IsRegisteredNode(absl::string_view node_name) const {
       return nodes_.find(node_name) != nodes_.end();
     }
+
    private:
     absl::flat_hash_map<std::string, std::unique_ptr<Node>> nodes_;
   };
