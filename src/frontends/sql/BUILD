@@ -26,9 +26,13 @@ package(
     licenses = ["notice"],
 )
 
+# Expose the proto library to the top-level package. While this is extraneous
+# in the public version of Raksha, it allows us to "trampoline" exporting
+# these protos to tools in the Google-internal repo.
 proto_library(
     name = "sql_ir_proto",
     srcs = ["sql_ir.proto"],
+    visibility = ["//:__pkg__"],
 )
 
 cc_proto_library(
