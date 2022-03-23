@@ -28,13 +28,44 @@ mod test;
 use std::env;
 use structopt::StructOpt;
 
+#[derive(StructOpt)]
+#[structopt(name = "auth-logic", about = "An authorization logic compiler.")]
+struct Opt {
+    /// The name of the auth logic program to compile
+    // First positional argument (should be passed as a raw value, not --filename=...)
+    #[structopt(required = true)]
+    filename: String,
+
+    /// Input directory where the auth logic program lives.
+    /// If unspecified, it will be the current working directory.
+    // Can be passed as -i or --in-dir
+    #[structopt(short, long, env("PWD"))]
+    in_dir: String,
+
+    /// Output directory, where the compiled datalog program will be saved.
+    /// If unspecified, it will be the current working directory.
+    // Can be passed as -o or --out-dir
+    #[structopt(short, long, env("PWD"))]
+    out_dir: String,
+
+    /// List of declarations to skip when generating Souffle code
+    // Can be passed as -s or --skip. Passed as a comma-separated list.
+    #[structopt(short = "s", long = "skip")]
+    decl_skip: Vec<String>,
+
+    /// Whether to skip running Souffle on the compiled datalog
+    // Can be passed only as --skip-souffle
+    #[structopt(long)]
+    skip_souffle: bool,
+}
+
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let filename = &args[1];
-    let in_dir = &args[2];
-    let out_dir = &args[3];
-    let decl_skip = if(args.len() > 4) { &args[4] } else { "" };
-    compilation_top_level::compile(filename, in_dir, out_dir, &decl_skip);
-    souffle::souffle_interface::run_souffle(&format!("{}/{}.dl", out_dir,
-                                                    filename), out_dir);
+    let opt = Opt::from_args();
+    compilation_top_level::compile(&opt.filename, &opt.in_dir, &opt.out_dir, &opt.decl_skip);
+    if (!opt.skip_souffle) {
+        souffle::souffle_interface::run_souffle(
+            &format!("{}/{}.dl", &opt.out_dir, &opt.filename),
+            &opt.out_dir,
+        );
+    };
 }

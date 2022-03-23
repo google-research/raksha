@@ -21,6 +21,6 @@ mod test {
     #[test]
     #[should_panic]
     fn test_type_error() {
-        compile("type_error", "test_inputs", "test_outputs", "");
+        compile("type_error", "test_inputs", "test_outputs", &Vec::new());
     }
 }
