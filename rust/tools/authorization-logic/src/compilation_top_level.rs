@@ -33,28 +33,27 @@ use crate::{
 
 use std::fs;
 
-fn source_file_to_ast(filename: &str, in_dir: &str) -> AstProgram {
-    let source = fs::read_to_string(&format!("{}/{}", in_dir, filename))
-        .expect("failed to read input in input_to_souffle_file");
+fn source_file_to_ast(input_file_path: &str) -> AstProgram {
+    let source = fs::read_to_string(input_file_path)
+        .expect(&format!("failed to read {}", input_file_path));
     astconstructionvisitor::parse_program(&source[..])
 }
 
 // Make source_file_to_ast publicly visible only in tests
 #[cfg(test)]
-pub fn source_file_to_ast_test_only(filename: &str, in_dir: &str) -> AstProgram {
-    let resolved_in_dir = utils::get_resolved_path(&in_dir);
-    source_file_to_ast(filename, &resolved_in_dir)
+pub fn source_file_to_ast_test_only(input_file_path: &str) -> AstProgram {
+    let resolved_in_file_path = utils::get_resolved_path(&input_file_path);
+    source_file_to_ast(&resolved_in_file_path)
 }
 
-pub fn compile(filename: &str, in_dir: &str, out_dir: &str, decl_skip: &Vec<String>){
-    let resolved_in_dir = utils::get_resolved_path(&in_dir);
-    let resolved_out_dir = utils::get_resolved_path(&out_dir);
-    let prog = source_file_to_ast(filename, &resolved_in_dir);
+pub fn compile(input_file_path: &str, output_file_path: &str, decl_skip: &Vec<String>){
+    let resolved_in_file = utils::get_resolved_path(&input_file_path);
+    let resolved_out_file = utils::get_resolved_path(&output_file_path);
+    let prog = source_file_to_ast(&resolved_in_file);
     let prog_with_imports = import_assertions::handle_imports(&prog);
     souffle_interface::ast_to_souffle_file(
         &prog_with_imports,
-        filename,
-        &resolved_out_dir,
+        &resolved_out_file,
         &Some(decl_skip.to_vec()));
     export_assertions::export_assertions(&prog_with_imports);
 }

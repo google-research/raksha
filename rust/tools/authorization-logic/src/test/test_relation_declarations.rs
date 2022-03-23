@@ -6,8 +6,8 @@ mod test {
 
     #[test]
     pub fn test_relation_declarations() {
-        let test_ast = source_file_to_ast_test_only("typeDeclarations",
-                                                    "test_inputs");
+        let test_ast = source_file_to_ast_test_only(
+                        "test_inputs/typeDeclarations");
         let custom_type = AstType::CustomType{ type_name: "CustomType".to_string() };
         assert!(test_ast.relation_declarations == vec![
                 AstRelationDeclaration {
