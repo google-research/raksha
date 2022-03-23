@@ -92,6 +92,7 @@ filegroup(
         "src/test/test_export_signatures.rs",
         "src/test/test_multimic_no_overrides.rs",
         "src/test/test_multimic_overrides.rs",
+        "src/test/test_multiprogram.rs",
         "src/test/test_multiverse_handling.rs",
         "src/test/test_negation.rs",
         "src/test/test_num_compare.rs",
