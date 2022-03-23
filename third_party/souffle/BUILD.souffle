@@ -135,6 +135,6 @@ cc_binary(
         # own code that we are more likely to need to fix.
         "-w",
     ],
-    linkopts = ["-pthread", "-static-libgcc", "-static-libstdc++"],
+    linkopts = ["-pthread", "-static", "-static-libgcc", "-static-libstdc++"],
     deps = [":souffle_lib"],
 )
