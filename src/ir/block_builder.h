@@ -16,6 +16,7 @@
 #ifndef SRC_IR_BLOCK_BUILDER_H_
 #define SRC_IR_BLOCK_BUILDER_H_
 
+#include <type_traits>
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
@@ -54,6 +55,25 @@ class BlockBuilder {
     block_->operations_.push_back(
         std::make_unique<Operation>(block_.get(), op, std::move(attributes),
                                     std::move(inputs), std::move(impl_module)));
+    return *block_->operations_.back();
+  }
+
+  // Allows an operation to be added to the block using a `T::Create` method as
+  // long as the following hold:
+  //   - `T` is a derived class of `Operation`.
+  //   - `T::create` takes a pointer to parent block as a first arguemnt.
+  // This method also checks that T::Create does not return a nullptr and
+  // sets the parent block correctly.
+  template <typename T, typename... Args,
+            std::enable_if_t<std::is_base_of<Operation, T>::value, bool> = true>
+  const Operation& AddOperation(Args&&... a) {
+    std::unique_ptr<Operation> result =
+        T::Create(block_.get(), std::forward<Args>(a)...);
+    CHECK(result != nullptr)
+        << "`T::Create` returned a nullptr when adding an operation.";
+    CHECK(result->parent() == block_.get())
+        << "`T::Create` did not set the correct parent block.";
+    block_->operations_.push_back(std::move(result));
     return *block_->operations_.back();
   }
 
