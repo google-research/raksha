@@ -18,22 +18,34 @@
 pub mod test{
     use crate::souffle::souffle_interface::*;
     use crate::compilation_top_level::*;
+    use crate::utils::*;
 
     #[test]
     pub fn multiprog_test() {
+
+        fn input(file: &str) -> String {
+            let resolved_in_dir = utils::get_resolved_path(&"test_inputs");
+            format!("{}/{}", resolved_in_dir, file)
+        }
+
+        fn output(file: &str) -> String {
+            let resolved_out_dir = utils::get_resolved_path(&"test_outputs");
+            format!("{}/{}", resolved_out_dir, file)
+        }
+
         compile(
             &vec!["test_inputs/multiprogram_part1.auth_logic".to_string(),
                 "test_inputs/multiprogram_part2.auth_logic".to_string()],
-            "test_outputs/merged_multiprogram.dl",
+            &"test_outputs/merged_multiprogram.dl",
             &vec![]);
 
         run_souffle(
-            &"test_outputs/merged_multiprogram.dl",
-            &"test_outputs/");
+            &output("merged_multiprogram.dl"),
+            &output(""));
 
         // This assertion checks that the query result is true, which
         // is the expected result.
-        assert!(!is_file_empty(&"test_outputs/multiprog_test_query.csv"));
+        assert!(!is_file_empty(&output("multiprog_test_query.csv")));
 
     }
 
