@@ -92,11 +92,6 @@ TEST_P(DecodeExprDeathTest, DecodeExprDeathTest) {
 }
 
 const TextprotoDeathMessagePair kTextprotoDeathMessagePairs[] = {
-    {.textproto =
-         R"(id: 0 source_table_column: { column_path: "table1.col" } )",
-     .death_message = "Required field id was not present in Expression."},
-    {.textproto = R"(source_table_column: { column_path: "table1.col" } )",
-     .death_message = "Required field id was not present in Expression."},
     {.textproto = R"(id: 1)",
      .death_message = "Required field expr_variant not set."},
     {.textproto = R"(id: 1 merge_operation: { })",

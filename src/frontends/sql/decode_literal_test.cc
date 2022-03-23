@@ -47,7 +47,7 @@ using ::testing::UnorderedElementsAreArray;
 using ::testing::Values;
 using ::testing::ValuesIn;
 
-constexpr uint64_t kSampleIds[] = {1, 5, 1000};
+constexpr uint64_t kSampleIds[] = {0, 1, 5, 1000};
 
 constexpr std::optional<absl::string_view> kSampleExprNames[] = {
     {}, {"name1"}, {"another_name"}};
@@ -76,7 +76,14 @@ TEST_P(DecodeLiteralExprTest, DecodeLiteralExprTest) {
   const Operation &operation = testing::UnwrapDefaultOperationResult(result);
   EXPECT_EQ(operation.parent(), &top_block);
   EXPECT_THAT(operation.impl_module(), IsNull());
-  EXPECT_EQ(result, decoder_context_.GetValue(id));
+
+  if (id == 0) {
+    EXPECT_DEATH(
+        { decoder_context_.GetValue(id); },
+        "Attempt to get a value with id 0, which is not a legal value id.");
+  } else {
+    EXPECT_EQ(result, decoder_context_.GetValue(id));
+  }
 
   const LiteralOp *literal_op = SqlOp::GetIf<LiteralOp>(operation);
   ASSERT_NE(literal_op, nullptr);
