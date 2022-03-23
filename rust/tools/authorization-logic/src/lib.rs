@@ -36,14 +36,19 @@ pub extern "C" fn generate_datalog_facts_from_authorization_logic(
     c_decl_skip: *const c_char
 ) -> c_int {
   let result = std::panic::catch_unwind(|| {
-    let input_filename = unsafe { CStr::from_ptr(c_in_filename) }.to_str().unwrap();
-    let output_filename = unsafe { CStr::from_ptr(c_out_filename) }.to_str().unwrap();
+    let input_filename = unsafe { 
+        CStr::from_ptr(c_in_filename)
+    }.to_str().unwrap();
+    let output_filename = unsafe {
+        CStr::from_ptr(c_out_filename) 
+    }.to_str().unwrap();
     let decl_skip_vec = unsafe {
         CStr::from_ptr(c_decl_skip)
     }.to_str().unwrap().split(',').map(|s| s.to_string()).collect();
-    // The CLI interface has been extended to take multiple files as inputs, but the C library does 
-    // not make use of this because it is not needed, yet. Doing so would just entail changing this 
-    // interface and the code that consumes it; the internals of the auth logic compiler should not 
+    // The CLI interface has been extended to take multiple files as inputs, 
+    // but the C library does not make use of this because it is not needed,
+    // yet. Doing so would just entail changing this interface and the code
+    // that consumes it; the internals of the auth logic compiler should not 
     // need to change -- the following line can just call compile(...)
     // instead of compile_one_prgram(...)
     compilation_top_level::compile_one_program(input_filename,
