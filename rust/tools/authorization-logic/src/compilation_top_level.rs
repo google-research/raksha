@@ -34,38 +34,16 @@ use crate::{
 use std::fs;
 
 fn merge_multiprogram(multiprog: Vec<AstProgram>) -> AstProgram {
-    AstProgram {
-        relation_declarations: multiprog
-            .iter()
-            .map(|prog| prog.relation_declarations.clone())
-            .flatten()
-            .collect(),
-        assertions: multiprog
-            .iter()
-            .map(|prog| prog.assertions.clone())
-            .flatten()
-            .collect(),
-        queries: multiprog
-            .iter()
-            .map(|prog| prog.queries.clone())
-            .flatten()
-            .collect(),
-        imports: multiprog
-            .iter()
-            .map(|prog| prog.imports.clone())
-            .flatten()
-            .collect(),
-        priv_binds: multiprog
-            .iter()
-            .map(|prog| prog.priv_binds.clone())
-            .flatten()
-            .collect(),
-        pub_binds: multiprog
-            .iter()
-            .map(|prog| prog.pub_binds.clone())
-            .flatten()
-            .collect(),
-    }
+    multiprog.into_iter().reduce(|mut acc, currentAstProg| {
+        let mut cur_prog = currentAstProg.clone();
+        acc.relation_declarations.append(&mut cur_prog.relation_declarations);
+        acc.assertions.append(&mut cur_prog.assertions);
+        acc.queries.append(&mut cur_prog.queries);
+        acc.imports.append(&mut cur_prog.imports);
+        acc.priv_binds.append(&mut cur_prog.priv_binds);
+        acc.pub_binds.append(&mut cur_prog.pub_binds);
+        acc
+    }).unwrap()
 }
 
 fn source_file_to_ast(input_file_path: &str) -> AstProgram {
