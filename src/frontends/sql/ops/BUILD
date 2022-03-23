@@ -15,6 +15,7 @@
 #
 #-------------------------------------------------------------------------------
 package(
+    default_visibility = ["//src/frontends/sql:__subpackages__"],
     features = ["layering_check"],
     licenses = ["notice"],
 )

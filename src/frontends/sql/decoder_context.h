@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "absl/container/flat_hash_map.h"
+#include "src/frontends/sql/ops/literal_op.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/block_builder.h"
 #include "src/ir/ir_context.h"
@@ -31,7 +32,6 @@ namespace raksha::frontends::sql {
 // inappropriate to put in IRContext.
 class DecoderContext {
  public:
-  static constexpr absl::string_view kSqlLiteralOpName = "sql.literal";
   static constexpr absl::string_view kSqlMergeOpName = "sql.merge";
   static constexpr absl::string_view kMergeOpDirectInputPrefix =
       "direct_input_";
@@ -43,13 +43,12 @@ class DecoderContext {
   static constexpr absl::string_view kTagTransformPreconditionInputPrefix =
       "precondition_";
   static constexpr absl::string_view kTagTransformRuleAttributeName = "rule";
-  static constexpr absl::string_view kLiteralStrAttrName = "literal_str";
   static constexpr absl::string_view kDefaultOutputName = "out";
 
   DecoderContext(ir::IRContext &ir_context)
       : ir_context_(ir_context),
         literal_operator_(ir_context_.RegisterOperator(
-            std::make_unique<ir::Operator>(kSqlLiteralOpName))),
+            std::make_unique<ir::Operator>(OpTraits<LiteralOp>::kName))),
         merge_operator_(ir_context_.RegisterOperator(
             std::make_unique<ir::Operator>(kSqlMergeOpName))),
         tag_transform_operator_(ir_context_.RegisterOperator(
@@ -95,12 +94,8 @@ class DecoderContext {
   // "sql.literal" and with the literal value indicated in a `literal_str`
   // attribute.
   const ir::Operation &MakeLiteralOperation(absl::string_view literal_str) {
-    return top_level_block_builder_.AddOperation(
-        literal_operator_,
-        ir::NamedAttributeMap{
-            {std::string(kLiteralStrAttrName),
-             ir::Attribute::Create<ir::StringAttribute>(literal_str)}},
-        ir::NamedValueMap{});
+    return top_level_block_builder_.AddOperation<LiteralOp>(ir_context_,
+                                                            literal_str);
   }
 
   const ir::Operation &MakeMergeOperation(
