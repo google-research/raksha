@@ -27,7 +27,7 @@ mod test {
         
         // Compile with some declarations removed
         compile("test_inputs/testDeclSkip","test_outputs/testDeclSkip.dl",
-             &vec!["grounded_dummy".to_string(),"says_isRelevantFor".to_string()]);
+             &vec!["grounded_dummy".to_string(), "says_isRelevantFor".to_string()]);
         let contents2 = file_line_list(&utils::get_resolved_path("test_outputs/testDeclSkip.dl"));
         assert!(!contents2.contains(&".decl grounded_dummy(dummy_param: DummyType)".to_string()));
         assert!(!contents2.contains(

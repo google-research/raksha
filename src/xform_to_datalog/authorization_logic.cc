@@ -63,19 +63,17 @@ int GenerateDatalogFactsFromAuthorizationLogic(
                                "when it has been disabled"
                             << " using DISABLE_AUTHORIZATION_LOGIC.";
 
-  return
 #ifdef DISABLE_AUTHORIZATION_LOGIC
-      // If authorization logic has been disabled, return an exit code as if it
-      // always failed. This should be unreachable due to the CHECK, and acts
-      // only as a way to keep the compiler happy.
-      1
+  // If authorization logic has been disabled, return an exit code as if it
+  // always failed. This should be unreachable due to the CHECK, and acts
+  // only as a way to keep the compiler happy.
+  return 1;
 #else
-      generate_datalog_facts_from_authorization_logic(
-          absl::StrCat(program_dir.c_str(), "/", program).c_str(),
-          absl::StrCat(result_dir.c_str(), "/", program, ".dl").c_str(),
-          relations_to_not_declare_str.data())
+  auto prog_path = absl::StrCat(program_dir.c_str(), "/", program);
+  auto result_path = absl::StrCat(result_dir.c_str(), "/", program, ".dl");
+  return generate_datalog_facts_from_authorization_logic(prog_path.c_str(),
+                                                         result_path.c_str());
 #endif
-      ;
 }
 
 }  // namespace raksha::xform_to_datalog
