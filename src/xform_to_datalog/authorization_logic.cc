@@ -71,8 +71,9 @@ int GenerateDatalogFactsFromAuthorizationLogic(
 #else
   auto prog_path = absl::StrCat(program_dir.c_str(), "/", program);
   auto result_path = absl::StrCat(result_dir.c_str(), "/", program, ".dl");
-  return generate_datalog_facts_from_authorization_logic(prog_path.c_str(),
-                                                         result_path.c_str());
+  return generate_datalog_facts_from_authorization_logic(
+      prog_path.c_str(), result_path.c_str(),
+      relations_to_not_declare_str.data());
 #endif
 }
 
