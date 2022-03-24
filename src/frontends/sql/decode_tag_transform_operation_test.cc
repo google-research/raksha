@@ -57,9 +57,9 @@ using ::testing::ValuesIn;
 using utils::MapIter;
 
 class DecodeTagTransformTest
-    : public ::testing::TestWithParam<
-          std::tuple<uint64_t, absl::string_view,
-                     std::pair<absl::string_view, std::vector<uint64_t>>>> {};
+    : public ::testing::TestWithParam<std::tuple<
+          uint64_t, absl::string_view, std::vector<absl::string_view>,
+          std::pair<absl::string_view, std::vector<uint64_t>>>> {};
 
 TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
   IRContext ir_context;
@@ -70,22 +70,41 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
 id: %u
 tag_transform : {
   transform_rule_name: "%s"
-  tag_precondition_ids: [ %s ]
+  tag_preconditions: [ %s ]
   transformed_node: { %s } })";
-  const auto &[id, rule_name, value_textproto_and_ids] = GetParam();
+  const auto &[id, rule_name, precondition_name_sequence,
+               value_textproto_and_ids] = GetParam();
   const auto &[value_textproto, value_ids] = value_textproto_and_ids;
+
+  absl::flat_hash_map<absl::string_view, uint64_t> precondition_name_to_id;
+  for (uint64_t i = 0; i < value_ids.size(); ++i) {
+    precondition_name_to_id.insert(
+        {precondition_name_sequence.at(i), value_ids.at(i)});
+  }
 
   Expression expr;
   EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
       absl::StrFormat(kTagTransformTextprotoFormat, id, rule_name,
-                      absl::StrJoin(value_ids, ", "), value_textproto),
+                      absl::StrJoin(precondition_name_to_id, ", ",
+                                    [](std::string *out, auto pair) {
+                                      return absl::StrAppend(
+                                          out, absl::StrFormat(
+                                                   R"({ key: "%s" value: %d })",
+                                                   pair.first, pair.second));
+                                    }),
+                      value_textproto),
       &expr));
   Value decoded_value = DecodeExpression(expr, decoder_context);
 
-  std::vector<Value> expected_values =
-      MapIter<Value>(value_ids, [&decoder_context](uint64_t current_id) {
-        return decoder_context.GetValue(current_id);
-      });
+  std::vector<std::pair<std::string, Value>> expected_name_to_value_vec =
+      MapIter<std::pair<std::string, Value>>(
+          precondition_name_to_id, [&decoder_context](auto name_id_pair) {
+            return std::make_pair(
+                std::string(name_id_pair.first),
+                decoder_context.GetValue(name_id_pair.second));
+          });
+  absl::flat_hash_map<std::string, Value> expected_name_to_value_map(
+      expected_name_to_value_vec.begin(), expected_name_to_value_vec.end());
 
   EXPECT_EQ(decoded_value, decoder_context.GetValue(id));
   TagTransformOperationView tag_xform_view(
@@ -95,7 +114,8 @@ tag_transform : {
   // another test, so we don't inspect it here. What does matter is ensuring
   // that the value vec that we got corresponds to the ID vec that we took
   // from the textproto.
-  EXPECT_EQ(tag_xform_view.GetPreconditions(), expected_values);
+  EXPECT_THAT(tag_xform_view.GetPreconditions(),
+              UnorderedElementsAreArray(expected_name_to_value_map));
 }
 
 static const std::pair<absl::string_view, std::vector<uint64_t>>
@@ -111,9 +131,17 @@ static const uint64_t kExampleIds[] = {7, 108, 300};
 static const absl::string_view kExampleRuleNames[] = {"rule1", "clearLowBits",
                                                       "SQL.Identity"};
 
+static const std::vector<absl::string_view>
+    kExamplePreconditionNameSequences[] = {
+        {"a", "b", "c"},
+        {"1", "2", "3"},
+        {"foo", "bar", "baz"},
+};
+
 INSTANTIATE_TEST_SUITE_P(
     DecodeTagTransformTest, DecodeTagTransformTest,
     Combine(ValuesIn(kExampleIds), ValuesIn(kExampleRuleNames),
+            ValuesIn(kExamplePreconditionNameSequences),
             ValuesIn(kValueTextprotoAndPreconditionIdVecs)));
 
 }  // namespace

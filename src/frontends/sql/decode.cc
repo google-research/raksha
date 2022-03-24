@@ -88,14 +88,12 @@ static Value DecodeTagTransform(const TagTransform &tag_transform,
   std::string transform_rule_name = tag_transform.transform_rule_name();
   CHECK(!transform_rule_name.empty())
       << "Required TagTransform field transform_rule_name not present.";
-  std::vector<uint64_t> precondition_ids;
-  precondition_ids.reserve(tag_transform.tag_precondition_ids_size());
-  for (uint64_t id : tag_transform.tag_precondition_ids()) {
-    precondition_ids.push_back(id);
-  }
+  absl::flat_hash_map<std::string, uint64_t> preconditions(
+      tag_transform.tag_preconditions().begin(),
+      tag_transform.tag_preconditions().end());
   return WrapOperationResultValue(decoder_context.MakeTagTransformOperation(
       std::move(transformed_value), transform_rule_name,
-      std::move(precondition_ids)));
+      std::move(preconditions)));
 }
 
 // A helper function to decode the specific subclass of the Expression.

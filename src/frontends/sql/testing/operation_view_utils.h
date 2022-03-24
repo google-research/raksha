@@ -14,8 +14,8 @@ namespace raksha::frontends::sql::testing {
 // This function skips past the prefix, interprets the number as an unsigned
 // int, and returns it. If any of those assumptions are not met, it returns
 // std::nullopt instead.
-std::optional<uint64_t> ExtractIdxAfterPrefix(
-      absl::string_view str, absl::string_view prefix);
+std::optional<uint64_t> ExtractIdxAfterPrefix(absl::string_view str,
+                                              absl::string_view prefix);
 
 // This method assumes that, within the given `NamedValueMap`, there are a
 // subset of elements that start with some prefix `prefix` and end with a
@@ -25,7 +25,15 @@ std::optional<uint64_t> ExtractIdxAfterPrefix(
 // trailing numeric suffixes being translated into positions in the resulting
 // vector. If the density assumption is not met, this method asserts.
 std::vector<ir::Value> GetVecWithPrefix(const ir::NamedValueMap &map,
-                                               absl::string_view prefix);
+                                        absl::string_view prefix);
+
+// This method assumes that, within the given `NamedValueMap`, there are a
+// subset of elements that start with some prefix `prefix` and end with a key
+// that should be associated with that value in the resulting map. It
+// composes that map and returns it.
+absl::flat_hash_map<std::string, ir::Value> GetMapWithPrefix(
+    const ir::NamedValueMap &map, absl::string_view prefix);
+
 }  // namespace raksha::frontends::sql::testing
 
 #endif  // SRC_FRONTENDS_SQL_TESTING_OPERATION_VIEW_UTILS_H_
