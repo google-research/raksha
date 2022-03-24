@@ -36,7 +36,7 @@ void AddEdge(const souffle::SouffleProgram *program, absl::string_view src,
 
 TEST(CppInterfaceTest, CanLoadDatalogProgram) {
   std::unique_ptr<souffle::SouffleProgram> program(
-      souffle::ProgramFactory::newInstance("raksha_policy_checker_cxx"));
+      souffle::ProgramFactory::newInstance("policy_checker_cxx"));
   ASSERT_NE(program, nullptr);
 
   AddEdge(program.get(), "R.mic_audio_stream_out", "R.app_audio_stream_in");
