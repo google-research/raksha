@@ -29,12 +29,12 @@ raksha_policy_check(
 )
 
 souffle_cc_library(
-    name = "raksha_policy_checker_dl",
-    src = ":raksha_policy_checker_cxx",
+    name = "policy_checker_dl",
+    src = ":policy_checker_cxx",
 )
 
 gen_souffle_cxx_code(
-    name = "raksha_policy_checker_cxx",
+    name = "policy_checker_cxx",
     src = ":multimic_datalog",
     included_dl_scripts = [
         "//src/analysis/souffle:attributes.dl",
@@ -49,8 +49,8 @@ gen_souffle_cxx_code(
 )
 
 cc_library(
-    name = "raksha_policy_checker",
-    srcs = ["raksha_policy_checker.cc"],
+    name = "policy_checker",
+    srcs = ["policy_checker.cc"],
     copts = [
         "-fexceptions",
         "-Iexternal/souffle/src/include/souffle",
@@ -61,17 +61,17 @@ cc_library(
     features = ["-use_header_modules"],
     linkopts = ["-pthread"],
     deps = [
-        ":raksha_policy_checker_dl",
+        ":policy_checker_dl",
         "@absl//absl/strings",
         "@souffle//:souffle_include_lib",
     ],
 )
 
 cc_test(
-    name = "raksha_policy_checker_test",
-    srcs = ["raksha_policy_checker_test.cc"],
+    name = "policy_checker_test",
+    srcs = ["policy_checker_test.cc"],
     deps = [
-        ":raksha_policy_checker",
+        ":policy_checker",
         "//src/common/logging",
         "//src/common/testing:gtest",
     ],
