@@ -54,22 +54,25 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
   const std::string generated_recipe_name_prefix = "GENERATED_RECIPE_NAME";
   uint64_t recipe_num = 0;
   for (const arcs::RecipeProto &recipe_proto : manifest_proto.recipes()) {
+    absl::flat_hash_map<std::string, uint64_t> particle_numbers;
     const std::string &recipe_name =
         recipe_proto.name().empty()
-          ? absl::StrCat(generated_recipe_name_prefix, recipe_num++)
-          : recipe_proto.name();
+            ? absl::StrCat(generated_recipe_name_prefix, recipe_num++)
+            : recipe_proto.name();
 
     // For each Particle, generate the relevant facts for that particle.
     // These fall into two categories: facts that lie within the ParticleSpec
     // that just need to be instantiated for this particular Particle, and
     // edges that connect this Particle to input/output Handles.
-    uint64_t particle_num = 0;
     for (const arcs::ParticleProto &particle_proto : recipe_proto.particles()) {
       const std::string &particle_spec_name = particle_proto.spec_name();
       CHECK(!particle_spec_name.empty())
         << "Particle with empty spec_name field not allowed.";
+      uint64_t particle_num = particle_numbers[particle_spec_name]++;
       const std::string particle_name =
-          absl::StrCat(particle_spec_name, "#", particle_num++);
+          (particle_num == 0)
+              ? particle_spec_name
+              : absl::StrCat(particle_spec_name, "#", particle_num);
 
       // Find the ParticleSpec referenced by this Particle. The information
       // contained in the spec will be needed for all facts produced within a
