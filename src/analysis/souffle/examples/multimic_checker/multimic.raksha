@@ -1,0 +1,107 @@
+particle SmartMicrophone
+  audio: writes AudioStream {}
+
+particle DemoApplication
+  audioIn: reads AudioStream {}
+  audioOut: writes AudioStream {}
+
+particle DemoApplicationASR
+  audio: reads AudioStream {}
+
+particle DemoApplicationAudioStore
+  audio: reads AudioStream {}
+
+recipe R
+  mic_audio_stream_out: create 'mic_audio_stream_out'
+  app_audio_stream_in: create 'app_audio_stream_in'
+  app_audio_stream_out: create 'app_audio_stream_out'
+  asr_audio_stream_in: create 'asr_audio_stream_in'
+  store_audio_stream_in: create 'store_audio_stream_in'
+  // SmartMicrophone
+  //   audio: writes mic_audio_stream_out
+  // DemoApplication
+  //   audioIn: reads mic_audio_stream_out
+  //   audioOut: writes app_audio_stream_out
+  // DemoApplicationASR
+  //   audio: reads app_audio_stream_out
+  // DemoApplicationAudioStore
+  //   audio: reads app_audio_stream_out
+  SmartMicrophone
+    audio: writes mic_audio_stream_out
+  DemoApplication
+    audioIn: reads app_audio_stream_in
+    audioOut: writes app_audio_stream_out
+  DemoApplicationASR
+    audio: reads asr_audio_stream_in
+  DemoApplicationAudioStore
+    audio: reads store_audio_stream_in
+
+// __AUTH_LOGIC__
+.decl ownsAccessPath(owner : Principal, ap : AccessPath)
+.decl hasTag(ap : AccessPath, owner : Principal, tag : Tag)
+.decl mayHaveTag(ap : AccessPath, owner : Principal, tag : Tag)
+.decl isAccessPath(ap : AccessPath)
+.decl isPrincipal(principal : Principal)
+
+"OwnerUser" says {
+  // Captures the fat that `OwnerUser` produces data for the `SmartMicrophone`.
+  ownsAccessPath("OwnerUser", "R.SmartMicrophone.audio").
+
+  // Settings that will be filled in programmatically.
+  hasTag("R.SmartMicrophone.audio", "OwnerUser", "RawAudio").
+  hasTag("R.SmartMicrophone.audio", "OwnerUser", "AllowASR").
+  hasTag("R.SmartMicrophone.audio", "OwnerUser", "AllowStreaming").
+  hasTag("R.SmartMicrophone.audio", "OwnerUser", "AllowAudioStore").
+
+  "SystemSettingsManager" canSay hasTag(ap, "OwnerUser", tag).
+}
+
+"GuestUser" says {
+  // Captures the fat that `GuestUser` produces data for the `SmartMicrophone`.
+  ownsAccessPath("GuestUser", "R.SmartMicrophone.audio").
+
+  // Settings that will be filled in programmatically.
+  hasTag("R.SmartMicrophone.audio", "GuestUser", "RawAudio").
+  hasTag("R.SmartMicrophone.audio", "GuestUser", "AllowASR").
+  // hasTag("R.SmartMicrophone.audio", "GuestUser", "AllowStreaming").
+  hasTag("R.SmartMicrophone.audio", "GuestUser", "AllowAudioStore").
+
+  "SystemSettingsManager" canSay hasTag(ap, "GuestUser", tag).
+}
+
+"SystemSettingsManager" says {
+  "DemoApplicationASR" canSay
+      hasTag("R.DemoApplicationASR.audio", owner, "DoesASR").
+
+  "DemoApplicationAudioStore" canSay
+      hasTag("R.DemoApplicationAudioStore.audio", owner, "DoesAudioStore").
+
+  "DemoApplication" canSay
+      hasTag("R.DemoApplication.audioIn", owner, "DoesStreaming").
+
+   // If the authorization parser support comparison operators, we can
+   // make this to be true for all users other than `OwnerUser`.  For
+   // now, we will have to be explicit.
+   //
+   // AllowASR for "GuestUser" no matter what.
+   hasTag(ap, "GuestUser", "AllowASR").
+   hasTag(ap, "GuestUser", "AllowStreaming").
+   hasTag(ap, "GuestUser", "AllowAudioStore").
+   // Allow "OwnerUser" to configure ASR.
+   "OwnerUser" canSay hasTag(ap, "OwnerUser", "AllowASR").
+   "OwnerUser" canSay hasTag(ap, "OwnerUser", "AllowStreaming").
+   "OwnerUser" canSay hasTag(ap, "OwnerUser", "AllowAudioStore").
+ }
+
+"DemoApplicationASR" says {
+    hasTag("R.DemoApplicationASR.audio", owner, "DoesASR").
+}
+"DemoApplicationAudioStore" says {
+    hasTag("R.DemoApplicationAudioStore.audio", owner, "DoesAudioStore").
+}
+"DemoApplication" says {
+    hasTag("R.DemoApplication.audioIn", owner, "DoesStreaming").
+}
+
+
+
