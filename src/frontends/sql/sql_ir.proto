@@ -71,10 +71,9 @@ message TagTransform {
 };
 
 message Expression {
-  // A unique ID assigned to each Expression. Allows TagTransform nodes to
-  // point at Expression, as the need to be able to check the tag state of
-  // particular MergeOperations to decide whether to perform the
-  // transform.
+  // An ID which, if present, uniquely identifies this `Expression`. This is
+  // used by `TagTransform`s to point at `Expression`s which must have a
+  // particular tag state for that `TagTransform` to execute.
   uint64 id = 1;
   // We may optionally associate expressions with names to help with building
   // `AccessPaths`. This name may include column and/or table aliases provided

@@ -126,10 +126,12 @@ static Value GetExprValue(const Expression &expr,
 Value DecodeExpression(const Expression &expr,
                        DecoderContext &decoder_context) {
   uint64_t id = expr.id();
-  CHECK(id != 0) << "Required field id was not present in Expression.";
   // TODO(#413): Figure out what to do with the optional name field.
   Value value = GetExprValue(expr, decoder_context);
-  decoder_context.RegisterValue(id, value);
+  // If the id is present, add it to the map from ids to values.
+  if (id != 0) {
+    decoder_context.RegisterValue(id, value);
+  }
   return value;
 }
 

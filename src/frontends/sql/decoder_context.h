@@ -67,6 +67,8 @@ class DecoderContext {
   // Get a copy of the value associated with a particular id. Assumes that the
   // ID is present; it will error if it is not.
   ir::Value GetValue(uint64_t id) const {
+    CHECK(id != 0)
+      << "Attempt to get a value with id 0, which is not a legal value id.";
     // We could use `at`, which would be more concise and would also fail if the
     // id is not present in the map, but it will not provide a nice error
     // message. Use `find` and `CHECK` to get a better error message.
