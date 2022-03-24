@@ -55,6 +55,11 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
   uint64_t recipe_num = 0;
   for (const arcs::RecipeProto &recipe_proto : manifest_proto.recipes()) {
     absl::flat_hash_map<std::string, uint64_t> particle_numbers;
+    absl::flat_hash_map<std::string, std::string> handle_ids;
+    for (const arcs::HandleProto &handle_proto : recipe_proto.handles()) {
+      handle_ids[handle_proto.name()] =
+          handle_proto.id().empty() ? handle_proto.name() : handle_proto.id();
+    }
     const std::string &recipe_name =
         recipe_proto.name().empty()
             ? absl::StrCat(generated_recipe_name_prefix, recipe_num++)
@@ -113,8 +118,12 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
           ir::AccessPathRoot(std::move(spec_handle_root)),
           ir::AccessPathRoot(instantiated_handle_root) });
 
-        raksha::ir::HandleAccessPathRoot handle_root(
-            recipe_name, std::move(handle_name));
+        auto find_result = handle_ids.find(handle_name);
+        std::string handle_id =
+            find_result == handle_ids.end() ? handle_name : find_result->second;
+
+        raksha::ir::HandleAccessPathRoot handle_root(recipe_name,
+                                                     std::move(handle_id));
 
         CHECK(connection_proto.has_type())
           << "Handle connection with absent type not allowed.";
