@@ -16,15 +16,131 @@
 //
 // Policy checker for the multimic use case.
 //
+#include "src/frontends/ambient/policy_checker.h"
+
 #include <iostream>
 #include <memory>
 
+#include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
+#include "absl/strings/match.h"
+#include "souffle/SouffleInterface.h"
+#include "src/common/logging/logging.h"
+#include "src/common/utils/ranges.h"
 
-namespace raksha {
+namespace raksha::ambient {
 
-bool IsValidEdge(absl::string_view src, std::string_view dst) {
+namespace {
+
+template <typename Range>
+void UpdateEdges(const souffle::SouffleProgram *program, Range edges) {
+  souffle::Relation *rel = CHECK_NOTNULL(program->getRelation("edge"));
+  for (const auto &[src, tgt] : edges) {
+    souffle::tuple edge(rel);  // Create an empty tuple
+    edge << std::string(src) << std::string(tgt);
+    rel->insert(edge);
+  }
+}
+
+template <typename Range>
+void UpdateSettings(const souffle::SouffleProgram *program,
+                    Range user_settings) {
+  souffle::Relation *rel = CHECK_NOTNULL(program->getRelation("hasTag"));
+  // .decl hasTag(accessPath: AccessPath, owner: Principal, tag: Tag)
+  for (const auto &[user, settings] : user_settings) {
+    for (const auto &[usage, allowed] : settings) {
+      souffle::tuple setting(rel);  // Create an empty tuple
+      if (allowed) {
+        setting << PolicyChecker::kMicrophoneAudio << user
+                << absl::StrFormat("Allow%s", usage);
+        rel->insert(setting);
+      }
+    }
+  }
+}
+
+}  // namespace
+
+bool PolicyChecker::CanUserChangeSetting(absl::string_view user,
+                                         absl::string_view setting_name) {
+  std::unique_ptr<souffle::SouffleProgram> program(
+      souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName));
+  CHECK_NOTNULL(program);
+  program->run();
+  //  .decl says_canSay_hasTag(speaker: Principal, delegatee1: Principal, ap:
+  //  AccessPath, owner: Principal, tag: Tag)
+  souffle::Relation *saysCanSayHasTag =
+      CHECK_NOTNULL(program->getRelation("says_canSay_hasTag"));
+  std::string setting_tag = absl::StrFormat("Allow%s", setting_name);
+  for (auto &output : *saysCanSayHasTag) {
+    std::string speaker, delegatee1, path, owner, tag;
+    output >> speaker >> delegatee1 >> path >> owner >> tag;
+    if (speaker == kSystemSettingsManager && path == kMicrophoneAudio &&
+        delegatee1 == user && owner == user && tag == setting_tag) {
+      return true;
+    }
+  }
+  return false;
+}
+
+absl::flat_hash_set<std::string> PolicyChecker::AvailableSettings(
+    absl::string_view user) const {
+  absl::flat_hash_set<std::string> result;
+  std::unique_ptr<souffle::SouffleProgram> program(
+      souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName));
+  CHECK_NOTNULL(program);
+  program->run();
+  //  .decl says_canSay_hasTag(speaker: Principal, delegatee1: Principal, ap:
+  //  AccessPath, owner: Principal, tag: Tag)
+  souffle::Relation *saysCanSayHasTag =
+      CHECK_NOTNULL(program->getRelation("says_canSay_hasTag"));
+  for (auto &output : *saysCanSayHasTag) {
+    std::string speaker, delegatee1, path, owner, tag;
+    output >> speaker >> delegatee1 >> path >> owner >> tag;
+    if (speaker == kSystemSettingsManager && path == kMicrophoneAudio &&
+        delegatee1 == user && owner == user && absl::StartsWith(tag, "Allow")) {
+      result.insert(std::string(tag, 5));  // Strip "Allow"
+    }
+  }
+  return result;
+}
+
+bool PolicyChecker::ChangeSetting(absl::string_view user,
+                                  absl::string_view settings_name, bool value) {
+  if (!CanUserChangeSetting(user, settings_name)) return false;
+  CHECK(user == kOwnerUser || user == kGuestUser);
+  user_settings_[user][settings_name] = value;
   return true;
 }
 
+std::pair<bool, std::string> PolicyChecker::ValidatePolicyCompliance() const {
+  std::unique_ptr<souffle::SouffleProgram> program(
+      souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName));
+  CHECK_NOTNULL(program);
+
+  UpdateEdges(program.get(), utils::make_range(edges_.begin(), edges_.end()));
+  UpdateSettings(program.get(), utils::make_range(user_settings_.begin(),
+                                                  user_settings_.end()));
+
+  program->run();
+
+  souffle::Relation *disallowed_usage =
+      CHECK_NOTNULL(program->getRelation("disallowedUsage"));
+  // .decl disallowedUsage(dataConsumer: Principal, usage: Usage, owner:
+  // Principal, tag: Tag)
+
+  if (disallowed_usage->size() == 0) {
+    return std::make_pair(true, "Success");
+  }
+
+  std::string data_consumer, usage, owner, tag;
+  std::string reason("Disallowed Usages:\n");
+  for (auto &output : *disallowed_usage) {
+    output >> data_consumer >> usage >> owner >> tag;
+    absl::StrAppend(&reason, absl::StrFormat(" '%s' for '%s' of '%s'\n", usage,
+                                             tag, owner));
+  }
+  return std::make_pair(false, reason);
 }
+
+}  // namespace raksha::ambient
