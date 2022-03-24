@@ -49,9 +49,9 @@ recipe R
 
   // Settings that will be filled in programmatically.
   hasTag("R.SmartMicrophone.audio", "OwnerUser", "RawAudio").
-  hasTag("R.SmartMicrophone.audio", "OwnerUser", "AllowASR").
-  hasTag("R.SmartMicrophone.audio", "OwnerUser", "AllowStreaming").
-  hasTag("R.SmartMicrophone.audio", "OwnerUser", "AllowRecording").
+  // hasTag("R.SmartMicrophone.audio", "OwnerUser", "AllowASR").
+  // hasTag("R.SmartMicrophone.audio", "OwnerUser", "AllowStreaming").
+  // hasTag("R.SmartMicrophone.audio", "OwnerUser", "AllowRecording").
 
   "SystemSettingsManager" canSay hasTag(ap, "OwnerUser", tag).
 }
@@ -62,9 +62,9 @@ recipe R
 
   // Settings that will be filled in programmatically.
   hasTag("R.SmartMicrophone.audio", "GuestUser", "RawAudio").
-  hasTag("R.SmartMicrophone.audio", "GuestUser", "AllowASR").
-  hasTag("R.SmartMicrophone.audio", "GuestUser", "AllowStreaming").
-  hasTag("R.SmartMicrophone.audio", "GuestUser", "AllowRecording").
+  // hasTag("R.SmartMicrophone.audio", "GuestUser", "AllowASR").
+  // hasTag("R.SmartMicrophone.audio", "GuestUser", "AllowStreaming").
+  // hasTag("R.SmartMicrophone.audio", "GuestUser", "AllowRecording").
 
   "SystemSettingsManager" canSay hasTag(ap, "GuestUser", tag).
 }
@@ -83,7 +83,7 @@ recipe R
    // make this to be true for all users other than `OwnerUser`.  For
    // now, we will have to be explicit.
    //
-   // AllowASR for "GuestUser" no matter what.
+   // "GuestUser" cannot change settings.
    hasTag(ap, "GuestUser", "AllowASR").
    hasTag(ap, "GuestUser", "AllowStreaming").
    hasTag(ap, "GuestUser", "AllowRecording").

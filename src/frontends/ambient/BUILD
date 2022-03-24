@@ -51,6 +51,7 @@ gen_souffle_cxx_code(
 cc_library(
     name = "policy_checker",
     srcs = ["policy_checker.cc"],
+    hdrs = ["policy_checker.h"],
     copts = [
         "-fexceptions",
         "-Iexternal/souffle/src/include/souffle",
@@ -62,7 +63,12 @@ cc_library(
     linkopts = ["-pthread"],
     deps = [
         ":policy_checker_dl",
+        "//src/common/logging",
+        "//src/common/utils:ranges",
+        "@absl//absl/container:flat_hash_map",
+        "@absl//absl/container:flat_hash_set",
         "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
         "@souffle//:souffle_include_lib",
     ],
 )

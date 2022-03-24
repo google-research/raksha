@@ -16,47 +16,73 @@
 //
 // Policy checker for the multimic use case.
 //
+#include "src/frontends/ambient/policy_checker.h"
+
 #include <iostream>
 #include <memory>
 
-#include "souffle/SouffleInterface.h"
-#include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
-#include "src/common/logging/logging.h"
 
-void AddEdge(const souffle::SouffleProgram *program, absl::string_view src,
-             absl::string_view tgt) {
-  souffle::Relation *rel = CHECK_NOTNULL(program->getRelation("edge"));
-  souffle::tuple edge(rel); // Create an empty tuple
-  edge << std::string(src) << std::string(tgt);
-  rel->insert(edge);
-  return;
-}
+namespace raksha::ambient {
+namespace {
 
-
-TEST(CppInterfaceTest, CanLoadDatalogProgram) {
-  std::unique_ptr<souffle::SouffleProgram> program(
-      souffle::ProgramFactory::newInstance("policy_checker_cxx"));
-  ASSERT_NE(program, nullptr);
-
-  AddEdge(program.get(), "R.mic_audio_stream_out", "R.app_audio_stream_in");
-  AddEdge(program.get(), "R.app_audio_stream_out", "R.asr_audio_stream_in");
-  AddEdge(program.get(), "R.app_audio_stream_out", "R.store_audio_stream_in");
-
-  program->run();
-  souffle::Relation *disallowed_usage = program->getRelation("disallowedUsage");
-  ASSERT_NE(disallowed_usage, nullptr);
-  // .decl disallowedUsage(dataConsumer: Principal, usage: Usage, owner: Principal, tag: Tag)
-
-  EXPECT_EQ(disallowed_usage->size(), 0);
-  if (disallowed_usage->size() > 0) {
-    std::string data_consumer, usage, owner, tag;
-    LOG(WARNING) << "Disallowed Usages";
-    for (auto &output : *disallowed_usage) {
-      output >> data_consumer >> usage >> owner >> tag;
-      LOG(WARNING) << "'" << usage << "' for  '" << tag
-                   << "' of '" << owner << "'";
-    }
+TEST(PolicyCheckerTest, EdgesTest) {
+  PolicyChecker checker;
+  checker.ChangeSetting(PolicyChecker::kOwnerUser, PolicyChecker::kASRSetting,
+                        true);
+  checker.ChangeSetting(PolicyChecker::kOwnerUser,
+                        PolicyChecker::kRecordingSetting, true);
+  checker.ChangeSetting(PolicyChecker::kOwnerUser,
+                        PolicyChecker::kStreamingSetting, true);
+  {
+    const auto& [is_compliant, reason] = checker.AddIfValidEdge(
+        PolicyChecker::kMicrophoneOut, PolicyChecker::kDemoAppIn);
+    EXPECT_EQ(is_compliant, true)
+        << "Edge kMicrophoneOut -> kDemoAppIn Invalid:\n"
+        << reason;
   }
-  // program->printAll();
+  {
+    const auto& [is_compliant, reason] = checker.AddIfValidEdge(
+        PolicyChecker::kDemoAppOut, PolicyChecker::kDemoASRIn);
+    EXPECT_EQ(is_compliant, true)
+        << "Edge kDemoAppOut -> kDemoASRIn Invalid:\n" << reason;
+  }
+  {
+    const auto& [is_compliant, reason] = checker.AddIfValidEdge(
+        PolicyChecker::kDemoAppOut, PolicyChecker::kDemoStoreIn);
+    EXPECT_EQ(is_compliant, true)
+        << "Edge kDemoAppOut -> kDemoStoreIn Invalid:\n" << reason;
+  }
+  const auto& [is_compliant, reason] = checker.ValidatePolicyCompliance();
+  EXPECT_EQ(is_compliant, true) << "Policy failing:\n" << reason;
 }
+
+TEST(PolicyCheckerTest, WhoCanChangeSettings) {
+  PolicyChecker checker;
+  EXPECT_TRUE(checker.CanUserChangeSetting(PolicyChecker::kOwnerUser,
+                                           PolicyChecker::kASRSetting));
+  EXPECT_TRUE(checker.CanUserChangeSetting(PolicyChecker::kOwnerUser,
+                                           PolicyChecker::kRecordingSetting));
+  EXPECT_TRUE(checker.CanUserChangeSetting(PolicyChecker::kOwnerUser,
+                                           PolicyChecker::kStreamingSetting));
+  EXPECT_FALSE(checker.CanUserChangeSetting(PolicyChecker::kGuestUser,
+                                            PolicyChecker::kASRSetting));
+  EXPECT_FALSE(checker.CanUserChangeSetting(PolicyChecker::kGuestUser,
+                                           PolicyChecker::kRecordingSetting));
+  EXPECT_FALSE(checker.CanUserChangeSetting(PolicyChecker::kGuestUser,
+                                            PolicyChecker::kStreamingSetting));
+}
+
+
+TEST(PolicyCheckerTest, AvailableSettings) {
+  PolicyChecker checker;
+  EXPECT_THAT(checker.AvailableSettings(PolicyChecker::kOwnerUser),
+              testing::UnorderedElementsAre(PolicyChecker::kASRSetting,
+                                            PolicyChecker::kRecordingSetting,
+                                            PolicyChecker::kStreamingSetting));
+  EXPECT_THAT(checker.AvailableSettings(PolicyChecker::kGuestUser),
+              testing::UnorderedElementsAre());
+}
+
+}  // namespace
+}  // namespace raksha::ambient
