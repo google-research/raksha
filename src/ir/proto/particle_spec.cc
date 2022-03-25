@@ -20,7 +20,9 @@
 
 #include "src/common/utils/map_iter.h"
 #include "src/ir/access_path_root.h"
-#include "src/ir/attribute.h"
+#include "src/ir/attributes/attribute.h"
+#include "src/ir/attributes/int_attribute.h"
+#include "src/ir/attributes/string_attribute.h"
 #include "src/ir/block_builder.h"
 #include "src/ir/handle_connection_spec.h"
 #include "src/ir/ir_context.h"
@@ -89,7 +91,7 @@ const Operation &Decode(IRContext &ir_context, BlockBuilder &parent_builder,
   std::unique_ptr<ParticleSpec> particle_spec =
       Decode(ir_context.type_factory(), particle_spec_proto);
   const Operator &particle_spec_operator =
-      ir_context.GetOperator(arcs::operators::kParticleSpec);
+      *CHECK_NOTNULL(ir_context.GetOperator(arcs::operators::kParticleSpec));
   std::string name = particle_spec_proto.name();
   CHECK(!name.empty()) << "Expected particle spec to have a name.";
 
@@ -120,7 +122,8 @@ const Operation &Decode(IRContext &ir_context, BlockBuilder &parent_builder,
     }
     for (const auto &output : outputs) {
       const Operation &output_operation = builder.AddOperation(
-          ir_context.GetOperator(arcs::operators::kMerge), {}, input_values);
+          *CHECK_NOTNULL(ir_context.GetOperator(arcs::operators::kMerge)),
+          NamedAttributeMap({}), input_values);
       results.insert({output, Value(value::OperationResult(
                                   output_operation, arcs::kDefaultResult))});
     }
@@ -131,8 +134,10 @@ const Operation &Decode(IRContext &ir_context, BlockBuilder &parent_builder,
       const auto *source_root = CHECK_NOTNULL(
           source.root().GetIf<HandleConnectionSpecAccessPathRoot>());
       const Operation &read_source = builder.AddOperation(
-          ir_context.GetOperator(arcs::operators::kReadAccessPath),
-          {{"path", StringAttribute::Create(source.selectors().ToString())}},
+          *CHECK_NOTNULL(
+              ir_context.GetOperator(arcs::operators::kReadAccessPath)),
+          NamedAttributeMap({{"path", Attribute::Create<StringAttribute>(
+                                          source.selectors().ToString())}}),
           {{std::string(arcs::kDefaultInput),
             Value(value::BlockArgument(
                 block, source_root->handle_connection_spec_name()))}});
@@ -145,8 +150,10 @@ const Operation &Decode(IRContext &ir_context, BlockBuilder &parent_builder,
       Value previous_value =
           results.at(target_root->handle_connection_spec_name());
       const Operation &write_target = builder.AddOperation(
-          ir_context.GetOperator(arcs::operators::kUpdateAccessPath),
-          {{"path", StringAttribute::Create(target.selectors().ToString())}},
+          *CHECK_NOTNULL(
+              ir_context.GetOperator(arcs::operators::kUpdateAccessPath)),
+          NamedAttributeMap({{"path", Attribute::Create<StringAttribute>(
+                                          target.selectors().ToString())}}),
           {{std::string(arcs::kDefaultInput), previous_value},
            {"value",
             Value(value::OperationResult(read_source, arcs::kDefaultResult))}});
@@ -163,11 +170,12 @@ const Operation &Decode(IRContext &ir_context, BlockBuilder &parent_builder,
       Value previous_value =
           results.at(target_root->handle_connection_spec_name());
       const Operation &claim_operation = builder.AddOperation(
-          ir_context.GetOperator(arcs::operators::kClaim),
-          {{"path", StringAttribute::Create(target.selectors().ToString())},
-           {"tag", StringAttribute::Create(claim.tag())},
+          *CHECK_NOTNULL(ir_context.GetOperator(arcs::operators::kClaim)),
+          {{"path",
+            Attribute::Create<StringAttribute>(target.selectors().ToString())},
+           {"tag", Attribute::Create<StringAttribute>(claim.tag())},
            {"is_present",
-            Int64Attribute::Create(claim.claim_tag_is_present())}},
+            Attribute::Create<Int64Attribute>(claim.claim_tag_is_present())}},
           {{std::string(arcs::kDefaultInput), previous_value}});
       Value result =
           Value(value::OperationResult(claim_operation, arcs::kDefaultResult));
@@ -184,7 +192,7 @@ const Operation &Decode(IRContext &ir_context, BlockBuilder &parent_builder,
 
   return parent_builder.AddOperation(
       particle_spec_operator,
-      NamedAttributeMap({{"name", StringAttribute::Create(name)}}),
+      NamedAttributeMap({{"name", Attribute::Create<StringAttribute>(name)}}),
       NamedValueMap({}), std::move(module));
 }
 

@@ -23,6 +23,9 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/test/utils.h"
+#include "src/ir/attributes/attribute.h"
+#include "src/ir/attributes/int_attribute.h"
+#include "src/ir/attributes/string_attribute.h"
 #include "src/ir/ir_printer.h"
 #include "src/ir/ir_visitor.h"
 #include "src/ir/proto/operators.h"
@@ -69,13 +72,13 @@ class ParticleDatalogPrinter {
     CHECK(operation.attributes().count("is_present") != 0);
     CHECK(operation.attributes().count("tag") != 0);
     Attribute attr = operation.attributes().at("is_present");
-    CHECK(attr->kind() == AttributeBase::Kind::kInt64);
-    bool is_present =
-        static_cast<const Int64Attribute *>(attr.get())->value() ? true : false;
+    auto int_attr = attr.GetIf<Int64Attribute>();
+    CHECK(int_attr != nullptr);
+    bool is_present = int_attr->value() ? true : false;
     auto input = *CHECK_NOTNULL(FindOrNull(operation.inputs(), "input"));
     out_ << (is_present ? "hasTag(" : "removeTag(");
     PrintValue(input);
-    out_ << ", " << operation.attributes().at("tag")->ToString();
+    out_ << ", " << operation.attributes().at("tag").ToString();
     out_ << ").\n";
     out_ << "edge(";
     PrintValue(input);
@@ -88,7 +91,7 @@ class ParticleDatalogPrinter {
     if (auto any = value.If<value::Any>()) return;
     out_ << "edge(";
     PrintValue(value);
-    out_ << ", " << particle_->attributes().at("name")->ToString() << "_"
+    out_ << ", " << particle_->attributes().at("name").ToString() << "_"
          << ssa_names_.GetOrCreateID(*particle_) << "." << name << ").\n";
   }
 
@@ -157,9 +160,9 @@ class ParticleDatalogPrinter {
         particle_spec_(&particle_spec),
         particle_(&particle) {
     CHECK(particle_spec_ != nullptr);
-    particle_prefix_ = absl::StrFormat(
-        "%s_%d.", particle_->attributes().at("name")->ToString(),
-        ssa_names_.GetOrCreateID(*particle_));
+    particle_prefix_ =
+        absl::StrFormat("%s_%d.", particle_->attributes().at("name").ToString(),
+                        ssa_names_.GetOrCreateID(*particle_));
   }
 
   std::ostream &out_;
@@ -192,7 +195,7 @@ class DatalogPrinter : public IRVisitor<DatalogPrinter> {
   void Visit(const Operation &operation) override {
     if (operation.op().name() == arcs::operators::kParticle) {
       Attribute attr = operation.attributes().at(arcs::kParticleNameAttribute);
-      const Block *particle_spec = particle_specs_.at(attr->ToString());
+      const Block *particle_spec = particle_specs_.at(attr.ToString());
       ParticleDatalogPrinter::ToDatalog(out_, ir_printer_, *particle_spec,
                                         operation);
     } else if (operation.op().name() == arcs::operators::kParticleSpec) {
@@ -200,7 +203,7 @@ class DatalogPrinter : public IRVisitor<DatalogPrinter> {
       CHECK(module.blocks().size() == 1);
       const Block &block = *module.blocks().front();
       Attribute attr = operation.attributes().at(arcs::kParticleNameAttribute);
-      particle_specs_[attr->ToString()] = &block;
+      particle_specs_[attr.ToString()] = &block;
     }
   }
 
@@ -288,14 +291,16 @@ TEST(ParticleSpecTest, TestSomething) {
         //   LOG(WARNING) << "Skipping " << handle_connection_proto.name();
         //   continue;
         // }
-        inputs.insert({handle_connection_proto.name(),
-                       Value(value::StoredValue(context.GetStorage(
-                           handle_connection_proto.handle())))});
+        inputs.insert(
+            {handle_connection_proto.name(),
+             Value(value::StoredValue(*CHECK_NOTNULL(
+                 context.GetStorage(handle_connection_proto.handle()))))});
       }
       // const Operation &invocation =
       builder.AddOperation(
-          context.GetOperator(arcs::operators::kParticle),
-          {{"name", StringAttribute::Create(particle_proto.spec_name())}},
+          *CHECK_NOTNULL(context.GetOperator(arcs::operators::kParticle)),
+          {{"name",
+            Attribute::Create<StringAttribute>(particle_proto.spec_name())}},
           inputs);
       // for (const auto &handle_connection_proto :
       // particle_proto.connections()) {
