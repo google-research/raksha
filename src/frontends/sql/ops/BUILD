@@ -48,6 +48,37 @@ cc_test(
 )
 
 cc_library(
+    name = "merge_op",
+    srcs = ["merge_op.cc"],
+    hdrs = ["merge_op.h"],
+    deps = [
+        ":sql_op",
+        "//src/common/utils:ranges",
+        "//src/ir:ir_context",
+        "//src/ir:module",
+        "//src/ir:value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+        "@absl//absl/algorithm:container",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "merge_op_test",
+    srcs = ["merge_op_test.cc"],
+    deps = [
+        ":merge_op",
+        ":sql_op",
+        "//src/common/testing:gtest",
+        "//src/common/utils:ranges",
+        "//src/ir:value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+    ],
+)
+
+cc_library(
     name = "sql_op",
     hdrs = ["sql_op.h"],
     deps = [

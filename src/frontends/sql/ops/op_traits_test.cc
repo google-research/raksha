@@ -21,6 +21,7 @@ namespace raksha::frontends::sql {
 
 TEST(OpTraitsTest, NameReturnsCorrectValue) {
   EXPECT_EQ(OpTraits<LiteralOp>::kName, "sql.literal");
+  EXPECT_EQ(OpTraits<MergeOp>::kName, "sql.merge");
 }
 
 }  // namespace raksha::frontends::sql
