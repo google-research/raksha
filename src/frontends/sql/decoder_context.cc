@@ -38,7 +38,7 @@ const Operation &DecoderContext::MakeMergeOperation(
 
 const ir::Operation &DecoderContext::MakeTagTransformOperation(
     ir::Value transformed_value, absl::string_view rule_name,
-    absl::flat_hash_map<std::string, uint64_t> preconditions) {
+    const absl::flat_hash_map<std::string, uint64_t> &preconditions) {
   // We need to reserve one space for the transformed value plus one for each
   // precondition.
   NamedValueMap values_map;
@@ -50,7 +50,7 @@ const ir::Operation &DecoderContext::MakeTagTransformOperation(
 
   // Each precondition is given the same input name prefix plus an incrementing
   // number in the same order as in the original ID list.
-  for (auto &[name, id] : preconditions) {
+  for (const auto &[name, id] : preconditions) {
     auto insert_result = values_map.insert(
         {absl::StrCat(kTagTransformPreconditionInputPrefix, name),
          GetValue(id)});

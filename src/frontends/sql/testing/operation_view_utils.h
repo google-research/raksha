@@ -31,7 +31,7 @@ std::vector<ir::Value> GetVecWithPrefix(const ir::NamedValueMap &map,
 // subset of elements that start with some prefix `prefix` and end with a key
 // that should be associated with that value in the resulting map. It
 // composes that map and returns it.
-absl::flat_hash_map<std::string, ir::Value> GetMapWithPrefix(
+absl::flat_hash_map<std::string, ir::Value> GetMapEntriesWithPrefix(
     const ir::NamedValueMap &map, absl::string_view prefix);
 
 }  // namespace raksha::frontends::sql::testing

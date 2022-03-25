@@ -49,7 +49,7 @@ std::vector<ir::Value> GetVecWithPrefix(const ir::NamedValueMap &map,
   return result;
 }
 
-absl::flat_hash_map<std::string, ir::Value> GetMapWithPrefix(
+absl::flat_hash_map<std::string, ir::Value> GetMapEntriesWithPrefix(
     const ir::NamedValueMap &map, absl::string_view prefix) {
   absl::flat_hash_map<std::string, ir::Value> result;
   for (auto &[key, value] : map) {

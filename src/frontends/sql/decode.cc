@@ -93,7 +93,7 @@ static Value DecodeTagTransform(const TagTransform &tag_transform,
       tag_transform.tag_preconditions().end());
   return WrapOperationResultValue(decoder_context.MakeTagTransformOperation(
       std::move(transformed_value), transform_rule_name,
-      std::move(preconditions)));
+      preconditions));
 }
 
 // A helper function to decode the specific subclass of the Expression.

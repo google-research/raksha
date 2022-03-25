@@ -106,7 +106,7 @@ class DecoderContext {
 
   const ir::Operation &MakeTagTransformOperation(
       ir::Value transformed_value, absl::string_view rule_name,
-      absl::flat_hash_map<std::string, uint64_t> tag_preconditions);
+      const absl::flat_hash_map<std::string, uint64_t> &tag_preconditions);
 
   // Finish building the top level block and
   const ir::Block &BuildTopLevelBlock() {

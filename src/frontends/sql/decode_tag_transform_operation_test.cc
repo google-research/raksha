@@ -96,7 +96,7 @@ tag_transform : {
       &expr));
   Value decoded_value = DecodeExpression(expr, decoder_context);
 
-  std::vector<std::pair<std::string, Value>> expected_name_to_value_vec =
+  auto expected_name_to_value_vec =
       MapIter<std::pair<std::string, Value>>(
           precondition_name_to_id, [&decoder_context](auto name_id_pair) {
             return std::make_pair(

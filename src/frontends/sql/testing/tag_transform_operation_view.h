@@ -47,7 +47,7 @@ class TagTransformOperationView {
   }
 
   absl::flat_hash_map<std::string, ir::Value> GetPreconditions() const {
-    return GetMapWithPrefix(
+    return GetMapEntriesWithPrefix(
         tag_transform_operation_->inputs(),
         DecoderContext::kTagTransformPreconditionInputPrefix);
   }
