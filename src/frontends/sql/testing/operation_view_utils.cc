@@ -5,25 +5,32 @@
 
 namespace raksha::frontends::sql::testing {
 
-std::optional<uint64_t> ExtractIdxAfterPrefix(
+std::optional<absl::string_view> ExtractSubstrAfterPrefix(
     absl::string_view str, absl::string_view prefix) {
   if (!absl::StartsWith(str, prefix)) return std::nullopt;
+  return str.substr(prefix.size());
+}
+
+std::optional<uint64_t> ExtractIdxAfterPrefix(absl::string_view str,
+                                              absl::string_view prefix) {
+  std::optional<absl::string_view> suffix =
+      ExtractSubstrAfterPrefix(str, prefix);
+  if (!suffix) return std::nullopt;
   uint64_t result = 0;
-  std::string index_str(str.substr(prefix.size()));
+  std::string index_str(*suffix);
   if (!absl::SimpleAtoi(index_str, &result)) return std::nullopt;
   return result;
 }
 
 std::vector<ir::Value> GetVecWithPrefix(const ir::NamedValueMap &map,
-                                               absl::string_view prefix) {
+                                        absl::string_view prefix) {
   uint64_t inferred_vec_length = 0;
 
   // The numbering of inputs should be dense. Thus, we can find the largest
   // index with the given prefix, add one to it, and consider that the
   // length of the vector.
   for (auto &[key, value] : map) {
-    if (std::optional<uint64_t> opt_idx =
-            ExtractIdxAfterPrefix(key, prefix)) {
+    if (std::optional<uint64_t> opt_idx = ExtractIdxAfterPrefix(key, prefix)) {
       inferred_vec_length = std::max(inferred_vec_length, *opt_idx + 1);
     }
   }
@@ -38,6 +45,18 @@ std::vector<ir::Value> GetVecWithPrefix(const ir::NamedValueMap &map,
     CHECK(find_result != map.end())
         << "Found a hole in the key numbering: " << find_result->first;
     result.push_back(find_result->second);
+  }
+  return result;
+}
+
+absl::flat_hash_map<std::string, ir::Value> GetMapEntriesWithPrefix(
+    const ir::NamedValueMap &map, absl::string_view prefix) {
+  absl::flat_hash_map<std::string, ir::Value> result;
+  for (auto &[key, value] : map) {
+    if (std::optional<absl::string_view> opt_key =
+            ExtractSubstrAfterPrefix(key, prefix)) {
+      result.insert({std::string(*opt_key), value});
+    }
   }
   return result;
 }

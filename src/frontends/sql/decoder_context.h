@@ -68,7 +68,7 @@ class DecoderContext {
   // ID is present; it will error if it is not.
   ir::Value GetValue(uint64_t id) const {
     CHECK(id != 0)
-      << "Attempt to get a value with id 0, which is not a legal value id.";
+        << "Attempt to get a value with id 0, which is not a legal value id.";
     // We could use `at`, which would be more concise and would also fail if the
     // id is not present in the map, but it will not provide a nice error
     // message. Use `find` and `CHECK` to get a better error message.
@@ -106,7 +106,7 @@ class DecoderContext {
 
   const ir::Operation &MakeTagTransformOperation(
       ir::Value transformed_value, absl::string_view rule_name,
-      std::vector<uint64_t> preconditions);
+      const absl::flat_hash_map<std::string, uint64_t> &tag_preconditions);
 
   // Finish building the top level block and
   const ir::Block &BuildTopLevelBlock() {

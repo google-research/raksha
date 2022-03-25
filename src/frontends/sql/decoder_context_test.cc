@@ -31,6 +31,7 @@ using ::testing::Pair;
 using ::testing::ResultOf;
 using ::testing::TestWithParam;
 using ::testing::UnorderedElementsAre;
+using ::testing::UnorderedElementsAreArray;
 using ::testing::Values;
 using ::testing::ValuesIn;
 
@@ -171,37 +172,45 @@ INSTANTIATE_TEST_SUITE_P(DecodeMergeOpTest, DecodeMergeOpTest,
 class DecodeTagTransformTest
     : public TestWithParam<
           std::tuple<ir::Value, absl::string_view, std::vector<ir::Value>,
-                     std::vector<uint64_t>>> {};
+                     std::vector<uint64_t>, std::vector<absl::string_view>>> {};
 
 TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
   const auto &[xformed_value, policy_rule_name, precondition_values,
-               id_sequence] = GetParam();
+               id_sequence, precondition_name_sequence] = GetParam();
 
   IRContext ir_context;
   DecoderContext decoder_context(ir_context);
 
-  // The id_sequence_vec is an id sequence that may have more IDs than we
-  // need for giving each value an ID. We will put a value_vec.size()
-  // prefix of it into precondition_value_ids, which then will contain only
-  // those IDs associated with a value.
-  std::vector<uint64_t> precondition_value_ids;
-  precondition_value_ids.reserve(precondition_values.size());
+  // The id_sequence and precondition_name_sequence each may have more entries
+  // need for associating each input with a name and ID. We will select the
+  // first precondition_values.size() prefix of each to build our name to ID
+  // map.
+  absl::flat_hash_map<std::string, uint64_t> precondition_name_to_id_map;
+  precondition_name_to_id_map.reserve(precondition_values.size());
   for (uint64_t idx = 0; idx < precondition_values.size(); ++idx) {
     uint64_t id = id_sequence.at(idx);
+    precondition_name_to_id_map.insert(
+        {std::string(precondition_name_sequence.at(idx)), id});
     decoder_context.RegisterValue(id, precondition_values.at(idx));
-    precondition_value_ids.push_back(id);
   }
 
   // Setup has finished. Create the tag transform operation and check its
   // properties.
   const Operation &tag_xform_operation =
       decoder_context.MakeTagTransformOperation(xformed_value, policy_rule_name,
-                                                precondition_value_ids);
+                                                precondition_name_to_id_map);
   testing::TagTransformOperationView tag_xform_view(tag_xform_operation);
+
+  absl::flat_hash_map<std::string, Value> precondition_name_to_value_map;
+  precondition_name_to_value_map.reserve(precondition_name_to_id_map.size());
+  for (const auto &[name, id] : precondition_name_to_id_map) {
+    precondition_name_to_value_map.insert({name, decoder_context.GetValue(id)});
+  }
 
   EXPECT_EQ(tag_xform_view.GetRuleName(), policy_rule_name);
   EXPECT_EQ(tag_xform_view.GetTransformedValue(), xformed_value);
-  EXPECT_EQ(tag_xform_view.GetPreconditions(), precondition_values);
+  EXPECT_THAT(tag_xform_view.GetPreconditions(),
+              UnorderedElementsAreArray(precondition_name_to_value_map));
 }
 
 static const Value kSampleValues[] = {
@@ -221,10 +230,30 @@ static const absl::string_view kSampleRuleNames[] = {
 static const std::vector<uint64_t> kSampleIdSequences[] = {
     {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {3, 90, 25, 7, 33, 49, 51, 2, 17, 400}};
 
+static const std::vector<absl::string_view> kSamplePreconditionNames[] = {
+    {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"},
+    // These are the first 10 words of Frakenstein by Mary
+    // Wollstonecraft Shelley, and are public domain. Retrieved via Project
+    // Gutenberg (https://www.gutenberg.org/files/84/84-h/84-h.htm#letter1).
+    {
+        "You",
+        "will",
+        "rejoice",
+        "to",
+        "hear",
+        "that",
+        "no",
+        "disaster",
+        "has",
+        "accompanied",
+    },
+};
+
 INSTANTIATE_TEST_SUITE_P(DecodeTagTransformTest, DecodeTagTransformTest,
                          Combine(ValuesIn(kSampleValues),
                                  ValuesIn(kSampleRuleNames),
                                  ValuesIn(kSampleInputVectors),
-                                 ValuesIn(kSampleIdSequences)));
+                                 ValuesIn(kSampleIdSequences),
+                                 ValuesIn(kSamplePreconditionNames)));
 
 }  // namespace raksha::frontends::sql

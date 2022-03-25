@@ -46,8 +46,8 @@ class TagTransformOperationView {
     return find_result->second;
   }
 
-  std::vector<ir::Value> GetPreconditions() const {
-    return GetVecWithPrefix(
+  absl::flat_hash_map<std::string, ir::Value> GetPreconditions() const {
+    return GetMapEntriesWithPrefix(
         tag_transform_operation_->inputs(),
         DecoderContext::kTagTransformPreconditionInputPrefix);
   }

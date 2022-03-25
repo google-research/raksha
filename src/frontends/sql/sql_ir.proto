@@ -63,11 +63,11 @@ message TagTransform {
   // The name of the rule that will govern whether this `TagTransform` is
   // active and what it does when active.
   string transform_rule_name = 2;
-  // A list of unique IDs of the expressions to be considered as
-  // preconditions of the `TagTransform`. The order matters here: the order
-  // number will be used to match these tag IDs with the requirements imposed
-  // by some rule.
-  repeated uint64 tag_precondition_ids = 3;
+  // A map from precondition names to unique IDs of expressions considered to
+  // be preconditions of the `TagTransform`. The names will also be used by
+  // the policy to match these tag IDs with the requirements imposed by some
+  // rule.
+  map<string, uint64> tag_preconditions = 3;
 };
 
 message Expression {

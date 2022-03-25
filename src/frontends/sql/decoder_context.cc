@@ -38,7 +38,7 @@ const Operation &DecoderContext::MakeMergeOperation(
 
 const ir::Operation &DecoderContext::MakeTagTransformOperation(
     ir::Value transformed_value, absl::string_view rule_name,
-    std::vector<uint64_t> preconditions) {
+    const absl::flat_hash_map<std::string, uint64_t> &preconditions) {
   // We need to reserve one space for the transformed value plus one for each
   // precondition.
   NamedValueMap values_map;
@@ -48,16 +48,12 @@ const ir::Operation &DecoderContext::MakeTagTransformOperation(
   values_map.insert(
       {std::string(kTagTransformTransformedValueInputName), transformed_value});
 
-  // Look up each precondition ID to get the corresponding Value.
-  std::vector<ir::Value> precondition_values_vec = utils::MapIter<ir::Value>(
-      preconditions, [&](uint64_t id) { return GetValue(id); });
-
   // Each precondition is given the same input name prefix plus an incrementing
   // number in the same order as in the original ID list.
-  for (uint64_t i = 0; i < precondition_values_vec.size(); ++i) {
+  for (const auto &[name, id] : preconditions) {
     auto insert_result = values_map.insert(
-        {absl::StrCat(kTagTransformPreconditionInputPrefix, i),
-         precondition_values_vec.at(i)});
+        {absl::StrCat(kTagTransformPreconditionInputPrefix, name),
+         GetValue(id)});
     CHECK(insert_result.second)
         << "Found duplicate entry for " << insert_result.first->first;
   }
