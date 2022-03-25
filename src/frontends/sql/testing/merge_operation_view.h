@@ -19,9 +19,10 @@
 
 #include "src/common/logging/logging.h"
 #include "src/frontends/sql/decoder_context.h"
+#include "src/frontends/sql/testing/operation_view_utils.h"
+#include "src/ir/attributes/int_attribute.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
-#include "src/frontends/sql/testing/operation_view_utils.h"
 
 namespace raksha::frontends::sql::testing {
 
@@ -32,17 +33,30 @@ class MergeOperationView {
   MergeOperationView(const ir::Operation &merge_operation)
       : merge_operation_(&merge_operation) {
     CHECK(merge_operation.op().name() == DecoderContext::kSqlMergeOpName);
-    CHECK(merge_operation.attributes().empty());
+    CHECK(merge_operation.attributes().count(
+              DecoderContext::kMergeOpControlStartIndex) > 0);
   }
 
   std::vector<ir::Value> GetDirectInputs() const {
-    return GetVecWithPrefix(merge_operation_->inputs(),
-                            DecoderContext::kMergeOpDirectInputPrefix);
+    auto attr_result = merge_operation_->attributes().find(
+        DecoderContext::kMergeOpControlStartIndex);
+    CHECK(attr_result != merge_operation_->attributes().end());
+    auto control_start_index =
+        CHECK_NOTNULL(attr_result->second.GetIf<ir::Int64Attribute>());
+    return std::vector<ir::Value>(
+        merge_operation_->inputs().begin(),
+        merge_operation_->inputs().begin() + control_start_index->value());
   }
 
   std::vector<ir::Value> GetControlInputs() const {
-    return GetVecWithPrefix(merge_operation_->inputs(),
-                            DecoderContext::kMergeOpControlInputPrefix);
+    auto attr_result = merge_operation_->attributes().find(
+        DecoderContext::kMergeOpControlStartIndex);
+    CHECK(attr_result != merge_operation_->attributes().end());
+    auto control_start_index =
+        CHECK_NOTNULL(attr_result->second.GetIf<ir::Int64Attribute>());
+    return std::vector<ir::Value>(
+        merge_operation_->inputs().begin() + control_start_index->value(),
+        merge_operation_->inputs().end());
   }
 
  private:

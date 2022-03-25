@@ -35,7 +35,7 @@ class Block;
 class Operation {
  public:
   Operation(const Block* parent, const Operator& op,
-            NamedAttributeMap attributes, NamedValueMap inputs,
+            NamedAttributeMap attributes, ValueList inputs,
             std::unique_ptr<Module> impl_module = nullptr)
       : parent_(parent),
         op_(std::addressof(op)),
@@ -51,7 +51,7 @@ class Operation {
 
   const Operator& op() const { return *op_; }
   const Block* parent() const { return parent_; }
-  const NamedValueMap& inputs() const { return inputs_; }
+  const ValueList& inputs() const { return inputs_; }
   const NamedAttributeMap& attributes() const { return attributes_; }
   const Module* impl_module() const { return impl_module_.get(); }
 
@@ -70,7 +70,7 @@ class Operation {
   // The attributes of the operation.
   NamedAttributeMap attributes_;
   // The inputs of the operation.
-  NamedValueMap inputs_;
+  ValueList inputs_;
   // If the operation can be broken down into other operations, it is
   // specified in the optional module. If `module_` is nullptr, then this is a
   // basic operator like `+`, `-`, etc., which cannot be broken down further.

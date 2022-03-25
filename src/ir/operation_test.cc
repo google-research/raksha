@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
+#include <memory>
+
 #include "absl/container/flat_hash_set.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/int_attribute.h"
@@ -28,7 +30,7 @@ struct OperationTestData {
   Block* block{};
   const Operator* op{};
   NamedAttributeMap attributes{};
-  NamedValueMap values{};
+  ValueList values{};
   // The expected string representation.
   absl::string_view string_rep;
 };
@@ -95,17 +97,17 @@ INSTANTIATE_TEST_SUITE_P(
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"const", Attribute::Create<Int64Attribute>(10)}},
-                           {{"arg", Value(value::Any())}},
-                           "%0 = core.minus [const: 10](arg: <<ANY>>)\n"}),
+                           {Value(value::Any())},
+
+                           "%0 = core.minus [const: 10](<<ANY>>)\n"}),
         OperationTestData(
             {&OperationTest::first_block_,
              &OperationTest::minus_op,
              {{"const", Attribute::Create<Int64Attribute>(10)}},
-             {{"a", Value(value::BlockArgument(OperationTest::first_block_,
-                                               "arg0"))},
-              {"b", Value(value::BlockArgument(OperationTest::first_block_,
-                                               "arg1"))}},
-             "%0 = core.minus [const: 10](a: %0.arg0, b: %0.arg1)\n"})));
+             {Value(value::BlockArgument(OperationTest::first_block_, "arg0")),
+              Value(value::BlockArgument(OperationTest::first_block_, "arg1"))},
+             "%0 = core.minus [const: "
+             "10](%0.arg0, %0.arg1)\n"})));
 
 }  // namespace
 }  // namespace raksha::ir

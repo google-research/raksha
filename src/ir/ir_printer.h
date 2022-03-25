@@ -82,9 +82,10 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
         operation.attributes(),
         [](const Attribute& attr) { return attr.ToString(); });
 
-    std::string inputs_string = PrintNamedMapInNameOrder(
-        operation.inputs(),
-        [&](const Value& val) { return val.ToString(ssa_names_); });
+    std::string inputs_string = absl::StrJoin(
+        operation.inputs(), ", ", [this](std::string* out, const Value& value) {
+          absl::StrAppend(out, value.ToString(ssa_names_));
+        });
 
     out_ << Indent()
          << absl::StreamFormat(kOperationFormat, this_ssa_name,

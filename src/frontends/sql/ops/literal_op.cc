@@ -34,7 +34,7 @@ std::unique_ptr<LiteralOp> LiteralOp::Create(const ir::Block* parent_block,
       ir::NamedAttributeMap(
           {{std::string(kLiteralStringAttrName),
             ir::Attribute::Create<ir::StringAttribute>(literal)}}),
-      ir::NamedValueMap({}),
+      ir::ValueList({}),
       /*impl_module=*/nullptr);
 }
 

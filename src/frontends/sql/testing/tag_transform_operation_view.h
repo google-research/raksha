@@ -20,6 +20,7 @@
 #include "src/common/logging/logging.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/testing/operation_view_utils.h"
+#include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
@@ -35,21 +36,27 @@ class TagTransformOperationView {
       : tag_transform_operation_(&tag_transform_operation) {
     CHECK(tag_transform_operation.op().name() ==
           DecoderContext::kTagTransformOpName);
-    CHECK(tag_transform_operation.attributes().size() == 1);
+    CHECK(tag_transform_operation.attributes().size() ==
+          tag_transform_operation.inputs().size());
   }
 
   ir::Value GetTransformedValue() const {
-    const ir::NamedValueMap &inputs = tag_transform_operation_->inputs();
-    auto find_result =
-        inputs.find(DecoderContext::kTagTransformTransformedValueInputName);
-    CHECK(find_result != inputs.end());
-    return find_result->second;
+    CHECK(tag_transform_operation_->inputs().size() >= 1);
+    return tag_transform_operation_->inputs().front();
   }
 
   absl::flat_hash_map<std::string, ir::Value> GetPreconditions() const {
-    return GetMapEntriesWithPrefix(
-        tag_transform_operation_->inputs(),
-        DecoderContext::kTagTransformPreconditionInputPrefix);
+    absl::flat_hash_map<std::string, ir::Value> result;
+    const ir::ValueList &inputs = tag_transform_operation_->inputs();
+    for (const auto &[name, attribute] :
+         tag_transform_operation_->attributes()) {
+      if (name == DecoderContext::kTagTransformRuleAttributeName) continue;
+      auto int_attribute = CHECK_NOTNULL(attribute.GetIf<ir::Int64Attribute>());
+      auto input_index = int_attribute->value();
+      CHECK(input_index < inputs.size()) << "Invalid index in TagTransformOp";
+      result.insert({name, inputs[input_index]});
+    }
+    return result;
   }
 
   absl::string_view GetRuleName() const {
