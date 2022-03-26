@@ -23,8 +23,8 @@ const Operation &DecoderContext::MakeMergeOperation(
                                   static_cast<int64_t>(control_start_index))}});
   // Combine the direct and control inputs.
   absl::c_move(control_inputs, std::back_inserter(direct_inputs));
-  return top_level_block_builder_.AddOperation(merge_operator_, attributes,
-                                               std::move(direct_inputs));
+  return top_level_block_builder_.AddOperation(
+      merge_operator_, std::move(attributes), std::move(direct_inputs));
 }
 
 const ir::Operation &DecoderContext::MakeTagTransformOperation(
