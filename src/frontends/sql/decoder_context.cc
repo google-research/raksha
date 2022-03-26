@@ -1,5 +1,7 @@
 #include "src/frontends/sql/decoder_context.h"
 
+#include <limits>
+
 #include "src/common/utils/map_iter.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/attributes/int_attribute.h"
@@ -13,10 +15,12 @@ using ir::Value;
 
 const Operation &DecoderContext::MakeMergeOperation(
     std::vector<Value> direct_inputs, std::vector<Value> control_inputs) {
-  auto control_start_index = direct_inputs.size();
-  auto attributes = ir::NamedAttributeMap(
-      {{std::string(kMergeOpControlStartIndex),
-        ir::Attribute::Create<ir::Int64Attribute>(control_start_index)}});
+  size_t control_start_index = direct_inputs.size();
+  CHECK(control_start_index < std::numeric_limits<int64_t>::max());
+  auto attributes =
+      ir::NamedAttributeMap({{std::string(kMergeOpControlStartIndex),
+                              ir::Attribute::Create<ir::Int64Attribute>(
+                                  static_cast<int64_t>(control_start_index))}});
   // Combine the direct and control inputs.
   absl::c_move(control_inputs, std::back_inserter(direct_inputs));
   return top_level_block_builder_.AddOperation(merge_operator_, attributes,
@@ -29,7 +33,8 @@ const ir::Operation &DecoderContext::MakeTagTransformOperation(
   // We need to reserve one space for the transformed value plus one for each
   // precondition.
   ir::ValueList inputs;
-  inputs.reserve(preconditions.size() + 1);
+  // Not adding +1 to avoid potential overflow.
+  inputs.reserve(preconditions.size());
 
   // Insert the value to be transformed.
   inputs.push_back(transformed_value);
@@ -37,10 +42,13 @@ const ir::Operation &DecoderContext::MakeTagTransformOperation(
   // Each precondition is given the same input name prefix plus an incrementing
   // number in the same order as in the original ID list.
   ir::NamedAttributeMap attributes;
-  unsigned index = 1;
+
   attributes.insert({std::string(kTagTransformRuleAttributeName),
                      ir::Attribute::Create<ir::StringAttribute>(rule_name)});
+  int64_t index = 1;
   for (const auto &[name, id] : preconditions) {
+    CHECK(index != std::numeric_limits<int64_t>::max())
+        << "`int64_t` might overflow. Why would you create so many attributes?";
     inputs.push_back(GetValue(id));
     auto insert_result = attributes.insert(
         {name, ir::Attribute::Create<ir::Int64Attribute>(index++)});

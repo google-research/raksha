@@ -35,6 +35,12 @@ class MergeOperationView {
     CHECK(merge_operation.op().name() == DecoderContext::kSqlMergeOpName);
     CHECK(merge_operation.attributes().count(
               DecoderContext::kMergeOpControlStartIndex) > 0);
+    auto index = merge_operation.attributes()
+                     .at(DecoderContext::kMergeOpControlStartIndex)
+                     .GetIf<ir::Int64Attribute>();
+    CHECK(index != nullptr);
+    CHECK(static_cast<size_t>(index->value()) <=
+          merge_operation.inputs().size());
   }
 
   std::vector<ir::Value> GetDirectInputs() const {
