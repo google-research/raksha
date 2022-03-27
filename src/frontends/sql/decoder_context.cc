@@ -33,8 +33,6 @@ const ir::Operation &DecoderContext::MakeTagTransformOperation(
   // We need to reserve one space for the transformed value plus one for each
   // precondition.
   ir::ValueList inputs;
-  // Not adding +1 to avoid potential overflow.
-  inputs.reserve(preconditions.size());
 
   // Insert the value to be transformed.
   inputs.push_back(transformed_value);
