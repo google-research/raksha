@@ -19,6 +19,7 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/ranges.h"
+#include "src/frontends/sql/ops/example_value_test_helper.h"
 #include "src/frontends/sql/ops/sql_op.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/value.h"
@@ -26,8 +27,8 @@
 namespace raksha::frontends::sql {
 namespace {
 
-class MergeOpTest
-    : public testing::TestWithParam<std::tuple<ir::ValueList, ir::ValueList>> {
+class MergeOpTest : public ::testing::TestWithParam<
+                        std::tuple<ir::ValueList, ir::ValueList>> {
  public:
   MergeOpTest() { SqlOp::RegisterOperator<MergeOp>(context_); }
 
@@ -35,10 +36,10 @@ class MergeOpTest
   ir::IRContext context_;
 };
 
-using testing::ElementsAreArray;
-using testing::Eq;
-using testing::Pair;
-using testing::UnorderedElementsAre;
+using ::testing::ElementsAreArray;
+using ::testing::Eq;
+using ::testing::Pair;
+using ::testing::UnorderedElementsAre;
 
 TEST_P(MergeOpTest, FactoryMethodCreatesCorrectOperation) {
   const auto& [inputs, controls] = GetParam();
@@ -105,44 +106,25 @@ TEST(MergeOpDeathTest, FailsIfBothDirectAndControlInputsAreEmpty) {
                "Both direct inputs and control inputs are empty.");
 }
 
-// Class that will help generate example values.
-class ExampleValueHelper {
- public:
-  ExampleValueHelper()
-      : operator_("example"), operation_(nullptr, operator_, {}, {}) {}
-
-  ir::Value operation_result() const {
-    return ir::Value(ir::value::OperationResult(operation_, "out"));
-  }
-
-  ir::Value block_argument() const {
-    return ir::Value(ir::value::BlockArgument(block_, "arg"));
-  }
-
-  ir::Value any() const { return ir::Value(ir::value::Any()); }
-
- private:
-  ir::Operator operator_;
-  ir::Operation operation_;
-  ir::Block block_;
-} example_helper;
+testing::ExampleValueTestHelper example_helper;
 
 static const ir::ValueList kValueListExamples[] = {
-    {example_helper.any()},
-    {example_helper.operation_result(), example_helper.block_argument(),
-     example_helper.any()}};
+    {example_helper.GetAny()},
+    {example_helper.GetOperationResult("out"),
+     example_helper.GetBlockArgument("arg"), example_helper.GetAny()}};
 
-using testing::Values;
-using testing::ValuesIn;
+using ::testing::Combine;
+using ::testing::Values;
+using ::testing::ValuesIn;
 
 INSTANTIATE_TEST_SUITE_P(MultipleValueCombinations, MergeOpTest,
-                         testing::Combine(ValuesIn(kValueListExamples),
-                                          ValuesIn(kValueListExamples)));
+                         Combine(ValuesIn(kValueListExamples),
+                                 ValuesIn(kValueListExamples)));
 INSTANTIATE_TEST_SUITE_P(EmptyDirectInputs, MergeOpTest,
-                         testing::Combine(Values(ir::ValueList({})),
-                                          ValuesIn(kValueListExamples)));
+                         Combine(Values(ir::ValueList({})),
+                                 ValuesIn(kValueListExamples)));
 INSTANTIATE_TEST_SUITE_P(EmptyControlInputs, MergeOpTest,
-                         testing::Combine(ValuesIn(kValueListExamples),
-                                          Values(ir::ValueList({}))));
+                         Combine(ValuesIn(kValueListExamples),
+                                 Values(ir::ValueList({}))));
 }  // namespace
 }  // namespace raksha::frontends::sql

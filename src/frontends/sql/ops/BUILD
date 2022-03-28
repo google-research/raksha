@@ -21,6 +21,18 @@ package(
 )
 
 cc_library(
+    name = "example_value_test_helper",
+    testonly = True,
+    hdrs = ["example_value_test_helper.h"],
+    deps = [
+        "//src/ir:ir_context",
+        "//src/ir:module",
+        "//src/ir:value",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "literal_op",
     srcs = ["literal_op.cc"],
     hdrs = ["literal_op.h"],
@@ -68,6 +80,7 @@ cc_test(
     name = "merge_op_test",
     srcs = ["merge_op_test.cc"],
     deps = [
+        ":example_value_test_helper",
         ":merge_op",
         ":sql_op",
         "//src/common/testing:gtest",
