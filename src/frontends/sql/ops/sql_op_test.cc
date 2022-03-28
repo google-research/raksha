@@ -89,10 +89,10 @@ class SqlOpGetIfTest : public testing::Test {
     SqlOp::RegisterOperator<AnotherTestOp>(context_);
     test_operation_ = std::make_unique<ir::Operation>(
         nullptr, *CHECK_NOTNULL(SqlOp::GetOperator<TestOp>(context_)),
-        ir::NamedAttributeMap({}), ir::NamedValueMap({}));
+        ir::NamedAttributeMap({}), ir::ValueList({}));
     another_test_operation_ = std::make_unique<ir::Operation>(
         nullptr, *CHECK_NOTNULL(SqlOp::GetOperator<AnotherTestOp>(context_)),
-        ir::NamedAttributeMap({}), ir::NamedValueMap({}));
+        ir::NamedAttributeMap({}), ir::ValueList({}));
   }
 
  protected:

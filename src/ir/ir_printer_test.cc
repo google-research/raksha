@@ -109,16 +109,16 @@ TEST_P(IRPrinterTest, PrettyPrintsOperationWithProperIndentation) {
 )");
 }
 
-TEST_P(IRPrinterTest, PrettyPrintAttributesAndArgsInSortedOrder) {
+TEST_P(IRPrinterTest, PrettyPrintAttributesInSortedOrder) {
   Operation operation(
       nullptr, minus_op(),
       {{"access", Attribute::Create<StringAttribute>("private")},
        {"name", Attribute::Create<StringAttribute>("addition")}},
-      {{"const", Value(value::Any())}, {"arg", Value(value::Any())}});
+      {Value(value::Any()), Value(value::Any())});
 
-  EXPECT_EQ(ToString(operation),
-            "%0 = core.minus [access: private, name: addition](arg: <<ANY>>, "
-            "const: <<ANY>>)\n");
+  EXPECT_EQ(
+      ToString(operation),
+      "%0 = core.minus [access: private, name: addition](<<ANY>>, <<ANY>>)\n");
 }
 
 }  // namespace

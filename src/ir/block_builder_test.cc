@@ -203,7 +203,7 @@ class TestOperation : public Operation {
     return std::make_unique<Operation>(
         op_name == "core.merge" ? nullptr : parent_block,
         *CHECK_NOTNULL(context.GetOperator(op_name)), NamedAttributeMap({}),
-        NamedValueMap({}));
+        ValueList({}));
   }
 };
 
