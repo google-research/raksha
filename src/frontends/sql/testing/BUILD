@@ -30,6 +30,7 @@ cc_library(
         "//src/frontends/sql:decoder_context",
         "//src/ir:module",
         "//src/ir:operator",
+        "//src/ir/attributes:int_attribute",
         "@absl//absl/strings",
     ],
 )
@@ -61,6 +62,7 @@ cc_library(
         "//src/frontends/sql/testing:utils",
         "//src/ir:module",
         "//src/ir:operator",
+        "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "@absl//absl/strings",
     ],

@@ -56,6 +56,7 @@ cc_library(
         "//src/ir:value",
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:int_attribute",
+        "//src/ir/attributes:string_attribute",
         "@absl//absl/container:flat_hash_map",
     ],
 )
