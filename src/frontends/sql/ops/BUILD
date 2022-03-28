@@ -116,6 +116,39 @@ cc_test(
 )
 
 cc_library(
+    name = "tag_transform_op",
+    srcs = ["tag_transform_op.cc"],
+    hdrs = ["tag_transform_op.h"],
+    deps = [
+        ":op_traits",
+        ":sql_op",
+        "//src/ir:ir_context",
+        "//src/ir:module",
+        "//src/ir:value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+        "//src/ir/attributes:string_attribute",
+    ],
+)
+
+cc_test(
+    name = "tag_transform_op_test",
+    srcs = ["tag_transform_op_test.cc"],
+    deps = [
+        ":example_value_test_helper",
+        ":op_traits",
+        ":sql_op",
+        ":tag_transform_op",
+        "//src/common/testing:gtest",
+        "//src/ir:ir_context",
+        "//src/ir:value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+        "//src/ir/attributes:string_attribute",
+    ],
+)
+
+cc_library(
     name = "op_traits",
     hdrs = ["op_traits.h"],
     deps = [
