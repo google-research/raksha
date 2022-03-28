@@ -22,7 +22,6 @@
 #include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/sql_ir.pb.h"
-#include "src/frontends/sql/testing/merge_operation_view.h"
 #include "src/frontends/sql/testing/tag_transform_operation_view.h"
 #include "src/frontends/sql/testing/utils.h"
 
@@ -43,7 +42,6 @@ using ::testing::Combine;
 using ::testing::Eq;
 using ::testing::IsEmpty;
 using ::testing::IsNull;
-using testing::MergeOperationView;
 using ::testing::NotNull;
 using ::testing::Pair;
 using ::testing::ResultOf;
@@ -96,13 +94,11 @@ tag_transform : {
       &expr));
   Value decoded_value = DecodeExpression(expr, decoder_context);
 
-  auto expected_name_to_value_vec =
-      MapIter<std::pair<std::string, Value>>(
-          precondition_name_to_id, [&decoder_context](auto name_id_pair) {
-            return std::make_pair(
-                std::string(name_id_pair.first),
-                decoder_context.GetValue(name_id_pair.second));
-          });
+  auto expected_name_to_value_vec = MapIter<std::pair<std::string, Value>>(
+      precondition_name_to_id, [&decoder_context](auto name_id_pair) {
+        return std::make_pair(std::string(name_id_pair.first),
+                              decoder_context.GetValue(name_id_pair.second));
+      });
   absl::flat_hash_map<std::string, Value> expected_name_to_value_map(
       expected_name_to_value_vec.begin(), expected_name_to_value_vec.end());
 

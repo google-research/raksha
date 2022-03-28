@@ -33,8 +33,7 @@ namespace raksha::frontends::sql {
 class DecoderContext {
  public:
   static constexpr absl::string_view kSqlMergeOpName = "sql.merge";
-  static constexpr absl::string_view kMergeOpControlStartIndex =
-      "control_start_index";
+
   static constexpr absl::string_view kTagTransformOpName = "sql.tag_transform";
   static constexpr absl::string_view kTagTransformTransformedValueInputName =
       "transformed_value";

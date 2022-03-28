@@ -13,14 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-
 #include "absl/strings/string_view.h"
 #include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/decoder_context.h"
+#include "src/frontends/sql/ops/merge_op.h"
 #include "src/frontends/sql/sql_ir.pb.h"
-#include "src/frontends/sql/testing/merge_operation_view.h"
 #include "src/frontends/sql/testing/utils.h"
 
 namespace raksha::frontends::sql {
@@ -116,11 +115,13 @@ TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
   const Operation &op = testing::UnwrapDefaultOperationResult(value);
   EXPECT_EQ(op.parent(), &top_level_block);
 
-  testing::MergeOperationView merge_operation_view(op);
-
+  auto merge_op = SqlOp::GetIf<MergeOp>(op);
+  ASSERT_NE(merge_op, nullptr);
   auto &[optional_name, direct_size, control_size] = GetParam();
-  EXPECT_THAT(merge_operation_view.GetDirectInputs().size(), direct_size);
-  EXPECT_THAT(merge_operation_view.GetControlInputs().size(), control_size);
+  EXPECT_THAT(merge_op->GetDirectInputs(),
+              ::testing::BeginEndDistanceIs(direct_size));
+  EXPECT_THAT(merge_op->GetControlInputs(),
+              ::testing::BeginEndDistanceIs(control_size));
 }
 
 static constexpr uint64_t kSampleControlInputLengths[] = {0, 1, 5, 10};
