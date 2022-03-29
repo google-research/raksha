@@ -98,7 +98,7 @@ TEST(MergeOpDeathTest, FailsIfMergeOpIsNotRegistered) {
   ir::IRContext context;
   EXPECT_DEATH(
       { MergeOp::Create(nullptr, context, {ir::Value(ir::value::Any())}, {}); },
-      "GetOperator<MergeOp>.*Must be non NULL");
+      "GetOperator<MergeOp>.*Must be non (null|NULL)");
 }
 
 TEST(MergeOpDeathTest, FailsIfBothDirectAndControlInputsAreEmpty) {
