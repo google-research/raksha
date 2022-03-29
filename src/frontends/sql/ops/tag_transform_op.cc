@@ -75,7 +75,7 @@ absl::string_view TagTransformOp::GetRuleName() const {
   const ir::NamedAttributeMap& attribute_map = attributes();
   auto find_result = attribute_map.find(kRuleNameAttribute);
   CHECK(find_result != attribute_map.end());
-  const auto& rule_name_attribute =
+  auto rule_name_attribute =
       CHECK_NOTNULL(find_result->second.GetIf<ir::StringAttribute>());
   return rule_name_attribute->value();
 }
