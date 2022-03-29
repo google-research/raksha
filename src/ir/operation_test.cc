@@ -62,10 +62,8 @@ TEST_P(OperationTest, AccessorsAndToStringReturnCorrectValue) {
   EXPECT_EQ(operation.impl_module(), nullptr);
   EXPECT_EQ(operation.parent(), block);
   EXPECT_EQ(&operation.op(), op);
-  // TODO(336): Enable this when we have a comparator for attributes.
-  // EXPECT_EQ(operation.attributes(), attributes);
-  // TODO(337): Enable this when we have a comparator for values.
-  // EXPECT_EQ(operation.inputs(), inputs);
+  EXPECT_EQ(operation.attributes(), attributes);
+  EXPECT_EQ(operation.inputs(), inputs);
   EXPECT_THAT(string_reps, testing::Eq(IRPrinter::ToString(operation)));
 }
 
