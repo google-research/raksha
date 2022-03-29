@@ -65,7 +65,7 @@ datalog::Predicate CanActAsToDLIR(const CanActAs& can_act_as) {
 }
 }  // namespace
 
-datalog::DLIRAssertion LoweringToDatalogPass::SpokenAttributeToDLIR(
+datalog::Rule LoweringToDatalogPass::SpokenAttributeToDLIR(
     const Principal& speaker, const Attribute& attribute) {
   // Attributes interact with "canActAs" because if "Y canActAs X"
   // then Y also picks up X's attributes. We need to generate
@@ -84,23 +84,17 @@ datalog::DLIRAssertion LoweringToDatalogPass::SpokenAttributeToDLIR(
   // This is `speaker says Y canActAs X`
   datalog::Predicate y_can_act_as_x =
       CanActAsToDLIR(CanActAs(prin_y, attribute.principal()));
-  datalog::Predicate speaker_says_y_can_act_as_x =
-      PushPrincipal("says_", speaker, y_can_act_as_x);
 
   // This is `speaker says X PredX`
   datalog::Predicate main_predicate = AttributeToDLIR(attribute);
-  datalog::Predicate speaker_says_x_pred =
-      PushPrincipal("says_", speaker, main_predicate);
 
   // This is the full generated rule:
   // `speaker says Y PredX :-
   //    speaker says Y canActAs X, speaker says X PredX`
-  return datalog::DLIRAssertion(datalog::DLIRCondAssertion(
-      generated_lhs, {std::move(speaker_says_y_can_act_as_x),
-                      std::move(speaker_says_x_pred)}));
+  return datalog::Rule(generated_lhs, {PushPrincipal("says_", speaker, y_can_act_as_x), PushPrincipal("says_", speaker, main_predicate)});
 }
 
-datalog::DLIRAssertion LoweringToDatalogPass::SpokenCanActAsToDLIR(
+datalog::Rule LoweringToDatalogPass::SpokenCanActAsToDLIR(
     const Principal& speaker, const CanActAs& can_act_as) {
   // "canActAs" facts are passed to principals via other canActAs facts in
   // essentially the same way as attributes. This function adds extra
@@ -120,45 +114,39 @@ datalog::DLIRAssertion LoweringToDatalogPass::SpokenCanActAsToDLIR(
   // This is `speaker says Y canActAs X`
   datalog::Predicate y_can_act_as_x =
       CanActAsToDLIR(CanActAs(prin_y, can_act_as.left_principal()));
-  datalog::Predicate speaker_says_y_can_act_as_x =
-      PushPrincipal("says_", speaker, y_can_act_as_x);
 
   // This is `speaker says X canActAs Z`
   datalog::Predicate main_predicate = CanActAsToDLIR(can_act_as);
-  datalog::Predicate speaker_says_x_can_act_as_z =
-      PushPrincipal("says_", speaker, main_predicate);
 
   // This is the full generated rule:
   // `speaker says Y PredX :-
   //    speaker says Y canActAs X, speaker says X canActAs Z`
-  return datalog::DLIRAssertion(datalog::DLIRCondAssertion(
-      generated_lhs, {std::move(speaker_says_y_can_act_as_x),
-                      std::move(speaker_says_x_can_act_as_z)}));
+  return datalog::Rule(generated_lhs, {PushPrincipal("says_", speaker, y_can_act_as_x), PushPrincipal("says_", speaker, main_predicate)});
 }
 
-std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+std::pair<datalog::Predicate, std::vector<datalog::Rule>>
 LoweringToDatalogPass::BaseFactToDLIRInner(
     const Principal& speaker, const datalog::Predicate& predicate) {
-  return std::make_pair(predicate, std::vector<datalog::DLIRAssertion>({}));
+  return std::make_pair(predicate, std::vector<datalog::Rule>({}));
 }
 
-std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+std::pair<datalog::Predicate, std::vector<datalog::Rule>>
 LoweringToDatalogPass::BaseFactToDLIRInner(const Principal& speaker,
                                            const Attribute& attribute) {
   return std::make_pair(AttributeToDLIR(attribute),
-                        std::vector<datalog::DLIRAssertion>(
+                        std::vector<datalog::Rule>(
                             {SpokenAttributeToDLIR(speaker, attribute)}));
 }
 
-std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+std::pair<datalog::Predicate, std::vector<datalog::Rule>>
 LoweringToDatalogPass::BaseFactToDLIRInner(const Principal& speaker,
                                            const CanActAs& canActAs) {
   return std::make_pair(CanActAsToDLIR(canActAs),
-                        std::vector<datalog::DLIRAssertion>(
+                        std::vector<datalog::Rule>(
                             {SpokenCanActAsToDLIR(speaker, canActAs)}));
 }
 
-std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+std::pair<datalog::Predicate, std::vector<datalog::Rule>>
 LoweringToDatalogPass::BaseFactToDLIR(const Principal& speaker,
                                       const BaseFact& base_fact) {
   return std::visit(
@@ -168,7 +156,7 @@ LoweringToDatalogPass::BaseFactToDLIR(const Principal& speaker,
       base_fact.GetValue());
 }
 
-std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+std::pair<datalog::Predicate, std::vector<datalog::Rule>>
 LoweringToDatalogPass::FactToDLIR(const Principal& speaker, const Fact& fact) {
   return std::visit(
       raksha::utils::overloaded{
@@ -197,9 +185,7 @@ LoweringToDatalogPass::FactToDLIR(const Principal& speaker, const Fact& fact) {
                 "says_", speaker,
                 PushPrincipal("canSay_", fresh_principal, inner_fact_dlir));
             auto rhs = {fresh_prin_says_inner, speaker_says_fresh_cansay_inner};
-            datalog::DLIRAssertion generated_rule(
-                datalog::DLIRCondAssertion(lhs, rhs));
-            gen_rules.push_back(generated_rule);
+            gen_rules.push_back(datalog::Rule(lhs, rhs));
 
             // Note that prin_cansay_pred does not begin with "speaker says"
             // because only the top-level fact should. This could
@@ -214,17 +200,15 @@ LoweringToDatalogPass::FactToDLIR(const Principal& speaker, const Fact& fact) {
       fact.GetValue());
 }
 
-std::vector<datalog::DLIRAssertion>
+std::vector<datalog::Rule>
 LoweringToDatalogPass::GenerateDLIRAssertions(const Principal& speaker,
                                               const Fact& fact) {
   auto [fact_predicate, generated_rules] = FactToDLIR(speaker, fact);
-  datalog::DLIRAssertion main_assertion =
-      datalog::DLIRAssertion(PushPrincipal("says_", speaker, fact_predicate));
-  generated_rules.push_back(main_assertion);
+  generated_rules.push_back(datalog::Rule(PushPrincipal("says_", speaker, fact_predicate)));
   return generated_rules;
 }
 
-std::vector<datalog::DLIRAssertion>
+std::vector<datalog::Rule>
 LoweringToDatalogPass::GenerateDLIRAssertions(
     const Principal& speaker,
     const ConditionalAssertion& conditional_assertion) {
@@ -235,13 +219,11 @@ LoweringToDatalogPass::GenerateDLIRAssertions(
       });
   auto [dlir_lhs, gen_rules] = FactToDLIR(speaker, conditional_assertion.lhs());
   auto dlir_lhs_prime = PushPrincipal("says_", speaker, dlir_lhs);
-  datalog::DLIRAssertion dlir_assertion(
-      datalog::DLIRCondAssertion(dlir_lhs_prime, dlir_rhs));
-  gen_rules.push_back(dlir_assertion);
+  gen_rules.push_back(datalog::Rule(dlir_lhs_prime, dlir_rhs));
   return gen_rules;
 }
 
-std::vector<datalog::DLIRAssertion>
+std::vector<datalog::Rule>
 LoweringToDatalogPass::SingleSaysAssertionToDLIR(const Principal& speaker,
                                                  const Assertion& assertion) {
   return std::visit(
@@ -258,9 +240,9 @@ LoweringToDatalogPass::SingleSaysAssertionToDLIR(const Principal& speaker,
       assertion.GetValue());
 }
 
-std::vector<datalog::DLIRAssertion> LoweringToDatalogPass::SaysAssertionToDLIR(
+std::vector<datalog::Rule> LoweringToDatalogPass::SaysAssertionToDLIR(
     const SaysAssertion& says_assertion) {
-  std::vector<datalog::DLIRAssertion> ret = {};
+  std::vector<datalog::Rule> ret = {};
   for (const Assertion& assertion : says_assertion.assertions()) {
     absl::c_move(
         SingleSaysAssertionToDLIR(says_assertion.principal(), assertion),
@@ -269,40 +251,39 @@ std::vector<datalog::DLIRAssertion> LoweringToDatalogPass::SaysAssertionToDLIR(
   return ret;
 }
 
-std::vector<datalog::DLIRAssertion> LoweringToDatalogPass::SaysAssertionsToDLIR(
+std::vector<datalog::Rule> LoweringToDatalogPass::SaysAssertionsToDLIR(
     const std::vector<SaysAssertion>& says_assertions) {
-  std::vector<datalog::DLIRAssertion> ret = {};
+  std::vector<datalog::Rule> ret = {};
   for (const SaysAssertion& says_assertion : says_assertions) {
     absl::c_move(SaysAssertionToDLIR(says_assertion), std::back_inserter(ret));
   }
   return ret;
 }
 
-std::vector<datalog::DLIRAssertion> LoweringToDatalogPass::QueriesToDLIR(
+std::vector<datalog::Rule> LoweringToDatalogPass::QueriesToDLIR(
     const std::vector<Query>& queries) {
-  return utils::MapIter<datalog::DLIRAssertion>(
+  return utils::MapIter<datalog::Rule>(
       queries, [this](const Query& query) {
         auto [main_pred, not_used] =
             FactToDLIR(query.principal(), query.fact());
         main_pred = PushPrincipal("says_", query.principal(), main_pred);
         datalog::Predicate lhs(query.name(), {"dummy_var"}, datalog::kPositive);
-        return datalog::DLIRAssertion(
-            datalog::DLIRCondAssertion(lhs, {main_pred, kDummyPredicate}));
+        return datalog::Rule(lhs, {main_pred, kDummyPredicate});
       });
 }
 
-datalog::DLIRProgram LoweringToDatalogPass::ProgToDLIR(const Program& program) {
+datalog::Program LoweringToDatalogPass::ProgToDLIR(const Program& program) {
   auto dlir_assertions = SaysAssertionsToDLIR(program.says_assertions());
   // We need to add a fact that says the dummy variable used in queries is
   // grounded.
-  datalog::DLIRAssertion dummy_assertion(kDummyPredicate);
+  datalog::Rule dummy_assertion(kDummyPredicate);
   absl::c_move(QueriesToDLIR(program.queries()),
                std::back_inserter(dlir_assertions));
   dlir_assertions.push_back(dummy_assertion);
 
   auto outputs = utils::MapIter<std::string>(
       program.queries(), [](const Query& query) { return query.name(); });
-  return datalog::DLIRProgram(dlir_assertions, outputs);
+  return datalog::Program(dlir_assertions, outputs);
 }
 
 }  // namespace raksha::ir::auth_logic

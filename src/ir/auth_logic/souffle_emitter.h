@@ -27,7 +27,7 @@ namespace raksha::ir::auth_logic {
 
 class SouffleEmitter {
  public:
-  static std::string EmitProgram(const datalog::DLIRProgram& program) {
+  static std::string EmitProgram(const datalog::Program& program) {
     SouffleEmitter emitter;
     std::string body = emitter.EmitProgramBody(program);
     std::string outputs = emitter.EmitOutputs(program);
@@ -69,34 +69,25 @@ class SouffleEmitter {
                         absl::StrJoin(predicate.args(), ", "), ")");
   }
 
-  std::string EmitAssertionInner(const datalog::Predicate& predicate) {
-    return absl::StrCat(EmitPredicate(predicate), ".");
-  }
-
-  std::string EmitAssertionInner(
-      const datalog::DLIRCondAssertion& cond_assertion) {
+  std::string EmitAssertion(
+      const datalog::Rule& cond_assertion) {
     std::vector rhs_translated = utils::MapIter<std::string>(
         cond_assertion.rhs(),
         [this](const datalog::Predicate& arg) { return EmitPredicate(arg); });
-    return absl::StrCat(EmitPredicate(cond_assertion.lhs()), " :- ",
-                        absl::StrJoin(rhs_translated, ", "), ".");
+    return absl::StrCat(EmitPredicate(cond_assertion.lhs()), (rhs_translated.size() == 0) ? "" : absl::StrCat(" :- ",
+                        absl::StrJoin(rhs_translated, ", ")), ".");
   }
 
-  std::string EmitAssertion(const datalog::DLIRAssertion& assertion) {
-    return std::visit([this](auto value) { return EmitAssertionInner(value); },
-                      assertion.GetValue());
-  }
-
-  std::string EmitProgramBody(const datalog::DLIRProgram& program) {
+  std::string EmitProgramBody(const datalog::Program& program) {
     return absl::StrJoin(
-        utils::MapIter<std::string>(program.assertions(),
-                                    [this](const datalog::DLIRAssertion& astn) {
+        utils::MapIter<std::string>(program.rules(),
+                                    [this](const datalog::Rule& astn) {
                                       return EmitAssertion(astn);
                                     }),
         "\n");
   }
 
-  std::string EmitOutputs(const datalog::DLIRProgram& program) {
+  std::string EmitOutputs(const datalog::Program& program) {
     return absl::StrJoin(program.outputs(), "\n",
                          [](std::string* out, const std::string& prog_out) {
                            return absl::StrAppend(out, ".output ", prog_out);
