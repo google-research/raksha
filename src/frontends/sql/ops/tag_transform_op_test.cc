@@ -29,6 +29,9 @@
 namespace raksha::frontends::sql {
 namespace {
 
+using ::testing::Combine;
+using ::testing::ValuesIn;
+
 class TagTransformOpTest
     : public ::testing::TestWithParam<
           std::tuple<const ir::Block*, absl::string_view, ir::Value,
@@ -82,6 +85,19 @@ TEST_P(TagTransformOpTest, AccessorsReturnTheCorrectValue) {
               ::testing::UnorderedElementsAreArray(preconditions));
 }
 
+TEST(TagTransformOpDeathTest, DuplicatePreconditionNamesAreDetected) {
+  ir::IRContext context;
+  SqlOp::RegisterOperator<TagTransformOp>(context);
+  auto any_value = ir::Value(ir::value::Any());
+  EXPECT_DEATH(
+      {
+        TagTransformOp::Create(
+            nullptr, context, "test", any_value,
+            {{"some", any_value}, {"another", any_value}, {"some", any_value}});
+      },
+      "Duplicate precondition name 'some'.");
+}
+
 static testing::ExampleValueTestHelper example_helper;
 
 static const absl::string_view kSampleRuleNames[] = {
@@ -109,9 +125,6 @@ static const std::vector<std::pair<std::string, ir::Value>>
         {{"one", example_helper.GetAny()},
          {"two", example_helper.GetBlockArgument("two")},
          {"three", example_helper.GetOperationResult("three")}}};
-
-using ::testing::Combine;
-using ::testing::ValuesIn;
 
 INSTANTIATE_TEST_SUITE_P(TagTransformOpTest, TagTransformOpTest,
                          Combine(ValuesIn(kSampleBlocks),

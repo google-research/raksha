@@ -39,8 +39,10 @@ std::unique_ptr<TagTransformOp> TagTransformOp::Create(
   for (const auto& [name, value] : preconditions) {
     CHECK(index < std::numeric_limits<int64_t>::max());
     inputs.push_back(value);
-    attributes.insert(
+    auto insert_result = attributes.insert(
         {name, ir::Attribute::Create<ir::Int64Attribute>(index++)});
+    CHECK(insert_result.second)
+        << "Duplicate precondition name '" << name << "'.";
   }
 
   return std::make_unique<TagTransformOp>(
