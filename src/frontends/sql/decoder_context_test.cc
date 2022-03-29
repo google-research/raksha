@@ -18,7 +18,7 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/ops/merge_op.h"
-#include "src/frontends/sql/testing/tag_transform_operation_view.h"
+#include "src/frontends/sql/ops/tag_transform_op.h"
 
 namespace raksha::frontends::sql {
 
@@ -204,17 +204,19 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
   const Operation &tag_xform_operation =
       decoder_context.MakeTagTransformOperation(xformed_value, policy_rule_name,
                                                 precondition_name_to_id_map);
-  testing::TagTransformOperationView tag_xform_view(tag_xform_operation);
 
+  const TagTransformOp *tag_transform_op =
+      SqlOp::GetIf<TagTransformOp>(tag_xform_operation);
+  ASSERT_NE(tag_transform_op, nullptr);
   absl::flat_hash_map<std::string, Value> precondition_name_to_value_map;
   precondition_name_to_value_map.reserve(precondition_name_to_id_map.size());
   for (const auto &[name, id] : precondition_name_to_id_map) {
     precondition_name_to_value_map.insert({name, decoder_context.GetValue(id)});
   }
 
-  EXPECT_EQ(tag_xform_view.GetRuleName(), policy_rule_name);
-  EXPECT_EQ(tag_xform_view.GetTransformedValue(), xformed_value);
-  EXPECT_THAT(tag_xform_view.GetPreconditions(),
+  EXPECT_EQ(tag_transform_op->GetRuleName(), policy_rule_name);
+  EXPECT_EQ(tag_transform_op->GetTransformedValue(), xformed_value);
+  EXPECT_THAT(tag_transform_op->GetPreconditions(),
               UnorderedElementsAreArray(precondition_name_to_value_map));
 }
 
