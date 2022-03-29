@@ -68,8 +68,9 @@ ir::ValueRange MergeOp::GetControlInputs() const {
 }
 
 size_t MergeOp::GetControlInputStartIndex() const {
-  auto find_result = attributes().find(kControlInputStartIndex);
-  CHECK(find_result != attributes().end());
+  const auto& attributes_map = attributes();
+  auto find_result = attributes_map.find(kControlInputStartIndex);
+  CHECK(find_result != attributes_map.end());
   auto int_attribute =
       CHECK_NOTNULL(find_result->second.GetIf<ir::Int64Attribute>());
 

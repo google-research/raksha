@@ -27,6 +27,13 @@
 namespace raksha::frontends::sql {
 namespace {
 
+using ::testing::Combine;
+using ::testing::ElementsAreArray;
+using ::testing::Pair;
+using ::testing::UnorderedElementsAre;
+using ::testing::Values;
+using ::testing::ValuesIn;
+
 class MergeOpTest : public ::testing::TestWithParam<
                         std::tuple<ir::ValueList, ir::ValueList>> {
  public:
@@ -35,11 +42,6 @@ class MergeOpTest : public ::testing::TestWithParam<
  protected:
   ir::IRContext context_;
 };
-
-using ::testing::ElementsAreArray;
-using ::testing::Eq;
-using ::testing::Pair;
-using ::testing::UnorderedElementsAre;
 
 TEST_P(MergeOpTest, FactoryMethodCreatesCorrectOperation) {
   const auto& [inputs, controls] = GetParam();
@@ -112,10 +114,6 @@ static const ir::ValueList kValueListExamples[] = {
     {example_helper.GetAny()},
     {example_helper.GetOperationResult("out"),
      example_helper.GetBlockArgument("arg"), example_helper.GetAny()}};
-
-using ::testing::Combine;
-using ::testing::Values;
-using ::testing::ValuesIn;
 
 INSTANTIATE_TEST_SUITE_P(MultipleValueCombinations, MergeOpTest,
                          Combine(ValuesIn(kValueListExamples),
