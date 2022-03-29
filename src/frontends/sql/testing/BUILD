@@ -31,14 +31,3 @@ cc_library(
         "//src/ir:value",
     ],
 )
-
-cc_library(
-    name = "operation_view_utils",
-    testonly = True,
-    srcs = ["operation_view_utils.cc"],
-    hdrs = ["operation_view_utils.h"],
-    deps = [
-        "//src/ir:value",
-        "@absl//absl/strings",
-    ],
-)
