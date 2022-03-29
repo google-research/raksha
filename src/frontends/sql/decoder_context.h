@@ -32,12 +32,6 @@ namespace raksha::frontends::sql {
 // inappropriate to put in IRContext.
 class DecoderContext {
  public:
-  static constexpr absl::string_view kTagTransformOpName = "sql.tag_transform";
-  static constexpr absl::string_view kTagTransformTransformedValueInputName =
-      "transformed_value";
-  static constexpr absl::string_view kTagTransformPreconditionInputPrefix =
-      "precondition_";
-  static constexpr absl::string_view kTagTransformRuleAttributeName = "rule";
   static constexpr absl::string_view kDefaultOutputName = "out";
 
   DecoderContext(ir::IRContext &ir_context)
@@ -47,7 +41,7 @@ class DecoderContext {
         merge_operator_(ir_context_.RegisterOperator(
             std::make_unique<ir::Operator>(OpTraits<MergeOp>::kName))),
         tag_transform_operator_(ir_context_.RegisterOperator(
-            std::make_unique<ir::Operator>(kTagTransformOpName))),
+            std::make_unique<ir::Operator>(OpTraits<TagTransformOp>::kName))),
         global_module_(),
         top_level_block_builder_() {}
 

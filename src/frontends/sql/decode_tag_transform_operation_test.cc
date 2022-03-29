@@ -21,8 +21,8 @@
 #include "src/common/utils/map_iter.h"
 #include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/decoder_context.h"
+#include "src/frontends/sql/ops/tag_transform_op.h"
 #include "src/frontends/sql/sql_ir.pb.h"
-#include "src/frontends/sql/testing/tag_transform_operation_view.h"
 #include "src/frontends/sql/testing/utils.h"
 
 namespace raksha::frontends::sql {
@@ -45,7 +45,6 @@ using ::testing::IsNull;
 using ::testing::NotNull;
 using ::testing::Pair;
 using ::testing::ResultOf;
-using testing::TagTransformOperationView;
 using ::testing::TestWithParam;
 using ::testing::UnorderedElementsAre;
 using ::testing::UnorderedElementsAreArray;
@@ -103,14 +102,15 @@ tag_transform : {
       expected_name_to_value_vec.begin(), expected_name_to_value_vec.end());
 
   EXPECT_EQ(decoded_value, decoder_context.GetValue(id));
-  TagTransformOperationView tag_xform_view(
-      UnwrapDefaultOperationResult(decoded_value));
-  EXPECT_EQ(tag_xform_view.GetRuleName(), rule_name);
+  const TagTransformOp *tag_transform_op =
+      SqlOp::GetIf<TagTransformOp>(UnwrapDefaultOperationResult(decoded_value));
+  ASSERT_NE(tag_transform_op, nullptr);
+  EXPECT_EQ(tag_transform_op->GetRuleName(), rule_name);
   // Dealing with the internal structure of the sub-value is the job of
   // another test, so we don't inspect it here. What does matter is ensuring
   // that the value vec that we got corresponds to the ID vec that we took
   // from the textproto.
-  EXPECT_THAT(tag_xform_view.GetPreconditions(),
+  EXPECT_THAT(tag_transform_op->GetPreconditions(),
               UnorderedElementsAreArray(expected_name_to_value_map));
 }
 

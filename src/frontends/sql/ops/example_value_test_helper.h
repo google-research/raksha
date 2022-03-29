@@ -39,6 +39,8 @@ class ExampleValueTestHelper {
 
   ir::Value GetAny() const { return ir::Value(ir::value::Any()); }
 
+  const ir::Block& GetBlock() const { return block_; }
+
  private:
   ir::Operator operator_;
   ir::Operation operation_;

@@ -32,6 +32,7 @@ struct OpTraits {};
 
 DEFINE_OP_TRAITS(LiteralOp, "sql.literal");
 DEFINE_OP_TRAITS(MergeOp, "sql.merge");
+DEFINE_OP_TRAITS(TagTransformOp, "sql.tag_transform");
 
 #undef DEFINE_OP_TRAITS
 
