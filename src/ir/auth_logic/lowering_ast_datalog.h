@@ -128,7 +128,7 @@ namespace raksha::ir::auth_logic {
 
 class LoweringToDatalogPass {
  public:
-  static datalog::DLIRProgram Lower(const Program& auth_logic_program) {
+  static datalog::Program Lower(const Program& auth_logic_program) {
     return LoweringToDatalogPass().ProgToDLIR(auth_logic_program);
   }
 
@@ -152,7 +152,7 @@ class LoweringToDatalogPass {
   // - If it appears on the LHS of an assertion, it explicitly has a speaker
   // - If it appears on the RHS of an assertion, it behaves semantically
   // like it has the same speaker as the head of the assertion.
-  datalog::DLIRAssertion SpokenAttributeToDLIR(const Principal& speaker,
+  datalog::Rule SpokenAttributeToDLIR(const Principal& speaker,
                                                const Attribute& attribute);
 
   // In the same way that attributes are passed around with "CanActAs", so
@@ -160,45 +160,45 @@ class LoweringToDatalogPass {
   // CanActAs also results in both a predicate and an extra rule that passes
   // these facts around. This function is for generating the extra rule and
   // it works similarly to "SpokenAttributeToDLIR".
-  datalog::DLIRAssertion SpokenCanActAsToDLIR(const Principal& speaker,
+  datalog::Rule SpokenCanActAsToDLIR(const Principal& speaker,
                                               const CanActAs& can_act_as);
 
-  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+  std::pair<datalog::Predicate, std::vector<datalog::Rule>>
   BaseFactToDLIRInner(const Principal& speaker,
                       const datalog::Predicate& predicate);
 
-  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+  std::pair<datalog::Predicate, std::vector<datalog::Rule>>
   BaseFactToDLIRInner(const Principal& speaker, const Attribute& attribute);
 
-  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+  std::pair<datalog::Predicate, std::vector<datalog::Rule>>
   BaseFactToDLIRInner(const Principal& speaker, const CanActAs& canActAs);
 
   // The second return value represents 0 or 1 newly generated rules, so an
   // option might seem more intuitive. However, the interface that consumes
   // this needs to construct a vector anyway, so a vector is used in the
   // return type.
-  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>>
+  std::pair<datalog::Predicate, std::vector<datalog::Rule>>
   BaseFactToDLIR(const Principal& speaker, const BaseFact& base_fact);
 
   // This can result in 0 or more new rules because the translation of
   // nested canSayFacts might result in more than 1 rule.
-  std::pair<datalog::Predicate, std::vector<datalog::DLIRAssertion>> FactToDLIR(
+  std::pair<datalog::Predicate, std::vector<datalog::Rule>> FactToDLIR(
       const Principal& speaker, const Fact& fact);
 
-  std::vector<datalog::DLIRAssertion> GenerateDLIRAssertions(
+  std::vector<datalog::Rule> GenerateDLIRAssertions(
       const Principal& speaker, const Fact& fact);
 
-  std::vector<datalog::DLIRAssertion> GenerateDLIRAssertions(
+  std::vector<datalog::Rule> GenerateDLIRAssertions(
       const Principal& speaker,
       const ConditionalAssertion& conditional_assertion);
 
-  std::vector<datalog::DLIRAssertion> SingleSaysAssertionToDLIR(
+  std::vector<datalog::Rule> SingleSaysAssertionToDLIR(
       const Principal& speaker, const Assertion& assertion);
 
-  std::vector<datalog::DLIRAssertion> SaysAssertionToDLIR(
+  std::vector<datalog::Rule> SaysAssertionToDLIR(
       const SaysAssertion& says_assertion);
 
-  std::vector<datalog::DLIRAssertion> SaysAssertionsToDLIR(
+  std::vector<datalog::Rule> SaysAssertionsToDLIR(
       const std::vector<SaysAssertion>& says_assertions);
 
   // Queries are like predicates with arity 0. Souffle does not have predicates
@@ -207,10 +207,10 @@ class LoweringToDatalogPass {
   static inline datalog::Predicate kDummyPredicate =
       datalog::Predicate("grounded_dummy", {"dummy_var"}, datalog::kPositive);
 
-  std::vector<datalog::DLIRAssertion> QueriesToDLIR(
+  std::vector<datalog::Rule> QueriesToDLIR(
       const std::vector<Query>& queries);
 
-  datalog::DLIRProgram ProgToDLIR(const Program& program);
+  datalog::Program ProgToDLIR(const Program& program);
 
   uint64_t fresh_var_count_;
 };

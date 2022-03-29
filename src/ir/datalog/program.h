@@ -68,12 +68,15 @@ class Predicate {
   Sign sign_;
 };
 
-// A conditional datalog assertion with a left hand side and a right hand
-// side.
-class DLIRCondAssertion {
+// A conditional datalog assertion with a left hand side and/or a right hand
+// side. A Rule is either:
+//    - an unconditional fact which is a predicate
+//    - a conditional assertion
+class Rule {
  public:
-  explicit DLIRCondAssertion(Predicate lhs, std::vector<Predicate> rhs)
+  explicit Rule(Predicate lhs, std::vector<Predicate> rhs)
       : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+  explicit Rule(Predicate lhs) : lhs_(std::move(lhs)) {}
   const Predicate& lhs() const { return lhs_; }
   const std::vector<Predicate>& rhs() const { return rhs_; }
 
@@ -82,33 +85,16 @@ class DLIRCondAssertion {
   std::vector<Predicate> rhs_;
 };
 
-// A Datalog IR assertion is either:
-//  - an unconditional fact which is just a predicate
-//  - a conditional assertion
-class DLIRAssertion {
+class Program {
  public:
-  // DLIRAssertionVariantType represents the alternative forms for
-  // DLIRAssertions. Client code should use this type for traversing
-  // DLIRAssertions. This type may be changed in the future.
-  using DLIRAssertionVariantType = std::variant<Predicate, DLIRCondAssertion>;
-  explicit DLIRAssertion(DLIRAssertionVariantType value)
-      : value_(std::move(value)) {}
-  const DLIRAssertionVariantType& GetValue() const { return value_; }
-
- private:
-  std::variant<Predicate, DLIRCondAssertion> value_;
-};
-
-class DLIRProgram {
- public:
-  DLIRProgram(std::vector<DLIRAssertion> assertions,
+  Program(std::vector<Rule> rules,
               std::vector<std::string> outputs)
-      : assertions_(std::move(assertions)), outputs_(std::move(outputs)) {}
-  const std::vector<DLIRAssertion>& assertions() const { return assertions_; }
+      : rules_(std::move(rules)), outputs_(std::move(outputs)) {}
+  const std::vector<Rule>& rules() const { return rules_; }
   const std::vector<std::string>& outputs() const { return outputs_; }
 
  private:
-  std::vector<DLIRAssertion> assertions_;
+  std::vector<Rule> rules_;
   std::vector<std::string> outputs_;
 };
 
