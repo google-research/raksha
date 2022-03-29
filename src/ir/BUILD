@@ -235,6 +235,7 @@ cc_library(
     deps = [
         ":ssa_names",
         ":storage",
+        "//src/common/utils:ranges",
         "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings:str_format",

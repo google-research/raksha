@@ -21,6 +21,18 @@ package(
 )
 
 cc_library(
+    name = "example_value_test_helper",
+    testonly = True,
+    hdrs = ["example_value_test_helper.h"],
+    deps = [
+        "//src/ir:ir_context",
+        "//src/ir:module",
+        "//src/ir:value",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "literal_op",
     srcs = ["literal_op.cc"],
     hdrs = ["literal_op.h"],
@@ -44,6 +56,38 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:string_attribute",
+    ],
+)
+
+cc_library(
+    name = "merge_op",
+    srcs = ["merge_op.cc"],
+    hdrs = ["merge_op.h"],
+    deps = [
+        ":sql_op",
+        "//src/common/utils:ranges",
+        "//src/ir:ir_context",
+        "//src/ir:module",
+        "//src/ir:value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+        "@absl//absl/algorithm:container",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "merge_op_test",
+    srcs = ["merge_op_test.cc"],
+    deps = [
+        ":example_value_test_helper",
+        ":merge_op",
+        ":sql_op",
+        "//src/common/testing:gtest",
+        "//src/common/utils:ranges",
+        "//src/ir:value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
     ],
 )
 

@@ -3,6 +3,7 @@
 #include <limits>
 
 #include "src/common/utils/map_iter.h"
+#include "src/frontends/sql/ops/merge_op.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 
@@ -15,16 +16,8 @@ using ir::Value;
 
 const Operation &DecoderContext::MakeMergeOperation(
     std::vector<Value> direct_inputs, std::vector<Value> control_inputs) {
-  size_t control_start_index = direct_inputs.size();
-  CHECK(control_start_index < std::numeric_limits<int64_t>::max());
-  auto attributes =
-      ir::NamedAttributeMap({{std::string(kMergeOpControlStartIndex),
-                              ir::Attribute::Create<ir::Int64Attribute>(
-                                  static_cast<int64_t>(control_start_index))}});
-  // Combine the direct and control inputs.
-  absl::c_move(control_inputs, std::back_inserter(direct_inputs));
-  return top_level_block_builder_.AddOperation(
-      merge_operator_, std::move(attributes), std::move(direct_inputs));
+  return top_level_block_builder_.AddOperation<MergeOp>(
+      ir_context_, std::move(direct_inputs), std::move(control_inputs));
 }
 
 const ir::Operation &DecoderContext::MakeTagTransformOperation(

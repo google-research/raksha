@@ -20,22 +20,6 @@ package(
 )
 
 cc_library(
-    name = "merge_operation_view",
-    testonly = True,
-    hdrs = ["merge_operation_view.h"],
-    visibility = ["//src/frontends/sql:__subpackages__"],
-    deps = [
-        ":operation_view_utils",
-        "//src/common/logging",
-        "//src/frontends/sql:decoder_context",
-        "//src/ir:module",
-        "//src/ir:operator",
-        "//src/ir/attributes:int_attribute",
-        "@absl//absl/strings",
-    ],
-)
-
-cc_library(
     name = "utils",
     testonly = True,
     hdrs = ["utils.h"],
@@ -58,7 +42,6 @@ cc_library(
         "//src/common/logging",
         "//src/common/utils:map_iter",
         "//src/frontends/sql:decoder_context",
-        "//src/frontends/sql/testing:merge_operation_view",
         "//src/frontends/sql/testing:utils",
         "//src/ir:module",
         "//src/ir:operator",

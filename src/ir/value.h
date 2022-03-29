@@ -20,6 +20,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"
+#include "src/common/utils/ranges.h"
 #include "src/ir/ssa_names.h"
 #include "src/ir/storage.h"
 #include "src/ir/types/type.h"
@@ -54,7 +55,7 @@ class NamedValue {
   }
 
  protected:
-  bool operator==(const NamedValue<T> &other) const {
+  bool operator==(const NamedValue<T>& other) const {
     return (element_ == other.element_) && (name_ == other.name_);
   }
 
@@ -152,6 +153,7 @@ class Value {
 };
 
 using ValueList = std::vector<Value>;
+using ValueRange = utils::iterator_range<ValueList::const_iterator>;
 using NamedValueMap = absl::flat_hash_map<std::string, Value>;
 using NamedValueListMap = absl::flat_hash_map<std::string, ValueList>;
 

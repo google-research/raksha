@@ -17,12 +17,13 @@
 #include "src/frontends/sql/decoder_context.h"
 
 #include "src/common/testing/gtest.h"
-#include "src/frontends/sql/testing/merge_operation_view.h"
+#include "src/frontends/sql/ops/merge_op.h"
 #include "src/frontends/sql/testing/tag_transform_operation_view.h"
 
 namespace raksha::frontends::sql {
 
 using ::testing::Combine;
+using ::testing::ElementsAreArray;
 using ::testing::Eq;
 using ::testing::IsEmpty;
 using ::testing::IsNull;
@@ -144,11 +145,11 @@ TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
 
   EXPECT_EQ(op.parent(), &top_block);
 
-  testing::MergeOperationView merge_op_view(op);
-
+  auto merge_op = SqlOp::GetIf<MergeOp>(op);
+  ASSERT_NE(merge_op, nullptr);
   // Test the vectors for equivalence.
-  EXPECT_EQ(merge_op_view.GetDirectInputs(), direct_inputs);
-  EXPECT_EQ(merge_op_view.GetControlInputs(), control_inputs);
+  EXPECT_THAT(merge_op->GetDirectInputs(), ElementsAreArray(direct_inputs));
+  EXPECT_THAT(merge_op->GetControlInputs(), ElementsAreArray(control_inputs));
 }
 
 // Create some example values for use in test inputs. Skip `StoredValue`
@@ -160,15 +161,19 @@ static const Operation kExampleOperation(nullptr, kExampleOp, {}, {});
 static const Block kExampleBlock;
 
 static const std::vector<Value> kSampleInputVectors[] = {
-    std::vector<Value>{},
     {Value(Any())},
     {Value(OperationResult(kExampleOperation, "out")),
      Value(BlockArgument(kExampleBlock, "arg0")), Value(Any())}};
 
-INSTANTIATE_TEST_SUITE_P(DecodeMergeOpTest, DecodeMergeOpTest,
+INSTANTIATE_TEST_SUITE_P(NonEmptyValues, DecodeMergeOpTest,
                          Combine(ValuesIn(kSampleInputVectors),
                                  ValuesIn(kSampleInputVectors)));
-
+INSTANTIATE_TEST_SUITE_P(EmptyDirectInputs, DecodeMergeOpTest,
+                         Combine(Values(ir::ValueList({})),
+                                 ValuesIn(kSampleInputVectors)));
+INSTANTIATE_TEST_SUITE_P(EmptyControlInputs, DecodeMergeOpTest,
+                         Combine(ValuesIn(kSampleInputVectors),
+                                 Values(ir::ValueList({}))));
 class DecodeTagTransformTest
     : public TestWithParam<
           std::tuple<ir::Value, absl::string_view, std::vector<ir::Value>,
