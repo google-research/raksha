@@ -36,8 +36,8 @@ std::unique_ptr<TagTransformOp> TagTransformOp::Create(
   int64_t index = 1;
   attributes.insert({std::string(kRuleNameAttribute),
                      ir::Attribute::Create<ir::StringAttribute>(rule_name)});
+  CHECK(preconditions.size() < std::numeric_limits<int64_t>::max());
   for (const auto& [name, value] : preconditions) {
-    CHECK(index < std::numeric_limits<int64_t>::max());
     inputs.push_back(value);
     auto insert_result = attributes.insert(
         {name, ir::Attribute::Create<ir::Int64Attribute>(index++)});
