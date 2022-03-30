@@ -29,18 +29,18 @@ saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
 // Claims:
-says_hasTag("P1", "R.P1#0.foo", owner, "userSelection") :- ownsAccessPath(owner, "R.P1#0.foo").
+says_hasTag("P1", "R.P1.foo", owner, "userSelection") :- ownsAccessPath(owner, "R.P1.foo").
 
 // Checks:
-isCheck("check_num_0", "R.P3#2.bar"). check("check_num_0", owner, "R.P3#2.bar") :-
-  ownsAccessPath(owner, "R.P3#2.bar"), mayHaveTag("R.P3#2.bar", owner, "userSelection").
+isCheck("check_num_0", "R.P3.bar"). check("check_num_0", owner, "R.P3.bar") :-
+  ownsAccessPath(owner, "R.P3.bar"), mayHaveTag("R.P3.bar", owner, "userSelection").
 
 // Edges:
-edge("R.P1#0.foo", "R.handle0").
-edge("R.handle0", "R.P2#1.bar").
-edge("R.P2#1.foo", "R.handle1").
-edge("R.P2#1.bar", "R.P2#1.foo").
-edge("R.handle1", "R.P3#2.bar").
+edge("R.P1.foo", "R.handle0").
+edge("R.handle0", "R.P2.bar").
+edge("R.P2.foo", "R.handle1").
+edge("R.P2.bar", "R.P2.foo").
+edge("R.handle1", "R.P3.bar").
 
 
 // Authorization Logic

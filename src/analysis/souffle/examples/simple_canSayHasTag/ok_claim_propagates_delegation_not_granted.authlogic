@@ -3,4 +3,4 @@
 "EndUser" says ownsTag("EndUser", "userSelection").
 //TODO(#220): We should claim ownership at the level of handles that correspond
 // to stores where ownership makes more sense.
-"EndUser" says ownsAccessPath("EndUser", "R.P1#0.foo").
+"EndUser" says ownsAccessPath("EndUser", "R.P1.foo").

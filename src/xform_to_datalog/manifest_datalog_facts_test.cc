@@ -321,12 +321,12 @@ class ParseBigManifestTest : public testing::Test {
 
 static const std::string kExpectedClaimStrings[] = {
     R"(// Claims:)",
-    R"(says_hasTag("PS1", "NamedR.PS1#0.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "NamedR.PS1#0.out_handle.field1").)",
+    R"(says_hasTag("PS1", "NamedR.PS1.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "NamedR.PS1.out_handle.field1").)",
     R"(says_hasTag("PS1", "NamedR.PS1#1.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "NamedR.PS1#1.out_handle.field1").)",
-    R"(says_hasTag("PS2", "NamedR.PS2#2.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "NamedR.PS2#2.out_handle.field1").)",
-    R"(says_hasTag("PS1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1").)",
+    R"(says_hasTag("PS2", "NamedR.PS2.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "NamedR.PS2.out_handle.field1").)",
+    R"(says_hasTag("PS1", "GENERATED_RECIPE_NAME0.PS1.out_handle.field1", owner, "tag1") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS1.out_handle.field1").)",
+    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2.out_handle.field1").)",
     R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1").)",
-    R"(says_hasTag("PS2", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", owner, "tag3") :- ownsAccessPath(owner, "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1").)",
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
@@ -344,18 +344,18 @@ static constexpr absl::string_view kPattern =
 
 static std::string kExpectedCheckStrings[] = {
     R"(// Checks:)",
-    absl::Substitute(kPattern, "check_num_0", "NamedR.PS1#0.in_handle.field1",
+    absl::Substitute(kPattern, "check_num_0", "NamedR.PS1.in_handle.field1",
                      "tag2"),
     absl::Substitute(kPattern, "check_num_1", "NamedR.PS1#1.in_handle.field1",
                      "tag2"),
-    absl::Substitute(kPattern, "check_num_2", "NamedR.PS2#2.in_handle.field1",
+    absl::Substitute(kPattern, "check_num_2", "NamedR.PS2.in_handle.field1",
                      "tag4"),
     absl::Substitute(kPattern, "check_num_3",
-                     "GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "tag2"),
+                     "GENERATED_RECIPE_NAME0.PS1.in_handle.field1", "tag2"),
     absl::Substitute(kPattern, "check_num_4",
-                     "GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4"),
+                     "GENERATED_RECIPE_NAME0.PS2.in_handle.field1", "tag4"),
     absl::Substitute(kPattern, "check_num_5",
-                     "GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "tag4"),
+                     "GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "tag4"),
 };
 
 TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {
@@ -370,14 +370,14 @@ static const std::string kExpectedEdgeStrings[] = {
     // Named recipe edges:
     // Edges connecting h1 to NamedR.PS1#0 for fields {field1, field2}.
     R"(// Edges:)",
-    R"(edge("NamedR.h1.field1", "NamedR.PS1#0.in_handle.field1").)",
-    R"(edge("NamedR.h1.field2", "NamedR.PS1#0.in_handle.field2").)",
+    R"(edge("NamedR.h1.field1", "NamedR.PS1.in_handle.field1").)",
+    R"(edge("NamedR.h1.field2", "NamedR.PS1.in_handle.field2").)",
 
     // Edges connecting h2 to NamedR.PS1#0 for field1
-    R"(edge("NamedR.PS1#0.out_handle.field1", "NamedR.h2.field1").)",
+    R"(edge("NamedR.PS1.out_handle.field1", "NamedR.h2.field1").)",
 
     // Intra-particle connection
-    R"(edge("NamedR.PS1#0.in_handle.field1", "NamedR.PS1#0.out_handle.field1").)",
+    R"(edge("NamedR.PS1.in_handle.field1", "NamedR.PS1.out_handle.field1").)",
 
     // Edges connecting h2 to NamedR.PS1#1 for field1.
     R"(edge("NamedR.h2.field1", "NamedR.PS1#1.in_handle.field1").)",
@@ -389,40 +389,40 @@ static const std::string kExpectedEdgeStrings[] = {
     R"(edge("NamedR.PS1#1.in_handle.field1", "NamedR.PS1#1.out_handle.field1").)",
 
     // Edges connecting h3 to NamedR.PS2#2 for field1
-    R"(edge("NamedR.h3.field1", "NamedR.PS2#2.in_handle.field1").)",
+    R"(edge("NamedR.h3.field1", "NamedR.PS2.in_handle.field1").)",
 
     // Edges connecting h4 to NamedR.Ps2#2 for field1
-    R"(edge("NamedR.PS2#2.out_handle.field1", "NamedR.h4.field1").)",
+    R"(edge("NamedR.PS2.out_handle.field1", "NamedR.h4.field1").)",
 
     // Intra-particle connection
-    R"(edge("NamedR.PS2#2.in_handle.field1", "NamedR.PS2#2.out_handle.field1").)",
+    R"(edge("NamedR.PS2.in_handle.field1", "NamedR.PS2.out_handle.field1").)",
 
     // Unnamed recipe edges:
-    R"(edge("GENERATED_RECIPE_NAME0.h1.field1", "GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1").)",
+    R"(edge("GENERATED_RECIPE_NAME0.h1.field1", "GENERATED_RECIPE_NAME0.PS1.in_handle.field1").)",
 
     // Edges connecting h2 to NamedR.PS1#0 for field1
-    R"(edge("GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1", "GENERATED_RECIPE_NAME0.h2.field1").)",
+    R"(edge("GENERATED_RECIPE_NAME0.PS1.out_handle.field1", "GENERATED_RECIPE_NAME0.h2.field1").)",
 
     // Intra-particle connection
-    R"(edge("GENERATED_RECIPE_NAME0.PS1#0.in_handle.field1", "GENERATED_RECIPE_NAME0.PS1#0.out_handle.field1").)",
+    R"(edge("GENERATED_RECIPE_NAME0.PS1.in_handle.field1", "GENERATED_RECIPE_NAME0.PS1.out_handle.field1").)",
 
     // Edges connecting h2 to NamedR.PS2#1 for field1.
-    R"(edge("GENERATED_RECIPE_NAME0.h2.field1", "GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1").)",
+    R"(edge("GENERATED_RECIPE_NAME0.h2.field1", "GENERATED_RECIPE_NAME0.PS2.in_handle.field1").)",
 
     // Edges connecting h3 to NamedR.PS2#1 for field1
-    R"(edge("GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "GENERATED_RECIPE_NAME0.h3.field1").)",
+    R"(edge("GENERATED_RECIPE_NAME0.PS2.out_handle.field1", "GENERATED_RECIPE_NAME0.h3.field1").)",
 
     // Intra-particle connection
-    R"(edge("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1").)",
+    R"(edge("GENERATED_RECIPE_NAME0.PS2.in_handle.field1", "GENERATED_RECIPE_NAME0.PS2.out_handle.field1").)",
 
-    // Edges connecting h3 to NamedR.PS2#2 for field1
-    R"(edge("GENERATED_RECIPE_NAME0.h3.field1", "GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1").)",
+    // Edges connecting h3 to NamedR.PS2 for field1
+    R"(edge("GENERATED_RECIPE_NAME0.h3.field1", "GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1").)",
 
-    // Edges connecting h4 to NamedR.PS2#2 for field1
-    R"(edge("GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1", "GENERATED_RECIPE_NAME0.h4.field1").)",
+    // Edges connecting h4 to NamedR.PS2 for field1
+    R"(edge("GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1", "GENERATED_RECIPE_NAME0.h4.field1").)",
 
     // Intra-particle connection
-    R"(edge("GENERATED_RECIPE_NAME0.PS2#2.in_handle.field1", "GENERATED_RECIPE_NAME0.PS2#2.out_handle.field1").)"};
+    R"(edge("GENERATED_RECIPE_NAME0.PS2#1.in_handle.field1", "GENERATED_RECIPE_NAME0.PS2#1.out_handle.field1").)"};
 
 TEST_F(ParseBigManifestTest, ManifestProtoEdgesTest) {
   EXPECT_THAT(utils::make_range(std::find(datalog_strings_.begin(),
