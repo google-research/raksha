@@ -33,9 +33,19 @@ souffle_cc_library(
     src = ":policy_checker_cxx",
 )
 
+genrule(
+    name = "multimic_disallowed_usage_dl",
+    srcs = [
+        ":multimic_datalog",
+        "disallowed_usage.dl",
+    ],
+    outs = ["multimic_disallowed_usage.dl"],
+    cmd = "cat $(location :multimic_datalog) $(location disallowed_usage.dl) > $@",
+)
+
 gen_souffle_cxx_code(
     name = "policy_checker_cxx",
-    src = ":multimic_datalog",
+    src = ":multimic_disallowed_usage_dl",
     included_dl_scripts = [
         "//src/analysis/souffle:attributes.dl",
         "//src/analysis/souffle:authorization_logic.dl",
