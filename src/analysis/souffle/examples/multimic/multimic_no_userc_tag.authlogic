@@ -2,11 +2,11 @@
 
 // TODO(#220): we should claim ownership at the level of handles rather recipe access paths.
 "UserA" says {
-  ownsAccessPath("UserA", "DoASRUserAAndUserB.UserATainter#3.audioIn").
-  ownsAccessPath("UserA", "DoASRUserAAndUserBAndUserC.UserATainter#3.audioIn").
+  ownsAccessPath("UserA", "DoASRUserAAndUserB.UserATainter.audioIn").
+  ownsAccessPath("UserA", "DoASRUserAAndUserBAndUserC.UserATainter.audioIn").
 }
 
 "UserB" says {
-  ownsAccessPath("UserB", "DoASRUserAAndUserB.UserBTainter#4.audioIn").
-  ownsAccessPath("UserB", "DoASRUserAAndUserBAndUserC.UserBTainter#4.audioIn").
+  ownsAccessPath("UserB", "DoASRUserAAndUserB.UserBTainter.audioIn").
+  ownsAccessPath("UserB", "DoASRUserAAndUserBAndUserC.UserBTainter.audioIn").
 }

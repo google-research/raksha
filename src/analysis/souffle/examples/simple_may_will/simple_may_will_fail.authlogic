@@ -22,7 +22,7 @@
 
 "EndUser" says {
     ownsTag("EndUser", "rawVideo").
-    ownsAccessPath("EndUser", "R.P1#0.foo").
+    ownsAccessPath("EndUser", "R.P1.foo").
     "P1" canSay hasTag(PathX, "EndUser", "rawVideo").
 }
 
@@ -34,5 +34,5 @@
 // ```
 // or similar, but the equivalent auth logic is:
 "P2" says {
-    will("doLocalComputation", "R.P2#1.foo").
+    will("doLocalComputation", "R.P2.foo").
 }
