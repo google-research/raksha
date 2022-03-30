@@ -63,9 +63,8 @@ void UpdateSettings(const souffle::SouffleProgram *program,
 
 bool PolicyChecker::CanUserChangeSetting(absl::string_view user,
                                          absl::string_view setting_name) {
-  std::unique_ptr<souffle::SouffleProgram> program(
-      souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName));
-  CHECK_NOTNULL(program);
+  std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
+      souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
   program->run();
 
   // .decl says_canSay_isEnabled(speaker: Principal, delegatee1: Principal, usage: symbol)
@@ -87,8 +86,7 @@ absl::flat_hash_set<std::string> PolicyChecker::AvailableSettings(
     absl::string_view user) const {
   absl::flat_hash_set<std::string> result;
   std::unique_ptr<souffle::SouffleProgram> program(
-      souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName));
-  CHECK_NOTNULL(program);
+      CHECK_NOTNULL(souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
   program->run();
 
     // .decl says_canSay_isEnabled(speaker: Principal, delegatee1: Principal, usage: symbol)
@@ -114,9 +112,8 @@ bool PolicyChecker::ChangeSetting(absl::string_view user,
 }
 
 std::pair<bool, std::string> PolicyChecker::ValidatePolicyCompliance() const {
-  std::unique_ptr<souffle::SouffleProgram> program(
-      souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName));
-  CHECK_NOTNULL(program);
+  std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
+      souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
 
   UpdateEdges(program.get(), utils::make_range(edges_.begin(), edges_.end()));
   UpdateSettings(program.get(), utils::make_range(user_settings_.begin(),
