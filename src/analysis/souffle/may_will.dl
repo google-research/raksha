@@ -41,15 +41,4 @@ disallowedUsage(dataConsumer, usage, owner, tag) :-
 allUsagesAllowed("dummy_var") :- !disallowedUsage(dataConsumer, usage, owner, tag),
     isPrincipal(dataConsumer), isUsage(usage), isTag(tag), ownsTag(owner, tag).
 
-isUsage("ASR").
-isUsage("Streaming").
-isUsage("Recording").
-
-disallowedUsage(owner, usage, owner, "RawAudio") :-
-   isUsage(usage),
-   mayHaveTag(ap, owner, "RawAudio"),
-   mayHaveTag(ap, owner, cat("Does", usage)),
-   !mayHaveTag(ap, owner, cat("Allow", usage)),
-   tag = cat("Does", usage).
-
 #endif // MAY_WILL_DL_
