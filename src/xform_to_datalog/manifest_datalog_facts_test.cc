@@ -219,6 +219,9 @@ static const std::string kManifestTextproto = R"(
     ]
     recipes: [
      { name: "NamedR"
+       handles: [
+         { name: "h1", id: "NamedH1" }
+       ]
        particles: [
          { spec_name: "PS1"
            connections: [
@@ -370,8 +373,8 @@ static const std::string kExpectedEdgeStrings[] = {
     // Named recipe edges:
     // Edges connecting h1 to NamedR.PS1#0 for fields {field1, field2}.
     R"(// Edges:)",
-    R"(edge("NamedR.h1.field1", "NamedR.PS1.in_handle.field1").)",
-    R"(edge("NamedR.h1.field2", "NamedR.PS1.in_handle.field2").)",
+    R"(edge("NamedR.NamedH1.field1", "NamedR.PS1.in_handle.field1").)",
+    R"(edge("NamedR.NamedH1.field2", "NamedR.PS1.in_handle.field2").)",
 
     // Edges connecting h2 to NamedR.PS1#0 for field1
     R"(edge("NamedR.PS1.out_handle.field1", "NamedR.h2.field1").)",
