@@ -17,7 +17,6 @@
 load(
     "//build_defs:souffle.bzl",
     "gen_souffle_cxx_code",
-    "souffle_cc_binary",
     "souffle_cc_library",
 )
 
