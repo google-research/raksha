@@ -64,7 +64,11 @@ absl::flat_hash_map<std::string, ir::Value> TagTransformOp::GetPreconditions()
     if (name == kRuleNameAttribute) continue;
     auto int_attribute = CHECK_NOTNULL(attribute.GetIf<ir::Int64Attribute>());
     auto input_index = int_attribute->value();
-    CHECK(input_index < input_values.size())
+    // If input_values.size() > std::numeric_limits<int64_t>::max(), the
+    // static_cast will return a negative value and this condition will fail,
+    // which is desired.
+    CHECK(input_index >= 1 &&
+          input_index < static_cast<int64_t>(input_values.size()))
         << "Invalid index in TagTransformOp";
     result.insert({name, input_values[input_index]});
   }
