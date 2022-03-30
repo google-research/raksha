@@ -17,15 +17,8 @@ recipe R
   app_audio_stream_out: create 'app_audio_stream_out'
   asr_audio_stream_in: create 'asr_audio_stream_in'
   store_audio_stream_in: create 'store_audio_stream_in'
-  // SmartMicrophone
-  //   audio: writes mic_audio_stream_out
-  // DemoApplication
-  //   audioIn: reads mic_audio_stream_out
-  //   audioOut: writes app_audio_stream_out
-  // DemoApplicationASR
-  //   audio: reads app_audio_stream_out
-  // DemoApplicationAudioStore
-  //   audio: reads app_audio_stream_out
+  // Just define the ins and outs of the particles.
+  // We will connect them programmatically.
   SmartMicrophone
     audio: writes mic_audio_stream_out
   DemoApplication
