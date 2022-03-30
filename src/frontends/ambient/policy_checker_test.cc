@@ -26,6 +26,49 @@
 namespace raksha::ambient {
 namespace {
 
+class PolicyCheckerEdgeTest : public testing::TestWithParam<bool> {};
+
+TEST_P(PolicyCheckerEdgeTest, StreamingEdgeTest) {
+  bool setting = GetParam();
+  PolicyChecker checker;
+  checker.ChangeSetting(PolicyChecker::kOwnerUser,
+                        PolicyChecker::kStreamingSetting, setting);
+  {
+    const auto& [is_compliant, reason] = checker.AddIfValidEdge(
+        PolicyChecker::kMicrophoneOut, PolicyChecker::kDemoAppIn);
+    EXPECT_EQ(is_compliant, setting)
+        << "Edge kMicrophoneOut -> kDemoAppIn Invalid:\n"
+        << reason;
+  }
+}
+
+TEST_P(PolicyCheckerEdgeTest, ASREdgeTest) {
+  bool setting = GetParam();
+  PolicyChecker checker;
+  checker.ChangeSetting(PolicyChecker::kOwnerUser, PolicyChecker::kASRSetting,
+                        setting);
+  const auto& [is_compliant, reason] = checker.AddIfValidEdge(
+      PolicyChecker::kDemoAppOut, PolicyChecker::kDemoASRIn);
+  EXPECT_EQ(is_compliant, setting)
+      << "Edge kDemoAppOut -> kDemoASRIn Invalid:\n"
+      << reason;
+}
+
+TEST_P(PolicyCheckerEdgeTest, StorageEdgeTest) {
+  bool setting = GetParam();
+  PolicyChecker checker;
+  checker.ChangeSetting(PolicyChecker::kOwnerUser,
+                        PolicyChecker::kRecordingSetting, setting);
+  const auto& [is_compliant, reason] = checker.AddIfValidEdge(
+      PolicyChecker::kDemoAppOut, PolicyChecker::kDemoStoreIn);
+  EXPECT_EQ(is_compliant, setting)
+      << "Edge kDemoAppOut -> kDemoStoreIn Invalid:\n"
+      << reason;
+}
+
+INSTANTIATE_TEST_SUITE_P(PolicyCheckerEdgeTest, PolicyCheckerEdgeTest,
+                         testing::Values(false, true));
+
 TEST(PolicyCheckerTest, EdgesTest) {
   PolicyChecker checker;
   checker.ChangeSetting(PolicyChecker::kOwnerUser, PolicyChecker::kASRSetting,
@@ -44,14 +87,15 @@ TEST(PolicyCheckerTest, EdgesTest) {
   {
     const auto& [is_compliant, reason] = checker.AddIfValidEdge(
         PolicyChecker::kDemoAppOut, PolicyChecker::kDemoASRIn);
-    EXPECT_EQ(is_compliant, true)
-        << "Edge kDemoAppOut -> kDemoASRIn Invalid:\n" << reason;
+    EXPECT_EQ(is_compliant, true) << "Edge kDemoAppOut -> kDemoASRIn Invalid:\n"
+                                  << reason;
   }
   {
     const auto& [is_compliant, reason] = checker.AddIfValidEdge(
         PolicyChecker::kDemoAppOut, PolicyChecker::kDemoStoreIn);
     EXPECT_EQ(is_compliant, true)
-        << "Edge kDemoAppOut -> kDemoStoreIn Invalid:\n" << reason;
+        << "Edge kDemoAppOut -> kDemoStoreIn Invalid:\n"
+        << reason;
   }
   const auto& [is_compliant, reason] = checker.ValidatePolicyCompliance();
   EXPECT_EQ(is_compliant, true) << "Policy failing:\n" << reason;
@@ -68,11 +112,10 @@ TEST(PolicyCheckerTest, WhoCanChangeSettings) {
   EXPECT_FALSE(checker.CanUserChangeSetting(PolicyChecker::kGuestUser,
                                             PolicyChecker::kASRSetting));
   EXPECT_FALSE(checker.CanUserChangeSetting(PolicyChecker::kGuestUser,
-                                           PolicyChecker::kRecordingSetting));
+                                            PolicyChecker::kRecordingSetting));
   EXPECT_FALSE(checker.CanUserChangeSetting(PolicyChecker::kGuestUser,
                                             PolicyChecker::kStreamingSetting));
 }
-
 
 TEST(PolicyCheckerTest, AvailableSettings) {
   PolicyChecker checker;
