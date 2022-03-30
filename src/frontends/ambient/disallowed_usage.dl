@@ -14,7 +14,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
-// One-off rules for disallowed usage in multimic use case. 
+// A file containe one-off rules for disallowed usages for the multimic demo.
+//
 isUsage("ASR").
 isUsage("Streaming").
 isUsage("Recording").
@@ -25,3 +26,28 @@ disallowedUsage(owner, usage, owner, "RawAudio") :-
    mayHaveTag(ap, owner, cat("Does", usage)),
    !mayHaveTag(ap, owner, cat("Allow", usage)),
    tag = cat("Does", usage).
+
+.decl mismatchedPreferences(dataConsumer: Principal, usage: Usage, owner: Principal, tag: Tag)
+
+mismatchedPreferences(owner, usage, owner, "RawAudio") :-
+   isUsage(usage),
+   !says_hasPreference(owner, usage, "RawAudio"),
+   mayHaveTag(ap, owner, "RawAudio"),
+   mayHaveTag(ap, owner, cat("Does", usage)),
+   mayHaveTag(ap, owner, cat("Allow", usage)),
+   tag = cat("Does", usage).
+
+// Configure the inputs and outputs for the ambient demo.
+.input edge
+.input hasTag
+.output mismatchedPreferences(IO=stdout)
+.output says_hasPreference(IO=stdout)
+.output saysMay(IO=stdout)
+.output saysWill(IO=stdout)
+.output mayHaveTag(IO=stdout)
+.output says_hasTag(IO=stdout)
+.output ownsAccessPath(IO=stdout)
+.output says_hasPreference(IO=stdout)
+.output saysMay(IO=stdout)
+.output saysWill(IO=stdout)
+

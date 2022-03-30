@@ -45,14 +45,14 @@ void UpdateEdges(const souffle::SouffleProgram *program, Range edges) {
 template <typename Range>
 void UpdateSettings(const souffle::SouffleProgram *program,
                     Range user_settings) {
-  souffle::Relation *rel = CHECK_NOTNULL(program->getRelation("hasTag"));
+  souffle::Relation *rel =
+      CHECK_NOTNULL(program->getRelation("says_isEnabled"));
   // .decl hasTag(accessPath: AccessPath, owner: Principal, tag: Tag)
   for (const auto &[user, settings] : user_settings) {
     for (const auto &[usage, allowed] : settings) {
       souffle::tuple setting(rel);  // Create an empty tuple
       if (allowed) {
-        setting << PolicyChecker::kMicrophoneAudio << user
-                << absl::StrFormat("Allow%s", usage);
+        setting << user << usage;
         rel->insert(setting);
       }
     }
@@ -67,16 +67,16 @@ bool PolicyChecker::CanUserChangeSetting(absl::string_view user,
       souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName));
   CHECK_NOTNULL(program);
   program->run();
-  //  .decl says_canSay_hasTag(speaker: Principal, delegatee1: Principal, ap:
-  //  AccessPath, owner: Principal, tag: Tag)
-  souffle::Relation *saysCanSayHasTag =
-      CHECK_NOTNULL(program->getRelation("says_canSay_hasTag"));
-  std::string setting_tag = absl::StrFormat("Allow%s", setting_name);
-  for (auto &output : *saysCanSayHasTag) {
-    std::string speaker, delegatee1, path, owner, tag;
-    output >> speaker >> delegatee1 >> path >> owner >> tag;
-    if (speaker == kSystemSettingsManager && path == kMicrophoneAudio &&
-        delegatee1 == user && owner == user && tag == setting_tag) {
+
+  // .decl says_canSay_isEnabled(speaker: Principal, delegatee1: Principal, usage: symbol)
+  souffle::Relation *saysCanSayIsEnabled =
+      CHECK_NOTNULL(program->getRelation("says_canSay_isEnabled"));
+  // std::string setting_tag = absl::StrFormat("Allow%s", setting_name);
+  for (auto &output : *saysCanSayIsEnabled) {
+    std::string speaker, delegatee1, usage;
+    output >> speaker >> delegatee1 >> usage;
+    if (speaker == kSystemSettingsManager && delegatee1 == user &&
+        usage == setting_name) {
       return true;
     }
   }
@@ -90,16 +90,16 @@ absl::flat_hash_set<std::string> PolicyChecker::AvailableSettings(
       souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName));
   CHECK_NOTNULL(program);
   program->run();
-  //  .decl says_canSay_hasTag(speaker: Principal, delegatee1: Principal, ap:
-  //  AccessPath, owner: Principal, tag: Tag)
-  souffle::Relation *saysCanSayHasTag =
-      CHECK_NOTNULL(program->getRelation("says_canSay_hasTag"));
-  for (auto &output : *saysCanSayHasTag) {
-    std::string speaker, delegatee1, path, owner, tag;
-    output >> speaker >> delegatee1 >> path >> owner >> tag;
-    if (speaker == kSystemSettingsManager && path == kMicrophoneAudio &&
-        delegatee1 == user && owner == user && absl::StartsWith(tag, "Allow")) {
-      result.insert(std::string(tag, 5));  // Strip "Allow"
+
+    // .decl says_canSay_isEnabled(speaker: Principal, delegatee1: Principal, usage: symbol)
+  souffle::Relation *saysCanSayIsEnabled =
+      CHECK_NOTNULL(program->getRelation("says_canSay_isEnabled"));
+  // std::string setting_tag = absl::StrFormat("Allow%s", setting_name);
+  for (auto &output : *saysCanSayIsEnabled) {
+    std::string speaker, delegatee1, usage;
+    output >> speaker >> delegatee1 >> usage;
+    if (speaker == kSystemSettingsManager && delegatee1 == user) {
+      result.insert(usage);
     }
   }
   return result;

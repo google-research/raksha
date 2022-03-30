@@ -17,6 +17,19 @@ recipe R
   app_audio_stream_out: create 'app_audio_stream_out'
   asr_audio_stream_in: create 'asr_audio_stream_in'
   store_audio_stream_in: create 'store_audio_stream_in'
+  // If you want the edges to be connected in the recipe,
+  // uncomment the following and comment out the section
+  // of recipe after this comment block.
+  //
+  // SmartMicrophone
+  //   audio: writes mic_audio_stream_out
+  // DemoApplication
+  //   audioIn: reads mic_audio_stream_out
+  //   audioOut: writes app_audio_stream_out
+  // DemoApplicationASR
+  //   audio: reads app_audio_stream_out
+  // DemoApplicationAudioStore
+  //   audio: reads app_audio_stream_out
   // Just define the ins and outs of the particles.
   // We will connect them programmatically.
   SmartMicrophone
@@ -30,36 +43,72 @@ recipe R
     audio: reads store_audio_stream_in
 
 // __AUTH_LOGIC__
-.decl ownsAccessPath(owner : Principal, ap : AccessPath)
 .decl hasTag(ap : AccessPath, owner : Principal, tag : Tag)
-.decl mayHaveTag(ap : AccessPath, owner : Principal, tag : Tag)
-.decl isAccessPath(ap : AccessPath)
-.decl isPrincipal(principal : Principal)
+.decl hasPreference(usage : symbol, tag : Tag)
+.decl isEnabled(usage : symbol)
 
 "OwnerUser" says {
-  // Captures the fat that `OwnerUser` produces data for the `SmartMicrophone`.
-  ownsAccessPath("OwnerUser", "R.SmartMicrophone.audio").
+  hasTag("R.SmartMicrophone.audio", "OwnerUser", "RawAudio").
+
+  // Ideally, the following `RawAudio` tag should be propagated through dataflow
+  // edges.  However, for the purposes of the demo, we want to trigger allowed
+  // usage check even if the `RawAudio` is not streamed to the DemoApp yet.
+  // So, we are marking "R.DemoApplication.audioIn" to be containing "RawAudio"
+  // no matter what the dataflow edges are.
+  hasTag("R.DemoApplication.audioIn", "OwnerUser", "RawAudio").
+
+  hasTag(ap, "OwnerUser", "AllowStreaming") :-
+      hasPreference("Streaming", "RawAudio"),
+      hasTag(ap, "OwnerUser", "RawAudio").
+
+  hasTag(ap, "OwnerUser", "AllowASR") :-
+      hasPreference("ASR", "RawAudio"),
+      hasTag(ap, "OwnerUser", "RawAudio").
+
+  hasTag(ap, "OwnerUser", "AllowRecording") :-
+      hasPreference("Recording", "RawAudio"),
+      hasTag(ap, "OwnerUser", "RawAudio").
+
+  hasPreference("Streaming", "RawAudio") :- isEnabled("Streaming").
+  hasPreference("ASR", "RawAudio") :- isEnabled("ASR").
+  hasPreference("Recording", "RawAudio") :- isEnabled("Recording").
 
   // Settings that will be filled in programmatically.
-  hasTag("R.SmartMicrophone.audio", "OwnerUser", "RawAudio").
-  // hasTag("R.SmartMicrophone.audio", "OwnerUser", "AllowASR").
-  // hasTag("R.SmartMicrophone.audio", "OwnerUser", "AllowStreaming").
-  // hasTag("R.SmartMicrophone.audio", "OwnerUser", "AllowRecording").
+  // isEnabled("Streaming").
+  // isEnabled("ASR").
+  // isEnabled("Recording").
 
-  "SystemSettingsManager" canSay hasTag(ap, "OwnerUser", tag).
+  // NOTE: We should probably use `may` and `will` relations to capture
+  // the fact that some processing happens for an access path with
+  // a particular `tag`. `may` and `will` have not be updated ot deal with
+  // tags that also have owners attached. For now, we will mimic `will` by
+  // using "DoesXYZ" tags. We explicitly allow "SystemSettingsManager" to
+  // attach "DoesXYZ" tag to  paths on behalf "OwnerUser". However, this
+  // delegation should not be required because particles themselves should
+  // be able to claim what processing is done on that node.
+  "SystemSettingsManager" canSay hasTag(ap, "OwnerUser", "DoesStreaming").
+  "SystemSettingsManager" canSay hasTag(ap, "OwnerUser", "DoesASR").
+  "SystemSettingsManager" canSay hasTag(ap, "OwnerUser", "DoesRecording").
 }
 
 "GuestUser" says {
-  // Captures the fat that `GuestUser` produces data for the `SmartMicrophone`.
-  ownsAccessPath("GuestUser", "R.SmartMicrophone.audio").
-
-  // Settings that will be filled in programmatically.
   hasTag("R.SmartMicrophone.audio", "GuestUser", "RawAudio").
-  // hasTag("R.SmartMicrophone.audio", "GuestUser", "AllowASR").
-  // hasTag("R.SmartMicrophone.audio", "GuestUser", "AllowStreaming").
-  // hasTag("R.SmartMicrophone.audio", "GuestUser", "AllowRecording").
+  // Ideally, the following `RawAudio` tag should be propagated through dataflow
+  // edges.  However, for the purposes of the demo, we want to trigger allowed
+  // usage check even if the `RawAudio` is not streamed to the DemoApp yet.
+  // So, we are marking "R.DemoApplication.audioIn" to be containing "RawAudio"
+  // no matter what the dataflow edges are.
+  hasTag("R.DemoApplication.audioIn", "GuestUser", "RawAudio").
 
+  // If we want the System to respect "GuestUser"'s preference, we should
+  // only allow "DoesXYZ" tags to be managed by "SystemSettingsManager". For
+  // now, we are providing blanket approval for the "GuestUser". Also, see
+  // discussion in "OwnerUser" space.
+  //
   "SystemSettingsManager" canSay hasTag(ap, "GuestUser", tag).
+  // "SystemSettingsManager" canSay hasTag(ap, "GuestUser", "DoesStreaming").
+  // "SystemSettingsManager" canSay hasTag(ap, "GuestUser", "DoesASR").
+  // "SystemSettingsManager" canSay hasTag(ap, "GuestUser", "DoesRecording").
 }
 
 "SystemSettingsManager" says {
@@ -67,23 +116,25 @@ recipe R
       hasTag("R.DemoApplicationASR.audio", owner, "DoesASR").
 
   "DemoApplicationAudioStore" canSay
-      hasTag("R.DemoApplicationAudioStore.audio", owner, "DoesRecording").
+          hasTag("R.DemoApplicationAudioStore.audio", owner, "DoesRecording").
 
   "DemoApplication" canSay
       hasTag("R.DemoApplication.audioIn", owner, "DoesStreaming").
+
+   // Allow "OwnerUser" to configure settings.
+   "OwnerUser" canSay isEnabled("Streaming").
+   "OwnerUser" canSay isEnabled("ASR").
+   "OwnerUser" canSay isEnabled("Recording").
 
    // If the authorization parser support comparison operators, we can
    // make this to be true for all users other than `OwnerUser`.  For
    // now, we will have to be explicit.
    //
-   // "GuestUser" cannot change settings.
+   // We don't resepect the preferences of a  "GuestUser". "GuestUser" should
+   // be OK with it. See discussion in "GuestUser" says section.
    hasTag(ap, "GuestUser", "AllowASR").
    hasTag(ap, "GuestUser", "AllowStreaming").
    hasTag(ap, "GuestUser", "AllowRecording").
-   // Allow "OwnerUser" to configure ASR.
-   "OwnerUser" canSay hasTag(ap, "OwnerUser", "AllowASR").
-   "OwnerUser" canSay hasTag(ap, "OwnerUser", "AllowStreaming").
-   "OwnerUser" canSay hasTag(ap, "OwnerUser", "AllowRecording").
  }
 
 "DemoApplicationASR" says {
@@ -95,6 +146,4 @@ recipe R
 "DemoApplication" says {
     hasTag("R.DemoApplication.audioIn", owner, "DoesStreaming").
 }
-
-
 
