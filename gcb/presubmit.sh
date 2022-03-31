@@ -93,6 +93,8 @@ check_build_files_for_licenses_rule
 # Verify that files have copyright header.
 check_copyright
 
+bazel_run clean --expunge
+
 # Verifies that the following targets build fine:
 #  - Arcs parser and proto works.
 #  - Arcs manifest tests that we do not yet handle parse correctly.
