@@ -44,6 +44,7 @@ recipe R
 
 // __AUTH_LOGIC__
 .decl hasTag(ap : AccessPath, owner : Principal, tag : Tag)
+.decl removeTag(ap : AccessPath, owner : Principal, tag : Tag)
 .decl hasPreference(usage : symbol, tag : Tag)
 .decl isEnabled(usage : symbol)
 
@@ -55,7 +56,7 @@ recipe R
   // usage check even if the `RawAudio` is not streamed to the DemoApp yet.
   // So, we are marking "R.DemoApplication.audioIn" to be containing "RawAudio"
   // no matter what the dataflow edges are.
-  hasTag("R.DemoApplication.audioIn", "OwnerUser", "RawAudio").
+  hasTag("R.DemoApplication.audioOut", "OwnerUser", "RawAudio").
 
   hasTag(ap, "OwnerUser", "AllowStreaming") :-
       hasPreference("Streaming", "RawAudio"),
@@ -89,6 +90,8 @@ recipe R
   "SystemSettingsManager" canSay hasTag(ap, "OwnerUser", "DoesStreaming").
   "SystemSettingsManager" canSay hasTag(ap, "OwnerUser", "DoesASR").
   "SystemSettingsManager" canSay hasTag(ap, "OwnerUser", "DoesRecording").
+
+  "SystemSettingsManager" canSay removeTag(ap, "OwnerUser", tag).
 }
 
 "GuestUser" says {
@@ -96,9 +99,9 @@ recipe R
   // Ideally, the following `RawAudio` tag should be propagated through dataflow
   // edges.  However, for the purposes of the demo, we want to trigger allowed
   // usage check even if the `RawAudio` is not streamed to the DemoApp yet.
-  // So, we are marking "R.DemoApplication.audioIn" to be containing "RawAudio"
+  // So, we are marking "R.DemoApplication.audioOut" to be containing "RawAudio"
   // no matter what the dataflow edges are.
-  hasTag("R.DemoApplication.audioIn", "GuestUser", "RawAudio").
+  hasTag("R.DemoApplication.audioOut", "GuestUser", "RawAudio").
 
   // If we want the System to respect "GuestUser"'s preference, we should
   // only allow "DoesXYZ" tags to be managed by "SystemSettingsManager". For
@@ -109,6 +112,8 @@ recipe R
   // "SystemSettingsManager" canSay hasTag(ap, "GuestUser", "DoesStreaming").
   // "SystemSettingsManager" canSay hasTag(ap, "GuestUser", "DoesASR").
   // "SystemSettingsManager" canSay hasTag(ap, "GuestUser", "DoesRecording").
+
+  "SystemSettingsManager" canSay removeTag(ap, "GuestUser", tag).
 }
 
 "SystemSettingsManager" says {
@@ -116,11 +121,12 @@ recipe R
       hasTag("R.DemoApplicationASR.audio", owner, "DoesASR").
 
   "DemoApplicationAudioStore" canSay
-          hasTag("R.DemoApplicationAudioStore.audio", owner, "DoesRecording").
+      hasTag("R.DemoApplicationAudioStore.audio", owner, "DoesRecording").
 
   "DemoApplication" canSay
       hasTag("R.DemoApplication.audioIn", owner, "DoesStreaming").
-
+  "DemoApplication" canSay
+    removeTag("R.DemoApplication.audioOut", owner, "DoesStreaming").
    // Allow "OwnerUser" to configure settings.
    "OwnerUser" canSay isEnabled("Streaming").
    "OwnerUser" canSay isEnabled("ASR").
@@ -145,5 +151,6 @@ recipe R
 }
 "DemoApplication" says {
     hasTag("R.DemoApplication.audioIn", owner, "DoesStreaming").
+    removeTag("R.DemoApplication.audioOut", owner, "DoesStreaming").
 }
 
