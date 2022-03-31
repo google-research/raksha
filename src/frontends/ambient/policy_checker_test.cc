@@ -31,11 +31,12 @@ class PolicyCheckerEdgeTest : public testing::TestWithParam<bool> {};
 TEST_P(PolicyCheckerEdgeTest, StreamingEdgeTest) {
   bool setting = GetParam();
   PolicyChecker checker;
-  checker.ChangeSetting(PolicyChecker::kOwnerUser,
-                        PolicyChecker::kStreamingSetting, setting);
+  checker.ChangeSetting(PolicyChecker::User::kOwner,
+                        PolicyChecker::Settings::kStreaming, setting);
   {
-    const auto& [is_compliant, reason] = checker.AddIfValidEdge(
-        PolicyChecker::kMicrophoneOut, PolicyChecker::kDemoAppIn);
+    const auto& [is_compliant, reason] =
+        checker.AddIfValidEdge(PolicyChecker::Node::kSmartMicrophone,
+                               PolicyChecker::Node::kDemoApplication);
     EXPECT_EQ(is_compliant, setting)
         << "Edge kMicrophoneOut -> kDemoAppIn Invalid:\n"
         << reason;
@@ -45,10 +46,11 @@ TEST_P(PolicyCheckerEdgeTest, StreamingEdgeTest) {
 TEST_P(PolicyCheckerEdgeTest, ASREdgeTest) {
   bool setting = GetParam();
   PolicyChecker checker;
-  checker.ChangeSetting(PolicyChecker::kOwnerUser, PolicyChecker::kASRSetting,
-                        setting);
-  const auto& [is_compliant, reason] = checker.AddIfValidEdge(
-      PolicyChecker::kDemoAppOut, PolicyChecker::kDemoASRIn);
+  checker.ChangeSetting(PolicyChecker::User::kOwner,
+                        PolicyChecker::Settings::kASR, setting);
+  const auto& [is_compliant, reason] =
+      checker.AddIfValidEdge(PolicyChecker::Node::kDemoApplication,
+                             PolicyChecker::Node::kDemoApplicationASR);
   EXPECT_EQ(is_compliant, setting)
       << "Edge kDemoAppOut -> kDemoASRIn Invalid:\n"
       << reason;
@@ -57,10 +59,11 @@ TEST_P(PolicyCheckerEdgeTest, ASREdgeTest) {
 TEST_P(PolicyCheckerEdgeTest, StorageEdgeTest) {
   bool setting = GetParam();
   PolicyChecker checker;
-  checker.ChangeSetting(PolicyChecker::kOwnerUser,
-                        PolicyChecker::kRecordingSetting, setting);
-  const auto& [is_compliant, reason] = checker.AddIfValidEdge(
-      PolicyChecker::kDemoAppOut, PolicyChecker::kDemoStoreIn);
+  checker.ChangeSetting(PolicyChecker::User::kOwner,
+                        PolicyChecker::Settings::kRecording, setting);
+  const auto& [is_compliant, reason] =
+      checker.AddIfValidEdge(PolicyChecker::Node::kDemoApplication,
+                             PolicyChecker::Node::kDemoApplicationAudioStore);
   EXPECT_EQ(is_compliant, setting)
       << "Edge kDemoAppOut -> kDemoStoreIn Invalid:\n"
       << reason;
@@ -71,28 +74,32 @@ INSTANTIATE_TEST_SUITE_P(PolicyCheckerEdgeTest, PolicyCheckerEdgeTest,
 
 TEST(PolicyCheckerTest, EdgesTest) {
   PolicyChecker checker;
-  checker.ChangeSetting(PolicyChecker::kOwnerUser, PolicyChecker::kASRSetting,
-                        true);
-  checker.ChangeSetting(PolicyChecker::kOwnerUser,
-                        PolicyChecker::kRecordingSetting, true);
-  checker.ChangeSetting(PolicyChecker::kOwnerUser,
-                        PolicyChecker::kStreamingSetting, true);
+  checker.ChangeSetting(PolicyChecker::User::kOwner,
+                        PolicyChecker::Settings::kASR, true);
+  checker.ChangeSetting(PolicyChecker::User::kOwner,
+                        PolicyChecker::Settings::kRecording, true);
+  checker.ChangeSetting(PolicyChecker::User::kOwner,
+                        PolicyChecker::Settings::kStreaming, true);
   {
-    const auto& [is_compliant, reason] = checker.AddIfValidEdge(
-        PolicyChecker::kMicrophoneOut, PolicyChecker::kDemoAppIn);
+    const auto& [is_compliant, reason] =
+        checker.AddIfValidEdge(PolicyChecker::Node::kSmartMicrophone,
+                               PolicyChecker::Node::kDemoApplication);
+
     EXPECT_EQ(is_compliant, true)
         << "Edge kMicrophoneOut -> kDemoAppIn Invalid:\n"
         << reason;
   }
   {
-    const auto& [is_compliant, reason] = checker.AddIfValidEdge(
-        PolicyChecker::kDemoAppOut, PolicyChecker::kDemoASRIn);
+    const auto& [is_compliant, reason] =
+        checker.AddIfValidEdge(PolicyChecker::Node::kDemoApplication,
+                               PolicyChecker::Node::kDemoApplicationASR);
     EXPECT_EQ(is_compliant, true) << "Edge kDemoAppOut -> kDemoASRIn Invalid:\n"
                                   << reason;
   }
   {
-    const auto& [is_compliant, reason] = checker.AddIfValidEdge(
-        PolicyChecker::kDemoAppOut, PolicyChecker::kDemoStoreIn);
+    const auto& [is_compliant, reason] =
+        checker.AddIfValidEdge(PolicyChecker::Node::kDemoApplication,
+                               PolicyChecker::Node::kDemoApplicationAudioStore);
     EXPECT_EQ(is_compliant, true)
         << "Edge kDemoAppOut -> kDemoStoreIn Invalid:\n"
         << reason;
@@ -103,27 +110,28 @@ TEST(PolicyCheckerTest, EdgesTest) {
 
 TEST(PolicyCheckerTest, WhoCanChangeSettings) {
   PolicyChecker checker;
-  EXPECT_TRUE(checker.CanUserChangeSetting(PolicyChecker::kOwnerUser,
-                                           PolicyChecker::kASRSetting));
-  EXPECT_TRUE(checker.CanUserChangeSetting(PolicyChecker::kOwnerUser,
-                                           PolicyChecker::kRecordingSetting));
-  EXPECT_TRUE(checker.CanUserChangeSetting(PolicyChecker::kOwnerUser,
-                                           PolicyChecker::kStreamingSetting));
-  EXPECT_FALSE(checker.CanUserChangeSetting(PolicyChecker::kGuestUser,
-                                            PolicyChecker::kASRSetting));
-  EXPECT_FALSE(checker.CanUserChangeSetting(PolicyChecker::kGuestUser,
-                                            PolicyChecker::kRecordingSetting));
-  EXPECT_FALSE(checker.CanUserChangeSetting(PolicyChecker::kGuestUser,
-                                            PolicyChecker::kStreamingSetting));
+  EXPECT_TRUE(checker.CanUserChangeSetting(PolicyChecker::User::kOwner,
+                                           PolicyChecker::Settings::kASR));
+  EXPECT_TRUE(checker.CanUserChangeSetting(
+      PolicyChecker::User::kOwner, PolicyChecker::Settings::kRecording));
+  EXPECT_TRUE(checker.CanUserChangeSetting(
+      PolicyChecker::User::kOwner, PolicyChecker::Settings::kStreaming));
+  EXPECT_FALSE(checker.CanUserChangeSetting(PolicyChecker::User::kGuest,
+                                            PolicyChecker::Settings::kASR));
+  EXPECT_FALSE(checker.CanUserChangeSetting(
+      PolicyChecker::User::kGuest, PolicyChecker::Settings::kRecording));
+  EXPECT_FALSE(checker.CanUserChangeSetting(
+      PolicyChecker::User::kGuest, PolicyChecker::Settings::kStreaming));
 }
 
 TEST(PolicyCheckerTest, AvailableSettings) {
   PolicyChecker checker;
-  EXPECT_THAT(checker.AvailableSettings(PolicyChecker::kOwnerUser),
-              testing::UnorderedElementsAre(PolicyChecker::kASRSetting,
-                                            PolicyChecker::kRecordingSetting,
-                                            PolicyChecker::kStreamingSetting));
-  EXPECT_THAT(checker.AvailableSettings(PolicyChecker::kGuestUser),
+  EXPECT_THAT(
+      checker.AvailableSettings(PolicyChecker::User::kOwner),
+      testing::UnorderedElementsAre(PolicyChecker::Settings::kASR,
+                                    PolicyChecker::Settings::kRecording,
+                                    PolicyChecker::Settings::kStreaming));
+  EXPECT_THAT(checker.AvailableSettings(PolicyChecker::User::kGuest),
               testing::UnorderedElementsAre());
 }
 

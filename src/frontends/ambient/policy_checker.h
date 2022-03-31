@@ -31,55 +31,61 @@ namespace raksha::ambient {
 
 class PolicyChecker {
  public:
-  using DataFlowEdge = std::pair<std::string, std::string>;
-  using SettingsMap = absl::flat_hash_map<std::string, bool>;
+  enum class Node {
+    kUnknown,
+    kSmartMicrophone,
+    kDemoApplication,
+    kDemoApplicationASR,
+    kDemoApplicationAudioStore,
+  };
 
-  static constexpr char kASRSetting[] = "ASR";
-  static constexpr char kStreamingSetting[] = "Streaming";
-  static constexpr char kRecordingSetting[] = "Recording";
-  static constexpr char kOwnerUser[] = "OwnerUser";
-  static constexpr char kGuestUser[] = "GuestUser";
-  static constexpr char kMicrophoneAudio[] = "R.SmartMicrophone.audio";
-  static constexpr char kMicrophoneOut[] = "R.mic_audio_stream_out";
-  static constexpr char kDemoAppIn[] = "R.app_audio_stream_in";
-  static constexpr char kDemoAppOut[] = "R.app_audio_stream_out";
-  static constexpr char kDemoASRIn[] = "R.asr_audio_stream_in";
-  static constexpr char kDemoStoreIn[] = "R.store_audio_stream_in";
-  static constexpr char kSystemSettingsManager[] = "SystemSettingsManager";
+  enum class User {
+    kUnknown,
+    kOwner,
+    kGuest,
+  };
+
+  enum class Settings { kUnknown, kStreaming, kASR, kRecording };
+
+  using DataFlowEdge = std::pair<std::string, std::string>;
+  using SettingsMap = absl::flat_hash_map<Settings, bool>;
 
   PolicyChecker() {
-    user_settings_[kOwnerUser] = SettingsMap({{kASRSetting, true},
-                                              {kStreamingSetting, true},
-                                              {kRecordingSetting, true}});
-    user_settings_[kGuestUser] = SettingsMap({{kASRSetting, true},
-                                              {kStreamingSetting, true},
-                                              {kRecordingSetting, true}});
+    user_settings_[User::kOwner] = SettingsMap({{Settings::kASR, true},
+                                                {Settings::kStreaming, true},
+                                                {Settings::kRecording, true}});
+    user_settings_[User::kGuest] = SettingsMap({{Settings::kASR, true},
+                                                {Settings::kStreaming, true},
+                                                {Settings::kRecording, true}});
   }
 
-  // Check if the given edge into the policy context.
-  std::pair<bool, std::string> AddIfValidEdge(absl::string_view src,
-                                              absl::string_view tgt) {
-    bool edge_already_in_context = IsEdgePresent(src, tgt);
-    if (!edge_already_in_context) AddEdge(src, tgt);
-    auto result = ValidatePolicyCompliance();
-    if (!result.first && !edge_already_in_context) {
-      RemoveEdge(src, tgt);
-    }
-    return result;
-  }
+  // Check if the given edge can be added safely to the policy context.
+  std::pair<bool, std::string> AddIfValidEdge(Node source, Node target);
 
   // If the current setup is policy compliant, returns true. Otherwise, returns
   // false along with a reason.
   std::pair<bool, std::string> ValidatePolicyCompliance() const;
 
   // If the setting is successful, returns true. Otherwise, returns false.
-  bool ChangeSetting(absl::string_view user, absl::string_view name,
-                     bool value);
+  bool ChangeSetting(User user, Settings name, bool value);
+
+  // Returns true if the user can change the given setting.
+  bool CanUserChangeSetting(User user, Settings setting_name);
+
+  // Returns the set of available settings for the given user.
+  absl::flat_hash_set<PolicyChecker::Settings> AvailableSettings(
+      User user) const;
+
+ private:
+  // Check if the given edge can be added safely to the policy context.
+  std::pair<bool, std::string> AddIfValidEdge(absl::string_view src,
+                                              absl::string_view tgt);
 
   // Returns true if the user can change the given setting.
   bool CanUserChangeSetting(absl::string_view user,
                             absl::string_view setting_name);
 
+  // Returns the set of available settings for the given user.
   absl::flat_hash_set<std::string> AvailableSettings(
       absl::string_view user) const;
 
@@ -98,9 +104,8 @@ class PolicyChecker {
     edges_.erase(DataFlowEdge(std::string(src), std::string(tgt)));
   }
 
- private:
   absl::flat_hash_set<DataFlowEdge> edges_;
-  absl::flat_hash_map<std::string, SettingsMap> user_settings_;
+  absl::flat_hash_map<User, SettingsMap> user_settings_;
 
   static constexpr char kPolicyCheckerProgramName[] = "policy_checker_cxx";
 };

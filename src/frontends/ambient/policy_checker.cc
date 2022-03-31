@@ -21,9 +21,9 @@
 #include <iostream>
 #include <memory>
 
+#include "absl/strings/match.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
-#include "absl/strings/match.h"
 #include "souffle/SouffleInterface.h"
 #include "src/common/logging/logging.h"
 #include "src/common/utils/ranges.h"
@@ -31,6 +31,95 @@
 namespace raksha::ambient {
 
 namespace {
+
+static constexpr char kASRSetting[] = "ASR";
+static constexpr char kStreamingSetting[] = "Streaming";
+static constexpr char kRecordingSetting[] = "Recording";
+static constexpr char kOwnerUser[] = "OwnerUser";
+static constexpr char kGuestUser[] = "GuestUser";
+static constexpr char kMicrophoneAudio[] = "R.SmartMicrophone.audio";
+static constexpr char kMicrophoneOut[] = "R.mic_audio_stream_out";
+static constexpr char kDemoAppIn[] = "R.app_audio_stream_in";
+static constexpr char kDemoAppOut[] = "R.app_audio_stream_out";
+static constexpr char kDemoASRIn[] = "R.asr_audio_stream_in";
+static constexpr char kDemoStoreIn[] = "R.store_audio_stream_in";
+static constexpr char kSystemSettingsManager[] = "SystemSettingsManager";
+
+absl::string_view GetSettingsName(PolicyChecker::Settings settings) {
+  switch (settings) {
+    case PolicyChecker::Settings::kASR: {
+      return kASRSetting;
+    }
+    case PolicyChecker::Settings::kStreaming: {
+      return kStreamingSetting;
+    }
+    case PolicyChecker::Settings::kRecording: {
+      return kRecordingSetting;
+    }
+    default: {
+      CHECK(false) << "Unknown settings";
+      // This is unreachable, but adding a return to keep the compiler happy.
+      return "";
+    }
+  }
+}
+
+PolicyChecker::Settings GetSettings(absl::string_view name) {
+  if (name == kASRSetting) {
+    return PolicyChecker::Settings::kASR;
+  } else if (name == kStreamingSetting) {
+    return PolicyChecker::Settings::kStreaming;
+  } else if (name == kRecordingSetting) {
+    return PolicyChecker::Settings::kRecording;
+  } else {
+    CHECK(false) << "Unknown settings";
+    // This is unreachable, but adding a return to keep the compiler happy.
+    return PolicyChecker::Settings::kUnknown;
+  }
+}
+
+absl::string_view GetUserName(PolicyChecker::User user) {
+  switch (user) {
+    case PolicyChecker::User::kOwner: {
+      return kOwnerUser;
+    }
+    case PolicyChecker::User::kGuest: {
+      return kGuestUser;
+    }
+    default: {
+      CHECK(false) << "Unknown user";
+      // This is unreachable, but adding a return to keep the compiler happy.
+      return "";
+    }
+  }
+}
+
+absl::string_view GetDataConnectionName(PolicyChecker::Node node,
+                                        bool in_bound) {
+  switch (node) {
+    case PolicyChecker::Node::kSmartMicrophone: {
+      CHECK(!in_bound) << "No inbound connections for SmartMicrophone";
+      return kMicrophoneOut;
+    }
+    case PolicyChecker::Node::kDemoApplication: {
+      return in_bound ? kDemoAppIn : kDemoAppOut;
+    }
+    case PolicyChecker::Node::kDemoApplicationASR: {
+      CHECK(in_bound) << "No outbound connections for ASR application.";
+      return kDemoASRIn;
+    }
+    case PolicyChecker::Node::kDemoApplicationAudioStore: {
+      CHECK(in_bound) << "No outbound connections for ASR application.";
+      return kDemoStoreIn;
+    }
+    case PolicyChecker::Node::kUnknown:
+    default: {
+      CHECK(false) << "Unknown node";
+      // This is unreachable, but adding a return to keep the compiler happy.
+      return "";
+    }
+  }
+}
 
 template <typename Range>
 void UpdateEdges(const souffle::SouffleProgram *program, Range edges) {
@@ -52,7 +141,8 @@ void UpdateSettings(const souffle::SouffleProgram *program,
     for (const auto &[usage, allowed] : settings) {
       souffle::tuple setting(rel);  // Create an empty tuple
       if (allowed) {
-        setting << user << usage;
+        setting << std::string(GetUserName(user))
+                << std::string(GetSettingsName(usage));
         rel->insert(setting);
       }
     }
@@ -61,13 +151,19 @@ void UpdateSettings(const souffle::SouffleProgram *program,
 
 }  // namespace
 
+bool PolicyChecker::CanUserChangeSetting(PolicyChecker::User user,
+                                         PolicyChecker::Settings setting) {
+  return CanUserChangeSetting(GetUserName(user), GetSettingsName(setting));
+}
+
 bool PolicyChecker::CanUserChangeSetting(absl::string_view user,
                                          absl::string_view setting_name) {
   std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
       souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
   program->run();
 
-  // .decl says_canSay_isEnabled(speaker: Principal, delegatee1: Principal, usage: symbol)
+  // .decl says_canSay_isEnabled(speaker: Principal, delegatee1: Principal,
+  // usage: symbol)
   souffle::Relation *saysCanSayIsEnabled =
       CHECK_NOTNULL(program->getRelation("says_canSay_isEnabled"));
   // std::string setting_tag = absl::StrFormat("Allow%s", setting_name);
@@ -82,14 +178,24 @@ bool PolicyChecker::CanUserChangeSetting(absl::string_view user,
   return false;
 }
 
+absl::flat_hash_set<PolicyChecker::Settings> PolicyChecker::AvailableSettings(
+    PolicyChecker::User user) const {
+  absl::flat_hash_set<PolicyChecker::Settings> result;
+  for (auto name : AvailableSettings(GetUserName(user))) {
+    result.insert(GetSettings(name));
+  }
+  return result;
+}
+
 absl::flat_hash_set<std::string> PolicyChecker::AvailableSettings(
     absl::string_view user) const {
   absl::flat_hash_set<std::string> result;
-  std::unique_ptr<souffle::SouffleProgram> program(
-      CHECK_NOTNULL(souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
+  std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
+      souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
   program->run();
 
-    // .decl says_canSay_isEnabled(speaker: Principal, delegatee1: Principal, usage: symbol)
+  // .decl says_canSay_isEnabled(speaker: Principal, delegatee1: Principal,
+  // usage: symbol)
   souffle::Relation *saysCanSayIsEnabled =
       CHECK_NOTNULL(program->getRelation("says_canSay_isEnabled"));
   // std::string setting_tag = absl::StrFormat("Allow%s", setting_name);
@@ -103,12 +209,42 @@ absl::flat_hash_set<std::string> PolicyChecker::AvailableSettings(
   return result;
 }
 
-bool PolicyChecker::ChangeSetting(absl::string_view user,
-                                  absl::string_view settings_name, bool value) {
-  if (!CanUserChangeSetting(user, settings_name)) return false;
-  CHECK(user == kOwnerUser || user == kGuestUser);
-  user_settings_[user][settings_name] = value;
+bool PolicyChecker::ChangeSetting(PolicyChecker::User user,
+                                  PolicyChecker::Settings setting, bool value) {
+  absl::string_view user_name = GetUserName(user);
+  absl::string_view settings_name = GetSettingsName(setting);
+  if (!CanUserChangeSetting(user_name, settings_name)) {
+    return false;
+  }
+  CHECK(user == User::kOwner || user == User::kGuest);
+  user_settings_[user][setting] = value;
   return true;
+}
+
+// bool PolicyChecker::ChangeSetting(absl::string_view user,
+//                                   absl::string_view settings_name, bool
+//                                   value) {
+//   if (!CanUserChangeSetting(user, settings_name)) return false;
+//   CHECK(user == kOwnerUser || user == kGuestUser);
+//   user_settings_[user][settings_name] = value;
+//   return true;
+// }
+
+std::pair<bool, std::string> PolicyChecker::AddIfValidEdge(Node source,
+                                                           Node target) {
+  return AddIfValidEdge(GetDataConnectionName(source, /*inbound=*/false),
+                        GetDataConnectionName(target, /*inbound=*/true));
+}
+
+std::pair<bool, std::string> PolicyChecker::AddIfValidEdge(
+    absl::string_view src, absl::string_view tgt) {
+  bool edge_already_in_context = IsEdgePresent(src, tgt);
+  if (!edge_already_in_context) AddEdge(src, tgt);
+  auto result = ValidatePolicyCompliance();
+  if (!result.first && !edge_already_in_context) {
+    RemoveEdge(src, tgt);
+  }
+  return result;
 }
 
 std::pair<bool, std::string> PolicyChecker::ValidatePolicyCompliance() const {
