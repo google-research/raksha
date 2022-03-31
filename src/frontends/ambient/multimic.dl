@@ -47,6 +47,7 @@ edge("R.SmartMicrophone.audio", "R.mic_audio_stream_out").
 .decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
 .decl says_canSay_hasTag(speaker: Principal, delegatee1: Principal, ap: AccessPath, owner: Principal, tag: Tag)
 .decl says_canSay_isEnabled(speaker: Principal, delegatee1: Principal, usage: symbol)
+.decl says_canSay_removeTag(speaker: Principal, delegatee1: Principal, ap: AccessPath, owner: Principal, tag: Tag)
 .decl says_hasPreference(speaker: Principal, usage: symbol, tag: Tag)
 .decl says_isEnabled(speaker: Principal, usage: symbol)
 .decl says_isNumber(speaker: Principal, x: number)
@@ -62,16 +63,19 @@ says_canSay_hasTag("SystemSettingsManager", "DemoApplicationAudioStore", "R.Demo
 says_canSay_isEnabled("SystemSettingsManager", "OwnerUser", "ASR").
 says_canSay_isEnabled("SystemSettingsManager", "OwnerUser", "Recording").
 says_canSay_isEnabled("SystemSettingsManager", "OwnerUser", "Streaming").
+says_canSay_removeTag("GuestUser", "SystemSettingsManager", ap, "GuestUser", tag) :- says_isAccessPath("GuestUser", ap), says_isTag("GuestUser", tag).
+says_canSay_removeTag("OwnerUser", "SystemSettingsManager", ap, "OwnerUser", tag) :- says_isAccessPath("OwnerUser", ap), says_isTag("OwnerUser", tag).
+says_canSay_removeTag("SystemSettingsManager", "DemoApplication", "R.DemoApplication.audioOut", owner, "DoesStreaming") :- says_isPrincipal("SystemSettingsManager", owner).
 says_hasPreference("OwnerUser", "ASR", "RawAudio") :- says_isEnabled("OwnerUser", "ASR").
 says_hasPreference("OwnerUser", "Recording", "RawAudio") :- says_isEnabled("OwnerUser", "Recording").
 says_hasPreference("OwnerUser", "Streaming", "RawAudio") :- says_isEnabled("OwnerUser", "Streaming").
 says_hasTag("DemoApplication", "R.DemoApplication.audioIn", owner, "DoesStreaming") :- says_isPrincipal("DemoApplication", owner).
 says_hasTag("DemoApplicationASR", "R.DemoApplicationASR.audio", owner, "DoesASR") :- says_isPrincipal("DemoApplicationASR", owner).
 says_hasTag("DemoApplicationAudioStore", "R.DemoApplicationAudioStore.audio", owner, "DoesRecording") :- says_isPrincipal("DemoApplicationAudioStore", owner).
-says_hasTag("GuestUser", "R.DemoApplication.audioIn", "GuestUser", "RawAudio").
+says_hasTag("GuestUser", "R.DemoApplication.audioOut", "GuestUser", "RawAudio").
 says_hasTag("GuestUser", "R.SmartMicrophone.audio", "GuestUser", "RawAudio").
-says_hasTag("GuestUser", ap, "GuestUser", tag) :- says_hasTag(x___4, ap, "GuestUser", tag), says_canSay_hasTag("GuestUser", x___4, ap, "GuestUser", tag).
-says_hasTag("OwnerUser", "R.DemoApplication.audioIn", "OwnerUser", "RawAudio").
+says_hasTag("GuestUser", ap, "GuestUser", tag) :- says_hasTag(x___5, ap, "GuestUser", tag), says_canSay_hasTag("GuestUser", x___5, ap, "GuestUser", tag).
+says_hasTag("OwnerUser", "R.DemoApplication.audioOut", "OwnerUser", "RawAudio").
 says_hasTag("OwnerUser", "R.SmartMicrophone.audio", "OwnerUser", "RawAudio").
 says_hasTag("OwnerUser", ap, "OwnerUser", "AllowASR") :- says_hasPreference("OwnerUser", "ASR", "RawAudio"), says_hasTag("OwnerUser", ap, "OwnerUser", "RawAudio"), says_isAccessPath("OwnerUser", ap).
 says_hasTag("OwnerUser", ap, "OwnerUser", "AllowRecording") :- says_hasPreference("OwnerUser", "Recording", "RawAudio"), says_hasTag("OwnerUser", ap, "OwnerUser", "RawAudio"), says_isAccessPath("OwnerUser", ap).
@@ -79,39 +83,45 @@ says_hasTag("OwnerUser", ap, "OwnerUser", "AllowStreaming") :- says_hasPreferenc
 says_hasTag("OwnerUser", ap, "OwnerUser", "DoesASR") :- says_hasTag(x___2, ap, "OwnerUser", "DoesASR"), says_canSay_hasTag("OwnerUser", x___2, ap, "OwnerUser", "DoesASR").
 says_hasTag("OwnerUser", ap, "OwnerUser", "DoesRecording") :- says_hasTag(x___3, ap, "OwnerUser", "DoesRecording"), says_canSay_hasTag("OwnerUser", x___3, ap, "OwnerUser", "DoesRecording").
 says_hasTag("OwnerUser", ap, "OwnerUser", "DoesStreaming") :- says_hasTag(x___1, ap, "OwnerUser", "DoesStreaming"), says_canSay_hasTag("OwnerUser", x___1, ap, "OwnerUser", "DoesStreaming").
-says_hasTag("SystemSettingsManager", "R.DemoApplication.audioIn", owner, "DoesStreaming") :- says_hasTag(x___7, "R.DemoApplication.audioIn", owner, "DoesStreaming"), says_canSay_hasTag("SystemSettingsManager", x___7, "R.DemoApplication.audioIn", owner, "DoesStreaming").
-says_hasTag("SystemSettingsManager", "R.DemoApplicationASR.audio", owner, "DoesASR") :- says_hasTag(x___5, "R.DemoApplicationASR.audio", owner, "DoesASR"), says_canSay_hasTag("SystemSettingsManager", x___5, "R.DemoApplicationASR.audio", owner, "DoesASR").
-says_hasTag("SystemSettingsManager", "R.DemoApplicationAudioStore.audio", owner, "DoesRecording") :- says_hasTag(x___6, "R.DemoApplicationAudioStore.audio", owner, "DoesRecording"), says_canSay_hasTag("SystemSettingsManager", x___6, "R.DemoApplicationAudioStore.audio", owner, "DoesRecording").
+says_hasTag("SystemSettingsManager", "R.DemoApplication.audioIn", owner, "DoesStreaming") :- says_hasTag(x___9, "R.DemoApplication.audioIn", owner, "DoesStreaming"), says_canSay_hasTag("SystemSettingsManager", x___9, "R.DemoApplication.audioIn", owner, "DoesStreaming").
+says_hasTag("SystemSettingsManager", "R.DemoApplicationASR.audio", owner, "DoesASR") :- says_hasTag(x___7, "R.DemoApplicationASR.audio", owner, "DoesASR"), says_canSay_hasTag("SystemSettingsManager", x___7, "R.DemoApplicationASR.audio", owner, "DoesASR").
+says_hasTag("SystemSettingsManager", "R.DemoApplicationAudioStore.audio", owner, "DoesRecording") :- says_hasTag(x___8, "R.DemoApplicationAudioStore.audio", owner, "DoesRecording"), says_canSay_hasTag("SystemSettingsManager", x___8, "R.DemoApplicationAudioStore.audio", owner, "DoesRecording").
 says_hasTag("SystemSettingsManager", ap, "GuestUser", "AllowASR") :- says_isAccessPath("SystemSettingsManager", ap).
 says_hasTag("SystemSettingsManager", ap, "GuestUser", "AllowRecording") :- says_isAccessPath("SystemSettingsManager", ap).
 says_hasTag("SystemSettingsManager", ap, "GuestUser", "AllowStreaming") :- says_isAccessPath("SystemSettingsManager", ap).
 says_isAccessPath("DemoApplication", "R.DemoApplication.audioIn").
+says_isAccessPath("DemoApplication", "R.DemoApplication.audioOut").
 says_isAccessPath("DemoApplication", "R.DemoApplicationASR.audio").
 says_isAccessPath("DemoApplication", "R.DemoApplicationAudioStore.audio").
 says_isAccessPath("DemoApplication", "R.SmartMicrophone.audio").
 says_isAccessPath("DemoApplicationASR", "R.DemoApplication.audioIn").
+says_isAccessPath("DemoApplicationASR", "R.DemoApplication.audioOut").
 says_isAccessPath("DemoApplicationASR", "R.DemoApplicationASR.audio").
 says_isAccessPath("DemoApplicationASR", "R.DemoApplicationAudioStore.audio").
 says_isAccessPath("DemoApplicationASR", "R.SmartMicrophone.audio").
 says_isAccessPath("DemoApplicationAudioStore", "R.DemoApplication.audioIn").
+says_isAccessPath("DemoApplicationAudioStore", "R.DemoApplication.audioOut").
 says_isAccessPath("DemoApplicationAudioStore", "R.DemoApplicationASR.audio").
 says_isAccessPath("DemoApplicationAudioStore", "R.DemoApplicationAudioStore.audio").
 says_isAccessPath("DemoApplicationAudioStore", "R.SmartMicrophone.audio").
 says_isAccessPath("GuestUser", "R.DemoApplication.audioIn").
+says_isAccessPath("GuestUser", "R.DemoApplication.audioOut").
 says_isAccessPath("GuestUser", "R.DemoApplicationASR.audio").
 says_isAccessPath("GuestUser", "R.DemoApplicationAudioStore.audio").
 says_isAccessPath("GuestUser", "R.SmartMicrophone.audio").
 says_isAccessPath("OwnerUser", "R.DemoApplication.audioIn").
+says_isAccessPath("OwnerUser", "R.DemoApplication.audioOut").
 says_isAccessPath("OwnerUser", "R.DemoApplicationASR.audio").
 says_isAccessPath("OwnerUser", "R.DemoApplicationAudioStore.audio").
 says_isAccessPath("OwnerUser", "R.SmartMicrophone.audio").
 says_isAccessPath("SystemSettingsManager", "R.DemoApplication.audioIn").
+says_isAccessPath("SystemSettingsManager", "R.DemoApplication.audioOut").
 says_isAccessPath("SystemSettingsManager", "R.DemoApplicationASR.audio").
 says_isAccessPath("SystemSettingsManager", "R.DemoApplicationAudioStore.audio").
 says_isAccessPath("SystemSettingsManager", "R.SmartMicrophone.audio").
-says_isEnabled("SystemSettingsManager", "ASR") :- says_isEnabled(x___9, "ASR"), says_canSay_isEnabled("SystemSettingsManager", x___9, "ASR").
-says_isEnabled("SystemSettingsManager", "Recording") :- says_isEnabled(x___10, "Recording"), says_canSay_isEnabled("SystemSettingsManager", x___10, "Recording").
-says_isEnabled("SystemSettingsManager", "Streaming") :- says_isEnabled(x___8, "Streaming"), says_canSay_isEnabled("SystemSettingsManager", x___8, "Streaming").
+says_isEnabled("SystemSettingsManager", "ASR") :- says_isEnabled(x___12, "ASR"), says_canSay_isEnabled("SystemSettingsManager", x___12, "ASR").
+says_isEnabled("SystemSettingsManager", "Recording") :- says_isEnabled(x___13, "Recording"), says_canSay_isEnabled("SystemSettingsManager", x___13, "Recording").
+says_isEnabled("SystemSettingsManager", "Streaming") :- says_isEnabled(x___11, "Streaming"), says_canSay_isEnabled("SystemSettingsManager", x___11, "Streaming").
 says_isPrincipal("DemoApplication", "DemoApplication").
 says_isPrincipal("DemoApplication", "DemoApplicationASR").
 says_isPrincipal("DemoApplication", "DemoApplicationAudioStore").
@@ -208,4 +218,8 @@ says_issymbol("OwnerUser", "Streaming").
 says_issymbol("SystemSettingsManager", "ASR").
 says_issymbol("SystemSettingsManager", "Recording").
 says_issymbol("SystemSettingsManager", "Streaming").
+says_removeTag("DemoApplication", "R.DemoApplication.audioOut", owner, "DoesStreaming") :- says_isPrincipal("DemoApplication", owner).
+says_removeTag("GuestUser", ap, "GuestUser", tag) :- says_removeTag(x___6, ap, "GuestUser", tag), says_canSay_removeTag("GuestUser", x___6, ap, "GuestUser", tag).
+says_removeTag("OwnerUser", ap, "OwnerUser", tag) :- says_removeTag(x___4, ap, "OwnerUser", tag), says_canSay_removeTag("OwnerUser", x___4, ap, "OwnerUser", tag).
+says_removeTag("SystemSettingsManager", "R.DemoApplication.audioOut", owner, "DoesStreaming") :- says_removeTag(x___10, "R.DemoApplication.audioOut", owner, "DoesStreaming"), says_canSay_removeTag("SystemSettingsManager", x___10, "R.DemoApplication.audioOut", owner, "DoesStreaming").
 
