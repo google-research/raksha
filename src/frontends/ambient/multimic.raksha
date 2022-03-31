@@ -132,6 +132,11 @@ recipe R
    "OwnerUser" canSay isEnabled("ASR").
    "OwnerUser" canSay isEnabled("Recording").
 
+   // Uncomment if you want to allow "GuestUser" to configure settings.
+   // "GuestUser" canSay isEnabled("Streaming").
+   // "GuestUser" canSay isEnabled("ASR").
+   // "GuestUser" canSay isEnabled("Recording").
+
    // If the authorization parser support comparison operators, we can
    // make this to be true for all users other than `OwnerUser`.  For
    // now, we will have to be explicit.
