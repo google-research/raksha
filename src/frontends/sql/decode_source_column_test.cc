@@ -17,42 +17,26 @@
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decoder_context.h"
-#include "src/frontends/sql/id_name_and_string_test.h"
+#include "src/frontends/sql/name_and_string_test.h"
 
 namespace raksha::frontends::sql {
 
 namespace {
 
-using ir::Attribute;
-using ir::Block;
-using ir::IRContext;
-using ir::Operation;
 using ir::Storage;
 using ir::Value;
 using ir::types::TypeBase;
-using ir::value::OperationResult;
 using ir::value::StoredValue;
 using ::testing::Combine;
-using ::testing::Eq;
-using ::testing::IsEmpty;
-using ::testing::IsNull;
 using ::testing::NotNull;
-using ::testing::Pair;
-using ::testing::ResultOf;
-using ::testing::TestWithParam;
-using ::testing::UnorderedElementsAre;
-using ::testing::UnorderedElementsAreArray;
-using ::testing::Values;
 using ::testing::ValuesIn;
 
-class DecodeSourceTableColumnExprTest : public IdNameAndStringTest {
-  absl::ParsedFormat<'u', 's', 's'> GetTextprotoFormat() const override {
-    return absl::ParsedFormat<'u', 's', 's'>(
-        R"(id: %u %s source_table_column: { column_path: "%s" })");
+class DecodeSourceTableColumnExprTest : public NameAndStringTest {
+  absl::ParsedFormat<'s', 's'> GetTextprotoFormat() const override {
+    return absl::ParsedFormat<'s', 's'>(
+        R"({ %s source_table_column: { column_path: "%s" } })");
   }
 };
-
-constexpr uint64_t kSampleIds[] = {1, 5, 1000};
 
 constexpr std::optional<absl::string_view> kSampleExprNames[] = {
     {}, {"name1"}, {"another_name"}};
@@ -66,20 +50,18 @@ absl::string_view kStrings[] = {"MyTable.col",
                                 "3.1415"};
 
 TEST_P(DecodeSourceTableColumnExprTest, DecodeSourceTableColumnExprTest) {
-  auto &[id, name, str] = GetParam();
+  auto &[name, str] = GetParam();
   Value result = GetDecodedValue();
   const StoredValue *stored_value = result.If<StoredValue>();
   EXPECT_THAT(stored_value, NotNull());
   const Storage &storage = stored_value->storage();
   EXPECT_EQ(storage.name(), str);
   EXPECT_EQ(storage.type().type_base().kind(), TypeBase::Kind::kPrimitive);
-  EXPECT_EQ(result, decoder_context_.GetValue(id));
 }
 
 INSTANTIATE_TEST_SUITE_P(DecodeSourceTableColumnExprTest,
                          DecodeSourceTableColumnExprTest,
-                         Combine(ValuesIn(kSampleIds),
-                                 ValuesIn(kSampleExprNames),
+                         Combine(ValuesIn(kSampleExprNames),
                                  ValuesIn(kStrings)));
 
 }  // anonymous namespace

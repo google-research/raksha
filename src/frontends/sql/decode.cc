@@ -17,16 +17,16 @@
 #include "src/frontends/sql/decode.h"
 
 #include "src/frontends/sql/decoder_context.h"
+#include "src/ir/value.h"
 
 namespace raksha::frontends::sql {
 
 using ir::Operation;
 using ir::Value;
-using ir::value::OperationResult;
 using ir::value::StoredValue;
 
 static Value WrapOperationResultValue(const Operation &operation) {
-  return Value(OperationResult(operation, DecoderContext::kDefaultOutputName));
+  return DecoderContext::WrapOperationResultValue(operation);
 }
 
 static Value DecodeSourceTableColumn(
@@ -61,30 +61,18 @@ static Value DecodeMergeOperation(const MergeOperation &merge_operation,
   CHECK(merge_operation.inputs_size() >= 1)
       << "Each MergeOperation is expected to have at least one non-control "
          "input.";
-  std::vector<Value> direct_input_values;
-  direct_input_values.reserve(merge_operation.inputs_size());
-  for (Expression input_expr : merge_operation.inputs()) {
-    direct_input_values.push_back(
-        DecodeExpression(input_expr, decoder_context));
-  }
-
-  std::vector<Value> control_input_values;
-  control_input_values.reserve(merge_operation.control_inputs_size());
-  for (Expression control_expr : merge_operation.control_inputs()) {
-    control_input_values.push_back(
-        DecodeExpression(control_expr, decoder_context));
-  }
-
+  const auto &inputs = merge_operation.inputs();
+  const auto &control_inputs = merge_operation.control_inputs();
   return WrapOperationResultValue(decoder_context.MakeMergeOperation(
-      std::move(direct_input_values), std::move(control_input_values)));
+      std::vector<uint64_t>(inputs.begin(), inputs.end()),
+      std::vector<uint64_t>(control_inputs.begin(), control_inputs.end())));
 }
 
 static Value DecodeTagTransform(const TagTransform &tag_transform,
                                 DecoderContext &decoder_context) {
-  CHECK(tag_transform.has_transformed_node())
+  uint64_t transformed_node_id = tag_transform.transformed_node();
+  CHECK(transformed_node_id != 0)
       << "Required TagTransform field transformed_node not present.";
-  ir::Value transformed_value =
-      DecodeExpression(tag_transform.transformed_node(), decoder_context);
   std::string transform_rule_name = tag_transform.transform_rule_name();
   CHECK(!transform_rule_name.empty())
       << "Required TagTransform field transform_rule_name not present.";
@@ -92,13 +80,12 @@ static Value DecodeTagTransform(const TagTransform &tag_transform,
       tag_transform.tag_preconditions().begin(),
       tag_transform.tag_preconditions().end());
   return WrapOperationResultValue(decoder_context.MakeTagTransformOperation(
-      std::move(transformed_value), transform_rule_name,
-      preconditions));
+      transformed_node_id, transform_rule_name, preconditions));
 }
 
-// A helper function to decode the specific subclass of the Expression.
-static Value GetExprValue(const Expression &expr,
-                          DecoderContext &decoder_context) {
+static Value DecodeExpression(const Expression &expr,
+                              DecoderContext &decoder_context) {
+  // TODO(#413): Figure out what to do with the optional name field.
   switch (expr.expr_variant_case()) {
     case Expression::EXPR_VARIANT_NOT_SET: {
       CHECK(false) << "Required field expr_variant not set.";
@@ -121,16 +108,19 @@ static Value GetExprValue(const Expression &expr,
   CHECK(false) << "Unreachable!";
 }
 
-Value DecodeExpression(const Expression &expr,
-                       DecoderContext &decoder_context) {
-  uint64_t id = expr.id();
-  // TODO(#413): Figure out what to do with the optional name field.
-  Value value = GetExprValue(expr, decoder_context);
-  // If the id is present, add it to the map from ids to values.
-  if (id != 0) {
-    decoder_context.RegisterValue(id, value);
+// Decode every `Expression`
+Value DecodeExpressionArena(const ExpressionArena &expr_arena,
+                            DecoderContext &decoder_context) {
+  std::optional<Value> top_level_value = std::nullopt;
+  for (const IdExpressionPair &id_expr_pair :
+       expr_arena.id_expression_pairs()) {
+    Value value = DecodeExpression(id_expr_pair.expression(), decoder_context);
+    decoder_context.RegisterValue(id_expr_pair.id(), value);
+    top_level_value = value;
   }
-  return value;
+  CHECK(top_level_value.has_value()) << "Expected at least one expression to "
+                                        "be provided in the ExpressionArena.";
+  return *top_level_value;
 }
 
 }  // namespace raksha::frontends::sql

@@ -45,6 +45,12 @@ class DecoderContext {
         global_module_(),
         top_level_block_builder_() {}
 
+  // Takes an `Operation` that should only return a single result and creates
+  // the default `OperationResult` value for that `Operation`.
+  static ir::Value WrapOperationResultValue(const ir::Operation &operation) {
+    return ir::Value(ir::value::OperationResult(operation, kDefaultOutputName));
+  }
+
   // Register a value as associated with a particular id.
   void RegisterValue(uint64_t id, ir::Value value) {
     auto insert_result = id_to_value.insert({id, std::move(value)});
@@ -90,11 +96,11 @@ class DecoderContext {
   }
 
   const ir::Operation &MakeMergeOperation(
-      std::vector<ir::Value> direct_inputs,
-      std::vector<ir::Value> control_inputs);
+      std::vector<uint64_t> direct_input_ids,
+      std::vector<uint64_t> control_input_ids);
 
   const ir::Operation &MakeTagTransformOperation(
-      ir::Value transformed_value, absl::string_view rule_name,
+      uint64_t transformed_value_id, absl::string_view rule_name,
       const absl::flat_hash_map<std::string, uint64_t> &tag_preconditions);
 
   // Finish building the top level block and

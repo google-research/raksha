@@ -51,7 +51,6 @@ cc_library(
         "//src/common/utils:map_iter",
         "//src/frontends/sql/ops:literal_op",
         "//src/frontends/sql/ops:merge_op",
-        "//src/frontends/sql/ops:op_traits",
         "//src/frontends/sql/ops:tag_transform_op",
         "//src/ir:block_builder",
         "//src/ir:ir_context",
@@ -74,13 +73,7 @@ cc_library(
     deps = [
         ":decoder_context",
         ":sql_ir_cc_proto",
-        "//src/common/logging",
-        "//src/ir",
-        "//src/ir:block_builder",
-        "//src/ir:ir_context",
-        "//src/ir:ssa_names",
         "//src/ir:value",
-        "//src/ir/attributes:attribute",
     ],
 )
 
@@ -90,24 +83,24 @@ cc_test(
     deps = [
         ":decoder_context",
         "//src/common/testing:gtest",
+        "//src/common/utils:map_iter",
         "//src/frontends/sql/ops:merge_op",
         "//src/frontends/sql/ops:tag_transform_op",
-        "@absl//absl/strings",
     ],
 )
 
 cc_library(
-    name = "id_name_and_string_test",
+    name = "name_and_string_test",
     testonly = True,
-    hdrs = ["id_name_and_string_test.h"],
+    hdrs = ["name_and_string_test.h"],
     deps = [
         ":decode",
         ":decoder_context",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/frontends/sql:sql_ir_cc_proto",
+        "//src/frontends/sql/testing:utils",
         "//src/ir:ir_context",
-        "//src/ir:value",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],
@@ -122,6 +115,7 @@ cc_test(
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/frontends/sql:sql_ir_cc_proto",
+        "//src/frontends/sql/testing:utils",
         "@absl//absl/strings",
     ],
 )
@@ -131,7 +125,7 @@ cc_test(
     srcs = ["decode_literal_test.cc"],
     deps = [
         ":decoder_context",
-        ":id_name_and_string_test",
+        ":name_and_string_test",
         "//src/common/testing:gtest",
         "//src/frontends/sql/ops:literal_op",
         "//src/frontends/sql/testing:utils",
@@ -144,7 +138,7 @@ cc_test(
     srcs = ["decode_source_column_test.cc"],
     deps = [
         ":decoder_context",
-        ":id_name_and_string_test",
+        ":name_and_string_test",
         "//src/common/testing:gtest",
         "@absl//absl/strings",
     ],
@@ -177,6 +171,7 @@ cc_test(
         "//src/frontends/sql:sql_ir_cc_proto",
         "//src/frontends/sql/ops:tag_transform_op",
         "//src/frontends/sql/testing:utils",
+        "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],
