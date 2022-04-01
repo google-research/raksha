@@ -17,6 +17,7 @@
 #include "src/frontends/sql/decoder_context.h"
 
 #include "src/common/testing/gtest.h"
+#include "src/common/utils/map_iter.h"
 #include "src/frontends/sql/ops/merge_op.h"
 #include "src/frontends/sql/ops/tag_transform_op.h"
 
@@ -24,19 +25,13 @@ namespace raksha::frontends::sql {
 
 using ::testing::Combine;
 using ::testing::ElementsAreArray;
-using ::testing::Eq;
-using ::testing::IsEmpty;
 using ::testing::IsNull;
 using ::testing::NotNull;
-using ::testing::Pair;
-using ::testing::ResultOf;
 using ::testing::TestWithParam;
-using ::testing::UnorderedElementsAre;
 using ::testing::UnorderedElementsAreArray;
 using ::testing::Values;
 using ::testing::ValuesIn;
 
-using ir::Attribute;
 using ir::Block;
 using ir::IRContext;
 using ir::NamedValueMap;
@@ -49,6 +44,7 @@ using ir::value::Any;
 using ir::value::BlockArgument;
 using ir::value::OperationResult;
 using ir::value::StoredValue;
+using utils::MapIter;
 
 TEST(DecoderContextTest, BuildTopLevelBlock) {
   IRContext context;
@@ -139,8 +135,20 @@ TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
   IRContext ir_context;
   DecoderContext decoder_context(ir_context);
 
+  uint64_t next_id = 1;
+  auto register_value_and_get_id = [&decoder_context,
+                                    &next_id](Value value) mutable {
+    uint64_t current_id = next_id++;
+    decoder_context.RegisterValue(current_id, value);
+    return current_id;
+  };
+  auto direct_input_ids =
+      MapIter<uint64_t>(direct_inputs, register_value_and_get_id);
+  auto control_input_ids =
+      MapIter<uint64_t>(control_inputs, register_value_and_get_id);
+
   const Operation &op =
-      decoder_context.MakeMergeOperation(direct_inputs, control_inputs);
+      decoder_context.MakeMergeOperation(direct_input_ids, control_input_ids);
   const Block &top_block = decoder_context.BuildTopLevelBlock();
 
   EXPECT_EQ(op.parent(), &top_block);
@@ -192,18 +200,23 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
   // map.
   absl::flat_hash_map<std::string, uint64_t> precondition_name_to_id_map;
   precondition_name_to_id_map.reserve(precondition_values.size());
+  uint64_t max_id = 0;
   for (uint64_t idx = 0; idx < precondition_values.size(); ++idx) {
     uint64_t id = id_sequence.at(idx);
+    max_id = std::max(max_id, id);
     precondition_name_to_id_map.insert(
         {std::string(precondition_name_sequence.at(idx)), id});
     decoder_context.RegisterValue(id, precondition_values.at(idx));
   }
 
+  uint64_t xformed_value_id = max_id + 1;
+  decoder_context.RegisterValue(xformed_value_id, xformed_value);
+
   // Setup has finished. Create the tag transform operation and check its
   // properties.
   const Operation &tag_xform_operation =
-      decoder_context.MakeTagTransformOperation(xformed_value, policy_rule_name,
-                                                precondition_name_to_id_map);
+      decoder_context.MakeTagTransformOperation(
+          xformed_value_id, policy_rule_name, precondition_name_to_id_map);
 
   const TagTransformOp *tag_transform_op =
       SqlOp::GetIf<TagTransformOp>(tag_xform_operation);

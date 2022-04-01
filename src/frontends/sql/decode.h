@@ -25,8 +25,11 @@
 
 namespace raksha::frontends::sql {
 
-ir::Value DecodeExpression(const Expression &expr,
-                           DecoderContext &decoder_context);
+// Decodes the `ExpressionArena` protobuf and returns the value resulting from
+// evaluating the top-level expression. The SQL verifier will want to ensure
+// that no confidentiality tags exist upon this expression.
+ir::Value DecodeExpressionArena(const ExpressionArena &expr,
+                                DecoderContext &decoder_context);
 
 }  // namespace raksha::frontends::sql
 

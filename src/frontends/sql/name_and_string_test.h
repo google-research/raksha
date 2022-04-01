@@ -17,13 +17,14 @@
 #ifndef SRC_FRONTENDS_SQL_ID_NAME_AND_STRING_TEST_H_
 #define SRC_FRONTENDS_SQL_ID_NAME_AND_STRING_TEST_H_
 
+#include "google/protobuf/text_format.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
-#include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/sql_ir.pb.h"
+#include "src/frontends/sql/testing/utils.h"
 #include "src/ir/ir_context.h"
 
 namespace raksha::frontends::sql {
@@ -35,27 +36,30 @@ namespace raksha::frontends::sql {
 // superclass allows us to reuse the common logic while the virtual
 // `GetTexprotoFormat` allows us to construct the textproto as necessary for
 // each structure.
-class IdNameAndStringTest
-    : public testing::TestWithParam<std::tuple<
-          uint64_t, std::optional<absl::string_view>, absl::string_view>> {
+class NameAndStringTest
+    : public ::testing::TestWithParam<
+          std::tuple<std::optional<absl::string_view>, absl::string_view>> {
  protected:
-  IdNameAndStringTest() : ir_context_(), decoder_context_(ir_context_) {}
+  NameAndStringTest() : ir_context_(), decoder_context_(ir_context_) {}
 
-  virtual absl::ParsedFormat<'u', 's', 's'> GetTextprotoFormat() const = 0;
+  virtual absl::ParsedFormat<'s', 's'> GetTextprotoFormat() const = 0;
 
   std::string GetTextproto() const {
-    auto &[id, name, str] = GetParam();
+    auto &[name, str] = GetParam();
     std::string name_str =
         (name.has_value()) ? absl::StrFormat(R"(name: "%s")", *name) : "";
-    return absl::StrFormat(GetTextprotoFormat(), id, name_str, str);
+    return absl::StrFormat(
+        "{ id: 1 expression: %s } ",
+        absl::StrFormat(GetTextprotoFormat(), name_str, str));
   }
 
   ir::Value GetDecodedValue() {
-    Expression expr;
-    EXPECT_TRUE(
-        google::protobuf::TextFormat::ParseFromString(GetTextproto(), &expr))
+    ExpressionArena exprArena;
+    EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
+        testing::CreateExprArenaTextprotoWithLiteralsPrefix(GetTextproto(), {}),
+        &exprArena))
         << "Could not decode expr";
-    return DecodeExpression(expr, decoder_context_);
+    return DecodeExpressionArena(exprArena, decoder_context_);
   }
 
   ir::IRContext ir_context_;

@@ -33,6 +33,24 @@ const ir::Operation &UnwrapDefaultOperationResult(
   return result->operation();
 }
 
+// Creates an `ExpressionArena` with some number of `Literal` expressions as its
+// prefix. Useful for when you need to test that some textproto points at other
+// expressions, but you don't care what they are really are.
+std::string CreateExprArenaTextprotoWithLiteralsPrefix(
+    std::string top_level_proto, std::vector<uint64_t> ids_to_be_filled) {
+  const absl::string_view kExprArenaFormat = "id_expression_pairs: [ %s ]";
+  // Generate a bunch of literals to act as potential child expressions.
+  std::vector<std::string> expr_protos;
+  expr_protos.reserve(ids_to_be_filled.size() + 1);
+  for (uint64_t id : ids_to_be_filled) {
+    expr_protos.push_back(absl::StrFormat(
+        R"({ id: %u expression: { literal: { literal_str: "%u" } } })", id,
+        id));
+  }
+  expr_protos.push_back(top_level_proto);
+  return absl::StrFormat(kExprArenaFormat, absl::StrJoin(expr_protos, ", "));
+}
+
 }  // namespace raksha::frontends::sql::testing
 
 #endif  // SRC_FRONTENDS_SQL_TESTING_UTILS_H_
