@@ -15,9 +15,10 @@
 //-----------------------------------------------------------------------------
 #include "src/common/utils/overloaded.h"
 
-#include <string>
 #include <iostream>
+#include <string>
 
+#include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
 
 namespace raksha::utils {
@@ -33,7 +34,7 @@ TEST_P(OverloadedTest, DispatchesToCorrectType) {
   Kind kind =
       std::visit(overloaded{[](int l) { return Kind::kInt; },
                             [](long l) { return Kind::kLong; },
-                            [](const std::string& s) { return Kind::kString; },
+                            [](absl::string_view s) { return Kind::kString; },
                             [](double d) { return Kind::kDouble; }},
                  variant);
   EXPECT_EQ(kind, expected_kind);

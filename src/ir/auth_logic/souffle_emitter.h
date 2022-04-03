@@ -20,6 +20,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
+#include "absl/strings/string_view.h"
 #include "src/common/utils/map_iter.h"
 #include "src/ir/datalog/program.h"
 
@@ -53,7 +54,7 @@ class SouffleEmitter {
     return datalog::Predicate(
         predicate.name(),
         utils::MapIter<std::string>(predicate.args(),
-                                    [i](const std::string& arg) mutable {
+                                    [i](absl::string_view arg) mutable {
                                       return absl::StrCat("x",
                                                           std::to_string(i++));
                                     }),
@@ -89,14 +90,14 @@ class SouffleEmitter {
 
   std::string EmitOutputs(const datalog::Program& program) {
     return absl::StrJoin(program.outputs(), "\n",
-                         [](std::string* out, const std::string& prog_out) {
+                         [](std::string* out, absl::string_view prog_out) {
                            return absl::StrAppend(out, ".output ", prog_out);
                          });
   }
 
   std::string EmitDeclaration(const datalog::Predicate& predicate) {
     std::string arguments = absl::StrJoin(
-        predicate.args(), ", ", [](std::string* out, const std::string& arg) {
+        predicate.args(), ", ", [](std::string* out, absl::string_view arg) {
           return absl::StrAppend(out, arg, ": symbol");
         });
     return absl::StrCat(".decl ", predicate.name(), "(", arguments, ")");

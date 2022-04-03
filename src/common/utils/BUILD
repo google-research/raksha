@@ -91,6 +91,7 @@ cc_test(
     deps = [
         ":overloaded",
         "//src/common/testing:gtest",
+        "@absl//absl/strings",
     ],
 )
 
