@@ -6,7 +6,8 @@ REMOTE_INSTANCE_NAME="projects/google.com:raksha-ci/instances/raksha_rbe_instanc
 RESULT_UI="--bes_backend=buildeventservice.googleapis.com --bes_timeout=60s \
            --bes_results_url=https://source.cloud.google.com/results/invocations/ \
            --project_id=google.com:raksha-ci"
-BAZEL_CONFIG="--config=remote --remote_instance_name=${REMOTE_INSTANCE_NAME} ${RESULT_UI}"
+# BAZEL_CONFIG="--config=remote --remote_instance_name=${REMOTE_INSTANCE_NAME} ${RESULT_UI}"
+BAZEL_CONFIG=
 BAZELISK="bazelisk"
 BUILDIFIER="buildifier"
 
