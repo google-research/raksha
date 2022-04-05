@@ -29,6 +29,7 @@ RUN apt-get install default-jdk -y --no-install-recommends
 ENV JAVA_HOME /usr/lib/jvm/default-java
 
 # Set up baselisk.
+ENV USE_BAZEL_VERSION=5.0.0
 RUN wget https://github.com/bazelbuild/bazelisk/releases/download/v1.10.1/bazelisk-linux-amd64 \
     -O /usr/local/bin/bazelisk && chmod a+x /usr/local/bin/bazelisk
 
