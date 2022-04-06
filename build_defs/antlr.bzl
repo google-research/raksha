@@ -19,14 +19,14 @@ Generates C++ parser, visitor, listener, lexer from a grammar file.
 
 load("@rules_antlr//antlr:antlr4.bzl", "antlr")
 
-def antlr4_cc_combined(name, src, listener = False, visitor = False):
+def antlr4_cc_combined(name, src, listener = False, visitor = True):
     """Creates a C++ lexer, visitor, listener, parser from a source grammar.
     Args:
       name: Base name for the lexer and the parser rules.
       src: source ANTLR grammar file
       package: The namespace for the generated code
-      listener: generate ANTLR listener (default: False)
-      visitor: generate ANTLR visitor (default: False)
+      listener: generate ANTLR listener (default: True)
+      visitor: generate ANTLR visitor (default: True)
     """
     generated = name + "_grammar"
     antlr(
@@ -35,11 +35,11 @@ def antlr4_cc_combined(name, src, listener = False, visitor = False):
         language = "Cpp",
         listener = listener,
         visitor = visitor,
-        package = "",
+        package = "auth_logic_cc_generator",
     )
 
     native.cc_library(
-        name = name + "_cc_parser",
+        name = name,
         srcs = [generated],
         hdrs = [generated],
         copts = ["-fexceptions"],
