@@ -39,7 +39,7 @@ def antlr4_cc_combined(name, src, listener = False, visitor = False):
     )
 
     native.cc_library(
-        name = name + "_cc_parser",
+        name = name,
         srcs = [generated],
         hdrs = [generated],
         copts = ["-fexceptions"],
