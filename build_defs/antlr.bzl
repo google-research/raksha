@@ -35,12 +35,13 @@ def antlr4_cc_combined(name, src, listener = False, visitor = True):
         language = "Cpp",
         listener = listener,
         visitor = visitor,
-        package = "",
+        package = name,
     )
 
     native.cc_library(
         name = name,
         srcs = [generated],
+        hdrs = [generated],
         copts = ["-fexceptions"],
         linkopts = ["-fexceptions"],
         features = ["-use_header_modules"],
