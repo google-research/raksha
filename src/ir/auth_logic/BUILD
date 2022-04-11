@@ -91,3 +91,32 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
+
+cc_library(
+    name = "ast_construction",
+    srcs = ["ast_construction.cc"],
+    hdrs = ["ast_construction.h"],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    deps = [
+        "//src/common/logging",
+        "//src/common/utils:map_iter",
+        "//src/common/utils:overloaded",
+        "//src/ir/auth_logic:ast",
+        "//src/ir/datalog:program",
+        "//src/policy/auth_logic:auth_logic_cc_generator",
+    ],
+)
+
+cc_test(
+    name = "ast_construction_test",
+    srcs = ["ast_construction_test.cc"],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    deps = [
+        ":ast",
+        ":ast_construction",
+        "//src/common/testing:gtest",
+        "//src/ir/datalog:program",
+    ],
+)
