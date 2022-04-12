@@ -57,8 +57,10 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
     absl::flat_hash_map<std::string, uint64_t> particle_numbers;
     absl::flat_hash_map<std::string, std::string> handle_ids;
     for (const arcs::HandleProto &handle_proto : recipe_proto.handles()) {
-      handle_ids[handle_proto.name()] =
-          handle_proto.id().empty() ? handle_proto.name() : handle_proto.id();
+      auto insert_result = handle_ids.insert(
+          {handle_proto.name(), handle_proto.id().empty() ? handle_proto.name()
+                                                          : handle_proto.id()});
+      CHECK(insert_result.second) << "Duplicate handle id is not expected.";
     }
     const std::string &recipe_name =
         recipe_proto.name().empty()
