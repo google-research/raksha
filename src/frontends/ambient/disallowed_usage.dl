@@ -14,7 +14,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
-// A file containe one-off rules for disallowed usages for the multimic demo.
+// A file containing one-off rules for disallowed usages in the multimic demo.
 //
 isUsage("ASR").
 isUsage("Streaming").

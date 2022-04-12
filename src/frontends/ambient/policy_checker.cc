@@ -221,15 +221,6 @@ bool PolicyChecker::ChangeSetting(PolicyChecker::User user,
   return true;
 }
 
-// bool PolicyChecker::ChangeSetting(absl::string_view user,
-//                                   absl::string_view settings_name, bool
-//                                   value) {
-//   if (!CanUserChangeSetting(user, settings_name)) return false;
-//   CHECK(user == kOwnerUser || user == kGuestUser);
-//   user_settings_[user][settings_name] = value;
-//   return true;
-// }
-
 std::pair<bool, std::string> PolicyChecker::AddIfValidEdge(Node source,
                                                            Node target) {
   return AddIfValidEdge(GetDataConnectionName(source, /*inbound=*/false),
