@@ -35,8 +35,8 @@ TEST_P(PolicyCheckerEdgeTest, StreamingEdgeTest) {
                         PolicyChecker::Settings::kStreaming, setting);
   {
     const auto& [is_compliant, reason] =
-        checker.AddIfValidEdge(PolicyChecker::Node::kSmartMicrophone,
-                               PolicyChecker::Node::kDemoApplication);
+        checker.IsValidEdge(PolicyChecker::Node::kSmartMicrophone,
+                            PolicyChecker::Node::kDemoApplication);
     EXPECT_EQ(is_compliant, setting)
         << "Edge kMicrophoneOut -> kDemoAppIn Invalid:\n"
         << reason;
@@ -49,8 +49,8 @@ TEST_P(PolicyCheckerEdgeTest, ASREdgeTest) {
   checker.ChangeSetting(PolicyChecker::User::kOwner,
                         PolicyChecker::Settings::kASR, setting);
   const auto& [is_compliant, reason] =
-      checker.AddIfValidEdge(PolicyChecker::Node::kDemoApplication,
-                             PolicyChecker::Node::kDemoApplicationASR);
+      checker.IsValidEdge(PolicyChecker::Node::kDemoApplication,
+                          PolicyChecker::Node::kDemoApplicationASR);
   EXPECT_EQ(is_compliant, setting)
       << "Edge kDemoAppOut -> kDemoASRIn Invalid:\n"
       << reason;
@@ -62,8 +62,8 @@ TEST_P(PolicyCheckerEdgeTest, StorageEdgeTest) {
   checker.ChangeSetting(PolicyChecker::User::kOwner,
                         PolicyChecker::Settings::kRecording, setting);
   const auto& [is_compliant, reason] =
-      checker.AddIfValidEdge(PolicyChecker::Node::kDemoApplication,
-                             PolicyChecker::Node::kDemoApplicationAudioStore);
+      checker.IsValidEdge(PolicyChecker::Node::kDemoApplication,
+                          PolicyChecker::Node::kDemoApplicationAudioStore);
   EXPECT_EQ(is_compliant, setting)
       << "Edge kDemoAppOut -> kDemoStoreIn Invalid:\n"
       << reason;

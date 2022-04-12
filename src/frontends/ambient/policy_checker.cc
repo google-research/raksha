@@ -238,6 +238,20 @@ std::pair<bool, std::string> PolicyChecker::AddIfValidEdge(
   return result;
 }
 
+std::pair<bool, std::string> PolicyChecker::IsValidEdge(Node source,
+                                                        Node target) {
+  return IsValidEdge(GetDataConnectionName(source, /*inbound=*/false),
+                     GetDataConnectionName(target, /*inbound=*/true));
+}
+
+std::pair<bool, std::string> PolicyChecker::IsValidEdge(absl::string_view src,
+                                                        absl::string_view tgt) {
+  AddEdge(src, tgt);
+  auto result = ValidatePolicyCompliance();
+  RemoveEdge(src, tgt);
+  return result;
+}
+
 std::pair<bool, std::string> PolicyChecker::ValidatePolicyCompliance() const {
   std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
       souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));

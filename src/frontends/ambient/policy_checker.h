@@ -59,8 +59,10 @@ class PolicyChecker {
                                                 {Settings::kRecording, true}});
   }
 
-  // Check if the given edge can be added safely to the policy context.
+  // Check and add if the given edge can be added safely to the policy context.
   std::pair<bool, std::string> AddIfValidEdge(Node source, Node target);
+  // Simply check if the given edge can be added safely to the policy context.
+  std::pair<bool, std::string> IsValidEdge(Node source, Node target);
 
   // If the current setup is policy compliant, returns true. Otherwise, returns
   // false along with a reason.
@@ -77,9 +79,12 @@ class PolicyChecker {
       User user) const;
 
  private:
-  // Check if the given edge can be added safely to the policy context.
+  // Check and add if the given edge can be added safely to the policy context.
   std::pair<bool, std::string> AddIfValidEdge(absl::string_view src,
                                               absl::string_view tgt);
+  // Simply check if the given edge can be added safely to the policy context.
+  std::pair<bool, std::string> IsValidEdge(absl::string_view src,
+                                           absl::string_view tgt);
 
   // Returns true if the user can change the given setting.
   bool CanUserChangeSetting(absl::string_view user,
