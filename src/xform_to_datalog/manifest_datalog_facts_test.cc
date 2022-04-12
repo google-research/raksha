@@ -371,7 +371,7 @@ TEST_F(ParseBigManifestTest, ManifestProtoChecksTest) {
 
 static const std::string kExpectedEdgeStrings[] = {
     // Named recipe edges:
-    // Edges connecting h1 to NamedR.PS1#0 for fields {field1, field2}.
+    // Edges connecting NamedH1 to NamedR.PS1#0 for fields {field1, field2}.
     R"(// Edges:)",
     R"(edge("NamedR.NamedH1.field1", "NamedR.PS1.in_handle.field1").)",
     R"(edge("NamedR.NamedH1.field2", "NamedR.PS1.in_handle.field2").)",
