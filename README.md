@@ -9,8 +9,10 @@ enforcing privacy policies in a system with heterogeneous runtimes.
 
 On a Linux Debian system, for example:
 
+```
 % sudo apt-get install bazel mcpp
 % bazel build ...
+```
 
 At the time of writing (Apr 12, 2022) the latest version of Bazel is 5.1.1 and is known to work.
 
@@ -26,4 +28,4 @@ TODO(markww): mcpp must be pre-installed due to souffle searching the user's sys
 
 TODO(markww): Elaborate.
 
-[^1]: The name [Raksha](https://en.wikipedia.org/wiki/Raksha_(Vedic)) is used here in the  context of protection.
+[^1]: The name [Raksha](https://en.wikipedia.org/wiki/Raksha_(Vedic)) is used here in the context of protection.
