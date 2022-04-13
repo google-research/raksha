@@ -37,7 +37,6 @@ static constexpr char kStreamingSetting[] = "Streaming";
 static constexpr char kRecordingSetting[] = "Recording";
 static constexpr char kOwnerUser[] = "OwnerUser";
 static constexpr char kGuestUser[] = "GuestUser";
-static constexpr char kMicrophoneAudio[] = "R.SmartMicrophone.audio";
 static constexpr char kMicrophoneOut[] = "R.mic_audio_stream_out";
 static constexpr char kDemoAppIn[] = "R.app_audio_stream_in";
 static constexpr char kDemoAppOut[] = "R.app_audio_stream_out";
