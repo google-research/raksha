@@ -24,10 +24,10 @@ class AccessPathSelectorTest : public testing::TestWithParam<std::string> {};
 
 TEST_P(AccessPathSelectorTest, RoundTripToProtoPreservesAll) {
  arcs::AccessPathProto_Selector orig_selector_proto;
- ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
+ ASSERT_TRUE(google3_proto_compat::TextFormat::ParseFromString(
      GetParam(), &orig_selector_proto))
      << "Unable to parse text proto.";
- ASSERT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
+ ASSERT_TRUE(google3_proto_compat::util::MessageDifferencer::Equals(
      orig_selector_proto, Encode(Decode(orig_selector_proto))));
 }
 
@@ -43,7 +43,7 @@ TEST_P(AccessPathSelectorsFromProtoTest, AccessPathSelectorsFromProtoTest) {
   const auto& [access_path_textproto, expected_to_string] = GetParam();
 
   arcs::AccessPathProto orig_access_path_proto;
-  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
+  ASSERT_TRUE(google3_proto_compat::TextFormat::ParseFromString(
       access_path_textproto, &orig_access_path_proto))
       << "Unable to parse text proto.";
 
@@ -60,7 +60,7 @@ TEST_P(AccessPathSelectorsFromProtoTest, AccessPathSelectorsFromProtoTest) {
 
   arcs::AccessPathProto result_access_path_proto;
   EncodeSelectors(access_path_selectors, result_access_path_proto);
-  EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
+  EXPECT_TRUE(google3_proto_compat::util::MessageDifferencer::Equals(
       result_access_path_proto, orig_access_path_proto));
 }
 

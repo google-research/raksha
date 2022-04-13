@@ -51,7 +51,7 @@ TEST_P(TagClaimToDatalogWithRootTest, TagClaimToDatalogWithRootTest) {
                         root.ToString(), root.ToString()));
   }
   arcs::ClaimProto_Assume assume_proto;
-  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
+  ASSERT_TRUE(google3_proto_compat::TextFormat::ParseFromString(
       assume_textproto, &assume_proto));
   std::vector<TagClaim> unrooted_tag_claim_vec =
       proto::Decode(particle_spec_name, assume_proto);

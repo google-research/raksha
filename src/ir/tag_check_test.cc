@@ -29,7 +29,7 @@ TEST_P(TagCheckToDatalogWithRootTest, TagCheckToDatalogWithRootTest) {
   const std::string &expected_todatalog = absl::Substitute(
       expected_todatalog_format_string, "check_num_0", root_string);
   arcs::CheckProto check_proto;
-  google::protobuf::TextFormat::ParseFromString(check_textproto, &check_proto);
+  google3_proto_compat::TextFormat::ParseFromString(check_textproto, &check_proto);
   TagCheck unrooted_tag_check = proto::Decode(check_proto);
 
   DatalogPrintContext ctxt;

@@ -41,7 +41,7 @@ class DecodeExprDeathTest : public TestWithParam<TextprotoDeathMessagePair> {
 
   ExpressionArena GetExprArena() {
     ExpressionArena exprArena;
-    EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
+    EXPECT_TRUE(google3_proto_compat::TextFormat::ParseFromString(
         testing::CreateExprArenaTextprotoWithLiteralsPrefix(
             GetParam().textproto, {}),
         &exprArena))

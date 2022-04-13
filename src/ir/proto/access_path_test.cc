@@ -27,7 +27,7 @@ TEST_P(AccessPathFromProtoTest, AccessPathFromProtoTest) {
   const auto& [textproto, expected_tostring_suffix] = GetParam();
 
   arcs::AccessPathProto access_path_proto;
-  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(textproto,
+  ASSERT_TRUE(google3_proto_compat::TextFormat::ParseFromString(textproto,
                                                             &access_path_proto))
       << "Unable to parse text proto.";
 

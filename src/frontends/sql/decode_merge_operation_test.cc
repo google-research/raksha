@@ -86,7 +86,7 @@ class DecodeMergeOpTest
 
 TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
   ExpressionArena exprArena;
-  EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(GetTextproto(),
+  EXPECT_TRUE(google3_proto_compat::TextFormat::ParseFromString(GetTextproto(),
                                                                 &exprArena))
       << "Could not decode expr";
   Value value = DecodeExpressionArena(exprArena, decoder_context_);

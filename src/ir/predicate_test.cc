@@ -49,7 +49,7 @@ class ToDatalogRuleBodyTest :
 TEST_P(ToDatalogRuleBodyTest, ToDatalogRuleBodyTest) {
   DatalogPrintContext ctxt;
   arcs::InformationFlowLabelProto_Predicate predicate_proto;
-  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
+  ASSERT_TRUE(google3_proto_compat::TextFormat::ParseFromString(
       textproto_, &predicate_proto));
   std::unique_ptr<Predicate> predicate = proto::Decode(predicate_proto);
   EXPECT_EQ(

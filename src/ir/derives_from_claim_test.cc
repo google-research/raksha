@@ -60,7 +60,7 @@ class DerivesFromAsAccessPathPairTest :
                 kDerivesFromTextprotoFormat,
                 std::get<0>(GetParam()),
                 std::get<1>(GetParam()));
-      google::protobuf::TextFormat::ParseFromString(
+      google3_proto_compat::TextFormat::ParseFromString(
           textproto, &derives_from_proto);
       return proto::Decode(derives_from_proto);
   }
@@ -69,7 +69,7 @@ class DerivesFromAsAccessPathPairTest :
   AccessPath CreateAccessPathFromParam() const {
     arcs::AccessPathProto access_path_proto;
     const std::string &textproto = std::get<ParamNum>(GetParam());
-    google::protobuf::TextFormat::ParseFromString(
+    google3_proto_compat::TextFormat::ParseFromString(
         textproto, &access_path_proto);
     return proto::Decode(access_path_proto);
   }
