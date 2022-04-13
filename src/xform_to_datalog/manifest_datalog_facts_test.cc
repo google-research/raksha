@@ -304,7 +304,7 @@ class ParseBigManifestTest : public testing::Test {
  public:
   ParseBigManifestTest() {
     arcs::ManifestProto manifest_proto;
-    google3_proto_compat::TextFormat::ParseFromString(
+    google::protobuf::TextFormat::ParseFromString(
         kManifestTextproto, &manifest_proto);
     system_spec_ = ir::proto::Decode(type_factory, manifest_proto);
     CHECK(system_spec_ != nullptr);

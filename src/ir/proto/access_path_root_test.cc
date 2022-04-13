@@ -24,10 +24,10 @@ class AccessPathRootTest : public testing::TestWithParam<std::string> {};
 
 TEST_P(AccessPathRootTest, RoundTripToProtoPreservesAll) {
   arcs::AccessPathProto_HandleRoot orig_root_proto;
-  ASSERT_TRUE(google3_proto_compat::TextFormat::ParseFromString(GetParam(),
+  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(GetParam(),
                                                             &orig_root_proto))
       << "Unable to parse text proto.";
-  ASSERT_TRUE(google3_proto_compat::util::MessageDifferencer::Equals(
+  ASSERT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
       orig_root_proto, Encode(Decode(orig_root_proto))));
 }
 

@@ -43,7 +43,7 @@ class ParticleSpecFromProtoTest :
       types::TypeFactory& type_factory) {
     arcs::ParticleSpecProto particle_spec_proto;
     std::string textproto = GetParam().textproto;
-    CHECK(google3_proto_compat::TextFormat::ParseFromString(
+    CHECK(google::protobuf::TextFormat::ParseFromString(
         textproto, &particle_spec_proto))
         << "Particle spec textproto did not parse correctly.";
     return proto::Decode(type_factory, particle_spec_proto);

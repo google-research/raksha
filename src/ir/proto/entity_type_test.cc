@@ -33,12 +33,12 @@ class EntityTypeTest : public testing::TestWithParam<std::string> {
 
 TEST_P(EntityTypeTest, RoundTripPreservesAllInformation) {
   arcs::TypeProto orig_type_proto;
-  ASSERT_TRUE(google3_proto_compat::TextFormat::ParseFromString(GetParam(),
+  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(GetParam(),
                                                             &orig_type_proto))
       << "Failed to parse type proto.";
   arcs::TypeProto result_type_proto =
       Encode(Decode(type_factory_, orig_type_proto));
-  ASSERT_TRUE(google3_proto_compat::util::MessageDifferencer::Equals(
+  ASSERT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
       orig_type_proto, result_type_proto));
 }
 

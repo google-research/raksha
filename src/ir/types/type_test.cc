@@ -246,7 +246,7 @@ TEST_P(GetAccessPathSelectorsWithProtoTest,
        GetAccessPathSelectorsWithProtoTest) {
   const auto &[type_as_textproto, expected_access_path_strs] = GetParam();
   arcs::TypeProto orig_type_proto;
-  ASSERT_TRUE(google3_proto_compat::TextFormat::ParseFromString(type_as_textproto,
+  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(type_as_textproto,
                                                           &orig_type_proto))
       << "Failed to parse text proto!";
   Type type = proto::Decode(type_factory_, orig_type_proto);

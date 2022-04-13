@@ -44,7 +44,7 @@ TEST_P(RoundTripHandleConnectionSpecProtoTest,
   ProtoStringAndExpectations info = GetParam();
 
   arcs::HandleConnectionSpecProto original_proto;
-  google3_proto_compat::TextFormat::ParseFromString(
+  google::protobuf::TextFormat::ParseFromString(
       info.proto_str, &original_proto);
   HandleConnectionSpec handle_connection_spec =
       proto::Decode(type_factory_, original_proto);
@@ -56,7 +56,7 @@ TEST_P(RoundTripHandleConnectionSpecProtoTest,
   arcs::HandleConnectionSpecProto result_proto =
       proto::Encode(handle_connection_spec);
    ASSERT_TRUE(
-      google3_proto_compat::util::MessageDifferencer::Equals(
+      google::protobuf::util::MessageDifferencer::Equals(
           original_proto, result_proto));
 }
 
@@ -100,7 +100,7 @@ TEST_P(GetAccessPathTest, GetAccessPathTest) {
   const ProtoStringAndExpectedAccessPathPieces &param = std::get<0>(GetParam());
   const std::string &particle_spec_name = std::get<1>(GetParam());
   arcs::HandleConnectionSpecProto hcs_proto;
-  google3_proto_compat::TextFormat::ParseFromString(param.textproto, &hcs_proto);
+  google::protobuf::TextFormat::ParseFromString(param.textproto, &hcs_proto);
   HandleConnectionSpec handle_connection_spec =
       proto::Decode(type_factory_, hcs_proto);
   std::vector<ir::AccessPath> access_paths =

@@ -84,7 +84,7 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
           ids_to_be_filled);
 
   ExpressionArena exprArena;
-  EXPECT_TRUE(google3_proto_compat::TextFormat::ParseFromString(
+  EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
       exprArenaTextproto, &exprArena));
   Value decoded_value = DecodeExpressionArena(exprArena, decoder_context);
 
