@@ -14,8 +14,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "google/protobuf/text_format.h"
 #include "absl/strings/string_view.h"
+#include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/sql_ir.pb.h"
@@ -44,13 +44,11 @@ class DecodeExprDeathTest : public TestWithParam<TextprotoDeathMessagePair> {
         << "Could not decode exprArena";
     return exprArena;
   }
-
 };
 
 TEST_P(DecodeExprDeathTest, DecodeExprDeathTest) {
   ExpressionArena exprArena = GetExprArena();
-  EXPECT_DEATH({ DecodeExpressionArena(exprArena); },
-               GetParam().death_message);
+  EXPECT_DEATH({ DecodeExpressionArena(exprArena); }, GetParam().death_message);
 }
 
 const TextprotoDeathMessagePair kTextprotoDeathMessagePairs[] = {
