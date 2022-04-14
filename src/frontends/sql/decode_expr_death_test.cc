@@ -18,7 +18,6 @@
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decode.h"
-#include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/sql_ir.pb.h"
 #include "src/frontends/sql/testing/utils.h"
 
@@ -26,7 +25,6 @@ namespace raksha::frontends::sql {
 
 namespace {
 
-using ir::IRContext;
 using ::testing::TestWithParam;
 using ::testing::ValuesIn;
 
@@ -37,8 +35,6 @@ struct TextprotoDeathMessagePair {
 
 class DecodeExprDeathTest : public TestWithParam<TextprotoDeathMessagePair> {
  protected:
-  DecodeExprDeathTest() : ir_context_(), decoder_context_(ir_context_) {}
-
   ExpressionArena GetExprArena() {
     ExpressionArena exprArena;
     EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
@@ -49,13 +45,11 @@ class DecodeExprDeathTest : public TestWithParam<TextprotoDeathMessagePair> {
     return exprArena;
   }
 
-  IRContext ir_context_;
-  DecoderContext decoder_context_;
 };
 
 TEST_P(DecodeExprDeathTest, DecodeExprDeathTest) {
   ExpressionArena exprArena = GetExprArena();
-  EXPECT_DEATH({ DecodeExpressionArena(exprArena, decoder_context_); },
+  EXPECT_DEATH({ DecodeExpressionArena(exprArena); },
                GetParam().death_message);
 }
 

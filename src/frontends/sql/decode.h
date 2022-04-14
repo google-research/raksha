@@ -31,6 +31,10 @@ namespace raksha::frontends::sql {
 ir::Value DecodeExpressionArena(const ExpressionArena &expr,
                                 DecoderContext &decoder_context);
 
+// A simple no-context variant for decoding the expression arena which creates
+// a fresh context and calls the above.
+ir::Value DecodeExpressionArena(const ExpressionArena &expr);
+
 }  // namespace raksha::frontends::sql
 
 #endif  // SRC_FRONTENDS_SQL_DECODE_H_

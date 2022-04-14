@@ -108,9 +108,10 @@ static Value DecodeExpression(const Expression &expr,
   CHECK(false) << "Unreachable!";
 }
 
-// Decode every `Expression`
-Value DecodeExpressionArena(const ExpressionArena &expr_arena,
-                            DecoderContext &decoder_context) {
+// Decode every `Expression` contained within the arena and return the top
+// level `ir::Value` for that arena.
+Value DecodeExpressionArena(
+    const ExpressionArena &expr_arena, DecoderContext &decoder_context) {
   std::optional<Value> top_level_value = std::nullopt;
   for (const IdExpressionPair &id_expr_pair :
        expr_arena.id_expression_pairs()) {
@@ -122,5 +123,12 @@ Value DecodeExpressionArena(const ExpressionArena &expr_arena,
                                         "be provided in the ExpressionArena.";
   return *top_level_value;
 }
+
+Value DecodeExpressionArena(const ExpressionArena &expr_arena) {
+  ir::IRContext ir_context;
+  DecoderContext decoder_context(ir_context);
+  return DecodeExpressionArena(expr_arena, decoder_context);
+}
+
 
 }  // namespace raksha::frontends::sql
