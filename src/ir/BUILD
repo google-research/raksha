@@ -70,6 +70,10 @@ cc_test(
 cc_library(
     name = "ir_context",
     hdrs = ["ir_context.h"],
+    visibility = [
+        "//:__pkg__",
+        "//src:__subpackages__",
+    ],
     deps = [
         ":module",
         ":operator",
