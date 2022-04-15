@@ -40,13 +40,17 @@ cc_proto_library(
     protos = [
         ":sql_ir_proto",
     ],
+    visibility = ["//:__pkg__"],
 )
 
 cc_library(
     name = "decoder_context",
     srcs = ["decoder_context.cc"],
     hdrs = ["decoder_context.h"],
-    visibility = [":__subpackages__"],
+    visibility = [
+        ":__subpackages__",
+        "//:__pkg__",
+    ],
     deps = [
         "//src/common/utils:map_iter",
         "//src/frontends/sql/ops:literal_op",
@@ -69,6 +73,9 @@ cc_library(
     ],
     hdrs = [
         "decode.h",
+    ],
+    visibility = [
+        "//:__pkg__",
     ],
     deps = [
         ":decoder_context",
