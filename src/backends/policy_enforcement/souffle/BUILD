@@ -38,6 +38,21 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "raksha",
+    hdrs = [
+        "attribute.h",
+        "operation.h",
+    ],
+    deps = [
+        ":fact",
+        ":value",
+        "//src/common/logging",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
 cc_test(
     name = "value_test",
     srcs = ["value_test.cc"],
@@ -53,6 +68,18 @@ cc_test(
     srcs = ["fact_test.cc"],
     deps = [
         ":fact",
+        ":value",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "operation_test",
+    srcs = ["operation_test.cc"],
+    deps = [
+        ":fact",
+        ":raksha",
         ":value",
         "//src/common/testing:gtest",
         "@absl//absl/strings",
