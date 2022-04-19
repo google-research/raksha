@@ -89,36 +89,23 @@ class BaseFact {
   BaseFactVariantType value_;
 };
 
-// CanSay and Fact are forward-declared because they are mutually recursive.
-class CanSay;
-class Fact;
-
-// CanSay corresponds to an expression of the form <principal> canSay Fact
-class CanSay {
- public:
-  explicit CanSay(Principal principal, std::unique_ptr<Fact>& fact)
-      : principal_(principal), fact_(std::move(fact)) {}
-  const Principal& principal() const { return principal_; }
-  const Fact* fact() const { return fact_.get(); }
-
- private:
-  Principal principal_;
-  std::unique_ptr<Fact> fact_;
-};
-
 // Fact corresponds to either a base fact or a an expression of the form
 // <principal> canSay <Fact>
 class Fact {
  public:
-  // FactVariantType gives the different forms of Facts. Client code
-  // should use this type to traverse these forms. This type may be changed in
-  // the future.
-  using FactVariantType = std::variant<BaseFact, std::unique_ptr<CanSay>>;
-  explicit Fact(FactVariantType value) : value_(std::move(value)) {}
-  const FactVariantType& GetValue() const { return value_; }
+  Fact(std::forward_list<Principal> delegation_chain, BaseFact base_fact)
+      : delegation_chain_(std::move(delegation_chain)),
+        base_fact_(std::move(base_fact)) {}
+
+  const std::forward_list<Principal>& delegation_chain() const {
+    return delegation_chain_;
+  }
+
+  const BaseFact& base_fact() const { return base_fact_; }
 
  private:
-  FactVariantType value_;
+  std::forward_list<Principal> delegation_chain_;
+  BaseFact base_fact_;
 };
 
 // ConditionalAssertion the particular form of assertion that can have

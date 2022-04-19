@@ -26,51 +26,77 @@
 #include <variant>
 #include <vector>
 
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "src/common/testing/gtest.h"
+#include "src/common/utils/overloaded.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/datalog/program.h"
 
 namespace raksha::ir::auth_logic {
 
+using ::testing::UnorderedElementsAre;
+
 struct QueryTestData {
   std::string input_text;
   std::string query_name;
-  std::string principal_name;
-  std::string fact_name;
-  datalog::Predicate predicate;
+  std::string principal;
+  std::string fact;
 };
+
+std::string ToString(datalog::Predicate predicate) {
+  return absl::StrCat(predicate.sign() == datalog::Sign::kNegated ? "!" : "",
+                      predicate.name(), "(",
+                      absl::StrJoin(predicate.args(), ", "), ")");
+}
+std::string ToString(BaseFact basefact) {
+  return std::visit(
+      raksha::utils::overloaded{
+          [](datalog::Predicate predicate) { return ToString(predicate); },
+          [](Attribute attribute) {
+            return absl::StrJoin(
+                {attribute.principal().name(), ToString(attribute.predicate())},
+                " ");
+          },
+          [](CanActAs can_act_as) {
+            return absl::StrJoin({can_act_as.left_principal().name(),
+                                  can_act_as.right_principal().name()},
+                                 " canActAs ");
+          }},
+      basefact.GetValue());
+}
+
+std::string ToString(Fact fact) {
+  if (fact.delegation_chain().empty()) {
+    return ToString(fact.base_fact());
+  }
+  std::string cansay_string = "";
+  for (const Principal& delegatees : fact.delegation_chain()) {
+    cansay_string =
+        absl::StrJoin({delegatees.name(), cansay_string}, " canSay ");
+  }
+  return absl::StrJoin({cansay_string, ToString(fact.base_fact())}, " ");
+}
 
 class AstConstructionTest : public testing::TestWithParam<QueryTestData> {};
 
 TEST_P(AstConstructionTest, SimpleTestWithQueryProgram) {
-  const auto& [input_text, query_name, principal_name, fact_name, predicate] =
-      GetParam();
+  const auto& [input_text, query_name, principal, fact] = GetParam();
   Program prog_out = ParseProgram(input_text);
   ASSERT_EQ(prog_out.queries().size(), 1);
   const Query& query = prog_out.queries().front();
   EXPECT_EQ(query.name(), query_name);
-  EXPECT_EQ(query.principal().name(), principal_name);
-  EXPECT_EQ(std::get<datalog::Predicate>(
-                std::get<BaseFact>(query.fact().GetValue()).GetValue())
-                .name(),
-            fact_name);
-  EXPECT_EQ(std::get<datalog::Predicate>(
-                std::get<BaseFact>(query.fact().GetValue()).GetValue()),
-            predicate);
+  EXPECT_EQ(query.principal().name(), principal);
+  EXPECT_EQ(ToString(query.fact()), fact);
 }
 
 INSTANTIATE_TEST_SUITE_P(
     AstConstructionTest, AstConstructionTest,
     testing::Values(
-        QueryTestData(
-            {R"(may_notifierA = query "UserA" says mayA("NotifierA"))",
-             "may_notifierA", R"("UserA")", "mayA",
-             datalog::Predicate("mayA", {R"("NotifierA")"},
-                                datalog::Sign::kPositive)}),
-        QueryTestData(
-            {R"(may_notifierB = query "UserB" says !mayB("NotifierB"))",
-             "may_notifierB", R"("UserB")", "mayB",
-             datalog::Predicate("mayB", {R"("NotifierB")"},
-                                datalog::Sign::kNegated)})));
+        QueryTestData({R"(may_notifierA = query "UserA" says mayA(NotifierA))",
+                       "may_notifierA", R"("UserA")", "mayA(NotifierA)"}),
+        QueryTestData({R"(may_notifierB = query "UserB" says !mayB(NotifierB))",
+                       "may_notifierB", R"("UserB")", "!mayB(NotifierB)"})));
 
-}  // namespace raksha::ir::auth_logic
+}  // namespace
+   // raksha::ir::auth_logic
