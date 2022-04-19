@@ -27,10 +27,32 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "fact",
+    hdrs = ["fact.h"],
+    deps = [
+        ":value",
+        "//src/common/logging",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
 cc_test(
     name = "value_test",
     srcs = ["value_test.cc"],
     deps = [
+        ":value",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "fact_test",
+    srcs = ["fact_test.cc"],
+    deps = [
+        ":fact",
         ":value",
         "//src/common/testing:gtest",
         "@absl//absl/strings",
