@@ -44,10 +44,11 @@ static const absl::string_view kSampleAccessPathStrings[] = {"", "P1.foo",
 INSTANTIATE_TEST_SUITE_P(IsAccessPathFactTest, IsAccessPathFactTest,
                          ValuesIn(kSampleAccessPathStrings));
 
-static const char kSimpleAdtName[] = "SimpleAdt";
 static const char kUnitName[] = "Unit";
 
-using SimpleAdt = Adt<kSimpleAdtName>;
+class SimpleAdt : public Adt {
+  using Adt::Adt;
+};
 
 class UnitAdtBranch : public SimpleAdt {
  public:

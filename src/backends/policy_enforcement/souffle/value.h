@@ -99,7 +99,6 @@ class Record : public Value {
   std::unique_ptr<std::tuple<RecordFieldValueTypes...>> record_arguments_;
 };
 
-template <const char *kAdtName>
 class Adt : public AdtMemberValue {
  public:
   explicit Adt(absl::string_view branch_name) : branch_name_(branch_name) {}

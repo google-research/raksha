@@ -21,22 +21,25 @@
 
 namespace raksha::backends::policy_enforcement::souffle {
 
-constexpr char kAttributePayloadName[] = "AttributePayload";
 constexpr char kStringAttributePayloadName[] = "StringAttributePayload";
 constexpr char kNumberAttributePayloadName[] = "NumberAttributePayload";
 
-using AttributePayload = Adt<kAttributePayloadName>;
+class AttributePayload : public Adt {
+  using Adt::Adt;
+};
 
 class StringAttributePayload : public AttributePayload {
  public:
-  StringAttributePayload(Symbol symbol) : Adt(kStringAttributePayloadName) {
+  StringAttributePayload(Symbol symbol)
+      : AttributePayload(kStringAttributePayloadName) {
     members_.push_back(std::make_unique<Symbol>(symbol));
   }
 };
 
 class NumberAttributePayload : public AttributePayload {
  public:
-  NumberAttributePayload(Number number) : Adt(kNumberAttributePayloadName) {
+  NumberAttributePayload(Number number)
+      : AttributePayload(kNumberAttributePayloadName) {
     members_.push_back(std::make_unique<Number>(number));
   }
 };

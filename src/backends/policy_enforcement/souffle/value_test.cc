@@ -111,28 +111,29 @@ static NumListAndExpectedDatalog kListAndExpectedDatalog[] = {
 INSTANTIATE_TEST_SUITE_P(NumListTest, NumListTest,
                          ValuesIn(kListAndExpectedDatalog));
 
-static constexpr char kArithAdtName[] = "Arith";
 static constexpr char kNullBranchName[] = "Null";
 static constexpr char kNumberBranchName[] = "Number";
 static constexpr char kAddBranchName[] = "Add";
 
-using ArithAdt = Adt<kArithAdtName>;
+class ArithAdt : public Adt {
+  using Adt::Adt;
+};
 
 class NullBranch : public ArithAdt {
  public:
-  NullBranch() : Adt(kNullBranchName) {}
+  NullBranch() : ArithAdt(kNullBranchName) {}
 };
 
 class NumberBranch : public ArithAdt {
  public:
-  NumberBranch(Number number) : Adt(kNumberBranchName) {
+  NumberBranch(Number number) : ArithAdt(kNumberBranchName) {
     members_.push_back(std::make_unique<Number>(number));
   }
 };
 
 class AddBranch : public ArithAdt {
  public:
-  AddBranch(ArithAdt lhs, ArithAdt rhs) : Adt(kAddBranchName) {
+  AddBranch(ArithAdt lhs, ArithAdt rhs) : ArithAdt(kAddBranchName) {
     members_.push_back(std::make_unique<ArithAdt>(std::move(lhs)));
     members_.push_back(std::make_unique<ArithAdt>(std::move(rhs)));
   }
