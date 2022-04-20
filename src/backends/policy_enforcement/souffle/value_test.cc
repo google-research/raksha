@@ -81,6 +81,7 @@ INSTANTIATE_TEST_SUITE_P(SimpleRecordTest, SimpleRecordTest,
                                  ValuesIn(kSampleIntegerValues)));
 
 class NumList : public Record<Number, NumList> {
+ public:
   using Record::Record;
 };
 
@@ -97,7 +98,7 @@ TEST_P(NumListTest, NumListTest) {
 }
 
 static const NumList kEmptyNumList;
-static const NumList kOneElementNumList(Number(5), NumList());
+static const NumList kOneElementNumList = NumList(Number(5), NumList());
 static const NumList kTwoElementNumList(Number(-30),
                                         NumList(Number(28), NumList()));
 
@@ -117,9 +118,25 @@ static constexpr char kAddBranchName[] = "Add";
 
 using ArithAdt = Adt<kArithAdtName>;
 
-using NullBranch = AdtBranch<kArithAdtName, kNullBranchName>;
-using NumberBranch = AdtBranch<kArithAdtName, kNumberBranchName, Number>;
-using AddBranch = AdtBranch<kArithAdtName, kAddBranchName, ArithAdt, ArithAdt>;
+class NullBranch : public ArithAdt {
+ public:
+  NullBranch() : Adt(kNullBranchName) {}
+};
+
+class NumberBranch : public ArithAdt {
+ public:
+  NumberBranch(Number number) : Adt(kNumberBranchName) {
+    members_.push_back(std::make_unique<Number>(number));
+  }
+};
+
+class AddBranch : public ArithAdt {
+ public:
+  AddBranch(ArithAdt lhs, ArithAdt rhs) : Adt(kAddBranchName) {
+    members_.push_back(std::make_unique<ArithAdt>(std::move(lhs)));
+    members_.push_back(std::make_unique<ArithAdt>(std::move(rhs)));
+  }
+};
 
 struct AdtAndExpectedDatalog {
   const ArithAdt *adt;

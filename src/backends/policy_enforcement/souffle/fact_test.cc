@@ -46,11 +46,13 @@ INSTANTIATE_TEST_SUITE_P(IsAccessPathFactTest, IsAccessPathFactTest,
 
 static const char kSimpleAdtName[] = "SimpleAdt";
 static const char kUnitName[] = "Unit";
-static const char kForkName[] = "Fork";
 
 using SimpleAdt = Adt<kSimpleAdtName>;
 
-using UnitAdtBranch = AdtBranch<kSimpleAdtName, kUnitName>;
+class UnitAdtBranch : public SimpleAdt {
+ public:
+  UnitAdtBranch() : SimpleAdt(kUnitName) {}
+};
 
 static const char kOneOfEachName[] = "oneOfEach";
 
