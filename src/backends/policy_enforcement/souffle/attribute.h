@@ -25,15 +25,21 @@ constexpr char kAttributePayloadName[] = "AttributePayload";
 constexpr char kStringAttributePayloadName[] = "StringAttributePayload";
 constexpr char kNumberAttributePayloadName[] = "NumberAttributePayload";
 
-using StringAttributePayload =
-    AdtBranch<kAttributePayloadName, kStringAttributePayloadName,
-              Symbol /*str*/>;
-
-using NumberAttributePayload =
-    AdtBranch<kAttributePayloadName, kNumberAttributePayloadName,
-              Number /*num*/>;
-
 using AttributePayload = Adt<kAttributePayloadName>;
+
+class StringAttributePayload : public AttributePayload {
+ public:
+  StringAttributePayload(Symbol symbol) : Adt(kStringAttributePayloadName) {
+    members_.push_back(std::make_unique<Symbol>(symbol));
+  }
+};
+
+class NumberAttributePayload : public AttributePayload {
+ public:
+  NumberAttributePayload(Number number) : Adt(kNumberAttributePayloadName) {
+    members_.push_back(std::make_unique<Number>(number));
+  }
+};
 
 using Attribute =
     Record<Symbol /*attr_name*/, AttributePayload /*attr_payload*/>;
