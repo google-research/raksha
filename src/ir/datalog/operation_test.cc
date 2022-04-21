@@ -14,14 +14,14 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/backends/policy_enforcement/souffle/operation.h"
+#include "src/ir/datalog/operation.h"
 
 #include "absl/strings/string_view.h"
-#include "src/backends/policy_enforcement/souffle/fact.h"
-#include "src/backends/policy_enforcement/souffle/value.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/datalog/fact.h"
+#include "src/ir/datalog/value.h"
 
-namespace raksha::backends::policy_enforcement::souffle {
+namespace raksha::ir::datalog {
 
 using testing::Combine;
 using testing::TestWithParam;
@@ -63,4 +63,4 @@ static IsOperationFactAndExpectedDatalog kSampleIsOperationFactsAndDatalog[] = {
 INSTANTIATE_TEST_SUITE_P(IsOperationFactTest, IsOperationFactTest,
                          ValuesIn(kSampleIsOperationFactsAndDatalog));
 
-}  // namespace raksha::backends::policy_enforcement::souffle
+}  // namespace raksha::ir::datalog

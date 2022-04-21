@@ -14,17 +14,20 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#ifndef SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_ATTRIBUTE_H_
-#define SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_ATTRIBUTE_H_
+#ifndef SRC_IR_DATALOG_ATTRIBUTE_H_
+#define SRC_IR_DATALOG_ATTRIBUTE_H_
 
-#include "src/backends/policy_enforcement/souffle/value.h"
+#include <memory>
 
-namespace raksha::backends::policy_enforcement::souffle {
+#include "src/ir/datalog/value.h"
+
+namespace raksha::ir::datalog {
 
 constexpr char kStringAttributePayloadName[] = "StringAttributePayload";
 constexpr char kNumberAttributePayloadName[] = "NumberAttributePayload";
 
 class AttributePayload : public Adt {
+ public:
   using Adt::Adt;
 };
 
@@ -32,7 +35,7 @@ class StringAttributePayload : public AttributePayload {
  public:
   StringAttributePayload(Symbol symbol)
       : AttributePayload(kStringAttributePayloadName) {
-    members_.push_back(std::make_unique<Symbol>(symbol));
+    arguments_.push_back(std::make_unique<Symbol>(symbol));
   }
 };
 
@@ -40,7 +43,7 @@ class NumberAttributePayload : public AttributePayload {
  public:
   NumberAttributePayload(Number number)
       : AttributePayload(kNumberAttributePayloadName) {
-    members_.push_back(std::make_unique<Number>(number));
+    arguments_.push_back(std::make_unique<Number>(number));
   }
 };
 
@@ -53,6 +56,6 @@ class AttributeList
   using Record::Record;
 };
 
-}  // namespace raksha::backends::policy_enforcement::souffle
+}  // namespace raksha::ir::datalog
 
-#endif  // SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_ATTRIBUTE_H_
+#endif  // SRC_IR_DATALOG_ATTRIBUTE_H_

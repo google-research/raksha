@@ -14,14 +14,14 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#ifndef SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_OPERATION_H_
-#define SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_OPERATION_H_
+#ifndef SRC_IR_DATALOG_OPERATION_H_
+#define SRC_IR_DATALOG_OPERATION_H_
 
-#include "src/backends/policy_enforcement/souffle/attribute.h"
-#include "src/backends/policy_enforcement/souffle/fact.h"
-#include "src/backends/policy_enforcement/souffle/value.h"
+#include "src/ir/datalog/attribute.h"
+#include "src/ir/datalog/fact.h"
+#include "src/ir/datalog/value.h"
 
-namespace raksha::backends::policy_enforcement::souffle {
+namespace raksha::ir::datalog {
 
 class OperandList : public Record<Symbol /*operand*/, OperandList /*next*/> {
   using Record::Record;
@@ -35,6 +35,6 @@ constexpr char kIsOperationRelationName[] = "isOperation";
 
 using IsOperationFact = Fact<kIsOperationRelationName, Operation>;
 
-}  // namespace raksha::backends::policy_enforcement::souffle
+}  // namespace raksha::ir::datalog
 
-#endif  // SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_OPERATION_H_
+#endif  // SRC_IR_DATALOG_OPERATION_H_
