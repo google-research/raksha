@@ -127,7 +127,7 @@ class NullBranch : public ArithmeticAdt {
 class NumberBranch : public ArithmeticAdt {
  public:
   NumberBranch(Number number) : ArithmeticAdt(kNumberBranchName) {
-    members_.push_back(std::make_unique<Number>(number));
+    arguments_.push_back(std::make_unique<Number>(number));
   }
 };
 
@@ -135,8 +135,8 @@ class AddBranch : public ArithmeticAdt {
  public:
   AddBranch(ArithmeticAdt lhs, ArithmeticAdt rhs)
       : ArithmeticAdt(kAddBranchName) {
-    members_.push_back(std::make_unique<ArithmeticAdt>(std::move(lhs)));
-    members_.push_back(std::make_unique<ArithmeticAdt>(std::move(rhs)));
+    arguments_.push_back(std::make_unique<ArithmeticAdt>(std::move(lhs)));
+    arguments_.push_back(std::make_unique<ArithmeticAdt>(std::move(rhs)));
   }
 };
 

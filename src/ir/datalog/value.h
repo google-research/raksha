@@ -97,13 +97,13 @@ class Adt : public Value {
   std::string ToDatalogString() const {
     return absl::StrFormat(
         "$%s{%s}", branch_name_,
-        absl::StrJoin(members_, ", ", [](std::string *str, const auto &arg) {
+        absl::StrJoin(arguments_, ", ", [](std::string *str, const auto &arg) {
           absl::StrAppend(str, arg->ToDatalogString());
         }));
   }
 
  protected:
-  std::vector<std::unique_ptr<Value>> members_;
+  std::vector<std::unique_ptr<Value>> arguments_;
 
  private:
   absl::string_view branch_name_;
