@@ -14,13 +14,13 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/backends/policy_enforcement/souffle/fact.h"
+#include "src/ir/datalog/fact.h"
 
 #include "absl/strings/string_view.h"
-#include "src/backends/policy_enforcement/souffle/value.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/datalog/value.h"
 
-namespace raksha::backends::policy_enforcement::souffle {
+namespace raksha::ir::datalog {
 
 using testing::Combine;
 using testing::TestWithParam;
@@ -47,7 +47,9 @@ INSTANTIATE_TEST_SUITE_P(IsAccessPathFactTest, IsAccessPathFactTest,
 static const char kSimpleAdtName[] = "SimpleAdt";
 static const char kUnitName[] = "Unit";
 
-using SimpleAdt = Adt<kSimpleAdtName>;
+class SimpleAdt : public Adt {
+  using Adt::Adt;
+};
 
 class UnitAdtBranch : public SimpleAdt {
  public:
@@ -67,4 +69,4 @@ TEST(OneOfEachFactTest, OneOfEachFactTest) {
             R"(oneOfEach(5, "foo", [3, "bar"], $Unit{}).)");
 }
 
-}  // namespace raksha::backends::policy_enforcement::souffle
+}  // namespace raksha::ir::datalog
