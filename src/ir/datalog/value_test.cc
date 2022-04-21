@@ -14,7 +14,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/backends/policy_enforcement/souffle/value.h"
+#include "src/ir/datalog/value.h"
 
 #include <limits>
 
@@ -22,7 +22,7 @@
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
 
-namespace raksha::backends::policy_enforcement::souffle {
+namespace raksha::ir::datalog {
 
 using testing::Combine;
 using testing::TestWithParam;
@@ -115,32 +115,33 @@ static constexpr char kNullBranchName[] = "Null";
 static constexpr char kNumberBranchName[] = "Number";
 static constexpr char kAddBranchName[] = "Add";
 
-class ArithAdt : public Adt {
+class ArithmeticAdt : public Adt {
   using Adt::Adt;
 };
 
-class NullBranch : public ArithAdt {
+class NullBranch : public ArithmeticAdt {
  public:
-  NullBranch() : ArithAdt(kNullBranchName) {}
+  NullBranch() : ArithmeticAdt(kNullBranchName) {}
 };
 
-class NumberBranch : public ArithAdt {
+class NumberBranch : public ArithmeticAdt {
  public:
-  NumberBranch(Number number) : ArithAdt(kNumberBranchName) {
-    members_.push_back(std::make_unique<Number>(number));
+  NumberBranch(Number number) : ArithmeticAdt(kNumberBranchName) {
+    arguments_.push_back(std::make_unique<Number>(number));
   }
 };
 
-class AddBranch : public ArithAdt {
+class AddBranch : public ArithmeticAdt {
  public:
-  AddBranch(ArithAdt lhs, ArithAdt rhs) : ArithAdt(kAddBranchName) {
-    members_.push_back(std::make_unique<ArithAdt>(std::move(lhs)));
-    members_.push_back(std::make_unique<ArithAdt>(std::move(rhs)));
+  AddBranch(ArithmeticAdt lhs, ArithmeticAdt rhs)
+      : ArithmeticAdt(kAddBranchName) {
+    arguments_.push_back(std::make_unique<ArithmeticAdt>(std::move(lhs)));
+    arguments_.push_back(std::make_unique<ArithmeticAdt>(std::move(rhs)));
   }
 };
 
 struct AdtAndExpectedDatalog {
-  const ArithAdt *adt;
+  const ArithmeticAdt *adt;
   absl::string_view expected_datalog;
 };
 
@@ -151,15 +152,16 @@ TEST_P(AdtTest, AdtTest) {
   EXPECT_EQ(adt->ToDatalogString(), expected_datalog);
 }
 
-static const ArithAdt kNull = ArithAdt(NullBranch());
-static const ArithAdt kFive = ArithAdt(NumberBranch(Number(5)));
-static const ArithAdt kTwo = ArithAdt(NumberBranch(Number(2)));
-static const ArithAdt kFivePlusTwo = ArithAdt(AddBranch(
-    ArithAdt(NumberBranch(Number(5))), ArithAdt(NumberBranch(Number(2)))));
-static const ArithAdt kFivePlusTwoPlusNull =
-    ArithAdt(AddBranch(ArithAdt(NumberBranch(Number(5))),
-                       ArithAdt(AddBranch(ArithAdt(NumberBranch(Number(2))),
-                                          ArithAdt(NullBranch())))));
+static const ArithmeticAdt kNull = ArithmeticAdt(NullBranch());
+static const ArithmeticAdt kFive = ArithmeticAdt(NumberBranch(Number(5)));
+static const ArithmeticAdt kTwo = ArithmeticAdt(NumberBranch(Number(2)));
+static const ArithmeticAdt kFivePlusTwo =
+    ArithmeticAdt(AddBranch(ArithmeticAdt(NumberBranch(Number(5))),
+                            ArithmeticAdt(NumberBranch(Number(2)))));
+static const ArithmeticAdt kFivePlusTwoPlusNull = ArithmeticAdt(
+    AddBranch(ArithmeticAdt(NumberBranch(Number(5))),
+              ArithmeticAdt(AddBranch(ArithmeticAdt(NumberBranch(Number(2))),
+                                      ArithmeticAdt(NullBranch())))));
 
 static const AdtAndExpectedDatalog kAdtAndExpectedDatalog[] = {
     {.adt = &kNull, .expected_datalog = "$Null{}"},
@@ -170,4 +172,4 @@ static const AdtAndExpectedDatalog kAdtAndExpectedDatalog[] = {
 
 INSTANTIATE_TEST_SUITE_P(AdtTest, AdtTest, ValuesIn(kAdtAndExpectedDatalog));
 
-}  // namespace raksha::backends::policy_enforcement::souffle
+}  // namespace raksha::ir::datalog

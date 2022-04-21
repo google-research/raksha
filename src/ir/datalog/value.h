@@ -14,8 +14,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#ifndef SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_VALUE_H_
-#define SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_VALUE_H_
+#ifndef SRC_IR_DATALOG_VALUE_H_
+#define SRC_IR_DATALOG_VALUE_H_
 
 #include <string>
 #include <tuple>
@@ -25,7 +25,7 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 
-namespace raksha::backends::policy_enforcement::souffle {
+namespace raksha::ir::datalog {
 
 // The common supertype of any "fully fledged" Souffle value type. Anything
 // descending form `Value` should be able to be used in a `.type` declaration.
@@ -34,21 +34,13 @@ namespace raksha::backends::policy_enforcement::souffle {
 class Value {
  public:
   virtual std::string ToDatalogString() const = 0;
-};
-
-// This is the common supertype of any Souffle value type that can
-// participate in an ADT. This is all Values except Records. Values that can
-// participate in an ADT must have a virtual destructor.
-class AdtMemberValue : public Value {
- public:
-  virtual ~AdtMemberValue() {}
+  virtual ~Value() {}
 };
 
 // Corresponds to Souffle's `number` type.
-class Number : public AdtMemberValue {
+class Number : public Value {
  public:
   explicit Number(int64_t value) : number_value_(value) {}
-  virtual ~Number() {}
 
   std::string ToDatalogString() const override {
     return std::to_string(number_value_);
@@ -59,10 +51,9 @@ class Number : public AdtMemberValue {
 };
 
 // Corresponds to Souffle's `symbol` type.
-class Symbol : public AdtMemberValue {
+class Symbol : public Value {
  public:
   explicit Symbol(absl::string_view value) : symbol_value_(value) {}
-  virtual ~Symbol() {}
 
   std::string ToDatalogString() const override {
     return absl::StrFormat(R"("%s")", symbol_value_);
@@ -99,25 +90,25 @@ class Record : public Value {
   std::unique_ptr<std::tuple<RecordFieldValueTypes...>> record_arguments_;
 };
 
-class Adt : public AdtMemberValue {
+class Adt : public Value {
  public:
   explicit Adt(absl::string_view branch_name) : branch_name_(branch_name) {}
 
   std::string ToDatalogString() const {
     return absl::StrFormat(
         "$%s{%s}", branch_name_,
-        absl::StrJoin(members_, ", ", [](std::string *str, const auto &arg) {
+        absl::StrJoin(arguments_, ", ", [](std::string *str, const auto &arg) {
           absl::StrAppend(str, arg->ToDatalogString());
         }));
   }
 
  protected:
-  std::vector<std::unique_ptr<AdtMemberValue>> members_;
+  std::vector<std::unique_ptr<Value>> arguments_;
 
  private:
   absl::string_view branch_name_;
 };
 
-}  // namespace raksha::backends::policy_enforcement::souffle
+}  // namespace raksha::ir::datalog
 
-#endif  // SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_VALUE_H_
+#endif  // SRC_IR_DATALOG_VALUE_H_

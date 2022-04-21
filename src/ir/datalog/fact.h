@@ -14,14 +14,16 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#ifndef SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_FACT_H_
-#define SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_FACT_H_
+#ifndef SRC_IR_DATALOG_FACT_H_
+#define SRC_IR_DATALOG_FACT_H_
 
 #include <utility>
 
-#include "src/backends/policy_enforcement/souffle/value.h"
+#include "absl/strings/str_format.h"
+#include "absl/strings/str_join.h"
+#include "src/ir/datalog/value.h"
 
-namespace raksha::backends::policy_enforcement::souffle {
+namespace raksha::ir::datalog {
 
 template <const char *kRelationName, class... RelationParameterTypes>
 class Fact {
@@ -42,6 +44,6 @@ class Fact {
   std::tuple<RelationParameterTypes...> relation_arguments_;
 };
 
-}  // namespace raksha::backends::policy_enforcement::souffle
+}  // namespace raksha::ir::datalog
 
-#endif  // SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_FACT_H_
+#endif  // SRC_IR_DATALOG_FACT_H_
