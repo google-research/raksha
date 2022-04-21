@@ -17,6 +17,7 @@
 
 #include "src/ir/auth_logic/ast_construction.h"
 
+#include <forward_list>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -33,10 +34,10 @@
 #include "src/policy/auth_logic/auth_logic_cc_generator_grammar.inc/auth_logic_cc_generator/AuthLogicLexer.h"
 #include "src/policy/auth_logic/auth_logic_cc_generator_grammar.inc/auth_logic_cc_generator/AuthLogicParser.h"
 
-using auth_logic_cc_generator::AuthLogicParser;
-using auth_logic_cc_generator::AuthLogicLexer;
-
 namespace raksha::ir::auth_logic {
+
+using auth_logic_cc_generator::AuthLogicLexer;
+using auth_logic_cc_generator::AuthLogicParser;
 
 static Principal ConstructPrincipal(
     AuthLogicParser::PrincipalContext& context) {
@@ -78,22 +79,26 @@ static BaseFact ConstructFlatFact(AuthLogicParser::FlatFactContext& context) {
   return BaseFact(ConstructPredicate(*CHECK_NOTNULL(ctx.predicate())));
 }
 
-static Fact ConstructFact(AuthLogicParser::FactContext& context) {
+static Fact ConstructFact(std::forward_list<Principal> delegation_chain,
+                          AuthLogicParser::FactContext& context) {
   if (auto* flat_fact_fact_ctx =
           dynamic_cast<AuthLogicParser::FlatFactFactContext*>(
               &context)) {  // FlatFactFactContext
     return Fact(
+        std::move(delegation_chain),
         ConstructFlatFact(*CHECK_NOTNULL(flat_fact_fact_ctx->flatFact())));
   }
   auto& ctx = *CHECK_NOTNULL(
       dynamic_cast<AuthLogicParser::CanSayFactContext*>(&context));
-  return ConstructFact(*CHECK_NOTNULL(ctx.fact()));
+  delegation_chain.push_front(
+      ConstructPrincipal(*CHECK_NOTNULL(ctx.principal())));
+  return ConstructFact(std::move(delegation_chain), *CHECK_NOTNULL(ctx.fact()));
 }
 
 static Query ConstructQuery(AuthLogicParser::QueryContext& context) {
   return Query(context.ID()->getText(),
                ConstructPrincipal(*CHECK_NOTNULL(context.principal())),
-               ConstructFact(*CHECK_NOTNULL(context.fact())));
+               ConstructFact({}, *CHECK_NOTNULL(context.fact())));
 }
 
 static Program ConstructProgram(AuthLogicParser::ProgramContext& context) {
