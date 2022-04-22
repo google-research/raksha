@@ -18,7 +18,7 @@
 
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
-#include "src/ir/datalog/fact.h"
+#include "src/ir/datalog/input_relation_fact.h"
 #include "src/ir/datalog/value.h"
 
 namespace raksha::ir::datalog {

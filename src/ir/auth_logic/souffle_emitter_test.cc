@@ -38,8 +38,8 @@ SaysAssertion BuildSingleSaysAssertion(Principal speaker, Assertion assertion) {
 Program BuildPredicateTestProgram() {
   return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
       Principal("TestPrincipal"),
-      Assertion(Fact(BaseFact(
-          datalog::Predicate("foo", {"bar", "baz"}, datalog::kPositive))))));
+      Assertion(Fact({}, BaseFact(datalog::Predicate("foo", {"bar", "baz"},
+                                                     datalog::kPositive))))));
 }
 
 TEST(EmitterTestSuite, SimpleTest) {
@@ -60,8 +60,8 @@ grounded_dummy(dummy_var).
 Program BuildAttributeTestProgram() {
   return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
       Principal("TestSpeaker"),
-      Assertion(Fact(
-          BaseFact(Attribute(Principal("OtherTestPrincipal"),
+      Assertion(Fact({}, BaseFact(Attribute(
+                             Principal("OtherTestPrincipal"),
                              datalog::Predicate("hasProperty", {"wellTested"},
                                                 datalog::kPositive)))))));
 }
@@ -86,8 +86,8 @@ grounded_dummy(dummy_var).
 Program BuildCanActAsProgram() {
   return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
       Principal("TestSpeaker"),
-      Assertion(Fact(BaseFact(
-          CanActAs(Principal("PrincipalA"), Principal("PrincipalB")))))));
+      Assertion(Fact({}, BaseFact(CanActAs(Principal("PrincipalA"),
+                                           Principal("PrincipalB")))))));
 }
 
 TEST(EmitterTestSuite, CanActAsTest) {
@@ -107,12 +107,11 @@ grounded_dummy(dummy_var).
 }
 
 Program BuildCanSayProgram() {
-  std::unique_ptr<Fact> inner_fact = std::unique_ptr<Fact>(new Fact(BaseFact(
-      datalog::Predicate("grantAccess", {"secretFile"}, datalog::kPositive))));
-  Fact::FactVariantType cansay_fact =
-      std::unique_ptr<CanSay>(new CanSay(Principal("PrincipalA"), inner_fact));
+  BaseFact inner_base_fact(
+      datalog::Predicate("grantAccess", {"secretFile"}, datalog::kPositive));
+  Fact cansay_fact({Principal("PrincipalA")}, std::move(inner_base_fact));
   return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
-      Principal("TestSpeaker"), Assertion(Fact(std::move(cansay_fact)))));
+      Principal("TestSpeaker"), Assertion(std::move(cansay_fact))));
 }
 
 TEST(EmitterTestSuite, CanSayTest) {
@@ -133,15 +132,10 @@ grounded_dummy(dummy_var).
 }
 
 Program BuildDoubleCanSayProgram() {
-  // So much fun with unique pointers!
-  std::unique_ptr<Fact> inner_fact = std::unique_ptr<Fact>(new Fact(BaseFact(
-      datalog::Predicate("grantAccess", {"secretFile"}, datalog::kPositive))));
-  Fact::FactVariantType inner_cansay =
-      std::unique_ptr<CanSay>(new CanSay(Principal("PrincipalA"), inner_fact));
-  std::unique_ptr<Fact> inner_cansay_fact =
-      std::unique_ptr<Fact>(new Fact(std::move(inner_cansay)));
-  Fact::FactVariantType cansay_fact = std::unique_ptr<CanSay>(
-      new CanSay(Principal("PrincipalB"), inner_cansay_fact));
+  BaseFact inner_base_fact(
+      datalog::Predicate("grantAccess", {"secretFile"}, datalog::kPositive));
+  Fact cansay_fact({Principal("PrincipalA"), Principal("PrincipalB")},
+                   inner_base_fact);
   return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
       Principal("TestSpeaker"), Assertion(Fact(std::move(cansay_fact)))));
 }
@@ -168,7 +162,8 @@ grounded_dummy(dummy_var).
 Program BuildConditionalProgram() {
   std::vector<BaseFact> rhs = {BaseFact(
       datalog::Predicate("isEmployee", {"somePerson"}, datalog::kPositive))};
-  Fact lhs(BaseFact(datalog::Predicate("canAccess", {"somePerson", "someFile"},
+  Fact lhs({},
+           BaseFact(datalog::Predicate("canAccess", {"somePerson", "someFile"},
                                        datalog::kPositive)));
   return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
       Principal("TestSpeaker"),
@@ -193,7 +188,8 @@ Program BuildMultiAssertionProgram() {
   // Conditional Assertion
   std::vector<BaseFact> rhs = {BaseFact(
       datalog::Predicate("isEmployee", {"somePerson"}, datalog::kPositive))};
-  Fact lhs(BaseFact(datalog::Predicate("canAccess", {"somePerson", "someFile"},
+  Fact lhs({},
+           BaseFact(datalog::Predicate("canAccess", {"somePerson", "someFile"},
                                        datalog::kPositive)));
   SaysAssertion condAssertion = BuildSingleSaysAssertion(
       Principal("TestPrincipal"),
@@ -202,8 +198,9 @@ Program BuildMultiAssertionProgram() {
   // Assertion stating the condition
   SaysAssertion predicateAssertion = BuildSingleSaysAssertion(
       Principal("TestPrincipal"),
-      Assertion(Fact(BaseFact(datalog::Predicate("isEmployee", {"somePerson"},
-                                                 datalog::kPositive)))));
+      Assertion(
+          Fact({}, BaseFact(datalog::Predicate("isEmployee", {"somePerson"},
+                                               datalog::kPositive)))));
 
   // I would love to just write this:
   // return Program({std::move(condAssertion),
@@ -232,8 +229,8 @@ grounded_dummy(dummy_var).
 
 Program BuildQueryProgram() {
   Query testQuery("theTestQuery", Principal("TestSpeaker"),
-                  Fact(BaseFact(datalog::Predicate("anything", {"atAll"},
-                                                   datalog::kPositive))));
+                  Fact({}, BaseFact(datalog::Predicate("anything", {"atAll"},
+                                                       datalog::kPositive))));
   std::vector<Query> query_list = {};
   query_list.push_back(std::move(testQuery));
   return Program({}, std::move(query_list));

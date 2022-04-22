@@ -14,7 +14,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/ir/datalog/fact.h"
+#include "src/ir/datalog/input_relation_fact.h"
 
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
@@ -28,7 +28,7 @@ using testing::ValuesIn;
 
 static const char kIsAccessPathName[] = "isAccessPath";
 
-using IsAccessPathFact = Fact<kIsAccessPathName, Symbol>;
+using IsAccessPathFact = InputRelationFact<kIsAccessPathName, Symbol>;
 
 class IsAccessPathFactTest : public TestWithParam<absl::string_view> {};
 
@@ -57,8 +57,8 @@ class UnitAdtBranch : public SimpleAdt {
 
 static const char kOneOfEachName[] = "oneOfEach";
 
-using OneOfEachFact =
-    Fact<kOneOfEachName, Number, Symbol, Record<Number, Symbol>, SimpleAdt>;
+using OneOfEachFact = InputRelationFact<kOneOfEachName, Number, Symbol,
+                                        Record<Number, Symbol>, SimpleAdt>;
 
 TEST(OneOfEachFactTest, OneOfEachFactTest) {
   EXPECT_EQ(OneOfEachFact(Number(5), Symbol("foo"),
