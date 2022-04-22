@@ -117,6 +117,8 @@ cc_test(
         ":ast",
         ":ast_construction",
         "//src/common/testing:gtest",
+        "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
+        "@absl//absl/strings",
     ],
 )

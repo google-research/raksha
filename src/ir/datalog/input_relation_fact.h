@@ -14,8 +14,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#ifndef SRC_IR_DATALOG_FACT_H_
-#define SRC_IR_DATALOG_FACT_H_
+#ifndef SRC_IR_DATALOG_INPUT_RELATION_FACT_H_
+#define SRC_IR_DATALOG_INPUT_RELATION_FACT_H_
 
 #include <utility>
 
@@ -25,10 +25,15 @@
 
 namespace raksha::ir::datalog {
 
+// A fact that is built to be fed into an input relation for Souffle.
+// Although the `Rule` class can also express a `Fact` by having no RHS, this
+// is explicitly to prepare input to a Souffle program. You can think of the
+// difference between this `Fact` and a `Rule` fact as a difference between
+// data and code.
 template <const char *kRelationName, class... RelationParameterTypes>
-class Fact {
+class InputRelationFact {
  public:
-  Fact(RelationParameterTypes &&...args)
+  InputRelationFact(RelationParameterTypes &&...args)
       : relation_arguments_(std::forward<RelationParameterTypes>(args)...) {}
 
   std::string ToDatalogString() const {
@@ -46,4 +51,4 @@ class Fact {
 
 }  // namespace raksha::ir::datalog
 
-#endif  // SRC_IR_DATALOG_FACT_H_
+#endif  // SRC_IR_DATALOG_INPUT_RELATION_FACT_H_

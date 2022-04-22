@@ -111,6 +111,34 @@ static NumListAndExpectedDatalog kListAndExpectedDatalog[] = {
 INSTANTIATE_TEST_SUITE_P(NumListTest, NumListTest,
                          ValuesIn(kListAndExpectedDatalog));
 
+using NumberSymbolPair = Record<Number, Symbol>;
+using NumberSymbolPairPair = Record<NumberSymbolPair, NumberSymbolPair>;
+
+class NumberSymbolPairPairTest
+    : public TestWithParam<std::tuple<std::tuple<int64_t, absl::string_view>,
+                                      std::tuple<int64_t, absl::string_view>>> {
+};
+
+TEST_P(NumberSymbolPairPairTest, NumberSymbolPairPairTest) {
+  auto const &[pair1, pair2] = GetParam();
+  auto const [number1, symbol1] = pair1;
+  auto const [number2, symbol2] = pair2;
+  NumberSymbolPair number_symbol_pair1 =
+      NumberSymbolPair(Number(number1), Symbol(symbol1));
+  NumberSymbolPair number_symbol_pair2 =
+      NumberSymbolPair(Number(number2), Symbol(symbol2));
+  NumberSymbolPairPair pair_pair(std::move(number_symbol_pair1),
+                                 std::move(number_symbol_pair2));
+  EXPECT_EQ(pair_pair.ToDatalogString(),
+            absl::StrFormat(R"([[%d, "%s"], [%d, "%s"]])", number1, symbol1,
+                            number2, symbol2));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    NumberSymbolPairPairTest, NumberSymbolPairPairTest,
+    Combine(Combine(ValuesIn(kSampleIntegerValues), ValuesIn(kSampleSymbols)),
+            Combine(ValuesIn(kSampleIntegerValues), ValuesIn(kSampleSymbols))));
+
 static constexpr char kNullBranchName[] = "Null";
 static constexpr char kNumberBranchName[] = "Number";
 static constexpr char kAddBranchName[] = "Add";

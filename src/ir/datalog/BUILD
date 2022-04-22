@@ -49,7 +49,7 @@ cc_library(
 
 cc_library(
     name = "fact",
-    hdrs = ["fact.h"],
+    hdrs = ["input_relation_fact.h"],
     deps = [
         ":value",
         "//src/common/logging",
@@ -85,7 +85,7 @@ cc_test(
 
 cc_test(
     name = "fact_test",
-    srcs = ["fact_test.cc"],
+    srcs = ["input_relation_fact_test.cc"],
     deps = [
         ":fact",
         ":value",
