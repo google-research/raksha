@@ -48,7 +48,7 @@ cc_library(
 )
 
 cc_library(
-    name = "fact",
+    name = "input_relation_fact",
     hdrs = ["input_relation_fact.h"],
     deps = [
         ":value",
@@ -84,10 +84,10 @@ cc_test(
 )
 
 cc_test(
-    name = "fact_test",
+    name = "input_relation_fact_test",
     srcs = ["input_relation_fact_test.cc"],
     deps = [
-        ":fact",
+        ":input_relation_fact",
         ":value",
         "//src/common/testing:gtest",
         "@absl//absl/strings",
