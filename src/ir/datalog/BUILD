@@ -65,7 +65,7 @@ cc_library(
         "operation.h",
     ],
     deps = [
-        ":fact",
+        ":input_relation_fact",
         ":value",
         "//src/common/logging",
         "@absl//absl/strings",
@@ -98,7 +98,7 @@ cc_test(
     name = "operation_test",
     srcs = ["operation_test.cc"],
     deps = [
-        ":fact",
+        ":input_relation_fact",
         ":raksha",
         ":value",
         "//src/common/testing:gtest",

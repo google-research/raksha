@@ -18,7 +18,7 @@
 #define SRC_IR_DATALOG_OPERATION_H_
 
 #include "src/ir/datalog/attribute.h"
-#include "src/ir/datalog/fact.h"
+#include "src/ir/datalog/input_relation_fact.h"
 #include "src/ir/datalog/value.h"
 
 namespace raksha::ir::datalog {
@@ -33,7 +33,7 @@ using Operation =
 
 constexpr char kIsOperationRelationName[] = "isOperation";
 
-using IsOperationFact = Fact<kIsOperationRelationName, Operation>;
+using IsOperationFact = InputRelationFact<kIsOperationRelationName, Operation>;
 
 }  // namespace raksha::ir::datalog
 
