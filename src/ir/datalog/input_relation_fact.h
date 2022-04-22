@@ -30,14 +30,16 @@ namespace raksha::ir::datalog {
 // is explicitly to prepare input to a Souffle program. You can think of the
 // difference between this `Fact` and a `Rule` fact as a difference between
 // data and code.
-template <const char *kRelationName, class... RelationParameterTypes>
+template <class... RelationParameterTypes>
 class InputRelationFact {
  public:
   InputRelationFact(RelationParameterTypes &&...args)
       : relation_arguments_(std::forward<RelationParameterTypes>(args)...) {}
 
+  virtual absl::string_view GetRelationName() const = 0;
+
   std::string ToDatalogString() const {
-    return absl::StrFormat(R"(%s(%s).)", kRelationName,
+    return absl::StrFormat(R"(%s(%s).)", GetRelationName(),
                            absl::StrJoin(relation_arguments_, ", ",
                                          [](std::string *str, const auto &arg) {
                                            absl::StrAppend(
