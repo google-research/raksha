@@ -238,5 +238,13 @@ TEST(IntrusivePtrTest, ComparisionAgainstNullPtrs) {
   EXPECT_EQ(null, nullptr);
   EXPECT_EQ(nullptr, null);
 }
+
+TEST(IntrusivePtrBoolConversionTest, IntrusivePtrBoolConversionTest) {
+  RefCountedTypePtr ptr = make_intrusive_ptr<RefCountedType>();
+  EXPECT_TRUE(ptr);
+  RefCountedTypePtr null;
+  EXPECT_FALSE(null);
+}
+
 }  // namespace
 }  // namespace raksha

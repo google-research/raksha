@@ -53,6 +53,9 @@ class intrusive_ptr {
 
   T* operator->() const { return ptr_; }
   T* get() const { return ptr_; }
+  explicit operator bool() const {
+    return ptr_ != nullptr;
+  }
 
  private:
   void Swap(intrusive_ptr<T>& other) {
