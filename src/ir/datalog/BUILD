@@ -33,3 +33,26 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
+
+# This library contains our C++ model of the value types of Souffle.
+cc_library(
+    name = "value",
+    hdrs = [
+        "value.h",
+    ],
+    deps = [
+        "//src/common/logging",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "value_test",
+    srcs = ["value_test.cc"],
+    deps = [
+        ":value",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)
