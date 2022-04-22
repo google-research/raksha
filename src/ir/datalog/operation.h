@@ -17,6 +17,7 @@
 #ifndef SRC_IR_DATALOG_OPERATION_H_
 #define SRC_IR_DATALOG_OPERATION_H_
 
+#include "absl/strings/string_view.h"
 #include "src/ir/datalog/attribute.h"
 #include "src/ir/datalog/input_relation_fact.h"
 #include "src/ir/datalog/value.h"
@@ -31,9 +32,12 @@ using Operation =
     Record<Symbol /*owner*/, Symbol /*operator*/, Symbol /*result*/,
            OperandList /*operands*/, AttributeList /*attributes*/>;
 
-constexpr char kIsOperationRelationName[] = "isOperation";
-
-using IsOperationFact = InputRelationFact<kIsOperationRelationName, Operation>;
+class IsOperationFact : public InputRelationFact<Operation> {
+ public:
+  using InputRelationFact::InputRelationFact;
+  static constexpr absl::string_view relation_name() { return "isOperation"; }
+  absl::string_view GetRelationName() const { return relation_name(); }
+};
 
 }  // namespace raksha::ir::datalog
 
