@@ -26,9 +26,12 @@ using testing::Combine;
 using testing::TestWithParam;
 using testing::ValuesIn;
 
-static const char kIsAccessPathName[] = "isAccessPath";
-
-using IsAccessPathFact = InputRelationFact<kIsAccessPathName, Symbol>;
+class IsAccessPathFact : public InputRelationFact<Symbol> {
+ public:
+  using InputRelationFact::InputRelationFact;
+  static constexpr absl::string_view relation_name() { return "isAccessPath"; }
+  absl::string_view GetRelationName() const override { return relation_name(); }
+};
 
 class IsAccessPathFactTest : public TestWithParam<absl::string_view> {};
 
@@ -55,10 +58,14 @@ class UnitAdtBranch : public SimpleAdt {
   UnitAdtBranch() : SimpleAdt(kUnitName) {}
 };
 
-static const char kOneOfEachName[] = "oneOfEach";
-
-using OneOfEachFact = InputRelationFact<kOneOfEachName, Number, Symbol,
-                                        Record<Number, Symbol>, SimpleAdt>;
+class OneOfEachFact
+    : public InputRelationFact<Number, Symbol, Record<Number, Symbol>,
+                               SimpleAdt> {
+ public:
+  using InputRelationFact::InputRelationFact;
+  static constexpr absl::string_view relation_name() { return "oneOfEach"; }
+  absl::string_view GetRelationName() const override { return relation_name(); }
+};
 
 TEST(OneOfEachFactTest, OneOfEachFactTest) {
   EXPECT_EQ(OneOfEachFact(Number(5), Symbol("foo"),
