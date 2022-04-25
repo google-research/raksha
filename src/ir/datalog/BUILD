@@ -47,10 +47,32 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "input_relation_fact",
+    hdrs = ["input_relation_fact.h"],
+    deps = [
+        ":value",
+        "//src/common/logging",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
 cc_test(
     name = "value_test",
     srcs = ["value_test.cc"],
     deps = [
+        ":value",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "input_relation_fact_test",
+    srcs = ["input_relation_fact_test.cc"],
+    deps = [
+        ":input_relation_fact",
         ":value",
         "//src/common/testing:gtest",
         "@absl//absl/strings",
