@@ -29,62 +29,73 @@
 namespace raksha::ir::auth_logic {
 std::vector<std::string> binary_operations = {"<", ">", "=", "!=", "<=", ">="};
 
-std::string ToString(datalog::Predicate predicate) {
-  if (std::find(binary_operations.begin(), binary_operations.end(),
-                predicate.name()) != binary_operations.end()) {
-    return absl::StrCat(predicate.args().front(), " ", predicate.name(), " ",
-                        predicate.args().back());
-  }
-  return absl::StrCat(predicate.sign() == datalog::Sign::kNegated ? "!" : "",
-                      predicate.name(), "(",
-                      absl::StrJoin(predicate.args(), ", "), ")");
-}
+using AstNodeVariantType = std::variant<datalog::Predicate, BaseFact, Fact,
+                                        ConditionalAssertion, Assertion>;
 
-std::string ToString(BaseFact basefact) {
+std::string ToString(AstNodeVariantType Node) {
   return std::visit(
       raksha::utils::overloaded{
-          [](datalog::Predicate predicate) { return ToString(predicate); },
-          [](Attribute attribute) {
-            return absl::StrJoin(
-                {attribute.principal().name(), ToString(attribute.predicate())},
-                " ");
+          [](datalog::Predicate predicate) {
+            if (std::find(binary_operations.begin(), binary_operations.end(),
+                          predicate.name()) != binary_operations.end()) {
+              return absl::StrCat(predicate.args().front(), " ",
+                                  predicate.name(), " ",
+                                  predicate.args().back());
+            }
+            return absl::StrCat(
+                predicate.sign() == datalog::Sign::kNegated ? "!" : "",
+                predicate.name(), "(", absl::StrJoin(predicate.args(), ", "),
+                ")");
           },
-          [](CanActAs can_act_as) {
-            return absl::StrJoin({can_act_as.left_principal().name(),
-                                  can_act_as.right_principal().name()},
-                                 " canActAs ");
+          [](BaseFact basefact) {
+            return std::visit(raksha::utils::overloaded{
+                                  [](datalog::Predicate predicate) {
+                                    return ToString(predicate);
+                                  },
+                                  [](Attribute attribute) {
+                                    return absl::StrJoin(
+                                        {attribute.principal().name(),
+                                         ToString(attribute.predicate())},
+                                        " ");
+                                  },
+                                  [](CanActAs can_act_as) {
+                                    return absl::StrJoin(
+                                        {can_act_as.left_principal().name(),
+                                         can_act_as.right_principal().name()},
+                                        " canActAs ");
+                                  }},
+                              basefact.GetValue());
+          },
+          [](Fact fact) {
+            if (fact.delegation_chain().empty()) {
+              return ToString(fact.base_fact());
+            }
+            std::string cansay_string = "";
+            for (const Principal& delegatees : fact.delegation_chain()) {
+              cansay_string =
+                  absl::StrJoin({delegatees.name(), cansay_string}, " canSay ");
+            }
+            return absl::StrJoin({cansay_string, ToString(fact.base_fact())},
+                                 " ");
+          },
+          [](ConditionalAssertion conditional_assertion) {
+            std::string lhs = ToString(conditional_assertion.lhs());
+            std::vector<std::string> rhs;
+            for (const BaseFact& base_fact : conditional_assertion.rhs()) {
+              rhs.push_back(ToString(base_fact));
+            }
+            return absl::StrJoin({lhs, absl::StrJoin(rhs, ",")}, " :- ");
+          },
+          [](Assertion assertion) {
+            return std::visit(
+                raksha::utils::overloaded{
+                    [](Fact fact) { return ToString(fact); },
+                    [](ConditionalAssertion conditional_assertion) {
+                      return ToString(conditional_assertion);
+                    }},
+                assertion.GetValue());
           }},
-      basefact.GetValue());
-}
-
-std::string ToString(Fact fact) {
-  if (fact.delegation_chain().empty()) {
-    return ToString(fact.base_fact());
-  }
-  std::string cansay_string = "";
-  for (const Principal& delegatees : fact.delegation_chain()) {
-    cansay_string =
-        absl::StrJoin({delegatees.name(), cansay_string}, " canSay ");
-  }
-  return absl::StrJoin({cansay_string, ToString(fact.base_fact())}, " ");
-}
-
-std::string ToString(ConditionalAssertion conditional_assertion) {
-  std::string lhs = ToString(conditional_assertion.lhs());
-  std::vector<std::string> rhs;
-  for (const BaseFact& base_fact : conditional_assertion.rhs()) {
-    rhs.push_back(ToString(base_fact));
-  }
-  return absl::StrJoin({lhs, absl::StrJoin(rhs, ",")}, " :- ");
-}
-
-std::string ToString(Assertion assertion) {
-  return std::visit(
-      raksha::utils::overloaded{[](Fact fact) { return ToString(fact); },
-                                [](ConditionalAssertion conditional_assertion) {
-                                  return ToString(conditional_assertion);
-                                }},
-      assertion.GetValue());
+      Node);
 }
 
 }  // namespace raksha::ir::auth_logic

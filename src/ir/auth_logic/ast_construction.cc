@@ -107,6 +107,10 @@ static BaseFact ConstructRvalue(
                                      datalog::Sign::kPositive));
 }
 
+// Fact corresponds to a delagation chain of principal and a Basefact.
+//<Princiapl> canSay <Principal> canSay <Principal> ...<BaseFact>
+// delegation_chain list is populated by recursion and when called from
+// outside(SaysAssertion or Queries) is an empty list
 static Fact ConstructFact(std::forward_list<Principal> delegation_chain,
                           AuthLogicParser::FactContext& fact_context) {
   if (auto* flat_fact_fact_context =
