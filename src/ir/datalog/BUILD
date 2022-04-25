@@ -58,8 +58,10 @@ cc_library(
     ],
 )
 
+# The interface to the Raksha analysis, as described by the C++ version of the
+# Datalog relations that are input/output relations.
 cc_library(
-    name = "raksha",
+    name = "raksha_relation_interface",
     hdrs = [
         "attribute.h",
         "operation.h",
@@ -99,7 +101,7 @@ cc_test(
     srcs = ["operation_test.cc"],
     deps = [
         ":input_relation_fact",
-        ":raksha",
+        ":raksha_relation_interface",
         ":value",
         "//src/common/testing:gtest",
         "@absl//absl/strings",

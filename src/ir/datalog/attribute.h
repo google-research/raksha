@@ -19,12 +19,15 @@
 
 #include <memory>
 
+#include "absl/strings/string_view.h"
 #include "src/ir/datalog/value.h"
 
 namespace raksha::ir::datalog {
 
-constexpr char kStringAttributePayloadName[] = "StringAttributePayload";
-constexpr char kNumberAttributePayloadName[] = "NumberAttributePayload";
+inline constexpr absl::string_view kStringAttributePayloadName =
+    "StringAttributePayload";
+inline constexpr absl::string_view kNumberAttributePayloadName =
+    "NumberAttributePayload";
 
 class AttributePayload : public Adt {
  public:
