@@ -18,12 +18,15 @@ cc_library(
     name = "datalog_lowering_visitor",
     hdrs = ["datalog_lowering_visitor.h"],
     deps = [
-        ":fact",
-        ":raksha",
-        ":value",
         "//src/common/logging",
         "//src/ir:module",
         "//src/ir:operator",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+        "//src/ir/attributes:string_attribute",
+        "//src/ir/datalog:input_relation_fact",
+        "//src/ir/datalog:raksha",
+        "//src/ir/datalog:value",
     ],
 )
 
@@ -32,9 +35,9 @@ cc_test(
     srcs = ["datalog_lowering_visitor_test.cc"],
     deps = [
         ":datalog_lowering_visitor",
-        ":raksha",
-        ":value",
         "//src/common/testing:gtest",
+        "//src/ir/datalog:raksha",
+        "//src/ir/datalog:value",
         "@absl//absl/strings",
     ],
 )

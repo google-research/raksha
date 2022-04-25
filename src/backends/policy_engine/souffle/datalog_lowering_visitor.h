@@ -1,32 +1,35 @@
-#ifndef SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
-#define SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
+#ifndef SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
+#define SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
 
-#include "external/glog/src/glog/log_severity.h"
-#include "src/backends/policy_enforcement/souffle/operation.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
+#include "src/ir/datalog/operation.h"
 #include "src/ir/ir_visitor.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
 
-namespace raksha::backends::policy_enforcement::souffle {
+namespace raksha::backends::policy_engine::souffle {
 
 // A class containing the Datalog facts produced by the IR translator in
 // structured (ie, C++ objects, not strings) form.
 class RakshaDatalogFacts {
  public:
-  void AddIsOperationFact(IsOperationFact fact) {
+  void AddIsOperationFact(ir::datalog::IsOperationFact fact) {
     is_operation_facts_.push_back(std::move(fact));
   }
 
   std::string ToDatalogString() const {
-    return absl::StrJoin(is_operation_facts_, "\n");
+    return absl::StrJoin(
+        is_operation_facts_, "\n",
+        [](std::string *out, const ir::datalog::IsOperationFact &arg) {
+          absl::StrAppend(out, arg.ToDatalogString());
+        });
   }
 
  private:
-  std::vector<IsOperationFact> is_operation_facts_;
+  std::vector<ir::datalog::IsOperationFact> is_operation_facts_;
 };
 
 class DatalogLoweringVisitor : public ir::IRVisitor<DatalogLoweringVisitor> {
@@ -48,43 +51,53 @@ class DatalogLoweringVisitor : public ir::IRVisitor<DatalogLoweringVisitor> {
     absl::string_view op_name = op.name();
 
     const ir::ValueList &ir_operand_list = operation.inputs();
-    OperandList operand_list = RangeToDatalogList<OperandList>(
-        ir_operand_list.begin(), ir_operand_list.end());
+    ir::datalog::OperandList operand_list =
+        RangeToDatalogList<ir::datalog::OperandList>(ir_operand_list.begin(),
+                                                     ir_operand_list.end());
     const ir::NamedAttributeMap &ir_attr_map = operation.attributes();
-    AttributeList attribute_list = RangeToDatalogList<AttributeList>(
-        ir_attr_map.begin(), ir_attr_map.end());
+    ir::datalog::AttributeList attribute_list =
+        RangeToDatalogList<ir::datalog::AttributeList>(ir_attr_map.begin(),
+                                                       ir_attr_map.end());
 
-    Operation datalog_operation = Operation(
-        Symbol(kUnknownPrincipal), Symbol(op_name),
-        Symbol(ir::value::OperationResult(operation, kDefaultOutputName)
-                   .ToString(ssa_names_)),
+    ir::datalog::Operation datalog_operation = ir::datalog::Operation(
+        ir::datalog::Symbol(kUnknownPrincipal), ir::datalog::Symbol(op_name),
+        ir::datalog::Symbol(
+            ir::value::OperationResult(operation, kDefaultOutputName)
+                .ToString(ssa_names_)),
         std::move(operand_list), std::move(attribute_list));
     datalog_facts_.AddIsOperationFact(
-        IsOperationFact(std::move(datalog_operation)));
+        ir::datalog::IsOperationFact(std::move(datalog_operation)));
   }
 
-  RakshaDatalogFacts datalog_facts() { return datalog_facts_; }
+  const RakshaDatalogFacts &datalog_facts() { return datalog_facts_; }
 
  private:
-  AttributePayload GetPayloadForAttribute(ir::Attribute attr) const {
+  ir::datalog::AttributePayload GetPayloadForAttribute(
+      ir::Attribute attr) const {
     if (intrusive_ptr<const ir::Int64Attribute> int_attr =
             attr.GetIf<ir::Int64Attribute>()) {
-      return NumberAttributePayload(Number(int_attr->value()));
+      return ir::datalog::NumberAttributePayload(
+          ir::datalog::Number(int_attr->value()));
     } else if (intrusive_ptr<const ir::StringAttribute> string_attr =
                    attr.GetIf<ir::StringAttribute>()) {
-      return StringAttributePayload(Symbol(string_attr->value()));
+      return ir::datalog::StringAttributePayload(
+          ir::datalog::Symbol(string_attr->value()));
     } else {
       LOG(FATAL) << "Unknown attribute kind.";
     }
+    // Unreachable, just to placate compiler.
+    return ir::datalog::StringAttributePayload(ir::datalog::Symbol(""));
   }
 
-  Attribute TranslateIrNodeToDatalog(
+  ir::datalog::Attribute TranslateIrNodeToDatalog(
       std::pair<std::string, ir::Attribute> name_attr_pair) {
-    const auto &[attr_name, attr] = name_attr_pair;
+    return ir::datalog::Attribute(
+        ir::datalog::Symbol(std::move(name_attr_pair.first)),
+        GetPayloadForAttribute(std::move(name_attr_pair.second)));
   }
 
-  Symbol TranslateIrNodeToDatalog(ir::Value value) {
-    return Symbol(value.ToString(ssa_names_));
+  ir::datalog::Symbol TranslateIrNodeToDatalog(ir::Value value) {
+    return ir::datalog::Symbol(value.ToString(ssa_names_));
   }
 
   // Turn a range of IR nodes in a C++ container into a Datalog-style linked
@@ -103,6 +116,6 @@ class DatalogLoweringVisitor : public ir::IRVisitor<DatalogLoweringVisitor> {
   RakshaDatalogFacts datalog_facts_;
 };
 
-}  // namespace raksha::backends::policy_enforcement::souffle
+}  // namespace raksha::backends::policy_engine::souffle
 
-#endif  // SRC_BACKENDS_POLICY_ENFORCEMENT_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
+#endif  // SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
