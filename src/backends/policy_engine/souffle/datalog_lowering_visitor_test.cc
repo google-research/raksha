@@ -18,6 +18,7 @@
 
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/block_builder.h"
 #include "src/ir/datalog/value.h"
 #include "src/ir/module.h"
 
@@ -89,25 +90,154 @@ static const IrAndDatalogOperationPairs kIrAndDatalogOperations[] = {
 INSTANTIATE_TEST_SUITE_P(IrOperationLoweringTest, IrOperationLoweringTest,
                          ValuesIn(kIrAndDatalogOperations));
 
-struct ModuleBuildingFnAndExpectedRakshaDatalogFacts {
-  std::function<ir::Module()> module_building_fn;
-  intrusive_ptr<RakshaDatalogFacts> expected_raksha_datalog_facts;
+struct ModuleAndExpectedRakshaDatalogFactBuilders {
+  std::function<ir::Module()> module_fn;
+  std::function<RakshaDatalogFacts()> facts_fn;
 };
 
-class DatalogLoweringVisitModuleTest : public
-    TestWithParam<ModuleBuildingFnAndExpectedRakshaDatalogFacts> {};
+class DatalogLoweringVisitModuleTest
+    : public TestWithParam<ModuleAndExpectedRakshaDatalogFactBuilders> {};
 
-TEST_P(DatalogLoweringVisitOperationTest, DatalogLoweringVisitOperationTest) {
-  const auto &[module, facts] = GetParam();
+TEST_P(DatalogLoweringVisitModuleTest, DatalogLoweringVisitModuleTest) {
+  const auto [module_fn, facts_fn] = GetParam();
+  ir::Module module = module_fn();
+  RakshaDatalogFacts raksha_datalog_facts = facts_fn();
   ir::SsaNames ssa_names;
   DatalogLoweringVisitor visitor(ssa_names);
   module.Accept(visitor);
-  EXPECT_EQ(visitor.datalog_facts().ToDatalogString(), facts.ToDatalogString());
+  EXPECT_EQ(visitor.datalog_facts().ToDatalogString(),
+            raksha_datalog_facts.ToDatalogString());
 }
 
-static const ModuleAndExpectedRakshaDatalogFacts
-kModuleAndExpectedRakshaDatalogFacts[] = {
-    { .module = }
-};
+static const ModuleAndExpectedRakshaDatalogFactBuilders
+    kModuleAndExpectedRakshaDatalogFacts[] = {
+        // Empty module test.
+        {.module_fn = []() { return ir::Module(); },
+         .facts_fn = []() { return RakshaDatalogFacts(); }},
+        // Test containing a single passthrough operation.
+        {.module_fn =
+             []() {
+               ir::BlockBuilder block_builder;
+               block_builder.AddOperation(kMergeOpOperator, {},
+                                          {ir::Value(ir::value::Any())});
+               ir::Module module;
+               module.AddBlock(block_builder.build());
+               return module;
+             },
+         .facts_fn =
+             []() {
+               RakshaDatalogFacts facts;
+               facts.AddIsOperationFact(
+                   ir::datalog::IsOperationFact(ir::datalog::Operation(
+                       ir::datalog::Symbol("UNKNOWN"),
+                       ir::datalog::Symbol("sql.MergeOp"),
+                       ir::datalog::Symbol("%0.out"),
+                       ir::datalog::OperandList(ir::datalog::Symbol("<<ANY>>"),
+                                                ir::datalog::OperandList()),
+                       ir::datalog::AttributeList())));
+               return facts;
+             }},
+        // Show two passthroughs chained together.
+        {.module_fn =
+             []() {
+               ir::BlockBuilder block_builder;
+               const ir::Operation &operation = block_builder.AddOperation(
+                   kMergeOpOperator, {}, {ir::Value(ir::value::Any())});
+               block_builder.AddOperation(
+                   kMergeOpOperator, {},
+                   {ir::Value(ir::value::OperationResult(operation, "out"))});
+               ir::Module module;
+               module.AddBlock(block_builder.build());
+               return module;
+             },
+         .facts_fn =
+             []() {
+               RakshaDatalogFacts facts;
+               facts.AddIsOperationFact(
+                   ir::datalog::IsOperationFact(ir::datalog::Operation(
+                       ir::datalog::Symbol("UNKNOWN"),
+                       ir::datalog::Symbol("sql.MergeOp"),
+                       ir::datalog::Symbol("%0.out"),
+                       ir::datalog::OperandList(ir::datalog::Symbol("<<ANY>>"),
+                                                ir::datalog::OperandList()),
+                       ir::datalog::AttributeList())));
+               facts.AddIsOperationFact(
+                   ir::datalog::IsOperationFact(ir::datalog::Operation(
+                       ir::datalog::Symbol("UNKNOWN"),
+                       ir::datalog::Symbol("sql.MergeOp"),
+                       ir::datalog::Symbol("%1.out"),
+                       ir::datalog::OperandList(ir::datalog::Symbol("%0.out"),
+                                                ir::datalog::OperandList()),
+                       ir::datalog::AttributeList())));
+               return facts;
+             }},
+        // Show a diamond of operations.
+        {.module_fn =
+             []() {
+               ir::BlockBuilder block_builder;
+               const ir::Operation &start_operation =
+                   block_builder.AddOperation(kMergeOpOperator, {},
+                                              {ir::Value(ir::value::Any())});
+               const ir::Operation &left_operation = block_builder.AddOperation(
+                   kMergeOpOperator, {},
+                   {ir::Value(
+                       ir::value::OperationResult(start_operation, "out"))});
+               const ir::Operation &right_operation =
+                   block_builder.AddOperation(
+                       kMergeOpOperator, {},
+                       {ir::Value(ir::value::OperationResult(start_operation,
+                                                             "out"))});
+               block_builder.AddOperation(kMergeOpOperator, {},
+                                          {ir::Value(ir::value::OperationResult(
+                                               left_operation, "out")),
+                                           ir::Value(ir::value::OperationResult(
+                                               right_operation, "out"))});
+               ir::Module module;
+               module.AddBlock(block_builder.build());
+               return module;
+             },
+         .facts_fn =
+             []() {
+               RakshaDatalogFacts facts;
+               facts.AddIsOperationFact(
+                   ir::datalog::IsOperationFact(ir::datalog::Operation(
+                       ir::datalog::Symbol("UNKNOWN"),
+                       ir::datalog::Symbol("sql.MergeOp"),
+                       ir::datalog::Symbol("%0.out"),
+                       ir::datalog::OperandList(ir::datalog::Symbol("<<ANY>>"),
+                                                ir::datalog::OperandList()),
+                       ir::datalog::AttributeList())));
+               facts.AddIsOperationFact(
+                   ir::datalog::IsOperationFact(ir::datalog::Operation(
+                       ir::datalog::Symbol("UNKNOWN"),
+                       ir::datalog::Symbol("sql.MergeOp"),
+                       ir::datalog::Symbol("%1.out"),
+                       ir::datalog::OperandList(ir::datalog::Symbol("%0.out"),
+                                                ir::datalog::OperandList()),
+                       ir::datalog::AttributeList())));
+               facts.AddIsOperationFact(
+                   ir::datalog::IsOperationFact(ir::datalog::Operation(
+                       ir::datalog::Symbol("UNKNOWN"),
+                       ir::datalog::Symbol("sql.MergeOp"),
+                       ir::datalog::Symbol("%2.out"),
+                       ir::datalog::OperandList(ir::datalog::Symbol("%0.out"),
+                                                ir::datalog::OperandList()),
+                       ir::datalog::AttributeList())));
+               facts.AddIsOperationFact(ir::datalog::IsOperationFact(
+                   ir::datalog::Operation(ir::datalog::Symbol("UNKNOWN"),
+                                          ir::datalog::Symbol("sql.MergeOp"),
+                                          ir::datalog::Symbol("%3.out"),
+                                          ir::datalog::OperandList(
+                                              ir::datalog::Symbol("%1.out"),
+                                              ir::datalog::OperandList(
+                                                  ir::datalog::Symbol("%2.out"),
+                                                  ir::datalog::OperandList())),
+                                          ir::datalog::AttributeList())));
+               return facts;
+             }}};
+
+INSTANTIATE_TEST_SUITE_P(DatalogLoweringVisitModuleTest,
+                         DatalogLoweringVisitModuleTest,
+                         ValuesIn(kModuleAndExpectedRakshaDatalogFacts));
 
 }  // namespace raksha::backends::policy_engine::souffle

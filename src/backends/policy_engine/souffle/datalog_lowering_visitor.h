@@ -9,6 +9,7 @@
 #include "src/ir/ir_visitor.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
+#include "src/ir/ir_traversing_visitor.h"
 
 namespace raksha::backends::policy_engine::souffle {
 
@@ -32,18 +33,14 @@ class RakshaDatalogFacts {
   std::vector<ir::datalog::IsOperationFact> is_operation_facts_;
 };
 
-class DatalogLoweringVisitor : public ir::IRVisitor<DatalogLoweringVisitor> {
+ class DatalogLoweringVisitor : public ir::IRTraversingVisitor<DatalogLoweringVisitor> {
  public:
   // TODO: Dedup this from `DecoderContext` in the SQL frontend.
   static constexpr absl::string_view kDefaultOutputName = "out";
   DatalogLoweringVisitor(ir::SsaNames &ssa_names) : ssa_names_(ssa_names) {}
   virtual ~DatalogLoweringVisitor() {}
 
-  void Visit(const ir::Block &) override {}
-
-  void Visit(const ir::Module &) override {}
-
-  void Visit(const ir::Operation &operation) override {
+  void PreVisit(const ir::Operation &operation) override {
     // We currently don't have any owner information when outputting IR. We
     // don't need it yet, really, but we do need to output something.
     constexpr absl::string_view kUnknownPrincipal = "UNKNOWN";
@@ -59,7 +56,7 @@ class DatalogLoweringVisitor : public ir::IRVisitor<DatalogLoweringVisitor> {
         RangeToDatalogList<ir::datalog::AttributeList>(ir_attr_map.begin(),
                                                        ir_attr_map.end());
 
-    ir::datalog::Operation datalog_operation = ir::datalog::Operation(
+    ir::datalog::Operation datalog_operation(
         ir::datalog::Symbol(kUnknownPrincipal), ir::datalog::Symbol(op_name),
         ir::datalog::Symbol(
             ir::value::OperationResult(operation, kDefaultOutputName)
