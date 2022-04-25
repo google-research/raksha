@@ -29,7 +29,7 @@ using testing::ValuesIn;
 class IsAccessPathFact : public InputRelationFact<Symbol> {
  public:
   using InputRelationFact::InputRelationFact;
-  ~IsAccessPathFact() {}
+  virtual ~IsAccessPathFact() {}
   static constexpr absl::string_view relation_name() { return "isAccessPath"; }
   absl::string_view GetRelationName() const override { return relation_name(); }
 };
@@ -64,7 +64,7 @@ class OneOfEachFact
                                SimpleAdt> {
  public:
   using InputRelationFact::InputRelationFact;
-  ~OneOfEachFact() {}
+  virtual ~OneOfEachFact() {}
   static constexpr absl::string_view relation_name() { return "oneOfEach"; }
   absl::string_view GetRelationName() const override { return relation_name(); }
 };
