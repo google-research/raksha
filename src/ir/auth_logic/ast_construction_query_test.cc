@@ -15,23 +15,18 @@
 //
 //-------------------------------------------------------------------------------
 
-#include "src/ir/auth_logic/ast_construction.h"
-
 #include <iostream>
 #include <memory>
 #include <optional>
 #include <stdexcept>
-#include <string>
-#include <utility>
-#include <variant>
-#include <vector>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/overloaded.h"
 #include "src/ir/auth_logic/ast.h"
-#include "src/ir/datalog/program.h"
+#include "src/ir/auth_logic/ast_construction.h"
+#include "src/ir/auth_logic/ast_string.h"
 
 namespace raksha::ir::auth_logic {
 
@@ -78,9 +73,10 @@ std::string ToString(Fact fact) {
   return absl::StrJoin({cansay_string, ToString(fact.base_fact())}, " ");
 }
 
-class AstConstructionTest : public testing::TestWithParam<QueryTestData> {};
+class QueryAstConstructionTest : public testing::TestWithParam<QueryTestData> {
+};
 
-TEST_P(AstConstructionTest, SimpleTestWithQueryProgram) {
+TEST_P(QueryAstConstructionTest, SimpleTestWithQueryProgram) {
   const auto& [input_text, query_name, principal, fact] = GetParam();
   Program prog_out = ParseProgram(input_text);
   ASSERT_EQ(prog_out.queries().size(), 1);
@@ -91,7 +87,7 @@ TEST_P(AstConstructionTest, SimpleTestWithQueryProgram) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    AstConstructionTest, AstConstructionTest,
+    QueryAstConstructionTest, QueryAstConstructionTest,
     testing::Values(
         QueryTestData({R"(may_notifierA = query "UserA" says mayA(NotifierA))",
                        "may_notifierA", R"("UserA")", "mayA(NotifierA)"}),

@@ -108,15 +108,46 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "ast_string",
+    hdrs = [
+        "ast_string.h",
+    ],
+    deps = [
+        ":ast",
+        "//src/common/utils:overloaded",
+        "//src/ir/datalog:program",
+        "@absl//absl/strings",
+    ],
+)
+
 cc_test(
-    name = "ast_construction_test",
-    srcs = ["ast_construction_test.cc"],
+    name = "ast_construction_query_test",
+    srcs = ["ast_construction_query_test.cc"],
     copts = ["-fexceptions"],
     features = ["-use_header_modules"],
     deps = [
         ":ast",
         ":ast_construction",
+        ":ast_string",
         "//src/common/testing:gtest",
+        "//src/common/utils:overloaded",
+        "//src/ir/datalog:program",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "ast_construction_says_assertion_test",
+    srcs = ["ast_construction_says_assertion_test.cc"],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    deps = [
+        ":ast",
+        ":ast_construction",
+        ":ast_string",
+        "//src/common/testing:gtest",
+        "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
         "@absl//absl/strings",
