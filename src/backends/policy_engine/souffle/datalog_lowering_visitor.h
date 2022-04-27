@@ -35,7 +35,6 @@ class DatalogLoweringVisitor
   // We currently don't have any owner information when outputting IR. We don't
   // need it yet, really, but we do need to output something.
   static constexpr absl::string_view kDefaultPrincipal = "sql";
-  virtual ~DatalogLoweringVisitor() {}
 
   void PreVisit(const ir::Operation &operation) override;
 
