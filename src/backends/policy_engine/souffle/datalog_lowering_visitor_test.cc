@@ -42,8 +42,7 @@ class IrOperationLoweringTest
 TEST_P(IrOperationLoweringTest, IrOperationLoweringTest) {
   const auto [ir_operation, datalog_is_operation] = GetParam();
 
-  ir::SsaNames ssa_names;
-  DatalogLoweringVisitor datalog_lowering_visitor(ssa_names);
+  DatalogLoweringVisitor datalog_lowering_visitor;
   ir_operation->Accept(datalog_lowering_visitor);
   const RakshaDatalogFacts &facts = datalog_lowering_visitor.datalog_facts();
   EXPECT_EQ(facts.ToDatalogString(), datalog_is_operation->ToDatalogString());
@@ -102,8 +101,7 @@ TEST_P(DatalogLoweringVisitModuleTest, DatalogLoweringVisitModuleTest) {
   const auto [module_fn, facts_fn] = GetParam();
   ir::Module module = module_fn();
   RakshaDatalogFacts raksha_datalog_facts = facts_fn();
-  ir::SsaNames ssa_names;
-  DatalogLoweringVisitor visitor(ssa_names);
+  DatalogLoweringVisitor visitor;
   module.Accept(visitor);
   EXPECT_EQ(visitor.datalog_facts().ToDatalogString(),
             raksha_datalog_facts.ToDatalogString());

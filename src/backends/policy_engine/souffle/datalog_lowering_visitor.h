@@ -35,7 +35,6 @@ class DatalogLoweringVisitor
   // TODO: Dedup this from `DecoderContext` in the SQL frontend.
   static constexpr absl::string_view kDefaultOutputName = "out";
   static constexpr absl::string_view kDefaultPrincipal = "sql";
-  DatalogLoweringVisitor(ir::SsaNames &ssa_names) : ssa_names_(ssa_names) {}
   virtual ~DatalogLoweringVisitor() {}
 
   void PreVisit(const ir::Operation &operation) override;
@@ -43,7 +42,7 @@ class DatalogLoweringVisitor
   const RakshaDatalogFacts &datalog_facts() { return datalog_facts_; }
 
  private:
-  ir::SsaNames &ssa_names_;
+  ir::SsaNames ssa_names_;
   RakshaDatalogFacts datalog_facts_;
 };
 
