@@ -34,6 +34,7 @@ class DatalogLoweringVisitor
  public:
   // TODO: Dedup this from `DecoderContext` in the SQL frontend.
   static constexpr absl::string_view kDefaultOutputName = "out";
+  static constexpr absl::string_view kDefaultPrincipal = "sql";
   DatalogLoweringVisitor(ir::SsaNames &ssa_names) : ssa_names_(ssa_names) {}
   virtual ~DatalogLoweringVisitor() {}
 
