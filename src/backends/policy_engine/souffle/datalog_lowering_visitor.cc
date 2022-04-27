@@ -44,9 +44,8 @@ static DatalogAttributePayload GetPayloadForAttribute(ir::Attribute attr,
     return DatalogNumberAttributePayload(DatalogNumber(int_attr->value()));
   } else if (auto string_attr = attr.GetIf<ir::StringAttribute>()) {
     return DatalogStringAttributePayload(DatalogSymbol(string_attr->value()));
-  } else {
-    LOG(FATAL) << "Unknown attribute kind.";
   }
+  LOG(FATAL) << "Unknown attribute kind.";
   // Unreachable, just to placate compiler.
   return DatalogStringAttributePayload(DatalogSymbol(""));
 }
