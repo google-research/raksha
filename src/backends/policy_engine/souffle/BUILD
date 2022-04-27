@@ -23,6 +23,7 @@ cc_library(
     ],
     deps = [
         "//src/common/logging",
+        "//src/frontends/sql:decoder_context",
         "//src/ir:ir_traversing_visitor",
         "//src/ir:module",
         "//src/ir:operator",

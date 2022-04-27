@@ -17,6 +17,7 @@
 #include "src/backends/policy_engine/souffle/datalog_lowering_visitor.h"
 
 #include "src/common/logging/logging.h"
+#include "src/frontends/sql/decoder_context.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
@@ -77,8 +78,6 @@ static ListT RangeToDatalogList(IrNodeIter ir_node_list_begin,
 }
 
 void DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
-  // We currently don't have any owner information when outputting IR. We
-  // don't need it yet, really, but we do need to output something.
   const ir::Operator &op = operation.op();
   absl::string_view op_name = op.name();
 
@@ -92,8 +91,10 @@ void DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
 
   DatalogOperation datalog_operation(
       DatalogSymbol(kDefaultPrincipal), DatalogSymbol(op_name),
-      DatalogSymbol(ir::value::OperationResult(operation, kDefaultOutputName)
-                        .ToString(ssa_names_)),
+      DatalogSymbol(
+          ir::value::OperationResult(
+              operation, frontends::sql::DecoderContext::kDefaultOutputName)
+              .ToString(ssa_names_)),
       std::move(operand_list), std::move(attribute_list));
   datalog_facts_.AddIsOperationFact(
       DatalogIsOperationFact(std::move(datalog_operation)));

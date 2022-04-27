@@ -32,8 +32,8 @@ namespace raksha::backends::policy_engine::souffle {
 class DatalogLoweringVisitor
     : public ir::IRTraversingVisitor<DatalogLoweringVisitor> {
  public:
-  // TODO: Dedup this from `DecoderContext` in the SQL frontend.
-  static constexpr absl::string_view kDefaultOutputName = "out";
+  // We currently don't have any owner information when outputting IR. We don't
+  // need it yet, really, but we do need to output something.
   static constexpr absl::string_view kDefaultPrincipal = "sql";
   virtual ~DatalogLoweringVisitor() {}
 

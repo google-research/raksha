@@ -50,6 +50,8 @@ cc_library(
     visibility = [
         ":__subpackages__",
         "//:__pkg__",
+        # Make this visible to the datalog lowering visitor so it can use the default output value constant.
+        "//src/backends/policy_engine/souffle:__pkg__",
     ],
     deps = [
         "//src/common/utils:map_iter",
