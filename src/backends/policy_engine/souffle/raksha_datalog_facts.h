@@ -14,10 +14,9 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#ifndef SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
-#define SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
+#ifndef SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_RAKSHA_DATALOG_FACTS_H_
+#define SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_RAKSHA_DATALOG_FACTS_H_
 
-#include "src/backends/policy_engine/souffle/raksha_datalog_facts.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/attributes/int_attribute.h"
@@ -29,23 +28,26 @@
 
 namespace raksha::backends::policy_engine::souffle {
 
-class DatalogLoweringVisitor
-    : public ir::IRTraversingVisitor<DatalogLoweringVisitor> {
+// A class containing the Datalog facts produced by the IR translator in
+// structured (ie, C++ objects, not strings) form.
+class RakshaDatalogFacts {
  public:
-  // TODO: Dedup this from `DecoderContext` in the SQL frontend.
-  static constexpr absl::string_view kDefaultOutputName = "out";
-  DatalogLoweringVisitor(ir::SsaNames &ssa_names) : ssa_names_(ssa_names) {}
-  virtual ~DatalogLoweringVisitor() {}
+  void AddIsOperationFact(ir::datalog::IsOperationFact fact) {
+    is_operation_facts_.push_back(std::move(fact));
+  }
 
-  void PreVisit(const ir::Operation &operation) override;
-
-  const RakshaDatalogFacts &datalog_facts() { return datalog_facts_; }
+  std::string ToDatalogString() const {
+    return absl::StrJoin(
+        is_operation_facts_, "\n",
+        [](std::string *out, const ir::datalog::IsOperationFact &arg) {
+          absl::StrAppend(out, arg.ToDatalogString());
+        });
+  }
 
  private:
-  ir::SsaNames &ssa_names_;
-  RakshaDatalogFacts datalog_facts_;
+  std::vector<ir::datalog::IsOperationFact> is_operation_facts_;
 };
 
 }  // namespace raksha::backends::policy_engine::souffle
 
-#endif  // SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
+#endif  // SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_RAKSHA_DATALOG_FACTS_H_

@@ -16,7 +16,11 @@
 
 cc_library(
     name = "datalog_lowering_visitor",
-    hdrs = ["datalog_lowering_visitor.h"],
+    srcs = ["datalog_lowering_visitor.cc"],
+    hdrs = [
+        "datalog_lowering_visitor.h",
+        "raksha_datalog_facts.h",
+    ],
     deps = [
         "//src/common/logging",
         "//src/ir:ir_traversing_visitor",
