@@ -80,6 +80,25 @@ cc_test(
 )
 
 cc_library(
+    name = "refct_ptr",
+    hdrs = ["refct_ptr.h"],
+    deps = [
+        ":intrusive_ptr",
+        ":ref_counted",
+    ],
+)
+
+cc_test(
+    name = "refct_ptr_test",
+    srcs = ["refct_ptr_test.cc"],
+    deps = [
+        ":refct_ptr",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "overloaded",
     hdrs = ["overloaded.h"],
     deps = [],
