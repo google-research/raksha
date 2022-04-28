@@ -29,8 +29,9 @@
 namespace raksha::ir::auth_logic {
 std::vector<std::string> binary_operations = {"<", ">", "=", "!=", "<=", ">="};
 
-using AstNodeVariantType = std::variant<datalog::Predicate, BaseFact, Fact,
-                                        ConditionalAssertion, Assertion>;
+using AstNodeVariantType =
+    std::variant<datalog::Predicate, BaseFact, Fact, ConditionalAssertion,
+                 Assertion, Argument>;
 
 std::string ToString(AstNodeVariantType Node) {
   return std::visit(
@@ -94,6 +95,11 @@ std::string ToString(AstNodeVariantType Node) {
                       return ToString(conditional_assertion);
                     }},
                 assertion.GetValue());
+          },
+          [](Argument argument) {
+            return absl::StrJoin(
+                {argument.argument_name(), argument.argument_type().name()},
+                " : ");
           }},
       Node);
 }

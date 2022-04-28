@@ -128,6 +128,50 @@ static Fact ConstructFact(std::forward_list<Principal> delegation_chain,
                        *CHECK_NOTNULL(can_say_fact_context.fact()));
 }
 
+static ArgumentType ConstructArgumentType(
+    AuthLogicParser::AuthLogicTypeContext& auth_logic_type_context) {
+  if (auto* number_type_context =
+          dynamic_cast<AuthLogicParser::NumberTypeContext*>(
+              &auth_logic_type_context)) {
+    return ArgumentType(ArgumentType::Kind::kNumber,
+                        number_type_context->NUMBERTYPE()->getText());
+  } else if (auto* principal_type_context =
+                 dynamic_cast<AuthLogicParser::PrincipalTypeContext*>(
+                     &auth_logic_type_context)) {
+    return ArgumentType(ArgumentType::Kind::kPrincipal,
+                        principal_type_context->PRINCIPALTYPE()->getText());
+  }
+  auto& custom_type_context =
+      *CHECK_NOTNULL(dynamic_cast<AuthLogicParser::CustomTypeContext*>(
+          &auth_logic_type_context));
+  return ArgumentType(ArgumentType::Kind::kCustom,
+                      custom_type_context.ID()->getText());
+}
+
+static RelationDeclaration ConstructRelationDeclaration(
+    AuthLogicParser::RelationDeclarationContext& relation_declaration_context) {
+  // grammar rule for relationDeclaration:
+  // '.decl' ATTRIBUTE? ID '(' ID ':' authLogicType (',' ID ':'authLogicType)*
+  // ')' When translated to Antlr generated Parse tree, ID[0] corresponds to
+  // relation_name.
+  // (ID[1] : authLogicType[0]), (ID[2] : authLogicType[1]),.....,(ID[n] :
+  // authLogicType[n-1]) corresponds to
+  //  arguments for the relation.
+  std::vector<Argument> arguments;
+  arguments.reserve(relation_declaration_context.authLogicType().size());
+  for (uint64_t i = 0; i < relation_declaration_context.authLogicType().size();
+       ++i) {
+    arguments.push_back(Argument(
+        relation_declaration_context.ID(i + 1)->getText(),
+        ConstructArgumentType(
+            *CHECK_NOTNULL(relation_declaration_context.authLogicType(i)))));
+  }
+  return RelationDeclaration(
+      relation_declaration_context.ID(0)->getText(),
+      relation_declaration_context.ATTRIBUTE() != nullptr,
+      std::move(arguments));
+}
+
 static Query ConstructQuery(AuthLogicParser::QueryContext& query_context) {
   return Query(query_context.ID()->getText(),
                ConstructPrincipal(*CHECK_NOTNULL(query_context.principal())),
@@ -182,6 +226,13 @@ static SaysAssertion ConstructSaysAssertion(
 
 static Program ConstructProgram(
     AuthLogicParser::ProgramContext& program_context) {
+  auto relation_declarations = utils::MapIter<RelationDeclaration>(
+      program_context.relationDeclaration(),
+      [](AuthLogicParser::RelationDeclarationContext*
+             relation_declaration_context) {
+        return ConstructRelationDeclaration(
+            *CHECK_NOTNULL(relation_declaration_context));
+      });
   std::vector<SaysAssertion> says_assertions = utils::MapIter<SaysAssertion>(
       program_context.saysAssertion(),
       [](AuthLogicParser::SaysAssertionContext* says_assertion_context) {
@@ -192,7 +243,8 @@ static Program ConstructProgram(
       [](AuthLogicParser::QueryContext* query_context) {
         return ConstructQuery(*CHECK_NOTNULL(query_context));
       });
-  return Program(std::move(says_assertions), std::move(queries));
+  return Program(std::move(relation_declarations), std::move(says_assertions),
+                 std::move(queries));
 }
 
 /// This function produces an abstract syntax tree (AST) rooted with a program

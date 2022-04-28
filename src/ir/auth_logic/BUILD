@@ -153,3 +153,20 @@ cc_test(
         "@absl//absl/strings",
     ],
 )
+
+cc_test(
+    name = "ast_construction_relation_declaration_test",
+    srcs = ["ast_construction_relation_declaration_test.cc"],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    deps = [
+        ":ast",
+        ":ast_construction",
+        ":ast_string",
+        "//src/common/testing:gtest",
+        "//src/common/utils:map_iter",
+        "//src/common/utils:overloaded",
+        "//src/ir/datalog:program",
+        "@absl//absl/strings",
+    ],
+)
