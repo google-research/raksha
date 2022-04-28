@@ -7,7 +7,7 @@
 #include "absl/strings/str_join.h"
 #include "src/ir/selector.h"
 
-namespace raksha::ir {
+namespace raksha::frontends::arcs {
 
 // Represents an AccessPathSelectors descending through the members of types.
 // This is eventually used for printing edges, checks, and claims to the
@@ -83,6 +83,6 @@ class AccessPathSelectors {
   std::vector<Selector> reverse_selectors_;
 };
 
-}  // namespace raksha::ir
+}  // namespace raksha::frontends::arcs
 
 #endif  // SRC_FRONTENDS_ARCS_ACCESS_PATH_SELECTORS_H_

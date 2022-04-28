@@ -1,8 +1,9 @@
-#include "absl/strings/str_cat.h"
+#include "src/ir/access_path_selectors_set.h"
+
 #include "absl/container/btree_set.h"
 #include "absl/container/flat_hash_set.h"
+#include "absl/strings/str_cat.h"
 #include "src/common/testing/gtest.h"
-#include "src/ir/access_path_selectors_set.h"
 #include "src/ir/field_selector.h"
 #include "src/ir/selector.h"
 
@@ -20,24 +21,22 @@ static const AccessPathSelectors kBazFieldSelectorPath(kBazFieldSelector);
 
 // An array of selectors to use as test inputs.
 static const Selector sample_selectors[] = {
-    kFooFieldSelector,
-    kBarFieldSelector,
-    kBarFieldSelector
-};
+    kFooFieldSelector, kBarFieldSelector, kBarFieldSelector};
 
 // Vectors of AccessPathSelectors to use as test inputs.
 static const std::vector<AccessPathSelectors> sample_path_vecs[] = {
-    {}, {kFooFieldSelectorPath}, {kFooFieldSelectorPath, kFooFieldSelectorPath},
-    { kFooFieldSelectorPath, kBarFieldSelectorPath, kBazFieldSelectorPath,
-      kBarFieldSelectorPath, kBazFieldSelectorPath, kFooFieldSelectorPath},
-    { AccessPathSelectors(kFooFieldSelector, kBazFieldSelectorPath),
-      kBarFieldSelectorPath },
-    { AccessPathSelectors(kFooFieldSelector, kBazFieldSelectorPath),
-      AccessPathSelectors(kBarFieldSelector, kBarFieldSelectorPath) }
-};
+    {},
+    {kFooFieldSelectorPath},
+    {kFooFieldSelectorPath, kFooFieldSelectorPath},
+    {kFooFieldSelectorPath, kBarFieldSelectorPath, kBazFieldSelectorPath,
+     kBarFieldSelectorPath, kBazFieldSelectorPath, kFooFieldSelectorPath},
+    {AccessPathSelectors(kFooFieldSelector, kBazFieldSelectorPath),
+     kBarFieldSelectorPath},
+    {AccessPathSelectors(kFooFieldSelector, kBazFieldSelectorPath),
+     AccessPathSelectors(kBarFieldSelector, kBarFieldSelectorPath)}};
 
-class CreateAbslSetTest :
-    public ::testing::TestWithParam<std::vector<AccessPathSelectors>> {};
+class CreateAbslSetTest
+    : public ::testing::TestWithParam<std::vector<AccessPathSelectors>> {};
 
 // It should be the case that creating an AccessPathSelectorsSet from a group
 // of AccessPathSelectors and then making an absl set from that should be
@@ -50,15 +49,12 @@ TEST_P(CreateAbslSetTest, CreateAbslSetTest) {
       absl::flat_hash_set<AccessPathSelectors>(param.begin(), param.end()));
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    CreateAbslSetTest,
-    CreateAbslSetTest,
-    testing::ValuesIn(sample_path_vecs)
-);
+INSTANTIATE_TEST_SUITE_P(CreateAbslSetTest, CreateAbslSetTest,
+                         testing::ValuesIn(sample_path_vecs));
 
-class AddParentTest :
-   public ::testing::TestWithParam<
-    std::tuple<Selector, std::vector<AccessPathSelectors>>> {};
+class AddParentTest
+    : public ::testing::TestWithParam<
+          std::tuple<Selector, std::vector<AccessPathSelectors>>> {};
 
 // Adding a parent selector to a set should be equivalent to prepending the
 // parent selector's string representation to the front of the string
@@ -93,17 +89,14 @@ TEST_P(AddParentTest, AddParentTest) {
   }
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    AddParentTest,
-    AddParentTest,
-    testing::Combine(
-        testing::ValuesIn(sample_selectors),
-        testing::ValuesIn(sample_path_vecs)));
+INSTANTIATE_TEST_SUITE_P(AddParentTest, AddParentTest,
+                         testing::Combine(testing::ValuesIn(sample_selectors),
+                                          testing::ValuesIn(sample_path_vecs)));
 
-class UnionTest :
-    public ::testing::TestWithParam<
-      std::tuple<
-        std::vector<AccessPathSelectors>, std::vector<AccessPathSelectors>>> {};
+class UnionTest
+    : public ::testing::TestWithParam<std::tuple<
+          std::vector<AccessPathSelectors>, std::vector<AccessPathSelectors>>> {
+};
 
 absl::btree_set<std::string> MakeOrderedStrSet(
     AccessPathSelectorsSet orig_set) {
@@ -123,41 +116,35 @@ absl::btree_set<std::string> MakeOrderedStrSet(
 // them.
 TEST_P(UnionTest, UnionTest) {
   std::tuple<std::vector<AccessPathSelectors>, std::vector<AccessPathSelectors>>
-    info = GetParam();
+      info = GetParam();
   AccessPathSelectorsSet set1 = AccessPathSelectorsSet(std::get<0>(info));
   AccessPathSelectorsSet set2 = AccessPathSelectorsSet(std::get<1>(info));
 
   absl::btree_set<std::string> str_set1 = MakeOrderedStrSet(set1);
   absl::btree_set<std::string> str_set2 = MakeOrderedStrSet(set2);
-  absl::btree_set<std::string> unioned_str_set =
-      MakeOrderedStrSet(
-          AccessPathSelectorsSet::Union(std::move(set1), std::move(set2)));
+  absl::btree_set<std::string> unioned_str_set = MakeOrderedStrSet(
+      AccessPathSelectorsSet::Union(std::move(set1), std::move(set2)));
 
   str_set1.merge(str_set2);
   ASSERT_EQ(unioned_str_set, str_set1);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    UnionTestSuite,
-    UnionTest,
-    testing::Combine(
-        testing::ValuesIn(sample_path_vecs),
-        testing::ValuesIn(sample_path_vecs)));
+INSTANTIATE_TEST_SUITE_P(UnionTestSuite, UnionTest,
+                         testing::Combine(testing::ValuesIn(sample_path_vecs),
+                                          testing::ValuesIn(sample_path_vecs)));
 
-class IntersectionTest :
- public ::testing::TestWithParam<
-  std::tuple<
-    std::vector<AccessPathSelectors>,
-    std::vector<AccessPathSelectors>>> {};
+class IntersectionTest
+    : public ::testing::TestWithParam<std::tuple<
+          std::vector<AccessPathSelectors>, std::vector<AccessPathSelectors>>> {
+};
 
 // Intersecting two sets and calling ToString on each element should produce the
 // same set of string representations result as creating tree sets of
 // the string representations of the contents of the two sets and intersecting
 // them.
 TEST_P(IntersectionTest, IntersectionTest) {
-  std::tuple<
-    std::vector<AccessPathSelectors>,
-    std::vector<AccessPathSelectors>> info = GetParam();
+  std::tuple<std::vector<AccessPathSelectors>, std::vector<AccessPathSelectors>>
+      info = GetParam();
 
   AccessPathSelectorsSet set1 = AccessPathSelectorsSet(std::get<0>(info));
   AccessPathSelectorsSet set2 = AccessPathSelectorsSet(std::get<1>(info));
@@ -168,19 +155,16 @@ TEST_P(IntersectionTest, IntersectionTest) {
       MakeOrderedStrSet(AccessPathSelectorsSet::Intersect(set1, set2));
 
   absl::btree_set<std::string> std_set_intersection_result;
-  std::set_intersection(
-      str_set1.begin(), str_set1.end(), str_set2.begin(), str_set2.end(),
-      std::inserter(std_set_intersection_result,
-                    std_set_intersection_result.begin()));
+  std::set_intersection(str_set1.begin(), str_set1.end(), str_set2.begin(),
+                        str_set2.end(),
+                        std::inserter(std_set_intersection_result,
+                                      std_set_intersection_result.begin()));
 
   ASSERT_EQ(intersected_str_set, std_set_intersection_result);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    IntersectionTestSuite,
-    IntersectionTest,
-    testing::Combine(
-      testing::ValuesIn(sample_path_vecs),
-      testing::ValuesIn(sample_path_vecs)));
+INSTANTIATE_TEST_SUITE_P(IntersectionTestSuite, IntersectionTest,
+                         testing::Combine(testing::ValuesIn(sample_path_vecs),
+                                          testing::ValuesIn(sample_path_vecs)));
 
 }  // namespace raksha::ir

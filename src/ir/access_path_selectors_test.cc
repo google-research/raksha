@@ -17,24 +17,24 @@ namespace raksha::ir {
 // be useful as a method in AccessPathSelectors itself, but, it's a bit
 // simplified right now, as it only splits on '.', the field separator
 // character. Also, I haven't found a use for it in non-test code yet.
-static AccessPathSelectors MakeSelectorAccessPathFromString(
-    std::string str) {
+static AccessPathSelectors MakeSelectorAccessPathFromString(std::string str) {
   std::vector<std::string> selector_strs =
       absl::StrSplit(std::move(str), '.', absl::SkipEmpty());
 
   // Start with an empty path and add all Selectors as parents.
   AccessPathSelectors result;
-  for (auto iter = selector_strs.rbegin();
-        iter != selector_strs.rend(); ++iter) {
-    result = AccessPathSelectors(
-        Selector(FieldSelector(std::move(*iter))), std::move(result));
+  for (auto iter = selector_strs.rbegin(); iter != selector_strs.rend();
+       ++iter) {
+    result = AccessPathSelectors(Selector(FieldSelector(std::move(*iter))),
+                                 std::move(result));
   }
 
   return result;
 }
 
-class AccessPathEqualsTest :
-   public ::testing::TestWithParam<::std::tuple<std::string, std::string>> {};
+class AccessPathEqualsTest
+    : public ::testing::TestWithParam<::std::tuple<std::string, std::string>> {
+};
 
 // This test ensures that, given a pair of access path strings, the access
 // paths will be equal only if the original strings are equal. This allows us
@@ -60,25 +60,15 @@ TEST_P(AccessPathEqualsTest, AccessPathsForEqualStringsCompareEquals) {
 // A selection of interesting and valid access_path_strs to use as inputs to
 // various tests.
 static const std::string access_path_strs[] = {
-  "",
-  ".comp1",
-  ".comp2",
-  ".comp1.comp2",
-  ".comp1comp2",
-  ".c",
-  ".x.y.z",
-  ".x.y.z.w",
-  ".w.x.y.z"
-};
+    "",   ".comp1", ".comp2",   ".comp1.comp2", ".comp1comp2",
+    ".c", ".x.y.z", ".x.y.z.w", ".w.x.y.z"};
 
 // For the Equals test, test it on each pair of strings from access_path_strs.
 INSTANTIATE_TEST_SUITE_P(
-    AccessPathEqTestSuite,
-    AccessPathEqualsTest,
+    AccessPathEqTestSuite, AccessPathEqualsTest,
     // Get the cartesian product of the list of input strs with itself.
-    testing::Combine(
-        testing::ValuesIn(access_path_strs),
-        testing::ValuesIn(access_path_strs)));
+    testing::Combine(testing::ValuesIn(access_path_strs),
+                     testing::ValuesIn(access_path_strs)));
 
 class AccessPathSelectorsIteratorTest
     : public ::testing::TestWithParam<std::string> {};
@@ -122,17 +112,14 @@ TEST_P(AccessPathTest, CanRoundTripAccessPathString) {
   ASSERT_EQ(access_path->ToString(), original_access_path);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    AccessPathTestsWithPaths,
-    AccessPathTest,
-    testing::ValuesIn(access_path_strs)
-);
+INSTANTIATE_TEST_SUITE_P(AccessPathTestsWithPaths, AccessPathTest,
+                         testing::ValuesIn(access_path_strs));
 
 // Check that our Absl hash function works as expected for the
 // AccessPathSelectors we provide.
 TEST(AccessPathHashTest, SelectorAccessPathHashTest) {
   std::vector<AccessPathSelectors> access_paths_to_check;
-  for (const std::string &access_path_str : access_path_strs) {
+  for (const std::string& access_path_str : access_path_strs) {
     absl::StatusOr<AccessPathSelectors> access_path =
         MakeSelectorAccessPathFromString(access_path_str);
     ASSERT_TRUE(access_path.ok());
@@ -143,4 +130,4 @@ TEST(AccessPathHashTest, SelectorAccessPathHashTest) {
       absl::VerifyTypeImplementsAbslHashCorrectly(access_paths_to_check));
 }
 
-} // namespace raksha::ir
+}  // namespace raksha::ir
