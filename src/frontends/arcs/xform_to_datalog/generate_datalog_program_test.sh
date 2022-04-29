@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # A simple script to test the generate_datalog_program command line.
-ROOT_DIR=$TEST_SRCDIR/$TEST_WORKSPACE/src/xform_to_datalog
+ROOT_DIR=$TEST_SRCDIR/$TEST_WORKSPACE/src/frontends/arcs/xform_to_datalog
 CMD=$ROOT_DIR/generate_datalog_program
 
 AUTH_FILE=$ROOT_DIR/testdata/ok_claim_propagates.auth
