@@ -53,7 +53,7 @@ class ParticleSpecFromProtoTest
 };
 
 // Locally defined operator== for use in test below.
-bool operator==(const TagCheck& check1, const TagCheck* check2) {
+static bool operator==(const TagCheck& check1, const TagCheck* check2) {
   if (check2 == nullptr) return false;
   return check1 == *check2;
 }

@@ -89,15 +89,15 @@ struct ProtoStringAndExpectedAccessPathPieces {
 };
 
 class GetAccessPathTest
-    : public testing::TestWithParam<
-          std::tuple<ProtoStringAndExpectedAccessPathPieces, std::string>> {
+    : public testing::TestWithParam<std::tuple<
+          ProtoStringAndExpectedAccessPathPieces, absl::string_view>> {
  protected:
   ir::types::TypeFactory type_factory_;
 };
 
 TEST_P(GetAccessPathTest, GetAccessPathTest) {
   const ProtoStringAndExpectedAccessPathPieces &param = std::get<0>(GetParam());
-  const std::string &particle_spec_name = std::get<1>(GetParam());
+  std::string particle_spec_name = std::string(std::get<1>(GetParam()));
   ::arcs::HandleConnectionSpecProto hcs_proto;
   google::protobuf::TextFormat::ParseFromString(param.textproto, &hcs_proto);
   HandleConnectionSpec handle_connection_spec =
@@ -118,9 +118,10 @@ TEST_P(GetAccessPathTest, GetAccessPathTest) {
 }
 
 // Just some different strings that could be used as particle specs.
-std::string sample_particle_spec_names[] = {"ParticleSpec", "PS", "P1", "P2"};
+static absl::string_view sample_particle_spec_names[] = {"ParticleSpec", "PS",
+                                                         "P1", "P2"};
 
-ProtoStringAndExpectedAccessPathPieces protos_and_access_path_info[] = {
+static ProtoStringAndExpectedAccessPathPieces protos_and_access_path_info[] = {
     {.textproto =
          R"(name: "handle_spec" direction: READS type: { primitive: TEXT })",
      .handle_connection_name = "handle_spec",
