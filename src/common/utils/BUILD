@@ -123,3 +123,19 @@ cc_test(
         "//src/common/testing:gtest",
     ],
 )
+
+cc_library(
+    name = "fold",
+    hdrs = ["fold.h"],
+    deps = [],
+)
+
+cc_test(
+    name = "fold_test",
+    srcs = ["fold_test.cc"],
+    deps = [
+        ":fold",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)
