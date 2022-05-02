@@ -23,6 +23,10 @@
 #include <variant>
 #include <vector>
 
+#include "absl/strings/str_format.h"
+#include "absl/strings/str_join.h"
+#include "absl/strings/string_view.h"
+
 namespace raksha::ir::datalog {
 
 // Used to represent whether a predicate is negated or not

@@ -23,6 +23,7 @@
 #include <memory>
 #include <utility>  //included for std::pair
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "src/common/logging/logging.h"
@@ -153,7 +154,7 @@ class LoweringToDatalogPass {
   // - If it appears on the RHS of an assertion, it behaves semantically
   // like it has the same speaker as the head of the assertion.
   datalog::Rule SpokenAttributeToDLIR(const Principal& speaker,
-                                               const Attribute& attribute);
+                                      const Attribute& attribute);
 
   // In the same way that attributes are passed around with "CanActAs", so
   // are other "CanActAs" facts. To implement this, the translation of
@@ -161,32 +162,31 @@ class LoweringToDatalogPass {
   // these facts around. This function is for generating the extra rule and
   // it works similarly to "SpokenAttributeToDLIR".
   datalog::Rule SpokenCanActAsToDLIR(const Principal& speaker,
-                                              const CanActAs& can_act_as);
+                                     const CanActAs& can_act_as);
 
-  std::pair<datalog::Predicate, std::vector<datalog::Rule>>
-  BaseFactToDLIRInner(const Principal& speaker,
-                      const datalog::Predicate& predicate);
+  std::pair<datalog::Predicate, std::vector<datalog::Rule>> BaseFactToDLIRInner(
+      const Principal& speaker, const datalog::Predicate& predicate);
 
-  std::pair<datalog::Predicate, std::vector<datalog::Rule>>
-  BaseFactToDLIRInner(const Principal& speaker, const Attribute& attribute);
+  std::pair<datalog::Predicate, std::vector<datalog::Rule>> BaseFactToDLIRInner(
+      const Principal& speaker, const Attribute& attribute);
 
-  std::pair<datalog::Predicate, std::vector<datalog::Rule>>
-  BaseFactToDLIRInner(const Principal& speaker, const CanActAs& canActAs);
+  std::pair<datalog::Predicate, std::vector<datalog::Rule>> BaseFactToDLIRInner(
+      const Principal& speaker, const CanActAs& canActAs);
 
   // The second return value represents 0 or 1 newly generated rules, so an
   // option might seem more intuitive. However, the interface that consumes
   // this needs to construct a vector anyway, so a vector is used in the
   // return type.
-  std::pair<datalog::Predicate, std::vector<datalog::Rule>>
-  BaseFactToDLIR(const Principal& speaker, const BaseFact& base_fact);
+  std::pair<datalog::Predicate, std::vector<datalog::Rule>> BaseFactToDLIR(
+      const Principal& speaker, const BaseFact& base_fact);
 
   // This can result in 0 or more new rules because the translation of
   // nested canSayFacts might result in more than 1 rule.
   std::pair<datalog::Predicate, std::vector<datalog::Rule>> FactToDLIR(
       const Principal& speaker, const Fact& fact);
 
-  std::vector<datalog::Rule> GenerateDLIRAssertions(
-      const Principal& speaker, const Fact& fact);
+  std::vector<datalog::Rule> GenerateDLIRAssertions(const Principal& speaker,
+                                                    const Fact& fact);
 
   std::vector<datalog::Rule> GenerateDLIRAssertions(
       const Principal& speaker,
@@ -207,12 +207,32 @@ class LoweringToDatalogPass {
   static inline datalog::Predicate kDummyPredicate =
       datalog::Predicate("grounded_dummy", {"dummy_var"}, datalog::kPositive);
 
-  std::vector<datalog::Rule> QueriesToDLIR(
+  std::vector<datalog::RelationDeclaration> RelationDeclarationToDLIR(
+      const std::vector<datalog::RelationDeclaration>& relation_declaration);
+
+  std::vector<datalog::Rule> QueriesToDLIR(const std::vector<Query>& queries);
+
+  std::vector<datalog::RelationDeclaration> QueryRelationDeclarationToDLIR(
       const std::vector<Query>& queries);
 
   datalog::Program ProgToDLIR(const Program& program);
 
+  void update_can_say_depth(std::string_view predicate_name, uint64_t depth);
+
   uint64_t fresh_var_count_;
+  // This pass needs to generate relation declarations for predicates that
+  // appear in `AstCanSayFact`s which look like `A1 says A2 canSay ... An canSay
+  // foo(args)` and can in general be nested. The generated declarations look
+  // like: `says_cansay_..._cansay_foo(A1, A2, ..., An, args)`, so to generate
+  // these declarations, we need to know the number of "canSays" to include for
+  // each base predicate (e.g., foo). This pass does this by tracking the
+  // maximum depth of "canSay"s with which each predicate is used and storing
+  // this in the `cansay_depth` HashMap. When a predicate appears with depth
+  // `n`, it may also need to be used with depths (1..n), so we only maintain
+  // the maximum depth in which it appears and we generate declarations for
+  // (1..n). `cansay_depth` is only updated by `update_cansay_depth` which
+  // tracks this maximum.
+  absl::flat_hash_map<std::string_view, uint64_t> can_say_depth;
 };
 
 }  // namespace raksha::ir::auth_logic

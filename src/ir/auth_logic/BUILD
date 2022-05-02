@@ -50,9 +50,9 @@ cc_library(
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
         "@absl//absl/algorithm:container",
+        "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
-        "@absl//absl/container:flat_hash_map",
     ],
 )
 
