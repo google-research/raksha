@@ -39,40 +39,6 @@ struct QueryTestData {
   std::string fact;
 };
 
-std::string ToString(datalog::Predicate predicate) {
-  return absl::StrCat(predicate.sign() == datalog::Sign::kNegated ? "!" : "",
-                      predicate.name(), "(",
-                      absl::StrJoin(predicate.args(), ", "), ")");
-}
-std::string ToString(BaseFact basefact) {
-  return std::visit(
-      raksha::utils::overloaded{
-          [](datalog::Predicate predicate) { return ToString(predicate); },
-          [](Attribute attribute) {
-            return absl::StrJoin(
-                {attribute.principal().name(), ToString(attribute.predicate())},
-                " ");
-          },
-          [](CanActAs can_act_as) {
-            return absl::StrJoin({can_act_as.left_principal().name(),
-                                  can_act_as.right_principal().name()},
-                                 " canActAs ");
-          }},
-      basefact.GetValue());
-}
-
-std::string ToString(Fact fact) {
-  if (fact.delegation_chain().empty()) {
-    return ToString(fact.base_fact());
-  }
-  std::string cansay_string = "";
-  for (const Principal& delegatees : fact.delegation_chain()) {
-    cansay_string =
-        absl::StrJoin({delegatees.name(), cansay_string}, " canSay ");
-  }
-  return absl::StrJoin({cansay_string, ToString(fact.base_fact())}, " ");
-}
-
 class QueryAstConstructionTest : public testing::TestWithParam<QueryTestData> {
 };
 
