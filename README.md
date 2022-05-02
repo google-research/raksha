@@ -16,7 +16,7 @@ On a Linux Debian system, for example:
 
 At the time of writing (Apr 12, 2022) the latest version of Bazel is 5.1.1 and is known to work.
 
-TODO(harsha-mandadi): Add troubleshooting tips specific to MacOS.
+TODO(harsha-mandadi): Make sure bazel version is 5.1.1 and above to avoid clang errors. 
 
 TODO(markww): mcpp must be pre-installed due to souffle searching the user's system path -- consider a fix to potentially allow more hermetic builds.
 

@@ -31,7 +31,7 @@ std::vector<std::string> binary_operations = {"<", ">", "=", "!=", "<=", ">="};
 
 using AstNodeVariantType =
     std::variant<datalog::Predicate, BaseFact, Fact, ConditionalAssertion,
-                 Assertion, Argument>;
+                 Assertion, datalog::Argument>;
 
 std::string ToString(AstNodeVariantType Node) {
   return std::visit(
@@ -96,7 +96,7 @@ std::string ToString(AstNodeVariantType Node) {
                     }},
                 assertion.GetValue());
           },
-          [](Argument argument) {
+          [](datalog::Argument argument) {
             return absl::StrJoin(
                 {argument.argument_name(), argument.argument_type().name()},
                 " : ");

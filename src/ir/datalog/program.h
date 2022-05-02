@@ -68,6 +68,54 @@ class Predicate {
   Sign sign_;
 };
 
+// Relation declaration types are of 3 forms
+// 1. NumberType
+// 2. PrincipalType
+// 3. User defined CustomType (string to store name of the type)
+class ArgumentType {
+ public:
+  enum class Kind { kNumber, kPrincipal, kCustom };
+  explicit ArgumentType(Kind kind, absl::string_view name)
+      : kind_(kind), name_(name) {}
+  Kind kind() const { return kind_; }
+  absl::string_view name() const { return name_; }
+
+ private:
+  Kind kind_;
+  std::string name_;
+};
+
+class Argument {
+ public:
+  explicit Argument(std::string_view argument_name, ArgumentType argument_type)
+      : argument_name_(argument_name),
+        argument_type_(std::move(argument_type)) {}
+  absl::string_view argument_name() const { return argument_name_; }
+  ArgumentType argument_type() const { return argument_type_; }
+
+ private:
+  std::string argument_name_;
+  ArgumentType argument_type_;
+};
+
+class RelationDeclaration {
+ public:
+  explicit RelationDeclaration(absl::string_view relation_name,
+                               bool is_attribute,
+                               std::vector<Argument> arguments)
+      : relation_name_(relation_name),
+        is_attribute_(is_attribute),
+        arguments_(std::move(arguments)) {}
+  absl::string_view relation_name() const { return relation_name_; }
+  bool is_attribute() const { return is_attribute_; }
+  const std::vector<Argument>& arguments() const { return arguments_; }
+
+ private:
+  std::string relation_name_;
+  bool is_attribute_;
+  std::vector<Argument> arguments_;
+};
+
 // A conditional datalog assertion with a left hand side and/or a right hand
 // side. A Rule is either:
 //    - an unconditional fact which is a predicate
@@ -87,13 +135,19 @@ class Rule {
 
 class Program {
  public:
-  Program(std::vector<Rule> rules,
-              std::vector<std::string> outputs)
-      : rules_(std::move(rules)), outputs_(std::move(outputs)) {}
+  Program(std::vector<RelationDeclaration> relation_declarations,
+          std::vector<Rule> rules, std::vector<std::string> outputs)
+      : relation_declarations_(std::move(relation_declarations)),
+        rules_(std::move(rules)),
+        outputs_(std::move(outputs)) {}
+  const std::vector<RelationDeclaration>& relation_declarations() const {
+    return relation_declarations_;
+  }
   const std::vector<Rule>& rules() const { return rules_; }
   const std::vector<std::string>& outputs() const { return outputs_; }
 
  private:
+  std::vector<RelationDeclaration> relation_declarations_;
   std::vector<Rule> rules_;
   std::vector<std::string> outputs_;
 };

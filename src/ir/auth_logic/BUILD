@@ -52,6 +52,7 @@ cc_library(
         "@absl//absl/algorithm:container",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
+        "@absl//absl/container:flat_hash_map",
     ],
 )
 
