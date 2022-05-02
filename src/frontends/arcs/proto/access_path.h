@@ -41,7 +41,7 @@ HandleConnectionSpecAccessPathRoot Decode(
 
 // Encodes the given `handle_root` as arcs::AccessPathProto_HandleRoot.
 ::arcs::AccessPathProto_HandleRoot Encode(
-    const HandleConnectionSpecAccessPathRoot& hande_root);
+    const HandleConnectionSpecAccessPathRoot& handle_root);
 
 // Decodes the given `access_path_proto` as a AccessPath.
 AccessPath Decode(const ::arcs::AccessPathProto& access_path_proto);

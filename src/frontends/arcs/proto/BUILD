@@ -44,6 +44,7 @@ cc_library(
 
 cc_library(
     name = "tag_check",
+    srcs = ["tag_check.cc"],
     hdrs = ["tag_check.h"],
     deps = [
         ":access_path",
@@ -65,6 +66,7 @@ cc_library(
 
 cc_library(
     name = "derives_from_claim",
+    srcs = ["derives_from_claim.cc"],
     hdrs = ["derives_from_claim.h"],
     deps = [
         "//src/frontends/arcs",
