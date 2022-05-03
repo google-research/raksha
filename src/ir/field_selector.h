@@ -1,5 +1,5 @@
-#ifndef SRC_IR_FIELD_SELECTOR_H_
-#define SRC_IR_FIELD_SELECTOR_H_
+#ifndef SRC_FRONTENDS_ARCS_FIELD_SELECTOR_H_
+#define SRC_FRONTENDS_ARCS_FIELD_SELECTOR_H_
 
 #include <string>
 
@@ -24,7 +24,7 @@ class FieldSelector {
     return field_name_ == other.field_name_;
   }
 
-  template<typename H>
+  template <typename H>
   friend H AbslHashValue(H h, const FieldSelector &field_selector) {
     return H::combine(std::move(h), field_selector.field_name_);
   }
@@ -36,4 +36,4 @@ class FieldSelector {
 
 }  // namespace raksha::ir
 
-#endif  // SRC_IR_FIELD_SELECTOR_H_
+#endif  // SRC_FRONTENDS_ARCS_FIELD_SELECTOR_H_

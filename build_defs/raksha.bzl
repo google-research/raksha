@@ -83,11 +83,11 @@ def policy_check(name, dataflow_graph, auth_logic, expect_failure = False, visib
             proto_target,
         ],
         outs = [datalog_file],
-        cmd = "$(location //src/xform_to_datalog:generate_datalog_program) " +
+        cmd = "$(location //src/frontends/arcs/xform_to_datalog:generate_datalog_program) " +
               " --auth_logic_file=\"$(location %s)\" " % auth_logic +
               " --manifest_proto=\"$(location %s)\" " % proto_target +
               " --datalog_file=\"$@\" ",
-        tools = ["//src/xform_to_datalog:generate_datalog_program"],
+        tools = ["//src/frontends/arcs/xform_to_datalog:generate_datalog_program"],
     )
 
     # Generate souffle C++ library
