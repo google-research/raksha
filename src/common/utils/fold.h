@@ -38,27 +38,27 @@ namespace raksha::common::utils {
 // value of `accumulated`. Corresponds very directly to `std::accumulate` with a
 // custom `BinaryOperator`.
 template <class I, class A, class F>
-A fold_iter(I begin_iter, I end_iter, A accumulated, F fold_fn) {
+A fold(I begin_iter, I end_iter, A accumulated, F fold_fn) {
   if (begin_iter == end_iter) return accumulated;
   const auto &current_element = *begin_iter;
-  return fold_iter(++begin_iter, end_iter,
-                   fold_fn(std::move(accumulated), current_element), fold_fn);
+  return fold(++begin_iter, end_iter,
+              fold_fn(std::move(accumulated), current_element), fold_fn);
 }
 
 // A left fold over the provided container using `fold_fn` with an initial value
 // of `init`.
 template <class C, class A, class F>
 A fold(const C &container, A &&init, F &&fold_fn) {
-  return fold_iter(std::begin(container), std::end(container),
-                   std::forward<A>(init), std::forward<F>(fold_fn));
+  return fold(std::begin(container), std::end(container), std::forward<A>(init),
+              std::forward<F>(fold_fn));
 }
 
 // A right (or reverse) fold over the provided container using `fold_fn` with an
 // initial value of `init`.
 template <class C, class A, class F>
 A rfold(const C &container, A &&init, F &&fold_fn) {
-  return fold_iter(std::rbegin(container), std::rend(container),
-                   std::forward<A>(init), std::forward<F>(fold_fn));
+  return fold(std::rbegin(container), std::rend(container),
+              std::forward<A>(init), std::forward<F>(fold_fn));
 }
 
 }  // namespace raksha::common::utils
