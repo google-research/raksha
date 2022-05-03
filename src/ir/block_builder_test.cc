@@ -29,12 +29,16 @@ namespace {
 
 class BlockBuilderTest : public testing::Test {
  public:
-  BlockBuilderTest() {
-    context_.RegisterOperator(std::make_unique<Operator>("core.plus"));
-    context_.RegisterOperator(std::make_unique<Operator>("core.minus"));
-    context_.RegisterOperator(std::make_unique<Operator>("core.merge"));
-    context_.RegisterOperator(std::make_unique<Operator>("core.choose"));
-  }
+  BlockBuilderTest()
+      : type_factory_(),
+        context_(
+            {
+                Operator("core.plus"),
+                Operator("core.minus"),
+                Operator("core.merge"),
+                Operator("core.choose"),
+            },
+            {}) {}
 
   types::Type MakeTestEntityType(absl::string_view schema_name) {
     const types::Schema& schema =
