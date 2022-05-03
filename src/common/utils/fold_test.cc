@@ -73,23 +73,22 @@ class BoxFoldTest : public testing::TestWithParam<std::vector<std::string>> {};
 
 TEST_P(BoxFoldTest, BoxFoldTest) {
   const std::vector<std::string> &string_vec = GetParam();
-  auto box_fn = [](std::vector<std::unique_ptr<std::string>> boxed_so_far,
-                   const std::string &input) {
-    boxed_so_far.push_back(std::make_unique<std::string>(input));
-    return boxed_so_far;
-  };
   std::vector<std::unique_ptr<std::string>> boxed_strings =
-      fold(string_vec, std::vector<std::unique_ptr<std::string>>(), box_fn);
-  auto unbox_fn = [](std::vector<std::string> unboxed_so_far,
-                     const std::unique_ptr<std::string> &to_unbox) {
-    unboxed_so_far.push_back(*to_unbox);
-    return unboxed_so_far;
-  };
+      fold(string_vec, std::vector<std::unique_ptr<std::string>>(),
+           [](std::vector<std::unique_ptr<std::string>> boxed_so_far,
+              const std::string &input) {
+             boxed_so_far.push_back(std::make_unique<std::string>(input));
+             return boxed_so_far;
+           });
   std::vector<std::string> unboxed_strings =
-      fold(boxed_strings, std::vector<std::string>(), unbox_fn);
+      fold(boxed_strings, std::vector<std::string>(),
+           [](std::vector<std::string> unboxed_so_far,
+              const std::unique_ptr<std::string> &to_unbox) {
+             unboxed_so_far.push_back(*to_unbox);
+             return unboxed_so_far;
+           });
   EXPECT_THAT(unboxed_strings, testing::ElementsAreArray(string_vec));
 }
-
 
 INSTANTIATE_TEST_SUITE_P(BoxFoldTest, BoxFoldTest,
                          testing::ValuesIn(kSampleStringVecs));
@@ -108,7 +107,7 @@ TEST_P(RawPointerFoldTest, RawPointerFoldTest) {
   EXPECT_THAT(fold_iter(begin_ptr, end_ptr, 0, sum_fn), expected_result);
 }
 
-INSTANTIATE_TEST_SUITE_P(RawPointerFoldTest, RawPointerFoldTest, testing::ValuesIn(kIntVecsAndSum));
-
+INSTANTIATE_TEST_SUITE_P(RawPointerFoldTest, RawPointerFoldTest,
+                         testing::ValuesIn(kIntVecsAndSum));
 
 }  // namespace raksha::common::utils
