@@ -32,6 +32,11 @@
 
 namespace raksha::common::utils {
 
+// An implementation of `fold` that takes as inputs an iterator to the beginning
+// of some range and an iterator to the end of that range. This just folds using
+// `fold_fn` from the beginning iterator to the end iterator with an initial
+// value of `accumulated`. Corresponds very directly to `std::accumulate` with a
+// custom `BinaryOperator`.
 template <class I, class A, class F>
 A fold_iter(I begin_iter, I end_iter, A accumulated, F fold_fn) {
   if (begin_iter == end_iter) return accumulated;
@@ -40,12 +45,16 @@ A fold_iter(I begin_iter, I end_iter, A accumulated, F fold_fn) {
                    fold_fn(std::move(accumulated), current_element), fold_fn);
 }
 
+// A left fold over the provided container using `fold_fn` with an initial value
+// of `init`.
 template <class C, class A, class F>
 A fold(const C &container, A &&init, F &&fold_fn) {
   return fold_iter(std::begin(container), std::end(container),
                    std::forward<A>(init), std::forward<F>(fold_fn));
 }
 
+// A right (or reverse) fold over the provided container using `fold_fn` with an
+// initial value of `init`.
 template <class C, class A, class F>
 A rfold(const C &container, A &&init, F &&fold_fn) {
   return fold_iter(std::rbegin(container), std::rend(container),

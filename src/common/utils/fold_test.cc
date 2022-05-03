@@ -90,7 +90,25 @@ TEST_P(BoxFoldTest, BoxFoldTest) {
   EXPECT_THAT(unboxed_strings, testing::ElementsAreArray(string_vec));
 }
 
+
 INSTANTIATE_TEST_SUITE_P(BoxFoldTest, BoxFoldTest,
                          testing::ValuesIn(kSampleStringVecs));
+
+using RawPointerFoldTest = SumFoldTest;
+
+// Indirectly, the other tests actually do test `fold_iter`, as they delegate
+// to it. Here we show `fold_iter` doing something that they cannot: folding
+// over a pair of "iterators" that are actually just pointers to a contiguous
+// chunk of memory.
+TEST_P(RawPointerFoldTest, RawPointerFoldTest) {
+  const auto &[vec, expected_result] = GetParam();
+  const int *begin_ptr = vec.data();
+  const int *end_ptr = vec.data() + vec.size();
+  auto sum_fn = [](int sum_so_far, int num) { return sum_so_far + num; };
+  EXPECT_THAT(fold_iter(begin_ptr, end_ptr, 0, sum_fn), expected_result);
+}
+
+INSTANTIATE_TEST_SUITE_P(RawPointerFoldTest, RawPointerFoldTest, testing::ValuesIn(kIntVecsAndSum));
+
 
 }  // namespace raksha::common::utils
