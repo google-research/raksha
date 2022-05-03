@@ -21,7 +21,7 @@
 #include "src/frontends/arcs/xform_to_datalog/authorization_logic_datalog_facts.h"
 #include "src/frontends/arcs/xform_to_datalog/manifest_datalog_facts.h"
 
-namespace raksha::xform_to_datalog {
+namespace raksha::frontends::arcs::xform_to_datalog {
 
 // If authorization logic is disabled, just run a single, always-true dummy
 // test.
@@ -42,24 +42,21 @@ TEST_P(DatalogFactsTest, IncludesManifestFactsWithCorrectPrefixAndSuffix) {
   const auto &[manifest_datalog_facts, auth_logic_datalog_facts,
                expected_string] = GetParam();
   DatalogFacts datalog_facts(manifest_datalog_facts, auth_logic_datalog_facts);
-  arcs::DatalogPrintContext ctxt;
+  DatalogPrintContext ctxt;
   EXPECT_EQ(datalog_facts.ToDatalog(ctxt), expected_string);
 }
 
-static std::unique_ptr<arcs::ParticleSpec> particle_spec(
-    arcs::ParticleSpec::Create(
-        "particle",
-        /*checks=*/{},
-        /*tag_claims=*/
-        {arcs::TagClaim(
-            "particle",
-            arcs::AccessPath(
-                arcs::AccessPathRoot(arcs::HandleConnectionAccessPathRoot(
-                    "recipe", "particle", "out")),
-                ir::AccessPathSelectors()),
-            true, "tag")},
-        /*derives_from_claims=*/{},
-        /*edges=*/{}));
+static std::unique_ptr<ParticleSpec> particle_spec(ParticleSpec::Create(
+    "particle",
+    /*checks=*/{},
+    /*tag_claims=*/
+    {TagClaim("particle",
+              AccessPath(AccessPathRoot(HandleConnectionAccessPathRoot(
+                             "recipe", "particle", "out")),
+                         ir::AccessPathSelectors()),
+              true, "tag")},
+    /*derives_from_claims=*/{},
+    /*edges=*/{}));
 
 INSTANTIATE_TEST_SUITE_P(
     DatalogFactsTest, DatalogFactsTest,
@@ -177,4 +174,4 @@ says_isSomeType("prin1", "foo").
 
 #endif
 
-}  // namespace raksha::xform_to_datalog
+}  // namespace raksha::frontends::arcs::xform_to_datalog

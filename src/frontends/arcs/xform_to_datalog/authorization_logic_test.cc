@@ -23,7 +23,7 @@
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/test/utils.h"
 
-namespace raksha::xform_to_datalog {
+namespace raksha::frontends::arcs::xform_to_datalog {
 
 namespace fs = std::filesystem;
 
@@ -82,4 +82,4 @@ TEST(AuthorizationLogicTest, ErrorsInRustToolReturnsNonZeroValue) {
 
 #endif
 
-}  // namespace raksha::xform_to_datalog
+}  // namespace raksha::frontends::arcs::xform_to_datalog

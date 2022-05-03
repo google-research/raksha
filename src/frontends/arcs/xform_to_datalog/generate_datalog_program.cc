@@ -42,9 +42,9 @@ ABSL_FLAG(bool, overwrite, false,
 constexpr char kUsageMessage[] =
     "This tool takes a manifest proto and generates a datalog program.";
 
-using ManifestDatalogFacts = raksha::xform_to_datalog::ManifestDatalogFacts;
+using ManifestDatalogFacts = raksha::frontends::arcs::xform_to_datalog::ManifestDatalogFacts;
 using AuthorizationLogicDatalogFacts =
-    raksha::xform_to_datalog::AuthorizationLogicDatalogFacts;
+    raksha::frontends::arcs::xform_to_datalog::AuthorizationLogicDatalogFacts;
 
 int main(int argc, char *argv[]) {
   google::InitGoogleLogging("generate_datalog_program");
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  auto datalog_facts = raksha::xform_to_datalog::DatalogFacts(
+  auto datalog_facts = raksha::frontends::arcs::xform_to_datalog::DatalogFacts(
       manifest_datalog_facts, *auth_logic_datalog_facts);
 
   std::ofstream datalog_file(
