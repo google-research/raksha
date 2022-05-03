@@ -33,6 +33,19 @@ class IRContext {
   IRContext(const IRContext &) = delete;
   IRContext &operator=(const IRContext &) = delete;
 
+  // Create a context with some number of operators and storages pre-seeded.
+  IRContext(std::vector<ir::Operator> operators,
+            std::vector<ir::Storage> storages) {
+    for (auto iter = std::make_move_iterator(operators.begin());
+         iter != std::make_move_iterator(operators.end()); ++iter) {
+      RegisterOperator(std::make_unique<Operator>(*iter));
+    }
+    for (auto iter = std::make_move_iterator(storages.begin());
+         iter != std::make_move_iterator(storages.end()); ++iter) {
+      RegisterStorage(std::make_unique<Storage>(*iter));
+    }
+  }
+
   types::TypeFactory &type_factory() { return type_factory_; }
 
   // Register an operator and return the stored operator instances.
