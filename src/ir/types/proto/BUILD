@@ -21,25 +21,36 @@ package(
 )
 
 cc_library(
-    name = "types",
+    name = "proto",
     srcs = [
+        "entity_type.cc",
+        "primitive_type.cc",
         "schema.cc",
-        "type_factory.cc",
+        "type.cc",
     ],
     hdrs = [
         "entity_type.h",
         "primitive_type.h",
         "schema.h",
         "type.h",
-        "type_factory.h",
     ],
     deps = [
         "//src/common/logging",
-        "//src/common/utils:intrusive_ptr",
-        "//src/ir:access_path_selectors",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/container:flat_hash_set",
-        "@absl//absl/hash",
+        "//src/ir/types",
+        "//third_party/arcs/proto:manifest_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "entity_type_test",
+    srcs = ["entity_type_test.cc"],
+    deps = [
+        ":proto",
+        "//src/common/proto:proto_message_differencer",
+        "//src/common/proto:protobuf",
+        "//src/common/testing:gtest",
+        "//src/ir/types",
+        "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
 
@@ -47,24 +58,9 @@ cc_test(
     name = "primitive_type_test",
     srcs = ["primitive_type_test.cc"],
     deps = [
-        ":types",
+        ":proto",
         "//src/common/testing:gtest",
-        "//src/frontends/arcs:access_path",
-        "//src/ir:access_path_selectors",
-    ],
-)
-
-cc_test(
-    name = "type_test",
-    srcs = ["type_test.cc"],
-    deps = [
-        ":types",
-        "//src/common/logging",
-        "//src/common/proto:protobuf",
-        "//src/common/testing:gtest",
-        "//src/ir:access_path_selectors",
-        "//src/ir/types/proto",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/strings",
+        "//src/ir/types",
+        "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
