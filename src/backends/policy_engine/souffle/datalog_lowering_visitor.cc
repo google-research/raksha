@@ -17,6 +17,7 @@
 #include "src/backends/policy_engine/souffle/datalog_lowering_visitor.h"
 
 #include "src/common/logging/logging.h"
+#include "src/common/utils/fold.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/attributes/int_attribute.h"
@@ -37,7 +38,6 @@ using DatalogAttribute = ir::datalog::Attribute;
 using DatalogAttributePayload = ir::datalog::AttributePayload;
 using DatalogStringAttributePayload = ir::datalog::StringAttributePayload;
 using DatalogNumberAttributePayload = ir::datalog::NumberAttributePayload;
-using IrOperation = ir::Operation;
 
 static DatalogAttributePayload GetPayloadForAttribute(ir::Attribute attr,
                                                       ir::SsaNames &ssa_names) {
@@ -51,44 +51,36 @@ static DatalogAttributePayload GetPayloadForAttribute(ir::Attribute attr,
   return DatalogStringAttributePayload(DatalogSymbol(""));
 }
 
-static DatalogAttribute TranslateIrNodeToDatalog(
-    std::pair<std::string, ir::Attribute> name_attr_pair,
-    ir::SsaNames &ssa_names) {
-  return DatalogAttribute(
-      DatalogSymbol(std::move(name_attr_pair.first)),
-      GetPayloadForAttribute(std::move(name_attr_pair.second), ssa_names));
-}
-
-static DatalogSymbol TranslateIrNodeToDatalog(ir::Value value,
-                                              ir::SsaNames &ssa_names) {
-  return DatalogSymbol(value.ToString(ssa_names));
-}
-
-// Turn a range of IR nodes in a C++ container into a Datalog-style linked
-// list.
-template <class ListT, class IrNodeIter>
-static ListT RangeToDatalogList(IrNodeIter ir_node_list_begin,
-                                IrNodeIter ir_node_list_end,
-                                ir::SsaNames &ssa_names) {
-  if (ir_node_list_begin == ir_node_list_end) return ListT();
-  auto head_in_dl = TranslateIrNodeToDatalog(*ir_node_list_begin, ssa_names);
-  return ListT(std::move(head_in_dl),
-               RangeToDatalogList<ListT>(++ir_node_list_begin, ir_node_list_end,
-                                         ssa_names));
-}
-
 void DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
   const ir::Operator &op = operation.op();
   absl::string_view op_name = op.name();
 
-  const ir::ValueList &ir_operand_list = operation.inputs();
-  DatalogOperandList operand_list = RangeToDatalogList<DatalogOperandList>(
-      ir_operand_list.begin(), ir_operand_list.end(), ssa_names_);
-  const ir::NamedAttributeMap &ir_attr_map = operation.attributes();
-  DatalogAttributeList attribute_list =
-      RangeToDatalogList<DatalogAttributeList>(ir_attr_map.begin(),
-                                               ir_attr_map.end(), ssa_names_);
+  // Introduce a local to make capturing this field in lambdas easier.
+  ir::SsaNames &ssa_names = ssa_names_;
 
+  // Convert each operand into an `AccessPath` `Symbol` and put it in a
+  // `DatalogOperandList` to send to Souffle.
+  const ir::ValueList &ir_operand_list = operation.inputs();
+  DatalogOperandList operand_list = common::utils::rfold(
+      ir_operand_list, DatalogOperandList(),
+      [&ssa_names](DatalogOperandList list_so_far, const ir::Value &value) {
+        return DatalogOperandList(DatalogSymbol(value.ToString(ssa_names)),
+                                  std::move(list_so_far));
+      });
+
+  // Convert each `Attribute` to the analogous record in datalog and put into an
+  // `AttributeList`.
+  const ir::NamedAttributeMap &ir_attr_map = operation.attributes();
+  DatalogAttributeList attribute_list = common::utils::fold(
+      ir_attr_map, DatalogAttributeList(),
+      [&ssa_names](DatalogAttributeList list_so_far,
+                   std::pair<std::string, ir::Attribute> name_attr_pair) {
+        return DatalogAttributeList(
+            DatalogAttribute(DatalogSymbol(std::move(name_attr_pair.first)),
+                             GetPayloadForAttribute(
+                                 std::move(name_attr_pair.second), ssa_names)),
+            std::move(list_so_far));
+      });
   DatalogOperation datalog_operation(
       DatalogSymbol(kDefaultPrincipal), DatalogSymbol(op_name),
       DatalogSymbol(
