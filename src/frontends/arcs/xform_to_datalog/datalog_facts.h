@@ -28,7 +28,7 @@
 #include "src/frontends/arcs/xform_to_datalog/manifest_datalog_facts.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
-namespace raksha::xform_to_datalog {
+namespace raksha::frontends::arcs::xform_to_datalog {
 
 // A utility class that is used to generate a datalog program by combining
 // datalog facts from different sources and adding the necessary headers.
@@ -88,6 +88,6 @@ saysWill(w, x, y) :- says_will(w, x, y).
 )";
 };
 
-}  // namespace raksha::xform_to_datalog
+}  // namespace raksha::frontends::arcs::xform_to_datalog
 
 #endif  // SRC_FRONTENDS_ARCS_XFORM_TO_DATALOG_DATALOG_FACTS_H_

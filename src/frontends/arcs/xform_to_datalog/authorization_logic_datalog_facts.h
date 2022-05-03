@@ -22,7 +22,7 @@
 
 #include "absl/strings/string_view.h"
 
-namespace raksha::xform_to_datalog {
+namespace raksha::frontends::arcs::xform_to_datalog {
 
 class AuthorizationLogicDatalogFacts {
  public:
@@ -45,6 +45,6 @@ class AuthorizationLogicDatalogFacts {
   std::string datalog_facts_;
 };
 
-}  // namespace raksha::xform_to_datalog
+}  // namespace raksha::frontends::arcs::xform_to_datalog
 
 #endif  // SRC_FRONTENDS_ARCS_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_DATALOG_FACTS_H_

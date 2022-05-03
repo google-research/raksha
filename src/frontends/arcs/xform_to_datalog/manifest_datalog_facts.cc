@@ -22,7 +22,7 @@
 #include "src/ir/types/proto/type.h"
 #include "src/ir/types/type_factory.h"
 
-namespace raksha::xform_to_datalog {
+namespace raksha::frontends::arcs::xform_to_datalog {
 
 namespace arcs = frontends::arcs;
 namespace types = raksha::ir::types;
@@ -174,4 +174,4 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
   return ManifestDatalogFacts(std::move(particle_instances));
 }
 
-}  // namespace raksha::xform_to_datalog
+}  // namespace raksha::frontends::arcs::xform_to_datalog
