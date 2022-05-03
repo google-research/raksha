@@ -58,6 +58,53 @@ TEST(IRContextDeathTest, DuplicateOperatorRegistrationCausesFailure) {
       "Cannot register duplicate operator with name 'core.choose'.");
 }
 
+// Don't seed `Storage`s at static scope for now because the `Storage`s require
+// a `Type`, which is a `unique_ptr` to a `TypeBase` only constructable by a
+// `TypeFactory`. That's just hard to construct at static scope, so we don't do
+// that for now.
+//
+// We could test seeding both `Storage`s and `Operation`s at once with a
+// fixture, but we really want to show that seeding an `IRContext` with
+// `Operator`s works at the static scope.
+const IRContext kSeededContext({Operator("core.op1"), Operator("core.op2")},
+                               {});
+
+TEST(IRContextTest, SeededOperatorsAreRegistered) {
+  EXPECT_TRUE(kSeededContext.IsRegisteredOperator("core.op1"));
+  EXPECT_TRUE(kSeededContext.IsRegisteredOperator("core.op2"));
+  EXPECT_FALSE(kSeededContext.IsRegisteredOperator("core.op3"));
+}
+
+TEST(IRContextTest, GetSeededOperators) {
+  auto get_op1_result = kSeededContext.GetOperator("core.op1");
+  EXPECT_THAT(get_op1_result, testing::NotNull());
+  EXPECT_EQ(get_op1_result->name(), "core.op1");
+
+  auto get_op2_result = kSeededContext.GetOperator("core.op2");
+  EXPECT_THAT(get_op2_result, testing::NotNull());
+  EXPECT_EQ(get_op2_result->name(), "core.op2");
+
+  EXPECT_THAT(kSeededContext.GetOperator("core.op3"), testing::IsNull());
+}
+
+TEST(IRContextTest, DoubleRegisterSeededOperatorsFails) {
+  IRContext seeded_context({Operator("core.op1"), Operator("core.op2")}, {});
+  EXPECT_DEATH(
+      {
+        seeded_context.RegisterOperator(std::make_unique<Operator>("core.op1"));
+      },
+      "Cannot register duplicate operator with name 'core.op1'.");
+  EXPECT_DEATH(
+      {
+        seeded_context.RegisterOperator(std::make_unique<Operator>("core.op2"));
+      },
+      "Cannot register duplicate operator with name 'core.op2'.");
+  EXPECT_EQ(
+      seeded_context.RegisterOperator(std::make_unique<Operator>("core.op3"))
+          .name(),
+      "core.op3");
+}
+
 TEST(IRContextTest, RegisterStorageReturnsRegisteredStorage) {
   IRContext context;
   types::TypeFactory& type_factory = context.type_factory();
@@ -89,6 +136,63 @@ TEST(IRContextTest, IsRegisteredStorageReturnsCorrectValues) {
       std::make_unique<Storage>("storage1", type_factory.MakePrimitiveType()));
   EXPECT_TRUE(context.IsRegisteredStorage("storage1"));
   EXPECT_FALSE(context.IsRegisteredStorage("storage2"));
+}
+
+class SeededStorageTest : public testing::Test {
+ public:
+  SeededStorageTest()
+      : type_factory_(),
+        init_array_{Storage("storage1", type_factory_.MakePrimitiveType()),
+                    Storage("storage2", type_factory_.MakePrimitiveType())},
+        context_({}, std::vector<Storage>(
+                         std::make_move_iterator(std::begin(init_array_)),
+                         std::make_move_iterator(std::end(init_array_)))) {}
+
+ protected:
+  types::TypeFactory type_factory_;
+  // This is a hack to get around the fact that you can only copy out of C++
+  // initializer lists. We create a `std::array` to act as a mutable
+  // "initializer list" and move items from that into our destination vector.
+  std::array<ir::Storage, 2> init_array_;
+  IRContext context_;
+};
+
+TEST_F(SeededStorageTest, SeededStoragesAreRegistered) {
+  EXPECT_TRUE(context_.IsRegisteredStorage("storage1"));
+  EXPECT_TRUE(context_.IsRegisteredStorage("storage2"));
+  EXPECT_FALSE(context_.IsRegisteredStorage("storage3"));
+}
+
+TEST_F(SeededStorageTest, GetSeededStorages) {
+  const Storage* storage1 = context_.GetStorage("storage1");
+  EXPECT_THAT(storage1, testing::NotNull());
+  EXPECT_EQ(storage1->name(), "storage1");
+
+  const Storage* storage2 = context_.GetStorage("storage2");
+  EXPECT_THAT(storage2, testing::NotNull());
+  EXPECT_EQ(storage2->name(), "storage2");
+
+  EXPECT_THAT(context_.GetStorage("storage3"), testing::IsNull());
+}
+
+TEST_F(SeededStorageTest, DoubleRegisterSeededStorages) {
+  EXPECT_DEATH(
+      {
+        context_.RegisterStorage(std::make_unique<Storage>(
+            "storage1", type_factory_.MakePrimitiveType()));
+      },
+      "Cannot register duplicate storage with name 'storage1'.");
+  EXPECT_DEATH(
+      {
+        context_.RegisterStorage(std::make_unique<Storage>(
+            "storage2", type_factory_.MakePrimitiveType()));
+      },
+      "Cannot register duplicate storage with name 'storage2'.");
+  EXPECT_EQ(context_
+                .RegisterStorage(std::make_unique<Storage>(
+                    "storage3", type_factory_.MakePrimitiveType()))
+                .name(),
+            "storage3");
 }
 
 TEST(IRContextDeathTest, GetStorageReturnsNullptrForUnregisteredStorage) {
