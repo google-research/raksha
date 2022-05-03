@@ -1,5 +1,5 @@
-#ifndef SRC_FRONTENDS_ARCS_ACCESS_PATH_SELECTORS_H_
-#define SRC_FRONTENDS_ARCS_ACCESS_PATH_SELECTORS_H_
+#ifndef SRC_IR_ACCESS_PATH_SELECTORS_H_
+#define SRC_IR_ACCESS_PATH_SELECTORS_H_
 
 #include <vector>
 
@@ -85,4 +85,4 @@ class AccessPathSelectors {
 
 }  // namespace raksha::ir
 
-#endif  // SRC_FRONTENDS_ARCS_ACCESS_PATH_SELECTORS_H_
+#endif  // SRC_IR_ACCESS_PATH_SELECTORS_H_
