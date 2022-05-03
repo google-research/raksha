@@ -44,27 +44,39 @@ static const IntVecAndSum kIntVecsAndSum[] = {
 INSTANTIATE_TEST_SUITE_P(SumFoldTest, SumFoldTest,
                          testing::ValuesIn(kIntVecsAndSum));
 
-class ConcatFoldTest : public testing::TestWithParam<std::vector<std::string>> {
+struct StringVecsAndConcatResults {
+  std::vector<std::string> string_vec;
+  std::string concat_result;
+  std::string reverse_concat_result;
 };
 
+class ConcatFoldTest
+    : public testing::TestWithParam<StringVecsAndConcatResults> {};
+
 TEST_P(ConcatFoldTest, ConcatFoldTest) {
-  const std::vector<std::string> &string_vec = GetParam();
+  const auto &[string_vec, concat_result, reverse_concat_result] = GetParam();
   auto concat_fn = [](std::string concat_so_far, const std::string &input) {
     // Yes, this is bad form in general, but the quadraticness shouldn't matter
     // for a test.
     return concat_so_far + input;
   };
-  EXPECT_EQ(fold(string_vec, std::string(""), concat_fn),
-            absl::StrJoin(string_vec, ""));
+  EXPECT_EQ(fold(string_vec, std::string(""), concat_fn), concat_result);
   EXPECT_EQ(rfold(string_vec, std::string(""), concat_fn),
-            absl::StrJoin(string_vec.rbegin(), string_vec.rend(), ""));
+            reverse_concat_result);
 }
 
-static const std::vector<std::string> kSampleStringVecs[] = {
-    {}, {"x"}, {"hello", "world"}, {"a", "b", "c", "d", "e"}};
+static const StringVecsAndConcatResults kSampleStringVecsAndConcatResults[] = {
+    {.string_vec = {}, .concat_result = "", .reverse_concat_result = ""},
+    {.string_vec = {"x"}, .concat_result = "x", .reverse_concat_result = "x"},
+    {.string_vec = {"hello", "world"},
+     .concat_result = "helloworld",
+     .reverse_concat_result = "worldhello"},
+    {.string_vec = {"a", "b", "c", "d", "e"},
+     .concat_result = "abcde",
+     .reverse_concat_result = "edcba"}};
 
 INSTANTIATE_TEST_SUITE_P(ConcatFoldTest, ConcatFoldTest,
-                         testing::ValuesIn(kSampleStringVecs));
+                         testing::ValuesIn(kSampleStringVecsAndConcatResults));
 
 // Box and unbox some strings via `fold`. This mainly tests that we can handle
 // an uncopyable accumulator (ie, the vector of unique pointers that we build
@@ -89,6 +101,9 @@ TEST_P(BoxFoldTest, BoxFoldTest) {
            });
   EXPECT_THAT(unboxed_strings, testing::ElementsAreArray(string_vec));
 }
+
+static const std::vector<std::string> kSampleStringVecs[] = {
+    {}, {"x"}, {"hello", "world"}, {"a", "b", "c", "d", "e"}};
 
 INSTANTIATE_TEST_SUITE_P(BoxFoldTest, BoxFoldTest,
                          testing::ValuesIn(kSampleStringVecs));
