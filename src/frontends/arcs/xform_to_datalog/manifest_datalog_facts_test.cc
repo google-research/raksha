@@ -25,7 +25,7 @@
 #include "src/frontends/arcs/proto/system_spec.h"
 #include "src/ir/types/primitive_type.h"
 
-namespace raksha::xform_to_datalog {
+namespace raksha::frontends::arcs::xform_to_datalog {
 
 namespace arcs = frontends::arcs;
 
@@ -436,4 +436,4 @@ TEST_F(ParseBigManifestTest, ManifestProtoEdgesTest) {
               testing::UnorderedElementsAreArray(kExpectedEdgeStrings));
 }
 
-}  // namespace raksha::xform_to_datalog
+}  // namespace raksha::frontends::arcs::xform_to_datalog

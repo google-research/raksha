@@ -40,7 +40,7 @@ extern "C" int generate_datalog_facts_from_authorization_logic(
 
 #endif
 
-namespace raksha::xform_to_datalog {
+namespace raksha::frontends::arcs::xform_to_datalog {
 
 int GenerateDatalogFactsFromAuthorizationLogic(
     absl::string_view program, const std::filesystem::path& program_dir,
@@ -77,4 +77,4 @@ int GenerateDatalogFactsFromAuthorizationLogic(
 #endif
 }
 
-}  // namespace raksha::xform_to_datalog
+}  // namespace raksha::frontends::arcs::xform_to_datalog

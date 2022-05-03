@@ -29,7 +29,7 @@
 #include "src/ir/types/type_factory.h"
 #include "third_party/arcs/proto/manifest.pb.h"
 
-namespace raksha::xform_to_datalog {
+namespace raksha::frontends::arcs::xform_to_datalog {
 
 class ManifestDatalogFacts {
  public:
@@ -64,7 +64,7 @@ class ManifestDatalogFacts {
   static ManifestDatalogFacts CreateFromManifestProto(
       ir::types::TypeFactory &type_factory,
       const frontends::arcs::SystemSpec &system_spec,
-      const arcs::ManifestProto &manifest_proto);
+      const ::arcs::ManifestProto &manifest_proto);
 
   // A default constructor creates a sensible, legal state (no facts) and
   // allows a bit more flexibility in constructing objects within which
@@ -122,6 +122,6 @@ class ManifestDatalogFacts {
   std::vector<Particle> particle_instances_;
 };
 
-}  // namespace raksha::xform_to_datalog
+}  // namespace raksha::frontends::arcs::xform_to_datalog
 
 #endif  // SRC_FRONTENDS_ARCS_XFORM_TO_DATALOG_MANIFEST_DATALOG_FACTS_H_

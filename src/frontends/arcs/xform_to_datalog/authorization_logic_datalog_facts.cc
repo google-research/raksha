@@ -26,7 +26,7 @@
 #include "src/common/logging/logging.h"
 #include "src/frontends/arcs/xform_to_datalog/authorization_logic.h"
 
-namespace raksha::xform_to_datalog {
+namespace raksha::frontends::arcs::xform_to_datalog {
 
 std::optional<AuthorizationLogicDatalogFacts>
 AuthorizationLogicDatalogFacts::create(const std::filesystem::path &program_dir,
@@ -82,4 +82,4 @@ AuthorizationLogicDatalogFacts::create(const std::filesystem::path &program_dir,
   return AuthorizationLogicDatalogFacts(datalog_program);
 }
 
-}  // namespace raksha::xform_to_datalog
+}  // namespace raksha::frontends::arcs::xform_to_datalog

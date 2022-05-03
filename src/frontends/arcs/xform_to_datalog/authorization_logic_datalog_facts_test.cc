@@ -28,7 +28,7 @@
 
 namespace fs = std::filesystem;
 
-namespace raksha::xform_to_datalog {
+namespace raksha::frontends::arcs::xform_to_datalog {
 
 // If authorization logic is disabled, just run a single, always-true dummy
 // test.
@@ -76,4 +76,4 @@ TEST(AuthorizationLogicDatalogFactsTest, InvalidFileReturnsNullOpt) {
 
 #endif
 
-}  // namespace raksha::xform_to_datalog
+}  // namespace raksha::frontends::arcs::xform_to_datalog
