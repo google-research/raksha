@@ -36,13 +36,11 @@ class IRContext {
   // Create a context with some number of operators and storages pre-seeded.
   IRContext(std::vector<ir::Operator> operators,
             std::vector<ir::Storage> storages) {
-    for (auto iter = std::make_move_iterator(operators.begin());
-         iter != std::make_move_iterator(operators.end()); ++iter) {
-      RegisterOperator(std::make_unique<Operator>(*iter));
+    for (ir::Operator &op : operators) {
+      RegisterOperator(std::make_unique<Operator>(std::move(op)));
     }
-    for (auto iter = std::make_move_iterator(storages.begin());
-         iter != std::make_move_iterator(storages.end()); ++iter) {
-      RegisterStorage(std::make_unique<Storage>(*iter));
+    for (Storage &storage : storages) {
+      RegisterStorage(std::make_unique<Storage>(std::move(storage)));
     }
   }
 
