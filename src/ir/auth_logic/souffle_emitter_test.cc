@@ -26,7 +26,7 @@ namespace raksha::ir::auth_logic {
 Program BuildSingleAssertionProgram(SaysAssertion assertion) {
   std::vector<SaysAssertion> assertion_list = {};
   assertion_list.push_back(std::move(assertion));
-  return Program(std::move(assertion_list), {});
+  return Program({}, std::move(assertion_list), {});
 }
 
 SaysAssertion BuildSingleSaysAssertion(Principal speaker, Assertion assertion) {
@@ -209,7 +209,7 @@ Program BuildMultiAssertionProgram() {
   std::vector<SaysAssertion> assertion_list = {};
   assertion_list.push_back(std::move(condAssertion));
   assertion_list.push_back(std::move(predicateAssertion));
-  return Program(std::move(assertion_list), {});
+  return Program({}, std::move(assertion_list), {});
 }
 
 TEST(EmitterTestSuite, MultiAssertionProgramTest) {
@@ -233,7 +233,7 @@ Program BuildQueryProgram() {
                                                        datalog::kPositive))));
   std::vector<Query> query_list = {};
   query_list.push_back(std::move(testQuery));
-  return Program({}, std::move(query_list));
+  return Program({}, {}, std::move(query_list));
 }
 
 TEST(EmitterTestSuite, QueryTestProgram) {
