@@ -74,6 +74,37 @@ TEST_P(TagTransformOpTest, TestSomething) {
   EXPECT_EQ(tag_transform_op->attributes(), attributes);
 }
 
+TEST_P(TagTransformOpTest, TestCtorBehavesAsExpected) {
+  const auto& [parent_block, policy_rule_name, xformed_value, preconditions] =
+      GetParam();
+  TagTransformOp tag_transform_op(parent_block, context, policy_rule_name,
+                                  xformed_value, preconditions);
+
+  EXPECT_EQ(tag_transform_op.op().name(), OpTraits<TagTransformOp>::kName);
+  EXPECT_EQ(tag_transform_op.parent(), parent_block);
+
+  const ir::ValueList& inputs = tag_transform_op.inputs();
+  EXPECT_EQ(inputs.size(), preconditions.size() + 1);
+  ASSERT_GT(inputs.size(), 0);
+  EXPECT_EQ(inputs.front(), xformed_value)
+      << "First operand is not the transformed value.";
+  ir::ValueList precondition_values;
+  ir::NamedAttributeMap attributes;
+  attributes.insert(
+      {std::string(TagTransformOp::kRuleNameAttribute),
+       ir::Attribute::Create<ir::StringAttribute>(policy_rule_name)});
+  absl::c_for_each(
+      preconditions, [&attributes, &precondition_values,
+                      index = 1](const auto& precondition) mutable {
+        attributes.insert({precondition.first,
+                           ir::Attribute::Create<ir::Int64Attribute>(index++)});
+        precondition_values.push_back(precondition.second);
+      });
+  EXPECT_THAT(utils::make_range(inputs.begin() + 1, inputs.end()),
+              ::testing::ElementsAreArray(precondition_values));
+  EXPECT_EQ(tag_transform_op.attributes(), attributes);
+}
+
 TEST_P(TagTransformOpTest, AccessorsReturnTheCorrectValue) {
   const auto& [parent_block, policy_rule_name, xformed_value, preconditions] =
       GetParam();

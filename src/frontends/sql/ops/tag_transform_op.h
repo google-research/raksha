@@ -30,10 +30,18 @@ class TagTransformOp : public SqlOp {
       "sql.tag_transform.rule_name";
 
   // Constructs a TagTransformOp.
-  static std::unique_ptr<TagTransformOp> Create(
+  TagTransformOp(
       const ir::Block* parent_block, const ir::IRContext& context,
       absl::string_view rule_name, ir::Value transformed_value,
       const std::vector<std::pair<std::string, ir::Value>>& preconditions);
+
+  static std::unique_ptr<TagTransformOp> Create(
+      const ir::Block* parent_block, const ir::IRContext& context,
+      absl::string_view rule_name, ir::Value transformed_value,
+      const std::vector<std::pair<std::string, ir::Value>>& preconditions) {
+    return std::make_unique<TagTransformOp>(parent_block, context, rule_name,
+                                            transformed_value, preconditions);
+  }
 
   // Returns the value that is being tranformed by this op.
   ir::Value GetTransformedValue() const;
@@ -42,10 +50,6 @@ class TagTransformOp : public SqlOp {
   absl::flat_hash_map<std::string, ir::Value> GetPreconditions() const;
 
   absl::string_view GetRuleName() const;
-
- private:
-  // Inherit constructors.
-  using SqlOp::SqlOp;
 };
 
 }  // namespace raksha::frontends::sql

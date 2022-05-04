@@ -29,16 +29,17 @@ class LiteralOp : public SqlOp {
   static constexpr absl::string_view kLiteralStringAttrName = "literal_string";
 
   // Constructs a LiteralOp.
+  LiteralOp(const ir::Block* parent_block, const ir::IRContext& context,
+            absl::string_view literal);
+
   static std::unique_ptr<LiteralOp> Create(const ir::Block* parent_block,
                                            const ir::IRContext& context,
-                                           absl::string_view literal);
+                                           absl::string_view literal) {
+    return std::make_unique<LiteralOp>(parent_block, context, literal);
+  }
 
   // Returns the literal string associated with the operation.
   absl::string_view GetLiteralString() const;
-
- private:
-  // Inherit constructors.
-  using SqlOp::SqlOp;
 };
 
 }  // namespace raksha::frontends::sql

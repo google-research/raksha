@@ -30,31 +30,39 @@
 
 namespace raksha::frontends::sql {
 
-std::unique_ptr<MergeOp> MergeOp::Create(const ir::Block* parent_block,
-                                         const ir::IRContext& context,
-                                         ir::ValueList direct_inputs,
-                                         ir::ValueList control_inputs) {
-  // Do some sanity checks.
-  CHECK(!direct_inputs.empty() || !control_inputs.empty())
-      << "Both direct inputs and control inputs are empty.";
-  CHECK(direct_inputs.size() < std::numeric_limits<int64_t>::max())
-      << "Too many direct_inputs.";  // We will not test this.
-
-  // Now remember the index for the start of control inputs.
-  int64_t control_start_index = static_cast<int64_t>(direct_inputs.size());
-
-  // Move direct_inputs and control_inputs to inputs.
+ir::ValueList MakeCombinedInputs(ir::ValueList direct_inputs,
+                                 ir::ValueList control_inputs) {
   ir::ValueList inputs;
   absl::c_move(direct_inputs, std::back_inserter(inputs));
   absl::c_move(control_inputs, std::back_inserter(inputs));
+  return inputs;
+}
 
-  // Construct and return the operation
-  return std::make_unique<MergeOp>(
-      parent_block, *CHECK_NOTNULL(SqlOp::GetOperator<MergeOp>(context)),
-      ir::NamedAttributeMap(
-          {{std::string(kControlInputStartIndex),
-            ir::Attribute::Create<ir::Int64Attribute>(control_start_index)}}),
-      std::move(inputs));
+static int64_t GetControlInputStartIndexFromDirectInputListSize(
+    size_t direct_inputs_size) {
+  int64_t control_start_index = static_cast<int64_t>(direct_inputs_size);
+  return control_start_index;
+}
+
+MergeOp::MergeOp(const ir::Block* parent_block, const ir::IRContext& context,
+                 ir::ValueList direct_inputs, ir::ValueList control_inputs)
+    : SqlOp(parent_block, *CHECK_NOTNULL(SqlOp::GetOperator<MergeOp>(context)),
+            ir::NamedAttributeMap(
+                {{std::string(kControlInputStartIndex),
+                  ir::Attribute::Create<ir::Int64Attribute>(
+                      GetControlInputStartIndexFromDirectInputListSize(
+                          direct_inputs.size()))}}),
+            // Note: if we move `direct_inputs` here, we destroy the contents of
+            // the vector which are needed for initializing the attribute list.
+            // Unfortunately, there is no guarantee on the order in which the
+            // arguments to this parent ctor will be evaluated. We should see if
+            // we can get rid of this copy somehow.
+            MakeCombinedInputs(direct_inputs, std::move(control_inputs))) {
+  // Do some sanity checks.
+  CHECK(!inputs().empty())
+      << "Both direct inputs and control inputs are empty.";
+  CHECK(inputs().size() < std::numeric_limits<int64_t>::max())
+      << "Too many direct_inputs.";  // We will not test this.
 }
 
 ir::ValueRange MergeOp::GetDirectInputs() const {

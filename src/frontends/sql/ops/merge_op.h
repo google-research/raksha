@@ -37,10 +37,17 @@ class MergeOp : public SqlOp {
       "control_input_start_index";
 
   // Constructs a MergeOp.
+  MergeOp(const ir::Block* parent_block, const ir::IRContext& context,
+          ir::ValueList direct_inputs, ir::ValueList control_inputs);
+
   static std::unique_ptr<MergeOp> Create(const ir::Block* parent_block,
                                          const ir::IRContext& context,
                                          ir::ValueList direct_inputs,
-                                         ir::ValueList control_inputs);
+                                         ir::ValueList control_inputs) {
+    return std::make_unique<MergeOp>(parent_block, context,
+                                     std::move(direct_inputs),
+                                     std::move(control_inputs));
+  }
 
   // Returns an iterator range for the direct inputs.
   ir::ValueRange GetDirectInputs() const;
@@ -50,10 +57,6 @@ class MergeOp : public SqlOp {
 
   // Returns the index where the control inputs start.
   size_t GetControlInputStartIndex() const;
-
- private:
-  // Inherit constructors.
-  using SqlOp::SqlOp;
 };
 
 }  // namespace raksha::frontends::sql

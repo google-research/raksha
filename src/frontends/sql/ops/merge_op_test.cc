@@ -65,6 +65,27 @@ TEST_P(MergeOpTest, FactoryMethodCreatesCorrectOperation) {
                   ir::Attribute::Create<ir::Int64Attribute>(inputs.size()))));
 }
 
+TEST_P(MergeOpTest, CtorCreatesCorrectOperation) {
+  const auto& [inputs, controls] = GetParam();
+  // It is rare for the assignment to lose precision.
+  // Even if it does, the test will most certainly fail.
+  int64_t control_start_index = inputs.size();
+
+  MergeOp op(nullptr, context_, inputs, controls);
+  EXPECT_EQ(op.op().name(), OpTraits<MergeOp>::kName);
+  EXPECT_EQ(op.parent(), nullptr);
+  EXPECT_THAT(utils::make_range(op.inputs().begin(),
+                                op.inputs().begin() + control_start_index),
+              ElementsAreArray(inputs));
+  EXPECT_THAT(utils::make_range(op.inputs().begin() + control_start_index,
+                                op.inputs().end()),
+              ElementsAreArray(controls));
+  EXPECT_THAT(op.attributes(),
+              UnorderedElementsAre(Pair(
+                  std::string(MergeOp::kControlInputStartIndex),
+                  ir::Attribute::Create<ir::Int64Attribute>(inputs.size()))));
+}
+
 TEST_P(MergeOpTest, EnsureInputsAndEmptyInParamAreNotEmptySimultaneously) {
   const auto& [inputs, controls] = GetParam();
   // This will cause failures which is tested in a separate death test.

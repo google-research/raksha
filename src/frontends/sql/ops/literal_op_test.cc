@@ -40,5 +40,19 @@ TEST(LiteralOpTest, FactoryMethodCreatesCorrectOperation) {
                   ir::Attribute::Create<ir::StringAttribute>("hello"))));
 }
 
+static const ir::IRContext kContext({ir::Operator(OpTraits<LiteralOp>::kName)},
+                                    {});
+static LiteralOp kGlobalLiteralOp(nullptr, kContext, "hello");
+
+TEST(LiteralOpTest, CtorCreatesCorrectOperation) {
+  EXPECT_EQ(kGlobalLiteralOp.op().name(), OpTraits<LiteralOp>::kName);
+  EXPECT_EQ(kGlobalLiteralOp.parent(), nullptr);
+  EXPECT_TRUE(kGlobalLiteralOp.inputs().empty());
+  EXPECT_THAT(kGlobalLiteralOp.attributes(),
+              testing::UnorderedElementsAre(testing::Pair(
+                  std::string(LiteralOp::kLiteralStringAttrName),
+                  ir::Attribute::Create<ir::StringAttribute>("hello"))));
+}
+
 }  // namespace
 }  // namespace raksha::frontends::sql

@@ -26,29 +26,43 @@
 
 namespace raksha::frontends::sql {
 
-std::unique_ptr<TagTransformOp> TagTransformOp::Create(
-    const ir::Block* parent_block, const ir::IRContext& context,
-    absl::string_view rule_name, ir::Value transformed_value,
+static ir::ValueList MakeInputs(
+    ir::Value transformed_value,
     const std::vector<std::pair<std::string, ir::Value>>& preconditions) {
   ir::ValueList inputs;
-  ir::NamedAttributeMap attributes;
   inputs.push_back(transformed_value);
-  int64_t index = 1;
-  attributes.insert({std::string(kRuleNameAttribute),
-                     ir::Attribute::Create<ir::StringAttribute>(rule_name)});
-  CHECK(preconditions.size() < std::numeric_limits<int64_t>::max());
   for (const auto& [name, value] : preconditions) {
     inputs.push_back(value);
+  }
+  return inputs;
+}
+
+static ir::NamedAttributeMap MakeAttributes(
+    absl::string_view rule_name,
+    const std::vector<std::pair<std::string, ir::Value>>& preconditions) {
+  ir::NamedAttributeMap attributes;
+  int64_t index = 1;
+  attributes.insert({std::string(TagTransformOp::kRuleNameAttribute),
+                     ir::Attribute::Create<ir::StringAttribute>(rule_name)});
+  for (const auto& [name, value] : preconditions) {
     auto insert_result = attributes.insert(
         {name, ir::Attribute::Create<ir::Int64Attribute>(index++)});
     CHECK(insert_result.second)
         << "Duplicate precondition name '" << name << "'.";
   }
+  return attributes;
+}
 
-  return std::make_unique<TagTransformOp>(
-      parent_block,
-      *CHECK_NOTNULL(context.GetOperator(OpTraits<TagTransformOp>::kName)),
-      attributes, inputs);
+TagTransformOp::TagTransformOp(
+    const ir::Block* parent_block, const ir::IRContext& context,
+    absl::string_view rule_name, ir::Value transformed_value,
+    const std::vector<std::pair<std::string, ir::Value>>& preconditions)
+    : SqlOp(
+          parent_block,
+          *CHECK_NOTNULL(context.GetOperator(OpTraits<TagTransformOp>::kName)),
+          MakeAttributes(rule_name, preconditions),
+          MakeInputs(transformed_value, preconditions)) {
+  CHECK(preconditions.size() < std::numeric_limits<int64_t>::max());
 }
 
 ir::Value TagTransformOp::GetTransformedValue() const {
