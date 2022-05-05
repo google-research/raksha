@@ -20,6 +20,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
+#include "src/common/logging/logging.h"
 #include "src/common/utils/map_iter.h"
 #include "src/ir/datalog/program.h"
 
@@ -67,10 +68,12 @@ class SouffleEmitter {
   }
 
   std::string EmitPredicate(const datalog::Predicate& predicate) {
-    std::vector<std::string> comparision_operators = {"<",  ">",  "=",
+    const absl::string_view comparison_operators[] = {"<",  ">",  "=",
                                                       "!=", "<=", ">="};
-    if (std::find(comparision_operators.begin(), comparision_operators.end(),
-                  predicate.name()) != comparision_operators.end()) {
+    if (std::find(std::begin(comparison_operators),
+                  std::end(comparison_operators),
+                  predicate.name()) != std::end(comparison_operators)) {
+      CHECK(predicate.args().size() == 2);
       return absl::StrCat(predicate.args().front(), predicate.name(),
                           predicate.args().back());
     }
@@ -128,17 +131,17 @@ class SouffleEmitter {
   std::string EmitRelationDeclarations(
       const datalog::Program& program,
       const std::vector<std::string>& skip_declarations) {
-    std::vector<std::string> declaration_string;
+    std::vector<std::string> declaration_strings;
     for (const auto& declaration : program.relation_declarations()) {
-      if (std::find(skip_declarations.begin(), skip_declarations.end(),
-                    declaration.relation_name()) == skip_declarations.end()) {
-        declaration_string.push_back(
-            absl::StrCat(".decl ", declaration.relation_name(), "(",
-                         EmitArguments(declaration.arguments()), ")"));
-      }
+      if (absl::c_find(skip_declarations, declaration.relation_name()) !=
+          skip_declarations.end())
+        continue;
+      declaration_strings.push_back(
+          absl::StrCat(".decl ", declaration.relation_name(), "(",
+                       EmitArguments(declaration.arguments()), ")"));
     }
-    std::sort(declaration_string.begin(), declaration_string.end());
-    return absl::StrJoin(declaration_string, "\n");
+    std::sort(declaration_strings.begin(), declaration_strings.end());
+    return absl::StrJoin(declaration_strings, "\n");
   }
 
   std::string EmitTypeDeclarations(
@@ -147,13 +150,14 @@ class SouffleEmitter {
     std::vector<std::string> type_names;
     for (const auto& declaration : program.relation_declarations()) {
       for (const auto& argument : declaration.arguments()) {
-        if ((argument.argument_type().kind() ==
-             datalog::ArgumentType::Kind::kCustom) &&
-            (std::find(skip_declarations.begin(), skip_declarations.end(),
-                       argument.argument_name()) == skip_declarations.end())) {
-          type_names.push_back(absl::StrCat(
-              ".type ", argument.argument_type().name(), " <: symbol"));
-        }
+        if (argument.argument_type().kind() !=
+            datalog::ArgumentType::Kind::kCustom)
+          continue;
+        if (absl::c_find(skip_declarations, argument.argument_name()) !=
+            skip_declarations.end())
+          continue;
+        type_names.push_back(absl::StrCat(
+            ".type ", argument.argument_type().name(), " <: symbol"));
       }
     }
     std::sort(type_names.begin(), type_names.end());

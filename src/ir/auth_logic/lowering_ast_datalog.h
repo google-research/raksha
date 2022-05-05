@@ -207,6 +207,16 @@ class LoweringToDatalogPass {
   static inline datalog::Predicate kDummyPredicate =
       datalog::Predicate("grounded_dummy", {"dummy_var"}, datalog::kPositive);
 
+  std::vector<datalog::RelationDeclaration> TransformDeclarations(
+      const std::vector<datalog::RelationDeclaration>& relation_declarations);
+
+  std::vector<datalog::RelationDeclaration> CanSayDeclarations(
+      const absl::flat_hash_map<std::string_view, datalog::RelationDeclaration>&
+          type_environment);
+
+  std::vector<datalog::RelationDeclaration> SaysExtendRelationDeclarations(
+      const std::vector<datalog::RelationDeclaration>& relation_declarations);
+
   std::vector<datalog::RelationDeclaration> RelationDeclarationToDLIR(
       const std::vector<datalog::RelationDeclaration>& relation_declaration);
 
@@ -217,22 +227,23 @@ class LoweringToDatalogPass {
 
   datalog::Program ProgToDLIR(const Program& program);
 
-  void update_can_say_depth(std::string_view predicate_name, uint64_t depth);
+  void UpdateCanSayDepth(std::string_view predicate_name, uint64_t depth);
 
   uint64_t fresh_var_count_;
   // This pass needs to generate relation declarations for predicates that
-  // appear in `AstCanSayFact`s which look like `A1 says A2 canSay ... An canSay
-  // foo(args)` and can in general be nested. The generated declarations look
-  // like: `says_cansay_..._cansay_foo(A1, A2, ..., An, args)`, so to generate
-  // these declarations, we need to know the number of "canSays" to include for
-  // each base predicate (e.g., foo). This pass does this by tracking the
-  // maximum depth of "canSay"s with which each predicate is used and storing
-  // this in the `cansay_depth` HashMap. When a predicate appears with depth
-  // `n`, it may also need to be used with depths (1..n), so we only maintain
-  // the maximum depth in which it appears and we generate declarations for
-  // (1..n). `cansay_depth` is only updated by `update_cansay_depth` which
+  // appear in `AST CanSay Fact`s which look like `A1 says A2 canSay ... An
+  // canSay foo(args)` and can in general be nested. The generated declarations
+  // look like: `says_cansay_..._cansay_foo(A1, A2, ..., An, args)`, so to
+  // generate these declarations, we need to know the number of "canSays" to
+  // include for each base predicate (e.g., foo). This pass does this by
+  // tracking the maximum depth of "canSay"s with which each predicate is used
+  // and storing this in the `cansay_depth` HashMap. When a predicate appears
+  // with depth `n`, it may also need to be used with depths (1..n), so we only
+  // maintain the maximum depth in which it appears and we generate declarations
+  // for (1..n). `can_say_depth` is only updated by `UpdateCansayDepth` which
   // tracks this maximum.
-  absl::flat_hash_map<std::string_view, uint64_t> can_say_depth;
+  // key: predicate name, value: Number of can says.
+  absl::flat_hash_map<std::string_view, uint64_t> can_say_depth_;
 };
 
 }  // namespace raksha::ir::auth_logic

@@ -35,6 +35,9 @@ struct SaysAssertionTestData {
   std::vector<std::string> assertions;
 };
 
+class AstConstructionTest
+    : public testing::TestWithParam<SaysAssertionTestData> {};
+
 class SaysAssertionAstConstructionTest
     : public testing::TestWithParam<SaysAssertionTestData> {};
 

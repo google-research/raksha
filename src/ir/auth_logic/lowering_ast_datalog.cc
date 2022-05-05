@@ -67,12 +67,12 @@ datalog::Predicate CanActAsToDLIR(const CanActAs& can_act_as) {
 }
 }  // namespace
 
-void LoweringToDatalogPass::update_can_say_depth(
-    std::string_view predicate_name, uint64_t depth) {
-  if (can_say_depth.find(predicate_name) == can_say_depth.end()) {
-    can_say_depth.insert({predicate_name, depth});
-  } else if (depth > can_say_depth.find(predicate_name)->second) {
-    can_say_depth.find(predicate_name)->second = depth;
+void LoweringToDatalogPass::UpdateCanSayDepth(std::string_view predicate_name,
+                                              uint64_t depth) {
+  if (can_say_depth_.find(predicate_name) == can_say_depth_.end()) {
+    can_say_depth_.insert({predicate_name, depth});
+  } else if (depth > can_say_depth_.find(predicate_name)->second) {
+    can_say_depth_.find(predicate_name)->second = depth;
   }
 }
 
@@ -117,7 +117,6 @@ datalog::Rule LoweringToDatalogPass::SpokenCanActAsToDLIR(
   //    speaker says Y canActAs X, speaker says X canActAs Z`
   // (Where Y is a fresh variable)
   Principal prin_y(FreshVar());
-  // LoweringToDatalogPass::update_can_say_depth();
   // This is `speaker says Y canActAs Z`
   datalog::Predicate y_can_act_as_z =
       CanActAsToDLIR(CanActAs(prin_y, can_act_as.right_principal()));
@@ -174,7 +173,7 @@ LoweringToDatalogPass::BaseFactToDLIR(const Principal& speaker,
 std::pair<datalog::Predicate, std::vector<datalog::Rule>>
 LoweringToDatalogPass::FactToDLIR(const Principal& speaker, const Fact& fact) {
   auto [inner_fact_dlir, gen_rules] = BaseFactToDLIR(speaker, fact.base_fact());
-  uint64_t can_say_depth_ = 0;
+  uint64_t can_say_depth_inner = 0;
   for (const Principal& delegatees : fact.delegation_chain()) {
     Principal fresh_principal(FreshVar());
     // The following code generates the extra rule that does
@@ -205,9 +204,9 @@ LoweringToDatalogPass::FactToDLIR(const Principal& speaker, const Fact& fact) {
     datalog::Predicate prin_cansay_pred =
         PushPrincipal("canSay_", delegatees, inner_fact_dlir);
     inner_fact_dlir = prin_cansay_pred;
-    can_say_depth_ += 1;
+    can_say_depth_inner += 1;
   }
-  update_can_say_depth(inner_fact_dlir.name(), can_say_depth_);
+  UpdateCanSayDepth(inner_fact_dlir.name(), can_say_depth_inner);
   return std::make_pair(inner_fact_dlir, gen_rules);
 }
 
@@ -281,93 +280,73 @@ std::vector<datalog::Rule> LoweringToDatalogPass::QueriesToDLIR(
 }
 
 std::vector<datalog::RelationDeclaration>
-LoweringToDatalogPass::RelationDeclarationToDLIR(
+LoweringToDatalogPass::TransformDeclarations(
     const std::vector<datalog::RelationDeclaration>& relation_declarations) {
-  // Note that the additional relation declarations that are generated for
-  // (possibly nested) cansay expressions are based on an environment
-  // that tracks the maximum depth with which they appear. This environment is
-  // populated by side-effect while translating the program body. As a result,
-  // it is assumed that this function is called after the body is translated.
-
-  // The base relation declarations are the same as the ones from the
-  // surface program plus another one for "canActAs"
-  std::vector<datalog::RelationDeclaration> base_declarations =
-      relation_declarations;
-  base_declarations.push_back(datalog::RelationDeclaration(
-      "canActAs", false,
-      {datalog::Argument(
-           "p1", datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
-                                       "Principal")),
-       datalog::Argument(
-           "p2", datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
-                                       "Principal"))}));
   // Attributes have a principal that the attribute is applied to
   // as an additional parameter at the beginning of the param list.
   // Transform the attributes
-  std::vector<datalog::RelationDeclaration> transformed_declarations =
-      utils::MapIter<datalog::RelationDeclaration>(
-          base_declarations, [](datalog::RelationDeclaration declaration) {
-            if (declaration.is_attribute()) {
-              std::vector<datalog::Argument> transformed_arguments = {
-                  datalog::Argument("attribute_prin",
-                                    datalog::ArgumentType(
-                                        datalog::ArgumentType::Kind::kPrincipal,
+  return utils::MapIter<datalog::RelationDeclaration>(
+      relation_declarations,
+      [](const datalog::RelationDeclaration& declaration) {
+        if (declaration.is_attribute()) {
+          std::vector<datalog::Argument> transformed_arguments = {
+              datalog::Argument(
+                  "attribute_prin",
+                  datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
                                         "Principal"))};
-              transformed_arguments.insert(transformed_arguments.end(),
-                                           declaration.arguments().begin(),
-                                           declaration.arguments().end());
-              return datalog::RelationDeclaration(declaration.relation_name(),
-                                                  false, transformed_arguments);
-            } else {
-              return declaration;
-            }
-          });
-  // Produce a mapping from predicate names to predicate typings
-  // (where a predicate typing is the same as a predicate relation declaration)
-  absl::flat_hash_map<std::string_view, datalog::RelationDeclaration>
-      type_environment;
-  for (datalog::RelationDeclaration declaration : transformed_declarations) {
-    type_environment.insert({declaration.relation_name(), declaration});
-  }
+          absl::c_copy(declaration.arguments(),
+                       std::back_inserter(transformed_arguments));
 
+          return datalog::RelationDeclaration(declaration.relation_name(),
+                                              false, transformed_arguments);
+        } else {
+          return declaration;
+        }
+      });
+}
+
+std::vector<datalog::RelationDeclaration>
+LoweringToDatalogPass::CanSayDeclarations(
+    const absl::flat_hash_map<std::string_view, datalog::RelationDeclaration>&
+        type_environment) {
   // Generate relation declarations for delegated predicates with
   // each encountered delegation depth
   std::vector<datalog::RelationDeclaration> can_say_declarations;
-  for (const auto& can_say_depth_pair : can_say_depth) {
-    auto type_iterator = type_environment.find(can_say_depth_pair.first);
-
-    if ((can_say_depth_pair.second > 0) &&
-        (type_iterator != type_environment.end())) {
-      datalog::RelationDeclaration declaration = type_iterator->second;
-      for (uint64_t i = 1; i < can_say_depth_pair.second + 1; ++i) {
-        std::vector<datalog::Argument> argument = {datalog::Argument(
-            absl::StrCat("delegatee", i),
-            datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
-                                  "Principal"))};
-        argument.insert(argument.end(), declaration.arguments().begin(),
-                        declaration.arguments().end());
-        can_say_declarations.push_back(datalog::RelationDeclaration(
-            absl::StrCat("canSay_", declaration.relation_name()), false,
-            argument));
-        declaration = datalog::RelationDeclaration(
-            absl::StrCat("canSay_", declaration.relation_name()), false,
-            argument);
-      }
+  for (const auto& [predicate_name, depth] : can_say_depth_) {
+    if (depth == 0) continue;
+    auto type_iterator = type_environment.find(predicate_name);
+    if (type_iterator != type_environment.end()) continue;
+    datalog::RelationDeclaration declaration = type_iterator->second;
+    for (uint64_t i = 1; i < depth + 1; ++i) {
+      std::vector<datalog::Argument> arguments = {datalog::Argument(
+          absl::StrCat("delegatee", i),
+          datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
+                                "Principal"))};
+      absl::c_copy(declaration.arguments(), std::back_inserter(arguments));
+      can_say_declarations.push_back(datalog::RelationDeclaration(
+          absl::StrCat("canSay_", declaration.relation_name()), false,
+          arguments));
+      declaration = datalog::RelationDeclaration(
+          absl::StrCat("canSay_", declaration.relation_name()), false,
+          arguments);
     }
   }
-  transformed_declarations.insert(transformed_declarations.end(),
-                                  can_say_declarations.begin(),
-                                  can_say_declarations.end());
+  return can_say_declarations;
+}
+
+std::vector<datalog::RelationDeclaration>
+LoweringToDatalogPass::SaysExtendRelationDeclarations(
+    const std::vector<datalog::RelationDeclaration>& transformed_declarations) {
   // The translated declarations are all extended with "says_" and a speaker
   // argument
   std::vector<datalog::RelationDeclaration>
       says_extended_relational_declarations;
-  for (datalog::RelationDeclaration declaration : transformed_declarations) {
+  for (const datalog::RelationDeclaration& declaration :
+       transformed_declarations) {
     std::vector<datalog::Argument> arguments = {datalog::Argument(
         "speaker", datalog::ArgumentType(
                        datalog::ArgumentType::Kind::kPrincipal, "Principal"))};
-    arguments.insert(arguments.end(), declaration.arguments().begin(),
-                     declaration.arguments().end());
+    absl::c_copy(declaration.arguments(), std::back_inserter(arguments));
     says_extended_relational_declarations.push_back(
         datalog::RelationDeclaration(
             absl::StrCat("says_", declaration.relation_name()), false,
@@ -377,17 +356,71 @@ LoweringToDatalogPass::RelationDeclarationToDLIR(
 }
 
 std::vector<datalog::RelationDeclaration>
+LoweringToDatalogPass::RelationDeclarationToDLIR(
+    const std::vector<datalog::RelationDeclaration>& relation_declarations) {
+  // Note that the additional relation declarations that are generated for
+  // (possibly nested) cansay expressions are based on an environment
+  // that tracks the maximum depth with which they appear. This environment is
+  // populated by side-effect while translating the program body. As a result,
+  // it is assumed that this function is called after the body is translated.
+
+  std::vector<datalog::RelationDeclaration> transformed_declarations =
+      LoweringToDatalogPass::TransformDeclarations(relation_declarations);
+
+  // Produce a mapping from predicate names to predicate typings
+  // (where a predicate typing is the same as a predicate relation declaration)
+  absl::flat_hash_map<std::string_view, datalog::RelationDeclaration>
+      type_environment;
+  for (const datalog::RelationDeclaration& declaration :
+       transformed_declarations) {
+    type_environment.insert({declaration.relation_name(), declaration});
+  }
+
+  std::vector<datalog::RelationDeclaration> can_say_declarations =
+      LoweringToDatalogPass::CanSayDeclarations(type_environment);
+  absl::c_copy(can_say_declarations,
+               std::back_inserter(transformed_declarations));
+
+  // The transformed relation declarations are the same as the ones from the
+  // surface program plus another one for "canActAs"
+  transformed_declarations.push_back(datalog::RelationDeclaration(
+      "canActAs", false,
+      {datalog::Argument(
+           "p1", datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
+                                       "Principal")),
+       datalog::Argument(
+           "p2", datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
+                                       "Principal"))}));
+  // Another declaration "isNumber" added aa a work around for
+  // universe_translations. To be removed after adding parser for
+  // universe_translations
+  transformed_declarations.push_back(datalog::RelationDeclaration(
+      "isNumber", false,
+      {datalog::Argument(
+          "x", datalog::ArgumentType(datalog::ArgumentType::Kind::kNumber,
+                                     "Number"))}));
+  // The translated declarations are all extended with "says_" and a speaker
+  // argument
+  std::vector<datalog::RelationDeclaration>
+      says_extended_relational_declarations =
+          LoweringToDatalogPass::SaysExtendRelationDeclarations(
+              transformed_declarations);
+  return says_extended_relational_declarations;
+}
+
+std::vector<datalog::RelationDeclaration>
 LoweringToDatalogPass::QueryRelationDeclarationToDLIR(
     const std::vector<Query>& queries) {
   std::vector<datalog::RelationDeclaration> query_declarations =
-      utils::MapIter<datalog::RelationDeclaration>(queries, [](Query query) {
-        return datalog::RelationDeclaration(
-            query.name(), false,
-            {datalog::Argument(
-                "dummy_param",
-                datalog::ArgumentType(datalog::ArgumentType::Kind::kCustom,
-                                      "DummyType"))});
-      });
+      utils::MapIter<datalog::RelationDeclaration>(
+          queries, [](const Query& query) {
+            return datalog::RelationDeclaration(
+                query.name(), false,
+                {datalog::Argument(
+                    "dummy_param",
+                    datalog::ArgumentType(datalog::ArgumentType::Kind::kCustom,
+                                          "DummyType"))});
+          });
   query_declarations.push_back(datalog::RelationDeclaration(
       "grounded_dummy", false,
       {datalog::Argument(
@@ -416,11 +449,8 @@ datalog::Program LoweringToDatalogPass::ProgToDLIR(const Program& program) {
   // it is assumed that this function is called after the body is translated.
   auto dlir_relation_declarations =
       RelationDeclarationToDLIR(program.relation_declarations());
-  auto dlir_relation_declarations_queries =
-      QueryRelationDeclarationToDLIR(program.queries());
-  dlir_relation_declarations.insert(dlir_relation_declarations.end(),
-                                    dlir_relation_declarations_queries.begin(),
-                                    dlir_relation_declarations_queries.end());
+  absl::c_move(QueryRelationDeclarationToDLIR(program.queries()),
+               std::back_inserter(dlir_relation_declarations));
 
   return datalog::Program(dlir_relation_declarations, dlir_assertions, outputs);
 }
