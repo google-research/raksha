@@ -106,11 +106,6 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     }
   }
 
- private:
-  std::string Indent() { return std::string(indent_ * 2, ' '); }
-  void IncreaseIndent() { ++indent_; }
-  void DecreaseIndent() { --indent_; }
-
   // Returns a pretty-printed map where entries are sorted by the key.
   template <class T, class F>
   static std::string PrintNamedMapInNameOrder(
@@ -128,6 +123,11 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
                           value_pretty_printer(map_to_print.at(name)));
         });
   }
+
+ private:
+  std::string Indent() { return std::string(indent_ * 2, ' '); }
+  void IncreaseIndent() { ++indent_; }
+  void DecreaseIndent() { --indent_; }
 
   IRPrinter(std::ostream& out) : out_(out), indent_(0) {}
 
