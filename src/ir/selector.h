@@ -1,5 +1,5 @@
-#ifndef SRC_IR_SELECTOR_H_
-#define SRC_IR_SELECTOR_H_
+#ifndef SRC_FRONTENDS_ARCS_SELECTOR_H_
+#define SRC_FRONTENDS_ARCS_SELECTOR_H_
 
 #include <string>
 #include <variant>
@@ -17,7 +17,7 @@ namespace raksha::ir {
 class Selector {
  public:
   explicit Selector(FieldSelector field_selector)
-    : specific_selector_(std::move(field_selector)) {}
+      : specific_selector_(std::move(field_selector)) {}
 
   std::variant<FieldSelector> variant() const { return specific_selector_; }
 
@@ -27,8 +27,10 @@ class Selector {
   // contents of the selector itself.
   std::string ToString() const {
     return std::visit(
-      [](const auto &specific_selector) {
-          return specific_selector.ToString(); }, specific_selector_);
+        [](const auto &specific_selector) {
+          return specific_selector.ToString();
+        },
+        specific_selector_);
   }
 
   // Whether two selectors are equal. Will be true if they are the same type
@@ -40,7 +42,7 @@ class Selector {
     return specific_selector_ == other.specific_selector_;
   }
 
-  template<typename H>
+  template <typename H>
   friend H AbslHashValue(H h, const Selector &selector) {
     return H::combine(std::move(h), selector.specific_selector_);
   }
@@ -53,4 +55,4 @@ class Selector {
 
 }  // namespace raksha::ir
 
-#endif  // SRC_IR_SELECTOR_H_
+#endif  // SRC_FRONTENDS_ARCS_SELECTOR_H_

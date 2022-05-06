@@ -27,9 +27,12 @@ class Storage {
   Storage(absl::string_view name, types::Type type)
       : name_(name), type_(std::move(type)) {}
 
-  // Disable copy (and move) semantics.
+  // Disable copy semantics.
   Storage(const Storage&) = delete;
   Storage& operator=(const Storage&) = delete;
+
+  Storage(Storage&&) = default;
+  Storage& operator=(Storage&&) = default;
 
   absl::string_view name() const { return name_; }
   const types::Type& type() const { return type_; }

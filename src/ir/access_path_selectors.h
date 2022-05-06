@@ -1,12 +1,11 @@
 #ifndef SRC_IR_ACCESS_PATH_SELECTORS_H_
 #define SRC_IR_ACCESS_PATH_SELECTORS_H_
 
-#include "src/ir/selector.h"
-
 #include <vector>
 
 #include "absl/hash/hash.h"
 #include "absl/strings/str_join.h"
+#include "src/ir/selector.h"
 
 namespace raksha::ir {
 
@@ -37,8 +36,7 @@ class AccessPathSelectors {
   }
 
   AccessPathSelectors(Selector parent_selector, AccessPathSelectors child_path)
-    : AccessPathSelectors(std::move(child_path))
-  {
+      : AccessPathSelectors(std::move(child_path)) {
     reverse_selectors_.push_back(std::move(parent_selector));
   }
 
@@ -54,13 +52,10 @@ class AccessPathSelectors {
   // parent selector to child selector (which is the reverse order of how
   // they are stored internally).
   std::string ToString() const {
-      return absl::StrJoin(
-      reverse_selectors_.rbegin(),
-      reverse_selectors_.rend(),
-      "",
-      [](std::string *out, const Selector &selector){
-        out->append(selector.ToString()); });
-
+    return absl::StrJoin(reverse_selectors_.rbegin(), reverse_selectors_.rend(),
+                         "", [](std::string *out, const Selector &selector) {
+                           out->append(selector.ToString());
+                         });
   }
 
   // TODO(#98): This exposes the fact that the internal collection is a vector.
@@ -73,7 +68,7 @@ class AccessPathSelectors {
     return reverse_selectors_.rend();
   }
 
-  template<typename H>
+  template <typename H>
   friend H AbslHashValue(H h, const AccessPathSelectors &instance) {
     return H::combine(std::move(h), instance.reverse_selectors_);
   }

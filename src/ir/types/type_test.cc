@@ -11,21 +11,21 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/access_path_selectors.h"
 #include "src/ir/access_path_selectors_set.h"
-#include "src/ir/proto/type.h"
 #include "src/ir/types/entity_type.h"
+#include "src/ir/types/proto/type.h"
 #include "src/ir/types/schema.h"
 
 namespace raksha::ir::types {
 
 // Helper function for making an unnamed schema from a field map.
 static const Schema &MakeAnonymousSchema(
-    types::TypeFactory &type_factory,
+    TypeFactory &type_factory,
     absl::flat_hash_map<std::string, Type> field_map) {
   return type_factory.RegisterSchema(std::nullopt, std::move(field_map));
 }
 
 static Type MakeEntityTypeWithAnonymousSchema(
-    types::TypeFactory &type_factory,
+    TypeFactory &type_factory,
     absl::flat_hash_map<std::string, Type> field_map) {
   return type_factory.MakeEntityType(
       MakeAnonymousSchema(type_factory, std::move(field_map)));
@@ -37,9 +37,10 @@ static Type MakeEntityTypeWithAnonymousSchema(
 // this is not presented by the selector access path and thus cannot be
 // derived from it.
 template <typename Iter>
-static Type MakeMinimalTypeFromAccessPathFieldVec(
-    types::TypeFactory &type_factory, Iter begin_iter, Iter end_iter,
-    uint64_t depth) {
+static Type MakeMinimalTypeFromAccessPathFieldVec(TypeFactory &type_factory,
+                                                  Iter begin_iter,
+                                                  Iter end_iter,
+                                                  uint64_t depth) {
   // We expect that the incoming range is never empty.
   EXPECT_NE(begin_iter, end_iter);
   // If they happen to be equal, though, just bail out with a primitive type.
@@ -60,10 +61,8 @@ static Type MakeMinimalTypeFromAccessPathFieldVec(
 
   // An equality function that compares vectors only by the element at depth.
   // This is used to group the same field at a particular height in the tree.
-  auto compare_vecs_at_depth =
-      [depth](
-          const std::vector<std::string> &vec1,
-          const std::vector<std::string> &vec2) {
+  auto compare_vecs_at_depth = [depth](const std::vector<std::string> &vec1,
+                                       const std::vector<std::string> &vec2) {
     bool vec1_too_shallow = vec1.size() <= depth;
     bool vec2_too_shallow = vec2.size() <= depth;
 
@@ -86,8 +85,8 @@ static Type MakeMinimalTypeFromAccessPathFieldVec(
     // Get the iterator past the point where this field is referenced at this
     // depth. The earlier parts of the access path are guaranteed to be the
     // same due to the vector being sorted.
-    auto equal_range_end = std::upper_bound(
-        begin_iter, end_iter, *begin_iter, compare_vecs_at_depth);
+    auto equal_range_end = std::upper_bound(begin_iter, end_iter, *begin_iter,
+                                            compare_vecs_at_depth);
     auto insert_result =
         field_map.insert({field_name, MakeMinimalTypeFromAccessPathFieldVec(
                                           type_factory, begin_iter,
@@ -104,8 +103,7 @@ static Type MakeMinimalTypeFromAccessPathFieldVec(
 // Given a vector of strings representing access paths to leaves, generate a
 // type having all of those access paths and no others.
 static Type MakeMinimalTypeFromAccessPathStrings(
-    types::TypeFactory &type_factory,
-    std::vector<std::string> access_path_strs) {
+    TypeFactory &type_factory, std::vector<std::string> access_path_strs) {
   std::vector<std::vector<std::string>> access_path_field_vecs;
   for (std::string str : access_path_strs) {
     access_path_field_vecs.push_back(
@@ -117,30 +115,29 @@ static Type MakeMinimalTypeFromAccessPathStrings(
   // before it, then we are describing a path to an inner node instead of to
   // a leaf field, which is not appropriate for this test.
   for (auto iter = access_path_field_vecs.begin();
-    iter + 1 != access_path_field_vecs.end(); ++iter) {
+       iter + 1 != access_path_field_vecs.end(); ++iter) {
     const std::vector<std::string> &prev_vec = *iter;
     const std::vector<std::string> &next_vec = *(iter + 1);
-     // Can't be a prefix if it's longer.
-     if (prev_vec.size() > next_vec.size()) {
-       continue;
-     }
-     bool found_difference = false;
-     for (uint64_t i = 0; i < prev_vec.size(); ++i) {
-       if (prev_vec.at(i) != next_vec.at(i)) {
-         found_difference = true;
-         break;
-       }
-     }
-     CHECK(found_difference)
-      << "One path in test was prefix of another; all test paths required to "
-      << "be leaf paths.";
+    // Can't be a prefix if it's longer.
+    if (prev_vec.size() > next_vec.size()) {
+      continue;
+    }
+    bool found_difference = false;
+    for (uint64_t i = 0; i < prev_vec.size(); ++i) {
+      if (prev_vec.at(i) != next_vec.at(i)) {
+        found_difference = true;
+        break;
+      }
+    }
+    CHECK(found_difference)
+        << "One path in test was prefix of another; all test paths required to "
+        << "be leaf paths.";
   }
 
-  return MakeMinimalTypeFromAccessPathFieldVec(
-      type_factory,
-      access_path_field_vecs.begin(),
-      access_path_field_vecs.end(),
-      /*depth=*/0);
+  return MakeMinimalTypeFromAccessPathFieldVec(type_factory,
+                                               access_path_field_vecs.begin(),
+                                               access_path_field_vecs.end(),
+                                               /*depth=*/0);
 }
 
 // A list of collections of access path strings, describing types with
@@ -155,8 +152,7 @@ static std::vector<std::string> sample_access_path_str_vecs[] = {
     {".field1.child1", ".field1.child2"},
     {".field1.child1", ".field2.child2"},
     {".field1.a", ".field1.b", ".field1.c", ".field1.d", ".f.e", ".f.d"},
-    {".b", ".d", ".a.b.c", ".c.b.a", ".a.a.a"}
-};
+    {".b", ".d", ".a.b.c", ".c.b.a", ".a.a.a"}};
 
 static std::vector<std::string> GetAccessPathStrVecFromAccessPathSelectorsSet(
     raksha::ir::AccessPathSelectorsSet access_path_set) {
@@ -170,8 +166,8 @@ static std::vector<std::string> GetAccessPathStrVecFromAccessPathSelectorsSet(
   return result_strs;
 }
 
-class RoundTripStrsThroughTypeTest :
-    public testing::TestWithParam<std::vector<std::string>> {
+class RoundTripStrsThroughTypeTest
+    : public testing::TestWithParam<std::vector<std::string>> {
  protected:
   TypeFactory type_factory_;
 };
@@ -191,9 +187,9 @@ TEST_P(RoundTripStrsThroughTypeTest, RoundTripStrsThroughTypeTest) {
   EXPECT_THAT(result_strs, testing::UnorderedElementsAreArray(original_strs));
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    RoundTripStrsThroughTypeTest, RoundTripStrsThroughTypeTest,
-    testing::ValuesIn(sample_access_path_str_vecs));
+INSTANTIATE_TEST_SUITE_P(RoundTripStrsThroughTypeTest,
+                         RoundTripStrsThroughTypeTest,
+                         testing::ValuesIn(sample_access_path_str_vecs));
 
 class TypeProducesAccessPathStrsTest
     : public testing::TestWithParam<
@@ -230,16 +226,15 @@ static std::tuple<const TypeBase *, std::vector<std::string>>
     types_to_access_path_lists[] = {{&kPrimitive.type_base(), {""}},
                                     {&kEmptyEntity.type_base(), {""}}};
 
-INSTANTIATE_TEST_SUITE_P(
-    TypeProducesAccessPathStrsTest,
-    TypeProducesAccessPathStrsTest,
-    testing::ValuesIn(types_to_access_path_lists));
+INSTANTIATE_TEST_SUITE_P(TypeProducesAccessPathStrsTest,
+                         TypeProducesAccessPathStrsTest,
+                         testing::ValuesIn(types_to_access_path_lists));
 
-class GetAccessPathSelectorsWithProtoTest :
- public testing::TestWithParam<
-  std::tuple<std::string, std::vector<std::string>>> {
+class GetAccessPathSelectorsWithProtoTest
+    : public testing::TestWithParam<
+          std::tuple<std::string, std::vector<std::string>>> {
  protected:
-  types::TypeFactory type_factory_;
+  TypeFactory type_factory_;
 };
 
 TEST_P(GetAccessPathSelectorsWithProtoTest,
@@ -247,47 +242,46 @@ TEST_P(GetAccessPathSelectorsWithProtoTest,
   const auto &[type_as_textproto, expected_access_path_strs] = GetParam();
   arcs::TypeProto orig_type_proto;
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(type_as_textproto,
-                                                          &orig_type_proto))
+                                                            &orig_type_proto))
       << "Failed to parse text proto!";
   Type type = proto::Decode(type_factory_, orig_type_proto);
   std::vector<std::string> access_path_str_vec =
       GetAccessPathStrVecFromAccessPathSelectorsSet(
           type.GetAccessPathSelectorsSet());
-  EXPECT_THAT(
-      access_path_str_vec,
-      testing::UnorderedElementsAreArray(expected_access_path_strs));
+  EXPECT_THAT(access_path_str_vec,
+              testing::UnorderedElementsAreArray(expected_access_path_strs));
 }
 
 const std::tuple<std::string, std::vector<std::string>>
-  type_proto_and_access_path_strings[] = {
-    // Simple primitive type.
-    { "primitive: TEXT", { "" } },
-    // Entity with no fields.
-    {"entity: { schema: { } }", { "" } },
-    // Entity with one primitive field, field1.
-    {R"(
+    type_proto_and_access_path_strings[] = {
+        // Simple primitive type.
+        {"primitive: TEXT", {""}},
+        // Entity with no fields.
+        {"entity: { schema: { } }", {""}},
+        // Entity with one primitive field, field1.
+        {R"(
 entity: {
   schema: {
     fields [ { key: "field1", value: { primitive: TEXT } } ]} })",
-    { ".field1" } },
-    // Entity with one primitive field and a named schema
-    {R"(
+         {".field1"}},
+        // Entity with one primitive field and a named schema
+        {R"(
 entity: {
   schema: {
     names: ["my_schema"]
       fields: [ { key: "field1", value: { primitive: TEXT } } ] } })",
-     { ".field1" } },
-    // Entity with multiple primitive fields.
-    {R"(
+         {".field1"}},
+        // Entity with multiple primitive fields.
+        {R"(
 entity: {
   schema: {
     fields: [
       { key: "field1", value: { primitive: TEXT } },
       { key: "x", value: { primitive: TEXT } },
       { key: "hello", value: { primitive: TEXT } } ] } })",
-      {".field1", ".x", ".hello"} },
-    // Entity with sub entities and primitive fields.
-    {R"(
+         {".field1", ".x", ".hello"}},
+        // Entity with sub entities and primitive fields.
+        {R"(
 entity: {
   schema: {
     fields: [
@@ -299,13 +293,12 @@ entity: {
             { key: "sub_field2", value: { primitive: TEXT } }
            ]}}}},
       { key: "hello", value: { primitive: TEXT } } ] } })",
-      {".field1", ".x.sub_field1", ".x.sub_field2", ".hello"}},
+         {".field1", ".x.sub_field1", ".x.sub_field2", ".hello"}},
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    GetAccessPathSelectorsWithProtoTest,
-    GetAccessPathSelectorsWithProtoTest,
-    testing::ValuesIn(type_proto_and_access_path_strings));
+INSTANTIATE_TEST_SUITE_P(GetAccessPathSelectorsWithProtoTest,
+                         GetAccessPathSelectorsWithProtoTest,
+                         testing::ValuesIn(type_proto_and_access_path_strings));
 
 // TODO(#122): This test should be moved to appropriate file while refactoring.
 TEST(EntityTypeTest, KindReturnsCorrectKind) {
@@ -314,4 +307,4 @@ TEST(EntityTypeTest, KindReturnsCorrectKind) {
   EXPECT_EQ(entity_type.kind(), TypeBase::Kind::kEntity);
 }
 
-}  // namespace raksha::transform::types
+}  // namespace raksha::ir::types

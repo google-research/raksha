@@ -121,5 +121,17 @@ TEST_P(IRPrinterTest, PrettyPrintAttributesInSortedOrder) {
       "%0 = core.minus [access: private, name: addition](<<ANY>>, <<ANY>>)\n");
 }
 
+TEST(IRPrinterPrintNamedMapOrderTest, PrintsInSortedOrder) {
+  absl::flat_hash_map<std::string, int> values = {
+      {"zip", -1},
+      {"hello", 1},
+      {"world", 2},
+      {"number_42", 42},
+  };
+  EXPECT_THAT(IRPrinter::PrintNamedMapInNameOrder(
+                  values, [](int x) { return absl::StrFormat("%d", x); }),
+              "hello: 1, number_42: 42, world: 2, zip: -1");
+}
+
 }  // namespace
 }  // namespace raksha::ir

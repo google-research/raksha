@@ -1,9 +1,8 @@
-#ifndef SRC_IR_ACCESS_PATH_SELECTORS_SET_H_
-#define SRC_IR_ACCESS_PATH_SELECTORS_SET_H_
-
-#include "access_path_selectors.h"
+#ifndef SRC_FRONTENDS_ARCS_ACCESS_PATH_SELECTORS_SET_H_
+#define SRC_FRONTENDS_ARCS_ACCESS_PATH_SELECTORS_SET_H_
 
 #include "absl/container/flat_hash_set.h"
+#include "src/ir/access_path_selectors.h"
 
 namespace raksha::ir {
 
@@ -20,26 +19,25 @@ class AccessPathSelectorsSet {
   // Allow creating an AccessPathSelectorSet with an explicit list of items
   // that should be in that set.
   explicit AccessPathSelectorsSet(std::vector<AccessPathSelectors> contents)
-    : inner_vec_(std::move(contents)) {}
+      : inner_vec_(std::move(contents)) {}
 
   // Returns a set that is the union of the two passed-in sets.
-  static AccessPathSelectorsSet Union(
-      AccessPathSelectorsSet set1, AccessPathSelectorsSet set2) {
-    set1.inner_vec_.insert(
-        set1.inner_vec_.end(),
-        std::make_move_iterator(set2.inner_vec_.begin()),
-        std::make_move_iterator(set2.inner_vec_.end()));
+  static AccessPathSelectorsSet Union(AccessPathSelectorsSet set1,
+                                      AccessPathSelectorsSet set2) {
+    set1.inner_vec_.insert(set1.inner_vec_.end(),
+                           std::make_move_iterator(set2.inner_vec_.begin()),
+                           std::make_move_iterator(set2.inner_vec_.end()));
     return set1;
   }
 
   // Returns a set that is the intersection of the two passed-in sets.
-  static AccessPathSelectorsSet Intersect(
-      AccessPathSelectorsSet set1, AccessPathSelectorsSet set2) {
+  static AccessPathSelectorsSet Intersect(AccessPathSelectorsSet set1,
+                                          AccessPathSelectorsSet set2) {
     AccessPathSelectorsSet result;
 
     // Make the first set into a hash set for efficient lookup.
     absl::flat_hash_set<AccessPathSelectors> hash_set1 =
-      AccessPathSelectorsSet::CreateAbslSet(std::move(set1));
+        AccessPathSelectorsSet::CreateAbslSet(std::move(set1));
 
     // Place items from the second set into the result only if they were in
     // the first set.
@@ -88,4 +86,4 @@ class AccessPathSelectorsSet {
 
 }  // namespace raksha::ir
 
-#endif  // SRC_IR_ACCESS_PATH_SELECTORS_SET_H_
+#endif  // SRC_FRONTENDS_ARCS_ACCESS_PATH_SELECTORS_SET_H_
