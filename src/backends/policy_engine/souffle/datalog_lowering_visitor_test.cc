@@ -88,9 +88,8 @@ static const IrAndDatalogOperationPairs kIrAndDatalogOperations[] = {
          ir::datalog::Symbol("sql"), ir::datalog::Symbol("sql.ReadLiteral"),
          ir::datalog::Symbol("%0.out"), ir::datalog::OperandList(),
          ir::datalog::AttributeList(
-             ir::datalog::Attribute(ir::datalog::Symbol("literal"),
-                                    ir::datalog::StringAttributePayload(
-                                        ir::datalog::Symbol("number_5"))),
+             ir::datalog::Attribute("literal",
+                                    ir::datalog::Attribute::String("number_5")),
              ir::datalog::AttributeList()))},
     {.ir_operation = test_factory.CreateOperation(
          nullptr, kMergeOpOperator, ir::NamedAttributeMap({}),
