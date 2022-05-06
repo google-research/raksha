@@ -284,7 +284,9 @@ LoweringToDatalogPass::TransformDeclarations(
     const std::vector<datalog::RelationDeclaration>& relation_declarations) {
   // Attributes have a principal that the attribute is applied to
   // as an additional parameter at the beginning of the param list.
-  // Transform the attributes
+  // Example below shows transforming the attributes.
+  // Ex: .decl ATTRIBUTE hasProperty(x0 : Symbol) -> .decl
+  // hasProperty(attribute_prin : Prinipal, x0 : Symbol)
   return utils::MapIter<datalog::RelationDeclaration>(
       relation_declarations,
       [](const datalog::RelationDeclaration& declaration) {
@@ -305,6 +307,19 @@ LoweringToDatalogPass::TransformDeclarations(
       });
 }
 
+/*
+Example: A relation declaration and canSay fact shown below.
+".decl grantAccess(x0 : symbol, x1 : symbol)
+PrincipalA cansay PrincipalB grantAccess(secretFile)."
+can_say_depth_(A hashmap) maps "grantAccess" predicate name to depth 2.
+type_environment is a mapping from the relation names to the declaration
+datalog_ir node. In this example, type_environment[grantAccess] maps to
+RelationDeclaration(grantAccess, false, ...).
+The method adds 2 new declarations
+.decl canSay_grantAccess(delegatee1 : Principal, x0 : symbol, x1 : symbol) and
+.decl canSay_canSay_grantAccess(delegatee2 : Principal, delegatee1: Principal,
+x0 : symbol, x1 : symbol)
+*/
 std::vector<datalog::RelationDeclaration>
 LoweringToDatalogPass::CanSayDeclarations(
     const absl::flat_hash_map<std::string_view, datalog::RelationDeclaration>&
@@ -314,9 +329,11 @@ LoweringToDatalogPass::CanSayDeclarations(
   std::vector<datalog::RelationDeclaration> can_say_declarations;
   for (const auto& [predicate_name, depth] : can_say_depth_) {
     if (depth == 0) continue;
+    // find relation declaration corresponding to the predicate name
     auto type_iterator = type_environment.find(predicate_name);
     if (type_iterator != type_environment.end()) continue;
     datalog::RelationDeclaration declaration = type_iterator->second;
+    // Adds new relation declaration for each can say delegation
     for (uint64_t i = 1; i < depth + 1; ++i) {
       std::vector<datalog::Argument> arguments = {datalog::Argument(
           absl::StrCat("delegatee", i),
