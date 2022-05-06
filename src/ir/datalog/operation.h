@@ -35,6 +35,8 @@ using Operation =
 class IsOperationFact : public InputRelationFact<Operation> {
  public:
   using InputRelationFact::InputRelationFact;
+  IsOperationFact(IsOperationFact &&) = default;
+  IsOperationFact &operator=(IsOperationFact &&) = default;
   virtual ~IsOperationFact() {}
   static constexpr absl::string_view relation_name() { return "isOperation"; }
   absl::string_view GetRelationName() const { return relation_name(); }
