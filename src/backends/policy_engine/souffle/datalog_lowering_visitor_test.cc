@@ -28,6 +28,31 @@ using testing::Combine;
 using testing::TestWithParam;
 using testing::ValuesIn;
 
+class TestObjectFactory {
+ public:
+  // Helper to create operation for tests.
+  template <typename... Args>
+  const ir::Operation *CreateOperation(Args &&...a) {
+    operations_.push_back(
+        std::make_unique<ir::Operation>(std::forward<Args>(a)...));
+    return operations_.back().get();
+  }
+
+  // Creates and returns an IsOperationFact.
+  template <typename... Args>
+  const ir::datalog::IsOperationFact *CreateDatalogOperation(Args &&...a) {
+    datalog_operations_.push_back(
+        std::make_unique<ir::datalog::IsOperationFact>(
+            ir::datalog::Operation(std::forward<Args>(a)...)));
+    return datalog_operations_.back().get();
+  }
+
+ private:
+  ir::Block::OperationList operations_;
+  std::vector<std::unique_ptr<ir::datalog::IsOperationFact>>
+      datalog_operations_;
+};
+
 struct IrAndDatalogOperationPairs {
   const ir::Operation *ir_operation;
   const ir::datalog::IsOperationFact *datalog_is_operation;
@@ -49,42 +74,36 @@ TEST_P(IrOperationLoweringTest, IrOperationLoweringTest) {
 }
 
 static const ir::Operator kLiteralOperator("sql.ReadLiteral");
-
-static const ir::Operation kStringLiteralIrOperation(
-    nullptr, kLiteralOperator,
-    {{"literal", ir::Attribute::Create<ir::StringAttribute>("number_5")}}, {});
-
-static const ir::datalog::IsOperationFact kStringLiteralDatalogIsOperation(
-    ir::datalog::Operation(
-        ir::datalog::Symbol("sql"), ir::datalog::Symbol("sql.ReadLiteral"),
-        ir::datalog::Symbol("%0.out"), ir::datalog::OperandList(),
-        ir::datalog::AttributeList(
-            ir::datalog::Attribute(ir::datalog::Symbol("literal"),
-                                   ir::datalog::StringAttributePayload(
-                                       ir::datalog::Symbol("number_5"))),
-            ir::datalog::AttributeList())));
-
 static const ir::Operator kMergeOpOperator("sql.MergeOp");
 
-static const ir::Operation kMergeOpIrOperation(nullptr, kMergeOpOperator, {},
-                                               {ir::Value(ir::value::Any()),
-                                                ir::Value(ir::value::Any())});
-
-static const ir::datalog::IsOperationFact kMergeOpIsOperation(
-    ir::datalog::Operation(
-        ir::datalog::Symbol("sql"), ir::datalog::Symbol("sql.MergeOp"),
-        ir::datalog::Symbol("%0.out"),
-        ir::datalog::OperandList(
-            ir::datalog::Symbol("<<ANY>>"),
-            ir::datalog::OperandList(ir::datalog::Symbol("<<ANY>>"),
-                                     ir::datalog::OperandList())),
-        ir::datalog::AttributeList()));
-
+static TestObjectFactory test_factory;
 static const IrAndDatalogOperationPairs kIrAndDatalogOperations[] = {
-    {.ir_operation = &kStringLiteralIrOperation,
-     .datalog_is_operation = &kStringLiteralDatalogIsOperation},
-    {.ir_operation = &kMergeOpIrOperation,
-     .datalog_is_operation = &kMergeOpIsOperation}};
+    {.ir_operation = test_factory.CreateOperation(
+         nullptr, kLiteralOperator,
+         ir::NamedAttributeMap(
+             {{"literal",
+               ir::Attribute::Create<ir::StringAttribute>("number_5")}}),
+         ir::ValueList()),
+     .datalog_is_operation = test_factory.CreateDatalogOperation(
+         ir::datalog::Symbol("sql"), ir::datalog::Symbol("sql.ReadLiteral"),
+         ir::datalog::Symbol("%0.out"), ir::datalog::OperandList(),
+         ir::datalog::AttributeList(
+             ir::datalog::Attribute(ir::datalog::Symbol("literal"),
+                                    ir::datalog::StringAttributePayload(
+                                        ir::datalog::Symbol("number_5"))),
+             ir::datalog::AttributeList()))},
+    {.ir_operation = test_factory.CreateOperation(
+         nullptr, kMergeOpOperator, ir::NamedAttributeMap({}),
+         ir::ValueList(
+             {ir::Value(ir::value::Any()), ir::Value(ir::value::Any())})),
+     .datalog_is_operation = test_factory.CreateDatalogOperation(
+         ir::datalog::Symbol("sql"), ir::datalog::Symbol("sql.MergeOp"),
+         ir::datalog::Symbol("%0.out"),
+         ir::datalog::OperandList(
+             ir::datalog::Symbol("<<ANY>>"),
+             ir::datalog::OperandList(ir::datalog::Symbol("<<ANY>>"),
+                                      ir::datalog::OperandList())),
+         ir::datalog::AttributeList())}};
 
 INSTANTIATE_TEST_SUITE_P(IrOperationLoweringTest, IrOperationLoweringTest,
                          ValuesIn(kIrAndDatalogOperations));
