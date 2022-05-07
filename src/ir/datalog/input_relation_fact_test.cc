@@ -74,7 +74,7 @@ TEST(OneOfEachFactTest, OneOfEachFactTest) {
                           Record<Number, Symbol>(Number(3), Symbol("bar")),
                           SimpleAdt(UnitAdtBranch()))
                 .ToDatalogString(),
-            R"(oneOfEach(5, "foo", [3, "bar"], $Unit{}).)");
+            R"(oneOfEach(5, "foo", [3, "bar"], $Unit()).)");
 }
 
 }  // namespace raksha::ir::datalog

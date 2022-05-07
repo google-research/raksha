@@ -192,11 +192,11 @@ static const ArithmeticAdt kFivePlusTwoPlusNull = ArithmeticAdt(
                                       ArithmeticAdt(NullBranch())))));
 
 static const AdtAndExpectedDatalog kAdtAndExpectedDatalog[] = {
-    {.adt = &kNull, .expected_datalog = "$Null{}"},
-    {.adt = &kFive, .expected_datalog = "$Number{5}"},
-    {.adt = &kFivePlusTwo, .expected_datalog = "$Add{$Number{5}, $Number{2}}"},
+    {.adt = &kNull, .expected_datalog = "$Null()"},
+    {.adt = &kFive, .expected_datalog = "$Number(5)"},
+    {.adt = &kFivePlusTwo, .expected_datalog = "$Add($Number(5), $Number(2))"},
     {.adt = &kFivePlusTwoPlusNull,
-     .expected_datalog = "$Add{$Number{5}, $Add{$Number{2}, $Null{}}}"}};
+     .expected_datalog = "$Add($Number(5), $Add($Number(2), $Null()))"}};
 
 INSTANTIATE_TEST_SUITE_P(AdtTest, AdtTest, ValuesIn(kAdtAndExpectedDatalog));
 

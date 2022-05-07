@@ -96,7 +96,7 @@ class Adt : public Value {
 
   std::string ToDatalogString() const {
     return absl::StrFormat(
-        "$%s{%s}", branch_name_,
+        "$%s(%s)", branch_name_,
         absl::StrJoin(arguments_, ", ", [](std::string *str, const auto &arg) {
           absl::StrAppend(str, arg->ToDatalogString());
         }));
