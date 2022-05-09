@@ -36,7 +36,7 @@ class Attribute
    public:
     explicit String(Symbol symbol)
         : AttributePayload(kStringAttributePayloadName) {
-      arguments_.push_back(std::make_unique<Symbol>(symbol));
+      arguments_.push_back(std::make_unique<Symbol>(std::move(symbol)));
     }
 
     explicit String(absl::string_view symbol) : String(Symbol(symbol)) {}
@@ -47,7 +47,8 @@ class Attribute
     explicit Number(datalog::Number number)
         : AttributePayload(kNumberAttributePayloadName) {
       // NOTE: unique_ptr<datalog::Number> and **not** unique_ptr<Number>!
-      arguments_.push_back(std::make_unique<datalog::Number>(number));
+      arguments_.push_back(
+          std::make_unique<datalog::Number>(std::move(number)));
     }
 
     explicit Number(int64_t number) : Number(datalog::Number(number)) {}
