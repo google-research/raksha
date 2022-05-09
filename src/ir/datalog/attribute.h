@@ -24,34 +24,42 @@
 
 namespace raksha::ir::datalog {
 
-inline constexpr absl::string_view kStringAttributePayloadName =
-    "StringAttributePayload";
-inline constexpr absl::string_view kNumberAttributePayloadName =
-    "NumberAttributePayload";
+using AttributePayload = Adt;
 
-class AttributePayload : public Adt {
+class Attribute
+    : public Record<Symbol /*attr_name*/, AttributePayload /*attr_payload*/> {
  public:
-  using Adt::Adt;
-};
+  explicit Attribute(absl::string_view name, AttributePayload payload)
+      : Record(Symbol(name), std::move(payload)) {}
 
-class StringAttributePayload : public AttributePayload {
- public:
-  StringAttributePayload(Symbol symbol)
-      : AttributePayload(kStringAttributePayloadName) {
-    arguments_.push_back(std::make_unique<Symbol>(symbol));
-  }
-};
+  class String : public AttributePayload {
+   public:
+    explicit String(Symbol symbol)
+        : AttributePayload(kStringAttributePayloadName) {
+      arguments_.push_back(std::make_unique<Symbol>(std::move(symbol)));
+    }
 
-class NumberAttributePayload : public AttributePayload {
- public:
-  NumberAttributePayload(Number number)
-      : AttributePayload(kNumberAttributePayloadName) {
-    arguments_.push_back(std::make_unique<Number>(number));
-  }
-};
+    explicit String(absl::string_view symbol) : String(Symbol(symbol)) {}
+  };
 
-using Attribute =
-    Record<Symbol /*attr_name*/, AttributePayload /*attr_payload*/>;
+  class Number : public AttributePayload {
+   public:
+    explicit Number(datalog::Number number)
+        : AttributePayload(kNumberAttributePayloadName) {
+      // NOTE: unique_ptr<datalog::Number> and **not** unique_ptr<Number>!
+      arguments_.push_back(
+          std::make_unique<datalog::Number>(std::move(number)));
+    }
+
+    explicit Number(int64_t number) : Number(datalog::Number(number)) {}
+  };
+
+ private:
+  static constexpr absl::string_view kStringAttributePayloadName =
+      "StringAttributePayload";
+  static constexpr absl::string_view kNumberAttributePayloadName =
+      "NumberAttributePayload";
+};
 
 class AttributeList
     : public Record<Attribute /*attr*/, AttributeList /*next*/> {

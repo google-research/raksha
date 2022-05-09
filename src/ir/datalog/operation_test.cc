@@ -42,10 +42,8 @@ TEST_P(IsOperationFactTest, IsOperationFactTest) {
 
 static const IsOperationFact kSampleFact1 = IsOperationFact(Operation(
     Symbol("UserA"), Symbol("sql.Literal"), Symbol("out"), OperandList(),
-    AttributeList(
-        Attribute(Symbol("literal_value"),
-                  AttributePayload(StringAttributePayload(Symbol("number_5")))),
-        AttributeList())));
+    AttributeList(Attribute("literal_value", Attribute::String("number_5")),
+                  AttributeList())));
 
 static const IsOperationFact kSampleFact2 = IsOperationFact(Operation(
     Symbol("UserB"), Symbol("sql.MergeOp"), Symbol("out"),
