@@ -56,14 +56,14 @@ operationHasOperand(operation, operand) :-
 
 // A helper relation that produces all partial attribute lists of an
 // `Operation`.
-.decl operationToPartialAttributeLists(operation: Operation, attributes: AttributeList)
-operationToPartialAttributeLists([owner, op, result, operandList, attrs], attrs) :-
+.decl operationHasAttributeHelper(operation: Operation, attributes: AttributeList)
+operationHasAttributeHelper([owner, op, result, operandList, attrs], attrs) :-
   isOperation([owner, op, result, operandList, attrs]).
-operationToPartialAttributeLists(op, tail) :- operationToPartialAttributeLists(op, [_, tail]).
+operationHasAttributeHelper(op, tail) :- operationHasAttributeHelper(op, [_, tail]).
 
 // A mapping from an `Operation` to each individual `Attribute` on that
 // `Operation`.
-.decl operationToAttribute(op: Operation, attr: Attribute)
-operationToAttribute(op, attr) :- operationToPartialAttributeLists(op, [attr, _]).
+.decl operationHasAttribute(op: Operation, attr: Attribute)
+operationHasAttribute(op, attr) :- operationHasAttributeHelper(op, [attr, _]).
 
 #endif // SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_
