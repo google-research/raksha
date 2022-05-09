@@ -41,18 +41,18 @@ isOperation([owner, operator, result, [input1, [input2, nil]], attrs])
 
 // Explode the operand lists so that we can extract the heads of each sublist
 // to get a mapping from operations to their operands.
-.decl operationToPartialOperandLists(operation: Operation, partialList: OperandList)
+.decl operationHasOperandHelper(operation: Operation, partialList: OperandList)
 
-operationToPartialOperandLists([owner, op, result, operandList, attrs], operandList) :-
+operationHasOperandHelper([owner, op, result, operandList, attrs], operandList) :-
   isOperation([owner, op, result, operandList, attrs]).
-operationToPartialOperandLists(operation, tail) :-
-  operationToPartialOperandLists(operation, [_, tail]).
+operationHasOperandHelper(operation, tail) :-
+  operationHasOperandHelper(operation, [_, tail]).
 
-// Map full operations to operands.
-.decl operationToOperands(operation:Operation, operand: AccessPath)
+// True if `operand` is an argument of `operation`.
+.decl operationHasOperand(operation: Operation, operand: AccessPath)
 
-operationToOperands(operation, operand) :-
-  isOperation(operation), operationToPartialOperandLists(operation, [operand, _]).
+operationHasOperand(operation, operand) :-
+  isOperation(operation), operationHasOperandHelper(operation, [operand, _]).
 
 // A helper relation that produces all partial attribute lists of an
 // `Operation`.

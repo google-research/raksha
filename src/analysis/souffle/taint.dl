@@ -85,7 +85,7 @@
 //-----------------------------------------------------------------------------
 
 // Draw an edge from any operation's operand to its result.
-resolvedEdge(owner, src, tgt) :- operationToOperands([owner, _, tgt, _, _], src).
+resolvedEdge(owner, src, tgt) :- operationHasOperand([owner, _, tgt, _, _], src).
 
 // For all operations other than `=`, draw an edge from the special
 // "ArbitraryComputation" `AccessPath` to the result. This prevents default
