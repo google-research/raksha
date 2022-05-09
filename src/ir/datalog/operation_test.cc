@@ -55,7 +55,7 @@ static const IsOperationFact kSampleFact2 = IsOperationFact(Operation(
 static IsOperationFactAndExpectedDatalog kSampleIsOperationFactsAndDatalog[] = {
     {.is_operation_fact = &kSampleFact1,
      .expected_datalog =
-         R"(isOperation(["UserA", "sql.Literal", "out", nil, [["literal_value", $StringAttributePayload{"number_5"}], nil]]).)"},
+         R"(isOperation(["UserA", "sql.Literal", "out", nil, [["literal_value", $StringAttributePayload("number_5")], nil]]).)"},
     {.is_operation_fact = &kSampleFact2,
      .expected_datalog =
          R"(isOperation(["UserB", "sql.MergeOp", "out", ["input1", ["input2", nil]], nil]).)"}};
