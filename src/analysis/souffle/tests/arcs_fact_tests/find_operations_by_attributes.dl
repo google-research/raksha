@@ -50,7 +50,7 @@ isOperation(["owner", "op1", "result7", nil, [["attr3", PAYLOAD2], nil]]).
   result: AccessPath, attrName: AttributeName, payload: AttributePayload)
 
 resultToAttrNameAndPayload(result, attrName, payload) :-
-  operationToAttribute([_, _, result, _, _], [attrName, payload]).
+  operationHasAttribute([_, _, result, _, _], [attrName, payload]).
 
 .decl expectedResultToAttrNameAndPayload(
   result: AccessPath, attrName: AttributeName, payload: AttributePayload)
