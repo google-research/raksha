@@ -48,11 +48,32 @@ operationToPartialOperandLists([owner, op, result, operandList, attrs], operandL
 operationToPartialOperandLists(operation, tail) :-
   operationToPartialOperandLists(operation, [_, tail]).
 
-// Map full operations to operands.
-.decl operationToOperands(operation:Operation, operand: AccessPath)
+// `listLength` is the length of the `operandList`.
+.decl operandListLength(operandList: OperandList, listLength: number)
 
-operationToOperands(operation, operand) :-
-  isOperation(operation), operationToPartialOperandLists(operation, [operand, _]).
+operandListLength(nil, 0).
+operandListLength([head, tail], tailLen + 1) :-
+  operationToPartialOperandLists(_, [head, tail]), operandListLength(tail, tailLen).
+
+// `operandListLength` is the length of the `operandList` on the given
+// `operation`.
+.decl operationOperandListLength(operation: Operation, operandListLength: number)
+
+operationOperandListLength([owner, operator, result, operandList, attrs], len) :-
+  isOperation([owner, operator, result, operandList, attrs]),
+  operandListLength(operandList, len).
+
+// True when an `operation` has the given `operand` at the indicated `index` in
+// its `operandList`.
+.decl operationHasOperandAtIndex(operation: Operation, operand: AccessPath, index: number)
+
+// To find the index of an operand in an operation, find the sublist that it is
+// the head of in the operation, find the length of that list, and subtract it
+// from the overall length of the operand list in the operation.
+operationHasOperandAtIndex(operation, operand, opListLen - suffixListLen) :-
+  operationToPartialOperandLists(operation, [operand, tail]),
+  operandListLength([operand, tail], suffixListLen),
+  operationOperandListLength(operation, opListLen).
 
 // A helper relation that produces all partial attribute lists of an
 // `Operation`.
