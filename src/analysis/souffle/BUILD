@@ -44,8 +44,8 @@ gen_souffle_cxx_code(
 )
 
 gen_souffle_cxx_code(
-    name = "taint_cxx_for_test",
-    src = "taint.dl",
+    name = "tag_check_and_expectation_for_test",
+    src = "tag_check_and_expectation_interface.dl",
     for_test = True,
     included_dl_scripts = [
         "attributes.dl",
@@ -54,18 +54,19 @@ gen_souffle_cxx_code(
         "dataflow_graph.dl",
         "operations.dl",
         "tags.dl",
+        "taint.dl",
     ],
+)
+
+souffle_cc_binary(
+    name = "tag_check_and_expectation_test",
+    testonly = True,
+    src = ":tag_check_and_expectation_for_test",
 )
 
 souffle_cc_library(
     name = "taint_dl",
     src = ":taint_cxx",
-)
-
-souffle_cc_binary(
-    name = "taint_exec_test",
-    testonly = True,
-    src = ":taint_cxx_for_test",
 )
 
 exports_files([
