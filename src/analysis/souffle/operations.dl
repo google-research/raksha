@@ -41,19 +41,19 @@ isOperation([owner, operator, result, [input1, [input2, nil]], attrs])
 
 // Explode the operand lists so that we can extract the heads of each sublist
 // to get a mapping from operations to their operands.
-.decl operationToPartialOperandLists(operation: Operation, partialList: OperandList)
+.decl operationHasOperandListSuffix(operation: Operation, partialList: OperandList)
 
-operationToPartialOperandLists([owner, op, result, operandList, attrs], operandList) :-
+operationHasOperandListSuffix([owner, op, result, operandList, attrs], operandList) :-
   isOperation([owner, op, result, operandList, attrs]).
-operationToPartialOperandLists(operation, tail) :-
-  operationToPartialOperandLists(operation, [_, tail]).
+operationHasOperandListSuffix(operation, tail) :-
+  operationHasOperandListSuffix(operation, [_, tail]).
 
 // `listLength` is the length of the `operandList`.
 .decl operandListLength(operandList: OperandList, listLength: number)
 
 operandListLength(nil, 0).
 operandListLength([head, tail], tailLen + 1) :-
-  operationToPartialOperandLists(_, [head, tail]), operandListLength(tail, tailLen).
+  operationHasOperandListSuffix(_, [head, tail]), operandListLength(tail, tailLen).
 
 // `operandListLength` is the length of the `operandList` on the given
 // `operation`.
@@ -71,20 +71,20 @@ operationOperandListLength([owner, operator, result, operandList, attrs], len) :
 // the head of in the operation, find the length of that list, and subtract it
 // from the overall length of the operand list in the operation.
 operationHasOperandAtIndex(operation, operand, opListLen - suffixListLen) :-
-  operationToPartialOperandLists(operation, [operand, tail]),
+  operationHasOperandListSuffix(operation, [operand, tail]),
   operandListLength([operand, tail], suffixListLen),
   operationOperandListLength(operation, opListLen).
 
 // A helper relation that produces all partial attribute lists of an
 // `Operation`.
-.decl operationToPartialAttributeLists(operation: Operation, attributes: AttributeList)
-operationToPartialAttributeLists([owner, op, result, operandList, attrs], attrs) :-
+.decl operationHasAttributeListSuffix(operation: Operation, attributes: AttributeList)
+operationHasAttributeListSuffix([owner, op, result, operandList, attrs], attrs) :-
   isOperation([owner, op, result, operandList, attrs]).
-operationToPartialAttributeLists(op, tail) :- operationToPartialAttributeLists(op, [_, tail]).
+operationHasAttributeListSuffix(op, tail) :- operationHasAttributeListSuffix(op, [_, tail]).
 
 // A mapping from an `Operation` to each individual `Attribute` on that
 // `Operation`.
-.decl operationToAttribute(op: Operation, attr: Attribute)
-operationToAttribute(op, attr) :- operationToPartialAttributeLists(op, [attr, _]).
+.decl operationHasAttribute(op: Operation, attr: Attribute)
+operationHasAttribute(op, attr) :- operationHasAttributeListSuffix(op, [attr, _]).
 
 #endif // SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_
