@@ -1,0 +1,38 @@
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/fact_test_helper.dl"
+
+#define NO_OPERAND_OP ["someOwner", "op1", "result", nil, nil]
+
+isAccessPath("someOwner").
+isAccessPath("result").
+
+isOperation(NO_OPERAND_OP).
+
+TEST_CASE("no_indexed_operands_for_no_operand_operation") :-
+  count : { operationHasOperandAtIndex(NO_OPERAND_OP, _, _) } = 0.
+
+#define ONE_OPERAND_OP ["owner", "op2", "result2", ["path1", nil], nil]
+
+isAccessPath("result2").
+isAccessPath("path1").
+
+isOperation(ONE_OPERAND_OP).
+
+TEST_CASE("single_indexed_operand_is_path1") :-
+  operationHasOperandAtIndex(ONE_OPERAND_OP, "path1", 0),
+  count : { operationHasOperandAtIndex(ONE_OPERAND_OP, _, _) } = 1.
+
+#define MULTI_OPERAND_OP \
+  ["owner2", "op3", "result3", ["path2", ["path3", ["path2", nil] ] ], nil ]
+
+isAccessPath("path2").
+isAccessPath("path3").
+isAccessPath("result3").
+
+isOperation(MULTI_OPERAND_OP).
+
+TEST_CASE("multi_operand_op_has_correct_indexed_operands") :-
+  operationHasOperandAtIndex(MULTI_OPERAND_OP, "path2", 0),
+  operationHasOperandAtIndex(MULTI_OPERAND_OP, "path3", 1),
+  operationHasOperandAtIndex(MULTI_OPERAND_OP, "path2", 2),
+  count : { operationHasOperandAtIndex(MULTI_OPERAND_OP, _, _) } = 3.
