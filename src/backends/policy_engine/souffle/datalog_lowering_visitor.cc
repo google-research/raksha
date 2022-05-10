@@ -36,19 +36,17 @@ using DatalogOperandList = ir::datalog::OperandList;
 using DatalogIsOperationFact = ir::datalog::IsOperationFact;
 using DatalogAttribute = ir::datalog::Attribute;
 using DatalogAttributePayload = ir::datalog::AttributePayload;
-using DatalogStringAttributePayload = ir::datalog::StringAttributePayload;
-using DatalogNumberAttributePayload = ir::datalog::NumberAttributePayload;
 
 static DatalogAttributePayload GetPayloadForAttribute(ir::Attribute attr,
                                                       ir::SsaNames &ssa_names) {
   if (auto int_attr = attr.GetIf<ir::Int64Attribute>()) {
-    return DatalogNumberAttributePayload(DatalogNumber(int_attr->value()));
+    return DatalogAttribute::Number(int_attr->value());
   } else if (auto string_attr = attr.GetIf<ir::StringAttribute>()) {
-    return DatalogStringAttributePayload(DatalogSymbol(string_attr->value()));
+    return DatalogAttribute::String(string_attr->value());
   }
   LOG(FATAL) << "Unknown attribute kind.";
   // Unreachable, just to placate compiler.
-  return DatalogStringAttributePayload(DatalogSymbol(""));
+  return DatalogAttribute::String("");
 }
 
 void DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
@@ -76,7 +74,7 @@ void DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
       [&ssa_names](DatalogAttributeList list_so_far,
                    std::pair<std::string, ir::Attribute> name_attr_pair) {
         return DatalogAttributeList(
-            DatalogAttribute(DatalogSymbol(std::move(name_attr_pair.first)),
+            DatalogAttribute(std::move(name_attr_pair.first),
                              GetPayloadForAttribute(
                                  std::move(name_attr_pair.second), ssa_names)),
             std::move(list_so_far));

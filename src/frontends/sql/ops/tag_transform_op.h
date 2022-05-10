@@ -26,8 +26,7 @@ namespace raksha::frontends::sql {
 
 class TagTransformOp : public SqlOp {
  public:
-  static constexpr absl::string_view kRuleNameAttribute =
-      "sql.tag_transform.rule_name";
+  static constexpr absl::string_view kRuleNameAttribute = "rule_name";
 
   // Constructs a TagTransformOp.
   static std::unique_ptr<TagTransformOp> Create(
@@ -35,7 +34,7 @@ class TagTransformOp : public SqlOp {
       absl::string_view rule_name, ir::Value transformed_value,
       const std::vector<std::pair<std::string, ir::Value>>& preconditions);
 
-  // Returns the value that is being tranformed by this op.
+  // Returns the value that is being transformed by this op.
   ir::Value GetTransformedValue() const;
 
   // Returns the preconditions.

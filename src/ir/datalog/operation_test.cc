@@ -42,10 +42,8 @@ TEST_P(IsOperationFactTest, IsOperationFactTest) {
 
 static const IsOperationFact kSampleFact1 = IsOperationFact(Operation(
     Symbol("UserA"), Symbol("sql.Literal"), Symbol("out"), OperandList(),
-    AttributeList(
-        Attribute(Symbol("literal_value"),
-                  AttributePayload(StringAttributePayload(Symbol("number_5")))),
-        AttributeList())));
+    AttributeList(Attribute("literal_value", Attribute::String("number_5")),
+                  AttributeList())));
 
 static const IsOperationFact kSampleFact2 = IsOperationFact(Operation(
     Symbol("UserB"), Symbol("sql.MergeOp"), Symbol("out"),
@@ -55,7 +53,7 @@ static const IsOperationFact kSampleFact2 = IsOperationFact(Operation(
 static IsOperationFactAndExpectedDatalog kSampleIsOperationFactsAndDatalog[] = {
     {.is_operation_fact = &kSampleFact1,
      .expected_datalog =
-         R"(isOperation(["UserA", "sql.Literal", "out", nil, [["literal_value", $StringAttributePayload{"number_5"}], nil]]).)"},
+         R"(isOperation(["UserA", "sql.Literal", "out", nil, [["literal_value", $StringAttributePayload("number_5")], nil]]).)"},
     {.is_operation_fact = &kSampleFact2,
      .expected_datalog =
          R"(isOperation(["UserB", "sql.MergeOp", "out", ["input1", ["input2", nil]], nil]).)"}};
