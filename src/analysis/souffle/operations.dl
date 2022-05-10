@@ -41,29 +41,29 @@ isOperation([owner, operator, result, [input1, [input2, nil]], attrs])
 
 // Explode the operand lists so that we can extract the heads of each sublist
 // to get a mapping from operations to their operands.
-.decl operationHasOperandHelper(operation: Operation, partialList: OperandList)
+.decl operationHasOperandListSuffix(operation: Operation, suffix: OperandList)
 
-operationHasOperandHelper([owner, op, result, operandList, attrs], operandList) :-
+operationHasOperandListSuffix([owner, op, result, operandList, attrs], operandList) :-
   isOperation([owner, op, result, operandList, attrs]).
-operationHasOperandHelper(operation, tail) :-
-  operationHasOperandHelper(operation, [_, tail]).
+operationHasOperandListSuffix(operation, tail) :-
+  operationHasOperandListSuffix(operation, [_, tail]).
 
 // True if `operand` is an argument of `operation`.
 .decl operationHasOperand(operation: Operation, operand: AccessPath)
 
 operationHasOperand(operation, operand) :-
-  isOperation(operation), operationHasOperandHelper(operation, [operand, _]).
+  isOperation(operation), operationHasOperandListSuffix(operation, [operand, _]).
 
 // A helper relation that produces all partial attribute lists of an
 // `Operation`.
-.decl operationHasAttributeHelper(operation: Operation, attributes: AttributeList)
-operationHasAttributeHelper([owner, op, result, operandList, attrs], attrs) :-
+.decl operationHasAttributeListSuffix(operation: Operation, attributes: AttributeList)
+operationHasAttributeListSuffix([owner, op, result, operandList, attrs], attrs) :-
   isOperation([owner, op, result, operandList, attrs]).
-operationHasAttributeHelper(op, tail) :- operationHasAttributeHelper(op, [_, tail]).
+operationHasAttributeListSuffix(op, tail) :- operationHasAttributeListSuffix(op, [_, tail]).
 
 // A mapping from an `Operation` to each individual `Attribute` on that
 // `Operation`.
 .decl operationHasAttribute(op: Operation, attr: Attribute)
-operationHasAttribute(op, attr) :- operationHasAttributeHelper(op, [attr, _]).
+operationHasAttribute(op, attr) :- operationHasAttributeListSuffix(op, [attr, _]).
 
 #endif // SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_
