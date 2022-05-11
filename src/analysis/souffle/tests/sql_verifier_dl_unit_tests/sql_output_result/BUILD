@@ -26,8 +26,8 @@ package(
 
 output_rule_diff_test(
     name = "check_sql_output_unit_test",
-    test_bin = "//src/analysis/souffle:sql_verifier",
+    expected_contents_csv = ":expected.csv",
     input_files = glob(["*.facts"]),
     output_fact = "sqlOutputResult",
-    expected_contents_csv = ":expected.csv",
+    test_bin = "//src/analysis/souffle:sql_verifier",
 )

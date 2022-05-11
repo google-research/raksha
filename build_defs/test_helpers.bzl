@@ -198,10 +198,11 @@ def output_rule_diff_test(
         outs = ["resultFact"],
         srcs = input_files,
         testonly = True,
-        cmd = (("$(location {}) ".format(test_bin)) +
-               ("--output=$(RULEDIR) {fact_dirs} && ".format(fact_dirs = " ".join(facts_dir_opts))) +
-               ("cp $(RULEDIR)/{}.csv $@".format(output_fact))
-            ),
+        cmd = (
+            ("$(location {}) ".format(test_bin)) +
+            ("--output=$(RULEDIR) {fact_dirs} && ".format(fact_dirs = " ".join(facts_dir_opts))) +
+            ("cp $(RULEDIR)/{}.csv $@".format(output_fact))
+        ),
         tools = [test_bin],
         visibility = visibility,
     )
