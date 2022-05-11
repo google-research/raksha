@@ -82,7 +82,7 @@ TEST(OneOfEachFactTest, OneOfEachFactTest) {
   EXPECT_EQ(fact.ToDatalogString(),
             R"(oneOfEach(5, "foo", [3, "bar"], $Unit()).)");
   EXPECT_EQ(fact.ToDatalogFactsFileString(),
-            R"(5, "foo", [3, "bar"], $Unit())");
+            R"(5; "foo"; [3, "bar"]; $Unit())");
 }
 
 }  // namespace raksha::ir::datalog
