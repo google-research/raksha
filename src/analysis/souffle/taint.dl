@@ -172,10 +172,16 @@ mayHaveTag(base, owner, tag) :-
   mayHaveTag(member,owner, tag),
   isMemberOf(base, member).
 
-predicateEval($CP_TagPresence(ap, owner, tag), 1) :-
-  checkSubExprs($CP_TagPresence(ap, owner, tag)), mayHaveTag(ap, owner, tag).
+predicateEval($CP_TagPresence(ap, owner, $CTag(tag)), 1) :-
+  checkSubExprs($CP_TagPresence(ap, owner, $CTag(tag))), mayHaveTag(ap, owner, tag).
 
-predicateEval($CP_TagPresence(ap, owner, tag), 0) :-
-  checkSubExprs($CP_TagPresence(ap, owner, tag)), !mayHaveTag(ap, owner, tag).
+predicateEval($CP_TagPresence(ap, owner, $CTag(tag)), 0) :-
+  checkSubExprs($CP_TagPresence(ap, owner, $CTag(tag))), !mayHaveTag(ap, owner, tag).
+
+predicateEval($CP_TagPresence(ap, owner, $ITag(iTag)), 1) :-
+  checkSubExprs($CP_TagPresence(ap, owner, $ITag(iTag))), mustHaveIntegrityTag(ap, owner, iTag).
+
+predicateEval($CP_TagPresence(ap, owner, $ITag(iTag)), 0) :-
+  checkSubExprs($CP_TagPresence(ap, owner, $ITag(iTag))), !mustHaveIntegrityTag(ap, owner, iTag).
 
 #endif // SRC_ANALYSIS_SOUFFLE_TAINT_DL_

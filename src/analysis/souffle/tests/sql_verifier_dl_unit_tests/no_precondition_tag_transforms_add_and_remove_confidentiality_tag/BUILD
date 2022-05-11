@@ -14,7 +14,6 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-
 load(
     "//build_defs:test_helpers.bzl",
     "run_taint_exec_compare_check_results",
@@ -26,7 +25,7 @@ package(
 )
 
 run_taint_exec_compare_check_results(
-    name = "ok_claim_propagates",
+    name = "check_pred_unit_test",
     input_files = glob(["*.facts"]),
-    test_bin = "//src/analysis/souffle:tag_check_and_expectation_test",
+    test_bin = "//src/analysis/souffle:sql_verifier_tag_unit_test_test",
 )
