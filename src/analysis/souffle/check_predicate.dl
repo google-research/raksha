@@ -22,8 +22,10 @@
 
 .type Bool <: number
 
+.type IOrCTag = ITag{ iTag: IntegrityTag } | CTag{ cTag: Tag }
+
 .type CheckPredicate =
-  CP_TagPresence { ap: AccessPath, principal: Principal, tag: Tag }
+  CP_TagPresence { ap: AccessPath, principal: Principal, tag: IOrCTag }
   | CP_And { lhs: CheckPredicate, rhs: CheckPredicate }
   | CP_Or { lhs: CheckPredicate, rhs: CheckPredicate }
   | CP_Implies { antecedent: CheckPredicate, consequent: CheckPredicate }
@@ -69,7 +71,6 @@ checkAndResult(name, "FAIL") :- checkP(name, pred), predicateEval(pred, result),
 // A check with an attached expectation on whether a test expects this check to
 // pass or fail.
 .decl checkAndExpectation(name: symbol, pred: CheckPredicate, expectation: symbol)
-.input checkAndExpectation(delimiter=";")
 
 checkP(name, pred) :- checkAndExpectation(name, pred, _).
 
