@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "absl/status/statusor.h"
-#include "src/common/logging/logging.h"
 #include "src/ir/datalog/operation.h"
 
 namespace raksha::backends::policy_engine::souffle {
