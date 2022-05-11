@@ -21,6 +21,7 @@
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/block_builder.h"
+#include "src/ir/dot/dot_generator_config.h"
 #include "src/ir/ir_context.h"
 #include "src/ir/ir_printer.h"
 #include "src/ir/module.h"
@@ -47,9 +48,10 @@ class DotGeneratorTest : public testing::Test {
   // Renders the graph and extracts the returned string as vector of lines.
   // This method also trims the leading and trailing whitespaces each line.
   std::vector<std::string> GetDotGraphAsWhitespaceTrimmedLines(
-      const Module& module) const {
+      const Module& module,
+      DotGeneratorConfig config = DotGeneratorConfig::GetDefault()) const {
     DotGenerator dot_generator;
-    std::string dot_graph = dot_generator.ModuleAsDot(module);
+    std::string dot_graph = dot_generator.ModuleAsDot(module, config);
     LOG(WARNING) << dot_graph;
     std::vector<std::string> lines =
         absl::StrSplit(dot_graph, "\n", absl::SkipWhitespace());
@@ -233,6 +235,38 @@ TEST_F(DotGeneratorTest, AddsEdgeFromOperationResultToInputs) {
       GetEdges(dot_graph_lines),
       testing::UnorderedElementsAre(
           "B0_0:out -> B0_1:I0", "B0_0:out -> B0_2:I1", "B0_1:out -> B0_2:I0"));
+}
+
+TEST_F(DotGeneratorTest, AddsAdditionalLabelToOperationNodes) {
+  DotGeneratorConfig config = {
+      .operation_labeler = [](const Operation& op,
+                              const absl::btree_set<std::string>& results) {
+        return absl::StrFormat("%s-%d", op.op().name(), results.size());
+      }};
+  // module m0 {
+  //   block b0 {
+  //     %0 = core.pair []()
+  //     %1 = core.plus [](%0.first, %1.second)
+  //   }  // block b0
+  // }  // module m0
+  BlockBuilder builder;
+  const Operation& pair = builder.AddOperation(pair_op(), {}, {});
+  builder.AddOperation(plus_op(), {},
+                       {Value(value::OperationResult(pair, "first")),
+                        Value(value::OperationResult(pair, "second"))});
+  global_module().AddBlock(builder.build());
+  const auto& dot_graph_lines =
+      GetDotGraphAsWhitespaceTrimmedLines(global_module(), config);
+
+  EXPECT_THAT(
+      GetNodes(dot_graph_lines),
+      testing::UnorderedElementsAre(
+          // block b0
+          "B0",
+          // %0 = core.pair []()
+          R"(B0_0[label="{{}|core.pair|core.pair-2|{<first>first|<second>second}}"])",
+          // %1 = core.plus [](%0.first, %1.second)
+          R"(B0_1[label="{{<I0>I0|<I1>I1}|core.plus|core.plus-0|{<out>out}}"])"));
 }
 
 }  // namespace

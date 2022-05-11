@@ -19,6 +19,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_format.h"
+#include "src/ir/dot/dot_generator_config.h"
 #include "src/ir/ir_printer.h"
 #include "src/ir/ir_traversing_visitor.h"
 #include "src/ir/module.h"
@@ -33,8 +34,9 @@ class DotGeneratorHelper : public IRTraversingVisitor<DotGeneratorHelper> {
   using Node = std::string;
 
   // Returns a dot representation of the module.
-  static std::string ModuleAsDot(const Module& module) {
-    DotGeneratorHelper visitor;
+  static std::string ModuleAsDot(const Module& module,
+                                 DotGeneratorConfig config) {
+    DotGeneratorHelper visitor(std::move(config));
     module.Accept(visitor);
     return visitor.GetDotGraph();
   }
@@ -43,7 +45,7 @@ class DotGeneratorHelper : public IRTraversingVisitor<DotGeneratorHelper> {
   void PreVisit(const Operation& operation) override;
 
  private:
-  DotGeneratorHelper() {}
+  DotGeneratorHelper(DotGeneratorConfig config) : config_(std::move(config)) {}
 
   // Returns the captured state as a dot graph string.
   std::string GetDotGraph();
@@ -96,6 +98,7 @@ class DotGeneratorHelper : public IRTraversingVisitor<DotGeneratorHelper> {
       operation_results_;
   absl::flat_hash_set<Edge> edges_;
   SsaNames ssa_names_;
+  DotGeneratorConfig config_;
 };
 
 void DotGeneratorHelper::AddOperationNode(absl::string_view node_name,
@@ -136,6 +139,7 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
   //
   // The `Ix` and `Rx` are ports that we can connect edges to.
   // (cf. https://www.graphviz.org/doc/info/shapes.html#record)
+  static absl::btree_set<std::string> empty_results_set;
   std::string node_name = GetNodeName(op);
   std::string input_ports = absl::StrJoin(
       op.inputs(), "|", [i = 0](std::string* out, const Value& v) mutable {
@@ -144,14 +148,20 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
                         absl::StrFormat(R"(<I%d>I%d)", node_num, node_num));
       });
   auto find_result = operation_results_.find(node_name);
+  const absl::btree_set<std::string>& results =
+      (find_result == operation_results_.end()) ? empty_results_set
+                                                : find_result->second;
   std::string output_ports =
-      (find_result == operation_results_.end())
+      results.empty()
           ? "<out>out"
-          : absl::StrJoin(find_result->second, "|",
+          : absl::StrJoin(results, "|",
                           [](std::string* out, const std::string& name) {
                             absl::StrAppend(
                                 out, absl::StrFormat(R"(<%s>%s)", name, name));
                           });
+  std::string additional_label = config_.operation_labeler(op, results);
+  std::string additional_label_directive =
+      additional_label.empty() ? "" : absl::StrFormat("|%s", additional_label);
   std::string attributes =
       op.attributes().empty()
           ? ""
@@ -160,10 +170,10 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
                              op.attributes(), [](const Attribute& attribute) {
                                return attribute.ToString();
                              }));
-  return absl::StrFormat(R"(%s[label="{{%s}|%s%s|{%s}}"])",
-                         std::move(node_name), std::move(input_ports),
-                         op.op().name(), std::move(attributes),
-                         std::move(output_ports));
+  return absl::StrFormat(
+      R"(%s[label="{{%s}|%s%s%s|{%s}}"])", std::move(node_name),
+      std::move(input_ports), op.op().name(), std::move(attributes),
+      std::move(additional_label_directive), std::move(output_ports));
 }
 
 std::string DotGeneratorHelper::GetDotGraph() {
@@ -230,8 +240,9 @@ void DotGeneratorHelper::PreVisit(const Block& block) {
   AddBlockNode(block_name, block);
 }
 
-std::string DotGenerator::ModuleAsDot(const Module& module) const {
-  return DotGeneratorHelper::ModuleAsDot(module);
+std::string DotGenerator::ModuleAsDot(const Module& module,
+                                      DotGeneratorConfig config) const {
+  return DotGeneratorHelper::ModuleAsDot(module, std::move(config));
 }
 
 }  // namespace raksha::ir::dot

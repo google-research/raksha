@@ -13,23 +13,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_IR_DOT_DOT_GENERATOR_H_
-#define SRC_IR_DOT_DOT_GENERATOR_H_
+#ifndef SRC_IR_DOT_DOT_GENERATOR_CONFIG_H_
+#define SRC_IR_DOT_DOT_GENERATOR_CONFIG_H_
 
 #include <functional>
+#include <string>
+#include <vector>
 
-#include "src/ir/dot/dot_generator_config.h"
+#include "absl/container/btree_set.h"
 #include "src/ir/module.h"
 
 namespace raksha::ir::dot {
 
-class DotGenerator {
- public:
-  std::string ModuleAsDot(
-      const Module& module,
-      DotGeneratorConfig config = DotGeneratorConfig::GetDefault()) const;
+struct DotGeneratorConfig {
+  std::function<std::string(const Operation&,
+                            const absl::btree_set<std::string>&)>
+      operation_labeler;
+
+  // Default config.
+  static DotGeneratorConfig GetDefault() {
+    return {.operation_labeler =
+                [](const Operation& op,
+                   const absl::btree_set<std::string>& results) { return ""; }};
+  }
 };
 
 }  // namespace raksha::ir::dot
 
-#endif  // SRC_IR_DOT_DOT_GENERATOR_H_
+#endif  // SRC_IR_DOT_DOT_GENERATOR_CONFIG_H_
