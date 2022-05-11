@@ -1,0 +1,42 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+#ifndef SRC_ANALYSIS_SOUFFLE_SQL_OUTPUT_DL_
+#define SRC_ANALYSIS_SOUFFLE_SQL_OUTPUT_DL_
+
+#include "src/analysis/souffle/taint.dl"
+
+// Note: this will need to change when we integrate auth logic into the SQL
+// verifier.
+#define DEFAULT_SQL_OWNER "sql"
+#define SQL_OUTPUT_OPERATOR "sql.sql_output"
+
+.decl isSqlOutput(sqlOutputOperation: Operation)
+
+isSqlOutput([DEFAULT_SQL_OWNER, SQL_OUTPUT_OPERATOR, result, operandList, attributes]) :-
+  isOperation([DEFAULT_SQL_OWNER, SQL_OUTPUT_OPERATOR, result, operandList, attributes]).
+
+.decl sqlOutputHasConfidentialTag(sqlOutputOperation: Operation)
+
+sqlOutputHasConfidentialTag([owner, operator, result, operandList, attrs]) :-
+  isSqlOutput([owner, operator, result, operandList, attrs]),
+  isTag(tag), mayHaveTag(result, DEFAULT_SQL_OWNER, tag).
+
+.decl sqlOutputResult(sqlOutputOperation: Operation, passOrFail: symbol)
+
+sqlOutputResult(op, "FAIL") :- sqlOutputHasConfidentialTag(op).
+sqlOutputResult(op, "PASS") :- isSqlOutput(op), !sqlOutputHasConfidentialTag(op).
+
+#endif // SRC_ANALYSIS_SOUFFLE_SQL_OUTPUT_DL_
