@@ -42,6 +42,12 @@ TEST_P(IsAccessPathFactTest, IsAccessPathFactTest) {
             absl::StrFormat(R"(isAccessPath("%s").)", symbol_string));
 }
 
+TEST_P(IsAccessPathFactTest, ToDatalogFactsFileStringTest) {
+  absl::string_view symbol_string = GetParam();
+  EXPECT_EQ(IsAccessPathFact(Symbol(symbol_string)).ToDatalogFactsFileString(),
+            absl::StrFormat(R"("%s")", symbol_string));
+}
+
 static const absl::string_view kSampleAccessPathStrings[] = {"", "P1.foo",
                                                              "P2.handle1.x"};
 
@@ -70,11 +76,13 @@ class OneOfEachFact
 };
 
 TEST(OneOfEachFactTest, OneOfEachFactTest) {
-  EXPECT_EQ(OneOfEachFact(Number(5), Symbol("foo"),
-                          Record<Number, Symbol>(Number(3), Symbol("bar")),
-                          SimpleAdt(UnitAdtBranch()))
-                .ToDatalogString(),
+  auto fact = OneOfEachFact(Number(5), Symbol("foo"),
+                            Record<Number, Symbol>(Number(3), Symbol("bar")),
+                            SimpleAdt(UnitAdtBranch()));
+  EXPECT_EQ(fact.ToDatalogString(),
             R"(oneOfEach(5, "foo", [3, "bar"], $Unit()).)");
+  EXPECT_EQ(fact.ToDatalogFactsFileString(),
+            R"(5; "foo"; [3, "bar"]; $Unit())");
 }
 
 }  // namespace raksha::ir::datalog

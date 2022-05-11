@@ -31,9 +31,9 @@ cc_library(
     srcs = ["datalog_lowering_visitor.cc"],
     hdrs = [
         "datalog_lowering_visitor.h",
-        "raksha_datalog_facts.h",
     ],
     deps = [
+        ":raksha_datalog_facts",
         "//src/common/logging",
         "//src/common/utils:fold",
         "//src/frontends/sql:decoder_context",
@@ -57,6 +57,30 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/ir:block_builder",
         "//src/ir:module",
+        "//src/ir/datalog:raksha_relation_interface",
+        "//src/ir/datalog:value",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "raksha_datalog_facts",
+    srcs = ["raksha_datalog_facts.cc"],
+    hdrs = ["raksha_datalog_facts.h"],
+    deps = [
+        "//src/ir/datalog:input_relation_fact",
+        "//src/ir/datalog:raksha_relation_interface",
+        "@absl//absl/status:statusor",
+    ],
+)
+
+cc_test(
+    name = "raksha_datalog_facts_test",
+    srcs = ["raksha_datalog_facts_test.cc"],
+    deps = [
+        ":raksha_datalog_facts",
+        "//src/common/testing:gtest",
+        "//src/common/utils/test:utils",
         "//src/ir/datalog:raksha_relation_interface",
         "//src/ir/datalog:value",
         "@absl//absl/strings",
