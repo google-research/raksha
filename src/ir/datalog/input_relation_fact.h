@@ -47,6 +47,15 @@ class InputRelationFact {
                                          }));
   }
 
+  // Returns string representation of a fact that can be used in an input
+  // relations file.
+  std::string ToDatalogFactsFileString() const {
+    return absl::StrJoin(relation_arguments_, "; ",
+                         [](std::string *str, const auto &arg) {
+                           absl::StrAppend(str, arg.ToDatalogString());
+                         });
+  }
+
  private:
   std::tuple<RelationParameterTypes...> relation_arguments_;
 };
