@@ -130,11 +130,12 @@ def run_taint_exec_compare_check_results(
         outs = ["checkAndResult", "expectedCheckAndResult"],
         srcs = input_files,
         testonly = True,
-        cmd = ("$(location //src/analysis/souffle:taint_exec_test) --output=$(RULEDIR) {fact_dirs} && " +
+        cmd = ("$(location //src/analysis/souffle:tag_check_and_expectation_test) " +
+               "--output=$(RULEDIR) {fact_dirs} && " +
                "cp $(RULEDIR)/checkAndResult.csv $(location :checkAndResult) && " +
                "cp $(RULEDIR)/expectedCheckAndResult.csv $(location :expectedCheckAndResult)")
             .format(fact_dirs = " ".join(facts_dir_opts)),
-        tools = ["//src/analysis/souffle:taint_exec_test"],
+        tools = ["//src/analysis/souffle:tag_check_and_expectation_test"],
         visibility = visibility,
     )
 

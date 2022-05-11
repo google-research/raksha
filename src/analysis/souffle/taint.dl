@@ -54,11 +54,6 @@
 .decl says_isTag(prin: Principal, tag: Tag)
 .decl says_isPrincipal(prin1: Principal, prin2: Principal)
 
-// Manifests can produce base facts of this form, where usually the principal
-// is a particle (and this fact is entered by a code reviewer with no knowledge
-// of the taint analysis).
-.decl claimNotEdge(principal: Principal, src: AccessPath, dst: AccessPath)
-
 // Indicates that an integrity tag is directly applied to an AccessPath. This
 // rule should only be populated with base facts with no derivation to prevent
 // us from getting tangled up in stratification issues. Propagation will happen
