@@ -14,17 +14,17 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
-#ifndef SRC_ANALYSIS_SOUFFLE_SQL_VERIFIER_TAG_UNIT_TEST_INTERFACE
-#define SRC_ANALYSIS_SOUFFLE_SQL_VERIFIER_TAG_UNIT_TEST_INTERFACE
+#ifndef SRC_ANALYSIS_SOUFFLE_SQL_VERIFIER_INTERFACE
+#define SRC_ANALYSIS_SOUFFLE_SQL_VERIFIER_INTERFACE
 
 #include "src/analysis/souffle/sql_output.dl"
 #include "src/analysis/souffle/taint.dl"
 #include "src/analysis/souffle/tag_transforms.dl"
 
 // An interface used for running and getting results from the SQL verifier. Does
-// not concern itself with authorization logic facts, considers only `Operation`s and
-// `SqlPolicyRule`s. Returns as output the sqlOutputResult relation, which
-// indicates which sql outputs were tainted.
+// not concern itself with authorization logic facts, considers only
+// `Operation`s and `SqlPolicyRule`s. Returns as output the sqlOutputResult
+// relation, which indicates which sql outputs were tainted.
 .input isOperation(delimiter=";")
 .input isSqlPolicyRule(delimiter=";")
 .output sqlOutputResult(delimiter=";")
