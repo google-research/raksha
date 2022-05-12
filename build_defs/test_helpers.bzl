@@ -115,6 +115,9 @@ def run_taint_exec_compare_check_results(
 
     Args:
       name: String; Name of the test.
+      test_bin: List; List with one element containing the tool to be run to get
+                      results. This should be a string, but we ran into bizarre
+                      buildozer errors.
       input_files: List; List of labels indicatinginput files to taint_exec.
     """
 
@@ -131,12 +134,12 @@ def run_taint_exec_compare_check_results(
         outs = ["checkAndResult", "expectedCheckAndResult"],
         srcs = input_files,
         testonly = True,
-        cmd = (("$(location {}) ".format(test_bin)) +
+        cmd = (("$(location {}) ".format(test_bin[0])) +
                "--output=$(RULEDIR) {fact_dirs} && " +
                "cp $(RULEDIR)/checkAndResult.csv $(location :checkAndResult) && " +
                "cp $(RULEDIR)/expectedCheckAndResult.csv $(location :expectedCheckAndResult)")
             .format(fact_dirs = " ".join(facts_dir_opts)),
-        tools = [test_bin],
+        tools = test_bin,
         visibility = visibility,
     )
 

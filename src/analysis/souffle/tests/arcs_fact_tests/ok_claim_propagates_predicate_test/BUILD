@@ -28,5 +28,5 @@ package(
 run_taint_exec_compare_check_results(
     name = "ok_claim_propagates",
     input_files = glob(["*.facts"]),
-    test_bin = "//src/analysis/souffle:tag_check_and_expectation_test",
+    test_bin = ["//src/analysis/souffle:tag_check_and_expectation_test"],
 )
