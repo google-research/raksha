@@ -207,14 +207,14 @@ class LoweringToDatalogPass {
   static inline datalog::Predicate kDummyPredicate =
       datalog::Predicate("grounded_dummy", {"dummy_var"}, datalog::kPositive);
 
-  std::vector<datalog::RelationDeclaration> TransformDeclarations(
+  std::vector<datalog::RelationDeclaration> TransformAttributeDeclarations(
       const std::vector<datalog::RelationDeclaration>& relation_declarations);
 
-  std::vector<datalog::RelationDeclaration> CanSayDeclarations(
+  std::vector<datalog::RelationDeclaration> GetCanSayDeclarations(
       const absl::flat_hash_map<std::string_view, datalog::RelationDeclaration>&
           type_environment);
 
-  std::vector<datalog::RelationDeclaration> SaysExtendRelationDeclarations(
+  std::vector<datalog::RelationDeclaration> GetSaysExtendRelationDeclarations(
       const std::vector<datalog::RelationDeclaration>& relation_declarations);
 
   std::vector<datalog::RelationDeclaration> RelationDeclarationToDLIR(
@@ -227,7 +227,7 @@ class LoweringToDatalogPass {
 
   datalog::Program ProgToDLIR(const Program& program);
 
-  void UpdateCanSayDepth(std::string_view predicate_name, uint64_t depth);
+  void UpdateCanSayDepth(const std::string& predicate_name, uint64_t depth);
 
   uint64_t fresh_var_count_;
   // This pass needs to generate relation declarations for predicates that
@@ -243,7 +243,7 @@ class LoweringToDatalogPass {
   // for (1..n). `can_say_depth` is only updated by `UpdateCansayDepth` which
   // tracks this maximum.
   // key: predicate name, value: Number of can says.
-  absl::flat_hash_map<std::string_view, uint64_t> can_say_depth_;
+  absl::flat_hash_map<std::string, uint64_t> can_say_depth_;
 };
 
 }  // namespace raksha::ir::auth_logic

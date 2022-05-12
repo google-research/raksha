@@ -30,10 +30,11 @@ class SouffleEmitter {
  public:
   static std::string EmitProgram(
       const datalog::Program& program,
-      const std::vector<std::string> skip_declarations) {
+      const absl::flat_hash_set<std::string>& skip_declarations) {
     SouffleEmitter emitter;
     std::string body = emitter.EmitProgramBody(program);
     std::string outputs = emitter.EmitOutputs(program);
+
     std::string declarations =
         emitter.EmitRelationDeclarations(program, skip_declarations);
     std::string type_declarations =
@@ -68,11 +69,13 @@ class SouffleEmitter {
   }
 
   std::string EmitPredicate(const datalog::Predicate& predicate) {
-    const absl::string_view comparison_operators[] = {"<",  ">",  "=",
-                                                      "!=", "<=", ">="};
-    if (std::find(std::begin(comparison_operators),
-                  std::end(comparison_operators),
-                  predicate.name()) != std::end(comparison_operators)) {
+    static const absl::flat_hash_set<std::string> comparison_operators = {
+        {"<"}, {">"}, {"="}, {"!="}, {"<="}, {">="}};
+    // Rvalue rules which are represented as datalog::Predicates in AST, we use
+    // infix notation while translating to datalog.
+    // Ex: "<"(number1, number2) -> number1 < number2.
+    if (comparison_operators.find(predicate.name()) !=
+        comparison_operators.end()) {
       CHECK(predicate.args().size() == 2);
       return absl::StrCat(predicate.args().front(), predicate.name(),
                           predicate.args().back());
@@ -120,7 +123,7 @@ class SouffleEmitter {
     return absl::StrCat(".decl ", predicate.name(), "(", arguments, ")");
   }
 
-  std::string EmitArguments(std::vector<datalog::Argument> arguments) {
+  std::string EmitArguments(const std::vector<datalog::Argument>& arguments) {
     return absl::StrJoin(
         arguments, ", ", [](std::string* out, datalog::Argument argument) {
           return absl::StrAppend(out, argument.argument_name(), " : ",
@@ -130,10 +133,10 @@ class SouffleEmitter {
 
   std::string EmitRelationDeclarations(
       const datalog::Program& program,
-      const std::vector<std::string>& skip_declarations) {
+      const absl::flat_hash_set<std::string>& skip_declarations) {
     std::vector<std::string> declaration_strings;
     for (const auto& declaration : program.relation_declarations()) {
-      if (absl::c_find(skip_declarations, declaration.relation_name()) !=
+      if (skip_declarations.find(declaration.relation_name()) !=
           skip_declarations.end())
         continue;
       declaration_strings.push_back(
@@ -146,22 +149,24 @@ class SouffleEmitter {
 
   std::string EmitTypeDeclarations(
       const datalog::Program& program,
-      const std::vector<std::string>& skip_declarations) {
-    std::vector<std::string> type_names;
+      const absl::flat_hash_set<std::string>& skip_declarations) {
+    absl::flat_hash_set<std::string> type_names;
     for (const auto& declaration : program.relation_declarations()) {
       for (const auto& argument : declaration.arguments()) {
         if (argument.argument_type().kind() !=
             datalog::ArgumentType::Kind::kCustom)
           continue;
-        if (absl::c_find(skip_declarations, argument.argument_name()) !=
+        if (skip_declarations.find(argument.argument_name()) !=
             skip_declarations.end())
           continue;
-        type_names.push_back(absl::StrCat(
+        type_names.insert(absl::StrCat(
             ".type ", argument.argument_type().name(), " <: symbol"));
       }
     }
-    std::sort(type_names.begin(), type_names.end());
-    return absl::StrJoin(type_names, "\n");
+    std::vector<absl::string_view> sorted_type_names(type_names.begin(),
+                                                     type_names.end());
+    std::sort(sorted_type_names.begin(), sorted_type_names.end());
+    return absl::StrJoin(sorted_type_names, "\n");
   }
 
   absl::flat_hash_set<datalog::Predicate> declarations_;

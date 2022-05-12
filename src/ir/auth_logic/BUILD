@@ -63,6 +63,7 @@ cc_library(
         "souffle_emitter.h",
     ],
     deps = [
+        "//src/common/logging",
         "//src/common/utils:map_iter",
         "//src/ir/auth_logic:ast",
         "//src/ir/auth_logic:lowering_ast_datalog",

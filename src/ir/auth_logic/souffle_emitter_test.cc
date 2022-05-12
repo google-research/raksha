@@ -42,6 +42,22 @@ Program BuildPredicateTestProgram() {
                                                      datalog::kPositive))))));
 }
 
+Program BuildRelationDeclarationProgram(SaysAssertion assertion) {
+  std::vector<SaysAssertion> assertion_list = {};
+  assertion_list.push_back(std::move(assertion));
+  std::vector<datalog::RelationDeclaration> relation_declaration = {
+      datalog::RelationDeclaration(
+          "grantAccess", false,
+          {datalog::Argument(
+               "x0", datalog::ArgumentType(
+                         datalog::ArgumentType::Kind::kPrincipal, "Principal")),
+           datalog::Argument(
+               "x1", datalog::ArgumentType(datalog::ArgumentType::Kind::kCustom,
+                                           "FileName"))})};
+  return Program(std::move(relation_declaration), std::move(assertion_list),
+                 {});
+}
+
 TEST(EmitterTestSuite, EmptyAuthLogicTest) {
   std::string expected =
       R"(.type DummyType <: symbol
@@ -67,6 +83,66 @@ grounded_dummy(dummy_var).
 
   std::string actual = SouffleEmitter::EmitProgram(
       LoweringToDatalogPass::Lower(BuildPredicateTestProgram()), {});
+
+  EXPECT_EQ(actual, expected);
+}
+
+Program BuildCanSayProgram() {
+  return BuildRelationDeclarationProgram(BuildSingleSaysAssertion(
+      Principal("TestSpeaker"),
+      Assertion(Fact({Principal("PrincipalA")},
+                     BaseFact(datalog::Predicate("grantAccess", {"secretFile"},
+                                                 datalog::kPositive))))));
+};
+
+TEST(EmitterTestSuite, CanSayTest) {
+  std::string expected =
+      R"(.type DummyType <: symbol
+.type FileName <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_canSay_grantAccess(speaker : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
+.decl says_grantAccess(speaker : Principal, x0 : Principal, x1 : FileName)
+.decl says_isNumber(speaker : Principal, x : Number)
+says_grantAccess(TestSpeaker, secretFile) :- says_grantAccess(x__1, secretFile), says_canSay_grantAccess(TestSpeaker, x__1, secretFile).
+says_canSay_grantAccess(TestSpeaker, PrincipalA, secretFile).
+grounded_dummy(dummy_var).
+)";
+  const absl::flat_hash_set<std::string> skip_declarations = {{}};
+  std::string actual = SouffleEmitter::EmitProgram(
+      LoweringToDatalogPass::Lower(BuildCanSayProgram()),
+      std::move(skip_declarations));
+
+  EXPECT_EQ(actual, expected);
+}
+
+Program BuildDoubleCanSayProgram() {
+  BaseFact inner_base_fact(
+      datalog::Predicate("grantAccess", {"secretFile"}, datalog::kPositive));
+  Fact cansay_fact({Principal("PrincipalA"), Principal("PrincipalB")},
+                   inner_base_fact);
+  return BuildRelationDeclarationProgram(BuildSingleSaysAssertion(
+      Principal("TestSpeaker"), Assertion(Fact(std::move(cansay_fact)))));
+}
+
+TEST(EmitterTestSuite, DoubleCanSayTest) {
+  std::string expected =
+      R"(.type DummyType <: symbol
+.type FileName <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_canSay_canSay_grantAccess(speaker : Principal, delegatee2 : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
+.decl says_canSay_grantAccess(speaker : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
+.decl says_grantAccess(speaker : Principal, x0 : Principal, x1 : FileName)
+.decl says_isNumber(speaker : Principal, x : Number)
+says_grantAccess(TestSpeaker, secretFile) :- says_grantAccess(x__1, secretFile), says_canSay_grantAccess(TestSpeaker, x__1, secretFile).
+says_canSay_grantAccess(TestSpeaker, PrincipalA, secretFile) :- says_canSay_grantAccess(x__2, PrincipalA, secretFile), says_canSay_canSay_grantAccess(TestSpeaker, x__2, PrincipalA, secretFile).
+says_canSay_canSay_grantAccess(TestSpeaker, PrincipalB, PrincipalA, secretFile).
+grounded_dummy(dummy_var).
+)";
+
+  std::string actual = SouffleEmitter::EmitProgram(
+      LoweringToDatalogPass::Lower(BuildDoubleCanSayProgram()), {});
 
   EXPECT_EQ(actual, expected);
 }
