@@ -100,6 +100,11 @@ tagTransformHasRuleName(op, ruleName) :-
 tagTransformHasResultAccessPath([owner, operator, result, operandList, attrs], result) :-
   isTagTransformOperation([owner, operator, result, operandList, attrs]).
 
+// Associates the tagTransform operation with a tagPrecondition that must be
+// met for the transform to occur and the index of the corresponding policy
+// rule precondition in the relevant SqlPolicyRule record. We need the index to
+// allow us to check that all preconditions have been satisfied without using
+// negation (which could cause problems with stratification requirements).
 .decl tagTransformHasIndexedTagPrecondition(
   tagTransform: Operation, index: number, tagPrecondition: TagPrecondition)
 
