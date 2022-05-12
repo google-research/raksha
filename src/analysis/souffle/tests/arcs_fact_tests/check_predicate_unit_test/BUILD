@@ -27,5 +27,5 @@ package(
 run_taint_exec_compare_check_results(
     name = "check_pred_unit_test",
     input_files = glob(["*.facts"]),
-    test_bin = "//src/analysis/souffle:tag_check_and_expectation_test",
+    tool = "//src/analysis/souffle:tag_check_and_expectation_test",
 )
