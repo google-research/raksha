@@ -25,6 +25,9 @@
 #define TAG_TRANSFORM_OPERATOR "sql.tag_transform"
 #define TAG_TRANSFORM_RULE_NAME_ATTR "rule_name"
 
+// A precondition produced in the SQL verifier. The `preconditionName`
+// corresponds to the user-provided name in the SQL pattern in the original
+// policy rule.
 .type SqlPolicyRulePrecondition = [ preconditionName : symbol, requiredTag: IntegrityTag ]
 .type SqlPolicyRulePreconditionList =
   [ precondition: SqlPolicyRulePrecondition, next: SqlPolicyRulePreconditionList ]
@@ -100,6 +103,11 @@ tagTransformHasRuleName(op, ruleName) :-
 tagTransformHasResultAccessPath([owner, operator, result, operandList, attrs], result) :-
   isTagTransformOperation([owner, operator, result, operandList, attrs]).
 
+// Associates the tagTransform operation with a tagPrecondition that must be
+// met for the transform to occur and the index of the corresponding policy
+// rule precondition in the relevant SqlPolicyRule record. We need the index to
+// allow us to check that all preconditions have been satisfied without using
+// negation (which could cause problems with stratification requirements).
 .decl tagTransformHasIndexedTagPrecondition(
   tagTransform: Operation, index: number, tagPrecondition: TagPrecondition)
 
