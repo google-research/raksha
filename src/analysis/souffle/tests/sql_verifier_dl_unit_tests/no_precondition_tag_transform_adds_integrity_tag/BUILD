@@ -27,5 +27,5 @@ package(
 run_taint_exec_compare_check_results(
     name = "check_pred_unit_test",
     input_files = glob(["*.facts"]),
-    tool = "//src/analysis/souffle:sql_verifier_tag_unit_test_test",
+    test_bin = ["//src/analysis/souffle:sql_verifier_tag_unit_test_test"],
 )
