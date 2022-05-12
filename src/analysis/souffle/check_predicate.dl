@@ -22,10 +22,10 @@
 
 .type Bool <: number
 
-.type IOrCTag = ITag{ iTag: IntegrityTag } | CTag{ cTag: Tag }
+.type IFCTag = ITag{ iTag: IntegrityTag } | CTag{ cTag: Tag }
 
 .type CheckPredicate =
-  CP_TagPresence { ap: AccessPath, principal: Principal, tag: IOrCTag }
+  CP_TagPresence { ap: AccessPath, principal: Principal, tag: IFCTag }
   | CP_And { lhs: CheckPredicate, rhs: CheckPredicate }
   | CP_Or { lhs: CheckPredicate, rhs: CheckPredicate }
   | CP_Implies { antecedent: CheckPredicate, consequent: CheckPredicate }
