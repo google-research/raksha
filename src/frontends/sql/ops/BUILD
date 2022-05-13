@@ -153,7 +153,6 @@ cc_library(
     hdrs = ["sql_output_op.h"],
     deps = [
         ":sql_op",
-        "//src/common/logging",
         "//src/ir:ir_context",
         "//src/ir:module",
         "//src/ir:value",
