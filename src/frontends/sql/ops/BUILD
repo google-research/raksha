@@ -167,6 +167,7 @@ cc_test(
         ":example_value_test_helper",
         ":sql_op",
         ":sql_output_op",
+        "//src/common/logging",
         "//src/common/testing:gtest",
         "//src/common/utils:ranges",
         "//src/ir:value",
