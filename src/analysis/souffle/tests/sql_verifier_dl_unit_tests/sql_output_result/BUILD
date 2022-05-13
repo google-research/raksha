@@ -29,5 +29,5 @@ output_rule_diff_test(
     expected_contents_csv = ":expected.csv",
     input_files = glob(["*.facts"]),
     output_fact = "sqlOutputResult",
-    test_bin = "//src/analysis/souffle:sql_verifier_unit_test",
+    test_bin = ["//src/analysis/souffle:sql_verifier_unit_test"],
 )

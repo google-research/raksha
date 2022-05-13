@@ -125,8 +125,8 @@ souffle_cc_binary(
 )
 
 gen_souffle_cxx_code(
-    name = "sql_verifier_code",
-    src = "sql_verifier_interface.dl",
+    name = "datalog_policy_verifier_cxx",
+    src = "policy_verifier_interface.dl",
     included_dl_scripts = [
         "attributes.dl",
         "authorization_logic.dl",
@@ -141,8 +141,8 @@ gen_souffle_cxx_code(
 )
 
 souffle_cc_library(
-    name = "sql_verifier_lib",
-    src = ":sql_verifier_code",
+    name = "datalog_policy_verifier_lib",
+    src = ":datalog_policy_verifier_cxx",
 )
 
 souffle_cc_library(

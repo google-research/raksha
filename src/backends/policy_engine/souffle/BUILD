@@ -14,12 +14,6 @@
 # limitations under the License.
 #----------------------------------------------------------------------------
 
-load(
-    "//build_defs:souffle.bzl",
-    "gen_souffle_cxx_code",
-    "souffle_cc_library",
-)
-
 package(
     default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
@@ -101,7 +95,7 @@ cc_library(
     features = ["-use_header_modules"],
     linkopts = ["-pthread"],
     deps = [
-        "//src/analysis/souffle:sql_verifier_lib",
+        "//src/analysis/souffle:datalog_policy_verifier_lib",
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:policy_checker",
         "//src/ir:module",
