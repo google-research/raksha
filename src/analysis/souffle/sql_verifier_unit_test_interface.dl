@@ -23,11 +23,11 @@
 
 // An interface used for running and getting results from the SQL verifier. Does
 // not concern itself with authorization logic facts, considers only
-// `Operation`s and `SqlPolicyRule`s. Returns as output the violatesSqlPolicy
-// relation, which indicates whether there were failures in a way that is easy
-// to read across the Souffle C++ interface.
+// `Operation`s and `SqlPolicyRule`s. Returns as output the sqlOutputResult
+// relation, which indicates which sql outputs were tainted and which ones were
+// not tainted
 .input isOperation(delimiter=";")
 .input isSqlPolicyRule(delimiter=";")
-.output violatesSqlPolicy(delimiter=";")
+.output sqlOutputResult(delimiter=";")
 
 #endif

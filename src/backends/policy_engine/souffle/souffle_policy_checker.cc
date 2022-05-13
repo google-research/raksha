@@ -22,7 +22,7 @@
 
 namespace raksha::backends::policy_engine {
 
-static constexpr char kDatalogPolicyEngine[] = "datalog_policy_engine_cxx";
+static constexpr char kDatalogPolicyEngine[] = "sql_verifier_code";
 static constexpr char kViolatesSqlPolicyRelation[] = "violatesSqlPolicy";
 
 bool SoufflePolicyChecker::IsModulePolicyCompliant(const ir::Module& module,
