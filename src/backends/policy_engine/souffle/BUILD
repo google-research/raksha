@@ -14,12 +14,6 @@
 # limitations under the License.
 #----------------------------------------------------------------------------
 
-load(
-    "//build_defs:souffle.bzl",
-    "gen_souffle_cxx_code",
-    "souffle_cc_library",
-)
-
 package(
     default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
