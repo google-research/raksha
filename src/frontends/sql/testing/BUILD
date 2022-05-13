@@ -26,6 +26,7 @@ cc_library(
     visibility = ["//src/frontends/sql:__subpackages__"],
     deps = [
         "//src/frontends/sql:decoder_context",
+        "//src/frontends/sql/ops:sql_output_op",
         "//src/ir:module",
         "//src/ir:value",
     ],
