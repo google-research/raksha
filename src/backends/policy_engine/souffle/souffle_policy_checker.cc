@@ -22,8 +22,8 @@
 
 namespace raksha::backends::policy_engine {
 
-static constexpr char kDatalogPolicyEngine[] = "sql_verifier_code";
-static constexpr char kViolatesSqlPolicyRelation[] = "violatesSqlPolicy";
+static constexpr char kDatalogPolicyEngine[] = "datalog_policy_verifier_cxx";
+static constexpr char kViolatesPolicyRelation[] = "violatesPolicy";
 
 bool SoufflePolicyChecker::IsModulePolicyCompliant(const ir::Module& module,
                                                    const Policy& policy) const {
@@ -33,10 +33,10 @@ bool SoufflePolicyChecker::IsModulePolicyCompliant(const ir::Module& module,
   // TODO: Add relations from module.
   program->run();
 
-  souffle::Relation* hasSqlPolicyViolation =
-      CHECK_NOTNULL(program->getRelation(kViolatesSqlPolicyRelation));
+  souffle::Relation* hasPolicyViolation =
+      CHECK_NOTNULL(program->getRelation(kViolatesPolicyRelation));
 
-  return hasSqlPolicyViolation->size() > 0 ? false : true;
+  return hasPolicyViolation->size() > 0 ? false : true;
 }
 
 }  // namespace raksha::backends::policy_engine

@@ -39,7 +39,7 @@ sqlOutputHasConfidentialTag([owner, operator, result, operandList, attrs]) :-
 sqlOutputResult(op, "FAIL") :- sqlOutputHasConfidentialTag(op).
 sqlOutputResult(op, "PASS") :- isSqlOutput(op), !sqlOutputHasConfidentialTag(op).
 
-.decl violatesSqlPolicy(path: AccessPath)
-violatesSqlPolicy(path) :- sqlOutputHasConfidentialTag([_, _, path, _, _]).
+.decl violatesPolicy(path: AccessPath)
+violatesPolicy(path) :- sqlOutputHasConfidentialTag([_, _, path, _, _]).
 
 #endif // SRC_ANALYSIS_SOUFFLE_SQL_OUTPUT_DL_
