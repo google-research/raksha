@@ -171,3 +171,63 @@ def run_taint_exec_compare_check_results(
         data = [":checkAndResultSorted", ":expectedCheckAndResultSorted"],
         srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:diff_wrapper.sh"],
     )
+
+def output_rule_diff_test(
+        name,
+        test_bin,
+        input_files,
+        output_fact,
+        expected_contents_csv,
+        visibility = None):
+    """Run the Souffle-generated taint executable and diff the results contained in a single output relation against those in the expected_contents_csv.
+
+    Args:
+      name: String; Name of the test.
+      test_bin: List; List with one element containing the tool to be run to get
+                      results. This should be a string, but we ran into bizarre
+                      buildozer errors.
+      input_files: List; List of labels indicating input files to the analysis.
+      output_fact: String; The single output relation to be diffed.
+      expected_contents_csv: String; The label indicating the expected result.
+    """
+
+    facts_dir_opts = [
+        "--facts=`dirname $(location {})`".format(input_file)
+        for input_file in input_files
+    ]
+
+    test_bin_label = test_bin[0]
+
+    # Run the taint analysis Souffle binary to generate the Datalog output
+    # files, then copy the checkAndResult and expectedCheckAndResult output
+    # files to the rule outputs.
+    native.genrule(
+        name = name + "_test_results",
+        outs = ["resultFact"],
+        srcs = input_files,
+        testonly = True,
+        cmd = (
+            ("$(location {}) ".format(test_bin_label)) +
+            ("--output=$(RULEDIR) {fact_dirs} && ".format(fact_dirs = " ".join(facts_dir_opts))) +
+            ("cp $(RULEDIR)/{}.csv $@".format(output_fact))
+        ),
+        tools = [test_bin_label],
+        visibility = visibility,
+    )
+
+    native.genrule(
+        name = name + "_result_sorted",
+        outs = ["resultFactSorted"],
+        srcs = [":resultFact"],
+        testonly = True,
+        cmd = "sort $< > $@",
+        visibility = visibility,
+    )
+
+    # Compare the result for diff equality against expected.
+    native.sh_test(
+        name = name,
+        args = ["$(location {})".format(expected_contents_csv), "$(location :resultFact)"],
+        data = [expected_contents_csv, ":resultFact"],
+        srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:diff_wrapper.sh"],
+    )

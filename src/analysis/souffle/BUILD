@@ -103,6 +103,48 @@ souffle_cc_binary(
     src = ":sql_verifier_tag_unit_test_for_test",
 )
 
+gen_souffle_cxx_code(
+    name = "sql_verifier_unit_test_code",
+    src = "sql_verifier_unit_test_interface.dl",
+    included_dl_scripts = [
+        "attributes.dl",
+        "authorization_logic.dl",
+        "check_predicate.dl",
+        "dataflow_graph.dl",
+        "operations.dl",
+        "sql_output.dl",
+        "tag_transforms.dl",
+        "tags.dl",
+        "taint.dl",
+    ],
+)
+
+souffle_cc_binary(
+    name = "sql_verifier_unit_test",
+    src = ":sql_verifier_unit_test_code",
+)
+
+gen_souffle_cxx_code(
+    name = "datalog_policy_verifier_cxx",
+    src = "policy_verifier_interface.dl",
+    included_dl_scripts = [
+        "attributes.dl",
+        "authorization_logic.dl",
+        "check_predicate.dl",
+        "dataflow_graph.dl",
+        "operations.dl",
+        "sql_output.dl",
+        "tag_transforms.dl",
+        "tags.dl",
+        "taint.dl",
+    ],
+)
+
+souffle_cc_library(
+    name = "datalog_policy_verifier_lib",
+    src = ":datalog_policy_verifier_cxx",
+)
+
 souffle_cc_library(
     name = "taint_dl",
     src = ":taint_cxx",
