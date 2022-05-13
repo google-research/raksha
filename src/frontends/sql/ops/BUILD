@@ -149,6 +149,35 @@ cc_test(
 )
 
 cc_library(
+    name = "sql_output_op",
+    hdrs = ["sql_output_op.h"],
+    deps = [
+        ":sql_op",
+        "//src/common/logging",
+        "//src/ir:ir_context",
+        "//src/ir:module",
+        "//src/ir:value",
+        "@absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "sql_output_op_test",
+    srcs = ["sql_output_op_test.cc"],
+    deps = [
+        ":example_value_test_helper",
+        ":sql_op",
+        ":sql_output_op",
+        "//src/common/logging",
+        "//src/common/testing:gtest",
+        "//src/common/utils:ranges",
+        "//src/ir:value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+    ],
+)
+
+cc_library(
     name = "op_traits",
     hdrs = ["op_traits.h"],
     deps = [

@@ -17,6 +17,7 @@
 #include "src/frontends/sql/decode.h"
 
 #include "src/frontends/sql/decoder_context.h"
+#include "src/frontends/sql/ops/sql_output_op.h"
 #include "src/ir/value.h"
 
 namespace raksha::frontends::sql {
@@ -120,7 +121,8 @@ Value DecodeExpressionArena(const ExpressionArena &expr_arena,
   }
   CHECK(top_level_value.has_value()) << "Expected at least one expression to "
                                         "be provided in the ExpressionArena.";
-  return *top_level_value;
+  return WrapOperationResultValue(
+      decoder_context.MakeSqlOutputOperation(*top_level_value));
 }
 
 }  // namespace raksha::frontends::sql

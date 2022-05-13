@@ -14,10 +14,10 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "google/protobuf/text_format.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
+#include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/map_iter.h"
 #include "src/frontends/sql/decode.h"
@@ -84,9 +84,10 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
           ids_to_be_filled);
 
   ExpressionArena exprArena;
-  EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
-      exprArenaTextproto, &exprArena));
-  Value decoded_value = DecodeExpressionArena(exprArena, decoder_context);
+  EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(exprArenaTextproto,
+                                                            &exprArena));
+  Value decoded_value = testing::UnwrapTopLevelSqlOutputOp(
+      DecodeExpressionArena(exprArena, decoder_context));
 
   const TagTransformOp *tag_transform_op =
       SqlOp::GetIf<TagTransformOp>(UnwrapDefaultOperationResult(decoded_value));

@@ -18,6 +18,7 @@
 #define SRC_FRONTENDS_SQL_TESTING_UTILS_H_
 
 #include "src/frontends/sql/decoder_context.h"
+#include "src/frontends/sql/ops/sql_output_op.h"
 #include "src/ir/module.h"
 #include "src/ir/value.h"
 
@@ -31,6 +32,14 @@ const ir::Operation &UnwrapDefaultOperationResult(
   CHECK(result->name() == DecoderContext::kDefaultOutputName)
       << "Expected the result to have the default output name.";
   return result->operation();
+}
+
+ir::Value UnwrapTopLevelSqlOutputOp(ir::Value sql_output_value) {
+  const ir::Operation &operation =
+      UnwrapDefaultOperationResult(sql_output_value);
+  const SqlOutputOp &sql_output_op =
+      *CHECK_NOTNULL(SqlOp::GetIf<SqlOutputOp>(operation));
+  return sql_output_op.GetValueMarkedAsOutput();
 }
 
 // Creates an `ExpressionArena` with some number of `Literal` expressions as its

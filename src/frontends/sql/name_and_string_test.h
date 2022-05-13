@@ -17,9 +17,9 @@
 #ifndef SRC_FRONTENDS_SQL_ID_NAME_AND_STRING_TEST_H_
 #define SRC_FRONTENDS_SQL_ID_NAME_AND_STRING_TEST_H_
 
-#include "google/protobuf/text_format.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
+#include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/decoder_context.h"
@@ -59,7 +59,8 @@ class NameAndStringTest
         testing::CreateExprArenaTextprotoWithLiteralsPrefix(GetTextproto(), {}),
         &exprArena))
         << "Could not decode expr";
-    return DecodeExpressionArena(exprArena, decoder_context_);
+    return testing::UnwrapTopLevelSqlOutputOp(
+        DecodeExpressionArena(exprArena, decoder_context_));
   }
 
   ir::IRContext ir_context_;

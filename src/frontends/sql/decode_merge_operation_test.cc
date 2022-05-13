@@ -15,8 +15,8 @@
 //----------------------------------------------------------------------------
 #include <string>
 
-#include "google/protobuf/text_format.h"
 #include "absl/strings/string_view.h"
+#include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/decoder_context.h"
@@ -86,8 +86,8 @@ class DecodeMergeOpTest
 
 TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
   ExpressionArena exprArena;
-  EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(GetTextproto(),
-                                                                &exprArena))
+  EXPECT_TRUE(
+      google::protobuf::TextFormat::ParseFromString(GetTextproto(), &exprArena))
       << "Could not decode expr";
   Value value = DecodeExpressionArena(exprArena, decoder_context_);
   const Block &top_level_block = decoder_context_.BuildTopLevelBlock();
@@ -96,7 +96,8 @@ TEST_P(DecodeMergeOpTest, DecodeMergeOpTest) {
 
   // We always have the value of the `MergeOp` that we are decoding be 1 to
   // prevent collisions with child values.
-  const Operation &op = testing::UnwrapDefaultOperationResult(value);
+  const Operation &op = testing::UnwrapDefaultOperationResult(
+      testing::UnwrapTopLevelSqlOutputOp(value));
   EXPECT_EQ(op.parent(), &top_level_block);
 
   auto merge_op = SqlOp::GetIf<MergeOp>(op);

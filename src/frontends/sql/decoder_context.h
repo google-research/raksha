@@ -21,6 +21,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "src/frontends/sql/ops/literal_op.h"
+#include "src/frontends/sql/ops/sql_output_op.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/block_builder.h"
 #include "src/ir/ir_context.h"
@@ -42,6 +43,8 @@ class DecoderContext {
             std::make_unique<ir::Operator>(OpTraits<MergeOp>::kName))),
         tag_transform_operator_(ir_context_.RegisterOperator(
             std::make_unique<ir::Operator>(OpTraits<TagTransformOp>::kName))),
+        sql_output_operator_(ir_context_.RegisterOperator(
+            std::make_unique<ir::Operator>(OpTraits<SqlOutputOp>::kName))),
         global_module_(),
         top_level_block_builder_() {}
 
@@ -103,6 +106,11 @@ class DecoderContext {
       uint64_t transformed_value_id, absl::string_view rule_name,
       const absl::flat_hash_map<std::string, uint64_t> &tag_preconditions);
 
+  const ir::Operation &MakeSqlOutputOperation(ir::Value value) {
+    return top_level_block_builder_.AddOperation<SqlOutputOp>(ir_context_,
+                                                              value);
+  }
+
   // Finish building the top level block and
   const ir::Block &BuildTopLevelBlock() {
     return global_module_.AddBlock(top_level_block_builder_.build());
@@ -127,6 +135,9 @@ class DecoderContext {
   // An `Operator` that may perform some transformation upon the tag state if
   // some indicated policy rule fires.
   const ir::Operator &tag_transform_operator_;
+  // An `Operator` that indicates that the wrapped value is an output of a
+  // top-level query.
+  const ir::Operator &sql_output_operator_;
   // A global module to which we can add SQL IR nodes.
   ir::Module global_module_;
   // A BlockBuilder for building the top-level block.
