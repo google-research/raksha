@@ -153,6 +153,7 @@ cc_library(
     hdrs = ["sql_output_op.h"],
     deps = [
         ":sql_op",
+        "//src/common/logging",
         "//src/ir:ir_context",
         "//src/ir:module",
         "//src/ir:value",
@@ -167,7 +168,7 @@ cc_test(
         ":example_value_test_helper",
         ":sql_op",
         ":sql_output_op",
-        "//src/common/testing:gtest",
+        "//src/common/logging",
         "//src/common/utils:ranges",
         "//src/ir:value",
         "//src/ir/attributes:attribute",
