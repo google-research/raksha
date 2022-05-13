@@ -128,27 +128,28 @@ static Fact ConstructFact(std::forward_list<Principal> delegation_chain,
                        *CHECK_NOTNULL(can_say_fact_context.fact()));
 }
 
-static ArgumentType ConstructArgumentType(
+static datalog::ArgumentType ConstructArgumentType(
     AuthLogicParser::AuthLogicTypeContext& auth_logic_type_context) {
   if (auto* number_type_context =
           dynamic_cast<AuthLogicParser::NumberTypeContext*>(
               &auth_logic_type_context)) {
-    return ArgumentType(ArgumentType::Kind::kNumber,
-                        number_type_context->NUMBERTYPE()->getText());
+    return datalog::ArgumentType(datalog::ArgumentType::Kind::kNumber,
+                                 number_type_context->NUMBERTYPE()->getText());
   } else if (auto* principal_type_context =
                  dynamic_cast<AuthLogicParser::PrincipalTypeContext*>(
                      &auth_logic_type_context)) {
-    return ArgumentType(ArgumentType::Kind::kPrincipal,
-                        principal_type_context->PRINCIPALTYPE()->getText());
+    return datalog::ArgumentType(
+        datalog::ArgumentType::Kind::kPrincipal,
+        principal_type_context->PRINCIPALTYPE()->getText());
   }
   auto& custom_type_context =
       *CHECK_NOTNULL(dynamic_cast<AuthLogicParser::CustomTypeContext*>(
           &auth_logic_type_context));
-  return ArgumentType(ArgumentType::Kind::kCustom,
-                      custom_type_context.ID()->getText());
+  return datalog::ArgumentType(datalog::ArgumentType::Kind::kCustom,
+                               custom_type_context.ID()->getText());
 }
 
-static RelationDeclaration ConstructRelationDeclaration(
+static datalog::RelationDeclaration ConstructRelationDeclaration(
     AuthLogicParser::RelationDeclarationContext& relation_declaration_context) {
   // grammar rule for relationDeclaration:
   // '.decl' ATTRIBUTE? ID '(' ID ':' authLogicType (',' ID ':'authLogicType)*
@@ -157,16 +158,16 @@ static RelationDeclaration ConstructRelationDeclaration(
   // (ID[1] : authLogicType[0]), (ID[2] : authLogicType[1]),.....,(ID[n] :
   // authLogicType[n-1]) corresponds to
   //  arguments for the relation.
-  std::vector<Argument> arguments;
+  std::vector<datalog::Argument> arguments;
   arguments.reserve(relation_declaration_context.authLogicType().size());
   for (uint64_t i = 0; i < relation_declaration_context.authLogicType().size();
        ++i) {
-    arguments.push_back(Argument(
+    arguments.push_back(datalog::Argument(
         relation_declaration_context.ID(i + 1)->getText(),
         ConstructArgumentType(
             *CHECK_NOTNULL(relation_declaration_context.authLogicType(i)))));
   }
-  return RelationDeclaration(
+  return datalog::RelationDeclaration(
       relation_declaration_context.ID(0)->getText(),
       relation_declaration_context.ATTRIBUTE() != nullptr,
       std::move(arguments));
@@ -226,7 +227,7 @@ static SaysAssertion ConstructSaysAssertion(
 
 static Program ConstructProgram(
     AuthLogicParser::ProgramContext& program_context) {
-  auto relation_declarations = utils::MapIter<RelationDeclaration>(
+  auto relation_declarations = utils::MapIter<datalog::RelationDeclaration>(
       program_context.relationDeclaration(),
       [](AuthLogicParser::RelationDeclarationContext*
              relation_declaration_context) {

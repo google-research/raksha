@@ -139,56 +139,6 @@ class Assertion {
   AssertionVariantType value_;
 };
 
-enum class ConstantType { kNumberType, kPrincipalType };
-
-// Relation declaration types are of 3 forms
-// 1. NumberType
-// 2. PrincipalType
-// 3. User defined CustomType (string to store name of the type)
-class ArgumentType {
- public:
-  enum class Kind { kNumber, kPrincipal, kCustom };
-  explicit ArgumentType(Kind kind, absl::string_view name)
-      : kind_(kind), name_(name) {}
-  Kind kind() const { return kind_; }
-  absl::string_view name() const { return name_; }
-
- private:
-  Kind kind_;
-  std::string name_;
-};
-
-class Argument {
- public:
-  explicit Argument(std::string_view argument_name, ArgumentType argument_type)
-      : argument_name_(argument_name),
-        argument_type_(std::move(argument_type)) {}
-  absl::string_view argument_name() const { return argument_name_; }
-  ArgumentType argument_type() const { return argument_type_; }
-
- private:
-  std::string argument_name_;
-  ArgumentType argument_type_;
-};
-
-class RelationDeclaration {
- public:
-  explicit RelationDeclaration(absl::string_view relation_name,
-                               bool is_attribute,
-                               std::vector<Argument> arguments)
-      : relation_name_(relation_name),
-        is_attribute_(is_attribute),
-        arguments_(std::move(arguments)) {}
-  absl::string_view relation_name() const { return relation_name_; }
-  bool is_attribute() const { return is_attribute_; }
-  const std::vector<Argument>& arguments() const { return arguments_; }
-
- private:
-  std::string relation_name_;
-  bool is_attribute_;
-  std::vector<Argument> arguments_;
-};
-
 // SaysAssertion prepends an assertion with "<principal> says"
 class SaysAssertion {
  public:
@@ -223,14 +173,15 @@ class Query {
 // This is a top-level program.
 class Program {
  public:
-  explicit Program(std::vector<RelationDeclaration> relation_declarations,
-                   std::vector<SaysAssertion> says_assertions,
-                   std::vector<Query> queries)
+  explicit Program(
+      std::vector<datalog::RelationDeclaration> relation_declarations,
+      std::vector<SaysAssertion> says_assertions, std::vector<Query> queries)
       : relation_declarations_(std::move(relation_declarations)),
         says_assertions_(std::move(says_assertions)),
         queries_(std::move(queries)) {}
 
-  const std::vector<RelationDeclaration>& relation_declarations() const {
+  const std::vector<datalog::RelationDeclaration>& relation_declarations()
+      const {
     return relation_declarations_;
   }
 
@@ -241,7 +192,7 @@ class Program {
   const std::vector<Query>& queries() const { return queries_; }
 
  private:
-  std::vector<RelationDeclaration> relation_declarations_;
+  std::vector<datalog::RelationDeclaration> relation_declarations_;
   std::vector<SaysAssertion> says_assertions_;
   std::vector<Query> queries_;
 };

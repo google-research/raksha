@@ -23,6 +23,10 @@ package(
 cc_library(
     name = "program",
     hdrs = ["program.h"],
+    deps = [
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
+    ],
 )
 
 cc_test(
