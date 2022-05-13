@@ -1,0 +1,3 @@
+["add_tag_rule", $AddConfidentialityTag("tag"), nil]
+["add_tag2_rule", $AddConfidentialityTag("tag2"), nil]
+["remove_tag_rule", $RemoveConfidentialityTag("tag"), nil]

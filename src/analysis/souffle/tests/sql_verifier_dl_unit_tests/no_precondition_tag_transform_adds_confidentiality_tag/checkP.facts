@@ -1,0 +1,2 @@
+path1_does_not_have_tag;$CP_Not($CP_TagPresence("path1","sql",$CTag("tag")))
+path2_does_have_tag;$CP_TagPresence("path2","sql",$CTag("tag"))

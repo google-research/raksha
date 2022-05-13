@@ -35,6 +35,8 @@
 // Operation universe.
 .decl isOperation(operation: Operation)
 
+isPrincipal(owner), isAccessPath(result) :- isOperation([owner, _, result, _, _]).
+
 // BINARY_OPERATION is a convenience macro for the very-common-case of binary operations.
 #define BINARY_OPERATION(owner, operator, result, attrs, input1, input2) \
 isOperation([owner, operator, result, [input1, [input2, nil]], attrs])
@@ -66,6 +68,8 @@ operationOperandListLength([owner, operator, result, operandList, attrs], len) :
 // True when an `operation` has the given `operand` at the indicated `index` in
 // its `operandList`.
 .decl operationHasOperandAtIndex(operation: Operation, operand: AccessPath, index: number)
+
+isAccessPath(operand) :- operationHasOperandAtIndex(_, operand, _).
 
 // To find the index of an operand in an operation, find the sublist that it is
 // the head of in the operation, find the length of that list, and subtract it

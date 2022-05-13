@@ -1,0 +1,164 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+#ifndef SRC_ANALYSIS_SOUFFLE_TAG_TRANSFORMS_DL_
+#define SRC_ANALYSIS_SOUFFLE_TAG_TRANSFORMS_DL_
+
+#include "src/analysis/souffle/operations.dl"
+#include "src/analysis/souffle/tags.dl"
+
+// Note: this will need to change when we integrate auth logic into the SQL
+// verifier.
+#define DEFAULT_SQL_OWNER "sql"
+#define TAG_TRANSFORM_OPERATOR "sql.tag_transform"
+#define TAG_TRANSFORM_RULE_NAME_ATTR "rule_name"
+
+// A precondition produced in the SQL verifier. The `preconditionName`
+// corresponds to the user-provided name in the SQL pattern in the original
+// policy rule.
+.type SqlPolicyRulePrecondition = [ preconditionName : symbol, requiredTag: IntegrityTag ]
+.type SqlPolicyRulePreconditionList =
+  [ precondition: SqlPolicyRulePrecondition, next: SqlPolicyRulePreconditionList ]
+
+.type SqlPolicyRuleResult =
+  AddIntegrityTag { tag: IntegrityTag } 
+  | RemoveConfidentialityTag { tag: Tag }
+  // Note: In the SQL verifier, rules can only add confidentiality tags on
+  // named columns of global tables.
+  | AddConfidentialityTag { tag: Tag }
+
+// A policy rule, as expressed by the SQL verifier.
+.type SqlPolicyRule =
+  [ policyRuleName: symbol,
+    result: SqlPolicyRuleResult,
+    preconditions: SqlPolicyRulePreconditionList ]
+
+.decl isSqlPolicyRule(rule: SqlPolicyRule)
+
+.decl sqlPolicyRuleNameHasPreconditionList(
+  policyRuleName: symbol, policyRuleListSuffix: SqlPolicyRulePreconditionList)
+
+sqlPolicyRuleNameHasPreconditionList(name, preconditionList) :-
+  isSqlPolicyRule([name, _, preconditionList]).
+
+.decl sqlPolicyRuleNameHasPreconditionListSuffix(
+  policyRuleName: symbol, policyRuleListSuffix: SqlPolicyRulePreconditionList)
+
+sqlPolicyRuleNameHasPreconditionListSuffix(name, preconditionList) :-
+  sqlPolicyRuleNameHasPreconditionList(name, preconditionList).
+
+sqlPolicyRuleNameHasPreconditionListSuffix(name, preconditionListTail) :-
+  sqlPolicyRuleNameHasPreconditionListSuffix(name, [_, preconditionListTail]).
+
+.decl policyRulePreconditionListLength(
+  policyRuleList: SqlPolicyRulePreconditionList, length: number)
+
+policyRulePreconditionListLength(nil, 0).
+policyRulePreconditionListLength([head, tail], tailLen + 1) :-
+  sqlPolicyRuleNameHasPreconditionListSuffix(_, [head, tail]),
+  policyRulePreconditionListLength(tail, tailLen).
+
+.decl sqlPolicyRuleNameHasPreconditionAtIndex(
+  policyRuleName: symbol, policyRulePrecondition: SqlPolicyRulePrecondition, index: number) 
+
+sqlPolicyRuleNameHasPreconditionAtIndex(name, precondition, suffixLen - 1) :-
+  sqlPolicyRuleNameHasPreconditionListSuffix(name, [precondition, tail]),
+  policyRulePreconditionListLength([precondition, tail], suffixLen).
+
+.decl sqlPolicyRuleNameHasResult(policyRuleName: symbol, result: SqlPolicyRuleResult)
+
+sqlPolicyRuleNameHasResult(name, result) :- isSqlPolicyRule([name, result, _]).
+
+isTag(tag) :- sqlPolicyRuleNameHasResult(_, $AddConfidentialityTag(tag)).
+isTag(tag) :- sqlPolicyRuleNameHasResult(_, $RemoveConfidentialityTag(tag)).
+isIntegrityTag(tag) :- sqlPolicyRuleNameHasResult(_, $AddIntegrityTag(tag)).
+
+.decl isTagTransformOperation(tagTransform: Operation)
+
+isTagTransformOperation(
+  [DEFAULT_SQL_OWNER, TAG_TRANSFORM_OPERATOR, result, operandList, attributes]) :-
+  isOperation([DEFAULT_SQL_OWNER, TAG_TRANSFORM_OPERATOR, result, operandList, attributes]).
+
+.type TagPrecondition = [ path: AccessPath, itag: IntegrityTag ]
+
+.decl tagTransformHasRuleName(tagTransform: Operation, ruleName: symbol)
+
+tagTransformHasRuleName(op, ruleName) :-
+  isTagTransformOperation(op),
+  operationHasAttribute(op, [TAG_TRANSFORM_RULE_NAME_ATTR, $StringAttributePayload(ruleName)]).
+
+.decl tagTransformHasResultAccessPath(tagTransform: Operation, resultPath: AccessPath)
+tagTransformHasResultAccessPath([owner, operator, result, operandList, attrs], result) :-
+  isTagTransformOperation([owner, operator, result, operandList, attrs]).
+
+// Associates the tagTransform operation with a tagPrecondition that must be
+// met for the transform to occur and the index of the corresponding policy
+// rule precondition in the relevant SqlPolicyRule record. We need the index to
+// allow us to check that all preconditions have been satisfied without using
+// negation (which could cause problems with stratification requirements).
+.decl tagTransformHasIndexedTagPrecondition(
+  tagTransform: Operation, index: number, tagPrecondition: TagPrecondition)
+
+tagTransformHasIndexedTagPrecondition(op, index, [preconditionOperand, requiredTag]) :-
+  isTagTransformOperation(op),
+  tagTransformHasRuleName(op, ruleName),
+  operationHasAttribute(op, [preconditionName, $NumberAttributePayload(operandIndex)]),
+  preconditionName != TAG_TRANSFORM_RULE_NAME_ATTR,
+  operationHasOperandAtIndex(op, preconditionOperand, operandIndex),
+  sqlPolicyRuleNameHasPreconditionAtIndex(ruleName, [preconditionName, requiredTag], index).
+
+.decl allTagTransformPreconditionsLessThanIndexMet(tagTransform: Operation, index: number)
+allTagTransformPreconditionsLessThanIndexMet(op, 0) :- isTagTransformOperation(op).
+allTagTransformPreconditionsLessThanIndexMet(op, idx + 1) :-
+  isTagTransformOperation(op),
+  tagTransformHasIndexedTagPrecondition(op, idx, [preconditionPath, requiredITag]),
+  mustHaveIntegrityTag(preconditionPath, DEFAULT_SQL_OWNER, requiredITag),
+  allTagTransformPreconditionsLessThanIndexMet(op, idx).
+
+.decl allTagTransformPreconditionsMet(tagTransform: Operation)
+
+allTagTransformPreconditionsMet(tagTransform) :-
+  isTagTransformOperation(tagTransform),
+  tagTransformHasRuleName(tagTransform, ruleName),
+  sqlPolicyRuleNameHasPreconditionList(ruleName, preconditionList),
+  policyRulePreconditionListLength(preconditionList, preconditionListLength),
+  allTagTransformPreconditionsLessThanIndexMet(tagTransform, preconditionListLength).
+
+removeTag(result, DEFAULT_SQL_OWNER, tag) :-
+  isTagTransformOperation(op),
+  tagTransformHasResultAccessPath(op, result),
+  tagTransformHasRuleName(op, ruleName),
+  allTagTransformPreconditionsMet(op),
+  sqlPolicyRuleNameHasResult(ruleName, $RemoveConfidentialityTag(tag)).
+
+hasTag(result, DEFAULT_SQL_OWNER, tag) :-
+  isTagTransformOperation(op),
+  tagTransformHasResultAccessPath(op, result),
+  tagTransformHasRuleName(op, ruleName),
+  allTagTransformPreconditionsMet(op),
+  sqlPolicyRuleNameHasResult(ruleName, $AddConfidentialityTag(tag)).
+
+mustHaveIntegrityTag(result, DEFAULT_SQL_OWNER, iTag) :-
+  isTagTransformOperation(op),
+  tagTransformHasResultAccessPath(op, result),
+  tagTransformHasRuleName(op, ruleName),
+  allTagTransformPreconditionsMet(op),
+  sqlPolicyRuleNameHasResult(ruleName, $AddIntegrityTag(iTag)).
+
+#undef DEFAULT_SQL_OWNER
+#undef TAG_TRANSFORM_OPERATOR
+#undef TAG_TRANSFORM_RULE_NAME_ATTR
+
+#endif // SRC_ANALYSIS_SOUFFLE_TAG_TRANSFORMS_DL_
