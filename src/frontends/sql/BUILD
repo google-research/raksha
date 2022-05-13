@@ -83,6 +83,7 @@ cc_library(
     deps = [
         ":decoder_context",
         ":sql_ir_cc_proto",
+        "//src/frontends/sql/ops:sql_output_op",
         "//src/ir:value",
     ],
 )
