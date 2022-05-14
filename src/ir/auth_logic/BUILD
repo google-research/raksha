@@ -50,6 +50,7 @@ cc_library(
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
         "@absl//absl/algorithm:container",
+        "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],
@@ -62,6 +63,7 @@ cc_library(
         "souffle_emitter.h",
     ],
     deps = [
+        "//src/common/logging",
         "//src/common/utils:map_iter",
         "//src/ir/auth_logic:ast",
         "//src/ir/auth_logic:lowering_ast_datalog",

@@ -67,6 +67,14 @@ datalog::Predicate CanActAsToDLIR(const CanActAs& can_act_as) {
 }
 }  // namespace
 
+void LoweringToDatalogPass::UpdateCanSayDepth(const std::string& predicate_name,
+                                              uint64_t depth) {
+  auto insert_result = can_say_depth_.insert({predicate_name, depth});
+  if (!insert_result.second) {
+    insert_result.first->second = std::max(depth, insert_result.first->second);
+  }
+}
+
 datalog::Rule LoweringToDatalogPass::SpokenAttributeToDLIR(
     const Principal& speaker, const Attribute& attribute) {
   // Attributes interact with "canActAs" because if "Y canActAs X"
@@ -108,7 +116,6 @@ datalog::Rule LoweringToDatalogPass::SpokenCanActAsToDLIR(
   //    speaker says Y canActAs X, speaker says X canActAs Z`
   // (Where Y is a fresh variable)
   Principal prin_y(FreshVar());
-
   // This is `speaker says Y canActAs Z`
   datalog::Predicate y_can_act_as_z =
       CanActAsToDLIR(CanActAs(prin_y, can_act_as.right_principal()));
@@ -165,6 +172,7 @@ LoweringToDatalogPass::BaseFactToDLIR(const Principal& speaker,
 std::pair<datalog::Predicate, std::vector<datalog::Rule>>
 LoweringToDatalogPass::FactToDLIR(const Principal& speaker, const Fact& fact) {
   auto [inner_fact_dlir, gen_rules] = BaseFactToDLIR(speaker, fact.base_fact());
+  datalog::Predicate base_fact = inner_fact_dlir;
   for (const Principal& delegatees : fact.delegation_chain()) {
     Principal fresh_principal(FreshVar());
     // The following code generates the extra rule that does
@@ -196,6 +204,9 @@ LoweringToDatalogPass::FactToDLIR(const Principal& speaker, const Fact& fact) {
         PushPrincipal("canSay_", delegatees, inner_fact_dlir);
     inner_fact_dlir = prin_cansay_pred;
   }
+  UpdateCanSayDepth(base_fact.name(),
+                    std::distance(fact.delegation_chain().begin(),
+                                  fact.delegation_chain().end()));
   return std::make_pair(inner_fact_dlir, gen_rules);
 }
 
@@ -262,9 +273,198 @@ std::vector<datalog::Rule> LoweringToDatalogPass::QueriesToDLIR(
   return utils::MapIter<datalog::Rule>(queries, [this](const Query& query) {
     auto [main_pred, not_used] = FactToDLIR(query.principal(), query.fact());
     main_pred = PushPrincipal("says_", query.principal(), main_pred);
-    datalog::Predicate lhs(query.name(), {"dummy_var"}, datalog::kPositive);
+    datalog::Predicate lhs(query.name(), {R"("dummy_var")"},
+                           datalog::kPositive);
     return datalog::Rule(lhs, {main_pred, kDummyPredicate});
   });
+}
+
+std::vector<datalog::RelationDeclaration>
+LoweringToDatalogPass::TransformAttributeDeclarations(
+    const std::vector<datalog::RelationDeclaration>& relation_declarations) {
+  // Attributes have a principal that the attribute is applied to
+  // as an additional parameter at the beginning of the param list.
+  // Example below shows transforming the attributes.
+  // Ex: .decl ATTRIBUTE hasProperty(x0 : Symbol) -> .decl
+  // hasProperty(attribute_prin : Prinipal, x0 : Symbol)
+  return utils::MapIter<datalog::RelationDeclaration>(
+      relation_declarations,
+      [](const datalog::RelationDeclaration& declaration) {
+        if (!declaration.is_attribute()) return declaration;
+        std::vector<datalog::Argument> transformed_arguments = {
+            datalog::Argument(
+                "attribute_prin",
+                datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
+                                      "Principal"))};
+        absl::c_copy(declaration.arguments(),
+                     std::back_inserter(transformed_arguments));
+
+        return datalog::RelationDeclaration(declaration.relation_name(), false,
+                                            transformed_arguments);
+      });
+}
+
+std::vector<datalog::RelationDeclaration>
+LoweringToDatalogPass::GetCanSayDeclarations(
+    const absl::flat_hash_map<std::string_view, datalog::RelationDeclaration>&
+        type_environment) {
+  // Example: A relation declaration and canSay fact shown below.
+  // ".decl grantAccess(x0 : symbol, x1 : symbol)
+  // PrincipalA cansay PrincipalB grantAccess(secretFile)."
+  // can_say_depth_(A hashmap) maps "grantAccess" predicate name to depth 2.
+  // type_environment is a mapping from the relation names to the declaration
+  // datalog_ir node. In this example, type_environment[grantAccess] maps to
+  // RelationDeclaration(grantAccess, false, ...).
+  // The method adds 2 new declarations
+  // .decl canSay_grantAccess(delegatee1 : Principal, x0 : symbol, x1 : symbol)
+  // and .decl canSay_canSay_grantAccess(delegatee2 : Principal, delegatee1:
+  // Principal, x0 : symbol, x1 : symbol) Generate relation declarations for
+  // delegated predicates with each encountered delegation depth
+  std::vector<datalog::RelationDeclaration> can_say_declarations;
+  for (const auto& [predicate_name, depth] : can_say_depth_) {
+    if (depth == 0) continue;
+    // find relation declaration corresponding to the predicate name
+    auto type_iterator = type_environment.find(predicate_name);
+    if (type_iterator == type_environment.end()) continue;
+    // Adds new relation declaration for each can say delegation
+    for (uint64_t i = 1; i <= depth; ++i) {
+      std::vector<datalog::Argument> arguments = {datalog::Argument(
+          absl::StrCat("delegatee", i),
+          datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
+                                "Principal"))};
+      // for a depth of 1, we add a new can say declaration to the vector of can
+      // say declarations by looking at the type_environment mappings (This will
+      // give us the relation declaration for the base fact of can_say). Ex: To
+      // the existing ,decl grantAccess(x0 : symbol, x1 : symbol) , we add
+      // another declaration  .decl canSay_grantAccess(delegatee1 : Principal,
+      // x0 : symbol, x1 : symbol)
+      if (i == 1) {
+        absl::c_copy((type_iterator->second).arguments(),
+                     std::back_inserter(arguments));
+        const datalog::RelationDeclaration& can_say_declaration =
+            datalog::RelationDeclaration(
+                absl::StrCat("canSay_",
+                             (type_iterator->second).relation_name()),
+                false, arguments);
+        can_say_declarations.push_back(can_say_declaration);
+        continue;
+      }
+      // For a depth > 1, we refer to can say declaration which was built so far
+      // (depth-1) to get relation declarations for current depth. Ex: For a
+      // base declaration of decl grantAccess(x0 : symbol, x1 : symbol) and can
+      // say depth=2, we refer to declaration which has been built so far (at
+      // depth = 1), which is .decl canSay_grantAccess(delegatee1
+      // : Principal, x0 : symbol, x1 : symbol) and add new declaration .decl
+      // canSay_canSay_grantAccess(delegatee2 : Principal, delegatee1:
+      // Principal, x0 : symbol, x1 : symbol)
+      absl::c_copy(can_say_declarations.at(i - 2).arguments(),
+                   std::back_inserter(arguments));
+      const datalog::RelationDeclaration& can_say_declaration =
+          datalog::RelationDeclaration(
+              absl::StrCat("canSay_",
+                           can_say_declarations.at(i - 2).relation_name()),
+              false, arguments);
+      can_say_declarations.push_back(can_say_declaration);
+    }
+  }
+  return can_say_declarations;
+}
+
+std::vector<datalog::RelationDeclaration>
+LoweringToDatalogPass::GetSaysExtendRelationDeclarations(
+    const std::vector<datalog::RelationDeclaration>& transformed_declarations) {
+  // The translated declarations are all extended with "says_" and a speaker
+  // argument. Example below
+  // .decl deleteFile(file1 : "FileName") -> .decl says_deleteFile(speaker :
+  // Principal, file1 : "FileName")
+  return utils::MapIter<datalog::RelationDeclaration>(
+      transformed_declarations,
+      [](const datalog::RelationDeclaration& declaration) {
+        std::vector<datalog::Argument> arguments = {datalog::Argument(
+            "speaker",
+            datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
+                                  "Principal"))};
+        absl::c_copy(declaration.arguments(), std::back_inserter(arguments));
+        return datalog::RelationDeclaration(
+            absl::StrCat("says_", declaration.relation_name()), false,
+            arguments);
+      });
+}
+
+std::vector<datalog::RelationDeclaration>
+LoweringToDatalogPass::RelationDeclarationToDLIR(
+    const std::vector<datalog::RelationDeclaration>& relation_declarations) {
+  // Note that the additional relation declarations that are generated for
+  // (possibly nested) cansay expressions are based on an environment
+  // that tracks the maximum depth with which they appear. This environment is
+  // populated by side-effect while translating the program body. As a result,
+  // it is assumed that this function is called after the body is translated.
+  std::vector<datalog::RelationDeclaration> transformed_declarations =
+      LoweringToDatalogPass::TransformAttributeDeclarations(
+          relation_declarations);
+  // Produce a mapping from predicate names to predicate typings
+  // (where a predicate typing is the same as a predicate relation declaration)
+  absl::flat_hash_map<std::string_view, datalog::RelationDeclaration>
+      type_environment;
+  for (const datalog::RelationDeclaration& declaration :
+       transformed_declarations) {
+    type_environment.insert({declaration.relation_name(), declaration});
+  }
+  absl::c_move(LoweringToDatalogPass::GetCanSayDeclarations(type_environment),
+               std::back_inserter(transformed_declarations));
+  // The transformed relation declarations are the same as the ones from the
+  // surface program plus another one for "canActAs". Declaration being added is
+  //.decl canActAs(p1 : Principal, p2 : Principal)
+  transformed_declarations.push_back(datalog::RelationDeclaration(
+      "canActAs", false,
+      {datalog::Argument(
+           "p1", datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
+                                       "Principal")),
+       datalog::Argument(
+           "p2", datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
+                                       "Principal"))}));
+  // Another declaration "isNumber" added aa a work around for
+  // universe_translations. To be removed after adding parser for
+  // universe_translations. Declaration being added is
+  //.decl isNumber(x : Number)
+  transformed_declarations.push_back(datalog::RelationDeclaration(
+      "isNumber", false,
+      {datalog::Argument(
+          "x", datalog::ArgumentType(datalog::ArgumentType::Kind::kNumber,
+                                     "Number"))}));
+  // The translated declarations are all extended with "says_" and a speaker
+  // argument
+  std::vector<datalog::RelationDeclaration>
+      says_extended_relational_declarations =
+          LoweringToDatalogPass::GetSaysExtendRelationDeclarations(
+              transformed_declarations);
+  return says_extended_relational_declarations;
+}
+
+std::vector<datalog::RelationDeclaration>
+LoweringToDatalogPass::QueryRelationDeclarationToDLIR(
+    const std::vector<Query>& queries) {
+  // Adding relation declaration sstatements for all the query names.
+  //.decl query_name(dummy_param : DummyType)
+  std::vector<datalog::RelationDeclaration> query_declarations =
+      utils::MapIter<datalog::RelationDeclaration>(
+          queries, [](const Query& query) {
+            return datalog::RelationDeclaration(
+                query.name(), false,
+                {datalog::Argument(
+                    "dummy_param",
+                    datalog::ArgumentType(datalog::ArgumentType::Kind::kCustom,
+                                          "DummyType"))});
+          });
+  // Adding a relation declaration statement for grounded_dummy
+  //.decl "grounded_dummy"(dummy_param : DummyType)
+  query_declarations.push_back(datalog::RelationDeclaration(
+      "grounded_dummy", false,
+      {datalog::Argument(
+          "dummy_param",
+          datalog::ArgumentType(datalog::ArgumentType::Kind::kCustom,
+                                "DummyType"))}));
+  return query_declarations;
 }
 
 datalog::Program LoweringToDatalogPass::ProgToDLIR(const Program& program) {
@@ -278,7 +478,18 @@ datalog::Program LoweringToDatalogPass::ProgToDLIR(const Program& program) {
 
   auto outputs = utils::MapIter<std::string>(
       program.queries(), [](const Query& query) { return query.name(); });
-  return datalog::Program(dlir_assertions, outputs);
+
+  // Note that the additional relation declarations that are generated for
+  // (possibly nested) cansay expressions are based on an environment
+  // that tracks the maximum depth with which they appear. This environment is
+  // populated by side-effect while translating the program body. As a result,
+  // it is assumed that this function is called after the body is translated.
+  auto dlir_relation_declarations =
+      RelationDeclarationToDLIR(program.relation_declarations());
+  absl::c_move(QueryRelationDeclarationToDLIR(program.queries()),
+               std::back_inserter(dlir_relation_declarations));
+
+  return datalog::Program(dlir_relation_declarations, dlir_assertions, outputs);
 }
 
 }  // namespace raksha::ir::auth_logic

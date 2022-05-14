@@ -42,91 +42,76 @@ Program BuildPredicateTestProgram() {
                                                      datalog::kPositive))))));
 }
 
+Program BuildRelationDeclarationProgram(SaysAssertion assertion) {
+  std::vector<SaysAssertion> assertion_list = {};
+  assertion_list.push_back(std::move(assertion));
+  std::vector<datalog::RelationDeclaration> relation_declaration = {
+      datalog::RelationDeclaration(
+          "grantAccess", false,
+          {datalog::Argument(
+               "x0", datalog::ArgumentType(
+                         datalog::ArgumentType::Kind::kPrincipal, "Principal")),
+           datalog::Argument(
+               "x1", datalog::ArgumentType(datalog::ArgumentType::Kind::kCustom,
+                                           "FileName"))})};
+  return Program(std::move(relation_declaration), std::move(assertion_list),
+                 {});
+}
+
+TEST(EmitterTestSuite, EmptyAuthLogicTest) {
+  std::string expected =
+      R"(.type DummyType <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_isNumber(speaker : Principal, x : Number)
+grounded_dummy(dummy_var).
+)";
+  std::string actual = SouffleEmitter::EmitProgram(
+      LoweringToDatalogPass::Lower(Program({}, {}, {})), {});
+  EXPECT_EQ(actual, expected);
+}
+
 TEST(EmitterTestSuite, SimpleTest) {
   std::string expected =
-      R"(says_foo(TestPrincipal, bar, baz).
+      R"(.type DummyType <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_isNumber(speaker : Principal, x : Number)
+says_foo(TestPrincipal, bar, baz).
 grounded_dummy(dummy_var).
-
-.decl grounded_dummy(x0: symbol)
-.decl says_foo(x0: symbol, x1: symbol, x2: symbol)
 )";
 
   std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildPredicateTestProgram()));
-
-  EXPECT_EQ(actual, expected);
-}
-
-Program BuildAttributeTestProgram() {
-  return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
-      Principal("TestSpeaker"),
-      Assertion(Fact({}, BaseFact(Attribute(
-                             Principal("OtherTestPrincipal"),
-                             datalog::Predicate("hasProperty", {"wellTested"},
-                                                datalog::kPositive)))))));
-}
-
-TEST(EmitterTestSuite, AttributeTest) {
-  std::string expected =
-      R"(says_hasProperty(TestSpeaker, x__1, wellTested) :- says_canActAs(TestSpeaker, x__1, OtherTestPrincipal), says_hasProperty(TestSpeaker, OtherTestPrincipal, wellTested).
-says_hasProperty(TestSpeaker, OtherTestPrincipal, wellTested).
-grounded_dummy(dummy_var).
-
-.decl grounded_dummy(x0: symbol)
-.decl says_canActAs(x0: symbol, x1: symbol, x2: symbol)
-.decl says_hasProperty(x0: symbol, x1: symbol, x2: symbol)
-)";
-
-  std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildAttributeTestProgram()));
-
-  EXPECT_EQ(actual, expected);
-}
-
-Program BuildCanActAsProgram() {
-  return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
-      Principal("TestSpeaker"),
-      Assertion(Fact({}, BaseFact(CanActAs(Principal("PrincipalA"),
-                                           Principal("PrincipalB")))))));
-}
-
-TEST(EmitterTestSuite, CanActAsTest) {
-  std::string expected =
-      R"(says_canActAs(TestSpeaker, x__1, PrincipalB) :- says_canActAs(TestSpeaker, x__1, PrincipalA), says_canActAs(TestSpeaker, PrincipalA, PrincipalB).
-says_canActAs(TestSpeaker, PrincipalA, PrincipalB).
-grounded_dummy(dummy_var).
-
-.decl grounded_dummy(x0: symbol)
-.decl says_canActAs(x0: symbol, x1: symbol, x2: symbol)
-)";
-
-  std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildCanActAsProgram()));
+      LoweringToDatalogPass::Lower(BuildPredicateTestProgram()), {});
 
   EXPECT_EQ(actual, expected);
 }
 
 Program BuildCanSayProgram() {
-  BaseFact inner_base_fact(
-      datalog::Predicate("grantAccess", {"secretFile"}, datalog::kPositive));
-  Fact cansay_fact({Principal("PrincipalA")}, std::move(inner_base_fact));
-  return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
-      Principal("TestSpeaker"), Assertion(std::move(cansay_fact))));
-}
+  return BuildRelationDeclarationProgram(BuildSingleSaysAssertion(
+      Principal("TestSpeaker"),
+      Assertion(Fact({Principal("PrincipalA")},
+                     BaseFact(datalog::Predicate("grantAccess", {"secretFile"},
+                                                 datalog::kPositive))))));
+};
 
 TEST(EmitterTestSuite, CanSayTest) {
   std::string expected =
-      R"(says_grantAccess(TestSpeaker, secretFile) :- says_grantAccess(x__1, secretFile), says_canSay_grantAccess(TestSpeaker, x__1, secretFile).
+      R"(.type DummyType <: symbol
+.type FileName <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_canSay_grantAccess(speaker : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
+.decl says_grantAccess(speaker : Principal, x0 : Principal, x1 : FileName)
+.decl says_isNumber(speaker : Principal, x : Number)
+says_grantAccess(TestSpeaker, secretFile) :- says_grantAccess(x__1, secretFile), says_canSay_grantAccess(TestSpeaker, x__1, secretFile).
 says_canSay_grantAccess(TestSpeaker, PrincipalA, secretFile).
 grounded_dummy(dummy_var).
-
-.decl grounded_dummy(x0: symbol)
-.decl says_canSay_grantAccess(x0: symbol, x1: symbol, x2: symbol)
-.decl says_grantAccess(x0: symbol, x1: symbol)
 )";
-
+  const absl::flat_hash_set<std::string> skip_declarations = {{}};
   std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildCanSayProgram()));
+      LoweringToDatalogPass::Lower(BuildCanSayProgram()),
+      std::move(skip_declarations));
 
   EXPECT_EQ(actual, expected);
 }
@@ -136,125 +121,29 @@ Program BuildDoubleCanSayProgram() {
       datalog::Predicate("grantAccess", {"secretFile"}, datalog::kPositive));
   Fact cansay_fact({Principal("PrincipalA"), Principal("PrincipalB")},
                    inner_base_fact);
-  return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
+  return BuildRelationDeclarationProgram(BuildSingleSaysAssertion(
       Principal("TestSpeaker"), Assertion(Fact(std::move(cansay_fact)))));
 }
 
 TEST(EmitterTestSuite, DoubleCanSayTest) {
   std::string expected =
-      R"(says_grantAccess(TestSpeaker, secretFile) :- says_grantAccess(x__1, secretFile), says_canSay_grantAccess(TestSpeaker, x__1, secretFile).
+      R"(.type DummyType <: symbol
+.type FileName <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_canSay_canSay_grantAccess(speaker : Principal, delegatee2 : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
+.decl says_canSay_grantAccess(speaker : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
+.decl says_grantAccess(speaker : Principal, x0 : Principal, x1 : FileName)
+.decl says_isNumber(speaker : Principal, x : Number)
+says_grantAccess(TestSpeaker, secretFile) :- says_grantAccess(x__1, secretFile), says_canSay_grantAccess(TestSpeaker, x__1, secretFile).
 says_canSay_grantAccess(TestSpeaker, PrincipalA, secretFile) :- says_canSay_grantAccess(x__2, PrincipalA, secretFile), says_canSay_canSay_grantAccess(TestSpeaker, x__2, PrincipalA, secretFile).
 says_canSay_canSay_grantAccess(TestSpeaker, PrincipalB, PrincipalA, secretFile).
 grounded_dummy(dummy_var).
-
-.decl grounded_dummy(x0: symbol)
-.decl says_canSay_canSay_grantAccess(x0: symbol, x1: symbol, x2: symbol, x3: symbol)
-.decl says_canSay_grantAccess(x0: symbol, x1: symbol, x2: symbol)
-.decl says_grantAccess(x0: symbol, x1: symbol)
 )";
 
   std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildDoubleCanSayProgram()));
+      LoweringToDatalogPass::Lower(BuildDoubleCanSayProgram()), {});
 
-  EXPECT_EQ(actual, expected);
-}
-
-Program BuildConditionalProgram() {
-  std::vector<BaseFact> rhs = {BaseFact(
-      datalog::Predicate("isEmployee", {"somePerson"}, datalog::kPositive))};
-  Fact lhs({},
-           BaseFact(datalog::Predicate("canAccess", {"somePerson", "someFile"},
-                                       datalog::kPositive)));
-  return BuildSingleAssertionProgram(BuildSingleSaysAssertion(
-      Principal("TestSpeaker"),
-      Assertion(ConditionalAssertion(std::move(lhs), std::move(rhs)))));
-}
-
-TEST(EmitterTestSuite, ConditionalProgramTest) {
-  std::string expected =
-      R"(says_canAccess(TestSpeaker, somePerson, someFile) :- says_isEmployee(TestSpeaker, somePerson).
-grounded_dummy(dummy_var).
-
-.decl grounded_dummy(x0: symbol)
-.decl says_canAccess(x0: symbol, x1: symbol, x2: symbol)
-.decl says_isEmployee(x0: symbol, x1: symbol)
-)";
-  std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildConditionalProgram()));
-  EXPECT_EQ(actual, expected);
-}
-
-Program BuildMultiAssertionProgram() {
-  // Conditional Assertion
-  std::vector<BaseFact> rhs = {BaseFact(
-      datalog::Predicate("isEmployee", {"somePerson"}, datalog::kPositive))};
-  Fact lhs({},
-           BaseFact(datalog::Predicate("canAccess", {"somePerson", "someFile"},
-                                       datalog::kPositive)));
-  SaysAssertion condAssertion = BuildSingleSaysAssertion(
-      Principal("TestPrincipal"),
-      Assertion(ConditionalAssertion(std::move(lhs), std::move(rhs))));
-
-  // Assertion stating the condition
-  SaysAssertion predicateAssertion = BuildSingleSaysAssertion(
-      Principal("TestPrincipal"),
-      Assertion(
-          Fact({}, BaseFact(datalog::Predicate("isEmployee", {"somePerson"},
-                                               datalog::kPositive)))));
-
-  // I would love to just write this:
-  // return Program({std::move(condAssertion),
-  //     std::move(predicateAssertion)}, {});
-
-  std::vector<SaysAssertion> assertion_list = {};
-  assertion_list.push_back(std::move(condAssertion));
-  assertion_list.push_back(std::move(predicateAssertion));
-  return Program({}, std::move(assertion_list), {});
-}
-
-TEST(EmitterTestSuite, MultiAssertionProgramTest) {
-  std::string expected =
-      R"(says_canAccess(TestPrincipal, somePerson, someFile) :- says_isEmployee(TestPrincipal, somePerson).
-says_isEmployee(TestPrincipal, somePerson).
-grounded_dummy(dummy_var).
-
-.decl grounded_dummy(x0: symbol)
-.decl says_canAccess(x0: symbol, x1: symbol, x2: symbol)
-.decl says_isEmployee(x0: symbol, x1: symbol)
-)";
-  std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildMultiAssertionProgram()));
-  EXPECT_EQ(actual, expected);
-}
-
-Program BuildQueryProgram() {
-  Query testQuery("theTestQuery", Principal("TestSpeaker"),
-                  Fact({}, BaseFact(datalog::Predicate("anything", {"atAll"},
-                                                       datalog::kPositive))));
-  std::vector<Query> query_list = {};
-  query_list.push_back(std::move(testQuery));
-  return Program({}, {}, std::move(query_list));
-}
-
-TEST(EmitterTestSuite, QueryTestProgram) {
-  std::string expected =
-      R"(theTestQuery(dummy_var) :- says_anything(TestSpeaker, atAll), grounded_dummy(dummy_var).
-grounded_dummy(dummy_var).
-.output theTestQuery
-.decl grounded_dummy(x0: symbol)
-.decl says_anything(x0: symbol, x1: symbol)
-.decl theTestQuery(x0: symbol)
-)";
-
-  // R"(theTestQuery(dummy_var) :- says_anything(TestSpeaker, atAll),
-  // grounded_dummy(dummy_var). grounded_dummy(dummy_var). .output theTestQuery
-  //
-  // .decl theTestQuery(x0: symbol)
-  // .decl says_anything(x0: symbol, x1: symbol)
-  // .decl grounded_dummy(x0: symbol))";
-
-  std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildQueryProgram()));
   EXPECT_EQ(actual, expected);
 }
 

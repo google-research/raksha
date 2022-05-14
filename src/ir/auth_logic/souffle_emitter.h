@@ -20,6 +20,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
+#include "src/common/logging/logging.h"
 #include "src/common/utils/map_iter.h"
 #include "src/ir/datalog/program.h"
 
@@ -27,13 +28,20 @@ namespace raksha::ir::auth_logic {
 
 class SouffleEmitter {
  public:
-  static std::string EmitProgram(const datalog::Program& program) {
+  static std::string EmitProgram(
+      const datalog::Program& program,
+      const absl::flat_hash_set<std::string>& skip_declarations) {
     SouffleEmitter emitter;
     std::string body = emitter.EmitProgramBody(program);
     std::string outputs = emitter.EmitOutputs(program);
-    std::string decls = emitter.EmitDeclarations();
-    return absl::StrCat(std::move(body), "\n", std::move(outputs), "\n",
-                        std::move(decls), "\n");
+
+    std::string declarations =
+        emitter.EmitRelationDeclarations(program, skip_declarations);
+    std::string type_declarations =
+        emitter.EmitTypeDeclarations(program, skip_declarations);
+    return absl::StrCat(std::move(type_declarations), "\n",
+                        std::move(declarations), "\n", std::move(body), "\n",
+                        std::move(outputs));
   }
 
  private:
@@ -61,6 +69,17 @@ class SouffleEmitter {
   }
 
   std::string EmitPredicate(const datalog::Predicate& predicate) {
+    static const absl::flat_hash_set<std::string> comparison_operators = {
+        {"<"}, {">"}, {"="}, {"!="}, {"<="}, {">="}};
+    // Rvalue rules which are represented as datalog::Predicates in AST, we use
+    // infix notation while translating to datalog.
+    // Ex: "<"(number1, number2) -> number1 < number2.
+    if (comparison_operators.find(predicate.name()) !=
+        comparison_operators.end()) {
+      CHECK(predicate.args().size() == 2);
+      return absl::StrCat(predicate.args().front(), predicate.name(),
+                          predicate.args().back());
+    }
     // Whenever a new predicate is encountered, it is added to the set of
     // declarations (which does not include duplicates because it is a set).
     declarations_.insert(PredToDeclaration(predicate));
@@ -69,21 +88,23 @@ class SouffleEmitter {
                         absl::StrJoin(predicate.args(), ", "), ")");
   }
 
-  std::string EmitAssertion(
-      const datalog::Rule& cond_assertion) {
+  std::string EmitAssertion(const datalog::Rule& cond_assertion) {
     std::vector rhs_translated = utils::MapIter<std::string>(
         cond_assertion.rhs(),
         [this](const datalog::Predicate& arg) { return EmitPredicate(arg); });
-    return absl::StrCat(EmitPredicate(cond_assertion.lhs()), (rhs_translated.size() == 0) ? "" : absl::StrCat(" :- ",
-                        absl::StrJoin(rhs_translated, ", ")), ".");
+    return absl::StrCat(
+        EmitPredicate(cond_assertion.lhs()),
+        (rhs_translated.size() == 0)
+            ? ""
+            : absl::StrCat(" :- ", absl::StrJoin(rhs_translated, ", ")),
+        ".");
   }
 
   std::string EmitProgramBody(const datalog::Program& program) {
     return absl::StrJoin(
-        utils::MapIter<std::string>(program.rules(),
-                                    [this](const datalog::Rule& astn) {
-                                      return EmitAssertion(astn);
-                                    }),
+        utils::MapIter<std::string>(
+            program.rules(),
+            [this](const datalog::Rule& astn) { return EmitAssertion(astn); }),
         "\n");
   }
 
@@ -102,14 +123,50 @@ class SouffleEmitter {
     return absl::StrCat(".decl ", predicate.name(), "(", arguments, ")");
   }
 
-  std::string EmitDeclarations() {
-    std::vector elements_vec(std::make_move_iterator(declarations_.begin()),
-                             std::make_move_iterator(declarations_.end()));
-    std::sort(elements_vec.begin(), elements_vec.end());
-    return absl::StrJoin(elements_vec, "\n",
-                         [this](std::string* out, auto decl) {
-                           return absl::StrAppend(out, EmitDeclaration(decl));
-                         });
+  std::string EmitArguments(const std::vector<datalog::Argument>& arguments) {
+    return absl::StrJoin(
+        arguments, ", ", [](std::string* out, datalog::Argument argument) {
+          return absl::StrAppend(out, argument.argument_name(), " : ",
+                                 argument.argument_type().name());
+        });
+  }
+
+  std::string EmitRelationDeclarations(
+      const datalog::Program& program,
+      const absl::flat_hash_set<std::string>& skip_declarations) {
+    std::vector<std::string> declaration_strings;
+    for (const auto& declaration : program.relation_declarations()) {
+      if (skip_declarations.find(declaration.relation_name()) !=
+          skip_declarations.end())
+        continue;
+      declaration_strings.push_back(
+          absl::StrCat(".decl ", declaration.relation_name(), "(",
+                       EmitArguments(declaration.arguments()), ")"));
+    }
+    std::sort(declaration_strings.begin(), declaration_strings.end());
+    return absl::StrJoin(declaration_strings, "\n");
+  }
+
+  std::string EmitTypeDeclarations(
+      const datalog::Program& program,
+      const absl::flat_hash_set<std::string>& skip_declarations) {
+    absl::flat_hash_set<std::string> type_names;
+    for (const auto& declaration : program.relation_declarations()) {
+      for (const auto& argument : declaration.arguments()) {
+        if (argument.argument_type().kind() !=
+            datalog::ArgumentType::Kind::kCustom)
+          continue;
+        if (skip_declarations.find(argument.argument_name()) !=
+            skip_declarations.end())
+          continue;
+        type_names.insert(absl::StrCat(
+            ".type ", argument.argument_type().name(), " <: symbol"));
+      }
+    }
+    std::vector<absl::string_view> sorted_type_names(type_names.begin(),
+                                                     type_names.end());
+    std::sort(sorted_type_names.begin(), sorted_type_names.end());
+    return absl::StrJoin(sorted_type_names, "\n");
   }
 
   absl::flat_hash_set<datalog::Predicate> declarations_;

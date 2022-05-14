@@ -48,14 +48,14 @@ TEST_P(RelationDeclarationAstConstructionTest,
   const auto& [input_text, relation_name, is_attribute, arguments] = GetParam();
   Program prog_out = ParseProgram(input_text);
   ASSERT_EQ(prog_out.relation_declarations().size(), 1);
-  const RelationDeclaration& relation_declaration =
+  const datalog::RelationDeclaration& relation_declaration =
       prog_out.relation_declarations().front();
   EXPECT_EQ(relation_declaration.relation_name(), relation_name);
   EXPECT_EQ(relation_declaration.is_attribute(), is_attribute);
   EXPECT_EQ(relation_declaration.arguments().size(), arguments.size());
   std::vector<std::string> argument_string = utils::MapIter<std::string>(
       relation_declaration.arguments(),
-      [](Argument argument) { return ToString(argument); });
+      [](datalog::Argument argument) { return ToString(argument); });
   EXPECT_THAT(argument_string, ::testing::UnorderedElementsAreArray(arguments));
 }
 
