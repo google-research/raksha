@@ -18,25 +18,59 @@
 
 #include "souffle/SouffleInterface.h"
 #include "src/backends/policy_engine/policy.h"
+#include "src/backends/policy_engine/souffle/datalog_lowering_visitor.h"
+#include "src/common/utils/filesystem.h"
 #include "src/ir/module.h"
 
 namespace raksha::backends::policy_engine {
 
+// Disambiguate "souffle" and "::souffle" with using aliases.
+// These are from the Souffle project and have a top-level namespace of
+// "::souffle".
+using Relation = ::souffle::Relation;
+using SouffleProgram = ::souffle::SouffleProgram;
+using ProgramFactory = ::souffle::ProgramFactory;
+
+// These are from Raksha's "souffle" subpackage.
+using DatalogLoweringVisitor = souffle::DatalogLoweringVisitor;
+
 static constexpr char kDatalogPolicyEngine[] = "datalog_policy_verifier_cxx";
 static constexpr char kViolatesPolicyRelation[] = "violatesPolicy";
 
-bool SoufflePolicyChecker::IsModulePolicyCompliant(const ir::Module& module,
-                                                   const Policy& policy) const {
-  std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
-      souffle::ProgramFactory::newInstance(std::string(kDatalogPolicyEngine))));
+static bool IsModulePolicyCompliantInner(
+    const ir::Module& module, const Policy& policy,
+    std::filesystem::path facts_directory) {
+  absl::Status output_policy_status =
+      policy.OutputAsDlFactsToDirectory(facts_directory);
+  CHECK(output_policy_status.ok())
+      << "Unexpected error while outputting policy: " << output_policy_status;
 
-  // TODO: Add relations from module.
+  DatalogLoweringVisitor datalog_lowering_visitor;
+  module.Accept(datalog_lowering_visitor);
+  absl::Status output_module_status =
+      datalog_lowering_visitor.datalog_facts().DumpFactsToDirectory(
+          facts_directory, {});
+  CHECK(output_module_status.ok())
+      << "Unexpected error while outputting module: " << output_module_status;
+
+  std::unique_ptr<SouffleProgram> program(CHECK_NOTNULL(
+      ProgramFactory::newInstance(std::string(kDatalogPolicyEngine))));
+
+  program->loadAll(facts_directory.string());
   program->run();
 
-  souffle::Relation* hasPolicyViolation =
+  Relation* hasPolicyViolation =
       CHECK_NOTNULL(program->getRelation(kViolatesPolicyRelation));
 
   return hasPolicyViolation->size() > 0 ? false : true;
+}
+
+bool SoufflePolicyChecker::IsModulePolicyCompliant(const ir::Module& module,
+                                                   const Policy& policy) const {
+  std::filesystem::path temp_dir = common::utils::CreateTemporaryDirectory();
+  bool result = IsModulePolicyCompliantInner(module, policy, temp_dir);
+  std::filesystem::remove_all(temp_dir);
+  return result;
 }
 
 }  // namespace raksha::backends::policy_engine

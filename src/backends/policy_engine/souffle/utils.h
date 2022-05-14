@@ -13,25 +13,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_BACKENDS_POLICY_ENGINE_POLICY_H_
-#define SRC_BACKENDS_POLICY_ENGINE_POLICY_H_
+
+#ifndef SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_UTILS_H_
+#define SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_UTILS_H_
 
 #include <filesystem>
 
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 
-namespace raksha::backends::policy_engine {
+namespace raksha::backends::policy_engine::souffle {
 
-// Placeholder for the Policy datastructure. Right now, the policy is hard-coded
-// in datalog directly.
-class Policy {
- public:
-  // Outputs this policy as Datalog facts to the directory. This may fail or do
-  // nothing if the kind of the policy does not support this kind of operation.
-  virtual absl::Status OutputAsDlFactsToDirectory(
-      const std::filesystem::path &output_path) const = 0;
-};
+absl::Status WriteFactsStringToFactsFile(
+    const std::filesystem::path &facts_directory_path,
+    absl::string_view relation_name, absl::string_view facts_string);
 
-}  // namespace raksha::backends::policy_engine
+}  // namespace raksha::backends::policy_engine::souffle
 
-#endif
+#endif  // SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_UTILS_H_

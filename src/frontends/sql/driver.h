@@ -13,25 +13,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_BACKENDS_POLICY_ENGINE_POLICY_H_
-#define SRC_BACKENDS_POLICY_ENGINE_POLICY_H_
+
+#ifndef SRC_FRONTENDS_SQL_DRIVER_H_
+#define SRC_FRONTENDS_SQL_DRIVER_H_
 
 #include <filesystem>
+#include <optional>
 
-#include "absl/status/status.h"
+#include "src/backends/policy_engine/souffle/datalog_fact_policy.h"
+#include "src/frontends/sql/sql_ir.pb.h"
 
-namespace raksha::backends::policy_engine {
+namespace raksha::frontends::sql {
 
-// Placeholder for the Policy datastructure. Right now, the policy is hard-coded
-// in datalog directly.
-class Policy {
- public:
-  // Outputs this policy as Datalog facts to the directory. This may fail or do
-  // nothing if the kind of the policy does not support this kind of operation.
-  virtual absl::Status OutputAsDlFactsToDirectory(
-      const std::filesystem::path &output_path) const = 0;
-};
+// The driver for the SQL analysis, to be attached to a third-party parsing
+// frontend.
+bool verify(const ExpressionArena &arena,
+            backends::policy_engine::souffle::DatalogFactPolicy policy);
 
-}  // namespace raksha::backends::policy_engine
+}  // namespace raksha::frontends::sql
 
-#endif
+#endif  // SRC_FRONTENDS_SQL_DRIVER_H_
