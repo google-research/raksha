@@ -13,25 +13,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_BACKENDS_POLICY_ENGINE_POLICY_H_
-#define SRC_BACKENDS_POLICY_ENGINE_POLICY_H_
 
-#include <filesystem>
+#include "src/common/utils/filesystem.h"
 
-#include "absl/status/status.h"
+#include "src/common/testing/gtest.h"
 
-namespace raksha::backends::policy_engine {
+namespace raksha::common::utils {
 
-// Placeholder for the Policy datastructure. Right now, the policy is hard-coded
-// in datalog directly.
-class Policy {
- public:
-  // Outputs this policy as Datalog facts to the directory. This may fail or do
-  // nothing if the kind of the policy does not support this kind of operation.
-  virtual absl::Status OutputAsDlFactsToDirectory(
-      const std::filesystem::path &output_path) const = 0;
-};
+TEST(CreateTemporaryDirectoryTest, CreateTemporaryDirectoryTest) {
+  std::filesystem::path temp_dir = CreateTemporaryDirectory();
+  EXPECT_TRUE(std::filesystem::exists(temp_dir));
+  EXPECT_TRUE(std::filesystem::is_directory(temp_dir));
+  EXPECT_TRUE(std::filesystem::is_empty(temp_dir));
 
-}  // namespace raksha::backends::policy_engine
+  std::filesystem::path temp_dir2 = CreateTemporaryDirectory();
+  EXPECT_NE(temp_dir, temp_dir2);
+  std::filesystem::remove_all(temp_dir);
+  std::filesystem::remove_all(temp_dir2);
+}
 
-#endif
+}  // namespace raksha::common::utils

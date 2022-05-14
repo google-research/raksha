@@ -17,7 +17,9 @@
 
 #include <filesystem>
 
+#include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"
+#include "src/common/utils/filesystem.h"
 #include "src/common/utils/test/utils.h"
 #include "src/ir/datalog/operation.h"
 #include "src/ir/datalog/value.h"
@@ -52,6 +54,18 @@ class DumpFactsToDirectoryTest : public testing::Test {
       is_operation_file_facts_.push_back(fact.ToDatalogFactsFileString());
       facts_.AddIsOperationFact(std::move(fact));
     }
+    directory_ = common::utils::CreateTemporaryDirectory();
+  }
+
+  // Usually, the test fixture's destructor is fine. But I'm pretty sure that
+  // `remove_all` can throw an exception in general, which would cause undefined
+  // behavior if we put this in the destructor. This probably isn't possible
+  // with the noexception flags that we're using, but when it comes to undefined
+  // behavior in dtors, better safe than sorry.
+  void TearDown() override {
+    if (!directory_.empty()) {
+      std::filesystem::remove_all(directory_);
+    }
   }
 
   std::vector<std::string> GetFilesInDirectory(
@@ -80,6 +94,7 @@ class DumpFactsToDirectoryTest : public testing::Test {
  protected:
   RakshaDatalogFacts facts_;
   std::vector<std::string> is_operation_file_facts_;
+  std::filesystem::path directory_;
 };
 
 MATCHER(PathAsStringEq, "") {
@@ -90,25 +105,26 @@ MATCHER(PathAsStringEq, "") {
 
 TEST_F(DumpFactsToDirectoryTest,
        DefaultInvocationDumpsIsOperationInTempDirectory) {
-  auto directory = facts_.DumpFactsToDirectory();
-  ASSERT_TRUE(directory.ok());
+  absl::Status status = facts_.DumpFactsToDirectory(directory_);
+  ASSERT_TRUE(status.ok());
   auto directory_iter =
-      std::filesystem::directory_iterator(directory->string());
-  EXPECT_THAT(GetFilesInDirectory(*directory),
+      std::filesystem::directory_iterator(directory_.string());
+  EXPECT_THAT(GetFilesInDirectory(directory_),
               testing::UnorderedElementsAre("isOperation.facts"));
-  CheckFileContentsInDirectory(*directory);
+  CheckFileContentsInDirectory(directory_);
 }
 
 TEST_F(DumpFactsToDirectoryTest, CreatesEmptyRelationsIfRequested) {
   std::vector<std::string> empty_relations = {"check", "claim"};
-  auto directory = facts_.DumpFactsToDirectory(empty_relations);
-  ASSERT_TRUE(directory.ok());
+  absl::Status status =
+      facts_.DumpFactsToDirectory(directory_, empty_relations);
+  ASSERT_TRUE(status.ok());
   auto directory_iter =
-      std::filesystem::directory_iterator(directory->string());
-  auto files = GetFilesInDirectory(*directory);
+      std::filesystem::directory_iterator(directory_.string());
+  auto files = GetFilesInDirectory(directory_);
   EXPECT_THAT(files, testing::UnorderedElementsAre(
                          "isOperation.facts", "check.facts", "claim.facts"));
-  CheckFileContentsInDirectory(*directory, empty_relations);
+  CheckFileContentsInDirectory(directory_, empty_relations);
 }
 
 TEST_F(DumpFactsToDirectoryTest, CreatesFilesInRequestedDirectory) {
@@ -120,41 +136,40 @@ TEST_F(DumpFactsToDirectoryTest, CreatesFilesInRequestedDirectory) {
       std::filesystem::create_directory(desired_path, error_code);
   ASSERT_TRUE(tmp_dir_created);
 
-  auto directory = facts_.DumpFactsToDirectory(empty_relations, desired_path);
-  ASSERT_TRUE(directory.ok());
-  ASSERT_EQ(*directory, desired_path);
+  absl::Status status =
+      facts_.DumpFactsToDirectory(desired_path, empty_relations);
+  ASSERT_TRUE(status.ok());
 
   auto directory_iter =
-      std::filesystem::directory_iterator(directory->string());
-  auto files = GetFilesInDirectory(*directory);
+      std::filesystem::directory_iterator(desired_path.string());
+  auto files = GetFilesInDirectory(desired_path);
   EXPECT_THAT(files, testing::UnorderedElementsAre(
                          "isOperation.facts", "check.facts", "claim.facts"));
-  CheckFileContentsInDirectory(*directory, empty_relations);
+  CheckFileContentsInDirectory(desired_path, empty_relations);
 }
 
 TEST_F(DumpFactsToDirectoryTest, ReturnsErrorIfRequestedDirectoryDoesNotExist) {
   std::filesystem::path desired_path = std::tmpnam(nullptr);
-  auto directory = facts_.DumpFactsToDirectory({}, desired_path);
-  EXPECT_FALSE(directory.ok());
-  EXPECT_EQ(directory.status().code(), absl::StatusCode::kFailedPrecondition);
+  absl::Status status = facts_.DumpFactsToDirectory(desired_path, {});
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(status.code(), absl::StatusCode::kFailedPrecondition);
   EXPECT_EQ(
-      directory.status().message(),
+      status.message(),
       absl::StrFormat("Requested directory `%s` is not found!", desired_path));
 }
 
 TEST_F(DumpFactsToDirectoryTest,
        ReturnsErrorIfFactsFileAlreadyExistsInDirectory) {
   // Dump files to a temporary directory.
-  auto directory = facts_.DumpFactsToDirectory();
-  ASSERT_TRUE(directory.ok());
+  absl::Status status = facts_.DumpFactsToDirectory(directory_);
+  ASSERT_TRUE(status.ok());
   // Call again with the same directory to trigger an error.
-  auto new_directory = facts_.DumpFactsToDirectory({}, *directory);
-  EXPECT_FALSE(new_directory.ok());
-  EXPECT_EQ(new_directory.status().code(),
-            absl::StatusCode::kFailedPrecondition);
-  EXPECT_EQ(new_directory.status().message(),
+  absl::Status second_status = facts_.DumpFactsToDirectory(directory_);
+  EXPECT_FALSE(second_status.ok());
+  EXPECT_EQ(second_status.code(), absl::StatusCode::kFailedPrecondition);
+  EXPECT_EQ(second_status.message(),
             absl::StrFormat("Facts file `%s/isOperation.facts` already exists!",
-                            *directory));
+                            directory_));
 }
 
 }  // namespace

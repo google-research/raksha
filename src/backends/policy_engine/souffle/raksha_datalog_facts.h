@@ -41,17 +41,14 @@ class RakshaDatalogFacts {
         });
   }
 
-  // Dumps facts as individual files in a temporary directory so that they can
+  // Dumps facts as individual files in the provided directory so that they can
   // be used as inputs to running a souffle program using the souffle C++
   // interface. Returns the directory where the files where created. The method
-  // also takes two optional parameters that are used as follows:
-  //   - Creates empty files corresponding to relations in `empty_relations`.
-  //   - Creates files at the given `directory` instead of creating a temporary
-  //     directory. The given directory should exist already. If a file for a
-  //     particular relation already exists, this method fails with an error.
-  absl::StatusOr<std::filesystem::path> DumpFactsToDirectory(
-      const std::vector<std::string> &empty_relations = {},
-      const std::filesystem::path &directory = std::filesystem::path()) const;
+  // also an optional parameter called `empty_relations` that creates empty
+  // files corresponding to relations in `empty_relations`.
+  absl::Status DumpFactsToDirectory(
+      const std::filesystem::path &directory,
+      const std::vector<std::string> &empty_relations = {}) const;
 
  private:
   std::vector<ir::datalog::IsOperationFact> is_operation_facts_;
