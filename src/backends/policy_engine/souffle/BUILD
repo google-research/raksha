@@ -135,5 +135,6 @@ cc_library(
     deps = [
         "@absl//absl/status",
         "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
     ],
 )
