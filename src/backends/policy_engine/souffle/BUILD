@@ -136,3 +136,15 @@ cc_library(
         "@absl//absl/strings:str_format",
     ],
 )
+
+cc_test(
+    name = "utils_test",
+    srcs = ["utils_test.cc"],
+    deps = [
+        ":utils",
+        "//src/common/logging",
+        "//src/common/testing:gtest",
+        "//src/common/utils:filesystem",
+        "@absl//absl/status:statusor",
+    ],
+)
