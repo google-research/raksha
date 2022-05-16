@@ -68,9 +68,16 @@ static bool IsModulePolicyCompliantHelper(
 
 bool SoufflePolicyChecker::IsModulePolicyCompliant(const ir::Module& module,
                                                    const Policy& policy) const {
-  std::filesystem::path temp_dir = common::utils::CreateTemporaryDirectory();
-  bool result = IsModulePolicyCompliantHelper(module, policy, temp_dir);
-  std::filesystem::remove_all(temp_dir);
+  absl::StatusOr<std::filesystem::path> temp_dir =
+      common::utils::CreateTemporaryDirectory();
+  if (!temp_dir.ok()) {
+    LOG(ERROR) << absl::StrFormat(
+        "Could not create temporary directory for validating module: `%s`",
+        temp_dir.status().ToString());
+    return false;
+  }
+  bool result = IsModulePolicyCompliantHelper(module, policy, *temp_dir);
+  std::filesystem::remove_all(*temp_dir);
   return result;
 }
 

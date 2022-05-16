@@ -146,6 +146,8 @@ cc_library(
     hdrs = ["filesystem.h"],
     deps = [
         "//src/common/logging",
+        "@absl//absl/status",
+        "@absl//absl/status:statusor",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],
@@ -157,5 +159,7 @@ cc_test(
     deps = [
         ":filesystem",
         "//src/common/testing:gtest",
+        "@absl//absl/status",
+        "@absl//absl/status:statusor",
     ],
 )

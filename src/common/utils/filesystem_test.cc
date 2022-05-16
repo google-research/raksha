@@ -21,12 +21,18 @@
 namespace raksha::common::utils {
 
 TEST(CreateTemporaryDirectoryTest, CreateTemporaryDirectoryTest) {
-  std::filesystem::path temp_dir = CreateTemporaryDirectory();
+  absl::StatusOr<std::filesystem::path> temp_dir_statusor =
+      CreateTemporaryDirectory();
+  EXPECT_TRUE(temp_dir_statusor.ok());
+  std::filesystem::path temp_dir(temp_dir_statusor.value());
   EXPECT_TRUE(std::filesystem::exists(temp_dir));
   EXPECT_TRUE(std::filesystem::is_directory(temp_dir));
   EXPECT_TRUE(std::filesystem::is_empty(temp_dir));
 
-  std::filesystem::path temp_dir2 = CreateTemporaryDirectory();
+  absl::StatusOr<std::filesystem::path> temp_dir_statusor2 =
+      CreateTemporaryDirectory();
+  EXPECT_TRUE(temp_dir_statusor2.ok());
+  std::filesystem::path temp_dir2(temp_dir_statusor2.value());
   EXPECT_NE(temp_dir, temp_dir2);
   std::filesystem::remove_all(temp_dir);
   std::filesystem::remove_all(temp_dir2);

@@ -54,7 +54,10 @@ class DumpFactsToDirectoryTest : public testing::Test {
       is_operation_file_facts_.push_back(fact.ToDatalogFactsFileString());
       facts_.AddIsOperationFact(std::move(fact));
     }
-    directory_ = common::utils::CreateTemporaryDirectory();
+    absl::StatusOr<std::filesystem::path> temp_dir_statusor =
+        common::utils::CreateTemporaryDirectory();
+    CHECK(temp_dir_statusor.ok());
+    directory_ = temp_dir_statusor.value();
   }
 
   // Usually, the test fixture's destructor is fine. But I'm pretty sure that

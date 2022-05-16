@@ -19,9 +19,11 @@
 
 #include <filesystem>
 
+#include "absl/status/statusor.h"
+
 namespace raksha::common::utils {
 
-std::filesystem::path CreateTemporaryDirectory();
+absl::StatusOr<std::filesystem::path> CreateTemporaryDirectory();
 
 }  // namespace raksha::common::utils
 
