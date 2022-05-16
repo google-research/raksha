@@ -38,7 +38,7 @@ using DatalogLoweringVisitor = souffle::DatalogLoweringVisitor;
 static constexpr char kDatalogPolicyEngine[] = "datalog_policy_verifier_cxx";
 static constexpr char kViolatesPolicyRelation[] = "violatesPolicy";
 
-static bool IsModulePolicyCompliantInner(
+static bool IsModulePolicyCompliantHelper(
     const ir::Module& module, const Policy& policy,
     std::filesystem::path facts_directory) {
   absl::Status output_policy_status = souffle::WriteFactsStringToFactsFile(
@@ -69,7 +69,7 @@ static bool IsModulePolicyCompliantInner(
 bool SoufflePolicyChecker::IsModulePolicyCompliant(const ir::Module& module,
                                                    const Policy& policy) const {
   std::filesystem::path temp_dir = common::utils::CreateTemporaryDirectory();
-  bool result = IsModulePolicyCompliantInner(module, policy, temp_dir);
+  bool result = IsModulePolicyCompliantHelper(module, policy, temp_dir);
   std::filesystem::remove_all(temp_dir);
   return result;
 }
