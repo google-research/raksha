@@ -30,15 +30,16 @@ absl::StatusOr<std::filesystem::path> CreateTemporaryDirectory() {
   std::filesystem::path temp_path =
       std::filesystem::temp_directory_path(error_code);
   if (error_code) {
-    return absl::FailedPreconditionError(
-        "Unable to access temporary file directory");
+    return absl::FailedPreconditionError(absl::StrFormat(
+        "Unable to access temporary file directory: %s", error_code.message()));
   }
 
   absl::string_view temp_file = std::tmpnam(nullptr);
   std::filesystem::path new_temp_path = temp_path / temp_file;
   if (!std::filesystem::create_directory(new_temp_path, error_code)) {
     return absl::FailedPreconditionError(
-        absl::StrFormat("Unable to create directory `%s`", new_temp_path));
+        absl::StrFormat("Unable to create directory `%s`: %s", new_temp_path,
+                        error_code.message()));
   }
   return new_temp_path;
 }
