@@ -21,7 +21,6 @@
 #include "src/frontends/sql/ops/sql_op.h"
 #include "src/ir/ir_context.h"
 #include "src/ir/module.h"
-#include "src/common/logging/logging.h"
 
 namespace raksha::frontends::sql {
 
@@ -29,18 +28,15 @@ class SqlOutputOp : public SqlOp {
  public:
   // Constructs a SqlOutputOp.
   static std::unique_ptr<SqlOutputOp> Create(const ir::Block* parent_block,
-                                           const ir::IRContext& context,
-                                           ir::Value value) {
+                                             const ir::IRContext& context,
+                                             ir::Value value) {
     return std::make_unique<SqlOutputOp>(
-      parent_block, *CHECK_NOTNULL(SqlOp::GetOperator<SqlOutputOp>(context)),
-      ir::NamedAttributeMap(),
-      ir::ValueList({value}),
-      /*impl_module=*/nullptr);
+        parent_block, *CHECK_NOTNULL(SqlOp::GetOperator<SqlOutputOp>(context)),
+        ir::NamedAttributeMap(), ir::ValueList({value}),
+        /*impl_module=*/nullptr);
   }
 
-  ir::Value GetValueMarkedAsOutput() const {
-    return inputs().front();
-  }
+  ir::Value GetValueMarkedAsOutput() const { return inputs().front(); }
 
  private:
   // Inherit constructors.
