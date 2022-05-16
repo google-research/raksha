@@ -103,6 +103,7 @@ cc_library(
         "//src/analysis/souffle:datalog_policy_verifier_lib",
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:policy_checker",
+        "//src/backends/policy_engine/souffle:utils",
         "//src/common/utils:filesystem",
         "//src/ir:module",
         "@absl//absl/strings",
