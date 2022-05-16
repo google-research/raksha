@@ -17,6 +17,7 @@
 #include "src/frontends/sql/driver.h"
 
 #include "google/protobuf/text_format.h"
+#include "src/backends/policy_engine/policy.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/sql_ir.pb.h"
 
@@ -29,9 +30,7 @@ TEST(SimpleExpectedPassTest, SimpleExpectedPassTest) {
   ExpressionArena expression_arena;
   EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(textproto,
                                                             &expression_arena));
-  EXPECT_TRUE(
-      verify(expression_arena,
-             backends::policy_engine::souffle::SqlPolicyRuleFactPolicy("")));
+  EXPECT_TRUE(verify(expression_arena, backends::policy_engine::Policy("")));
 }
 
 TEST(SimpleExpectedFailTest, SimpleExpectedFailTest) {
@@ -46,12 +45,10 @@ id_expression_pairs: [
                                                             &expression_arena));
   EXPECT_FALSE(
       verify(expression_arena,
-             backends::policy_engine::souffle::SqlPolicyRuleFactPolicy(
+             backends::policy_engine::Policy(
                  R"(["add_tag", $AddConfidentialityTag("tag"), nil])")));
 
-  EXPECT_TRUE(
-      verify(expression_arena,
-             backends::policy_engine::souffle::SqlPolicyRuleFactPolicy("")));
+  EXPECT_TRUE(verify(expression_arena, backends::policy_engine::Policy("")));
 }
 
 }  // namespace raksha::frontends::sql

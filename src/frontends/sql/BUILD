@@ -98,7 +98,7 @@ cc_library(
     deps = [
         ":decode",
         ":sql_ir_cc_proto",
-        "//src/backends/policy_engine/souffle:datalog_fact_policy",
+        "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine/souffle:souffle_policy_checker",
     ],
 )

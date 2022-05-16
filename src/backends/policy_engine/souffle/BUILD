@@ -115,7 +115,7 @@ cc_test(
     srcs = ["souffle_policy_checker_test.cc"],
     deps = [
         ":souffle_policy_checker",
-        "//src/backends/policy_engine/souffle:datalog_fact_policy",
+        "//src/backends/policy_engine:policy",
         "//src/common/logging",
         "//src/common/testing:gtest",
         "//src/frontends/sql/ops:literal_op",
@@ -123,15 +123,6 @@ cc_test(
         "//src/frontends/sql/ops:tag_transform_op",
         "//src/ir:block_builder",
         "//src/ir:ir_context",
-    ],
-)
-
-cc_library(
-    name = "datalog_fact_policy",
-    hdrs = ["datalog_fact_policy.h"],
-    deps = [
-        ":utils",
-        "//src/backends/policy_engine:policy",
     ],
 )
 

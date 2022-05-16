@@ -20,7 +20,7 @@
 #include <filesystem>
 #include <optional>
 
-#include "src/backends/policy_engine/souffle/datalog_fact_policy.h"
+#include "src/backends/policy_engine/policy.h"
 #include "src/frontends/sql/sql_ir.pb.h"
 
 namespace raksha::frontends::sql {
@@ -28,7 +28,7 @@ namespace raksha::frontends::sql {
 // The driver for the SQL analysis, to be attached to a third-party parsing
 // frontend.
 bool verify(const ExpressionArena &arena,
-            backends::policy_engine::souffle::DatalogFactPolicy policy);
+            backends::policy_engine::Policy policy);
 
 }  // namespace raksha::frontends::sql
 

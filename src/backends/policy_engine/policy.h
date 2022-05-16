@@ -26,10 +26,18 @@ namespace raksha::backends::policy_engine {
 // in datalog directly.
 class Policy {
  public:
-  // Outputs this policy as Datalog facts to the directory. This may fail or do
-  // nothing if the kind of the policy does not support this kind of operation.
-  virtual absl::Status OutputAsDlFactsToDirectory(
-      const std::filesystem::path &output_path) const = 0;
+  Policy(std::string is_sql_policy_rule_facts)
+      : is_sql_policy_rule_facts_(std::move(is_sql_policy_rule_facts)) {}
+
+  absl::string_view is_sql_policy_rule_facts() const {
+    return is_sql_policy_rule_facts_;
+  }
+
+ private:
+  // At the moment, this is very SQL-verifier specific. We should refactor this
+  // once we have a clearer idea of the interface between the verifier and the
+  // analysis.
+  std::string is_sql_policy_rule_facts_;
 };
 
 }  // namespace raksha::backends::policy_engine

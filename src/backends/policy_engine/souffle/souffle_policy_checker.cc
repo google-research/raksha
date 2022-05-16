@@ -19,6 +19,7 @@
 #include "souffle/SouffleInterface.h"
 #include "src/backends/policy_engine/policy.h"
 #include "src/backends/policy_engine/souffle/datalog_lowering_visitor.h"
+#include "src/backends/policy_engine/souffle/utils.h"
 #include "src/common/utils/filesystem.h"
 #include "src/ir/module.h"
 
@@ -40,8 +41,8 @@ static constexpr char kViolatesPolicyRelation[] = "violatesPolicy";
 static bool IsModulePolicyCompliantInner(
     const ir::Module& module, const Policy& policy,
     std::filesystem::path facts_directory) {
-  absl::Status output_policy_status =
-      policy.OutputAsDlFactsToDirectory(facts_directory);
+  absl::Status output_policy_status = souffle::WriteFactsStringToFactsFile(
+      facts_directory, "isSqlPolicyRule", policy.is_sql_policy_rule_facts());
   CHECK(output_policy_status.ok())
       << "Unexpected error while outputting policy: " << output_policy_status;
 
