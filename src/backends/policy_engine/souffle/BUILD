@@ -118,6 +118,11 @@ cc_test(
         "//src/backends/policy_engine/souffle:datalog_fact_policy",
         "//src/common/logging",
         "//src/common/testing:gtest",
+        "//src/frontends/sql/ops:literal_op",
+        "//src/frontends/sql/ops:sql_output_op",
+        "//src/frontends/sql/ops:tag_transform_op",
+        "//src/ir:block_builder",
+        "//src/ir:ir_context",
     ],
 )
 
