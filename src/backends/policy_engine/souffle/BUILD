@@ -74,6 +74,7 @@ cc_test(
     srcs = ["raksha_datalog_facts_test.cc"],
     deps = [
         ":raksha_datalog_facts",
+        "//src/common/logging",
         "//src/common/testing:gtest",
         "//src/common/utils:filesystem",
         "//src/common/utils/test:utils",
