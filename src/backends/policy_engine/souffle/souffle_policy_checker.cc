@@ -40,7 +40,7 @@ static constexpr char kViolatesPolicyRelation[] = "violatesPolicy";
 
 static bool IsModulePolicyCompliantHelper(
     const ir::Module& module, const Policy& policy,
-    std::filesystem::path facts_directory) {
+    const std::filesystem::path& facts_directory) {
   absl::Status output_policy_status = souffle::WriteFactsStringToFactsFile(
       facts_directory, "isSqlPolicyRule", policy.is_sql_policy_rule_facts());
   CHECK(output_policy_status.ok())
@@ -63,7 +63,7 @@ static bool IsModulePolicyCompliantHelper(
   Relation* hasPolicyViolation =
       CHECK_NOTNULL(program->getRelation(kViolatesPolicyRelation));
 
-  return hasPolicyViolation->size() > 0 ? false : true;
+  return hasPolicyViolation->size() == 0;
 }
 
 bool SoufflePolicyChecker::IsModulePolicyCompliant(const ir::Module& module,
