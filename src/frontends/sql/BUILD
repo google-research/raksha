@@ -109,6 +109,7 @@ cc_test(
     deps = [
         ":driver",
         ":sql_ir_cc_proto",
+        "//src/backends/policy_engine:policy",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
     ],
