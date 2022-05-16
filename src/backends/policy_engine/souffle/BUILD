@@ -63,6 +63,7 @@ cc_library(
     hdrs = ["raksha_datalog_facts.h"],
     deps = [
         ":utils",
+        "//src/common/logging",
         "//src/ir/datalog:input_relation_fact",
         "//src/ir/datalog:raksha_relation_interface",
         "@absl//absl/status:statusor",
