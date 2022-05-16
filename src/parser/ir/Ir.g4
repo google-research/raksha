@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-grammar IrParser;
+grammar Ir;
 
 // Note: when changing this file, errors thrown by antlr will not
 // be gracefully passed to cargo because errors in build scripts are 
@@ -26,32 +26,25 @@ grammar IrParser;
 // Parser
 //-----------------------------------------------------------------------------
 
-operator_name
-    : ID
-    ;
-booleanType
-    : 'True'
-    | 'False'
-    ;
 //Califiration needed. Current ID is expected to start with a alpha and can have numbers, #, :.
 attribute
     : ID ':' NUMLITERAL
-    | ID ':' ID
-    | ID ':' booleanType
+    | ID ':' '"'ID'"'
     ;
 attributeList
     : attribute (',' attribute)*
     ;
 //Clarification needed. Is ID is expected to start with a alpha?
-argument
+value
     : ANY
-    | '%'NUMLITERAL'.'ID
+    | ID
+    | ID'.'ID
     ;
 argumentList
-    : argument (',' argument)*
+    : value (',' value)*
     ;
 operation
-    : RESULT '=' ID '['(attributeList)?']''('(argumentList)?')'
+    : ID '=' ID '['(attributeList)?']''('(argumentList)?')'
     ;
 irProgram
     : (operation)+
@@ -66,7 +59,7 @@ ANY: '<<ANY>>';
 
 // Identifiers wrapped in quotes are constants whereas
 // identifiers without quotes are variables.
-ID : ('"')? [_a-zA-Z][_a-zA-Z0-9/.#:]* ('"')?;
+ID : ('%')? [_a-zA-Z][_a-zA-Z0-9/.]*;
 NUMLITERAL : [0-9]+;
 RESULT : '%'[0-9]+;
 

@@ -24,11 +24,11 @@ package(
 )
 
 exports_files(
-    ["IrParser.g4"],
+    ["Ir.g4"],
 )
 
 #antlr
 antlr4_cc_combined(
-    name = "auth_logic_cc_generator",
-    src = "IrParser.g4",
+    name = "ir_parser_generator",
+    src = "Ir.g4",
 )
