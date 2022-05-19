@@ -26,7 +26,7 @@ cc_library(
     hdrs = [
         "ast.h",
     ],
-    visibility = ["//test:__pkg__"],
+    visibility = ["//visibility:private"],
     deps = [
         "//src/common/logging",
         "//src/common/utils:overloaded",
