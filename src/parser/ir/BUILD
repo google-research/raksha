@@ -20,6 +20,7 @@ package(
     default_visibility = [
         "//src/ir:__pkg__",
     ],
+    features = ["layering_check"],
     licenses = ["notice"],
 )
 
@@ -31,4 +32,36 @@ exports_files(
 antlr4_cc_combined(
     name = "ir_parser_generator",
     src = "Ir.g4",
+)
+
+cc_library(
+    name = "ir_parser",
+    srcs = ["ir_parser.cc"],
+    hdrs = ["ir_parser.h"],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    deps = [
+        "//src/common/logging",
+        "//src/common/utils:map_iter",
+        "//src/common/utils:overloaded",
+        "//src/ir:ir_context",
+        "//src/ir:module",
+        "//src/ir:operator",
+        "//src/ir:value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+        "//src/ir/attributes:string_attribute",
+        "//src/ir/types",
+        "//src/parser/ir:ir_parser_generator",
+    ],
+)
+
+cc_test(
+    name = "ir_parser_test",
+    srcs = ["ir_parser_test.cc"],
+    deps = [
+        ":ir_parser",
+        "//src/common/testing:gtest",
+        "//src/ir:ir_printer",
+    ],
 )

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Google LLC.
+ * Copyright 2022 Google LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,11 @@
 
 grammar Ir;
 
-// Note: when changing this file, errors thrown by antlr will not
-// be gracefully passed to cargo because errors in build scripts are 
-// suppressed. Instead, the rust files in antlr_gen will remain unchanged.
-// You can try to unsurpress them with "cargo build -vv", or run
-// the antlr command that build.rs runs manually.
-
 //-----------------------------------------------------------------------------
 // Parser
 //-----------------------------------------------------------------------------
 
-//Califiration needed. Current ID is expected to start with a alpha and can have numbers, #, :.
+
 attribute
     : ID ':' NUMLITERAL
     | ID ':' '"'ID'"'
@@ -34,7 +28,8 @@ attribute
 attributeList
     : attribute (',' attribute)*
     ;
-//Clarification needed. Is ID is expected to start with a alpha?
+//Based on Thursday meeting discussios, my understanding is that value of type operationResult, 
+//BlockArgument and storageResult is just ID. Is it safe to remove ID.ID rule for value here?
 value
     : ANY
     | ID
@@ -47,7 +42,7 @@ operation
     : ID '=' ID '['(attributeList)?']''('(argumentList)?')'
     ;
 irProgram
-    : (operation)+
+    : operation
     ;
 
 //-----------------------------------------------------------------------------
@@ -57,9 +52,7 @@ irProgram
 // keywords
 ANY: '<<ANY>>';
 
-// Identifiers wrapped in quotes are constants whereas
-// identifiers without quotes are variables.
-ID : ('%')? [_a-zA-Z][_a-zA-Z0-9/.]*;
+ID : ('%')? [_a-zA-Z0-9/.]*;
 NUMLITERAL : [0-9]+;
 RESULT : '%'[0-9]+;
 
