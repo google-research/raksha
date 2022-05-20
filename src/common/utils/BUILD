@@ -139,3 +139,27 @@ cc_test(
         "@absl//absl/strings",
     ],
 )
+
+cc_library(
+    name = "filesystem",
+    srcs = ["filesystem.cc"],
+    hdrs = ["filesystem.h"],
+    deps = [
+        "//src/common/logging",
+        "@absl//absl/status",
+        "@absl//absl/status:statusor",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "filesystem_test",
+    srcs = ["filesystem_test.cc"],
+    deps = [
+        ":filesystem",
+        "//src/common/testing:gtest",
+        "@absl//absl/status",
+        "@absl//absl/status:statusor",
+    ],
+)

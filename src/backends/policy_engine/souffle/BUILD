@@ -62,6 +62,8 @@ cc_library(
     srcs = ["raksha_datalog_facts.cc"],
     hdrs = ["raksha_datalog_facts.h"],
     deps = [
+        ":utils",
+        "//src/common/logging",
         "//src/ir/datalog:input_relation_fact",
         "//src/ir/datalog:raksha_relation_interface",
         "@absl//absl/status:statusor",
@@ -73,7 +75,9 @@ cc_test(
     srcs = ["raksha_datalog_facts_test.cc"],
     deps = [
         ":raksha_datalog_facts",
+        "//src/common/logging",
         "//src/common/testing:gtest",
+        "//src/common/utils:filesystem",
         "//src/common/utils/test:utils",
         "//src/ir/datalog:raksha_relation_interface",
         "//src/ir/datalog:value",
@@ -95,9 +99,12 @@ cc_library(
     features = ["-use_header_modules"],
     linkopts = ["-pthread"],
     deps = [
+        ":datalog_lowering_visitor",
         "//src/analysis/souffle:datalog_policy_verifier_lib",
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:policy_checker",
+        "//src/backends/policy_engine/souffle:utils",
+        "//src/common/utils:filesystem",
         "//src/ir:module",
         "@absl//absl/strings",
         "@souffle//:souffle_include_lib",
@@ -109,7 +116,36 @@ cc_test(
     srcs = ["souffle_policy_checker_test.cc"],
     deps = [
         ":souffle_policy_checker",
+        "//src/backends/policy_engine:policy",
         "//src/common/logging",
         "//src/common/testing:gtest",
+        "//src/frontends/sql/ops:literal_op",
+        "//src/frontends/sql/ops:sql_output_op",
+        "//src/frontends/sql/ops:tag_transform_op",
+        "//src/ir:block_builder",
+        "//src/ir:ir_context",
+    ],
+)
+
+cc_library(
+    name = "utils",
+    srcs = ["utils.cc"],
+    hdrs = ["utils.h"],
+    deps = [
+        "@absl//absl/status",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "utils_test",
+    srcs = ["utils_test.cc"],
+    deps = [
+        ":utils",
+        "//src/common/logging",
+        "//src/common/testing:gtest",
+        "//src/common/utils:filesystem",
+        "@absl//absl/status:statusor",
     ],
 )

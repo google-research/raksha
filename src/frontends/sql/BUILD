@@ -88,6 +88,33 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "driver",
+    srcs = ["driver.cc"],
+    hdrs = ["driver.h"],
+    visibility = [
+        "//:__pkg__",
+    ],
+    deps = [
+        ":decode",
+        ":sql_ir_cc_proto",
+        "//src/backends/policy_engine:policy",
+        "//src/backends/policy_engine/souffle:souffle_policy_checker",
+    ],
+)
+
+cc_test(
+    name = "driver_test",
+    srcs = ["driver_test.cc"],
+    deps = [
+        ":driver",
+        ":sql_ir_cc_proto",
+        "//src/backends/policy_engine:policy",
+        "//src/common/proto:protobuf",
+        "//src/common/testing:gtest",
+    ],
+)
+
 cc_test(
     name = "decoder_context_test",
     srcs = ["decoder_context_test.cc"],

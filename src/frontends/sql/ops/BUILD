@@ -15,7 +15,13 @@
 #
 #-------------------------------------------------------------------------------
 package(
-    default_visibility = ["//src/frontends/sql:__subpackages__"],
+    default_visibility = [
+        # The policy checker test currently requires specific operations from
+        # the SQL frontend because that's where tainting via operations is most
+        # developed. We should refactor to remove this test in the future.
+        "//src/backends/policy_engine/souffle:__pkg__",
+        "//src/frontends/sql:__subpackages__",
+    ],
     features = ["layering_check"],
     licenses = ["notice"],
 )

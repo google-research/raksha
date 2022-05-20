@@ -13,33 +13,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_BACKENDS_POLICY_ENGINE_POLICY_H_
-#define SRC_BACKENDS_POLICY_ENGINE_POLICY_H_
+
+#ifndef SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_UTILS_H_
+#define SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_UTILS_H_
 
 #include <filesystem>
 
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 
-namespace raksha::backends::policy_engine {
+namespace raksha::backends::policy_engine::souffle {
 
-// Placeholder for the Policy datastructure. Right now, the policy is hard-coded
-// in datalog directly.
-class Policy {
- public:
-  Policy(std::string is_sql_policy_rule_facts)
-      : is_sql_policy_rule_facts_(std::move(is_sql_policy_rule_facts)) {}
+absl::Status WriteFactsStringToFactsFile(
+    const std::filesystem::path &facts_directory_path,
+    absl::string_view relation_name, absl::string_view facts_string);
 
-  absl::string_view is_sql_policy_rule_facts() const {
-    return is_sql_policy_rule_facts_;
-  }
+}  // namespace raksha::backends::policy_engine::souffle
 
- private:
-  // At the moment, this is very SQL-verifier specific. We should refactor this
-  // once we have a clearer idea of the interface between the verifier and the
-  // analysis.
-  std::string is_sql_policy_rule_facts_;
-};
-
-}  // namespace raksha::backends::policy_engine
-
-#endif
+#endif  // SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_UTILS_H_
