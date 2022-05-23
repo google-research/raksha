@@ -50,7 +50,10 @@ message NamedValueMap {
 }
 
 message Operation {
-  string operator = 1;
+  // The name of the operator that this Operation performs. In the future, this
+  // may be used as a key to look up more details about the `Operator`
+  // elsewhere.
+  string operator_name = 1;
   repeated Value inputs = 2;
   NamedAttributeMap attributes = 3;
   NamedValueMap results = 4;
