@@ -1,0 +1,101 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//----------------------------------------------------------------------------
+
+// This proto file contains the proto representation of the Raksha IR. This
+// allows frontends to construct the Raksha IR in any language and send the IR
+// over the wire or across an FFI layer for analysis.
+
+syntax = "proto3";
+
+package raksha.ir.proto;
+
+message Module {
+  map<uint64, Block> blocks = 1;
+}
+
+message Block {
+  // A mapping from the ID for an operation in the block to that operation.
+  // This allows values produced by this `Operation` to "point" to the
+  // `Operation` that produced them within the block.
+  map<uint64, Operation> operations = 1;
+  NamedValueMap results = 2;
+}
+
+message AttributePayload {
+  oneof AttributePayloadKind {
+    int64 int64_payload = 1;
+    string string_payload = 2;
+  }
+}
+
+message NamedAttributeMap {
+  map<string, AttributePayload> attributes = 1;
+}
+
+message NamedValueMap {
+  map<string, Value> values = 1;
+}
+
+message Operation {
+  string operator = 1;
+  NamedValueMap results = 2;
+  NamedAttributeMap attributes = 3;
+  Module impl_module = 4;
+}
+
+message AnyValue {}
+
+message OperationResultValue {
+  uint64 operation_id = 1;
+  string output_name = 2;
+}
+
+message BlockArgumentValue {
+  uint64 block_id = 1;
+  string block_argument_name = 2;
+}
+
+message Value {
+  oneof ValueKind {
+    AnyValue any_value = 1;
+    OperationResultValue operation_result_value = 2;
+    BlockArgumentValue block_argument_value = 3;
+  }
+}
+
+// The top level IR message. Contains the top level module, plus some
+// bookkeeping that may help with diagnosing issues.
+message IrTranslationUnit {
+  // The top level module to be analyzed. This is the only field that's strictly
+  // necessary for an analysis to occur.
+  Module top_level_module = 1;
+  // The frontend that produced these IR messages.
+  string frontend = 2;
+}
+
+// A status indicating whether the analysis succeeded, failed, or encountered an
+// internal error.
+enum AnalysisResultStatus {
+  AR_UNKNOWN = 0;
+  AR_SUCCESS = 1;
+  AR_FAILURE = 2;
+  AR_INTERNAL_ERROR = 3;
+}
+
+// A message indicating the result of the analysis.
+message AnalysisResult {
+  AnalysisResultStatus result = 1;
+}
