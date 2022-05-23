@@ -51,9 +51,9 @@ message NamedValueMap {
 
 message Operation {
   string operator = 1;
-  NamedValueMap results = 2;
+  repeated Value inputs = 2;
   NamedAttributeMap attributes = 3;
-  Module impl_module = 4;
+  NamedValueMap results = 4;
 }
 
 message AnyValue {}
