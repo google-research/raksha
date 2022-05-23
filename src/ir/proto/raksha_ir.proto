@@ -23,6 +23,8 @@ syntax = "proto3";
 package raksha.ir.proto;
 
 message Module {
+  // Assign each block in the module an ID that is unique across the TU. This
+  // allows blocks to be indicated uniquely in `BlockArgumentValue`s.
   map<uint64, Block> blocks = 1;
 }
 
