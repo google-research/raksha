@@ -124,6 +124,17 @@ void DotGeneratorHelper::AddResult(const Operation& op,
   }
 }
 
+namespace {
+
+// Safe initialization of static empty btree set.
+const absl::btree_set<std::string>& GetEmptyStringBtreeSet() {
+  static const absl::btree_set<std::string>* empty_set =
+      new absl::btree_set<std::string>();
+  return *empty_set;
+}
+
+}  // namespace
+
 std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
   // Generates a dot representation of an operation as a node. Suppose that the
   // operation has `m` inputs and `n`results, the generated node will be
@@ -139,7 +150,6 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
   //
   // The `Ix` and `Rx` are ports that we can connect edges to.
   // (cf. https://www.graphviz.org/doc/info/shapes.html#record)
-  static absl::btree_set<std::string> empty_results_set;
   std::string node_name = GetNodeName(op);
   std::string input_ports = absl::StrJoin(
       op.inputs(), "|", [i = 0](std::string* out, const Value& v) mutable {
@@ -149,7 +159,7 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
       });
   auto find_result = operation_results_.find(node_name);
   const absl::btree_set<std::string>& results =
-      (find_result == operation_results_.end()) ? empty_results_set
+      (find_result == operation_results_.end()) ? GetEmptyStringBtreeSet()
                                                 : find_result->second;
   std::string output_ports =
       results.empty()
