@@ -1,7 +1,7 @@
 load(
     "//build_defs:native.oss.bzl",
-    "cc_proto_library",
     "proto_library",
+    "raksha_cc_proto_library",
 )
 
 licenses(["notice"])
@@ -34,7 +34,7 @@ proto_library(
     deps = [":annotation_proto"],
 )
 
-cc_proto_library(
+raksha_cc_proto_library(
     name = "manifest_cc_proto",
     protos = [
         ":annotation_proto",
