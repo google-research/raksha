@@ -22,24 +22,21 @@ grammar Ir;
 
 
 attribute
-    : ID ':' NUMLITERAL
-    | ID ':' '"'ID'"'
+    : ID ':' NUMLITERAL #numAttribute
+    | ID ':' ('"')?ID('"')? #stringAttribute
     ;
 attributeList
     : attribute (',' attribute)*
     ;
-//Based on Thursday meeting discussios, my understanding is that value of type operationResult, 
-//BlockArgument and storageResult is just ID. Is it safe to remove ID.ID rule for value here?
 value
-    : ANY
-    | ID
-    | ID'.'ID
+    : ANY #anyValue
+    | VALUE_ID  #namedValue
     ;
 argumentList
     : value (',' value)*
     ;
 operation
-    : ID '=' ID '['(attributeList)?']''('(argumentList)?')'
+    : VALUE_ID '=' ID '['(attributeList)?']''('(argumentList)?')'
     ;
 irProgram
     : operation
@@ -52,9 +49,10 @@ irProgram
 // keywords
 ANY: '<<ANY>>';
 
-ID : ('%')? [_a-zA-Z0-9/.]*;
+ID : [_a-zA-Z0-9/.]*;
 NUMLITERAL : [0-9]+;
-RESULT : '%'[0-9]+;
+VALUE_ID : ('%')? ID;
+
 
 WHITESPACE_IGNORE
     : [ \r\t\n]+ -> skip

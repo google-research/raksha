@@ -21,6 +21,7 @@
 #define SRC_PARSER_IR_IR_PARSER_H_
 #include <string>
 
+#include "absl/container/flat_hash_map.h"
 #include "src/ir/ir_context.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
@@ -36,12 +37,16 @@ using ir_parser_generator::IrParser;
 class IrProgramParser {
  public:
   // Parses an input string
-  Operation ParseProgram(absl::string_view prog_text);
+  const Operation& ParseProgram(absl::string_view prog_text);
 
  private:
-  Operation ConstructOperation(IrParser::OperationContext& operation_context);
-  absl::flat_hash_map<absl::string_view, Operation> operation_map;
-  IRContext context;
+  const Operation& ConstructOperation(
+      IrParser::OperationContext& operation_context);
+  // As it parses through the program, operation_map inserts new entity for each
+  // operation Ex: %0 = core.minus []() inserts a new entity {"%0",
+  // Operation(nullptr, Operator(core.minus), ..., nullptr )}
+  absl::flat_hash_map<std::string, std::unique_ptr<Operation>> operation_map_;
+  IRContext context_;
 };
 
 }  // namespace raksha::ir

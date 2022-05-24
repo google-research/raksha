@@ -20,11 +20,20 @@
 #include "src/ir/ir_printer.h"
 
 namespace raksha::ir {
-TEST(IrParserTest, SimpleOperation) {
+
+class IrParserTest : public testing::TestWithParam<absl::string_view> {};
+
+TEST_P(IrParserTest, SimpleTestOperation) {
+  auto input_program_text = GetParam();
   IrProgramParser ir_parser;
-  absl::string_view input_program_text =
-      "%0 = core.minus [access: private, name: addition](<<ANY>>, <<ANY>>)\n";
   EXPECT_EQ(IRPrinter::ToString(ir_parser.ParseProgram(input_program_text)),
             input_program_text);
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    IrParserTest, IrParserTest,
+    ::testing::Values(
+        "%0 = core.plus []()\n",
+        "%0 = core.minus [access: private, send: yes](<<ANY>>, <<ANY>>)\n"));
+
 }  // namespace raksha::ir
