@@ -238,10 +238,13 @@ TEST_F(DotGeneratorTest, AddsEdgeFromOperationResultToInputs) {
 }
 
 TEST_F(DotGeneratorTest, AddsAdditionalLabelToOperationNodes) {
+  // Create a config for additional annotations to operation nodes. The format
+  // of the annotation is `numResults(<op-name>): <num-results>`.
   DotGeneratorConfig config = {
       .operation_labeler = [](const Operation& op,
                               const absl::btree_set<std::string>& results) {
-        return absl::StrFormat("%s-%d", op.op().name(), results.size());
+        return absl::StrFormat("numResults(%s): %d", op.op().name(),
+                               results.size());
       }};
   // module m0 {
   //   block b0 {
@@ -264,9 +267,11 @@ TEST_F(DotGeneratorTest, AddsAdditionalLabelToOperationNodes) {
           // block b0
           "B0",
           // %0 = core.pair []()
-          R"(B0_0[label="{{}|core.pair|core.pair-2|{<first>first|<second>second}}"])",
+          // Check `|numResults(core.pair): 2` is added.
+          R"(B0_0[label="{{}|core.pair|numResults(core.pair): 2|{<first>first|<second>second}}"])",
           // %1 = core.plus [](%0.first, %1.second)
-          R"(B0_1[label="{{<I0>I0|<I1>I1}|core.plus|core.plus-0|{<out>out}}"])"));
+          // Check `|numResults(core.plus): 0` is added.
+          R"(B0_1[label="{{<I0>I0|<I1>I1}|core.plus|numResults(core.plus): 0|{<out>out}}"])"));
 }
 
 }  // namespace
