@@ -9,3 +9,22 @@ load("@rules_proto_grpc//cpp:defs.bzl", _cc_proto_library = "cpp_proto_library")
 
 cc_proto_library = _cc_proto_library
 proto_library = _proto_library
+
+def raksha_cc_proto_library(
+        name,
+        protos = [],
+        deps = [],
+        visibility = None):
+    """Used to paper over differences in interface between external and internal versions of cc_proto_library.
+
+    Args:
+        name: String; Name of the library
+        protos: List; labels of protos used to produce this library
+        deps: List; An alias for protos. This will be removed very shortly.
+        visibility: List; List of visibilities
+    """
+    _cc_proto_library(
+        name = name,
+        protos = protos + deps,
+        visibility = visibility,
+    )
