@@ -16,8 +16,8 @@
 #-------------------------------------------------------------------------------
 load(
     "//build_defs:native.oss.bzl",
-    "cc_proto_library",
     "proto_library",
+    "raksha_cc_proto_library",
 )
 
 package(
@@ -30,7 +30,7 @@ proto_library(
     srcs = ["raksha_ir.proto"],
 )
 
-cc_proto_library(
+raksha_cc_proto_library(
     name = "ir_cc_proto",
     protos = [":ir_proto"],
 )
