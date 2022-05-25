@@ -23,6 +23,10 @@ package(
 cc_library(
     name = "policy",
     hdrs = ["policy.h"],
+    visibility = [
+        "//:__pkg__",
+        "//src:__subpackages__",
+    ],
     deps = ["@absl//absl/status"],
 )
 
