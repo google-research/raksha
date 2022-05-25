@@ -17,8 +17,8 @@
 
 load(
     "//build_defs:native.oss.bzl",
-    "cc_proto_library",
     "proto_library",
+    "raksha_cc_proto_library",
 )
 
 package(
@@ -35,12 +35,12 @@ proto_library(
     visibility = ["//:__pkg__"],
 )
 
-cc_proto_library(
+raksha_cc_proto_library(
     name = "sql_ir_cc_proto",
-    protos = [
+    visibility = ["//:__pkg__"],
+    deps = [
         ":sql_ir_proto",
     ],
-    visibility = ["//:__pkg__"],
 )
 
 cc_library(
