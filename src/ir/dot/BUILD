@@ -25,7 +25,10 @@ cc_library(
     srcs = [
         "dot_generator.cc",
     ],
-    hdrs = ["dot_generator.h"],
+    hdrs = [
+        "dot_generator.h",
+        "dot_generator_config.h",
+    ],
     deps = [
         "//src/ir:ir_printer",
         "//src/ir:ir_traversing_visitor",
