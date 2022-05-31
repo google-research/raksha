@@ -99,7 +99,7 @@ message IrTranslationUnit {
   string frontend = 2;
   // The list of `Operator`s used in this TU. Think of this as a list of
   // `Operator` declarations.
-  repeated Operator operations = 3;
+  repeated Operator operators = 3;
 }
 
 // A status indicating whether the analysis succeeded, failed, or encountered an
