@@ -88,9 +88,7 @@ const Operation& IrProgramParser::ConstructOperation(
           : utils::MapIter<Value>(
                 operation_context.argumentList()->value(),
                 [this](IrParser::ValueContext* value_context) {
-                  if (auto* any_value_context =
-                          dynamic_cast<IrParser::AnyValueContext*>(
-                              value_context)) {
+                  if (dynamic_cast<IrParser::AnyValueContext*>(value_context)) {
                     return Value(value::Any());
                   }
                   auto* named_value_context =
