@@ -61,6 +61,14 @@ message Operation {
   NamedValueMap results = 4;
 }
 
+// Information that applies to all `Operation`s performing a particular
+// `Operator`. Currently this only contains the operator's name, but may be
+// extended in the future to provide arity information, type constraints, and
+// other helpful information.
+message Operator {
+  string name = 1;
+}
+
 message AnyValue {}
 
 message OperationResultValue {
@@ -89,6 +97,9 @@ message IrTranslationUnit {
   Module top_level_module = 1;
   // The frontend that produced these IR messages.
   string frontend = 2;
+  // The list of `Operator`s used in this TU. Think of this as a list of
+  // `Operator` declarations.
+  repeated Operator operations = 3;
 }
 
 // A status indicating whether the analysis succeeded, failed, or encountered an
