@@ -60,6 +60,7 @@ cc_library(
 cc_test(
     name = "ir_parser_test",
     srcs = ["ir_parser_test.cc"],
+    copts = ["-fexceptions"],
     deps = [
         ":ir_parser",
         "//src/common/testing:gtest",
