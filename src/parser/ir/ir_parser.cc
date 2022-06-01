@@ -32,6 +32,7 @@
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
+#include "src/ir/block_builder.h"
 #include "src/ir/ir_context.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
@@ -45,8 +46,9 @@ namespace raksha::ir {
 using ir_parser_generator::IrLexer;
 using ir_parser_generator::IrParser;
 
-const Operation& IrProgramParser::ConstructOperation(
-    IrParser::OperationContext& operation_context) {
+void IrProgramParser::ConstructOperation(
+    IrParser::OperationContext& operation_context,
+    BlockBuilder& block_builder) {
   // Operator
   if (context_.GetOperator(operation_context.ID()->getText()) == nullptr) {
     context_.RegisterOperator(
@@ -100,7 +102,7 @@ const Operation& IrProgramParser::ConstructOperation(
                   // Operation Result Value
                   auto find_value_id_operation = operation_map_.find(value_id);
                   // check in place as we do not support operation lists yet.
-                  CHECK(find_value_id_operation == operation_map_.end());
+                  // CHECK(find_value_id_operation == operation_map_.end());
                   if (find_value_id_operation != operation_map_.end()) {
                     return Value(value::OperationResult(
                         *find_value_id_operation->second, value_id));
@@ -113,19 +115,35 @@ const Operation& IrProgramParser::ConstructOperation(
 
   // Operation rule: VALUE_ID '=' ID '['(attributeList)?']''('(argumentList)?')'
   // mapping between Result(Ex:%0) and corresponding operation.
-  auto insert_result = operation_map_.insert(
+  operation_map_.insert(
       {operation_context.VALUE_ID()->getText(),
-       std::make_unique<Operation>(
-           nullptr,
+       std::addressof(block_builder.AddOperation(
            *CHECK_NOTNULL(
                context_.GetOperator(operation_context.ID()->getText())),
-           std::move(attributes), std::move(inputs), nullptr)});
-  return *insert_result.first->second;
+           std::move(attributes), std::move(inputs), nullptr))});
+}
+
+void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
+  BlockBuilder builder;
+  for (IrParser::OperationContext* operation_context :
+       block_context.operation()) {
+    IrProgramParser::ConstructOperation(*CHECK_NOTNULL(operation_context),
+                                        builder);
+  }
+  block_map_.insert({block_context.ID()->getText(),
+                     std::addressof(module_.AddBlock(builder.build()))});
+}
+
+void IrProgramParser::ConstructModule(IrParser::ModuleContext& module_context) {
+  Module module;
+  for (IrParser::BlockContext* block_context : module_context.block()) {
+    IrProgramParser::ConstructBlock(*CHECK_NOTNULL(block_context));
+  }
 }
 
 /// This function produces an abstract syntax tree (AST) rooted with a
 /// program node when given the textual representation of a program.
-const Operation& IrProgramParser::ParseProgram(absl::string_view prog_text) {
+const Module& IrProgramParser::ParseProgram(absl::string_view prog_text) {
   // Provide the input text in a stream
   antlr4::ANTLRInputStream input(prog_text);
   // Creates a lexer from input
@@ -137,8 +155,8 @@ const Operation& IrProgramParser::ParseProgram(absl::string_view prog_text) {
   // program_context points to the root of the parse tree
   IrParser::IrProgramContext& program_context =
       *CHECK_NOTNULL(parser.irProgram());
-  return IrProgramParser::ConstructOperation(
-      *CHECK_NOTNULL(program_context.operation()));
+  IrProgramParser::ConstructModule(*CHECK_NOTNULL(program_context.module()));
+  return module_;
 }
 
 }  // namespace raksha::ir
