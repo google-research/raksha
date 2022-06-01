@@ -38,8 +38,14 @@ argumentList
 operation
     : VALUE_ID '=' ID '['(attributeList)?']''('(argumentList)?')'
     ;
+block
+    : BLOCK ID '{' (operation)+ '}'
+    ;
+module
+    : MODULE ID '{' (block)+ '}'
+    ;
 irProgram
-    : operation
+    : module
     ;
 
 //-----------------------------------------------------------------------------
@@ -48,6 +54,8 @@ irProgram
 
 // keywords
 ANY: '<<ANY>>';
+BLOCK: 'block';
+MODULE: 'module';
 
 ID : [_a-zA-Z0-9/.]*;
 NUMLITERAL : [0-9]+;

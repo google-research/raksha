@@ -30,10 +30,32 @@ TEST_P(IrParserTest, SimpleTestOperation) {
             input_program_text);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    IrParserTest, IrParserTest,
-    ::testing::Values(
-        "%0 = core.plus []()\n",
-        "%0 = core.minus [access: private, send: yes](<<ANY>>, <<ANY>>)\n"));
+INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
+                         ::testing::Values(R"(module m0 {
+  block b0 {
+    %0 = core.plus []()
+  }  // block b0
+  block b1 {
+  }  // block b1
+}  // module m0
+)",
+                                           R"(module m0 {
+  block b0 {
+    %0 = core.plus []()
+  }  // block b0
+  block b1 {
+    %1 = core.plus [access: private, transform: no](<<ANY>>, <<ANY>>)
+  }  // block b1
+}  // module m0
+)",
+                                           R"(module m0 {
+  block b0 {
+    %0 = core.plus []()
+  }  // block b0
+  block b1 {
+    %1 = core.plus [access: private, transform: no](%0, <<ANY>>)
+  }  // block b1
+}  // module m0
+)"));
 
 }  // namespace raksha::ir
