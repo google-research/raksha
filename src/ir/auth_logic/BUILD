@@ -42,7 +42,7 @@ cc_library(
     hdrs = [
         "lowering_ast_datalog.h",
     ],
-    visibility = ["//test:__pkg__"],
+    visibility = ["//visibility:private"],
     deps = [
         ":ast",
         "//src/common/logging",
