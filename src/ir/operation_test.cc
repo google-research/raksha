@@ -103,7 +103,7 @@ INSTANTIATE_TEST_SUITE_P(
              {{"const", Attribute::Create<Int64Attribute>(10)}},
              {Value(value::BlockArgument(OperationTest::first_block_, "arg0")),
               Value(value::BlockArgument(OperationTest::first_block_, "arg1"))},
-             "%0 = core.minus [const: 10](arg0, arg1)\n"})));
+             "%0 = core.minus [const: 10](%0.arg0, %0.arg1)\n"})));
 
 }  // namespace
 }  // namespace raksha::ir

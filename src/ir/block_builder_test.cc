@@ -190,10 +190,10 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
   const NamedValueMap& results = block->results();
   SsaNames ssa_names;
   ASSERT_EQ(results.count("entity_output"), 1);
-  EXPECT_EQ(results.at("entity_output").ToString(ssa_names), "entity_value");
+  EXPECT_EQ(results.at("entity_output").ToString(ssa_names), "%0.entity_value");
   ASSERT_EQ(results.count("primitive_output"), 1);
   EXPECT_EQ(results.at("primitive_output").ToString(ssa_names),
-            "primitive_value");
+            "%0.primitive_value");
 }
 
 // A class to test `AddOperation`  with custom create methods.
