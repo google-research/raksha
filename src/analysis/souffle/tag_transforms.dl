@@ -157,6 +157,15 @@ mustHaveIntegrityTag(result, DEFAULT_SQL_OWNER, iTag) :-
   allTagTransformPreconditionsMet(op),
   sqlPolicyRuleNameHasResult(ruleName, $AddIntegrityTag(iTag)).
 
+// We may chain tag transforms to apply multiple integrity tags. That means
+// that tag transform operations should propagate integrity tags by default.
+mustHaveIntegrityTag(result, DEFAULT_SQL_OWNER, iTag) :-
+  isTagTransformOperation(op),
+  tagTransformHasResultAccessPath(op, result),
+  // 0 is reserved for the transformed input.
+  operationHasOperandAtIndex(op, transformedNodeOp, 0),
+  mustHaveIntegrityTag(transformedNodeOp, DEFAULT_SQL_OWNER, iTag).
+
 #undef DEFAULT_SQL_OWNER
 #undef TAG_TRANSFORM_OPERATOR
 #undef TAG_TRANSFORM_RULE_NAME_ATTR
