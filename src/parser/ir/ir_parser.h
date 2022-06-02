@@ -45,12 +45,11 @@ class IrProgramParser {
                           BlockBuilder& block_builder);
   void ConstructBlock(IrParser::BlockContext& block_context);
   void ConstructModule(IrParser::ModuleContext& module_context);
-  // As it parses through the program, operation_map inserts new entity for
+  // As it parses through the program, value_map inserts new entity for
   // each operation Ex: %0 = core.minus []() inserts a new entity {"%0",
   // Operation(nullptr, Operator(core.minus), ..., nullptr )}
-  absl::flat_hash_map<std::string, const Operation*> operation_map_;
+  absl::flat_hash_map<std::string, Value> value_map_;
   absl::flat_hash_map<std::string, const Block*> block_map_;
-  SsaNames ssa_names_;
   IRContext context_;
   Module module_;
 };

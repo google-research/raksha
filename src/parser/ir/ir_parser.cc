@@ -98,27 +98,21 @@ void IrProgramParser::ConstructOperation(
                   const std::string& value_id =
                       CHECK_NOTNULL(named_value_context)->VALUE_ID()->getText();
                   // Operation Result Value
-                  auto find_value_id_operation = operation_map_.find(value_id);
-                  // check in place as we do not support operation lists yet.
-                  // CHECK(find_value_id_operation == operation_map_.end());
-                  if (find_value_id_operation != operation_map_.end()) {
-                    return Value(value::OperationResult(
-                        *find_value_id_operation->second, value_id));
-                  }
-                  // Storage Value
-                  types::TypeFactory type_factory;
-                  return Value(value::StoredValue(
-                      Storage(value_id, type_factory.MakePrimitiveType())));
+                  auto find_value_id_operation = value_map_.find(value_id);
+                  CHECK(find_value_id_operation != value_map_.end()) << "Value not found" << value_id; 
+                  return find_value_id_operation->second;
                 });
 
   // Operation rule: VALUE_ID '=' ID '['(attributeList)?']''('(argumentList)?')'
   // mapping between Result(Ex:%0) and corresponding operation.
-  operation_map_.insert(
-      {operation_context.VALUE_ID()->getText(),
-       std::addressof(block_builder.AddOperation(
-           *CHECK_NOTNULL(
-               context_.GetOperator(operation_context.ID()->getText())),
-           std::move(attributes), std::move(inputs), nullptr))});
+  value_map_.insert(
+      {absl::StrCat(operation_context.VALUE_ID()->getText(), ".out"),
+       Value(value::OperationResult(
+           block_builder.AddOperation(
+               *CHECK_NOTNULL(
+                   context_.GetOperator(operation_context.ID()->getText())),
+               std::move(attributes), std::move(inputs), nullptr),
+           "out"))});
 }
 
 void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {

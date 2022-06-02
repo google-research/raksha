@@ -50,7 +50,8 @@ class NamedValue {
   const T& element() const { return *element_; }
   absl::string_view name() const { return name_; }
   std::string ToString(SsaNames& ssa_names) const {
-    return absl::StrFormat("%s", name_);
+    return absl::StrFormat("%%%d.%s", ssa_names.GetOrCreateID(*element_),
+                           name_);
   }
 
  protected:
