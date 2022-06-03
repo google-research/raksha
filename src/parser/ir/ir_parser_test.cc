@@ -30,10 +30,58 @@ TEST_P(IrParserTest, SimpleTestOperation) {
             input_program_text);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    IrParserTest, IrParserTest,
-    ::testing::Values(
-        "%0 = core.plus []()\n",
-        "%0 = core.minus [access: private, send: yes](<<ANY>>, <<ANY>>)\n"));
+INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
+                         ::testing::Values(
+R"(module m0 {
+  block b0 {
+    %0 = core.plus []()
+  }  // block b0
+  block b1 {
+  }  // block b1
+}  // module m0
+)",
+R"(module m0 {
+  block b0 {
+    %0 = core.plus []()
+  }  // block b0
+  block b1 {
+    %1 = core.plus [access: private, transform: no](<<ANY>>, <<ANY>>)
+  }  // block b1
+}  // module m0
+)",
+R"(module m0 {
+  block b0 {
+    %0 = core.plus []()
+  }  // block b0
+  block b1 {
+    %1 = core.plus [access: private, transform: no](%0.out, <<ANY>>)
+  }  // block b1
+}  // module m0
+)",
+R"(module m0 {
+  block b0 {
+    %0 = core.select []()
+    %1 = core.merge [](<<ANY>>, <<ANY>>)
+  }  // block b0
+  block b1 {
+    %2 = core.plus [access: private, transform: no](%0.out, <<ANY>>)
+    %3 = core.mult [access: private, transform: no](%0.out, %2.out)
+  }  // block b1
+}  // module m0
+)"));
 
+TEST(IrParseTest, ValueNotFoundCausesFailure) {
+  IrProgramParser ir_parser;
+  auto input_program_text = R"(module m0 {
+  block b0 {
+    %0 = core.plus []()
+  }  // block b0
+  block b1 {
+    %1 = core.plus [access: private, transform: no](%2, <<ANY>>)
+  }  // block b1
+}  // module m0
+)";
+  EXPECT_DEATH(IRPrinter::ToString(ir_parser.ParseProgram(input_program_text)),
+              "Value not found");
+}
 }  // namespace raksha::ir
