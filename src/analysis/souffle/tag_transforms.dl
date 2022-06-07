@@ -33,7 +33,7 @@
   [ precondition: SqlPolicyRulePrecondition, next: SqlPolicyRulePreconditionList ]
 
 .type SqlPolicyRuleResult =
-  AddIntegrityTag { tag: IntegrityTag } 
+  AddIntegrityTag { tag: IntegrityTag }
   | RemoveConfidentialityTag { tag: Tag }
   // Note: In the SQL verifier, rules can only add confidentiality tags on
   // named columns of global tables.
@@ -71,7 +71,7 @@ policyRulePreconditionListLength([head, tail], tailLen + 1) :-
   policyRulePreconditionListLength(tail, tailLen).
 
 .decl sqlPolicyRuleNameHasPreconditionAtIndex(
-  policyRuleName: symbol, policyRulePrecondition: SqlPolicyRulePrecondition, index: number) 
+  policyRuleName: symbol, policyRulePrecondition: SqlPolicyRulePrecondition, index: number)
 
 sqlPolicyRuleNameHasPreconditionAtIndex(name, precondition, suffixLen - 1) :-
   sqlPolicyRuleNameHasPreconditionListSuffix(name, [precondition, tail]),
@@ -98,10 +98,6 @@ isTagTransformOperation(
 tagTransformHasRuleName(op, ruleName) :-
   isTagTransformOperation(op),
   operationHasAttribute(op, [TAG_TRANSFORM_RULE_NAME_ATTR, $StringAttributePayload(ruleName)]).
-
-.decl tagTransformHasResultAccessPath(tagTransform: Operation, resultPath: AccessPath)
-tagTransformHasResultAccessPath([owner, operator, result, operandList, attrs], result) :-
-  isTagTransformOperation([owner, operator, result, operandList, attrs]).
 
 // Associates the tagTransform operation with a tagPrecondition that must be
 // met for the transform to occur and the index of the corresponding policy
@@ -138,21 +134,21 @@ allTagTransformPreconditionsMet(tagTransform) :-
 
 removeTag(result, DEFAULT_SQL_OWNER, tag) :-
   isTagTransformOperation(op),
-  tagTransformHasResultAccessPath(op, result),
+  operationHasResult(op, result),
   tagTransformHasRuleName(op, ruleName),
   allTagTransformPreconditionsMet(op),
   sqlPolicyRuleNameHasResult(ruleName, $RemoveConfidentialityTag(tag)).
 
 hasTag(result, DEFAULT_SQL_OWNER, tag) :-
   isTagTransformOperation(op),
-  tagTransformHasResultAccessPath(op, result),
+  operationHasResult(op, result),
   tagTransformHasRuleName(op, ruleName),
   allTagTransformPreconditionsMet(op),
   sqlPolicyRuleNameHasResult(ruleName, $AddConfidentialityTag(tag)).
 
 mustHaveIntegrityTag(result, DEFAULT_SQL_OWNER, iTag) :-
   isTagTransformOperation(op),
-  tagTransformHasResultAccessPath(op, result),
+  operationHasResult(op, result),
   tagTransformHasRuleName(op, ruleName),
   allTagTransformPreconditionsMet(op),
   sqlPolicyRuleNameHasResult(ruleName, $AddIntegrityTag(iTag)).
