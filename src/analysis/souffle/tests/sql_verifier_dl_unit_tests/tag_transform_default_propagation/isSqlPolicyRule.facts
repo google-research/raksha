@@ -1,0 +1,4 @@
+["add_tag_rule", $AddConfidentialityTag("tag"), nil]
+["add_itag_rule", $AddIntegrityTag("itag"), nil]
+["dummy", $RemoveConfidentialityTag("dummy"), nil]
+["dummy_with_precondition", $RemoveConfidentialityTag("dummy"), [["precond1", "dummyITag"], nil]]
