@@ -21,9 +21,11 @@
 
 // Note: this will need to change when we integrate auth logic into the SQL
 // verifier.
-#define DEFAULT_SQL_OWNER "sql"
-#define TAG_TRANSFORM_OPERATOR "sql.tag_transform"
+#define DEFAULT_SQL_OWNER as("sql", Principal)
+#define TAG_TRANSFORM_OPERATOR as("sql.tag_transform", Operator)
+#define MERGE_OPERATOR as("sql.merge", Operator)
 #define TAG_TRANSFORM_RULE_NAME_ATTR "rule_name"
+#define CONTROL_INPUT_START_INDEX_NAME_ATTR "control_input_start_index"
 
 // A precondition produced in the SQL verifier. The `preconditionName`
 // corresponds to the user-provided name in the SQL pattern in the original
@@ -152,6 +154,84 @@ mustHaveIntegrityTag(result, DEFAULT_SQL_OWNER, iTag) :-
   tagTransformHasRuleName(op, ruleName),
   allTagTransformPreconditionsMet(op),
   sqlPolicyRuleNameHasResult(ruleName, $AddIntegrityTag(iTag)).
+
+// In the SQL verifier, we have some merge operations that we would like to
+// propagate integrity tags in a non-default fashion (ie, rather than dropping
+// the integrity tags, we'd like them to intersect or union across all direct
+// inputs). To do that, we introduce a tag transform with special behavior:
+// rather than linking to a `SqlPolicyRule` fact, they shall instead link to
+// built-in rules here that modify how the integrity tags propagate across the
+// wrapped merge operation.
+
+#define RAKSHA_INTERNAL_INTERSECT_ITAG_RULE_NAME "##raksha_internal#intersect_itag_rule"
+#define RAKSHA_INTERNAL_UNION_ITAG_RULE_NAME "##raksha_internal#union_itag_rule"
+
+.decl isSpecialITagPropagationRule(ruleName: symbol)
+isSpecialITagPropagationRule(RAKSHA_INTERNAL_INTERSECT_ITAG_RULE_NAME).
+isSpecialITagPropagationRule(RAKSHA_INTERNAL_UNION_ITAG_RULE_NAME).
+
+.decl isMergeOp(mergeOp: Operation)
+isMergeOp(mergeOp) :- isOperation(mergeOp), operationHasOperator(mergeOp, MERGE_OPERATOR).
+
+.decl isModifiedPropagationMergeOp(mergeOp: Operation, ruleName: symbol)
+isModifiedPropagationMergeOp(mergeOp, ruleName) :-
+  isTagTransformOperation(tagTransformOp),
+  tagTransformHasRuleName(tagTransformOp, ruleName),
+  isSpecialITagPropagationRule(ruleName),
+  operationHasOperandAtIndex(tagTransformOp, transformedInput, 0),
+  operationHasResult(mergeOp, transformedInput),
+  isMergeOp(mergeOp).
+
+.decl mergeOperationHasControlInputStartIndex(mergeOp: Operation, controlStartIndex: number)
+mergeOperationHasControlInputStartIndex(mergeOp, controlStartIdx) :-
+  isMergeOp(mergeOp),
+  operationHasAttribute(mergeOp,
+    [CONTROL_INPUT_START_INDEX_NAME_ATTR, $NumberAttributePayload(controlStartIdx)]).
+
+.decl isMergeOperationDirectInput(mergeOp: Operation, ap: AccessPath)
+isMergeOperationDirectInput(mergeOp, inputPath) :-
+  isMergeOp(mergeOp), isAccessPath(inputPath), operationHasOperandAtIndex(mergeOp, inputPath, idx),
+  mergeOperationHasControlInputStartIndex(mergeOp, controlStartIdx),
+  idx < controlStartIdx.
+
+// For the union rule, any itag on a direct input should propagate to the
+// output.
+mustHaveIntegrityTag(result, DEFAULT_SQL_OWNER, iTag) :-
+  isModifiedPropagationMergeOp(mergeOp, RAKSHA_INTERNAL_UNION_ITAG_RULE_NAME),
+  operationHasResult(mergeOp, result),
+  isMergeOperationDirectInput(mergeOp, operand),
+  mustHaveIntegrityTag(operand, DEFAULT_SQL_OWNER, iTag).
+
+// For intersection, an integrity tag must be present on all direct inputs to be
+// placed upon the output. Use induction to check that it is present on all
+// direct inputs up to the length of the list.
+.decl mergeOperationHasIntegrityTagOnDirectOperandsUpToIndex(
+  mergeOp: Operation, integrityTag: IntegrityTag, index: number)
+
+// Base case, the 0th operand.
+mergeOperationHasIntegrityTagOnDirectOperandsUpToIndex(mergeOp, integrityTag, 0) :-
+  isMergeOp(mergeOp), isIntegrityTag(integrityTag),
+  operationHasOperandAtIndex(mergeOp, operand, 0),
+  isMergeOperationDirectInput(mergeOp, operand),
+  operationHasOwner(mergeOp, owner),
+  mustHaveIntegrityTag(operand, owner, integrityTag).
+
+// Inductive case.
+mergeOperationHasIntegrityTagOnDirectOperandsUpToIndex(mergeOp, integrityTag, idx + 1) :-
+  isMergeOp(mergeOp), isIntegrityTag(integrityTag),
+  mergeOperationHasIntegrityTagOnDirectOperandsUpToIndex(mergeOp, integrityTag, idx),
+  operationHasOperandAtIndex(mergeOp, operand, idx + 1),
+  isMergeOperationDirectInput(mergeOp, operand),
+  operationHasOwner(mergeOp, owner), mustHaveIntegrityTag(operand, owner, integrityTag).
+
+// Propagate the integrity tag if the operation has INTERSECTION propagation
+// behavior and the integrity tag is present on all operands at indices up to
+// just under the control start index.
+mustHaveIntegrityTag(result, owner, integTag) :-
+  isModifiedPropagationMergeOp(mergeOp, RAKSHA_INTERNAL_INTERSECT_ITAG_RULE_NAME),
+  isPrincipal(owner), isIntegrityTag(integTag), operationHasResult(mergeOp, result),
+  mergeOperationHasIntegrityTagOnDirectOperandsUpToIndex(mergeOp, integTag, idx),
+  mergeOperationHasControlInputStartIndex(mergeOp, idx + 1).
 
 #undef DEFAULT_SQL_OWNER
 #undef TAG_TRANSFORM_OPERATOR
