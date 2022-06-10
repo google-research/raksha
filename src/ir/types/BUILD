@@ -68,3 +68,16 @@ cc_test(
         "@absl//absl/strings",
     ],
 )
+
+
+cc_test(
+    name = "schema_test",
+    srcs = ["schema_test.cc"],
+    deps = [
+        ":types",
+        "//src/common/proto:protobuf",
+        "//src/common/testing:gtest",
+        "//src/ir/types/proto",
+
+    ],
+)
