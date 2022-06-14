@@ -18,7 +18,7 @@ load("//build_defs:antlr.bzl", "antlr4_cc_combined")
 
 package(
     default_visibility = [
-        "//src/ir:__pkg__",
+        "//src:__subpackages__",
     ],
     features = ["layering_check"],
     licenses = ["notice"],

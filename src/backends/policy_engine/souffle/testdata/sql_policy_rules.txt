@@ -1,0 +1,3 @@
+["set_restricted", $AddConfidentialityTag("restricted"), nil]
+["set_ssn_integrity", $AddIntegrityTag("SSN"), nil]
+["remove_restricted_for_ssn", $RemoveConfidentialityTag("restricted"), nil]
