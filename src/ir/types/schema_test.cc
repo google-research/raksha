@@ -1,13 +1,10 @@
+#include "src/ir/types/entity_type.h"
 #include "src/ir/types/schema.h"
 #include "src/ir/types/proto/schema.h"
 #include "src/ir/types/type.h"
-#include "src/ir/types/entity_type.h"
-
 
 #include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
-#include "absl/strings/str_cat.h"
-
 
 namespace raksha::ir::types {
 
@@ -16,11 +13,13 @@ namespace raksha::ir::types {
     };
 
     //test the ToString() in schema.h 
-    //takes as input a textproto to be converted to SchemaProto and the expected output of the ToString() 
+    //takes as input a textproto to be converted to SchemaProto 
+    //and the expected output of the ToString() 
     TEST_P(ToStringTest, ToStringTest) {
         const auto &[schema_as_textproto, expected_to_string_output] = GetParam();
         arcs::SchemaProto orig_schema_proto;
-        ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(schema_as_textproto, &orig_schema_proto)) 
+        ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
+                    schema_as_textproto, &orig_schema_proto)) 
         << "Failed to convert text to schema proto."; 
 
         TypeFactory type_factory_; 
