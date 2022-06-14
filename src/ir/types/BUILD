@@ -69,7 +69,6 @@ cc_test(
     ],
 )
 
-
 cc_test(
     name = "schema_test",
     srcs = ["schema_test.cc"],
