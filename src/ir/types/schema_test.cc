@@ -11,8 +11,6 @@
 
 namespace raksha::ir::types {
 
-
-
     class ToStringTest: public testing::TestWithParam<std::tuple<std::string, std::string>> {
         protected: TypeFactory type_factory_;
     };
@@ -22,7 +20,8 @@ namespace raksha::ir::types {
     TEST_P(ToStringTest, ToStringTest) {
         const auto &[schema_as_textproto, expected_to_string_output] = GetParam();
         arcs::SchemaProto orig_schema_proto;
-        ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(schema_as_textproto, &orig_schema_proto)) << "Failed to convert text to schema proto."; 
+        ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(schema_as_textproto, &orig_schema_proto)) 
+        << "Failed to convert text to schema proto."; 
 
         TypeFactory type_factory_; 
         Schema schema = proto::decode(type_factory_, orig_schema_proto);
@@ -35,16 +34,16 @@ namespace raksha::ir::types {
             // Schema with one primitive type.
             {R"(names: ["my_schema"]
             fields: [ { key: "field1", value: { primitive: TEXT } } ])", 
-            "name: my_schema\nfields: \n\tfield1: primitive\n"},
+            "my_schema {\n\tfield1: primitive\n}"},
 
             // Schema with no name and one primitive type
             {R"(fields: [ { key: "field1", value: { primitive: TEXT } } ])",
-            "name: \nfields: \n\tfield1: primitive\n"},
+            " {\n\tfield1: primitive\n}"},
 
             // Schema with one primitive type and one entity 
             {R"(names: ["my_schema"]
             fields: [ { key: "field1", value: { primitive: TEXT } }, { key: "field2", value: {entity: { schema: { } } }  } ])", 
-            "name: my_schema\nfields: \n\tfield1: primitive\n\tfield2: entity\n"},
+            "my_schema {\n\tfield1: primitive\n\tfield2: entity\n}"},
 
             //Schema with no name and three fields: primitive, entity and primitive 
 
@@ -58,11 +57,7 @@ namespace raksha::ir::types {
                     { key: "sub_field2", value: { primitive: TEXT } }
                 ]}}}},
             { key: "hello", value: { primitive: TEXT } } ] )",
-                "name: \nfields: \n\tfield1: primitive\n\thello: primitive\n\tx: entity\n"}
-
-
-
-
+                " {\n\tfield1: primitive\n\thello: primitive\n\tx: entity\n}"}
     };
 
     INSTANTIATE_TEST_SUITE_P(ToStringTest,
