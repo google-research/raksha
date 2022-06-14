@@ -78,6 +78,5 @@ cc_test(
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir/types/proto",
-
     ],
 )
