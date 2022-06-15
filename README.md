@@ -51,7 +51,7 @@ between them. There are other languages such as
 Given an IR, we envsion an architecture that is illustrated below, consisting
 of multiple frontends, a middle-end, and multiple backends:
 
-<img src="images/raksha_architecture.svg" alt="Raksha Architecture" width="600px"/>
+<img src="https://raw.githubusercontent.com/google-research/raksha/main/images/raksha_architecture.svg" alt="Raksha Architecture" width="600px"/>
 
 Note that this architecture doesn’t have to be centralized and can be
 distributed if we use the common IR as a way to communicate between
@@ -68,7 +68,7 @@ To guarantee safety of the reasoning, the frontend should ensure that the
 behaviors modeled by the IR is a superset of the actual behaviors manifested
 by the actual implementation as shown below:
 
-<img src="images/modeled_behaviors.svg" alt="Modeled Behaviors" width="300px"/>
+<img src="https://raw.githubusercontent.com/google-research/raksha/main/images/modeled_behaviors.svg" alt="Modeled Behaviors" width="300px"/>
 
 
 Each frontend will need to take into account the features and intricacies of
@@ -88,13 +88,13 @@ of false positives when it comes to policy verification:
   </tr>
   <tr>
     <td>
-      <img src="images/no_policy_violation.svg" alt="No Policy Violation" width="300px"/>
+      <img src="https://raw.githubusercontent.com/google-research/raksha/main/images/no_policy_violation.svg" alt="No Policy Violation" width="300px"/>
     </td>
     <td>
-      <img src="images/real_policy_violation.svg" alt="Policy Violation" width="300px"/>
+      <img src="https://raw.githubusercontent.com/google-research/raksha/main/images/real_policy_violation.svg" alt="Policy Violation" width="300px"/>
     </td>
     <td>
-      <img src="images/false_positive.svg" alt="False Positive" width="300px"/>
+      <img src="https://raw.githubusercontent.com/google-research/raksha/main/images/false_positive.svg" alt="False Positive" width="300px"/>
     </td>
   </tr>
 </table>
