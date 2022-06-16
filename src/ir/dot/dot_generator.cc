@@ -151,44 +151,76 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
   // The `Ix` and `Rx` are ports that we can connect edges to.
   // (cf. https://www.graphviz.org/doc/info/shapes.html#record)
   std::string node_name = GetNodeName(op);
-  std::string input_ports = absl::StrJoin(
-      op.inputs(), "|", [i = 0](std::string* out, const Value& v) mutable {
-        int node_num = i++;
-        absl::StrAppend(out,
-                        absl::StrFormat(R"(<I%d>I%d)", node_num, node_num));
-      });
   auto find_result = operation_results_.find(node_name);
   const absl::btree_set<std::string>& results =
       (find_result == operation_results_.end()) ? GetEmptyStringBtreeSet()
                                                 : find_result->second;
+  // The column_count is the LCM of the inputs and outputs, and will be used to
+  // determine the colspan for the table cells in the rendered table.
+  int column_count;
+  int input_colspan;
+  int output_colspan;
+  if (op.inputs().empty() && results.empty()) {
+    column_count = 1;
+    input_colspan = 1;
+    output_colspan = 1;
+  } else if (op.inputs().empty()) {
+    column_count = results.size();
+    input_colspan = column_count;
+    output_colspan = 1;
+  } else if (results.empty()) {
+    column_count = op.inputs().size();
+    input_colspan = 1;
+    output_colspan = column_count;
+  } else {
+    // Input column width = # of outputs, and vice-versa.
+    input_colspan = results.size();
+    output_colspan = op.inputs().size();
+    column_count = input_colspan * output_colspan;
+  }
+
+  std::string input_ports = 
+      op.inputs().empty() 
+          ? absl::StrFormat(R"(<TD COLSPAN="%d">&nbsp;</TD>)", column_count)
+          : absl::StrJoin(
+              op.inputs(), "", [i = 0, input_colspan = input_colspan](std::string* out, const Value& v) mutable {
+                int node_num = i++;
+                absl::StrAppend(out,
+                    absl::StrFormat(
+                        R"(<TD COLSPAN="%d" PORT="I%d">I%d</TD>)", 
+                        input_colspan, node_num, node_num));
+              });
   std::string output_ports =
       results.empty()
-          ? "<out>out"
-          : absl::StrJoin(results, "|",
-                          [](std::string* out, const std::string& name) {
+          ? absl::StrFormat(R"(<TD COLSPAN="%d" PORT="out">out</TD>)", 
+              column_count)
+          : absl::StrJoin(results, "",
+                          [output_colspan = output_colspan](std::string* out, const std::string& name) {
                             absl::StrAppend(
-                                out, absl::StrFormat(R"(<%s>%s)", name, name));
+                                out, absl::StrFormat(
+                                  R"(<TD COLSPAN="%d" PORT="%s">%s</TD>)", 
+                                  output_colspan, name, name));
                           });
   std::string additional_label = config_.operation_labeler(op, results);
   std::string additional_label_directive =
-      additional_label.empty() ? "" : absl::StrFormat("|%s", additional_label);
+      additional_label.empty() ? "" : absl::StrFormat(R"(<TR><TD COLSPAN="%d">%s </TD></TR>)", column_count, additional_label);
   std::string attributes =
       op.attributes().empty()
           ? ""
           : absl::StrFormat(
-                " [%s]", IRPrinter::PrintNamedMapInNameOrder(
+                " [%s] ", IRPrinter::PrintNamedMapInNameOrder(
                              op.attributes(), [](const Attribute& attribute) {
                                return attribute.ToString();
                              }));
   return absl::StrFormat(
-      R"(%s[label="{{%s}|%s%s%s|{%s}}"])", std::move(node_name),
-      std::move(input_ports), op.op().name(), std::move(attributes),
+      R"(%s [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR>%s</TR><TR><TD COLSPAN="%d">%s%s</TD></TR>%s<TR>%s</TR></TABLE>>])", std::move(node_name), std::move(input_ports), column_count,
+      op.op().name(), std::move(attributes),
       std::move(additional_label_directive), std::move(output_ports));
 }
 
 std::string DotGeneratorHelper::GetDotGraph() {
   constexpr absl::string_view kDigraphFormat = R"(digraph G {
-  node[shape=Mrecord];
+  node[shape=none];
   // Nodes:
   %s
   %s
@@ -202,7 +234,7 @@ std::string DotGeneratorHelper::GetDotGraph() {
       blocks_, "\n  ",
       [](std::string* out,
          absl::flat_hash_map<std::string, const Block*>::value_type
-             node_entry) { absl::StrAppend(out, node_entry.first); });
+             node_entry) { absl::StrAppend(out, absl::StrFormat("%s [shape=Mrecord]", node_entry.first)); });
   // Generate nodes for operations.
   std::string operations = absl::StrJoin(
       operations_, "\n  ",
