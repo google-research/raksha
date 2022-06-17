@@ -96,7 +96,7 @@ TEST_F(DotGeneratorTest, CreatesNodeForBlocks) {
   const auto& dot_graph_lines =
       GetDotGraphAsWhitespaceTrimmedLines(global_module());
   EXPECT_THAT(GetNodes(dot_graph_lines),
-              testing::UnorderedElementsAre("B0", "B1"));
+              testing::UnorderedElementsAre("B0 [shape=Mrecord]", "B1 [shape=Mrecord]"));
 }
 
 TEST_F(DotGeneratorTest, CreatesNodesForOperations) {
@@ -116,11 +116,9 @@ TEST_F(DotGeneratorTest, CreatesNodesForOperations) {
   EXPECT_THAT(GetNodes(dot_graph_lines),
               testing::UnorderedElementsAre(
                   //   block b0
-                  "B0",
-                  // %0 = core.plus []()
-                  R"(B0_0[label="{{}|core.plus|{<out>out}}"])",
-                  // %1 = core.minus []()
-                  R"(B0_1[label="{{}|core.minus|{<out>out}}"])"));
+                  "B0 [shape=Mrecord]",
+                  R"(B0_0 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.plus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])",
+                  R"(B0_1 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.minus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
 TEST_F(DotGeneratorTest, CreatesAttributesInNodesForOperation) {
@@ -142,10 +140,8 @@ TEST_F(DotGeneratorTest, CreatesAttributesInNodesForOperation) {
   EXPECT_THAT(
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
-          // block b0
-          "B0",
-          // %0 = core.plus [string:"something", ttl:10]()
-          R"(B0_0[label="{{}|core.plus [string: something, ttl: 10]|{<out>out}}"])"));
+          "B0 [shape=Mrecord]",
+          R"(B0_0 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.plus [string: something, ttl: 10] </TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
 TEST_F(DotGeneratorTest, CreatesInputPortsInNodesForOperation) {
@@ -164,12 +160,9 @@ TEST_F(DotGeneratorTest, CreatesInputPortsInNodesForOperation) {
       GetDotGraphAsWhitespaceTrimmedLines(global_module());
   EXPECT_THAT(GetNodes(dot_graph_lines),
               testing::UnorderedElementsAre(
-                  // block b0
-                  "B0",
-                  // %0 = core.plus [](<<ANY>>, <<ANY>>)
-                  R"(B0_0[label="{{<I0>I0|<I1>I1}|core.plus|{<out>out}}"])",
-                  // %1 = core.minus [](<<ANY>>)
-                  R"(B0_1[label="{{<I0>I0}|core.minus|{<out>out}}"])"));
+                  "B0 [shape=Mrecord]",
+                  R"(B0_0 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])",
+                  R"(B0_1 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD></TR><TR><TD COLSPAN="1">core.minus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
 TEST_F(DotGeneratorTest, CreatesOutputPortsInNodesForOperation) {
@@ -192,12 +185,9 @@ TEST_F(DotGeneratorTest, CreatesOutputPortsInNodesForOperation) {
   EXPECT_THAT(
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
-          // block b0
-          "B0",
-          // %0 = core.pair [](<<ANY>>, <<ANY>>)
-          R"(B0_0[label="{{<I0>I0|<I1>I1}|core.pair|{<first>first|<second>second}}"])",
-          // %1 = core.plus [](%0.first, %1.second)
-          R"(B0_1[label="{{<I0>I0|<I1>I1}|core.plus|{<out>out}}"])"));
+          "B0 [shape=Mrecord]",
+          R"(B0_0 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.pair</TD></TR><TR><TD COLSPAN="1" PORT="first">first</TD><TD COLSPAN="1" PORT="second">second</TD></TR></TABLE>>])",
+          R"(B0_1 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
 TEST_F(DotGeneratorTest, AddsEdgeFromOperationResultToInputs) {
@@ -223,14 +213,10 @@ TEST_F(DotGeneratorTest, AddsEdgeFromOperationResultToInputs) {
 
   EXPECT_THAT(GetNodes(dot_graph_lines),
               testing::UnorderedElementsAre(
-                  // block b0
-                  "B0",
-                  // %0 = core.minus [](<<ANY>>)
-                  R"(B0_0[label="{{<I0>I0}|core.minus|{<out>out}}"])",
-                  // %1 = core.plus [](%0.out, <<ANY>>)
-                  R"(B0_1[label="{{<I0>I0|<I1>I1}|core.plus|{<out>out}}"])",
-                  // %2 = core.plus [](%1.out, %0.out)
-                  R"(B0_2[label="{{<I0>I0|<I1>I1}|core.plus|{<out>out}}"])"));
+                  R"(B0 [shape=Mrecord])",
+                  R"(B0_2 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])",
+                  R"(B0_1 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])",
+                  R"(B0_0 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD></TR><TR><TD COLSPAN="1">core.minus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
   EXPECT_THAT(
       GetEdges(dot_graph_lines),
       testing::UnorderedElementsAre(
@@ -264,14 +250,9 @@ TEST_F(DotGeneratorTest, AddsAdditionalLabelToOperationNodes) {
   EXPECT_THAT(
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
-          // block b0
-          "B0",
-          // %0 = core.pair []()
-          // Check `|numResults(core.pair): 2` is added.
-          R"(B0_0[label="{{}|core.pair|numResults(core.pair): 2|{<first>first|<second>second}}"])",
-          // %1 = core.plus [](%0.first, %1.second)
-          // Check `|numResults(core.plus): 0` is added.
-          R"(B0_1[label="{{<I0>I0|<I1>I1}|core.plus|numResults(core.plus): 0|{<out>out}}"])"));
+          R"(B0 [shape=Mrecord])",
+          R"(B0_0 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="2">&nbsp;</TD></TR><TR><TD COLSPAN="2">core.pair</TD></TR><TR><TD COLSPAN="2">numResults(core.pair): 2 </TD></TR><TR><TD COLSPAN="1" PORT="first">first</TD><TD COLSPAN="1" PORT="second">second</TD></TR></TABLE>>])",
+          R"(B0_1 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2">numResults(core.plus): 0 </TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
 }  // namespace
