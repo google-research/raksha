@@ -155,35 +155,19 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
   const absl::btree_set<std::string>& results =
       (find_result == operation_results_.end()) ? GetEmptyStringBtreeSet()
                                                 : find_result->second;
-  // The column_count is the LCM of the inputs and outputs, and will be used to
+  // The total_colspan is the LCM of the inputs and outputs, and will be used to
   // determine the colspan for the table cells in the rendered table.
-  int column_count;
-  int input_colspan;
-  int output_colspan;
-  if (op.inputs().empty() && results.empty()) {
-    column_count = 1;
-    input_colspan = 1;
-    output_colspan = 1;
-  } else if (op.inputs().empty()) {
-    column_count = results.size();
-    input_colspan = column_count;
-    output_colspan = 1;
-  } else if (results.empty()) {
-    column_count = op.inputs().size();
-    input_colspan = 1;
-    output_colspan = column_count;
-  } else {
-    // Input column width = # of outputs, and vice-versa.
-    input_colspan = results.size();
-    output_colspan = op.inputs().size();
-    column_count = input_colspan * output_colspan;
-  }
+  size_t input_cols = std::max(1uL, op.inputs().size());
+  size_t output_cols = std::max(1L, results.size());
+  size_t total_colspan = std::lcm(input_cols, output_cols);
+  int input_colspan = total_colspan / input_cols;
+  int output_colspan = total_colspan / output_cols;
 
   std::string input_ports = 
       op.inputs().empty() 
-          ? absl::StrFormat(R"(<TD COLSPAN="%d">&nbsp;</TD>)", column_count)
+          ? absl::StrFormat(R"(<TD COLSPAN="%d">&nbsp;</TD>)", total_colspan)
           : absl::StrJoin(
-              op.inputs(), "", [i = 0, input_colspan = input_colspan](std::string* out, const Value& v) mutable {
+              op.inputs(), "", [i = 0, input_colspan](std::string* out, const Value& v) mutable {
                 int node_num = i++;
                 absl::StrAppend(out,
                     absl::StrFormat(
@@ -193,9 +177,9 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
   std::string output_ports =
       results.empty()
           ? absl::StrFormat(R"(<TD COLSPAN="%d" PORT="out">out</TD>)", 
-              column_count)
+              total_colspan)
           : absl::StrJoin(results, "",
-                          [output_colspan = output_colspan](std::string* out, const std::string& name) {
+                          [output_colspan](std::string* out, const std::string& name) {
                             absl::StrAppend(
                                 out, absl::StrFormat(
                                   R"(<TD COLSPAN="%d" PORT="%s">%s</TD>)", 
@@ -203,7 +187,11 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
                           });
   std::string additional_label = config_.operation_labeler(op, results);
   std::string additional_label_directive =
-      additional_label.empty() ? "" : absl::StrFormat(R"(<TR><TD COLSPAN="%d">%s </TD></TR>)", column_count, additional_label);
+      additional_label.empty() 
+          ? "" 
+          : absl::StrFormat(
+                R"(<TR><TD COLSPAN="%d">%s </TD></TR>)", total_colspan,
+                additional_label);
   std::string attributes =
       op.attributes().empty()
           ? ""
@@ -213,7 +201,8 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
                                return attribute.ToString();
                              }));
   return absl::StrFormat(
-      R"(%s [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR>%s</TR><TR><TD COLSPAN="%d">%s%s</TD></TR>%s<TR>%s</TR></TABLE>>])", std::move(node_name), std::move(input_ports), column_count,
+      R"(%s [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR>%s</TR><TR><TD COLSPAN="%d">%s%s</TD></TR>%s<TR>%s</TR></TABLE>>])",
+      std::move(node_name), std::move(input_ports), total_colspan,
       op.op().name(), std::move(attributes),
       std::move(additional_label_directive), std::move(output_ports));
 }

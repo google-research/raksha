@@ -186,7 +186,7 @@ TEST_F(DotGeneratorTest, CreatesOutputPortsInNodesForOperation) {
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
           "B0 [shape=Mrecord]",
-          R"(B0_0 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="2" PORT="I0">I0</TD><TD COLSPAN="2" PORT="I1">I1</TD></TR><TR><TD COLSPAN="4">core.pair</TD></TR><TR><TD COLSPAN="2" PORT="first">first</TD><TD COLSPAN="2" PORT="second">second</TD></TR></TABLE>>])",
+          R"(B0_0 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.pair</TD></TR><TR><TD COLSPAN="1" PORT="first">first</TD><TD COLSPAN="1" PORT="second">second</TD></TR></TABLE>>])",
           R"(B0_1 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
