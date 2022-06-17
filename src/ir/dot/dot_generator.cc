@@ -158,7 +158,7 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
   // The total_colspan is the LCM of the inputs and outputs, and will be used to
   // determine the colspan for the table cells in the rendered table.
   size_t input_cols = std::max(1uL, op.inputs().size());
-  size_t output_cols = std::max(1L, results.size());
+  size_t output_cols = std::max(1uL, (size_t)results.size());
   size_t total_colspan = std::lcm(input_cols, output_cols);
   int input_colspan = total_colspan / input_cols;
   int output_colspan = total_colspan / output_cols;
