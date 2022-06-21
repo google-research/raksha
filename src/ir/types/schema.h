@@ -31,8 +31,9 @@ class Schema {
   // of <field_kind> for easier testing, fields are sorted alphabetically based
   // on their name
   std::string ToString() const {
-    std::string schema_to_string =
-        absl::StrCat("schame ", name_.value_or(""), " {\n");
+    std::string schema_name = name_.value_or("");
+    std::string schema_to_string = absl::StrCat(
+        "schema ", schema_name, schema_name == "" ? "{\n" : " {\n");
     std::vector<std::string> fields_to_string;
     for (const auto& [name, kind] : fields_) {
       auto kind_to_string =
