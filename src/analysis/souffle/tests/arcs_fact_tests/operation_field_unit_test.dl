@@ -29,9 +29,6 @@
   TEST_SINGLE_RESULT_FOR_OPERATION(test_name, (operation), operationHasOperandList, (operandList)). \
   TEST_SINGLE_RESULT_FOR_OPERATION(test_name, (operation), operationHasAttributeList, (attrList))
 
-#define MAKE_OPERATION(owner, operator, result, operandList, attrList) \
-  [owner, operator, result, operandList, attrList]
-
 #define CREATE_AND_TEST_OPERATION(test_name, owner, operator, result, operandList, attrList) \
   CREATE_AND_TEST_OPERATOR_INNER(test_name, ([owner, operator, result, (operandList), (attrList)]), owner, operator, result, (operandList), (attrList))
 
