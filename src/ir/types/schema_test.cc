@@ -1,52 +1,55 @@
-#include "src/ir/types/entity_type.h"
 #include "src/ir/types/schema.h"
-#include "src/ir/types/proto/schema.h"
-#include "src/ir/types/type.h"
 
 #include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/types/entity_type.h"
+#include "src/ir/types/proto/schema.h"
+#include "src/ir/types/type.h"
 
 namespace raksha::ir::types {
 
-    class ToStringTest: public testing::TestWithParam<std::tuple<std::string, std::string>> {
-        protected: TypeFactory type_factory_;
-    };
+class ToStringTest
+    : public testing::TestWithParam<std::tuple<std::string, std::string>> {
+ protected:
+  TypeFactory type_factory_;
+};
 
-    //test the ToString() in schema.h 
-    //takes as input a textproto to be converted to SchemaProto 
-    //and the expected output of the ToString() 
-    TEST_P(ToStringTest, ToStringTest) {
-        const auto &[schema_as_textproto, expected_to_string_output] = GetParam();
-        arcs::SchemaProto orig_schema_proto;
-        ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
-                    schema_as_textproto, &orig_schema_proto)) 
-        << "Failed to convert text to schema proto."; 
+// test the ToString() in schema.h
+// takes as input a textproto to be converted to SchemaProto
+// and the expected output of the ToString()
+TEST_P(ToStringTest, ToStringTest) {
+  const auto &[schema_as_textproto, expected_to_string_output] = GetParam();
+  arcs::SchemaProto orig_schema_proto;
+  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(schema_as_textproto,
+                                                            &orig_schema_proto))
+      << "Failed to convert text to schema proto.";
 
-        TypeFactory type_factory_; 
-        Schema schema = proto::decode(type_factory_, orig_schema_proto);
-    
-        EXPECT_THAT(schema.ToString(), expected_to_string_output);
-    }
+  TypeFactory type_factory_;
+  Schema schema = proto::decode(type_factory_, orig_schema_proto);
 
-    //tuples of input for the ToStringTest test case 
-    const std::tuple<std::string, std::string> schema_proto_and_to_string_output_strings[] = {
-            // Schema with one primitive type.
-            {R"(names: ["my_schema"]
-            fields: [ { key: "field1", value: { primitive: TEXT } } ])", 
-            "my_schema {\n\tfield1: primitive\n}"},
+  EXPECT_THAT(schema.ToString(), expected_to_string_output);
+}
 
-            // Schema with no name and one primitive type
-            {R"(fields: [ { key: "field1", value: { primitive: TEXT } } ])",
-            " {\n\tfield1: primitive\n}"},
+// tuples of input for the ToStringTest test case
+const std::tuple<std::string, std::string>
+    schema_proto_and_to_string_output_strings[] = {
+        // Schema with one primitive type.
+        {R"(names: ["my_schema"]
+            fields: [ { key: "field1", value: { primitive: TEXT } } ])",
+         "my_schema {\n\tfield1: primitive\n}"},
 
-            // Schema with one primitive type and one entity 
-            {R"(names: ["my_schema"]
-            fields: [ { key: "field1", value: { primitive: TEXT } }, { key: "field2", value: {entity: { schema: { } } }  } ])", 
-            "my_schema {\n\tfield1: primitive\n\tfield2: entity\n}"},
+        // Schema with no name and one primitive type
+        {R"(fields: [ { key: "field1", value: { primitive: TEXT } } ])",
+         " {\n\tfield1: primitive\n}"},
 
-            //Schema with no name and three fields: primitive, entity and primitive 
+        // Schema with one primitive type and one entity
+        {R"(names: ["my_schema"]
+            fields: [ { key: "field1", value: { primitive: TEXT } }, { key: "field2", value: {entity: { schema: { } } }  } ])",
+         "my_schema {\n\tfield1: primitive\n\tfield2: entity\n}"},
 
-            {R"(
+        // Schema with no name and three fields: primitive, entity and primitive
+
+        {R"(
             fields: [
             { key: "field1", value: { primitive: TEXT } },
             { key: "x",
@@ -56,11 +59,10 @@ namespace raksha::ir::types {
                     { key: "sub_field2", value: { primitive: TEXT } }
                 ]}}}},
             { key: "hello", value: { primitive: TEXT } } ] )",
-                " {\n\tfield1: primitive\n\thello: primitive\n\tx: entity\n}"}
-    };
+         " {\n\tfield1: primitive\n\thello: primitive\n\tx: entity\n}"}};
 
-    INSTANTIATE_TEST_SUITE_P(ToStringTest,
-                            ToStringTest,
-                            testing::ValuesIn(schema_proto_and_to_string_output_strings));
+INSTANTIATE_TEST_SUITE_P(
+    ToStringTest, ToStringTest,
+    testing::ValuesIn(schema_proto_and_to_string_output_strings));
 
-}
+}  // namespace raksha::ir::types

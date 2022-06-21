@@ -22,27 +22,36 @@ class Schema {
 
   friend class TypeFactory;
 
-  //return a string representing the Schema in the following format: 
-  // <schema name> {
-  //    <field_name>: <field_kind>
-  //    ... 
-  // }
-  //only showing the first layer of the schema, e.g. not returning the values of <field_kind>
-  //for easier testing, fields are sorted alphabetically based on their name  
-  std::string ToString() const{
-    std::string schema_to_string = absl::StrCat(name_.value_or(""), " {\n"); 
-    std::vector<std::string> fields_to_string; 
-    for (auto& [name, kind] : fields_) {
-      auto kind_to_string = kind.type_base().kind() == raksha::ir::types::TypeBase::Kind::kPrimitive ? "primitive" : "entity"; 
-      fields_to_string.push_back(absl::StrCat("\t", name, ": ", kind_to_string));
+  // return a string representing the Schema in the following format:
+  //  schema <schema name> {
+  //     <field_name>: <field_kind>
+  //     ...
+  //  }
+  // only showing the first layer of the schema, e.g. not returning the values
+  // of <field_kind> for easier testing, fields are sorted alphabetically based
+  // on their name
+  std::string ToString() const {
+    std::string schema_to_string =
+        absl::StrCat("schame ", name_.value_or(""), " {\n");
+    std::vector<std::string> fields_to_string;
+    for (const auto& [name, kind] : fields_) {
+      auto kind_to_string =
+          kind.type_base().kind() ==
+                  raksha::ir::types::TypeBase::Kind::kPrimitive
+              ? "primitive"
+              : "entity";
+      fields_to_string.push_back(
+          absl::StrCat("\t", name, ": ", kind_to_string));
 
-    //TODO: decide if we want to further print out fields of EntityType (will be a bit more complex given entity includes schema.h)
+      // TODO: decide if we want to further print out fields of EntityType (will
+      // be a bit more complex given entity includes schema.h)
     }
 
-    //sorting for easier testing 
-    sort(fields_to_string.begin(), fields_to_string.end()); 
-    absl::StrAppend(&schema_to_string, absl::StrJoin(fields_to_string, "\n"), "\n}"); 
-    return schema_to_string;  
+    // Sorting to canonicalize output.
+    sort(fields_to_string.begin(), fields_to_string.end());
+    absl::StrAppend(&schema_to_string, absl::StrJoin(fields_to_string, "\n"),
+                    "\n}");
+    return schema_to_string;
   }
 
  private:
