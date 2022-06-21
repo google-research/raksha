@@ -30,9 +30,23 @@ namespace raksha::ir {
 class IRPrinter : public IRTraversingVisitor<IRPrinter> {
  public:
   template <typename T>
+  static void ToString(std::ostream& out, const T* entity,
+                       SsaNames& ssa_names) {
+    IRPrinter printer(out, ssa_names);
+    entity->Accept(printer);
+  }
+
+  template <typename T>
   static void ToString(std::ostream& out, const T& entity) {
     IRPrinter printer(out);
     entity.Accept(printer);
+  }
+
+  template <typename T>
+  static std::string ToString(const T* entity, SsaNames& ssa_names) {
+    std::ostringstream out;
+    ToString(out, entity, ssa_names);
+    return out.str();
   }
 
   template <typename T>
@@ -42,56 +56,95 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     return out.str();
   }
 
-  void PreVisit(const Module& module) override {
-    out_ << Indent()
-         << absl::StreamFormat("module m%d {\n",
-                               ssa_names_.GetOrCreateID(module));
+  void PreVisit(const Module* module) override {
+    if (ssa_names_.findID(module)) {
+      out_ << Indent()
+           << absl::StreamFormat("module %s {\n",
+                                 ssa_names_.GetOrCreateID(module));
+    } else {
+      out_ << Indent()
+           << absl::StreamFormat("module m%s {\n",
+                                 ssa_names_.GetOrCreateID(module));
+    }
     IncreaseIndent();
   }
 
-  void PostVisit(const Module& module) override {
+  void PostVisit(const Module* module) override {
     DecreaseIndent();
-    out_ << Indent()
-         << absl::StreamFormat("}  // module m%d\n",
-                               ssa_names_.GetOrCreateID(module));
+    if (ssa_names_.findID(module)) {
+      out_ << Indent()
+           << absl::StreamFormat("}  // module %s\n",
+                                 ssa_names_.GetOrCreateID(module));
+    } else {
+      out_ << Indent()
+           << absl::StreamFormat("}  // module m%s\n",
+                                 ssa_names_.GetOrCreateID(module));
+    }
   }
 
-  void PreVisit(const Block& block) override {
-    out_ << Indent()
-         << absl::StreamFormat("block b%d {\n",
-                               ssa_names_.GetOrCreateID(block));
+  void PreVisit(const Block* block) override {
+    if (ssa_names_.findID(block)) {
+      out_ << Indent()
+           << absl::StreamFormat("block %s {\n",
+                                 ssa_names_.GetOrCreateID(block));
+    } else {
+      out_ << Indent()
+           << absl::StreamFormat("block b%s {\n",
+                                 ssa_names_.GetOrCreateID(block));
+    }
     IncreaseIndent();
   }
 
-  void PostVisit(const Block& block) override {
+  void PostVisit(const Block* block) override {
     DecreaseIndent();
-    out_ << Indent()
-         << absl::StreamFormat("}  // block b%d\n",
-                               ssa_names_.GetOrCreateID(block));
+    if (ssa_names_.findID(block)) {
+      out_ << Indent()
+           << absl::StreamFormat("}  // block %s\n",
+                                 ssa_names_.GetOrCreateID(block));
+    } else {
+      out_ << Indent()
+           << absl::StreamFormat("}  // block b%s\n",
+                                 ssa_names_.GetOrCreateID(block));
+    }
   }
 
-  void PreVisit(const Operation& operation) override {
-    constexpr absl::string_view kOperationFormat = "%%%d = %s [%s](%s)";
+  void PreVisit(const Operation* operation) override {
+    constexpr absl::string_view kOperationFormat = "%s = %s [%s](%s)";
+
     SsaNames::ID this_ssa_name = ssa_names_.GetOrCreateID(operation);
 
-    // We want the attribute names to print in a stable order. This means that
-    // we cannot just print from the attribute map directly. Gather the names
-    // into a vector and sort that, then use the order in that vector to print
-    // the attributes.
+    // SsaNames::ID this_ssa_name = ssa_names_.GetOrCreateID(
+    //     Value(value::OperationResult(*operation, "out")));
+    // std::cout << "Harsha2"
+    //           << ssa_names_.GetOrCreateID(
+    //                  Value(value::OperationResult(*operation, "out")))
+    //           << std::endl;
+    // std::cout << "Harsha2"
+    //           << ssa_names_.GetOrCreateID(
+    //                  Value(value::OperationResult(*operation, "out")))
+    //           << std::endl;
+    // SsaNames::ID this_ssa_name =
+    //     ssa_names_.GetOrCreateID(Value(value::OperationResult(operation)));
+
+    // We want the attribute names to print in a stable order. This means
+    // that we cannot just print from the attribute map directly. Gather the
+    // names into a vector and sort that, then use the order in that vector
+    // to print the attributes.
     std::string attributes_string = PrintNamedMapInNameOrder(
-        operation.attributes(),
+        operation->attributes(),
         [](const Attribute& attr) { return attr.ToString(); });
 
-    std::string inputs_string = absl::StrJoin(
-        operation.inputs(), ", ", [this](std::string* out, const Value& value) {
-          absl::StrAppend(out, value.ToString(ssa_names_));
-        });
+    std::string inputs_string =
+        absl::StrJoin(operation->inputs(), ", ",
+                      [this](std::string* out, const Value& value) {
+                        absl::StrAppend(out, value.ToString(ssa_names_));
+                      });
 
     out_ << Indent()
          << absl::StreamFormat(kOperationFormat, this_ssa_name,
-                               operation.op().name(), attributes_string,
+                               operation->op().name(), attributes_string,
                                inputs_string);
-    if (operation.impl_module()) {
+    if (operation->impl_module()) {
       out_ << " {\n";
       IncreaseIndent();
     } else {
@@ -99,8 +152,8 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     }
   }
 
-  void PostVisit(const Operation& operation) override {
-    if (operation.impl_module()) {
+  void PostVisit(const Operation* operation) override {
+    if (operation->impl_module()) {
       DecreaseIndent();
       out_ << Indent() << "}\n";
     }
@@ -130,6 +183,9 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
   void DecreaseIndent() { --indent_; }
 
   IRPrinter(std::ostream& out) : out_(out), indent_(0) {}
+
+  IRPrinter(std::ostream& out, SsaNames ssa_names)
+      : out_(out), indent_(0), ssa_names_(ssa_names) {}
 
   std::ostream& out_;
   int indent_;

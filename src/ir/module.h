@@ -23,6 +23,7 @@
 #include "src/ir/data_decl.h"
 #include "src/ir/ir_visitor.h"
 #include "src/ir/operator.h"
+#include "src/ir/ssa_names.h"
 #include "src/ir/types/type.h"
 #include "src/ir/value.h"
 
@@ -59,7 +60,7 @@ class Operation {
 
   template <typename Derived>
   void Accept(IRVisitor<Derived>& visitor) const {
-    visitor.Visit(*this);
+    visitor.Visit(this);
   }
 
  private:
@@ -97,7 +98,7 @@ class Block {
 
   template <typename Derived>
   void Accept(IRVisitor<Derived>& visitor) const {
-    visitor.Visit(*this);
+    visitor.Visit(this);
   }
 
   friend class BlockBuilder;
@@ -149,7 +150,7 @@ class Module {
 
   template <typename Derived>
   void Accept(IRVisitor<Derived>& visitor) const {
-    visitor.Visit(*this);
+    visitor.Visit(this);
   }
 
  private:

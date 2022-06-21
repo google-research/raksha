@@ -35,27 +35,27 @@ class CollectingVisitor : public IRTraversingVisitor<CollectingVisitor> {
         post_visits_(traversal_type == TraversalType::POST ||
                      traversal_type == TraversalType::BOTH) {}
 
-  void PreVisit(const Module& module) override {
-    if (pre_visits_) nodes_.push_back(std::addressof(module));
+  void PreVisit(const Module* module) override {
+    if (pre_visits_) nodes_.push_back(module);
   }
-  void PostVisit(const Module& module) override {
-    if (post_visits_) nodes_.push_back(std::addressof(module));
-  }
-
-  void PreVisit(const Block& block) override {
-    if (pre_visits_) nodes_.push_back(std::addressof(block));
+  void PostVisit(const Module* module) override {
+    if (post_visits_) nodes_.push_back(module));
   }
 
-  void PostVisit(const Block& block) override {
-    if (post_visits_) nodes_.push_back(std::addressof(block));
+  void PreVisit(const Block* block) override {
+    if (pre_visits_) nodes_.push_back(block);
   }
 
-  void PreVisit(const Operation& operation) override {
-    if (pre_visits_) nodes_.push_back(std::addressof(operation));
+  void PostVisit(const Block* block) override {
+    if (post_visits_) nodes_.push_back(block);
   }
 
-  void PostVisit(const Operation& operation) override {
-    if (post_visits_) nodes_.push_back(std::addressof(operation));
+  void PreVisit(const Operation* operation) override {
+    if (pre_visits_) nodes_.push_back(operation);
+  }
+
+  void PostVisit(const Operation* operation) override {
+    if (post_visits_) nodes_.push_back(operation);
   }
 
   const std::vector<const void*>& nodes() const { return nodes_; }

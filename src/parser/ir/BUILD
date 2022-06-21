@@ -53,6 +53,7 @@ cc_library(
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "//src/ir/types",
+        "//src/ir:ssa_names",
         "//src/parser/ir:ir_parser_generator",
         "@absl//absl/container:flat_hash_map",
     ],

@@ -207,6 +207,7 @@ cc_test(
         ":operator",
         ":ssa_names",
         "//src/common/testing:gtest",
+        "//src/ir:value",
     ],
 )
 
@@ -234,10 +235,12 @@ cc_library(
     name = "value",
     hdrs = ["value.h"],
     deps = [
-        ":ssa_names",
         ":storage",
         "//src/common/utils:ranges",
+        "//src/common/utils:overloaded",
         "//src/ir/types",
+        ":ssa_names",
+        "@absl//absl/status:statusor",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings:str_format",
     ],

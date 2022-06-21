@@ -26,13 +26,15 @@ class IrParserTest : public testing::TestWithParam<absl::string_view> {};
 TEST_P(IrParserTest, SimpleTestOperation) {
   auto input_program_text = GetParam();
   IrProgramParser ir_parser;
-  EXPECT_EQ(IRPrinter::ToString(ir_parser.ParseProgram(input_program_text)),
+  const Module& result = ir_parser.ParseProgram(input_program_text);
+  EXPECT_EQ(IRPrinter::ToString(&result, ir_parser.ssa_names_),
             input_program_text);
 }
 
-INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
-                         ::testing::Values(
-R"(module m0 {
+INSTANTIATE_TEST_SUITE_P(
+    IrParserTest, IrParserTest,
+    ::testing::Values(
+        R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -40,7 +42,7 @@ R"(module m0 {
   }  // block b1
 }  // module m0
 )",
-R"(module m0 {
+        R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -49,7 +51,7 @@ R"(module m0 {
   }  // block b1
 }  // module m0
 )",
-R"(module m0 {
+        R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -57,18 +59,19 @@ R"(module m0 {
     %1 = core.plus [access: private, transform: no](%0.out, <<ANY>>)
   }  // block b1
 }  // module m0
-)",
-R"(module m0 {
-  block b0 {
-    %0 = core.select []()
-    %1 = core.merge [](<<ANY>>, <<ANY>>)
-  }  // block b0
-  block b1 {
-    %2 = core.plus [access: private, transform: no](%0.out, <<ANY>>)
-    %3 = core.mult [access: private, transform: no](%0.out, %2.out)
-  }  // block b1
-}  // module m0
-)"));
+        )"
+        // R"(module m0 {
+        //   block b0 {
+        //     %0 = core.select []()
+        //     %1 = core.merge [](<<ANY>>, <<ANY>>)
+        //   }  // block b0
+        //   block b1 {
+        //     %2 = core.plus [access: private, transform: no](%0.out, <<ANY>>)
+        //     %3 = core.mult [access: private, transform: no](%0.out, %2.out)
+        //   }  // block b1
+        // }  // module m0
+        // )"
+        ));
 
 TEST(IrParseTest, ValueNotFoundCausesFailure) {
   IrProgramParser ir_parser;
@@ -81,7 +84,8 @@ TEST(IrParseTest, ValueNotFoundCausesFailure) {
   }  // block b1
 }  // module m0
 )";
-  EXPECT_DEATH(IRPrinter::ToString(ir_parser.ParseProgram(input_program_text)),
-              "Value not found");
+  EXPECT_DEATH(IRPrinter::ToString(&ir_parser.ParseProgram(input_program_text),
+                                   ir_parser.ssa_names_),
+               "Value not found");
 }
 }  // namespace raksha::ir

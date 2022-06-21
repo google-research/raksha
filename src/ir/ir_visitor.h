@@ -28,9 +28,9 @@ template <typename Derived>
 class IRVisitor {
  public:
   virtual ~IRVisitor() {}
-  virtual void Visit(const Module& module) = 0;
-  virtual void Visit(const Block& operation) = 0;
-  virtual void Visit(const Operation& operation) = 0;
+  virtual void Visit(const Module* module) = 0;
+  virtual void Visit(const Block* operation) = 0;
+  virtual void Visit(const Operation* operation) = 0;
 };
 
 }  // namespace raksha::ir

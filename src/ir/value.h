@@ -16,10 +16,13 @@
 #ifndef SRC_IR_VALUE_H_
 #define SRC_IR_VALUE_H_
 
+#include <string>
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"
+#include "src/common/logging/logging.h"
+#include "src/common/utils/overloaded.h"
 #include "src/common/utils/ranges.h"
 #include "src/ir/ssa_names.h"
 #include "src/ir/storage.h"
@@ -49,10 +52,6 @@ class NamedValue {
 
   const T& element() const { return *element_; }
   absl::string_view name() const { return name_; }
-  std::string ToString(SsaNames& ssa_names) const {
-    return absl::StrFormat("%%%d.%s", ssa_names.GetOrCreateID(*element_),
-                           name_);
-  }
 
  protected:
   bool operator==(const NamedValue<T>& other) const {
@@ -124,9 +123,19 @@ class Value {
 
   std::string ToString(SsaNames& ssa_names) const {
     return std::visit(
-        [&ssa_names](const auto& variant) {
-          return variant.ToString(ssa_names);
-        },
+        raksha::utils::overloaded{
+            [&ssa_names](const value::Any& any) {
+              return any.ToString(ssa_names);
+            },
+            [&ssa_names](const value::StoredValue& stored_value) {
+              return stored_value.ToString(ssa_names);
+            },
+            [this, &ssa_names](const value::BlockArgument& block_argument) {
+              return absl::StrFormat("%s", ssa_names.GetOrCreateID(this));
+            },
+            [this, &ssa_names](const value::OperationResult& operation_result) {
+              return absl::StrFormat("%s", ssa_names.GetOrCreateID(this));
+            }},
         value_);
   }
 

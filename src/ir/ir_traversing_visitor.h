@@ -30,37 +30,37 @@ class IRTraversingVisitor : public IRVisitor<Derived> {
   virtual ~IRTraversingVisitor() {}
 
   // Invoked before all the children of `module` is visited.
-  virtual void PreVisit(const Module& module) {}
+  virtual void PreVisit(const Module* module) {}
   // Invoked after all the children of `module` is visited.
-  virtual void PostVisit(const Module& module) {}
+  virtual void PostVisit(const Module* module) {}
   // Invoked before all the children of `block` is visited.
-  virtual void PreVisit(const Block& block) {}
+  virtual void PreVisit(const Block* block) {}
   // Invoked after all the children of `block` is visited.
-  virtual void PostVisit(const Block& block) {}
+  virtual void PostVisit(const Block* block) {}
   // Invoked before all the children of `operation` is visited.
-  virtual void PreVisit(const Operation& operation) {}
+  virtual void PreVisit(const Operation* operation) {}
   // Invoked after all the children of `operation` is visited.
-  virtual void PostVisit(const Operation& operation) {}
+  virtual void PostVisit(const Operation* operation) {}
 
-  void Visit(const Module& module) final override {
+  void Visit(const Module* module) final override {
     PreVisit(module);
-    for (const std::unique_ptr<Block>& block : module.blocks()) {
+    for (const std::unique_ptr<Block>& block : module->blocks()) {
       block->Accept(*this);
     }
     PostVisit(module);
   }
 
-  void Visit(const Block& block) final override {
+  void Visit(const Block* block) final override {
     PreVisit(block);
-    for (const std::unique_ptr<Operation>& operation : block.operations()) {
+    for (const std::unique_ptr<Operation>& operation : block->operations()) {
       operation->Accept(*this);
     }
     PostVisit(block);
   }
 
-  void Visit(const Operation& operation) final override {
+  void Visit(const Operation* operation) final override {
     PreVisit(operation);
-    const Module* module = operation.impl_module();
+    const Module* module = operation->impl_module();
     if (module != nullptr) {
       module->Accept(*this);
     }
