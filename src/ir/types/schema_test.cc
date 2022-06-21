@@ -44,7 +44,10 @@ const std::tuple<std::string, std::string>
 
         // Schema with one primitive type and one entity
         {R"(names: ["my_schema"]
-            fields: [ { key: "field1", value: { primitive: TEXT } }, { key: "field2", value: {entity: { schema: { } } }  } ])",
+            fields: [ 
+                { key: "field1", value: { primitive: TEXT } }, 
+                { key: "field2", value: {entity: { schema: { } } 
+                }}])",
          "schema my_schema {\n\tfield1: primitive\n\tfield2: entity\n}"},
 
         // Schema with no name and three fields: primitive, entity and primitive
