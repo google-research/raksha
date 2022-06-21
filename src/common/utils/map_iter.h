@@ -20,6 +20,7 @@
 #define SRC_COMMON_UTILS_MAP_ITER_H_
 
 #include <algorithm>
+#include <iterator>
 #include <vector>
 
 namespace raksha::utils {
