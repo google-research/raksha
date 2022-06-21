@@ -42,7 +42,7 @@ class Schema {
               ? "primitive"
               : "entity";
       fields_to_string.push_back(
-          absl::StrCat("\t", name, ": ", kind_to_string));
+          absl::StrCat("  ", name, ": ", kind_to_string));
 
       // TODO(#585): decide if we want to further print out fields of EntityType
       // (will be a bit more complex given entity_type includes schema.h)

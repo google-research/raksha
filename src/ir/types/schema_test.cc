@@ -36,11 +36,11 @@ const std::tuple<std::string, std::string>
         // Schema with one primitive type.
         {R"(names: ["my_schema"]
             fields: [ { key: "field1", value: { primitive: TEXT } } ])",
-         "schema my_schema {\n\tfield1: primitive\n}"},
+         "schema my_schema {\n  field1: primitive\n}"},
 
         // Schema with no name and one primitive type
         {R"(fields: [ { key: "field1", value: { primitive: TEXT } } ])",
-         "schema {\n\tfield1: primitive\n}"},
+         "schema {\n  field1: primitive\n}"},
 
         // Schema with one primitive type and one entity
         {R"(names: ["my_schema"]
@@ -48,7 +48,7 @@ const std::tuple<std::string, std::string>
                 { key: "field1", value: { primitive: TEXT } }, 
                 { key: "field2", value: {entity: { schema: { } } 
                 }}])",
-         "schema my_schema {\n\tfield1: primitive\n\tfield2: entity\n}"},
+         "schema my_schema {\n  field1: primitive\n  field2: entity\n}"},
 
         // Schema with no name and three fields: primitive, entity and primitive
 
@@ -62,7 +62,7 @@ const std::tuple<std::string, std::string>
                     { key: "sub_field2", value: { primitive: TEXT } }
                 ]}}}},
             { key: "hello", value: { primitive: TEXT } } ] )",
-         "schema {\n\tfield1: primitive\n\thello: primitive\n\tx: entity\n}"}};
+         "schema {\n  field1: primitive\n  hello: primitive\n  x: entity\n}"}};
 
 INSTANTIATE_TEST_SUITE_P(
     ToStringTest, ToStringTest,
