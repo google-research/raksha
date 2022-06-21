@@ -35,7 +35,34 @@
 // Operation universe.
 .decl isOperation(operation: Operation)
 
-isPrincipal(owner), isAccessPath(result) :- isOperation([owner, _, result, _, _]).
+// OperandList universe.
+.decl isOperandList(operandList: OperandList)
+
+// Operator universe.
+.decl isOperator(operator: Operator)
+
+// Attribute list universe.
+.decl isAttributeList(attributeList: AttributeList)
+
+// Fill the appropriate universes with the pieces of the operation.
+isPrincipal(owner), isOperator(operator), isAccessPath(result),
+isOperandList(operandList), isAttributeList(attributeList) :-
+isOperation([owner, operator, result, operandList, attributeList]).
+
+// Declare mappings from an operation to its fields.
+.decl operationHasResult(operation: Operation, result: AccessPath)
+.decl operationHasOwner(operation: Operation, owner: Principal)
+.decl operationHasOperator(operation: Operation, operator: Operator)
+.decl operationHasOperandList(operation: Operation, operandList: OperandList)
+.decl operationHasAttributeList(operation: Operation, attributeList: AttributeList)
+
+// Populate field association relations.
+operationHasResult(operation, result), operationHasOwner(operation, owner),
+operationHasOperator(operation, operator), operationHasOperandList(operation, operands),
+operationHasAttributeList(operation, attributes) :-
+  isPrincipal(owner), isOperator(operator), isAccessPath(result), isOperandList(operands),
+  isAttributeList(attributes), isOperation(operation),
+  operation = [owner, operator, result, operands, attributes].
 
 // BINARY_OPERATION is a convenience macro for the very-common-case of binary operations.
 #define BINARY_OPERATION(owner, operator, result, attrs, input1, input2) \
@@ -45,8 +72,8 @@ isOperation([owner, operator, result, [input1, [input2, nil]], attrs])
 // to get a mapping from operations to their operands.
 .decl operationHasOperandListSuffix(operation: Operation, partialList: OperandList)
 
-operationHasOperandListSuffix([owner, op, result, operandList, attrs], operandList) :-
-  isOperation([owner, op, result, operandList, attrs]).
+operationHasOperandListSuffix(operation, operandList) :-
+  operationHasOperandList(operation, operandList).
 operationHasOperandListSuffix(operation, tail) :-
   operationHasOperandListSuffix(operation, [_, tail]).
 
@@ -61,8 +88,8 @@ operandListLength([head, tail], tailLen + 1) :-
 // `operation`.
 .decl operationOperandListLength(operation: Operation, operandListLength: number)
 
-operationOperandListLength([owner, operator, result, operandList, attrs], len) :-
-  isOperation([owner, operator, result, operandList, attrs]),
+operationOperandListLength(operation, len) :-
+  isOperation(operation), operationHasOperandList(operation, operandList),
   operandListLength(operandList, len).
 
 // True when an `operation` has the given `operand` at the indicated `index` in
@@ -82,8 +109,8 @@ operationHasOperandAtIndex(operation, operand, opListLen - suffixListLen) :-
 // A helper relation that produces all partial attribute lists of an
 // `Operation`.
 .decl operationHasAttributeListSuffix(operation: Operation, attributes: AttributeList)
-operationHasAttributeListSuffix([owner, op, result, operandList, attrs], attrs) :-
-  isOperation([owner, op, result, operandList, attrs]).
+operationHasAttributeListSuffix(operation, attrs) :-
+  isOperation(operation), operationHasAttributeList(operation, attrs).
 operationHasAttributeListSuffix(op, tail) :- operationHasAttributeListSuffix(op, [_, tail]).
 
 // A mapping from an `Operation` to each individual `Attribute` on that
