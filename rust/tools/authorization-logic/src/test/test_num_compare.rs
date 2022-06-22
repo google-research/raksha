@@ -16,10 +16,7 @@
 
 #[cfg(test)]
 pub mod test {
-    use crate::{
-        ast::*, compilation_top_level::*, souffle::souffle_interface::*,
-        test::test_queries::test::*,
-    };
+    use crate::test::test_queries::test::*;
 
     #[test]
     fn test_basic_number_comparisons() {

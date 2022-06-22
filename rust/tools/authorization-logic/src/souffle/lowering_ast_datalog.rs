@@ -235,7 +235,7 @@ impl LoweringToDatalogPass {
                 let gen = DLIRAssertion::DLIRCondAssertion {
                     lhs: gen_lhs,
                     rhs: [s_says_x_as_p, s_says_p_v]
-                        .into_iter()
+                        .iter()
                         .map(|pred| pred_to_dlir_rvalue(pred))
                         .collect(),
                 };
@@ -299,7 +299,7 @@ impl LoweringToDatalogPass {
                 );
                 // This is `p says fpf :- x says fpf, p says x canSay fpf`.
                 let rhs = [x_says_term, can_say_term]
-                    .into_iter()
+                    .iter()
                     .map(|pred| pred_to_dlir_rvalue(pred))
                     .collect();
                 let gen = DLIRAssertion::DLIRCondAssertion { lhs, rhs };
@@ -392,7 +392,7 @@ impl LoweringToDatalogPass {
         DLIRAssertion::DLIRCondAssertion {
             lhs: lhs,
             rhs: [main_fact, LoweringToDatalogPass::dummy_fact()]
-                .into_iter()
+                .iter()
                 .map(|pred| pred_to_dlir_rvalue(pred))
                 .collect()
         }

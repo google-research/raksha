@@ -25,7 +25,6 @@ mod souffle;
 mod utils;
 mod test;
 
-use std::env;
 use structopt::StructOpt;
 
 #[derive(StructOpt)]
@@ -63,7 +62,7 @@ fn main() {
     compilation_top_level::compile(&opt.input_filename,
                                    &opt.souffle_output_file,
                                    &opt.decl_skip);
-    if (!opt.skip_souffle) {
+    if !opt.skip_souffle {
         souffle::souffle_interface::run_souffle(
             &opt.souffle_output_file,
             &opt.output_queries_directory,

@@ -71,7 +71,7 @@ pub fn ast_to_souffle_file(prog: &AstProgram, output_file_path: &str,
 pub fn run_souffle(input_file_path: &str, queries_outdir: &str) {
     let souffle_command = match std::env::var("SOUFFLE_BIN") {
         Ok(val) => val,
-        Err(e) => "souffle".to_string()
+        Err(_e) => "souffle".to_string()
     };
     Command::new(souffle_command)
         .arg(&input_file_path)

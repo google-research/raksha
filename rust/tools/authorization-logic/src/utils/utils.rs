@@ -23,7 +23,7 @@ pub fn is_bazel_test() -> bool {
 // Otherwise, returns it unchanged.
 pub fn get_resolved_path(path: &str) -> String {
     if is_bazel_test() {
-        let tmp_dir = std::env::var("TEST_TMPDIR").unwrap();
+        let tmp_dir = std::env::var("TEST_TMPDIR").expect("Couldn't read env var TEST_TMPDIR");
         let path = format!("{}/{}", tmp_dir, path);
         path
     } else {
@@ -36,9 +36,10 @@ pub fn get_resolved_path(path: &str) -> String {
 #[cfg(test)]
 pub fn setup_bazeltest_data_paths(input_paths: Vec<&str>) {
     if !is_bazel_test() { return }
-    let tmp_dir = std::env::var("TEST_TMPDIR").unwrap();
-    let src_dir = std::env::var("TEST_SRCDIR").unwrap();
-    let workspace_dir = std::env::var("TEST_WORKSPACE").unwrap();
+    let tmp_dir = std::env::var("TEST_TMPDIR").expect("Couldn't read env var TEST_TMPDIR");
+    let src_dir = std::env::var("TEST_SRCDIR").expect("Couldn't read env var TEST_SRCDIR");
+    let workspace_dir = std::env::var("TEST_WORKSPACE")
+        .expect("Couldn't read env var TEST_WORKSPACE");
     for input_path in input_paths {
         let resolved_input_path = format!(
             "{}/{}/rust/tools/authorization-logic/{}",
@@ -59,11 +60,11 @@ pub fn setup_bazeltest_data_paths(input_paths: Vec<&str>) {
 #[cfg(test)]
 pub fn create_bazeltest_output_paths(output_paths: Vec<&str>) {
     if !is_bazel_test() { return }
-    let tmp_dir = std::env::var("TEST_TMPDIR").unwrap();
+    let tmp_dir = std::env::var("TEST_TMPDIR").expect("Couldn't read env var TEST_TMPDIR");
     for output_path in output_paths {
         let full_path = format!("{}/{}", tmp_dir, output_path);
         if !std::path::Path::new(&full_path).is_dir() {
-            std::fs::create_dir_all(&full_path);
+            std::fs::create_dir_all(&full_path).expect("Creating directories failed");
         }
     }
 }

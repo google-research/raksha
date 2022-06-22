@@ -19,7 +19,6 @@ pub mod test {
     use crate::souffle::souffle_interface::*;
     use std::process::Command;
     use crate::utils::*;
-    use crate::compilation_top_level::*;
 
     /// This struct gives the name of an authorization logic program in
     /// test_inputs, and a vector that relates the names of queries
