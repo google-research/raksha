@@ -91,10 +91,10 @@ int main(int argc, char* argv[]) {
   const Module& module = ir_parser.ParseProgram(*ir_string);
   Policy policy(*sql_policy_rules);
   if (checker.IsModulePolicyCompliant(module, policy)) {
-    std::cerr << "Policy check succeeded!";
+    LOG(ERROR) << "Policy check succeeded!";
     return 0;
   } else {
-    std::cerr << "Policy check failed!";
+    LOG(ERROR) << "Policy check failed!";
     return 1;
   }
 }
