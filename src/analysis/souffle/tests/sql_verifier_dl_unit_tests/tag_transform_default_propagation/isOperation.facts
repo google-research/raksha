@@ -1,0 +1,7 @@
+["sql", "arbitrary", "path1", nil, nil]
+["sql", "sql.tag_transform", "has_tag", ["path1", nil], [["rule_name", $StringAttributePayload("add_tag_rule")], nil]]
+["sql", "sql.tag_transform", "has_integrity_tag", ["path1", nil], [["rule_name", $StringAttributePayload("add_itag_rule")], nil]]
+["sql", "sql.tag_transform", "default_propagate_conf_tag", ["has_tag", nil], [["rule_name", $StringAttributePayload("dummy")], nil]]
+["sql", "sql.tag_transform", "default_propagate_integ_tag", ["has_integrity_tag", nil], [["rule_name", $StringAttributePayload("dummy")], nil]]
+["sql", "sql.tag_transform", "no_propagate_conf_tag_through_precond", ["arbitrary", ["has_tag", nil]], [["rule_name", $StringAttributePayload("dummy")], [["precond1", $NumberAttributePayload(1)], nil]]]
+["sql", "sql.tag_transform", "no_propagate_integ_tag_through_precond", ["arbitrary", ["has_integrity_tag", nil]], [["rule_name", $StringAttributePayload("dummy")], [["precond1", $NumberAttributePayload(1)], nil]]]

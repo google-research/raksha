@@ -27,6 +27,14 @@
 #define TAG_TRANSFORM_RULE_NAME_ATTR "rule_name"
 #define CONTROL_INPUT_START_INDEX_NAME_ATTR "control_input_start_index"
 
+// Tag transforms are very special in their propagation of tags: their
+// precondition inputs do not propagate confidentiality tags, as they aren't
+// part of the "real" dataflow. They are only used to indicate where a policy
+// rule should check for integrity tags preconditions. In addition, any tag
+// transform should propagate any integrity tags from its transformed input to
+// the output.
+hasSpecialEdgeRules(TAG_TRANSFORM_OPERATOR).
+
 // A precondition produced in the SQL verifier. The `preconditionName`
 // corresponds to the user-provided name in the SQL pattern in the original
 // policy rule.
@@ -92,6 +100,14 @@ isIntegrityTag(tag) :- sqlPolicyRuleNameHasResult(_, $AddIntegrityTag(tag)).
 isTagTransformOperation(
   [DEFAULT_SQL_OWNER, TAG_TRANSFORM_OPERATOR, result, operandList, attributes]) :-
   isOperation([DEFAULT_SQL_OWNER, TAG_TRANSFORM_OPERATOR, result, operandList, attributes]).
+
+// A TagTransform operator propagates confidentiality tags and integrity tags
+// only from its direct input (its 0th input) to its output. It faithfully
+// propagates all integrity tags. This can be expressed by drawing a single
+// edge from the input to the output.
+resolvedEdge(DEFAULT_SQL_OWNER, xformedInput, xformedOutput) :-
+  isTagTransformOperation(operation), operationHasOperandAtIndex(operation, xformedInput, 0),
+  operationHasResult(operation, xformedOutput).
 
 .type TagPrecondition = [ path: AccessPath, itag: IntegrityTag ]
 

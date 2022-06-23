@@ -118,4 +118,8 @@ operationHasAttributeListSuffix(op, tail) :- operationHasAttributeListSuffix(op,
 .decl operationHasAttribute(op: Operation, attr: Attribute)
 operationHasAttribute(op, attr) :- operationHasAttributeListSuffix(op, [attr, _]).
 
+// Indicates that this operator has special internal edges defined and should
+// not be subject to the default rules.
+.decl hasSpecialEdgeRules(operator: Operator)
+
 #endif // SRC_ANALYSIS_SOUFFLE_OPERATIONS_DL_

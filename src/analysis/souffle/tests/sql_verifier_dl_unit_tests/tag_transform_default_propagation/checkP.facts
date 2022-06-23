@@ -1,0 +1,4 @@
+default_propagate_conf_tag;$CP_TagPresence("default_propagate_conf_tag","sql",$CTag("tag"))
+default_propagate_integ_tag;$CP_TagPresence("default_propagate_integ_tag","sql",$ITag("itag"))
+no_propagate_conf_tag_through_precond;$CP_Not($CP_TagPresence("no_propagate_conf_tag_through_precond","sql",$CTag("tag")))
+no_propagate_integ_tag_through_precond;$CP_Not($CP_TagPresence("no_propagate_integ_tag_through_precond","sql",$ITag("itag")))
