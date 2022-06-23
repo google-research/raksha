@@ -39,6 +39,7 @@ class IrProgramParser {
  public:
   // Parses an input string
   const Module& ParseProgram(absl::string_view prog_text);
+  SsaNames& GetSsaNames();
 
  private:
   void ConstructOperation(IrParser::OperationContext& operation_context,
@@ -52,6 +53,7 @@ class IrProgramParser {
   absl::flat_hash_map<std::string, const Block*> block_map_;
   IRContext context_;
   Module module_;
+  SsaNames ssa_names_;
 };
 
 }  // namespace raksha::ir

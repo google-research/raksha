@@ -99,20 +99,19 @@ void IrProgramParser::ConstructOperation(
                       CHECK_NOTNULL(named_value_context)->VALUE_ID()->getText();
                   // Operation Result Value
                   auto find_value_id_operation = value_map_.find(value_id);
-                  CHECK(find_value_id_operation != value_map_.end()) << "Value not found" << value_id; 
+                  CHECK(find_value_id_operation != value_map_.end())
+                      << "Value not found" << value_id;
                   return find_value_id_operation->second;
                 });
-
   // Operation rule: VALUE_ID '=' ID '['(attributeList)?']''('(argumentList)?')'
   // mapping between Result(Ex:%0) and corresponding operation.
-  value_map_.insert(
-      {absl::StrCat(operation_context.VALUE_ID()->getText(), ".out"),
-       Value(value::OperationResult(
-           block_builder.AddOperation(
-               *CHECK_NOTNULL(
-                   context_.GetOperator(operation_context.ID()->getText())),
-               std::move(attributes), std::move(inputs), nullptr),
-           "out"))});
+  const Operation& op = block_builder.AddOperation(
+      *CHECK_NOTNULL(context_.GetOperator(operation_context.ID()->getText())),
+      std::move(attributes), std::move(inputs), nullptr);
+  const Value& v = Value(value::OperationResult(op, "out"));
+  value_map_.insert({absl::StrCat(operation_context.VALUE_ID()->getText()), v});
+  ssa_names_.UpdateID(v, operation_context.VALUE_ID()->getText());
+  ssa_names_.UpdateID(op, operation_context.VALUE_ID()->getText());
 }
 
 void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
@@ -122,16 +121,19 @@ void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
     IrProgramParser::ConstructOperation(*CHECK_NOTNULL(operation_context),
                                         builder);
   }
-  block_map_.insert({block_context.ID()->getText(),
-                     std::addressof(module_.AddBlock(builder.build()))});
+  const Block& b = module_.AddBlock(builder.build());
+  block_map_.insert({block_context.ID()->getText(), std::addressof(b)});
+  ssa_names_.UpdateID(b, block_context.ID()->getText());
 }
 
 void IrProgramParser::ConstructModule(IrParser::ModuleContext& module_context) {
-  Module module;
   for (IrParser::BlockContext* block_context : module_context.block()) {
     IrProgramParser::ConstructBlock(*CHECK_NOTNULL(block_context));
   }
+  ssa_names_.UpdateID(module_, module_context.ID()->getText());
 }
+
+SsaNames& IrProgramParser::GetSsaNames() { return ssa_names_; }
 
 /// This function produces an abstract syntax tree (AST) rooted with a
 /// program node when given the textual representation of a program.
@@ -147,7 +149,8 @@ const Module& IrProgramParser::ParseProgram(absl::string_view prog_text) {
   // program_context points to the root of the parse tree
   IrParser::IrProgramContext& program_context =
       *CHECK_NOTNULL(parser.irProgram());
-  IrProgramParser::ConstructModule(*CHECK_NOTNULL(program_context.module()));
+  ConstructModule(*CHECK_NOTNULL(program_context.module()));
+
   return module_;
 }
 

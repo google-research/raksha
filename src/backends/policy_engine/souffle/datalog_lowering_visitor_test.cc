@@ -86,7 +86,7 @@ static const IrAndDatalogOperationPairs kIrAndDatalogOperations[] = {
          ir::ValueList()),
      .datalog_is_operation = test_factory.CreateDatalogOperation(
          ir::datalog::Symbol("sql"), ir::datalog::Symbol("sql.ReadLiteral"),
-         ir::datalog::Symbol("%0.out"), ir::datalog::OperandList(),
+         ir::datalog::Symbol("%0"), ir::datalog::OperandList(),
          ir::datalog::AttributeList(
              ir::datalog::Attribute("literal",
                                     ir::datalog::Attribute::String("number_5")),
@@ -97,7 +97,7 @@ static const IrAndDatalogOperationPairs kIrAndDatalogOperations[] = {
              {ir::Value(ir::value::Any()), ir::Value(ir::value::Any())})),
      .datalog_is_operation = test_factory.CreateDatalogOperation(
          ir::datalog::Symbol("sql"), ir::datalog::Symbol("sql.MergeOp"),
-         ir::datalog::Symbol("%0.out"),
+         ir::datalog::Symbol("%0"),
          ir::datalog::OperandList(
              ir::datalog::Symbol("<<ANY>>"),
              ir::datalog::OperandList(ir::datalog::Symbol("<<ANY>>"),
@@ -154,7 +154,7 @@ static const ModuleAndExpectedRakshaDatalogFactBuilders
                    ir::datalog::IsOperationFact(ir::datalog::Operation(
                        ir::datalog::Symbol("sql"),
                        ir::datalog::Symbol("sql.MergeOp"),
-                       ir::datalog::Symbol("%0.out"),
+                       ir::datalog::Symbol("%0"),
                        ir::datalog::OperandList(ir::datalog::Symbol("<<ANY>>"),
                                                 ir::datalog::OperandList()),
                        ir::datalog::AttributeList())));
@@ -176,7 +176,7 @@ static const ModuleAndExpectedRakshaDatalogFactBuilders
                    ir::datalog::IsOperationFact(ir::datalog::Operation(
                        ir::datalog::Symbol("sql"),
                        ir::datalog::Symbol("sql.MergeOp"),
-                       ir::datalog::Symbol("%0.out"),
+                       ir::datalog::Symbol("%0"),
                        ir::datalog::OperandList(ir::datalog::Symbol("<<ANY>>"),
                                                 ir::datalog::OperandList()),
                        ir::datalog::AttributeList())));
@@ -184,8 +184,8 @@ static const ModuleAndExpectedRakshaDatalogFactBuilders
                    ir::datalog::IsOperationFact(ir::datalog::Operation(
                        ir::datalog::Symbol("sql"),
                        ir::datalog::Symbol("sql.MergeOp"),
-                       ir::datalog::Symbol("%1.out"),
-                       ir::datalog::OperandList(ir::datalog::Symbol("%0.out"),
+                       ir::datalog::Symbol("%1"),
+                       ir::datalog::OperandList(ir::datalog::Symbol("%0"),
                                                 ir::datalog::OperandList()),
                        ir::datalog::AttributeList())));
                return facts;
@@ -212,7 +212,7 @@ static const ModuleAndExpectedRakshaDatalogFactBuilders
                ir::datalog::IsOperationFact(ir::datalog::Operation(
                    ir::datalog::Symbol("sql"),
                    ir::datalog::Symbol("sql.MergeOp"),
-                   ir::datalog::Symbol("%0.out"),
+                   ir::datalog::Symbol("%0"),
                    ir::datalog::OperandList(ir::datalog::Symbol("<<ANY>>"),
                                             ir::datalog::OperandList()),
                    ir::datalog::AttributeList())));
@@ -220,26 +220,26 @@ static const ModuleAndExpectedRakshaDatalogFactBuilders
                ir::datalog::IsOperationFact(ir::datalog::Operation(
                    ir::datalog::Symbol("sql"),
                    ir::datalog::Symbol("sql.MergeOp"),
-                   ir::datalog::Symbol("%1.out"),
-                   ir::datalog::OperandList(ir::datalog::Symbol("%0.out"),
+                   ir::datalog::Symbol("%1"),
+                   ir::datalog::OperandList(ir::datalog::Symbol("%0"),
                                             ir::datalog::OperandList()),
                    ir::datalog::AttributeList())));
            facts.AddIsOperationFact(
                ir::datalog::IsOperationFact(ir::datalog::Operation(
                    ir::datalog::Symbol("sql"),
                    ir::datalog::Symbol("sql.MergeOp"),
-                   ir::datalog::Symbol("%2.out"),
-                   ir::datalog::OperandList(ir::datalog::Symbol("%0.out"),
+                   ir::datalog::Symbol("%2"),
+                   ir::datalog::OperandList(ir::datalog::Symbol("%0"),
                                             ir::datalog::OperandList()),
                    ir::datalog::AttributeList())));
            facts.AddIsOperationFact(
                ir::datalog::IsOperationFact(ir::datalog::Operation(
                    ir::datalog::Symbol("sql"),
                    ir::datalog::Symbol("sql.MergeOp"),
-                   ir::datalog::Symbol("%3.out"),
+                   ir::datalog::Symbol("%3"),
                    ir::datalog::OperandList(
-                       ir::datalog::Symbol("%1.out"),
-                       ir::datalog::OperandList(ir::datalog::Symbol("%2.out"),
+                       ir::datalog::Symbol("%1"),
+                       ir::datalog::OperandList(ir::datalog::Symbol("%2"),
                                                 ir::datalog::OperandList())),
                    ir::datalog::AttributeList())));
            return facts;
