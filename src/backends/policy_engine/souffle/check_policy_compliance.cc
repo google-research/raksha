@@ -51,6 +51,7 @@ absl::StatusOr<std::string> ReadFileContents(std::filesystem::path file_path) {
         "Unable to read file '", file_path.string(), "': ", strerror(errno)));
   }
 
+  // Read the entire file as ostringstream and convert to std::string.
   std::ostringstream string_stream;
   string_stream << file_stream.rdbuf();
   return string_stream.str();
