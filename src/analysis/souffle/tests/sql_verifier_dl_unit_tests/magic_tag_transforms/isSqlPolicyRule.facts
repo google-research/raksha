@@ -1,0 +1,2 @@
+["add_itag_rule", $AddIntegrityTag("iTag"), nil]
+["add_itag2_rule", $AddIntegrityTag("iTag2"), nil]
