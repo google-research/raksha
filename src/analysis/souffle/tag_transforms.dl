@@ -31,7 +31,7 @@
 // rule should check for integrity tags preconditions. In addition, any tag
 // transform should propagate any integrity tags from its transformed input to
 // the output.
-hasSpecialInternalEdges(TAG_TRANSFORM_OPERATOR).
+hasSpecialEdgeRules(TAG_TRANSFORM_OPERATOR).
 
 // A precondition produced in the SQL verifier. The `preconditionName`
 // corresponds to the user-provided name in the SQL pattern in the original
