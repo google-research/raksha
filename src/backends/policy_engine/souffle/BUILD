@@ -20,6 +20,53 @@ package(
     licenses = ["notice"],
 )
 
+cc_binary(
+    name = "check_policy_compliance",
+    srcs = ["check_policy_compliance.cc"],
+    deps = [
+        ":souffle_policy_checker",
+        "//src/backends/policy_engine:policy",
+        "//src/common/logging",
+        "//src/parser/ir:ir_parser",
+        "@absl//absl/flags:flag",
+        "@absl//absl/flags:parse",
+        "@absl//absl/flags:usage",
+        "@absl//absl/status:statusor",
+    ],
+)
+
+sh_test(
+    name = "check_policy_compliance_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "$(location //src/backends/policy_engine/souffle/testdata:simple_passing_sql.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:simple_passing_sql.ir",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+)
+
+sh_test(
+    name = "check_policy_compliance_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "$(location //src/backends/policy_engine/souffle/testdata:simple_failing_sql.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:simple_failing_sql.ir",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+)
+
 cc_library(
     name = "datalog_lowering_visitor",
     srcs = ["datalog_lowering_visitor.cc"],
