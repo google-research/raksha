@@ -54,9 +54,10 @@ if [ ${CMD_RESULT} -eq 0 ]; then
   ACTUAL_RESULT="${PASS_RESULT}"
 elif [ ${CMD_RESULT} -eq 1 ]; then
   ACTUAL_RESULT="${FAIL_RESULT}"
-else 
+else
   ACTUAL_RESULT="UNKNOWN"
 fi
+
 if [ "${ACTUAL_RESULT}" != "${EXPECTATION_ARG}" ]; then
   echo "Policy compliance check does not match expectations!"
   echo "  Expected: ${EXPECTATION_ARG}, Actual: ${ACTUAL_RESULT}"
