@@ -39,6 +39,7 @@ sh_test(
     name = "check_policy_compliance_pass_test",
     srcs = ["check_policy_compliance_test.sh"],
     args = [
+        "$(location :check_policy_compliance)",
         "pass",
         "$(location //src/backends/policy_engine/souffle/testdata:simple_passing_sql.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
@@ -54,6 +55,7 @@ sh_test(
     name = "check_policy_compliance_fail_test",
     srcs = ["check_policy_compliance_test.sh"],
     args = [
+        "$(location :check_policy_compliance)",
         "fail",
         "$(location //src/backends/policy_engine/souffle/testdata:simple_failing_sql.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",

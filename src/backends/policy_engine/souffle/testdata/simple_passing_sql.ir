@@ -2,7 +2,7 @@ module m0 {
   block b0 {
     %0 = sql.merge [control_input_start_index: 0]()
     %1 = sql.tag_transform [rule_name: set_restricted] (%0.out)
-    %2 = sql.tag_transform [rule_name: set_ssn_integrity] (%1.out) 
+    %2 = sql.tag_transform [rule_name: set_ssn_integrity] (%1.out)
     // Policy check succeeds because we are removing the restricted tag.
     %3 = sql.tag_transform [rule_name: remove_restricted_for_ssn] (%2.out)
     %4 = sql.sql_output [](%3.out)
