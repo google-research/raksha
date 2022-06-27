@@ -23,6 +23,7 @@ package(
 cc_binary(
     name = "check_policy_compliance",
     srcs = ["check_policy_compliance.cc"],
+    copts = ["-fexceptions"],
     deps = [
         ":souffle_policy_checker",
         "//src/backends/policy_engine:policy",
