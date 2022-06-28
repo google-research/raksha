@@ -20,6 +20,7 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/ir_context.h"
+#include "src/ir/ssa_names.h"
 #include "src/ir/types/entity_type.h"
 #include "src/ir/types/type.h"
 #include "src/ir/types/type_factory.h"
@@ -190,10 +191,13 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
   const NamedValueMap& results = block->results();
   SsaNames ssa_names;
   ASSERT_EQ(results.count("entity_output"), 1);
-  EXPECT_EQ(results.at("entity_output").ToString(ssa_names), "%0.entity_value");
+  //%0 is the entity_value OperationResult Value :
+  // Value(value::OperationResult(op, "entity_value"))
+  EXPECT_EQ(results.at("entity_output").ToString(ssa_names), "%0");
   ASSERT_EQ(results.count("primitive_output"), 1);
-  EXPECT_EQ(results.at("primitive_output").ToString(ssa_names),
-            "%0.primitive_value");
+  //%0 is the primitive_value OperationResult Value :
+  // Value(value::OperationResult(op, "primitive_value"))
+  EXPECT_EQ(results.at("primitive_output").ToString(ssa_names), "%1");
 }
 
 // A class to test `AddOperation`  with custom create methods.

@@ -21,6 +21,7 @@
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/ir_printer.h"
 #include "src/ir/module.h"
+#include "src/ir/ssa_names.h"
 #include "src/ir/value.h"
 
 namespace raksha::ir {
@@ -103,7 +104,7 @@ INSTANTIATE_TEST_SUITE_P(
              {{"const", Attribute::Create<Int64Attribute>(10)}},
              {Value(value::BlockArgument(OperationTest::first_block_, "arg0")),
               Value(value::BlockArgument(OperationTest::first_block_, "arg1"))},
-             "%0 = core.minus [const: 10](%0.arg0, %0.arg1)\n"})));
+             "%0 = core.minus [const: 10](%0, %1)\n"})));
 
 }  // namespace
 }  // namespace raksha::ir

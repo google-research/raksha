@@ -83,6 +83,7 @@ cc_library(
         "//src/ir:ir_traversing_visitor",
         "//src/ir:module",
         "//src/ir:operator",
+        "//src/ir:ssa_names",
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",

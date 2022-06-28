@@ -26,6 +26,7 @@
 #include "src/ir/ir_traversing_visitor.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
+#include "src/ir/ssa_names.h"
 
 namespace raksha::backends::policy_engine::souffle {
 

@@ -22,6 +22,7 @@
 #include "absl/strings/str_join.h"
 #include "src/ir/ir_traversing_visitor.h"
 #include "src/ir/module.h"
+#include "src/ir/ssa_names.h"
 #include "src/ir/value.h"
 
 namespace raksha::ir {

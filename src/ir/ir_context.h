@@ -32,6 +32,7 @@ class IRContext {
   // Disable copy (and move) semantics.
   IRContext(const IRContext &) = delete;
   IRContext &operator=(const IRContext &) = delete;
+  IRContext(IRContext &&) = default;
 
   // Create a context with some number of operators and storages pre-seeded.
   IRContext(std::vector<ir::Operator> operators,

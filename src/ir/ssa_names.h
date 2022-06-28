@@ -17,6 +17,7 @@
 #define SRC_IR_SSA_NAMES_H_
 
 #include "absl/container/flat_hash_map.h"
+#include "src/ir/value.h"
 
 namespace raksha::ir {
 
@@ -28,7 +29,12 @@ class Value;
 class SsaNames {
  public:
   using ID = std::string;
-  SsaNames() {}
+  SsaNames()
+      : block_ids_("b"),
+        module_ids_("m"),
+        value_ids_("%"),
+        operation_ids_("%") {}
+
   // Disable copy semantics.
   SsaNames(const SsaNames &) = delete;
   SsaNames &operator=(const SsaNames &) = delete;
@@ -57,34 +63,28 @@ class SsaNames {
   }
 
   ID GetOrCreateID(const Value &value) {
-    return value_ids_.GetOrCreateID(&value);
+    return value_ids_.GetOrCreateID(value);
   }
 
   ID UpdateID(const Value &value, ID id) {
-    return value_ids_.GetOrCreateID(&value, id);
+    return value_ids_.GetOrCreateID(value, id);
   }
 
  private:
-  template <class T>
+  template <typename T>
   class IDManager {
    public:
-    ID GetOrCreateID(const T *entity) {
+    IDManager(absl::string_view prefix) : prefix_(prefix) {}
+
+    ID GetOrCreateID(T entity) {
       // Note that if `entity` is already in the map, the `insert` call below
       // will return the existing entity. Otherwise, a new entity is added.
-
       auto insert_result =
-          (std::is_same<T, Module>::value)
-              ? item_ids_.insert(
-                    {entity, absl::StrCat("m", absl::StrCat(item_ids_.size()))})
-          : (std::is_same<T, Block>::value)
-              ? item_ids_.insert(
-                    {entity, absl::StrCat("b", absl::StrCat(item_ids_.size()))})
-              : item_ids_.insert(
-                    {entity,
-                     absl::StrCat("%", absl::StrCat(item_ids_.size()))});
+          item_ids_.insert({entity, absl::StrCat(prefix_, item_ids_.size())});
       return insert_result.first->second;
     }
-    ID GetOrCreateID(const T *entity, ID id) {
+
+    ID GetOrCreateID(T entity, ID id) {
       // Note that if `entity` is already in the map, the `insert` call below
       // will return the existing entity. Otherwise, a new entity is added.
       auto insert_result = item_ids_.insert({entity, id});
@@ -92,13 +92,14 @@ class SsaNames {
     }
 
    private:
-    absl::flat_hash_map<const T *, ID> item_ids_;
+    std::string prefix_;
+    absl::flat_hash_map<T, ID> item_ids_;
   };
 
-  IDManager<Block> block_ids_;
-  IDManager<Module> module_ids_;
+  IDManager<const Block *> block_ids_;
+  IDManager<const Module *> module_ids_;
   IDManager<Value> value_ids_;
-  IDManager<Operation> operation_ids_;
+  IDManager<const Operation *> operation_ids_;
 };
 
 }  // namespace raksha::ir

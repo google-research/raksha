@@ -50,8 +50,8 @@ void IrProgramParser::ConstructOperation(
     IrParser::OperationContext& operation_context,
     BlockBuilder& block_builder) {
   // Operator
-  if (context_.GetOperator(operation_context.ID()->getText()) == nullptr) {
-    context_.RegisterOperator(
+  if (context_->GetOperator(operation_context.ID()->getText()) == nullptr) {
+    context_->RegisterOperator(
         std::make_unique<Operator>(operation_context.ID()->getText()));
   }
   // Grammar rule for attributes is either
@@ -106,12 +106,12 @@ void IrProgramParser::ConstructOperation(
   // Operation rule: VALUE_ID '=' ID '['(attributeList)?']''('(argumentList)?')'
   // mapping between Result(Ex:%0) and corresponding operation.
   const Operation& op = block_builder.AddOperation(
-      *CHECK_NOTNULL(context_.GetOperator(operation_context.ID()->getText())),
+      *CHECK_NOTNULL(context_->GetOperator(operation_context.ID()->getText())),
       std::move(attributes), std::move(inputs), nullptr);
   const Value& v = Value(value::OperationResult(op, "out"));
   value_map_.insert({absl::StrCat(operation_context.VALUE_ID()->getText()), v});
-  ssa_names_.UpdateID(v, operation_context.VALUE_ID()->getText());
-  ssa_names_.UpdateID(op, operation_context.VALUE_ID()->getText());
+  ssa_names_->UpdateID(v, operation_context.VALUE_ID()->getText());
+  ssa_names_->UpdateID(op, operation_context.VALUE_ID()->getText());
 }
 
 void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
@@ -121,23 +121,24 @@ void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
     IrProgramParser::ConstructOperation(*CHECK_NOTNULL(operation_context),
                                         builder);
   }
-  const Block& b = module_.AddBlock(builder.build());
+  const Block& b = module_->AddBlock(builder.build());
   block_map_.insert({block_context.ID()->getText(), std::addressof(b)});
-  ssa_names_.UpdateID(b, block_context.ID()->getText());
+  ssa_names_->UpdateID(b, block_context.ID()->getText());
 }
 
 void IrProgramParser::ConstructModule(IrParser::ModuleContext& module_context) {
   for (IrParser::BlockContext* block_context : module_context.block()) {
     IrProgramParser::ConstructBlock(*CHECK_NOTNULL(block_context));
   }
-  ssa_names_.UpdateID(module_, module_context.ID()->getText());
+  ssa_names_->UpdateID(*module_, module_context.ID()->getText());
 }
-
-SsaNames& IrProgramParser::GetSsaNames() { return ssa_names_; }
 
 /// This function produces an abstract syntax tree (AST) rooted with a
 /// program node when given the textual representation of a program.
-const Module& IrProgramParser::ParseProgram(absl::string_view prog_text) {
+IrProgramParser::IrProgramParser(absl::string_view prog_text)
+    : context_(std::make_unique<IRContext>()),
+      ssa_names_(std::make_unique<SsaNames>()),
+      module_(std::make_unique<Module>()) {
   // Provide the input text in a stream
   antlr4::ANTLRInputStream input(prog_text);
   // Creates a lexer from input
@@ -150,8 +151,6 @@ const Module& IrProgramParser::ParseProgram(absl::string_view prog_text) {
   IrParser::IrProgramContext& program_context =
       *CHECK_NOTNULL(parser.irProgram());
   ConstructModule(*CHECK_NOTNULL(program_context.module()));
-
-  return module_;
 }
 
 }  // namespace raksha::ir

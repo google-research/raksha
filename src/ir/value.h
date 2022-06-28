@@ -19,9 +19,11 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/hash/hash.h"
 #include "absl/strings/str_format.h"
+#include "src/common/logging/logging.h"
+#include "src/common/utils/overloaded.h"
 #include "src/common/utils/ranges.h"
-#include "src/ir/ssa_names.h"
 #include "src/ir/storage.h"
 #include "src/ir/types/type.h"
 
@@ -31,6 +33,7 @@ class Block;
 class Operation;
 class Operator;
 class Value;
+class SsaNames;
 
 namespace value {
 
@@ -47,11 +50,13 @@ class NamedValue {
   NamedValue(NamedValue&&) = default;
   NamedValue& operator=(NamedValue&&) = default;
 
+  template <typename H>
+  friend H AbslHashValue(H h, const NamedValue<T>& v) {
+    return H::combine(std::move(h), v.element_, v.name_);
+  }
+
   const T& element() const { return *element_; }
   absl::string_view name() const { return name_; }
-  std::string ToString(SsaNames& ssa_names) const {
-    return absl::StrFormat("%s", ssa_names.GetOrCreateID(*element_));
-  }
 
  protected:
   bool operator==(const NamedValue<T>& other) const {
@@ -87,6 +92,11 @@ class StoredValue {
   StoredValue(const StoredValue&) = default;
   StoredValue& operator=(const StoredValue&) = default;
 
+  template <typename H>
+  friend H AbslHashValue(H h, const StoredValue& v) {
+    return H::combine(std::move(h), v.storage_);
+  }
+
   const Storage& storage() const { return *storage_; }
 
   std::string ToString(const SsaNames& ssa_names) const {
@@ -106,6 +116,11 @@ class Any {
  public:
   std::string ToString(const SsaNames& ssa_names) const { return "<<ANY>>"; }
 
+  template <typename H>
+  friend H AbslHashValue(H h, const Any& v) {
+    return H::combine(std::move(h), true);
+  }
+
   // Two `Any`s are always the same, as `Any` has no internal structure to
   // differ.
   bool operator==(const Any& other) const { return true; }
@@ -121,13 +136,13 @@ class Value {
 
   explicit Value(Variants value) : value_(std::move(value)) {}
 
-  std::string ToString(SsaNames& ssa_names) const {
-    return std::visit(
-        [&ssa_names](const auto& variant) {
-          return variant.ToString(ssa_names);
-        },
-        value_);
+  // friend bool operator ==(const Value& lhs, const Value &rhs);
+  template <typename H>
+  friend H AbslHashValue(H h, const Value& v) {
+    return H::combine(std::move(h), v.value_);
   }
+
+  std::string ToString(SsaNames& ssa_names) const;
 
   // A downcast operation. Just delegates directly to std::get on variants.
   template <class T>

@@ -25,16 +25,15 @@ class IrParserTest : public testing::TestWithParam<absl::string_view> {};
 
 TEST_P(IrParserTest, SimpleTestOperation) {
   auto input_program_text = GetParam();
-  IrProgramParser ir_parser;
-  auto& module = ir_parser.ParseProgram(input_program_text);
-  auto& ssa_names = ir_parser.GetSsaNames();
-  EXPECT_EQ(IRPrinter::ToString(std::move(module), std::move(ssa_names)),
+  auto [context, module, ssa_names] =
+      IrProgramParser::ParseProgram(input_program_text);
+  EXPECT_EQ(IRPrinter::ToString(*module, std::move(*ssa_names)),
             input_program_text);
 }
 
 INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
                          ::testing::Values(
-                             R"(module m0 {
+R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -42,7 +41,7 @@ INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
   }  // block b1
 }  // module m0
 )",
-                             R"(module m0 {
+R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -51,7 +50,7 @@ INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
   }  // block b1
 }  // module m0
 )",
-                             R"(module m0 {
+R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -60,7 +59,7 @@ INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
   }  // block b1
 }  // module m0
 )",
-                             R"(module m0 {
+R"(module m0 {
   block b0 {
     %0 = core.select []()
     %1 = core.merge [](<<ANY>>, <<ANY>>)
@@ -84,7 +83,6 @@ R"(module m0 {
 )"));
 
 TEST(IrParseTest, ValueNotFoundCausesFailure) {
-  IrProgramParser ir_parser;
   auto input_program_text = R"(module m0 {
   block b0 {
     %0 = core.plus []()
@@ -95,7 +93,8 @@ TEST(IrParseTest, ValueNotFoundCausesFailure) {
 }  // module m0
 )";
 
-  EXPECT_DEATH(ir_parser.ParseProgram(input_program_text), "Value not found");
+  EXPECT_DEATH(IrProgramParser::ParseProgram(input_program_text),
+               "Value not found");
 }
 
 TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {

@@ -39,6 +39,7 @@ cc_test(
     deps = [
         ":block_builder",
         ":ir_context",
+        ":ssa_names",
         "//src/common/testing:gtest",
         "//src/ir/attributes:attribute",
         "//src/ir/types",
@@ -155,6 +156,7 @@ cc_test(
     deps = [
         ":ir_printer",
         ":module",
+        ":ssa_names",
         ":value",
         "//src/common/testing:gtest",
         "//src/ir/attributes:int_attribute",
@@ -232,13 +234,16 @@ cc_test(
 
 cc_library(
     name = "value",
+    srcs = ["value.cc"],
     hdrs = ["value.h"],
     deps = [
         ":ssa_names",
         ":storage",
+        "//src/common/utils:overloaded",
         "//src/common/utils:ranges",
         "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
+        "@absl//absl/status:statusor",
         "@absl//absl/strings:str_format",
     ],
 )
@@ -248,6 +253,7 @@ cc_test(
     srcs = ["value_test.cc"],
     deps = [
         ":module",
+        ":ssa_names",
         ":value",
         "//src/common/testing:gtest",
         "//src/ir/types",

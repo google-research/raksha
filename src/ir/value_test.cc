@@ -17,6 +17,7 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/module.h"
+#include "src/ir/ssa_names.h"
 #include "src/ir/types/type_factory.h"
 
 namespace raksha::ir {
@@ -119,13 +120,13 @@ INSTANTIATE_TEST_SUITE_P(
     ValueToStringTest, ValueToStringTest,
     testing::Values(
         std::make_pair(Value(test_data.first_block_first_arg), "%0"),
-        std::make_pair(Value(test_data.first_block_second_arg), "%0"),
-        std::make_pair(Value(test_data.second_block_first_arg), "%1"),
-        std::make_pair(Value(test_data.second_block_second_arg), "%1"),
-        std::make_pair(Value(test_data.plus_operation_result1), "%0"),
-        std::make_pair(Value(test_data.plus_operation_result2), "%0"),
-        std::make_pair(Value(test_data.minus_operation_result1), "%1"),
-        std::make_pair(Value(test_data.minus_operation_result2), "%1"),
+        std::make_pair(Value(test_data.first_block_second_arg), "%1"),
+        std::make_pair(Value(test_data.second_block_first_arg), "%2"),
+        std::make_pair(Value(test_data.second_block_second_arg), "%3"),
+        std::make_pair(Value(test_data.plus_operation_result1), "%4"),
+        std::make_pair(Value(test_data.plus_operation_result2), "%5"),
+        std::make_pair(Value(test_data.minus_operation_result1), "%6"),
+        std::make_pair(Value(test_data.minus_operation_result2), "%7"),
         std::make_pair(Value(test_data.input_stored_value), "store:input:type"),
         std::make_pair(Value(test_data.output_stored_value),
                        "store:output:type"),
