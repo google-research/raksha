@@ -38,8 +38,9 @@ pub fn parse_program(prog_text: &str) -> AstProgram {
     construct_program(&parse_result)
 }
 
+
 fn construct_principal(ctx: &PrincipalContext) -> AstPrincipal {
-    let name_ = ctx.ID().unwrap().get_text();
+    let name_ = ctx.id().unwrap().get_text();
     AstPrincipal { name: name_ }
 }
 
@@ -48,7 +49,7 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
         Some(_) => Sign::Negated,
         None => Sign::Positive 
     };
-    let name_ = ctx.ID().unwrap().get_text();
+    let name_ = ctx.id().unwrap().get_text();
     let args_ = (&ctx).pred_arg_all()
         .iter()
         .map(|arg_ctx| arg_ctx.get_text())
@@ -183,7 +184,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
         SaysAssertionContextAll::SaysSingleContext(ctx_prime) => {
             let prin = construct_principal(&ctx_prime.principal().unwrap());
             let assertions = vec![construct_assertion(&ctx_prime.assertion().unwrap())];
-            let export_file = ctx_prime.ID().map(|p| p.get_text().replace("\"", ""));
+            let export_file = ctx_prime.id().map(|p| p.get_text().replace("\"", ""));
             AstSaysAssertion {
                 prin,
                 assertions,
@@ -197,7 +198,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
                 .iter()
                 .map(|x| construct_assertion(x))
                 .collect();
-            let export_file = ctx_prime.ID().map(|p| p.get_text().replace("\"", ""));
+            let export_file = ctx_prime.id().map(|p| p.get_text().replace("\"", ""));
             AstSaysAssertion {
                 prin,
                 assertions,
@@ -209,7 +210,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
 }
 
 fn construct_query(ctx: &QueryContext) -> AstQuery {
-    let name = ctx.ID().unwrap().get_text();
+    let name = ctx.id().unwrap().get_text();
     let principal = construct_principal(&ctx.principal().unwrap());
     let fact = construct_fact(&ctx.fact().unwrap());
     AstQuery {
@@ -222,12 +223,12 @@ fn construct_query(ctx: &QueryContext) -> AstQuery {
 fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
     match ctx {
         KeyBindContextAll::BindprivContext(ctx_prime) => AstKeybind {
-            filename: ctx_prime.ID().unwrap().get_text().replace("\"", ""),
+            filename: ctx_prime.id().unwrap().get_text().replace("\"", ""),
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: false,
         },
         KeyBindContextAll::BindpubContext(ctx_prime) => AstKeybind {
-            filename: ctx_prime.ID().unwrap().get_text().replace("\"", ""),
+            filename: ctx_prime.id().unwrap().get_text().replace("\"", ""),
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: true,
         },
@@ -238,7 +239,7 @@ fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
 fn construct_import(ctx: &ImportAssertionContext) -> AstImport {
     AstImport {
         principal: construct_principal(&ctx.principal().unwrap()),
-        filename: ctx.ID().unwrap().get_text().replace("\"", ""),
+        filename: ctx.id().unwrap().get_text().replace("\"", ""),
     }
 }
 
@@ -249,7 +250,7 @@ fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
         AuthLogicTypeContextAll::PrincipalTypeContext(_ctx_prime) =>
             AstType::PrincipalType,
         AuthLogicTypeContextAll::CustomTypeContext(ctx_prime) => {
-            AstType::CustomType { type_name: ctx_prime.ID().unwrap().get_text() }
+            AstType::CustomType { type_name: ctx_prime.id().unwrap().get_text() }
         }
         _ => { panic!("construct_type tried to build error"); }
     }
@@ -257,14 +258,14 @@ fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
 
 fn construct_relation_declaration(ctx: &RelationDeclarationContext) -> 
         AstRelationDeclaration {
-    let predicate_name_ = ctx.ID(0).unwrap().get_text();
+    let predicate_name_ = ctx.id(0).unwrap().get_text();
     // Note that ID_all() in the generated antlr-rust code is buggy,
     // (because all {LEX_RULE}_all() generations are buggy)
     // so rather than using a more idomatic iterator, "while Some(...)" is
     // used to populate this vector.
     let mut arg_names = Vec::new();
     let mut idx = 1;
-    while let Some(param_name) = ctx.ID(idx) {
+    while let Some(param_name) = ctx.id(idx) {
         arg_names.push(param_name.get_text());
         idx += 1;
     }
