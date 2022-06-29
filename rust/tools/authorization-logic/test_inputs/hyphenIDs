@@ -8,4 +8,5 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErnyr7XY6gxXPnqRGYEpv5lDsbBeX
 izVFLckaF/cbgBuzx7kfmf1qi2j+3DDOQYgISQOj9/LYt4c1cxbt+XtG4g==
 -----END PUBLIC KEY-----""").
     ourFavoriteTrustedBuilderIs("https://github.com/project-oak/transparent-release").
+    ourFavoriteTrustedBuilderIs("https://github.com/Attestations/GitHubHostedActions@v1").
 }
