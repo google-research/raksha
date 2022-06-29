@@ -27,6 +27,7 @@ grammar AuthLogic;
 //-----------------------------------------------------------------------------
 id 
     : CONSTANT
+    | MULTILINE_CONSTANT 
     | VARIABLE
     ; 
 
@@ -145,7 +146,8 @@ ATTRIBUTE: 'attribute';
 // Identifiers wrapped in quotes are constants whereas
 // identifiers without quotes are variables.
 VARIABLE : [_a-zA-Z][_a-zA-Z0-9/.#:]*; 
-CONSTANT : '"' [\n _a-zA-Z+-][\n _a-zA-Z0-9/.#:+=-]* '"';
+CONSTANT : '"' [_a-zA-Z+-][_a-zA-Z0-9/.#:+=-]* '"';
+MULTILINE_CONSTANT : '"""' [\n _a-zA-Z+-][\n _a-zA-Z0-9/.#:+=-]* '"""';
 NUMLITERAL : [0-9]+;
 
 NEG: '!';

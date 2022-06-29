@@ -41,9 +41,15 @@ pub fn parse_program(prog_text: &str) -> AstProgram {
 // The authorizaiton logic frontend supports newlines
 // in the names of constants, but souffle does not. As
 // an easy way to support this, we delete newlines from
-// constant names.
+// constant names. Since multiline literals/constants
+// are represented with triple quotes, we replace
+// triple quotes with single here.
 fn sanitize_id(name: String) -> String {
-    name.replace("\n", "")
+    name.replace("\n", "").replace("\"\"\"", "\"")
+}
+
+fn sanitize_filepath(name: String) -> String {
+    name.replace("\"", "")
 }
 
 fn construct_principal(ctx: &PrincipalContext) -> AstPrincipal {
@@ -191,7 +197,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
         SaysAssertionContextAll::SaysSingleContext(ctx_prime) => {
             let prin = construct_principal(&ctx_prime.principal().unwrap());
             let assertions = vec![construct_assertion(&ctx_prime.assertion().unwrap())];
-            let export_file = ctx_prime.id().map(|p| p.get_text().replace("\"", ""));
+            let export_file = ctx_prime.id().map(|p| sanitize_filepath(p.get_text()));
             AstSaysAssertion {
                 prin,
                 assertions,
@@ -205,7 +211,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
                 .iter()
                 .map(|x| construct_assertion(x))
                 .collect();
-            let export_file = ctx_prime.id().map(|p| p.get_text().replace("\"", ""));
+            let export_file = ctx_prime.id().map(|p| sanitize_filepath(p.get_text()));
             AstSaysAssertion {
                 prin,
                 assertions,
@@ -230,12 +236,12 @@ fn construct_query(ctx: &QueryContext) -> AstQuery {
 fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
     match ctx {
         KeyBindContextAll::BindprivContext(ctx_prime) => AstKeybind {
-            filename: ctx_prime.id().unwrap().get_text().replace("\"", ""),
+            filename: sanitize_filepath(ctx_prime.id().unwrap().get_text()),
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: false,
         },
         KeyBindContextAll::BindpubContext(ctx_prime) => AstKeybind {
-            filename: ctx_prime.id().unwrap().get_text().replace("\"", ""),
+            filename: sanitize_filepath(ctx_prime.id().unwrap().get_text()),
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: true,
         },
@@ -246,7 +252,7 @@ fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
 fn construct_import(ctx: &ImportAssertionContext) -> AstImport {
     AstImport {
         principal: construct_principal(&ctx.principal().unwrap()),
-        filename: sanitize_id(ctx.id().unwrap().get_text().replace("\"", "")),
+        filename: sanitize_filepath(ctx.id().unwrap().get_text()),
     }
 }
 
