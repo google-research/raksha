@@ -65,7 +65,7 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
     let name_ = sanitize_id(ctx.id().unwrap().get_text());
     let args_ = (&ctx).pred_arg_all()
         .iter()
-        .map(|arg_ctx| arg_ctx.get_text())
+        .map(|arg_ctx| sanitize_id(arg_ctx.get_text()))
         .collect();
     AstPredicate {
         sign: sign_,
@@ -160,9 +160,9 @@ fn construct_rvalue(ctx: &RvalueContextAll) -> AstRValue {
         RvalueContextAll::BinopRvalueContext(bctx) => {
             AstRValue::ArithCompareRValue {
                 arith_comp: AstArithmeticComparison {
-                    lnum: bctx.pred_arg(0).unwrap().get_text(),
+                    lnum: sanitize_id(bctx.pred_arg(0).unwrap().get_text()),
                     op: construct_binop(&bctx.binop().unwrap()),
-                    rnum: bctx.pred_arg(1).unwrap().get_text()
+                    rnum: sanitize_id(bctx.pred_arg(1).unwrap().get_text())
                 }
             }
         }
