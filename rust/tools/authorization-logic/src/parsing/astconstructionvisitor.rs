@@ -59,7 +59,7 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
     let name_ = sanitize_id(ctx.id().unwrap().get_text());
     let args_ = (&ctx).pred_arg_all()
         .iter()
-        .map(|arg_ctx| arg_ctx.get_text())
+        .map(|arg_ctx| sanitize_id(arg_ctx.get_text()))
         .collect();
     AstPredicate {
         sign: sign_,
@@ -154,9 +154,9 @@ fn construct_rvalue(ctx: &RvalueContextAll) -> AstRValue {
         RvalueContextAll::BinopRvalueContext(bctx) => {
             AstRValue::ArithCompareRValue {
                 arith_comp: AstArithmeticComparison {
-                    lnum: bctx.pred_arg(0).unwrap().get_text(),
+                    lnum: sanitize_id(bctx.pred_arg(0).unwrap().get_text()),
                     op: construct_binop(&bctx.binop().unwrap()),
-                    rnum: bctx.pred_arg(1).unwrap().get_text()
+                    rnum: sanitize_id(bctx.pred_arg(1).unwrap().get_text())
                 }
             }
         }
@@ -230,12 +230,12 @@ fn construct_query(ctx: &QueryContext) -> AstQuery {
 fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
     match ctx {
         KeyBindContextAll::BindprivContext(ctx_prime) => AstKeybind {
-            filename: ctx_prime.id().unwrap().get_text().replace("\"", ""),
+            filename: sanitize_id(ctx_prime.id().unwrap().get_text().replace("\"", "")),
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: false,
         },
         KeyBindContextAll::BindpubContext(ctx_prime) => AstKeybind {
-            filename: ctx_prime.id().unwrap().get_text().replace("\"", ""),
+            filename: sanitize_id(ctx_prime.id().unwrap().get_text().replace("\"", "")),
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: true,
         },
