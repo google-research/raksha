@@ -38,9 +38,16 @@ pub fn parse_program(prog_text: &str) -> AstProgram {
     construct_program(&parse_result)
 }
 
+// The authorizaiton logic frontend supports newlines
+// in the names of constants, but souffle does not. As
+// an easy way to support this, we delete newlines from
+// constant names.
+fn sanitize_id(name: String) -> String {
+    name.replace("\n", "")
+}
 
 fn construct_principal(ctx: &PrincipalContext) -> AstPrincipal {
-    let name_ = ctx.id().unwrap().get_text();
+    let name_ = sanitize_id(ctx.id().unwrap().get_text());
     AstPrincipal { name: name_ }
 }
 
@@ -49,7 +56,7 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
         Some(_) => Sign::Negated,
         None => Sign::Positive 
     };
-    let name_ = ctx.id().unwrap().get_text();
+    let name_ = sanitize_id(ctx.id().unwrap().get_text());
     let args_ = (&ctx).pred_arg_all()
         .iter()
         .map(|arg_ctx| arg_ctx.get_text())
@@ -210,7 +217,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
 }
 
 fn construct_query(ctx: &QueryContext) -> AstQuery {
-    let name = ctx.id().unwrap().get_text();
+    let name = sanitize_id(ctx.id().unwrap().get_text());
     let principal = construct_principal(&ctx.principal().unwrap());
     let fact = construct_fact(&ctx.fact().unwrap());
     AstQuery {
@@ -239,7 +246,7 @@ fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
 fn construct_import(ctx: &ImportAssertionContext) -> AstImport {
     AstImport {
         principal: construct_principal(&ctx.principal().unwrap()),
-        filename: ctx.id().unwrap().get_text().replace("\"", ""),
+        filename: sanitize_id(ctx.id().unwrap().get_text().replace("\"", "")),
     }
 }
 
@@ -258,7 +265,7 @@ fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
 
 fn construct_relation_declaration(ctx: &RelationDeclarationContext) -> 
         AstRelationDeclaration {
-    let predicate_name_ = ctx.id(0).unwrap().get_text();
+    let predicate_name_ = sanitize_id(ctx.id(0).unwrap().get_text());
     // Note that ID_all() in the generated antlr-rust code is buggy,
     // (because all {LEX_RULE}_all() generations are buggy)
     // so rather than using a more idomatic iterator, "while Some(...)" is
@@ -266,7 +273,7 @@ fn construct_relation_declaration(ctx: &RelationDeclarationContext) ->
     let mut arg_names = Vec::new();
     let mut idx = 1;
     while let Some(param_name) = ctx.id(idx) {
-        arg_names.push(param_name.get_text());
+        arg_names.push(sanitize_id(param_name.get_text()));
         idx += 1;
     }
     let types : Vec<AstType> = ctx.authLogicType_all()
