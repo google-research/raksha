@@ -57,8 +57,8 @@ ANY: '<<ANY>>';
 BLOCK: 'block';
 MODULE: 'module';
 
-ID : [_a-zA-Z0-9/.]*;
 NUMLITERAL : [0-9]+;
+ID : [_a-zA-Z0-9/.]*;
 VALUE_ID : ('%')? ID;
 
 
