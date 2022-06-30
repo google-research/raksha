@@ -75,8 +75,8 @@ R"(module m0 {
     %1 = core.merge [](<<ANY>>, <<ANY>>)
   }  // block b0
   block b1 {
-    %2 = core.plus [access: private, transform: no](%0.out, <<ANY>>)
-    %3 = core.mult [lhs: 10, rhs: 59](%0.out, %2.out)
+    %2 = core.plus [access: "private", transform: "no"](%0.out, <<ANY>>)
+    %3 = core.mult [lhs: 10, rhs: "_59"](%0.out, %2.out)
   }  // block b1
 }  // module m0
 )"));

@@ -58,7 +58,7 @@ BLOCK: 'block';
 MODULE: 'module';
 
 NUMLITERAL : [0-9]+;
-ID : [_a-zA-Z0-9/.]*;
+ID : [0-9_a-zA-Z/.]+;
 VALUE_ID : ('%')? ID;
 
 
