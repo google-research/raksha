@@ -141,7 +141,7 @@ TEST_F(DotGeneratorTest, CreatesAttributesInNodesForOperation) {
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
           "B0 [shape=Mrecord]",
-          R"(B0_0 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.plus [string: something, ttl: 10] </TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
+          R"(B0_0 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.plus [string: "something", ttl: 10] </TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
 TEST_F(DotGeneratorTest, CreatesInputPortsInNodesForOperation) {
