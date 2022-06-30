@@ -40,7 +40,7 @@ class StringAttribute : public AttributeBase {
     return *this == static_cast<const StringAttribute&>(other);
   }
 
-  std::string ToString() const override { return value_; }
+  std::string ToString() const override { return absl::StrCat("\"", value_, "\""); }
 
  private:
   StringAttribute(absl::string_view value)

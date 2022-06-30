@@ -23,7 +23,7 @@ grammar Ir;
 
 attribute
     : ID ':' NUMLITERAL #numAttribute
-    | ID ':' ('"')?ID('"')? #stringAttribute
+    | ID ':' '"'ID'"' #stringAttribute
     ;
 attributeList
     : attribute (',' attribute)*
