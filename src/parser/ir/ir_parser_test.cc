@@ -68,6 +68,17 @@ R"(module m0 {
     %3 = core.mult [access: private, transform: no](%0.out, %2.out)
   }  // block b1
 }  // module m0
+)",
+R"(module m0 {
+  block b0 {
+    %0 = core.select []()
+    %1 = core.merge [](<<ANY>>, <<ANY>>)
+  }  // block b0
+  block b1 {
+    %2 = core.plus [access: private, transform: no](%0.out, <<ANY>>)
+    %3 = core.mult [lhs: 10, rhs: 59](%0.out, %2.out)
+  }  // block b1
+}  // module m0
 )"));
 
 TEST(IrParseTest, ValueNotFoundCausesFailure) {
