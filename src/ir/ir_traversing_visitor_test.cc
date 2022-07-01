@@ -26,7 +26,7 @@ namespace {
 
 // Just a small test visitor that collects the nodes as they are visited to make
 // sure that  Pre and Post visits happened correctly.
-class CollectingVisitor : public IRTraversingVisitor<CollectingVisitor, std::monostate> {
+class CollectingVisitor : public IRTraversingVisitor<CollectingVisitor> {
  public:
   enum class TraversalType { PRE = 0x1, POST = 0x2, BOTH = 0x3 };
   CollectingVisitor(TraversalType traversal_type)
@@ -35,29 +35,26 @@ class CollectingVisitor : public IRTraversingVisitor<CollectingVisitor, std::mon
         post_visits_(traversal_type == TraversalType::POST ||
                      traversal_type == TraversalType::BOTH) {}
 
-  std::monostate PreVisit(const Module& module) override {
+  void PreVisit(const Module& module) override {
     if (pre_visits_) nodes_.push_back(std::addressof(module));
-    return {};
   }
-  void PostVisit(const Module& module, std::monostate&) override {
+  void PostVisit(const Module& module) override {
     if (post_visits_) nodes_.push_back(std::addressof(module));
   }
 
-  std::monostate PreVisit(const Block& block) override {
+  void PreVisit(const Block& block) override {
     if (pre_visits_) nodes_.push_back(std::addressof(block));
-    return {};
   }
 
-  void PostVisit(const Block& block, std::monostate&) override {
+  void PostVisit(const Block& block) override {
     if (post_visits_) nodes_.push_back(std::addressof(block));
   }
 
-  std::monostate PreVisit(const Operation& operation) override {
+  void PreVisit(const Operation& operation) override {
     if (pre_visits_) nodes_.push_back(std::addressof(operation));
-    return {};
   }
 
-  void PostVisit(const Operation& operation, std::monostate&) override {
+  void PostVisit(const Operation& operation) override {
     if (post_visits_) nodes_.push_back(std::addressof(operation));
   }
 
@@ -171,7 +168,7 @@ class ReturningVisitor : public IRTraversingVisitor<ReturningVisitor, ResultType
         post_visits_(traversal_type == TraversalType::POST ||
                      traversal_type == TraversalType::BOTH) {}
 
-  ResultType PreVisit(const Module& module) override {
+  ResultType ReturningPreVisit(const Module& module) override {
     ResultType result;
     if (pre_visits_) result.push_back((void*)std::addressof(module));
     return result;
@@ -183,7 +180,7 @@ class ReturningVisitor : public IRTraversingVisitor<ReturningVisitor, ResultType
     if (post_visits_) result.push_back((void*)std::addressof(module));
   }
 
-  ResultType PreVisit(const Block& block) override {
+  ResultType ReturningPreVisit(const Block& block) override {
     ResultType result;
     if (pre_visits_) result.push_back((void*)std::addressof(block));
     return result;
@@ -196,7 +193,7 @@ class ReturningVisitor : public IRTraversingVisitor<ReturningVisitor, ResultType
     if (post_visits_) result.push_back((void*)std::addressof(block));
   }
 
-  ResultType PreVisit(const Operation& operation) override {
+  ResultType ReturningPreVisit(const Operation& operation) override {
     ResultType result;
     if (pre_visits_) result.push_back((void*)std::addressof(operation));
     return result;

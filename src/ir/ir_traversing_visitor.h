@@ -31,23 +31,38 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   virtual ~IRTraversingVisitor() {}
 
   // Invoked before all the children of `module` is visited.
-  virtual Result PreVisit(const Module& module) { return Result(); }
+  virtual void PreVisit(const Module& module) {}
+  virtual Result ReturningPreVisit(const Module& module) {
+    PreVisit(module);
+    return Result();
+  }
   // Invoked after all the children of `module` is visited.
-  virtual void PostVisit(const Module& module, Result& result) {}
+  virtual void PostVisit(const Module& module) {}
+  virtual void PostVisit(const Module& module, Result& result) { PostVisit(module); }
   virtual void FoldResult(const Module& module, Result child_result, Result& result) {}
   // Invoked before all the children of `block` is visited.
-  virtual Result PreVisit(const Block& block) { return Result(); }
+  virtual void PreVisit(const Block& block) {}
+  virtual Result ReturningPreVisit(const Block& block) {
+    PreVisit(block);
+    return Result();
+  }
   // Invoked after all the children of `block` is visited.
-  virtual void PostVisit(const Block& block, Result& result) {}
+  virtual void PostVisit(const Block& block) {}
+  virtual void PostVisit(const Block& block, Result& result) { PostVisit(block); }
   virtual void FoldResult(const Block& block, Result child_result, Result& result) {}
   // Invoked before all the children of `operation` is visited.
-  virtual Result PreVisit(const Operation& operation) { return Result(); }
+  virtual void PreVisit(const Operation& operation) {}
+  virtual Result ReturningPreVisit(const Operation& operation) {
+    PreVisit(operation);
+    return Result();
+  }
   // Invoked after all the children of `operation` is visited.
-  virtual void PostVisit(const Operation& operation, Result& result) {}
+  virtual void PostVisit(const Operation& operation) {}
+  virtual void PostVisit(const Operation& operation, Result& result) { PostVisit(operation); }
   virtual void FoldResult(const Operation& operation, Result child_result, Result& result) {}
 
   Result Visit(const Module& module) final override {
-    Result result = PreVisit(module);
+    Result result = ReturningPreVisit(module);
     for (const std::unique_ptr<Block>& block : module.blocks()) {
       FoldResult(*block, block->Accept<Derived, Result>(*this), result);
     }
@@ -56,7 +71,7 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   }
 
   Result Visit(const Block& block) final override {
-    Result result = PreVisit(block);
+    Result result = ReturningPreVisit(block);
     for (const std::unique_ptr<Operation>& operation : block.operations()) {
       FoldResult(*operation, operation->Accept<Derived, Result>(*this), result);
     }
@@ -65,7 +80,7 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   }
 
   Result Visit(const Operation& operation) final override {
-    Result result = PreVisit(operation);
+    Result result = ReturningPreVisit(operation);
     const Module* module = operation.impl_module();
     if (module != nullptr) {
       FoldResult(operation, module->Accept<Derived, Result>(*this), result);

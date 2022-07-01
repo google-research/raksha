@@ -16,7 +16,6 @@
 #ifndef SRC_IR_IR_PRINTER_H_
 #define SRC_IR_IR_PRINTER_H_
 
-#include <variant>
 #include <memory>
 
 #include "absl/strings/str_format.h"
@@ -62,7 +61,7 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
          << absl::StreamFormat("module %s {\n",
                                ssa_names_->GetOrCreateID(module));
     IncreaseIndent();
-    return {};
+    return Unit();
   }
 
   Unit PostVisit(const Module& module, Unit result) override {
@@ -73,11 +72,10 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     return result;
   }
 
-  std::monostate PreVisit(const Block& block) override {
+  void PreVisit(const Block& block) override {
     out_ << Indent()
          << absl::StreamFormat("block %s {\n", ssa_names_->GetOrCreateID(block));
     IncreaseIndent();
-    return {};
   }
 
   Unit PostVisit(const Block& block, Unit result) override {
@@ -114,7 +112,6 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     } else {
       out_ << "\n";
     }
-    return {};
   }
 
   Unit PostVisit(const Operation& operation, Unit result) override {
