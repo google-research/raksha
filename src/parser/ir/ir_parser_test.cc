@@ -98,17 +98,16 @@ TEST(IrParseTest, ValueNotFoundCausesFailure) {
 }
 
 TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {
-  IrProgramParser ir_parser;
   auto input_program_text = R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
   block b1 {
-    %1 = core.plus [access: private, transform: "no"](%2, <<ANY>>)
+    %1 = core.plus [access: "private", transform: "no"](%2, <<ANY>>)
   }  // block b1
 }  // module m0
 )";
-  EXPECT_DEATH(IRPrinter::ToString(ir_parser.ParseProgram(input_program_text)),
+  EXPECT_DEATH(IrProgramParser::ParseProgram(input_program_text),
               "no viable alternative at input");
 }
 }  // namespace raksha::ir

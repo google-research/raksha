@@ -45,21 +45,21 @@ class SsaNames {
   }
 
   ID UpdateID(const Operation &operation, ID id) {
-    return operation_ids_.GetOrCreateID(&operation, id);
+    return operation_ids_.UpdateID(&operation, id);
   }
   ID GetOrCreateID(const Block &block) {
     return block_ids_.GetOrCreateID(&block);
   }
 
   ID UpdateID(const Block &block, ID id) {
-    return block_ids_.GetOrCreateID(&block, id);
+    return block_ids_.UpdateID(&block, id);
   }
 
   ID GetOrCreateID(const Module &module) {
     return module_ids_.GetOrCreateID(&module);
   }
   ID UpdateID(const Module &module, ID id) {
-    return module_ids_.GetOrCreateID(&module, id);
+    return module_ids_.UpdateID(&module, id);
   }
 
   ID GetOrCreateID(const Value &value) {
@@ -67,7 +67,7 @@ class SsaNames {
   }
 
   ID UpdateID(const Value &value, ID id) {
-    return value_ids_.GetOrCreateID(value, id);
+    return value_ids_.UpdateID(value, id);
   }
 
  private:
@@ -84,10 +84,10 @@ class SsaNames {
       return insert_result.first->second;
     }
 
-    ID GetOrCreateID(T entity, ID id) {
-      // Note that if `entity` is already in the map, the `insert` call below
-      // will return the existing entity. Otherwise, a new entity is added.
-      auto insert_result = item_ids_.insert({entity, id});
+    ID UpdateID(T entity, ID id) {
+      // Note that if `entity` is already in the map, we replace the id 
+      // and return the existing new id.
+      auto insert_result = item_ids_.insert_or_assign(entity, id);
       return insert_result.first->second;
     }
 

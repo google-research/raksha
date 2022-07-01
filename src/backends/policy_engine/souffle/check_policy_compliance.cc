@@ -88,10 +88,9 @@ int main(int argc, char* argv[]) {
 
   // Invoke policy checker and return result.
   SoufflePolicyChecker checker;
-  IrProgramParser ir_parser;
-  const Module& module = ir_parser.ParseProgram(*ir_string);
+  auto [context, module, ssa_names] = IrProgramParser::ParseProgram(*ir_string);
   Policy policy(*sql_policy_rules);
-  if (checker.IsModulePolicyCompliant(module, policy)) {
+  if (checker.IsModulePolicyCompliant(*module, policy)) {
     LOG(ERROR) << "Policy check succeeded!";
     return 0;
   } else {
