@@ -17,6 +17,7 @@
 #ifndef SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
 #define SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
 
+#include <variant>
 #include "src/backends/policy_engine/souffle/raksha_datalog_facts.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/attributes/attribute.h"
@@ -32,13 +33,13 @@
 namespace raksha::backends::policy_engine::souffle {
 
 class DatalogLoweringVisitor
-    : public ir::IRTraversingVisitor<DatalogLoweringVisitor> {
+    : public ir::IRTraversingVisitor<DatalogLoweringVisitor, std::monostate> {
  public:
   // We currently don't have any owner information when outputting IR. We don't
   // need it yet, really, but we do need to output something.
   static constexpr absl::string_view kDefaultPrincipal = "sql";
 
-  void PreVisit(const ir::Operation &operation) override;
+  std::monostate PreVisit(const ir::Operation &operation) override;
 
   const RakshaDatalogFacts &datalog_facts() { return datalog_facts_; }
 

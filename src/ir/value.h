@@ -17,6 +17,7 @@
 #define SRC_IR_VALUE_H_
 
 #include <vector>
+#include <variant>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"

@@ -57,9 +57,9 @@ class Operation {
 
   std::string ToString(SsaNames& ssa_names) const;
 
-  template <typename Derived>
-  void Accept(IRVisitor<Derived>& visitor) const {
-    visitor.Visit(*this);
+  template <typename Derived, typename Result=void>
+  Result Accept(IRVisitor<Derived, Result>& visitor) const {
+    return visitor.Visit(*this);
   }
 
  private:
@@ -95,9 +95,9 @@ class Block {
   const NamedValueMap& results() const { return results_; }
   const Module* parent_module() const { return parent_module_; }
 
-  template <typename Derived>
-  void Accept(IRVisitor<Derived>& visitor) const {
-    visitor.Visit(*this);
+  template <typename Derived, typename Result=void>
+  Result Accept(IRVisitor<Derived, Result>& visitor) const {
+    return visitor.Visit(*this);
   }
 
   friend class BlockBuilder;
@@ -147,9 +147,9 @@ class Module {
 
   const BlockListType& blocks() const { return blocks_; }
 
-  template <typename Derived>
-  void Accept(IRVisitor<Derived>& visitor) const {
-    visitor.Visit(*this);
+  template <typename Derived, typename Result=void>
+  Result Accept(IRVisitor<Derived, Result>& visitor) const {
+    return visitor.Visit(*this);
   }
 
  private:
