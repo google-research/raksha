@@ -45,7 +45,7 @@ R"(module m0 {
     %0 = core.plus []()
   }  // block b0
   block b1 {
-    %1 = core.plus [access: private, transform: no](<<ANY>>, <<ANY>>)
+    %1 = core.plus [access: "private", transform: "no"](<<ANY>>, <<ANY>>)
   }  // block b1
 }  // module m0
 )",
@@ -54,7 +54,7 @@ R"(module m0 {
     %0 = core.plus []()
   }  // block b0
   block b1 {
-    %1 = core.plus [access: private, transform: no](%0.out, <<ANY>>)
+    %1 = core.plus [access: "private", transform: "no"](%0.out, <<ANY>>)
   }  // block b1
 }  // module m0
 )",
@@ -64,8 +64,8 @@ R"(module m0 {
     %1 = core.merge [](<<ANY>>, <<ANY>>)
   }  // block b0
   block b1 {
-    %2 = core.plus [access: private, transform: no](%0.out, <<ANY>>)
-    %3 = core.mult [access: private, transform: no](%0.out, %2.out)
+    %2 = core.plus [access: "private", transform: "no"](%0.out, <<ANY>>)
+    %3 = core.mult [access: "private", transform: "no"](%0.out, %2.out)
   }  // block b1
 }  // module m0
 )",
@@ -75,8 +75,8 @@ R"(module m0 {
     %1 = core.merge [](<<ANY>>, <<ANY>>)
   }  // block b0
   block b1 {
-    %2 = core.plus [access: private, transform: no](%0.out, <<ANY>>)
-    %3 = core.mult [lhs: 10, rhs: 59](%0.out, %2.out)
+    %2 = core.plus [access: "private", transform: "no"](%0.out, <<ANY>>)
+    %3 = core.mult [lhs: 10, rhs: "_59"](%0.out, %2.out)
   }  // block b1
 }  // module m0
 )"));
@@ -88,11 +88,26 @@ TEST(IrParseTest, ValueNotFoundCausesFailure) {
     %0 = core.plus []()
   }  // block b0
   block b1 {
-    %1 = core.plus [access: private, transform: no](%2, <<ANY>>)
+    %1 = core.plus [access: "private", transform: "no"](%2, <<ANY>>)
   }  // block b1
 }  // module m0
 )";
   EXPECT_DEATH(IRPrinter::ToString(ir_parser.ParseProgram(input_program_text)),
               "Value not found");
+}
+
+TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {
+  IrProgramParser ir_parser;
+  auto input_program_text = R"(module m0 {
+  block b0 {
+    %0 = core.plus []()
+  }  // block b0
+  block b1 {
+    %1 = core.plus [access: private, transform: "no"](%2, <<ANY>>)
+  }  // block b1
+}  // module m0
+)";
+  EXPECT_DEATH(IRPrinter::ToString(ir_parser.ParseProgram(input_program_text)),
+              "no viable alternative at input");
 }
 }  // namespace raksha::ir

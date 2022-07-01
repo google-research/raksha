@@ -32,7 +32,7 @@ TEST_P(StringAttributeTest, KindAndToStringWorks) {
   absl::string_view value = GetParam();
   auto string_attribute = StringAttribute::Create(value);
   EXPECT_EQ(string_attribute->kind(), StringAttribute::kAttributeKind);
-  EXPECT_EQ(string_attribute->ToString(), value);
+  EXPECT_EQ(string_attribute->ToString(), absl::StrCat("\"", value, "\""));
 }
 
 INSTANTIATE_TEST_SUITE_P(StringAttributeTest, StringAttributeTest,

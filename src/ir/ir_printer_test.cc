@@ -118,7 +118,7 @@ TEST_P(IRPrinterTest, PrettyPrintAttributesInSortedOrder) {
 
   EXPECT_EQ(
       ToString(operation),
-      "%0 = core.minus [access: private, name: addition](<<ANY>>, <<ANY>>)\n");
+      "%0 = core.minus [access: \"private\", name: \"addition\"](<<ANY>>, <<ANY>>)\n");
 }
 
 TEST(IRPrinterPrintNamedMapOrderTest, PrintsInSortedOrder) {
