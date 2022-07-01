@@ -38,7 +38,7 @@ class Storage {
   const types::Type& type() const { return type_; }
 
   std::string ToString() const {
-    // TODD(#335): When types have a ToString use that to print types.
+    // TODO(#335): When types have a ToString use that to print types.
     return absl::StrFormat("store:%s:type", name_);
   }
 

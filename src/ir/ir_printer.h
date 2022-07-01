@@ -16,6 +16,7 @@
 #ifndef SRC_IR_IR_PRINTER_H_
 #define SRC_IR_IR_PRINTER_H_
 
+#include <variant>
 #include <memory>
 
 #include "absl/strings/str_format.h"
@@ -42,35 +43,37 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     return out.str();
   }
 
-  void PreVisit(const Module& module) override {
+  std::monostate PreVisit(const Module& module) override {
     out_ << Indent()
          << absl::StreamFormat("module m%d {\n",
                                ssa_names_.GetOrCreateID(module));
     IncreaseIndent();
+    return {};
   }
 
-  void PostVisit(const Module& module) override {
+  void PostVisit(const Module& module, std::monostate&) override {
     DecreaseIndent();
     out_ << Indent()
          << absl::StreamFormat("}  // module m%d\n",
                                ssa_names_.GetOrCreateID(module));
   }
 
-  void PreVisit(const Block& block) override {
+  std::monostate PreVisit(const Block& block) override {
     out_ << Indent()
          << absl::StreamFormat("block b%d {\n",
                                ssa_names_.GetOrCreateID(block));
     IncreaseIndent();
+    return {};
   }
 
-  void PostVisit(const Block& block) override {
+  void PostVisit(const Block& block, std::monostate&) override {
     DecreaseIndent();
     out_ << Indent()
          << absl::StreamFormat("}  // block b%d\n",
                                ssa_names_.GetOrCreateID(block));
   }
 
-  void PreVisit(const Operation& operation) override {
+  std::monostate PreVisit(const Operation& operation) override {
     constexpr absl::string_view kOperationFormat = "%%%d = %s [%s](%s)";
     SsaNames::ID this_ssa_name = ssa_names_.GetOrCreateID(operation);
 
@@ -97,9 +100,10 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     } else {
       out_ << "\n";
     }
+    return {};
   }
 
-  void PostVisit(const Operation& operation) override {
+  void PostVisit(const Operation& operation, std::monostate&) override {
     if (operation.impl_module()) {
       DecreaseIndent();
       out_ << Indent() << "}\n";
