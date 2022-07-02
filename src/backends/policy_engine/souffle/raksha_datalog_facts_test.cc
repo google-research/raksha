@@ -133,11 +133,9 @@ TEST_F(DumpFactsToDirectoryTest, CreatesEmptyRelationsIfRequested) {
 TEST_F(DumpFactsToDirectoryTest, CreatesFilesInRequestedDirectory) {
   std::vector<std::string> empty_relations = {"check", "claim"};
 
-  std::filesystem::path desired_path = std::tmpnam(nullptr);
-  std::error_code error_code;
-  bool tmp_dir_created =
-      std::filesystem::create_directory(desired_path, error_code);
-  ASSERT_TRUE(tmp_dir_created);
+  char filename[] = "/tmp/foo.XXXXXX";
+  ASSERT_NE(::mkdtemp(filename), nullptr);
+  std::filesystem::path desired_path(filename);
 
   absl::Status status =
       facts_.DumpFactsToDirectory(desired_path, empty_relations);
@@ -149,10 +147,14 @@ TEST_F(DumpFactsToDirectoryTest, CreatesFilesInRequestedDirectory) {
   EXPECT_THAT(files, testing::UnorderedElementsAre(
                          "isOperation.facts", "check.facts", "claim.facts"));
   CheckFileContentsInDirectory(desired_path, empty_relations);
+
+  ASSERT_TRUE(std::filesystem::remove_all(desired_path));
 }
 
 TEST_F(DumpFactsToDirectoryTest, ReturnsErrorIfRequestedDirectoryDoesNotExist) {
-  std::filesystem::path desired_path = std::tmpnam(nullptr);
+  std::filesystem::path desired_path("nosuchpath");
+  ASSERT_FALSE(std::filesystem::exists(desired_path));
+
   absl::Status status = facts_.DumpFactsToDirectory(desired_path, {});
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(status.code(), absl::StatusCode::kFailedPrecondition);

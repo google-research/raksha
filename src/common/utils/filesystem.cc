@@ -17,6 +17,7 @@
 #include "src/common/utils/filesystem.h"
 
 #include <cstdio>
+#include <errno.h>
 
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
@@ -34,13 +35,15 @@ absl::StatusOr<std::filesystem::path> CreateTemporaryDirectory() {
         "Unable to access temporary file directory: %s", error_code.message()));
   }
 
-  absl::string_view temp_file = std::tmpnam(nullptr);
-  std::filesystem::path new_temp_path = temp_path / temp_file;
-  if (!std::filesystem::create_directory(new_temp_path, error_code)) {
+  const int BUFFER_SIZE = 1024;
+  char new_temp_path[BUFFER_SIZE];
+  snprintf(new_temp_path, BUFFER_SIZE, "%s/XXXXXX", temp_path.c_str());
+  if (::mkdtemp(new_temp_path) == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrFormat("Unable to create directory `%s`: %s", new_temp_path,
-                        error_code.message()));
+                        strerror(errno)));
   }
+
   return new_temp_path;
 }
 
