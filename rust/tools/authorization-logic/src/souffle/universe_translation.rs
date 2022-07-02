@@ -65,12 +65,6 @@ fn push_option_to_vec<T>(vec: &mut Vec<T>, elt: Option<T>) {
     }
 }
 
-fn push_if_constant(hash_set: &mut HashSet<String>, name: String) {
-    if is_name_constant(&name) {
-        hash_set.insert(name);
-    }
-}
-
 fn universe_condition_principal(principal: &AstPrincipal) -> Option<AstPredicate> {
     if is_name_constant(&principal.name) {
         None

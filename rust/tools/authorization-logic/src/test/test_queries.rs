@@ -66,7 +66,8 @@ pub mod test {
 
     pub fn setup_dirs_and_run_query_test(t: QueryTest) {
         utils::setup_directories_for_bazeltest(vec![&t.input_dir], vec![&t.output_dir]);
-        run_query_test(t)
+        run_query_test(t);
+        clean_test_dir()
     }
 
     pub fn clean_test_dir() {
