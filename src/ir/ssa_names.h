@@ -85,7 +85,7 @@ class SsaNames {
     }
 
     ID UpdateID(T entity, ID id) {
-      // Note that if `entity` is already in the map, we replace the id 
+      // Note that if `entity` is already in the map, we replace the id
       // and return the existing new id.
       auto insert_result = item_ids_.insert_or_assign(entity, id);
       return insert_result.first->second;

@@ -135,10 +135,8 @@ void IrProgramParser::ConstructModule(IrParser::ModuleContext& module_context) {
 
 /// This function produces an abstract syntax tree (AST) rooted with a
 /// program node when given the textual representation of a program.
-IrProgramParser::IrProgramParser(absl::string_view prog_text)
-    : context_(std::make_unique<IRContext>()),
-      ssa_names_(std::make_unique<SsaNames>()),
-      module_(std::make_unique<Module>()) {
+IrProgramParser::Result IrProgramParser::ParseProgram(
+    absl::string_view prog_text) {
   // Provide the input text in a stream
   antlr4::ANTLRInputStream input(prog_text);
   // Creates a lexer from input
@@ -150,7 +148,12 @@ IrProgramParser::IrProgramParser(absl::string_view prog_text)
   // program_context points to the root of the parse tree
   IrParser::IrProgramContext& program_context =
       *CHECK_NOTNULL(parser.irProgram());
-  ConstructModule(*CHECK_NOTNULL(program_context.module()));
+
+  IrProgramParser::ConstructModule(*CHECK_NOTNULL(program_context.module()));
+
+  return IrProgramParser::Result{.context = std::move(context_),
+                                 .module = std::move(module_),
+                                 .ssa_names = std::move(ssa_names_)};
 }
 
 }  // namespace raksha::ir

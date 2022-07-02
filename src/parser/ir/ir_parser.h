@@ -44,16 +44,13 @@ class IrProgramParser {
     std::unique_ptr<SsaNames> ssa_names;
   };
 
-  static Result ParseProgram(absl::string_view prog_text) {
-    IrProgramParser parser(prog_text);
-    return {.context = std::move(parser.context_),
-            .module = std::move(parser.module_),
-            .ssa_names = std::move(parser.ssa_names_)};
-  }
+  IrProgramParser::Result ParseProgram(absl::string_view prog_text);
+  IrProgramParser()
+      : context_(std::make_unique<IRContext>()),
+        ssa_names_(std::make_unique<SsaNames>()),
+        module_(std::make_unique<Module>()){};
 
  private:
-  IrProgramParser(absl::string_view prog_text);
-
   void ConstructOperation(IrParser::OperationContext& operation_context,
                           BlockBuilder& block_builder);
   void ConstructBlock(IrParser::BlockContext& block_context);

@@ -25,9 +25,9 @@ class IrParserTest : public testing::TestWithParam<absl::string_view> {};
 
 TEST_P(IrParserTest, SimpleTestOperation) {
   auto input_program_text = GetParam();
-  auto [context, module, ssa_names] =
-      IrProgramParser::ParseProgram(input_program_text);
-  EXPECT_EQ(IRPrinter::ToString(*module, std::move(*ssa_names)),
+  IrProgramParser ir_parser;
+  auto result = ir_parser.ParseProgram(input_program_text);
+  EXPECT_EQ(IRPrinter::ToString(*result.module, std::move((*result.ssa_names.release()))),
             input_program_text);
 }
 
@@ -66,7 +66,7 @@ R"(module m0 {
   }  // block b0
   block b1 {
     %2 = core.plus [access: "private", transform: "no"](%0, <<ANY>>)
-    %3 = core.mult [access: "private", transform: "no"](%0, %2.out)
+    %3 = core.mult [access: "private", transform: "no"](%0, %2)
   }  // block b1
 }  // module m0
 )",
@@ -77,7 +77,7 @@ R"(module m0 {
   }  // block b0
   block b1 {
     %2 = core.plus [access: "private", transform: "no"](%0, <<ANY>>)
-    %3 = core.mult [lhs: 10, rhs: "_59"](%0, %2.out)
+    %3 = core.mult [lhs: 10, rhs: "_59"](%0, %2)
   }  // block b1
 }  // module m0
 )"));
@@ -92,9 +92,8 @@ TEST(IrParseTest, ValueNotFoundCausesFailure) {
   }  // block b1
 }  // module m0
 )";
-
-  EXPECT_DEATH(IrProgramParser::ParseProgram(input_program_text),
-               "Value not found");
+  IrProgramParser ir_parser;
+  EXPECT_DEATH(ir_parser.ParseProgram(input_program_text), "Value not found");
 }
 
 TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {
@@ -103,11 +102,12 @@ TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {
     %0 = core.plus []()
   }  // block b0
   block b1 {
-    %1 = core.plus [access: "private", transform: "no"](%2, <<ANY>>)
+    %1 = core.plus [access: private, transform: "no"](%2, <<ANY>>)
   }  // block b1
 }  // module m0
 )";
-  EXPECT_DEATH(IrProgramParser::ParseProgram(input_program_text),
-              "no viable alternative at input");
+  IrProgramParser ir_parser;
+  EXPECT_DEATH(ir_parser.ParseProgram(input_program_text),
+               "no viable alternative at input");
 }
 }  // namespace raksha::ir
