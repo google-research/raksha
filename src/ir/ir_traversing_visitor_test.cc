@@ -28,12 +28,12 @@ namespace {
 // sure that  Pre and Post visits happened correctly.
 class CollectingVisitor : public IRTraversingVisitor<CollectingVisitor> {
  public:
-  enum class TraversalType { PRE = 0x1, POST = 0x2, BOTH = 0x3 };
+  enum class TraversalType { kPre = 0x1, kPost = 0x2, kBoth = 0x3 };
   CollectingVisitor(TraversalType traversal_type)
-      : pre_visits_(traversal_type == TraversalType::PRE ||
-                    traversal_type == TraversalType::BOTH),
-        post_visits_(traversal_type == TraversalType::POST ||
-                     traversal_type == TraversalType::BOTH) {}
+      : pre_visits_(traversal_type == TraversalType::kPre ||
+                    traversal_type == TraversalType::kBoth),
+        post_visits_(traversal_type == TraversalType::kPost ||
+                     traversal_type == TraversalType::kBoth) {}
 
   void PreVisit(const Module& module) override {
     if (pre_visits_) nodes_.push_back(std::addressof(module));
@@ -73,19 +73,19 @@ TEST(IRTraversingVisitorTest, TraversesModuleAsExpected) {
   const Block* block2 =
       std::addressof(global_module.AddBlock(std::make_unique<Block>()));
 
-  CollectingVisitor preorder_visitor(CollectingVisitor::TraversalType::PRE);
+  CollectingVisitor preorder_visitor(CollectingVisitor::TraversalType::kPre);
   global_module.Accept(preorder_visitor);
   EXPECT_THAT(
       preorder_visitor.nodes(),
       testing::ElementsAre(std::addressof(global_module), block1, block2));
 
-  CollectingVisitor postorder_visitor(CollectingVisitor::TraversalType::POST);
+  CollectingVisitor postorder_visitor(CollectingVisitor::TraversalType::kPost);
   global_module.Accept(postorder_visitor);
   EXPECT_THAT(
       postorder_visitor.nodes(),
       testing::ElementsAre(block1, block2, std::addressof(global_module)));
 
-  CollectingVisitor all_order_visitor(CollectingVisitor::TraversalType::BOTH);
+  CollectingVisitor all_order_visitor(CollectingVisitor::TraversalType::kBoth);
   global_module.Accept(all_order_visitor);
   EXPECT_THAT(
       all_order_visitor.nodes(),
@@ -103,19 +103,19 @@ TEST(IRTraversingVisitorTest, TraversesBlockAsExpected) {
       std::addressof(builder.AddOperation(*minus_op, {}, {}));
   auto block = builder.build();
 
-  CollectingVisitor preorder_visitor(CollectingVisitor::TraversalType::PRE);
+  CollectingVisitor preorder_visitor(CollectingVisitor::TraversalType::kPre);
   block->Accept(preorder_visitor);
   EXPECT_THAT(
       preorder_visitor.nodes(),
       testing::ElementsAre(block.get(), plus_op_instance, minus_op_instance));
 
-  CollectingVisitor postorder_visitor(CollectingVisitor::TraversalType::POST);
+  CollectingVisitor postorder_visitor(CollectingVisitor::TraversalType::kPost);
   block->Accept(postorder_visitor);
   EXPECT_THAT(
       postorder_visitor.nodes(),
       testing::ElementsAre(plus_op_instance, minus_op_instance, block.get()));
 
-  CollectingVisitor all_order_visitor(CollectingVisitor::TraversalType::BOTH);
+  CollectingVisitor all_order_visitor(CollectingVisitor::TraversalType::kBoth);
   block->Accept(all_order_visitor);
   EXPECT_THAT(
       all_order_visitor.nodes(),
@@ -132,19 +132,19 @@ TEST(IRTraversingVisitorTest, TraversesOperationAsExpected) {
                              std::make_unique<Module>());
   auto plus_op_module = plus_op_instance.impl_module();
 
-  CollectingVisitor preorder_visitor(CollectingVisitor::TraversalType::PRE);
+  CollectingVisitor preorder_visitor(CollectingVisitor::TraversalType::kPre);
   plus_op_instance.Accept(preorder_visitor);
   EXPECT_THAT(
       preorder_visitor.nodes(),
       testing::ElementsAre(std::addressof(plus_op_instance), plus_op_module));
 
-  CollectingVisitor postorder_visitor(CollectingVisitor::TraversalType::POST);
+  CollectingVisitor postorder_visitor(CollectingVisitor::TraversalType::kPost);
   plus_op_instance.Accept(postorder_visitor);
   EXPECT_THAT(
       postorder_visitor.nodes(),
       testing::ElementsAre(plus_op_module, std::addressof(plus_op_instance)));
 
-  CollectingVisitor all_order_visitor(CollectingVisitor::TraversalType::BOTH);
+  CollectingVisitor all_order_visitor(CollectingVisitor::TraversalType::kBoth);
   plus_op_instance.Accept(all_order_visitor);
   EXPECT_THAT(
       all_order_visitor.nodes(),
@@ -218,19 +218,19 @@ TEST(IRTraversingVisitorTest, TraversesModuleAsExpectedUsingReturns) {
   const Block* block2 =
       std::addressof(global_module.AddBlock(std::make_unique<Block>()));
 
-  ReturningVisitor preorder_visitor(ReturningVisitor::TraversalType::PRE);
+  ReturningVisitor preorder_visitor(ReturningVisitor::TraversalType::kPre);
   ResultType nodes1 = global_module.Accept<ReturningVisitor, ResultType>(preorder_visitor);
   EXPECT_THAT(
       nodes1,
       testing::ElementsAre(std::addressof(global_module), block1, block2));
 
-  ReturningVisitor postorder_visitor(ReturningVisitor::TraversalType::POST);
+  ReturningVisitor postorder_visitor(ReturningVisitor::TraversalType::kPost);
   ResultType nodes2 = global_module.Accept(postorder_visitor);
   EXPECT_THAT(
       nodes2,
       testing::ElementsAre(block1, block2, std::addressof(global_module)));
 
-  ReturningVisitor all_order_visitor(ReturningVisitor::TraversalType::BOTH);
+  ReturningVisitor all_order_visitor(ReturningVisitor::TraversalType::kBoth);
   ResultType nodes3 = global_module.Accept(all_order_visitor);
   EXPECT_THAT(
       nodes3,
@@ -248,19 +248,19 @@ TEST(IRTraversingVisitorTest, TraversesBlockAsExpectedUsingReturns) {
       std::addressof(builder.AddOperation(*minus_op, {}, {}));
   auto block = builder.build();
 
-  ReturningVisitor preorder_visitor(ReturningVisitor::TraversalType::PRE);
+  ReturningVisitor preorder_visitor(ReturningVisitor::TraversalType::kPre);
   ResultType nodes1 = block->Accept<ReturningVisitor, ResultType>(preorder_visitor);
   EXPECT_THAT(
       nodes1,
       testing::ElementsAre(block.get(), plus_op_instance, minus_op_instance));
 
-  ReturningVisitor postorder_visitor(ReturningVisitor::TraversalType::POST);
+  ReturningVisitor postorder_visitor(ReturningVisitor::TraversalType::kPost);
   ResultType nodes2 = block->Accept(postorder_visitor);
   EXPECT_THAT(
       nodes2,
       testing::ElementsAre(plus_op_instance, minus_op_instance, block.get()));
 
-  ReturningVisitor all_order_visitor(ReturningVisitor::TraversalType::BOTH);
+  ReturningVisitor all_order_visitor(ReturningVisitor::TraversalType::kBoth);
   ResultType nodes3 = block->Accept(all_order_visitor);
   EXPECT_THAT(
       nodes3,
@@ -277,19 +277,19 @@ TEST(IRTraversingVisitorTest, TraversesOperationAsExpectedUsingReturns) {
                              std::make_unique<Module>());
   auto plus_op_module = plus_op_instance.impl_module();
 
-  ReturningVisitor preorder_visitor(ReturningVisitor::TraversalType::PRE);
+  ReturningVisitor preorder_visitor(ReturningVisitor::TraversalType::kPre);
   ResultType nodes1 = plus_op_instance.Accept(preorder_visitor);
   EXPECT_THAT(
       nodes1,
       testing::ElementsAre(std::addressof(plus_op_instance), plus_op_module));
 
-  ReturningVisitor postorder_visitor(ReturningVisitor::TraversalType::POST);
+  ReturningVisitor postorder_visitor(ReturningVisitor::TraversalType::kPost);
   ResultType nodes2 = plus_op_instance.Accept(postorder_visitor);
   EXPECT_THAT(
       nodes2,
       testing::ElementsAre(plus_op_module, std::addressof(plus_op_instance)));
 
-  ReturningVisitor all_order_visitor(ReturningVisitor::TraversalType::BOTH);
+  ReturningVisitor all_order_visitor(ReturningVisitor::TraversalType::kBoth);
   ResultType nodes3 = plus_op_instance.Accept(all_order_visitor);
   EXPECT_THAT(
       nodes3,
