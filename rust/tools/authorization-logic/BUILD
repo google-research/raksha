@@ -16,7 +16,7 @@
 #-------------------------------------------------------------------------------
 load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_library", "rust_test")
 
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//:__subpackages__"])
 
 licenses(["notice"])
 
