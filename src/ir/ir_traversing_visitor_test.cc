@@ -161,12 +161,12 @@ using ResultType=std::vector<void*>;
 // Uses 'returns' rather than side effects.
 class ReturningVisitor : public IRTraversingVisitor<ReturningVisitor, ResultType> {
  public:
-  enum class TraversalType { PRE = 0x1, POST = 0x2, BOTH = 0x3 };
+  enum class TraversalType { kPre = 0x1, kPost = 0x2, kBoth = 0x3 };
   ReturningVisitor(TraversalType traversal_type)
-      : pre_visits_(traversal_type == TraversalType::PRE ||
-                    traversal_type == TraversalType::BOTH),
-        post_visits_(traversal_type == TraversalType::POST ||
-                     traversal_type == TraversalType::BOTH) {}
+      : pre_visits_(traversal_type == TraversalType::kPre ||
+                    traversal_type == TraversalType::kBoth),
+        post_visits_(traversal_type == TraversalType::kPost ||
+                     traversal_type == TraversalType::kBoth) {}
 
   ResultType ReturningPreVisit(const Module& module) override {
     ResultType result;
