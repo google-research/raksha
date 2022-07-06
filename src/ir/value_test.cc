@@ -19,6 +19,7 @@
 #include "src/ir/module.h"
 #include "src/ir/ssa_names.h"
 #include "src/ir/types/type_factory.h"
+#include "absl/hash/hash_testing.h"
 
 namespace raksha::ir {
 namespace {
@@ -162,6 +163,15 @@ TEST_P(ValueEqTest, ValueEqTest) {
 INSTANTIATE_TEST_SUITE_P(ValueEqTest, ValueEqTest,
                          testing::Combine(testing::ValuesIn(kSampleValues),
                                           testing::ValuesIn(kSampleValues)));
+
+
+TEST(ValueHashTest, ValueHashTest) {
+  std::vector<Value> values;
+  for (const auto &kSampleValue : kSampleValues) {
+    values.push_back(kSampleValue.first);
+  }
+  EXPECT_TRUE(absl::VerifyTypeImplementsAbslHashCorrectly(values));
+}
 
 }  // namespace
 }  // namespace raksha::ir

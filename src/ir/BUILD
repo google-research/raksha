@@ -257,6 +257,7 @@ cc_test(
         ":value",
         "//src/common/testing:gtest",
         "//src/ir/types",
+        "@absl//absl/hash:hash_testing",
     ],
 )
 
