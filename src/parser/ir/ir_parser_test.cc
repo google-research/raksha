@@ -79,6 +79,15 @@ R"(module m0 {
     %3 = core.mult [lhs: 10, rhs: "_59"](%0.out, %2.out)
   }  // block b1
 }  // module m0
+)",
+R"(module m0 {
+  block b0 {
+    %0 = core.plus [access: "private", transform: "no"](%1, <<ANY>>)
+  }  // block b0
+  block b1 {
+    %1 = core.plus []()
+  }  // block b1
+}  // module m0
 )"));
 
 TEST(IrParseTest, ValueNotFoundCausesFailure) {

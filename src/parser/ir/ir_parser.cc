@@ -99,7 +99,7 @@ void IrProgramParser::ConstructOperation(
                       CHECK_NOTNULL(named_value_context)->VALUE_ID()->getText();
                   // Operation Result Value
                   auto find_value_id_operation = value_map_.find(value_id);
-                  CHECK(find_value_id_operation != value_map_.end()) << "Value not found" << value_id; 
+                  CHECK(find_value_id_operation != value_map_.end()) << "Value not found " << value_id;
                   return find_value_id_operation->second;
                 });
 
