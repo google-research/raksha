@@ -21,6 +21,12 @@ package(
 )
 
 cc_library(
+    name = "types",
+    hdrs = ["types.h"],
+    deps = [],
+)
+
+cc_library(
     name = "intrusive_ptr",
     hdrs = ["intrusive_ptr.h"],
     deps = [

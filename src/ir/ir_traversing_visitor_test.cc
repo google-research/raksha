@@ -173,11 +173,13 @@ class ReturningVisitor : public IRTraversingVisitor<ReturningVisitor, ResultType
     if (pre_visits_) result.push_back((void*)std::addressof(module));
     return result;
   }
-  void FoldResult(const Module& module, ResultType child_result, ResultType& result) override {
+  ResultType FoldResult(const Module& module, ResultType child_result, ResultType result) override {
     result.insert( result.end(), child_result.begin(), child_result.end() );
+    return result;
   }
-  void PostVisit(const Module& module, ResultType& result) override {
+  ResultType PostVisit(const Module& module, ResultType result) override {
     if (post_visits_) result.push_back((void*)std::addressof(module));
+    return result;
   }
 
   ResultType ReturningPreVisit(const Block& block) override {
@@ -186,11 +188,13 @@ class ReturningVisitor : public IRTraversingVisitor<ReturningVisitor, ResultType
     return result;
   }
 
-  void FoldResult(const Block& block, ResultType child_result, ResultType& result) override {
+  ResultType FoldResult(const Block& block, ResultType child_result, ResultType result) override {
     result.insert( result.end(), child_result.begin(), child_result.end() );
+    return result;
   }
-  void PostVisit(const Block& block, ResultType& result) override {
+  ResultType PostVisit(const Block& block, ResultType result) override {
     if (post_visits_) result.push_back((void*)std::addressof(block));
+    return result;
   }
 
   ResultType ReturningPreVisit(const Operation& operation) override {
@@ -199,11 +203,13 @@ class ReturningVisitor : public IRTraversingVisitor<ReturningVisitor, ResultType
     return result;
   }
 
-  void FoldResult(const Operation& operation, ResultType child_result, ResultType& result) override {
+  ResultType FoldResult(const Operation& operation, ResultType child_result, ResultType result) override {
     result.insert( result.end(), child_result.begin(), child_result.end() );
+    return result;
   }
-  void PostVisit(const Operation& operation, ResultType& result) override {
+  ResultType PostVisit(const Operation& operation, ResultType result) override {
     if (post_visits_) result.push_back((void*)std::addressof(operation));
+    return result;
   }
 
  private:

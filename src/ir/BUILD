@@ -118,7 +118,10 @@ cc_test(
 cc_library(
     name = "ir_traversing_visitor",
     hdrs = ["ir_traversing_visitor.h"],
-    deps = [":module"],
+    deps = [
+        ":module",
+        "//src/common/utils:types",
+    ],
 )
 
 cc_test(
