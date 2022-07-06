@@ -72,10 +72,11 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     return result;
   }
 
-  void PreVisit(const Block& block) override {
+  Unit PreVisit(const Block& block) override {
     out_ << Indent()
          << absl::StreamFormat("block %s {\n", ssa_names_->GetOrCreateID(block));
     IncreaseIndent();
+    return Unit();
   }
 
   Unit PostVisit(const Block& block, Unit result) override {
@@ -112,6 +113,7 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     } else {
       out_ << "\n";
     }
+    return Unit();
   }
 
   Unit PostVisit(const Operation& operation, Unit result) override {

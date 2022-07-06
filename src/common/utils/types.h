@@ -18,7 +18,9 @@
 
 #include <variant>
 
-// Type alias for monostate that sounds less scary.
-using Unit = std::monostate;
+namespace raksha {
+  // Type alias for monostate that sounds less scary.
+  using Unit = std::monostate;
+}
 
 #endif  // SRC_COMMON_UTILS_TYPES_H_

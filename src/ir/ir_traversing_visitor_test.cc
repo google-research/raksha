@@ -35,27 +35,33 @@ class CollectingVisitor : public IRTraversingVisitor<CollectingVisitor> {
         post_visits_(traversal_type == TraversalType::kPost ||
                      traversal_type == TraversalType::kBoth) {}
 
-  void PreVisit(const Module& module) override {
+  Unit PreVisit(const Module& module) override {
     if (pre_visits_) nodes_.push_back(std::addressof(module));
+    return Unit();
   }
-  void PostVisit(const Module& module) override {
+  Unit PostVisit(const Module& module) override {
     if (post_visits_) nodes_.push_back(std::addressof(module));
+    return Unit();
   }
 
-  void PreVisit(const Block& block) override {
+  Unit PreVisit(const Block& block) override {
     if (pre_visits_) nodes_.push_back(std::addressof(block));
+    return Unit();
   }
 
-  void PostVisit(const Block& block) override {
+  Unit PostVisit(const Block& block) override {
     if (post_visits_) nodes_.push_back(std::addressof(block));
+    return Unit();
   }
 
-  void PreVisit(const Operation& operation) override {
+  Unit PreVisit(const Operation& operation) override {
     if (pre_visits_) nodes_.push_back(std::addressof(operation));
+    return Unit();
   }
 
-  void PostVisit(const Operation& operation) override {
+  Unit PostVisit(const Operation& operation) override {
     if (post_visits_) nodes_.push_back(std::addressof(operation));
+    return Unit();
   }
 
   const std::vector<const void*>& nodes() const { return nodes_; }

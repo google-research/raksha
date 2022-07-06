@@ -51,7 +51,7 @@ static DatalogAttributePayload GetPayloadForAttribute(ir::Attribute attr,
   return DatalogAttribute::String("");
 }
 
-void DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
+Unit DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
   const ir::Operator &op = operation.op();
   absl::string_view op_name = op.name();
 
@@ -89,6 +89,7 @@ void DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
       operation, frontends::sql::DecoderContext::kDefaultOutputName)));
   datalog_facts_.AddIsOperationFact(
       DatalogIsOperationFact(std::move(datalog_operation)));
+  return Unit();
 }
 
 }  // namespace raksha::backends::policy_engine::souffle
