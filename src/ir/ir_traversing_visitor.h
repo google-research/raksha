@@ -26,8 +26,8 @@ namespace raksha::ir {
 // A visitor that also traverses the children of a node and allows performing
 // different actions before (PreVisit) and after (PostVisit) the children are
 // visited. Override any of the `PreVisit` and `PostVisit` methods as needed.
-template <typename Derived, typename Result = Unit>
-class IRTraversingVisitor : public IRVisitor<Derived, Result> {
+template <typename Derived, typename Result=Unit, bool IsConst=true>
+class IRTraversingVisitor : public IRVisitor<Derived, Result, IsConst> {
  private:
   template<class ValueType, class Enable = void>
   struct DefaultValueGetter {
@@ -53,56 +53,60 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
                             Result child_result) {
     return accumulator;
   }
-  // Invoked before all the children of `module` is visited.
-  virtual Result PreVisit(const Module& module) {
+
+  // Invoked before all the children of `module` are visited.
+  virtual Result PreVisit(CopyConst<IsConst, Module>& module) {
     return GetDefaultValue();
   }
-  // Invoked after all the children of `module` is visited.
-  virtual Result PostVisit(const Module& module, Result in_order_result) {
+  // Invoked after all the children of `module` are visited.
+  virtual Result PostVisit(CopyConst<IsConst, Module>& module, Result in_order_result) {
     return in_order_result;
   }
-  // Invoked before all the children of `block` is visited.
-  virtual Result PreVisit(const Block& block) {
+  // Invoked before all the children of `block` are visited.
+  virtual Result PreVisit(CopyConst<IsConst, Block>& block) {
     return GetDefaultValue();
   }
-  // Invoked after all the children of `block` is visited.
-  virtual Result PostVisit(const Block& block, Result in_order_result) {
+  // Invoked after all the children of `block` are visited.
+  virtual Result PostVisit(CopyConst<IsConst, Block>& block, Result in_order_result) {
     return in_order_result;
   }
-  // Invoked before all the children of `operation` is visited.
-  virtual Result PreVisit(const Operation& operation) {
+  // Invoked before all the children of `operation` are visited.
+  virtual Result PreVisit(CopyConst<IsConst, Operation>& operation) {
     return GetDefaultValue();
   }
-  // Invoked after all the children of `operation` is visited.
-  virtual Result PostVisit(const Operation& operation, Result in_order_result) {
+  // Invoked after all the children of `operation` are visited.
+  virtual Result PostVisit(CopyConst<IsConst, Operation>& operation,
+                           Result in_order_result) {
     return in_order_result;
   }
 
-  Result Visit(const Module& module) final override {
+  Result Visit(CopyConst<IsConst, Module>& module) final override {
     Result pre_visit_result = PreVisit(module);
     Result fold_result = common::utils::fold(
         module.blocks(), std::move(pre_visit_result),
-        [this](Result acc, const std::unique_ptr<Block>& block) {
+        [this](Result acc, CopyConst<IsConst, std::unique_ptr<Block>>& block) {
           return FoldResult(acc, block->Accept(*this));
         });
     return PostVisit(module, fold_result);
   }
 
-  Result Visit(const Block& block) final override {
+  Result Visit(CopyConst<IsConst, Block>& block) final override {
     Result pre_visit_result = PreVisit(block);
     Result fold_result = common::utils::fold(
         block.operations(), std::move(pre_visit_result),
-        [this](Result acc, const std::unique_ptr<Operation>& operation) {
+        [this](
+            Result acc,
+            CopyConst<IsConst, std::unique_ptr<Operation>>& operation) {
           return FoldResult(acc, operation->Accept(*this));
         });
     return PostVisit(block, fold_result);
   }
 
-  Result Visit(const Operation& operation) final override {
+  Result Visit(CopyConst<IsConst, Operation>& operation) final override {
     Result result = PreVisit(operation);
-    const Module* module = operation.impl_module();
+    auto* module = operation.impl_module();
     if (module != nullptr) {
-      result = FoldResult(std::move(result), module->Accept<Derived, Result>(*this));
+      result = FoldResult(result, module->Accept(*this));
     }
     return PostVisit(operation, result);
   }

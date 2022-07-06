@@ -26,13 +26,13 @@ class Operation;
 
 // An interface for the visitor class. We will also pass in the `Derived` class
 // as template argument if we want to support CRTP at a later point.
-template <typename Derived, typename Result = Unit>
+template <typename Derived, typename Result=Unit, bool IsConst=true>
 class IRVisitor {
  public:
   virtual ~IRVisitor() {}
-  virtual Result Visit(const Module& module) = 0;
-  virtual Result Visit(const Block& operation) = 0;
-  virtual Result Visit(const Operation& operation) = 0;
+  virtual Result Visit(CopyConst<IsConst, Module>& module) = 0;
+  virtual Result Visit(CopyConst<IsConst, Block>& operation) = 0;
+  virtual Result Visit(CopyConst<IsConst, Operation>& operation) = 0;
 };
 
 }  // namespace raksha::ir
