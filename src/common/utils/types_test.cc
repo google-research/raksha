@@ -13,31 +13,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_COMMON_UTILS_TYPES_H_
-#define SRC_COMMON_UTILS_TYPES_H_
+#include "src/common/utils/types.h"
 
-#include <variant>
+#include <iostream>
+#include <string>
+
+#include "src/common/testing/gtest.h"
 
 namespace raksha {
-// Type alias for monostate that sounds less scary.
-using Unit = std::monostate;
+namespace {
 
-// An implementation of a static, type-level, 'if'.
-// Useful for writing typesafe, code generically (especially for generic constness).
-// Based on SAT's laser (specifically 'misc_utils.h').
-template <bool Flag, typename T, typename F>
-struct SelectType {
-    using Result = T;
-};
-
-template <typename T, typename F>
-struct SelectType<false, T, F> {
-    using Result = F;
-};
-
-template <bool IsConst, typename T>
-using CopyConst = typename SelectType<IsConst, const T, T>::Result;
-
+TEST(TypesTest, SelectTypeTrue) {
+  SelectType<true, int, std::string>::Result a = 3;
+  EXPECT_EQ(a, 3);
 }
 
-#endif  // SRC_COMMON_UTILS_TYPES_H_
+TEST(TypesTest, SelectTypeFalse) {
+  SelectType<false, int, std::string>::Result a = "Hi";
+  EXPECT_EQ(a, "Hi");
+}
+
+TEST(TypesTest, CopyConstTypeTrue) {
+  CopyConst<true, int> a = 3;
+  // a++; // Should not compile.
+  EXPECT_EQ(a, 3);
+}
+
+TEST(TypesTest, CopyConstTypeFalse) {
+  CopyConst<false, int> a = 4;
+  a++;
+  EXPECT_EQ(a, 4);
+}
+
+}  // namespace
+}  // namespace raksha

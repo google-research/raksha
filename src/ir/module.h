@@ -58,7 +58,12 @@ class Operation {
   std::string ToString(SsaNames& ssa_names) const;
 
   template <typename Derived, typename Result=void>
-  Result Accept(IRVisitor<Derived, Result>& visitor) const {
+  Result Accept(IRVisitor<Derived, false, Result>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result=void>
+  Result Accept(IRVisitor<Derived, true, Result>& visitor) const {
     return visitor.Visit(*this);
   }
 
@@ -96,7 +101,12 @@ class Block {
   const Module* parent_module() const { return parent_module_; }
 
   template <typename Derived, typename Result=void>
-  Result Accept(IRVisitor<Derived, Result>& visitor) const {
+  Result Accept(IRVisitor<Derived, false, Result>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result=void>
+  Result Accept(IRVisitor<Derived, true, Result>& visitor) const {
     return visitor.Visit(*this);
   }
 
@@ -148,7 +158,12 @@ class Module {
   const BlockListType& blocks() const { return blocks_; }
 
   template <typename Derived, typename Result=void>
-  Result Accept(IRVisitor<Derived, Result>& visitor) const {
+  Result Accept(IRVisitor<Derived, false, Result>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result=void>
+  Result Accept(IRVisitor<Derived, true, Result>& visitor) const {
     return visitor.Visit(*this);
   }
 
