@@ -53,6 +53,7 @@ pub fn deserialize_from_file(filename: &str) -> Result<Vec<AstAssertion>, Error>
 // At present, this function is only used in tests, so a warning will be given
 // that this is not used. In the future, a script for generating keys might
 // also use this outside of tests.
+#[allow(dead_code)]
 pub fn store_new_keypair_cleartext(pub_key_file: &str, priv_key_file: &str) {
     tink_signature::init();
 
