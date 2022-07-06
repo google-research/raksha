@@ -15,11 +15,11 @@
 //----------------------------------------------------------------------------
 #include "src/ir/value.h"
 
+#include "absl/hash/hash_testing.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/module.h"
 #include "src/ir/ssa_names.h"
 #include "src/ir/types/type_factory.h"
-#include "absl/hash/hash_testing.h"
 
 namespace raksha::ir {
 namespace {
@@ -48,6 +48,17 @@ struct TestData {
     ssa_names.GetOrCreateID(second_block);
     ssa_names.GetOrCreateID(plus_operation);
     ssa_names.GetOrCreateID(minus_operation);
+    ssa_names.GetOrCreateID(Value(first_block_first_arg));
+    ssa_names.GetOrCreateID(Value(first_block_second_arg));
+    ssa_names.GetOrCreateID(Value(second_block_first_arg));
+    ssa_names.GetOrCreateID(Value(second_block_second_arg));
+    ssa_names.GetOrCreateID(Value(plus_operation_result1));
+    ssa_names.GetOrCreateID(Value(plus_operation_result2));
+    ssa_names.GetOrCreateID(Value(minus_operation_result1));
+    ssa_names.GetOrCreateID(Value(minus_operation_result2));
+    ssa_names.GetOrCreateID(Value(input_stored_value));
+    ssa_names.GetOrCreateID(Value(output_stored_value));
+    ssa_names.GetOrCreateID(Value(value::Any()));
   }
 
   types::TypeFactory type_factory;
@@ -163,7 +174,6 @@ TEST_P(ValueEqTest, ValueEqTest) {
 INSTANTIATE_TEST_SUITE_P(ValueEqTest, ValueEqTest,
                          testing::Combine(testing::ValuesIn(kSampleValues),
                                           testing::ValuesIn(kSampleValues)));
-
 
 TEST(ValueHashTest, ValueHashTest) {
   std::vector<Value> values;
