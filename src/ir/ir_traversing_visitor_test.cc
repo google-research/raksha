@@ -39,9 +39,9 @@ class CollectingVisitor : public IRTraversingVisitor<CollectingVisitor> {
     if (pre_visits_) nodes_.push_back(std::addressof(module));
     return Unit();
   }
-  Unit PostVisit(const Module& module) override {
+  Unit PostVisit(const Module& module, Unit result) override {
     if (post_visits_) nodes_.push_back(std::addressof(module));
-    return Unit();
+    return result;
   }
 
   Unit PreVisit(const Block& block) override {
@@ -49,9 +49,9 @@ class CollectingVisitor : public IRTraversingVisitor<CollectingVisitor> {
     return Unit();
   }
 
-  Unit PostVisit(const Block& block) override {
+  Unit PostVisit(const Block& block, Unit result) override {
     if (post_visits_) nodes_.push_back(std::addressof(block));
-    return Unit();
+    return result;
   }
 
   Unit PreVisit(const Operation& operation) override {
@@ -59,9 +59,9 @@ class CollectingVisitor : public IRTraversingVisitor<CollectingVisitor> {
     return Unit();
   }
 
-  Unit PostVisit(const Operation& operation) override {
+  Unit PostVisit(const Operation& operation, Unit result) override {
     if (post_visits_) nodes_.push_back(std::addressof(operation));
-    return Unit();
+    return result;
   }
 
   const std::vector<const void*>& nodes() const { return nodes_; }
@@ -174,7 +174,7 @@ class ReturningVisitor : public IRTraversingVisitor<ReturningVisitor, ResultType
         post_visits_(traversal_type == TraversalType::kPost ||
                      traversal_type == TraversalType::kBoth) {}
 
-  ResultType ReturningPreVisit(const Module& module) override {
+  ResultType PreVisit(const Module& module) override {
     ResultType result;
     if (pre_visits_) result.push_back((void*)std::addressof(module));
     return result;
@@ -188,7 +188,7 @@ class ReturningVisitor : public IRTraversingVisitor<ReturningVisitor, ResultType
     return result;
   }
 
-  ResultType ReturningPreVisit(const Block& block) override {
+  ResultType PreVisit(const Block& block) override {
     ResultType result;
     if (pre_visits_) result.push_back((void*)std::addressof(block));
     return result;
@@ -203,7 +203,7 @@ class ReturningVisitor : public IRTraversingVisitor<ReturningVisitor, ResultType
     return result;
   }
 
-  ResultType ReturningPreVisit(const Operation& operation) override {
+  ResultType PreVisit(const Operation& operation) override {
     ResultType result;
     if (pre_visits_) result.push_back((void*)std::addressof(operation));
     return result;

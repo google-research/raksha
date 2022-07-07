@@ -41,8 +41,8 @@ class DotGeneratorHelper : public IRTraversingVisitor<DotGeneratorHelper> {
     return visitor.GetDotGraph();
   }
 
-  void PreVisit(const Block& block) override;
-  void PreVisit(const Operation& operation) override;
+  Unit PreVisit(const Block& block) override;
+  Unit PreVisit(const Operation& operation) override;
 
  private:
   DotGeneratorHelper(DotGeneratorConfig config) : config_(std::move(config)) {}
@@ -239,7 +239,7 @@ std::string DotGeneratorHelper::GetDotGraph() {
   return absl::StrFormat(kDigraphFormat, blocks, operations, edges);
 }
 
-void DotGeneratorHelper::PreVisit(const Operation& operation) {
+Unit DotGeneratorHelper::PreVisit(const Operation& operation) {
   std::string node_name = GetNodeName(operation);
   AddOperationNode(node_name, operation);
   unsigned input_index = 0;
@@ -264,11 +264,13 @@ void DotGeneratorHelper::PreVisit(const Operation& operation) {
       AddEdge(GetNodeName(stored_value->storage()), input_name);
     }
   }
+  return Unit();
 }
 
-void DotGeneratorHelper::PreVisit(const Block& block) {
+Unit DotGeneratorHelper::PreVisit(const Block& block) {
   std::string block_name = GetNodeName(block);
   AddBlockNode(block_name, block);
+  return Unit();
 }
 
 std::string DotGenerator::ModuleAsDot(const Module& module,

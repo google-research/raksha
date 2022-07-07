@@ -50,12 +50,12 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     return Unit();
   }
 
-  Unit PostVisit(const Module& module) override {
+  Unit PostVisit(const Module& module, Unit result) override {
     DecreaseIndent();
     out_ << Indent()
          << absl::StreamFormat("}  // module m%d\n",
                                ssa_names_.GetOrCreateID(module));
-    return Unit();
+    return result;
   }
 
   Unit PreVisit(const Block& block) override {
@@ -66,12 +66,12 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     return Unit();
   }
 
-  Unit PostVisit(const Block& block) override {
+  Unit PostVisit(const Block& block, Unit result) override {
     DecreaseIndent();
     out_ << Indent()
          << absl::StreamFormat("}  // block b%d\n",
                                ssa_names_.GetOrCreateID(block));
-    return Unit();
+    return result;
   }
 
   Unit PreVisit(const Operation& operation) override {
@@ -104,12 +104,12 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     return Unit();
   }
 
-  Unit PostVisit(const Operation& operation) override {
+  Unit PostVisit(const Operation& operation, Unit result) override {
     if (operation.impl_module()) {
       DecreaseIndent();
       out_ << Indent() << "}\n";
     }
-    return Unit();
+    return result;
   }
 
   // Returns a pretty-printed map where entries are sorted by the key.
