@@ -64,7 +64,7 @@ class DotGeneratorHelper : public IRTraversingVisitor<DotGeneratorHelper> {
   // Returns the dot node name for the given `block`.
   std::string GetNodeName(const Block& block) {
     auto id = ssa_names_.GetOrCreateID(block);
-    return absl::StrFormat(R"("%s")", id);
+    return absl::StrFormat(R"(%s)", id);
   }
 
   // Returns the dot node name for the given `storage`.

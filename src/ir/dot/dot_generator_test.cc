@@ -96,8 +96,8 @@ TEST_F(DotGeneratorTest, CreatesNodeForBlocks) {
   const auto& dot_graph_lines =
       GetDotGraphAsWhitespaceTrimmedLines(global_module());
   EXPECT_THAT(GetNodes(dot_graph_lines),
-              testing::UnorderedElementsAre(R"("b0" [shape=Mrecord])",
-                                            R"("b1" [shape=Mrecord])"));
+              testing::UnorderedElementsAre(R"(b0 [shape=Mrecord])",
+                                            R"(b1 [shape=Mrecord])"));
 }
 
 TEST_F(DotGeneratorTest, CreatesNodesForOperations) {
@@ -118,9 +118,9 @@ TEST_F(DotGeneratorTest, CreatesNodesForOperations) {
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
           //   block b0
-          R"("b0" [shape=Mrecord])",
-          R"(""b0"_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.plus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])",
-          R"(""b0"_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.minus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
+          R"(b0 [shape=Mrecord])",
+          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.plus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])",
+          R"("b0_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.minus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
 TEST_F(DotGeneratorTest, CreatesAttributesInNodesForOperation) {
@@ -142,8 +142,8 @@ TEST_F(DotGeneratorTest, CreatesAttributesInNodesForOperation) {
   EXPECT_THAT(
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
-          R"("b0" [shape=Mrecord])",
-          R"(""b0"_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.plus [string: "something", ttl: 10] </TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
+          R"(b0 [shape=Mrecord])",
+          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.plus [string: "something", ttl: 10] </TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
 TEST_F(DotGeneratorTest, CreatesInputPortsInNodesForOperation) {
@@ -163,9 +163,9 @@ TEST_F(DotGeneratorTest, CreatesInputPortsInNodesForOperation) {
   EXPECT_THAT(
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
-          R"("b0" [shape=Mrecord])",
-          R"(""b0"_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])",
-          R"(""b0"_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD></TR><TR><TD COLSPAN="1">core.minus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
+          R"(b0 [shape=Mrecord])",
+          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])",
+          R"("b0_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD></TR><TR><TD COLSPAN="1">core.minus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
 TEST_F(DotGeneratorTest, CreatesOutputPortsInNodesForOperation) {
@@ -188,9 +188,9 @@ TEST_F(DotGeneratorTest, CreatesOutputPortsInNodesForOperation) {
   EXPECT_THAT(
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
-          R"("b0" [shape=Mrecord])",
-          R"(""b0"_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.pair</TD></TR><TR><TD COLSPAN="1" PORT="first">first</TD><TD COLSPAN="1" PORT="second">second</TD></TR></TABLE>>])",
-          R"(""b0"_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])"));
+          R"(b0 [shape=Mrecord])",
+          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.pair</TD></TR><TR><TD COLSPAN="1" PORT="first">first</TD><TD COLSPAN="1" PORT="second">second</TD></TR></TABLE>>])",
+          R"("b0_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
 TEST_F(DotGeneratorTest, AddsEdgeFromOperationResultToInputs) {
@@ -217,14 +217,14 @@ TEST_F(DotGeneratorTest, AddsEdgeFromOperationResultToInputs) {
   EXPECT_THAT(
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
-          R"("b0" [shape=Mrecord])",
-          R"(""b0"_%2" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])",
-          R"(""b0"_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])",
-          R"(""b0"_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD></TR><TR><TD COLSPAN="1">core.minus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
+          R"(b0 [shape=Mrecord])",
+          R"("b0_%2" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])",
+          R"("b0_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])",
+          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD></TR><TR><TD COLSPAN="1">core.minus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
   EXPECT_THAT(GetEdges(dot_graph_lines),
-              testing::UnorderedElementsAre(R"(""b0"_%0":out -> ""b0"_%1":I0)",
-                                            R"(""b0"_%0":out -> ""b0"_%2":I1)",
-                                            R"(""b0"_%1":out -> ""b0"_%2":I0)"));
+              testing::UnorderedElementsAre(R"("b0_%0":out -> "b0_%1":I0)",
+                                            R"("b0_%0":out -> "b0_%2":I1)",
+                                            R"("b0_%1":out -> "b0_%2":I0)"));
 }
 
 TEST_F(DotGeneratorTest, AddsAdditionalLabelToOperationNodes) {
@@ -254,9 +254,9 @@ TEST_F(DotGeneratorTest, AddsAdditionalLabelToOperationNodes) {
   EXPECT_THAT(
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
-          R"("b0" [shape=Mrecord])",
-          R"(""b0"_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="2">&nbsp;</TD></TR><TR><TD COLSPAN="2">core.pair</TD></TR><TR><TD COLSPAN="2">numResults(core.pair): 2 </TD></TR><TR><TD COLSPAN="1" PORT="first">first</TD><TD COLSPAN="1" PORT="second">second</TD></TR></TABLE>>])",
-          R"(""b0"_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2">numResults(core.plus): 0 </TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])"));
+          R"(b0 [shape=Mrecord])",
+          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="2">&nbsp;</TD></TR><TR><TD COLSPAN="2">core.pair</TD></TR><TR><TD COLSPAN="2">numResults(core.pair): 2 </TD></TR><TR><TD COLSPAN="1" PORT="first">first</TD><TD COLSPAN="1" PORT="second">second</TD></TR></TABLE>>])",
+          R"("b0_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2">numResults(core.plus): 0 </TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
 }  // namespace
