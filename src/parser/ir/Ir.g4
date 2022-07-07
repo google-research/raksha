@@ -20,10 +20,10 @@ grammar Ir;
 // Parser
 //-----------------------------------------------------------------------------
 
-
+stringLiteral : NUMLITERAL | ID;
 attribute
     : ID ':' NUMLITERAL #numAttribute
-    | ID ':' '"'ID'"' #stringAttribute
+    | ID ':' '"'stringLiteral'"' #stringAttribute
     ;
 attributeList
     : attribute (',' attribute)*
@@ -56,6 +56,7 @@ irProgram
 ANY: '<<ANY>>';
 BLOCK: 'block';
 MODULE: 'module';
+
 
 NUMLITERAL : [0-9]+;
 ID : [0-9_a-zA-Z/.]+;
