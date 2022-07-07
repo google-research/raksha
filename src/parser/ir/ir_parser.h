@@ -26,7 +26,6 @@
 #include "src/ir/ir_context.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
-#include "src/ir/ssa_names.h"
 #include "src/ir/types/type_factory.h"
 #include "src/ir/value.h"
 #include "src/parser/ir/ir_parser_generator_grammar.inc/ir_parser_generator/IrLexer.h"

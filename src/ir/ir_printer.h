@@ -17,9 +17,11 @@
 #define SRC_IR_IR_PRINTER_H_
 
 #include <memory>
+#include <vector>
 
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
+#include "src/common/utils/overloaded.h"
 #include "src/ir/ir_traversing_visitor.h"
 #include "src/ir/module.h"
 #include "src/ir/ssa_names.h"
@@ -31,7 +33,8 @@ namespace raksha::ir {
 class IRPrinter : public IRTraversingVisitor<IRPrinter> {
  public:
   template <typename T>
-  static void ToString(std::ostream& out, const T& entity, std::unique_ptr<SsaNames> ssa_names) {
+  static void ToString(std::ostream& out, const T& entity,
+                       std::unique_ptr<SsaNames> ssa_names) {
     IRPrinter printer(out, std::move(ssa_names));
     entity.Accept(printer);
   }
@@ -43,7 +46,8 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
   }
 
   template <typename T>
-  static std::string ToString(const T& entity, std::unique_ptr<SsaNames> ssa_names) {
+  static std::string ToString(const T& entity,
+                              std::unique_ptr<SsaNames> ssa_names) {
     std::ostringstream out;
     ToString(out, entity, std::move(ssa_names));
     return out.str();
@@ -72,7 +76,8 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
 
   void PreVisit(const Block& block) override {
     out_ << Indent()
-         << absl::StreamFormat("block %s {\n", ssa_names_->GetOrCreateID(block));
+         << absl::StreamFormat("block %s {\n",
+                               ssa_names_->GetOrCreateID(block));
     IncreaseIndent();
   }
 
@@ -141,7 +146,8 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
   void IncreaseIndent() { ++indent_; }
   void DecreaseIndent() { --indent_; }
 
-  IRPrinter(std::ostream& out) : out_(out), indent_(0), ssa_names_(std::make_unique<SsaNames>()) {}
+  IRPrinter(std::ostream& out)
+      : out_(out), indent_(0), ssa_names_(std::make_unique<SsaNames>()) {}
 
   IRPrinter(std::ostream& out, std::unique_ptr<SsaNames> ssa_names)
       : out_(out), indent_(0), ssa_names_(std::move(ssa_names)) {}
@@ -164,6 +170,25 @@ inline std::ostream& operator<<(std::ostream& out, const Module& module) {
   IRPrinter::ToString(out, module);
   return out;
 }
+
+std::string Value::ToString(SsaNames& ssa_names) const {
+  return std::visit(
+      raksha::utils::overloaded{
+          [&ssa_names](const value::Any& any) {
+            return any.ToString(ssa_names);
+          },
+          [&ssa_names](const value::StoredValue& stored_value) {
+            return stored_value.ToString(ssa_names);
+          },
+          [this, &ssa_names](const value::BlockArgument& block_argument) {
+            return absl::StrFormat("%s", ssa_names.GetOrCreateID(*this));
+          },
+          [this, &ssa_names](const value::OperationResult& operation_result) {
+            return absl::StrFormat("%s", ssa_names.GetOrCreateID(*this));
+          }},
+      Value::value_);
+}
+
 }  // namespace raksha::ir
 
 #endif  // SRC_IR_IR_PRINTER_H_

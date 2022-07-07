@@ -20,6 +20,7 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/ir_context.h"
+#include "src/ir/ir_printer.h"
 #include "src/ir/ssa_names.h"
 #include "src/ir/types/entity_type.h"
 #include "src/ir/types/type.h"
@@ -180,11 +181,11 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
         builder.AddResult("primitive_output",
                           Value(value::OperationResult(op, "primitive_value")));
         ssa_names.AddID(Value(value::OperationResult(op, "primitive_value")),
-                           "primitive_value");
+                        "primitive_value");
         builder.AddResult("entity_output",
                           Value(value::OperationResult(op, "entity_value")));
         ssa_names.AddID(Value(value::OperationResult(op, "entity_value")),
-                           "entity_value");
+                        "entity_value");
       });
 
   auto block = builder.build();
