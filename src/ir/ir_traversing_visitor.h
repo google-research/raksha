@@ -17,6 +17,7 @@
 #define SRC_IR_IR_TRAVERSING_VISITOR_H_
 
 #include "src/common/utils/types.h"
+#include "src/common/utils/fold.h"
 #include "src/ir/ir_visitor.h"
 #include "src/ir/module.h"
 
@@ -68,21 +69,21 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   }
 
   Result Visit(const Module& module) final override {
-    Result result = PreVisit(module);
-    for (const std::unique_ptr<Block>& block : module.blocks()) {
-      result =
-          FoldResult(*block, block->Accept<Derived, Result>(*this), std::move(result));
-    }
-    return PostVisit(module, std::move(result));
+    Result pre_visit_result = PreVisit(module);
+    Result fold_result = fold(module.blocks(), std::move(pre_visit_result),
+       [&this](Result acc, const std::unique_ptr<Block> &block) {
+         return FoldResult(*block, block->Accept<Derived, Result>(*this), std::move(acc));
+       });
+    return PostVisit(module, std::move(fold_result));
   }
 
   Result Visit(const Block& block) final override {
-    Result result = PreVisit(block);
-    for (const std::unique_ptr<Operation>& operation : block.operations()) {
-      result = FoldResult(*operation, operation->Accept<Derived, Result>(*this),
-                          std::move(result));
-    }
-    return PostVisit(block, std::move(result));
+    Result pre_visit_result = PreVisit(block);
+    Result fold_result = fold(block.operations(), std::move(pre_visit_result),
+       [&this](Result acc, const std::unique_ptr<Operation> &operation) {
+         return FoldResult(*operation, operation->Accept<Derived, Result>(*this), std::move(acc));
+       });
+    return PostVisit(module, std::move(fold_result));
   }
 
   Result Visit(const Operation& operation) final override {

@@ -123,6 +123,7 @@ cc_library(
     hdrs = ["ir_traversing_visitor.h"],
     deps = [
         ":module",
+        "//src/common/utils:fold",
         "//src/common/utils:types",
     ],
 )
