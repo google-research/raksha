@@ -112,9 +112,9 @@ http_archive(
     patches = [
         "@//third_party/souffle:remove_config.patch",
     ],
-    sha256 = "34b5723afb9f0b57172c984c8bb87cf1b57140d192d15d4786bc4f1fdc3ecbf2",
-    strip_prefix = "souffle-2.1",
-    urls = ["https://github.com/souffle-lang/souffle/archive/refs/tags/2.1.zip"],
+    sha256 = "60c7c2630a63e1388d5e19ceceff2ce5f265afe42451553a561e4e8864d570cc",
+    strip_prefix = "souffle-2.3",
+    urls = ["https://github.com/souffle-lang/souffle/archive/refs/tags/2.3.zip"],
 )
 
 #-------------------

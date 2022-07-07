@@ -134,11 +134,14 @@ filegroup(
     srcs = glob(["raksha_examples/**"]),
 )
 
-# Specifing `@souffle` as part of `data` in the `authorization_logic_test` target
+# Specifying `@souffle` as part of `data` in the `authorization_logic_test` target
 # triggers a build of souffle with `-fno-exceptions`, which causes the build
 # to fail. Instead, we extract the souffle binary using a genrule by making
 # it part of the `tools` (which does not trigger a rebuild) and use it when
 # running the authorization logic tests via `authorization_logic_test`.
+#
+# TODO(#607): Investigate warning as below on build:
+# WARNING: [...]/raksha/rust/tools/authorization-logic/BUILD:142:8: target 'souffle' is both a rule and a file; please choose another name for the rule
 genrule(
     name = "souffle",
     outs = ["souffle"],
