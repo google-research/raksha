@@ -179,11 +179,11 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
         const Operation& op = builder.AddOperation(core_plus, {}, {});
         builder.AddResult("primitive_output",
                           Value(value::OperationResult(op, "primitive_value")));
-        ssa_names.UpdateID(Value(value::OperationResult(op, "primitive_value")),
+        ssa_names.AddID(Value(value::OperationResult(op, "primitive_value")),
                            "primitive_value");
         builder.AddResult("entity_output",
                           Value(value::OperationResult(op, "entity_value")));
-        ssa_names.UpdateID(Value(value::OperationResult(op, "entity_value")),
+        ssa_names.AddID(Value(value::OperationResult(op, "entity_value")),
                            "entity_value");
       });
 

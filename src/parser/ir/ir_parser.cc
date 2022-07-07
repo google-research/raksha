@@ -110,8 +110,8 @@ void IrProgramParser::ConstructOperation(
       std::move(attributes), std::move(inputs), nullptr);
   const Value& v = Value(value::OperationResult(op, "out"));
   value_map_.insert({absl::StrCat(operation_context.VALUE_ID()->getText()), v});
-  ssa_names_->UpdateID(v, operation_context.VALUE_ID()->getText());
-  ssa_names_->UpdateID(op, operation_context.VALUE_ID()->getText());
+  ssa_names_->AddID(v, operation_context.VALUE_ID()->getText());
+  ssa_names_->AddID(op, operation_context.VALUE_ID()->getText());
 }
 
 void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
@@ -123,14 +123,14 @@ void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
   }
   const Block& b = module_->AddBlock(builder.build());
   block_map_.insert({block_context.ID()->getText(), std::addressof(b)});
-  ssa_names_->UpdateID(b, block_context.ID()->getText());
+  ssa_names_->AddID(b, block_context.ID()->getText());
 }
 
 void IrProgramParser::ConstructModule(IrParser::ModuleContext& module_context) {
   for (IrParser::BlockContext* block_context : module_context.block()) {
     IrProgramParser::ConstructBlock(*CHECK_NOTNULL(block_context));
   }
-  ssa_names_->UpdateID(*module_, module_context.ID()->getText());
+  ssa_names_->AddID(*module_, module_context.ID()->getText());
 }
 
 /// This function produces an abstract syntax tree (AST) rooted with a

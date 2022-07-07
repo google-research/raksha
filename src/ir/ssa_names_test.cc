@@ -54,15 +54,17 @@ TYPED_TEST(SsaNamesTest, GetOrCreateIDReturnsUniqueIDs) {
   EXPECT_EQ(names.GetOrCreateID(this->second_entity_), second_id);
 }
 
-TYPED_TEST(SsaNamesTest, UpdateIDReturnsCorrectIDs) {
+TYPED_TEST(SsaNamesTest, AddIDReturnsCorrectIDs) {
   SsaNames names;
   SsaNames::ID first_id = names.GetOrCreateID(this->first_entity_);
-  SsaNames::ID second_id = names.UpdateID(this->second_entity_, "something");
+  SsaNames::ID second_id = names.AddID(this->second_entity_, "something");
 
   EXPECT_NE(first_id, second_id);
-  EXPECT_EQ(names.UpdateID(this->first_entity_, "another_thing"), "another_thing");
-  EXPECT_EQ(names.GetOrCreateID(this->second_entity_), second_id);
+  EXPECT_DEATH(names.AddID(this->first_entity_, "another_thing"), "another_thing");
+  EXPECT_EQ(names.GetOrCreateID(this->second_entity_), "something");
 }
+
+
 
 }  // namespace
 }  // namespace raksha::ir

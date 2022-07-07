@@ -44,21 +44,24 @@ class SsaNames {
     return operation_ids_.GetOrCreateID(&operation);
   }
 
-  ID UpdateID(const Operation &operation, ID id) {
+  ID AddID(const Operation &operation, ID id) {
+    CHECK(operation_ids_.FindID(&operation)) << "Trying to update new ID " << id << " to an existing operation map";
     return operation_ids_.UpdateID(&operation, id);
   }
   ID GetOrCreateID(const Block &block) {
     return block_ids_.GetOrCreateID(&block);
   }
 
-  ID UpdateID(const Block &block, ID id) {
+  ID AddID(const Block &block, ID id) {
+    CHECK(block_ids_.FindID(&block)) << "Trying to update new ID " << id << " to an existing block map";
     return block_ids_.UpdateID(&block, id);
   }
 
   ID GetOrCreateID(const Module &module) {
     return module_ids_.GetOrCreateID(&module);
   }
-  ID UpdateID(const Module &module, ID id) {
+  ID AddID(const Module &module, ID id) {
+    CHECK(module_ids_.FindID(&module)) << "Trying to update new ID " << id << " to an existing module map";
     return module_ids_.UpdateID(&module, id);
   }
 
@@ -66,7 +69,8 @@ class SsaNames {
     return value_ids_.GetOrCreateID(value);
   }
 
-  ID UpdateID(const Value &value, ID id) {
+  ID AddID(const Value &value, ID id) {
+    CHECK(value_ids_.FindID(value)) << "Trying to update new ID " << id << " to an existing value map";
     return value_ids_.UpdateID(value, id);
   }
 
@@ -89,6 +93,11 @@ class SsaNames {
       // and return the existing new id.
       auto insert_result = item_ids_.insert_or_assign(entity, id);
       return insert_result.first->second;
+    }
+
+    bool FindID(T entity) {
+      auto result = item_ids_.find(entity);
+      return result == item_ids_.end();
     }
 
    private:
