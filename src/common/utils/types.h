@@ -31,6 +31,11 @@ struct SelectType {
 };
 
 template <typename T, typename F>
+struct SelectType<true, T, F> {
+    using Result = T;
+};
+
+template <typename T, typename F>
 struct SelectType<false, T, F> {
     using Result = F;
 };

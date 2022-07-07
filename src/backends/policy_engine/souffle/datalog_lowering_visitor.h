@@ -31,7 +31,7 @@
 namespace raksha::backends::policy_engine::souffle {
 
 class DatalogLoweringVisitor
-    : public ir::IRTraversingVisitor<DatalogLoweringVisitor> {
+    : public ir::IRTraversingVisitor<DatalogLoweringVisitor, Unit, true> {
  public:
   // We currently don't have any owner information when outputting IR. We don't
   // need it yet, really, but we do need to output something.

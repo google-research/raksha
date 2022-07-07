@@ -42,7 +42,7 @@ TEST(TypesTest, CopyConstTypeTrue) {
 TEST(TypesTest, CopyConstTypeFalse) {
   CopyConst<false, int> a = 4;
   a++;
-  EXPECT_EQ(a, 4);
+  EXPECT_EQ(a, 5);
 }
 
 }  // namespace

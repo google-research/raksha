@@ -165,7 +165,7 @@ using ResultType=std::vector<void*>;
 // Another small test visitor that collects the nodes as they are visited to make
 // sure that  Pre and Post visits happened correctly.
 // Uses 'returns' rather than side effects.
-class ReturningVisitor : public IRTraversingVisitor<ReturningVisitor, ResultType> {
+class ReturningVisitor : public IRTraversingVisitor<ReturningVisitor, ResultType, true> {
  public:
   enum class TraversalType { kPre = 0x1, kPost = 0x2, kBoth = 0x3 };
   ReturningVisitor(TraversalType traversal_type)
