@@ -139,11 +139,8 @@ filegroup(
 # to fail. Instead, we extract the souffle binary using a genrule by making
 # it part of the `tools` (which does not trigger a rebuild) and use it when
 # running the authorization logic tests via `authorization_logic_test`.
-#
-# TODO(#607): Investigate warning as below on build:
-# WARNING: [...]/raksha/rust/tools/authorization-logic/BUILD:142:8: target 'souffle' is both a rule and a file; please choose another name for the rule
 genrule(
-    name = "souffle",
+    name = "souffle_tool",
     outs = ["souffle"],
     cmd = "cp $(location @souffle) $@ && chmod a+x $@",
     tools = ["@souffle"],
@@ -154,11 +151,11 @@ rust_test(
     crate = ":authorization_logic_lib",
     data = [
         ":raksha_examples",
-        ":souffle",
+        ":souffle_tool",
         ":test_inputs",
     ],
     env = {
-        "SOUFFLE_BIN": "$(rootpath :souffle)",
+        "SOUFFLE_BIN": "$(rootpath :souffle_tool)",
     },
     rustc_flags = [
         "--cfg=feature=\"bazel_build\"",
