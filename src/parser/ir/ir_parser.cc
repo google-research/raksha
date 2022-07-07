@@ -65,9 +65,11 @@ void IrProgramParser::ConstructOperation(
               dynamic_cast<IrParser::StringAttributeContext*>(
                   attribute_context)) {
         attributes.insert(
-            {CHECK_NOTNULL(string_attribute_context)->ID(0)->getText(),
+            {CHECK_NOTNULL(string_attribute_context)->ID()->getText(),
              Attribute::Create<StringAttribute>(
-                 CHECK_NOTNULL(string_attribute_context)->ID(1)->getText())});
+                 CHECK_NOTNULL(string_attribute_context)
+                     ->stringLiteral()
+                     ->getText())});
         continue;
       }
       auto* num_attribute_context =
@@ -99,7 +101,8 @@ void IrProgramParser::ConstructOperation(
                       CHECK_NOTNULL(named_value_context)->VALUE_ID()->getText();
                   // Operation Result Value
                   auto find_value_id_operation = value_map_.find(value_id);
-                  CHECK(find_value_id_operation != value_map_.end()) << "Value not found" << value_id; 
+                  CHECK(find_value_id_operation != value_map_.end())
+                      << "Value not found" << value_id;
                   return find_value_id_operation->second;
                 });
 

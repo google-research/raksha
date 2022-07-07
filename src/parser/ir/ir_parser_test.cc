@@ -65,7 +65,7 @@ R"(module m0 {
   }  // block b0
   block b1 {
     %2 = core.plus [access: "private", transform: "no"](%0.out, <<ANY>>)
-    %3 = core.mult [access: "private", transform: "no"](%0.out, %2.out)
+    %3 = core.mult [access: "private", transform: 45](%0.out, %2.out)
   }  // block b1
 }  // module m0
 )",
@@ -76,7 +76,7 @@ R"(module m0 {
   }  // block b0
   block b1 {
     %2 = core.plus [access: "private", transform: "no"](%0.out, <<ANY>>)
-    %3 = core.mult [lhs: 10, rhs: "_59"](%0.out, %2.out)
+    %3 = core.mult [lhs: 10, rhs: "59"](%0.out, %2.out)
   }  // block b1
 }  // module m0
 )"));
@@ -93,7 +93,7 @@ TEST(IrParseTest, ValueNotFoundCausesFailure) {
 }  // module m0
 )";
   EXPECT_DEATH(IRPrinter::ToString(ir_parser.ParseProgram(input_program_text)),
-              "Value not found");
+               "Value not found");
 }
 
 TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {
@@ -108,6 +108,6 @@ TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {
 }  // module m0
 )";
   EXPECT_DEATH(IRPrinter::ToString(ir_parser.ParseProgram(input_program_text)),
-              "no viable alternative at input");
+               "no viable alternative at input");
 }
 }  // namespace raksha::ir
