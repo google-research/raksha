@@ -157,9 +157,7 @@ TEST(IRTraversingVisitorTest, TraversesOperationAsExpected) {
       testing::ElementsAre(std::addressof(plus_op_instance), plus_op_module,
                            plus_op_module, std::addressof(plus_op_instance)));
 }
-}  // namespace
 
-namespace {
 using ResultType=std::vector<void*>;
 
 // Another small test visitor that collects the nodes as they are visited to make
