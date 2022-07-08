@@ -82,9 +82,9 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
     Result pre_visit_result = PreVisit(module);
     Result fold_result = common::utils::fold(
         module.blocks(), std::move(pre_visit_result),
-        [this](Result acc, const std::unique_ptr<Block>& block) {
-          return std::move(FoldResult(std::move(acc), *block,
-                                      block->Accept<Derived, Result>(*this)));
+        [this, &module](Result acc, const std::unique_ptr<Block>& block) {
+          return std::move(FoldResult(std::move(acc), module,
+                                      block->Accept(*this)));
         });
     return PostVisit(module, std::move(fold_result));
   }
@@ -93,10 +93,10 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
     Result pre_visit_result = PreVisit(block);
     Result fold_result = common::utils::fold(
         block.operations(), std::move(pre_visit_result),
-        [this](Result acc, const std::unique_ptr<Operation>& operation) {
+        [this, &block](Result acc, const std::unique_ptr<Operation>& operation) {
           return std::move(
-              FoldResult(std::move(acc), *operation,
-                         operation->Accept<Derived, Result>(*this)));
+              FoldResult(std::move(acc), block,
+                         operation->Accept(*this)));
         });
     return PostVisit(block, std::move(fold_result));
   }
