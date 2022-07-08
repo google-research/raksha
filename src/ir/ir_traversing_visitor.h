@@ -42,36 +42,36 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
     return std::move(GetDefaultValue());
   }
   // Invoked after all the children of `module` is visited.
-  virtual Result PostVisit(const Module& module, Result result) {
-    return std::move(result);
+  virtual Result PostVisit(const Module& module, Result in_order_result) {
+    return std::move(in_order_result);
   }
   virtual Result FoldResult(const Module& module, Result child_result,
-                            Result result) {
-    return std::move(result);
+                            Result in_order_result) {
+    return std::move(in_order_result);
   }
   // Invoked before all the children of `block` is visited.
   virtual Result PreVisit(const Block& block) {
     return std::move(GetDefaultValue());
   }
   // Invoked after all the children of `block` is visited.
-  virtual Result PostVisit(const Block& block, Result result) {
-    return std::move(result);
+  virtual Result PostVisit(const Block& block, Result in_order_result) {
+    return std::move(in_order_result);
   }
   virtual Result FoldResult(const Block& block, Result child_result,
-                            Result result) {
-    return std::move(result);
+                            Result in_order_result) {
+    return std::move(in_order_result);
   }
   // Invoked before all the children of `operation` is visited.
   virtual Result PreVisit(const Operation& operation) {
     return std::move(GetDefaultValue());
   }
   // Invoked after all the children of `operation` is visited.
-  virtual Result PostVisit(const Operation& operation, Result result) {
-    return std::move(result);
+  virtual Result PostVisit(const Operation& operation, Result in_order_result) {
+    return std::move(in_order_result);
   }
   virtual Result FoldResult(const Operation& operation, Result child_result,
-                            Result result) {
-    return std::move(result);
+                            Result in_order_result) {
+    return std::move(in_order_result);
   }
 
   Result Visit(const Module& module) final override {
