@@ -17,51 +17,98 @@
 #define SRC_IR_SSA_NAMES_H_
 
 #include "absl/container/flat_hash_map.h"
+#include "src/ir/value.h"
 
 namespace raksha::ir {
 
 class Operation;
 class Block;
 class Module;
+class Value;
 
 class SsaNames {
  public:
-  using ID = int;
-  SsaNames() {}
-  // Disable copy (and move) semantics.
+  using ID = std::string;
+  SsaNames()
+      : block_ids_("b"),
+        module_ids_("m"),
+        value_ids_("%"),
+        operation_ids_("%") {}
+
+  // Disable copy semantics.
   SsaNames(const SsaNames &) = delete;
   SsaNames &operator=(const SsaNames &) = delete;
+  SsaNames(SsaNames &&) = default;
 
   ID GetOrCreateID(const Operation &operation) {
     return operation_ids_.GetOrCreateID(&operation);
   }
 
+  ID AddID(const Operation &operation, ID id) {
+    CHECK(operation_ids_.FindID(&operation)) << "Trying to update new ID " << id << " to an existing operation map";
+    return operation_ids_.UpdateID(&operation, id);
+  }
   ID GetOrCreateID(const Block &block) {
     return block_ids_.GetOrCreateID(&block);
   }
 
+  ID AddID(const Block &block, ID id) {
+    CHECK(block_ids_.FindID(&block)) << "Trying to update new ID " << id << " to an existing block map";
+    return block_ids_.UpdateID(&block, id);
+  }
+
   ID GetOrCreateID(const Module &module) {
-    return module_ids_.GetOrCreateID(std::addressof(module));
+    return module_ids_.GetOrCreateID(&module);
+  }
+  ID AddID(const Module &module, ID id) {
+    CHECK(module_ids_.FindID(&module)) << "Trying to update new ID " << id << " to an existing module map";
+    return module_ids_.UpdateID(&module, id);
+  }
+
+  ID GetOrCreateID(const Value &value) {
+    return value_ids_.GetOrCreateID(value);
+  }
+
+  ID AddID(const Value &value, ID id) {
+    CHECK(value_ids_.FindID(value)) << "Trying to update new ID " << id << " to an existing value map";
+    return value_ids_.UpdateID(value, id);
   }
 
  private:
-  template <class T>
+  template <typename T>
   class IDManager {
    public:
-    ID GetOrCreateID(const T *entity) {
+    IDManager(absl::string_view prefix) : prefix_(prefix) {}
+
+    ID GetOrCreateID(T entity) {
       // Note that if `entity` is already in the map, the `insert` call below
       // will return the existing entity. Otherwise, a new entity is added.
-      auto insert_result = item_ids_.insert({entity, item_ids_.size()});
+      auto insert_result =
+          item_ids_.insert({entity, absl::StrCat(prefix_, item_ids_.size())});
       return insert_result.first->second;
     }
 
+    ID UpdateID(T entity, ID id) {
+      // Note that if `entity` is already in the map, we replace the id
+      // and return the existing new id.
+      auto insert_result = item_ids_.insert_or_assign(entity, id);
+      return insert_result.first->second;
+    }
+
+    bool FindID(T entity) {
+      auto result = item_ids_.find(entity);
+      return result == item_ids_.end();
+    }
+
    private:
-    absl::flat_hash_map<const T *, ID> item_ids_;
+    std::string prefix_;
+    absl::flat_hash_map<T, ID> item_ids_;
   };
 
-  IDManager<Operation> operation_ids_;
-  IDManager<Block> block_ids_;
-  IDManager<Module> module_ids_;
+  IDManager<const Block *> block_ids_;
+  IDManager<const Module *> module_ids_;
+  IDManager<Value> value_ids_;
+  IDManager<const Operation *> operation_ids_;
 };
 
 }  // namespace raksha::ir

@@ -25,6 +25,8 @@
 #include "src/ir/datalog/operation.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
+#include "src/ir/ssa_names.h"
+#include "src/ir/ir_printer.h"
 
 namespace raksha::backends::policy_engine::souffle {
 
@@ -81,11 +83,10 @@ void DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
       });
   DatalogOperation datalog_operation(
       DatalogSymbol(kDefaultPrincipal), DatalogSymbol(op_name),
-      DatalogSymbol(
-          ir::value::OperationResult(
-              operation, frontends::sql::DecoderContext::kDefaultOutputName)
-              .ToString(ssa_names_)),
+      DatalogSymbol(ssa_names_.GetOrCreateID(operation)),
       std::move(operand_list), std::move(attribute_list));
+  ssa_names_.GetOrCreateID(ir::Value(ir::value::OperationResult(
+      operation, frontends::sql::DecoderContext::kDefaultOutputName)));
   datalog_facts_.AddIsOperationFact(
       DatalogIsOperationFact(std::move(datalog_operation)));
 }

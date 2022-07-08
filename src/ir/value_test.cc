@@ -15,8 +15,11 @@
 //----------------------------------------------------------------------------
 #include "src/ir/value.h"
 
+#include "absl/hash/hash_testing.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/ir_printer.h"
 #include "src/ir/module.h"
+#include "src/ir/ssa_names.h"
 #include "src/ir/types/type_factory.h"
 
 namespace raksha::ir {
@@ -46,6 +49,17 @@ struct TestData {
     ssa_names.GetOrCreateID(second_block);
     ssa_names.GetOrCreateID(plus_operation);
     ssa_names.GetOrCreateID(minus_operation);
+    ssa_names.GetOrCreateID(Value(first_block_first_arg));
+    ssa_names.GetOrCreateID(Value(first_block_second_arg));
+    ssa_names.GetOrCreateID(Value(second_block_first_arg));
+    ssa_names.GetOrCreateID(Value(second_block_second_arg));
+    ssa_names.GetOrCreateID(Value(plus_operation_result1));
+    ssa_names.GetOrCreateID(Value(plus_operation_result2));
+    ssa_names.GetOrCreateID(Value(minus_operation_result1));
+    ssa_names.GetOrCreateID(Value(minus_operation_result2));
+    ssa_names.GetOrCreateID(Value(input_stored_value));
+    ssa_names.GetOrCreateID(Value(output_stored_value));
+    ssa_names.GetOrCreateID(Value(value::Any()));
   }
 
   types::TypeFactory type_factory;
@@ -118,14 +132,14 @@ TEST_P(ValueToStringTest, ToStringReturnsExpectedFormat) {
 INSTANTIATE_TEST_SUITE_P(
     ValueToStringTest, ValueToStringTest,
     testing::Values(
-        std::make_pair(Value(test_data.first_block_first_arg), "%0.one"),
-        std::make_pair(Value(test_data.first_block_second_arg), "%0.two"),
-        std::make_pair(Value(test_data.second_block_first_arg), "%1.one"),
-        std::make_pair(Value(test_data.second_block_second_arg), "%1.two"),
-        std::make_pair(Value(test_data.plus_operation_result1), "%0.res1"),
-        std::make_pair(Value(test_data.plus_operation_result2), "%0.res2"),
-        std::make_pair(Value(test_data.minus_operation_result1), "%1.res1"),
-        std::make_pair(Value(test_data.minus_operation_result2), "%1.res2"),
+        std::make_pair(Value(test_data.first_block_first_arg), "%0"),
+        std::make_pair(Value(test_data.first_block_second_arg), "%1"),
+        std::make_pair(Value(test_data.second_block_first_arg), "%2"),
+        std::make_pair(Value(test_data.second_block_second_arg), "%3"),
+        std::make_pair(Value(test_data.plus_operation_result1), "%4"),
+        std::make_pair(Value(test_data.plus_operation_result2), "%5"),
+        std::make_pair(Value(test_data.minus_operation_result1), "%6"),
+        std::make_pair(Value(test_data.minus_operation_result2), "%7"),
         std::make_pair(Value(test_data.input_stored_value), "store:input:type"),
         std::make_pair(Value(test_data.output_stored_value),
                        "store:output:type"),
@@ -161,6 +175,14 @@ TEST_P(ValueEqTest, ValueEqTest) {
 INSTANTIATE_TEST_SUITE_P(ValueEqTest, ValueEqTest,
                          testing::Combine(testing::ValuesIn(kSampleValues),
                                           testing::ValuesIn(kSampleValues)));
+
+TEST(ValueHashTest, ValueHashTest) {
+  std::vector<Value> values;
+  for (const auto &kSampleValue : kSampleValues) {
+    values.push_back(kSampleValue.first);
+  }
+  EXPECT_TRUE(absl::VerifyTypeImplementsAbslHashCorrectly(values));
+}
 
 }  // namespace
 }  // namespace raksha::ir

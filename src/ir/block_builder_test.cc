@@ -20,9 +20,12 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/ir_context.h"
+#include  "third_party/raksha/src/ir/ir_printer.h"
+#include "src/ir/ssa_names.h"
 #include "src/ir/types/entity_type.h"
 #include "src/ir/types/type.h"
 #include "src/ir/types/type_factory.h"
+
 
 namespace raksha::ir {
 namespace {
@@ -166,19 +169,25 @@ TEST_F(BlockBuilderTest, AddImplementationPassesSelfAndResultBlock) {
 
 TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
   BlockBuilder builder;
-  builder.AddImplementation([this](BlockBuilder& builder, Block& block) {
-    builder.AddInput("primitive_input", MakePrimitiveType());
-    builder.AddInput("entity_input", MakeTestEntityType("InputTensor"));
-    builder.AddOutput("primitive_output", MakePrimitiveType());
-    builder.AddOutput("entity_output", MakeTestEntityType("OutputTensor"));
-    const Operator& core_plus =
-        *CHECK_NOTNULL(context_.GetOperator("core.plus"));
-    const Operation& op = builder.AddOperation(core_plus, {}, {});
-    builder.AddResult("primitive_output",
-                      Value(value::OperationResult(op, "primitive_value")));
-    builder.AddResult("entity_output",
-                      Value(value::OperationResult(op, "entity_value")));
-  });
+  SsaNames ssa_names;
+  builder.AddImplementation(
+      [this, &ssa_names](BlockBuilder& builder, Block& block) {
+        builder.AddInput("primitive_input", MakePrimitiveType());
+        builder.AddInput("entity_input", MakeTestEntityType("InputTensor"));
+        builder.AddOutput("primitive_output", MakePrimitiveType());
+        builder.AddOutput("entity_output", MakeTestEntityType("OutputTensor"));
+        const Operator& core_plus =
+            *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+        const Operation& op = builder.AddOperation(core_plus, {}, {});
+        builder.AddResult("primitive_output",
+                          Value(value::OperationResult(op, "primitive_value")));
+        ssa_names.AddID(Value(value::OperationResult(op, "primitive_value")),
+                           "primitive_value");
+        builder.AddResult("entity_output",
+                          Value(value::OperationResult(op, "entity_value")));
+        ssa_names.AddID(Value(value::OperationResult(op, "entity_value")),
+                           "entity_value");
+      });
 
   auto block = builder.build();
   CheckExpectedDecls(block->inputs(), /*entity_key=*/"entity_input",
@@ -188,12 +197,15 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
                      /*primitive_key=*/"primitive_output",
                      /*schema_name=*/"OutputTensor");
   const NamedValueMap& results = block->results();
-  SsaNames ssa_names;
   ASSERT_EQ(results.count("entity_output"), 1);
-  EXPECT_EQ(results.at("entity_output").ToString(ssa_names), "%0.entity_value");
+  //%0 is the entity_value OperationResult Value :
+  // Value(value::OperationResult(op, "entity_value"))
+  EXPECT_EQ(results.at("entity_output").ToString(ssa_names), "entity_value");
   ASSERT_EQ(results.count("primitive_output"), 1);
+  //%0 is the primitive_value OperationResult Value :
+  // Value(value::OperationResult(op, "primitive_value"))
   EXPECT_EQ(results.at("primitive_output").ToString(ssa_names),
-            "%0.primitive_value");
+            "primitive_value");
 }
 
 // A class to test `AddOperation`  with custom create methods.

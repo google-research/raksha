@@ -57,14 +57,14 @@ class DotGeneratorHelper : public IRTraversingVisitor<DotGeneratorHelper> {
   std::string GetNodeName(const Operation& operation) {
     const Block* block = operation.parent();
     auto id = ssa_names_.GetOrCreateID(operation);
-    return absl::StrFormat("%s_%d",
+    return absl::StrFormat(R"("%s_%s")",
                            block == nullptr ? "g" : GetNodeName(*block), id);
   }
 
   // Returns the dot node name for the given `block`.
   std::string GetNodeName(const Block& block) {
     auto id = ssa_names_.GetOrCreateID(block);
-    return absl::StrFormat("B%d", id);
+    return absl::StrFormat(R"(%s)", id);
   }
 
   // Returns the dot node name for the given `storage`.
@@ -163,43 +163,45 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
   int input_colspan = total_colspan / input_cols;
   int output_colspan = total_colspan / output_cols;
 
-  std::string input_ports = 
-      op.inputs().empty() 
+  std::string input_ports =
+      op.inputs().empty()
           ? absl::StrFormat(R"(<TD COLSPAN="%d">&nbsp;</TD>)", total_colspan)
           : absl::StrJoin(
-              op.inputs(), "", [i = 0, input_colspan](std::string* out, const Value& v) mutable {
-                int node_num = i++;
-                absl::StrAppend(out,
-                    absl::StrFormat(
-                        R"(<TD COLSPAN="%d" PORT="I%d">I%d</TD>)", 
-                        input_colspan, node_num, node_num));
-              });
+                op.inputs(), "",
+                [i = 0, input_colspan](std::string* out,
+                                       const Value& v) mutable {
+                  int node_num = i++;
+                  absl::StrAppend(
+                      out,
+                      absl::StrFormat(R"(<TD COLSPAN="%d" PORT="I%d">I%d</TD>)",
+                                      input_colspan, node_num, node_num));
+                });
   std::string output_ports =
       results.empty()
-          ? absl::StrFormat(R"(<TD COLSPAN="%d" PORT="out">out</TD>)", 
-              total_colspan)
-          : absl::StrJoin(results, "",
-                          [output_colspan](std::string* out, const std::string& name) {
-                            absl::StrAppend(
-                                out, absl::StrFormat(
-                                  R"(<TD COLSPAN="%d" PORT="%s">%s</TD>)", 
-                                  output_colspan, name, name));
-                          });
+          ? absl::StrFormat(R"(<TD COLSPAN="%d" PORT="out">out</TD>)",
+                            total_colspan)
+          : absl::StrJoin(
+                results, "",
+                [output_colspan](std::string* out, const std::string& name) {
+                  absl::StrAppend(
+                      out,
+                      absl::StrFormat(R"(<TD COLSPAN="%d" PORT="%s">%s</TD>)",
+                                      output_colspan, name, name));
+                });
   std::string additional_label = config_.operation_labeler(op, results);
   std::string additional_label_directive =
-      additional_label.empty() 
-          ? "" 
-          : absl::StrFormat(
-                R"(<TR><TD COLSPAN="%d">%s </TD></TR>)", total_colspan,
-                additional_label);
+      additional_label.empty()
+          ? ""
+          : absl::StrFormat(R"(<TR><TD COLSPAN="%d">%s </TD></TR>)",
+                            total_colspan, additional_label);
   std::string attributes =
       op.attributes().empty()
           ? ""
           : absl::StrFormat(
                 " [%s] ", IRPrinter::PrintNamedMapInNameOrder(
-                             op.attributes(), [](const Attribute& attribute) {
-                               return attribute.ToString();
-                             }));
+                              op.attributes(), [](const Attribute& attribute) {
+                                return attribute.ToString();
+                              }));
   return absl::StrFormat(
       R"(%s [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR>%s</TR><TR><TD COLSPAN="%d">%s%s</TD></TR>%s<TR>%s</TR></TABLE>>])",
       std::move(node_name), std::move(input_ports), total_colspan,
@@ -223,7 +225,10 @@ std::string DotGeneratorHelper::GetDotGraph() {
       blocks_, "\n  ",
       [](std::string* out,
          absl::flat_hash_map<std::string, const Block*>::value_type
-             node_entry) { absl::StrAppend(out, absl::StrFormat("%s [shape=Mrecord]", node_entry.first)); });
+             node_entry) {
+        absl::StrAppend(
+            out, absl::StrFormat("%s [shape=Mrecord]", node_entry.first));
+      });
   // Generate nodes for operations.
   std::string operations = absl::StrJoin(
       operations_, "\n  ",

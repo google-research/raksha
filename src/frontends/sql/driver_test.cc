@@ -20,6 +20,7 @@
 #include "src/backends/policy_engine/policy.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/sql_ir.pb.h"
+#include "src/ir/ir_printer.h"
 
 namespace raksha::frontends::sql {
 

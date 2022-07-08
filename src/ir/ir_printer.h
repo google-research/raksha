@@ -22,6 +22,7 @@
 #include "absl/strings/str_join.h"
 #include "src/ir/ir_traversing_visitor.h"
 #include "src/ir/module.h"
+#include "src/ir/ssa_names.h"
 #include "src/ir/value.h"
 
 namespace raksha::ir {
@@ -30,9 +31,22 @@ namespace raksha::ir {
 class IRPrinter : public IRTraversingVisitor<IRPrinter> {
  public:
   template <typename T>
+  static void ToString(std::ostream& out, const T& entity, std::unique_ptr<SsaNames> ssa_names) {
+    IRPrinter printer(out, std::move(ssa_names));
+    entity.Accept(printer);
+  }
+
+  template <typename T>
   static void ToString(std::ostream& out, const T& entity) {
     IRPrinter printer(out);
     entity.Accept(printer);
+  }
+
+  template <typename T>
+  static std::string ToString(const T& entity, std::unique_ptr<SsaNames> ssa_names) {
+    std::ostringstream out;
+    ToString(out, entity, std::move(ssa_names));
+    return out.str();
   }
 
   template <typename T>
@@ -44,35 +58,34 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
 
   void PreVisit(const Module& module) override {
     out_ << Indent()
-         << absl::StreamFormat("module m%d {\n",
-                               ssa_names_.GetOrCreateID(module));
+         << absl::StreamFormat("module %s {\n",
+                               ssa_names_->GetOrCreateID(module));
     IncreaseIndent();
   }
 
   void PostVisit(const Module& module) override {
     DecreaseIndent();
     out_ << Indent()
-         << absl::StreamFormat("}  // module m%d\n",
-                               ssa_names_.GetOrCreateID(module));
+         << absl::StreamFormat("}  // module %s\n",
+                               ssa_names_->GetOrCreateID(module));
   }
 
   void PreVisit(const Block& block) override {
     out_ << Indent()
-         << absl::StreamFormat("block b%d {\n",
-                               ssa_names_.GetOrCreateID(block));
+         << absl::StreamFormat("block %s {\n", ssa_names_->GetOrCreateID(block));
     IncreaseIndent();
   }
 
   void PostVisit(const Block& block) override {
     DecreaseIndent();
     out_ << Indent()
-         << absl::StreamFormat("}  // block b%d\n",
-                               ssa_names_.GetOrCreateID(block));
+         << absl::StreamFormat("}  // block %s\n",
+                               ssa_names_->GetOrCreateID(block));
   }
 
   void PreVisit(const Operation& operation) override {
-    constexpr absl::string_view kOperationFormat = "%%%d = %s [%s](%s)";
-    SsaNames::ID this_ssa_name = ssa_names_.GetOrCreateID(operation);
+    constexpr absl::string_view kOperationFormat = "%s = %s [%s](%s)";
+    SsaNames::ID this_ssa_name = ssa_names_->GetOrCreateID(operation);
 
     // We want the attribute names to print in a stable order. This means that
     // we cannot just print from the attribute map directly. Gather the names
@@ -84,9 +97,8 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
 
     std::string inputs_string = absl::StrJoin(
         operation.inputs(), ", ", [this](std::string* out, const Value& value) {
-          absl::StrAppend(out, value.ToString(ssa_names_));
+          absl::StrAppend(out, value.ToString(*ssa_names_));
         });
-
     out_ << Indent()
          << absl::StreamFormat(kOperationFormat, this_ssa_name,
                                operation.op().name(), attributes_string,
@@ -129,12 +141,33 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
   void IncreaseIndent() { ++indent_; }
   void DecreaseIndent() { --indent_; }
 
-  IRPrinter(std::ostream& out) : out_(out), indent_(0) {}
+  IRPrinter(std::ostream& out) : out_(out), indent_(0), ssa_names_(std::make_unique<SsaNames>()) {}
+
+  IRPrinter(std::ostream& out, std::unique_ptr<SsaNames> ssa_names)
+      : out_(out), indent_(0), ssa_names_(std::move(ssa_names)) {}
 
   std::ostream& out_;
   int indent_;
-  SsaNames ssa_names_;
+  std::unique_ptr<SsaNames> ssa_names_;
 };
+
+inline std::string Value::ToString(SsaNames& ssa_names) const {
+  return std::visit(
+      raksha::utils::overloaded{
+          [&ssa_names](const value::Any& any) {
+            return any.ToString(ssa_names);
+          },
+          [&ssa_names](const value::StoredValue& stored_value) {
+            return stored_value.ToString(ssa_names);
+          },
+          [this, &ssa_names](const value::BlockArgument& block_argument) {
+            return absl::StrFormat("%s", ssa_names.GetOrCreateID(*this));
+          },
+          [this, &ssa_names](const value::OperationResult& operation_result) {
+            return absl::StrFormat("%s", ssa_names.GetOrCreateID(*this));
+          }},
+      Value::value_);
+}
 
 inline std::ostream& operator<<(std::ostream& out, const Operation& operation) {
   IRPrinter::ToString(out, operation);

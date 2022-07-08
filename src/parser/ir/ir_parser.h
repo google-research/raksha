@@ -26,6 +26,7 @@
 #include "src/ir/ir_context.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
+#include "src/ir/ssa_names.h"
 #include "src/ir/types/type_factory.h"
 #include "src/ir/value.h"
 #include "src/parser/ir/ir_parser_generator_grammar.inc/ir_parser_generator/IrLexer.h"
@@ -37,8 +38,17 @@ using ir_parser_generator::IrParser;
 
 class IrProgramParser {
  public:
-  // Parses an input string
-  const Module& ParseProgram(absl::string_view prog_text);
+  struct Result {
+    std::unique_ptr<IRContext> context;
+    std::unique_ptr<Module> module;
+    std::unique_ptr<SsaNames> ssa_names;
+  };
+
+  IrProgramParser::Result ParseProgram(absl::string_view prog_text);
+  IrProgramParser()
+      : context_(std::make_unique<IRContext>()),
+        ssa_names_(std::make_unique<SsaNames>()),
+        module_(std::make_unique<Module>()){};
 
  private:
   void ConstructOperation(IrParser::OperationContext& operation_context,
@@ -50,8 +60,9 @@ class IrProgramParser {
   // Operation(nullptr, Operator(core.minus), ..., nullptr )}
   absl::flat_hash_map<std::string, Value> value_map_;
   absl::flat_hash_map<std::string, const Block*> block_map_;
-  IRContext context_;
-  Module module_;
+  std::unique_ptr<IRContext> context_;
+  std::unique_ptr<SsaNames> ssa_names_;
+  std::unique_ptr<Module> module_;
 };
 
 }  // namespace raksha::ir

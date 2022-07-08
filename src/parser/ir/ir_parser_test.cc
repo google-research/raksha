@@ -26,7 +26,8 @@ class IrParserTest : public testing::TestWithParam<absl::string_view> {};
 TEST_P(IrParserTest, SimpleTestOperation) {
   auto input_program_text = GetParam();
   IrProgramParser ir_parser;
-  EXPECT_EQ(IRPrinter::ToString(ir_parser.ParseProgram(input_program_text)),
+  auto result = ir_parser.ParseProgram(input_program_text);
+  EXPECT_EQ(IRPrinter::ToString(*result.module, std::move((result.ssa_names))),
             input_program_text);
 }
 
@@ -54,7 +55,7 @@ R"(module m0 {
     %0 = core.plus []()
   }  // block b0
   block b1 {
-    %1 = core.plus [access: "private", transform: "no"](%0.out, <<ANY>>)
+    %1 = core.plus [access: "private", transform: "no"](%0, <<ANY>>)
   }  // block b1
 }  // module m0
 )",
@@ -64,8 +65,8 @@ R"(module m0 {
     %1 = core.merge [](<<ANY>>, <<ANY>>)
   }  // block b0
   block b1 {
-    %2 = core.plus [access: "private", transform: "no"](%0.out, <<ANY>>)
-    %3 = core.mult [access: "private", transform: 45](%0.out, %2.out)
+    %2 = core.plus [access: "private", transform: "no"](%0, <<ANY>>)
+    %3 = core.mult [access: "private", transform: 45](%0, %2)
   }  // block b1
 }  // module m0
 )",
@@ -75,14 +76,13 @@ R"(module m0 {
     %1 = core.merge [](<<ANY>>, <<ANY>>)
   }  // block b0
   block b1 {
-    %2 = core.plus [access: "private", transform: "no"](%0.out, <<ANY>>)
-    %3 = core.mult [lhs: 10, rhs: "59"](%0.out, %2.out)
+    %2 = core.plus [access: "private", transform: "no"](%0, <<ANY>>)
+    %3 = core.mult [lhs: 10, rhs: "59"](%0, %2)
   }  // block b1
 }  // module m0
 )"));
 
 TEST(IrParseTest, ValueNotFoundCausesFailure) {
-  IrProgramParser ir_parser;
   auto input_program_text = R"(module m0 {
   block b0 {
     %0 = core.plus []()
@@ -92,12 +92,13 @@ TEST(IrParseTest, ValueNotFoundCausesFailure) {
   }  // block b1
 }  // module m0
 )";
-  EXPECT_DEATH(IRPrinter::ToString(ir_parser.ParseProgram(input_program_text)),
-               "Value not found");
+
+  IrProgramParser ir_parser;
+  EXPECT_DEATH(ir_parser.ParseProgram(input_program_text), "Value not found");
+
 }
 
 TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {
-  IrProgramParser ir_parser;
   auto input_program_text = R"(module m0 {
   block b0 {
     %0 = core.plus []()
@@ -107,7 +108,10 @@ TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {
   }  // block b1
 }  // module m0
 )";
-  EXPECT_DEATH(IRPrinter::ToString(ir_parser.ParseProgram(input_program_text)),
+
+  IrProgramParser ir_parser;
+  EXPECT_DEATH(ir_parser.ParseProgram(input_program_text),
+
                "no viable alternative at input");
 }
 }  // namespace raksha::ir

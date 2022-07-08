@@ -80,9 +80,11 @@ cc_library(
         "//src/common/logging",
         "//src/common/utils:fold",
         "//src/frontends/sql:decoder_context",
+        "//src/ir:ir_printer",
         "//src/ir:ir_traversing_visitor",
         "//src/ir:module",
         "//src/ir:operator",
+        "//src/ir:ssa_names",
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
@@ -173,6 +175,7 @@ cc_test(
         "//src/frontends/sql/ops:tag_transform_op",
         "//src/ir:block_builder",
         "//src/ir:ir_context",
+        "//src/ir:ir_printer",
     ],
 )
 

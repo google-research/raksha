@@ -112,6 +112,7 @@ cc_test(
         "//src/backends/policy_engine:policy",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
+        "//src/ir:ir_printer",
     ],
 )
 

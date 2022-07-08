@@ -22,6 +22,7 @@
 #include "src/frontends/sql/ops/tag_transform_op.h"
 #include "src/ir/block_builder.h"
 #include "src/ir/ir_context.h"
+#include "src/ir/ir_printer.h"
 
 namespace raksha::backends::policy_engine {
 namespace {

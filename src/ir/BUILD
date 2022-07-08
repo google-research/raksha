@@ -39,6 +39,8 @@ cc_test(
     deps = [
         ":block_builder",
         ":ir_context",
+        ":ir_printer",
+        ":ssa_names",
         "//src/common/testing:gtest",
         "//src/ir/attributes:attribute",
         "//src/ir/types",
@@ -95,6 +97,7 @@ cc_library(
     deps = [
         ":ir_traversing_visitor",
         ":module",
+        ":ssa_names",
         ":value",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
@@ -155,6 +158,7 @@ cc_test(
     deps = [
         ":ir_printer",
         ":module",
+        ":ssa_names",
         ":value",
         "//src/common/testing:gtest",
         "//src/ir/attributes:int_attribute",
@@ -195,6 +199,7 @@ cc_library(
     hdrs = ["ssa_names.h"],
     deps = [
         ":operator",
+        ":value",
         "@absl//absl/container:flat_hash_map",
     ],
 )
@@ -234,11 +239,12 @@ cc_library(
     name = "value",
     hdrs = ["value.h"],
     deps = [
-        ":ssa_names",
         ":storage",
+        "//src/common/utils:overloaded",
         "//src/common/utils:ranges",
         "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
+        "@absl//absl/status:statusor",
         "@absl//absl/strings:str_format",
     ],
 )
@@ -247,10 +253,13 @@ cc_test(
     name = "value_test",
     srcs = ["value_test.cc"],
     deps = [
+        ":ir_printer",
         ":module",
+        ":ssa_names",
         ":value",
         "//src/common/testing:gtest",
         "//src/ir/types",
+        "@absl//absl/hash:hash_testing",
     ],
 )
 
