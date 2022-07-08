@@ -57,7 +57,7 @@ class Operation {
 
   std::string ToString(SsaNames& ssa_names) const;
 
-  template <typename Derived, typename Result=void>
+  template <typename Derived, typename Result>
   Result Accept(IRVisitor<Derived, Result>& visitor) const {
     return visitor.Visit(*this);
   }
@@ -95,7 +95,7 @@ class Block {
   const NamedValueMap& results() const { return results_; }
   const Module* parent_module() const { return parent_module_; }
 
-  template <typename Derived, typename Result=void>
+  template <typename Derived, typename Result>
   Result Accept(IRVisitor<Derived, Result>& visitor) const {
     return visitor.Visit(*this);
   }
@@ -147,7 +147,7 @@ class Module {
 
   const BlockListType& blocks() const { return blocks_; }
 
-  template <typename Derived, typename Result=void>
+  template <typename Derived, typename Result>
   Result Accept(IRVisitor<Derived, Result>& visitor) const {
     return visitor.Visit(*this);
   }
