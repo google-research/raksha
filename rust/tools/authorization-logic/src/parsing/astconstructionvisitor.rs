@@ -271,14 +271,14 @@ fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
 
 fn construct_relation_declaration(ctx: &RelationDeclarationContext) -> 
         AstRelationDeclaration {
-    let predicate_name_ = sanitize_id(ctx.id(0).unwrap().get_text());
+    let predicate_name_ = sanitize_id(ctx.id().unwrap().get_text());
     // Note that ID_all() in the generated antlr-rust code is buggy,
     // (because all {LEX_RULE}_all() generations are buggy)
     // so rather than using a more idomatic iterator, "while Some(...)" is
     // used to populate this vector.
     let mut arg_names = Vec::new();
-    let mut idx = 1;
-    while let Some(param_name) = ctx.id(idx) {
+    let mut idx = 0;
+    while let Some(param_name) = ctx.VARIABLE(idx) {
         arg_names.push(sanitize_id(param_name.get_text()));
         idx += 1;
     }

@@ -114,7 +114,7 @@ authLogicType
     ;
 
 relationDeclaration
-    : '.decl' ATTRIBUTE? id '(' id ':' authLogicType (',' id ':' authLogicType)* ')'
+    : '.decl' ATTRIBUTE? id '(' VARIABLE ':' authLogicType (',' VARIABLE ':' authLogicType)* ')'
     ;
 
 program
