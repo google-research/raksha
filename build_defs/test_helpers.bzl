@@ -297,3 +297,4 @@ def run_sensitivity_analysis_compare_results(
         data = [":actualResultSorted", ":expectedResultSorted"],
         srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:diff_wrapper.sh"],
     )
+    
