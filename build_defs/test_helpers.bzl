@@ -231,6 +231,7 @@ def output_rule_diff_test(
         data = [expected_contents_csv, ":resultFact"],
         srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:diff_wrapper.sh"],
     )
+    
 def run_sensitivity_analysis_compare_results(
         name,
         test_bin,
@@ -297,4 +298,3 @@ def run_sensitivity_analysis_compare_results(
         data = [":actualResultSorted", ":expectedResultSorted"],
         srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:diff_wrapper.sh"],
     )
-    
