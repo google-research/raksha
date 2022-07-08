@@ -16,8 +16,8 @@
 #ifndef SRC_IR_IR_TRAVERSING_VISITOR_H_
 #define SRC_IR_IR_TRAVERSING_VISITOR_H_
 
-#include "src/common/utils/types.h"
 #include "src/common/utils/fold.h"
+#include "src/common/utils/types.h"
 #include "src/ir/ir_visitor.h"
 #include "src/ir/module.h"
 
@@ -33,9 +33,7 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
 
   // Gives a default value for all 'PreVisit's to start with.
   // Should be over-ridden if the Result is not default constructable.
-  virtual Result GetDefaultValue() {
-    return Result();
-  }
+  virtual Result GetDefaultValue() { return Result(); }
 
   // Invoked before all the children of `module` is visited.
   virtual Result PreVisit(const Module& module) {
@@ -45,9 +43,11 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   virtual Result PostVisit(const Module& module, Result in_order_result) {
     return std::move(in_order_result);
   }
-  virtual Result FoldResult(const Module& module, Result child_result,
-                            Result in_order_result) {
-    return std::move(in_order_result);
+  // Used to accumulate child results from the Module's children.
+  // Should discard or merge `child_result` into the `accumulator`.
+  virtual Result FoldResult(Result accumulator, const Module& module,
+                            Result child_result) {
+    return std::move(accumulator);
   }
   // Invoked before all the children of `block` is visited.
   virtual Result PreVisit(const Block& block) {
@@ -57,9 +57,11 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   virtual Result PostVisit(const Block& block, Result in_order_result) {
     return std::move(in_order_result);
   }
-  virtual Result FoldResult(const Block& block, Result child_result,
-                            Result in_order_result) {
-    return std::move(in_order_result);
+  // Used to accumulate child results from the Block's children.
+  // Should discard or merge `child_result` into the `accumulator`.
+  virtual Result FoldResult(Result accumulator, const Block& block,
+                            Result child_result) {
+    return std::move(accumulator);
   }
   // Invoked before all the children of `operation` is visited.
   virtual Result PreVisit(const Operation& operation) {
@@ -69,26 +71,33 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   virtual Result PostVisit(const Operation& operation, Result in_order_result) {
     return std::move(in_order_result);
   }
-  virtual Result FoldResult(const Operation& operation, Result child_result,
-                            Result in_order_result) {
-    return std::move(in_order_result);
+  // Used to accumulate child results from the Operation's children.
+  // Should discard or merge `child_result` into the `accumulator`.
+  virtual Result FoldResult(Result accumulator, const Operation& operation,
+                            Result child_result) {
+    return std::move(accumulator);
   }
 
   Result Visit(const Module& module) final override {
     Result pre_visit_result = PreVisit(module);
-    Result fold_result = common::utils::fold(module.blocks(), std::move(pre_visit_result),
-       [this](Result acc, const std::unique_ptr<Block> &block) {
-         return std::move(FoldResult(*block, block->Accept<Derived, Result>(*this), std::move(acc)));
-       });
+    Result fold_result = common::utils::fold(
+        module.blocks(), std::move(pre_visit_result),
+        [this](Result acc, const std::unique_ptr<Block>& block) {
+          return std::move(FoldResult(std::move(acc), *block,
+                                      block->Accept<Derived, Result>(*this)));
+        });
     return PostVisit(module, std::move(fold_result));
   }
 
   Result Visit(const Block& block) final override {
     Result pre_visit_result = PreVisit(block);
-    Result fold_result = common::utils::fold(block.operations(), std::move(pre_visit_result),
-       [this](Result acc, const std::unique_ptr<Operation> &operation) {
-         return std::move(FoldResult(*operation, operation->Accept<Derived, Result>(*this), std::move(acc)));
-       });
+    Result fold_result = common::utils::fold(
+        block.operations(), std::move(pre_visit_result),
+        [this](Result acc, const std::unique_ptr<Operation>& operation) {
+          return std::move(
+              FoldResult(std::move(acc), *operation,
+                         operation->Accept<Derived, Result>(*this)));
+        });
     return PostVisit(block, std::move(fold_result));
   }
 
@@ -96,8 +105,8 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
     Result result = PreVisit(operation);
     const Module* module = operation.impl_module();
     if (module != nullptr) {
-      result = std::move(FoldResult(operation, module->Accept<Derived, Result>(*this),
-                          std::move(result)));
+      result = std::move(FoldResult(std::move(result), operation,
+                                    module->Accept<Derived, Result>(*this)));
     }
     return PostVisit(operation, std::move(result));
   }

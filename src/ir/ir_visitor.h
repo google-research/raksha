@@ -26,7 +26,7 @@ class Operation;
 
 // An interface for the visitor class. We will also pass in the `Derived` class
 // as template argument if we want to support CRTP at a later point.
-template <typename Derived, typename Result=Unit>
+template <typename Derived, typename Result = Unit>
 class IRVisitor {
  public:
   virtual ~IRVisitor() {}
