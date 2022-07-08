@@ -1,0 +1,132 @@
+#ifndef SENSITIVITY_ANALYSIS_DL_
+#define SENSITIVITY_ANALYSIS_DL_
+//this file defines the calculations for sensitivity analysis 
+//to be used in dp calculations
+
+#include "src/analysis/souffle/taint.dl"
+
+//one isSqlOperator fact per each sql operator, currently supporting one output
+//referring to results as 'value' (sqlValue declared below) as per the discussion in the doc 
+.decl isSqlOperator(sqlOperator: Operation)
+isSqlOperator([owner, operator, result, input_list, attribute_list]) :- isOperation([owner, operator, result, input_list, attribute_list]), match("sql.*", operator). 
+
+
+.decl isSqlValue(value: AccessPath)
+isSqlValue(value) :- isSqlOperator([_, _, value, _, _]).
+
+//connecting each value to its input list 
+.decl sqlValueHasSqlInputList(value: AccessPath, sql_input: OperandList)
+sqlValueHasSqlInputList(value, input_list) :- isSqlOperator([_, _, value, input_list, _]). 
+
+//keeping track of the suffix of each input list
+//used in finding the maximm sensitvity 
+.decl sqlValueHasSqlInputListSuffix(value: AccessPath, partialList: OperandList)
+
+sqlValueHasSqlInputListSuffix(value, input_list) :-
+  sqlValueHasSqlInputList(value, input_list).
+sqlValueHasSqlInputListSuffix(value, tail) :-
+  sqlValueHasSqlInputListSuffix(value, [_, tail]).
+
+//calculate the length of each sql operator input list by iterating starting from the end
+.decl sqlOperatorInputListLength(input_list: OperandList, list_length: number)
+
+sqlOperatorInputListLength(nil, 0).
+sqlOperatorInputListLength([head, tail], tailLen + 1) :-
+  sqlValueHasSqlInputListSuffix(_, [head, tail]), sqlOperatorInputListLength(tail, tailLen).
+
+//assign the length of each input to the corresponding sqlValue
+.decl sqlValueSqlOperatorInputListLength(value: AccessPath, input_list_length: number)
+
+sqlValueSqlOperatorInputListLength(value, len) :-
+  isSqlValue(value), sqlValueHasSqlInputList(value, input_list),
+  sqlOperatorInputListLength(input_list, len).
+
+//indexing the input per value 
+.decl sqlValueHasSqlInputAtIndex(value: AccessPath, sql_input: AccessPath, index:number)
+
+sqlValueHasSqlInputAtIndex(value, sql_input, sql_input_list_len - suffix_list_len) :-
+       sqlValueHasSqlInputListSuffix(value, [sql_input, tail]), 
+       sqlOperatorInputListLength([sql_input, tail], suffix_list_len), 
+       sqlValueSqlOperatorInputListLength(value, sql_input_list_len). 
+
+//keeping track of all initial inputs as they all have sennsitivity score 1
+.decl isInitialInput (ingress_point: AccessPath)
+
+//helper functions to flatten input lists
+.decl intermediateFlatten(list:OperandList, sublist:OperandList, list_element:AccessPath)
+
+intermediateFlatten(list, sublist, list_element) :- isSqlOperator([_, _, _, list, _]), list = [list_element, sublist].
+intermediateFlatten(list, sublist, list_element) :- intermediateFlatten(list, [list_element, sublist], _).
+
+.decl flatten(list:OperandList, list_element:AccessPath)
+flatten(list, list_element) :- intermediateFlatten(list, _, list_element).
+
+//flattening each individual input per value
+.decl isSqlInput(value: AccessPath, sql_input: AccessPath)
+
+isSqlInput(value, sql_input) :- isSqlOperator([_, _, value, input_list, _]), 
+                              flatten(input_list, sql_input). 
+
+//keeping track of sensitivity score per each input at index 
+//used to calculate the maximum input sensitivity 
+.decl sqlValueHasSensitivityScoreAtIndex(value: AccessPath, sensitivity_score: number, index: number) 
+
+//base cases (index 0)
+//for initial inputs, sensitivity is 1
+sqlValueHasSensitivityScoreAtIndex(value, 1, 0) :- sqlValueHasSqlInputAtIndex(value, sql_input, 0),
+      isInitialInput(sql_input).
+
+//for all others, get the final sensitivity score
+sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, 0) :- sqlValueHasSqlInputAtIndex(value, sql_input, 0),
+       sqlValueSensitivity(sql_input, sensitivity_score).      
+
+//inductive cases 
+//keep track at the score at each index, only update if the new input score is higher
+sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, index) :- 
+      isSqlValue(value),
+      sqlValueHasSqlInputAtIndex(value, sql_input, index), 
+      isSqlInput(value, sql_input), 
+      sqlValueSensitivity(sql_input, input_sensitivity_score), 
+      sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, index-1),
+      sensitivity_score >= input_sensitivity_score. 
+
+
+sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, index) :- 
+      isSqlValue(value),
+      sqlValueHasSqlInputAtIndex(value, sql_input, index), 
+      isSqlInput(value, sql_input), 
+      sqlValueSensitivity(sql_input, sensitivity_score), 
+      sqlValueHasSensitivityScoreAtIndex(value, prev_sensitivity_score, index-1), 
+      sensitivity_score >= prev_sensitivity_score. 
+
+//function sensitivity scores per each sql operator as defined in PINQ
+//TODO: add other cases 
+.decl sqlFunctionSensitivity(operator: symbol, sensitivity_score: number)
+
+sqlFunctionSensitivity("sql.where", 1) :- isSqlOperator([_, "sql.where", _, _, _]). 
+sqlFunctionSensitivity("sql.group_by", 2) :- isSqlOperator([_,"sql.group_by", _, _, _]). 
+sqlFunctionSensitivity("sql.select", 1) :- isSqlOperator([_, "sql.select", _, _, _]). 
+
+
+//final value sensitivity score, the max of input multiplied by the function sensitivity 
+.decl sqlValueSensitivity(value: AccessPath, sensitivity_score: number)
+sqlValueSensitivity(value, sensitivity_score) :- 
+      isSqlOperator([_, operator, value, _, _]), 
+      sqlFunctionSensitivity(operator, function_sensitvity), 
+      sqlValueSqlOperatorInputListLength(value, input_list_length),
+      sqlValueHasSensitivityScoreAtIndex(value, input_sensitivity, input_list_length-1), 
+      sensitivity_score = input_sensitivity * function_sensitvity.
+
+
+isInitialInput("revenue_table").
+
+#ifndef test
+#define test 
+
+.decl actualResult(value: AccessPath, sensitivity_score: number)
+actualResult(value, sensitivity_score) :- sqlValueSensitivity(value, sensitivity_score).
+
+.decl expectedResult(value: AccessPath, sensitivity_score: number)
+
+#endif
+#endif // SENSITIVITY_ANALYSIS_DL_

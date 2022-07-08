@@ -1,0 +1,16 @@
+#ifndef SENSITIVITY_ANALYSIS_UNIT_TEST_INTERFACE_DL_
+#define SENSITIVITY_ANALYSIS_UNIT_TEST_INTERFACE_DL_
+
+#include "src/analysis/souffle/sensitivity_analysis.dl"
+
+//An interface used for unit testing of the sensitivity analysis. 
+//Only outputs value sensitivities
+
+.input isOperation(delimiter=";")
+.input isInitialInput(delimiter=";")
+.input expectedResult(delimiter=";")
+.output actualResult(delimiter=";")
+.output expectedResult(delimiter=";")
+
+
+#endif SENSITIVITY_ANALYSIS_UNIT_TEST_INTERFACE_DL_
