@@ -16,6 +16,8 @@
 #ifndef SRC_IR_IR_VISITOR_H_
 #define SRC_IR_IR_VISITOR_H_
 
+#include "src/common/utils/types.h"
+
 namespace raksha::ir {
 
 class Module;
@@ -24,7 +26,7 @@ class Operation;
 
 // An interface for the visitor class. We will also pass in the `Derived` class
 // as template argument if we want to support CRTP at a later point.
-template <typename Derived, typename Result=void>
+template <typename Derived, typename Result=Unit>
 class IRVisitor {
  public:
   virtual ~IRVisitor() {}

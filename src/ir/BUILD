@@ -182,6 +182,7 @@ cc_library(
         ":operator",
         ":ssa_names",
         ":value",
+        "//src/common/utils:types",
         "//src/ir/attributes:attribute",
         "//src/ir/types",
         "@absl//absl/container:flat_hash_map",
