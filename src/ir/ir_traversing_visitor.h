@@ -31,9 +31,15 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
  public:
   virtual ~IRTraversingVisitor() {}
 
+  // Gives a default value for all 'PreVisit's to start with.
+  // Should be over-ridden if the Result is not default constructable.
+  virtual Result GetDefaultValue() {
+    return Result();
+  }
+
   // Invoked before all the children of `module` is visited.
   virtual Result PreVisit(const Module& module) {
-    return Result();
+    return GetDefaultValue();
   }
   // Invoked after all the children of `module` is visited.
   virtual Result PostVisit(const Module& module, Result result) {
@@ -45,7 +51,7 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   }
   // Invoked before all the children of `block` is visited.
   virtual Result PreVisit(const Block& block) {
-    return Result();
+    return GetDefaultValue();
   }
   // Invoked after all the children of `block` is visited.
   virtual Result PostVisit(const Block& block, Result result) {
@@ -57,7 +63,7 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   }
   // Invoked before all the children of `operation` is visited.
   virtual Result PreVisit(const Operation& operation) {
-    return Result();
+    return GetDefaultValue();
   }
   // Invoked after all the children of `operation` is visited.
   virtual Result PostVisit(const Operation& operation, Result result) {
