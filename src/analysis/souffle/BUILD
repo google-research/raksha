@@ -104,6 +104,29 @@ souffle_cc_binary(
 )
 
 gen_souffle_cxx_code(
+    name = "sensitivity_analysis_test_for_test",
+    src = "sensitivity_analysis_unit_test_interface.dl",
+    for_test = True,
+    included_dl_scripts = [
+        "sensitivity_analysis.dl",
+        "attributes.dl",
+        "authorization_logic.dl",
+        "check_predicate.dl",
+        "dataflow_graph.dl",
+        "operations.dl",
+        "tag_transforms.dl",
+        "tags.dl",
+        "taint.dl",
+    ],    
+)
+
+souffle_cc_binary(
+    name = "sensitivity_analysis_test",
+    testonly = True,
+    src = ":sensitivity_analysis_test_for_test",
+)
+
+gen_souffle_cxx_code(
     name = "sql_verifier_unit_test_code",
     src = "sql_verifier_unit_test_interface.dl",
     included_dl_scripts = [
