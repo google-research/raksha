@@ -108,12 +108,12 @@ gen_souffle_cxx_code(
     src = "sensitivity_analysis_unit_test_interface.dl",
     for_test = True,
     included_dl_scripts = [
-        "sensitivity_analysis.dl",
         "attributes.dl",
         "authorization_logic.dl",
         "check_predicate.dl",
         "dataflow_graph.dl",
         "operations.dl",
+        "sensitivity_analysis.dl",
         "tag_transforms.dl",
         "tags.dl",
         "taint.dl",
