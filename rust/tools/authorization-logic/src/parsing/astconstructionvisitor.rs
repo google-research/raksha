@@ -38,7 +38,7 @@ pub fn parse_program(prog_text: &str) -> AstProgram {
     construct_program(&parse_result)
 }
 
-// The authorizaiton logic frontend supports newlines
+// The authorization logic frontend supports newlines
 // in the names of constants, but souffle does not. As
 // an easy way to support this, we delete newlines from
 // constant names. Since multiline literals/constants
