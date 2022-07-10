@@ -45,7 +45,7 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   }
   // Used to accumulate child results from the Module's children.
   // Should discard or merge `child_result` into the `accumulator`.
-  virtual Result FoldResult(Result accumulator, const Module& module,
+  virtual Result FoldResult(Result accumulator, const Module& parent,
                             Result child_result) {
     return std::move(accumulator);
   }
@@ -59,7 +59,7 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   }
   // Used to accumulate child results from the Block's children.
   // Should discard or merge `child_result` into the `accumulator`.
-  virtual Result FoldResult(Result accumulator, const Block& block,
+  virtual Result FoldResult(Result accumulator, const Block& parent,
                             Result child_result) {
     return std::move(accumulator);
   }
@@ -73,7 +73,7 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   }
   // Used to accumulate child results from the Operation's children.
   // Should discard or merge `child_result` into the `accumulator`.
-  virtual Result FoldResult(Result accumulator, const Operation& operation,
+  virtual Result FoldResult(Result accumulator, const Operation& parent,
                             Result child_result) {
     return std::move(accumulator);
   }
