@@ -117,7 +117,7 @@ gen_souffle_cxx_code(
         "tag_transforms.dl",
         "tags.dl",
         "taint.dl",
-    ],    
+    ],
 )
 
 souffle_cc_binary(

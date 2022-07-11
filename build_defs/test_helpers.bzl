@@ -231,7 +231,7 @@ def output_rule_diff_test(
         data = [expected_contents_csv, ":resultFact"],
         srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:diff_wrapper.sh"],
     )
-    
+
 def run_sensitivity_analysis_compare_results(
         name,
         test_bin,
@@ -243,7 +243,7 @@ def run_sensitivity_analysis_compare_results(
     Args:
       name: String; Name of the test.
       test_bin: List; List with one element containing the tool to be run to get
-                      results. (Note: This should be a string, but there are notes in this 
+                      results. (Note: This should be a string, but there are notes in this
                       file saying that causes bizarre
                       buildozer errors)
       input_files: List; List of labels indicating input files to sensitivity_analysis.
