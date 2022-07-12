@@ -34,21 +34,6 @@ sqlOperatorInputListLength(nil, 0).
 sqlOperatorInputListLength([head, tail], tailLen + 1) :-
   sqlValueHasSqlInputListSuffix(_, [head, tail]), sqlOperatorInputListLength(tail, tailLen).
 
-//assign the length of each input to the corresponding sqlValue
-.decl sqlValueSqlOperatorInputListLength(value: AccessPath, input_list_length: number)
-
-sqlValueSqlOperatorInputListLength(value, len) :- isSqlOperator(operation),
-                                                  operation = [_, _, value, _, _], 
-                                                 operationOperandListLength(operation, len).
-
-//indexing the input per value 
-.decl sqlValueHasSqlInputAtIndex(value: AccessPath, sql_input: AccessPath, index:number)
-
-sqlValueHasSqlInputAtIndex(value, sql_input, sql_input_list_len - suffix_list_len) :-
-       sqlValueHasSqlInputListSuffix(value, [sql_input, tail]), 
-       sqlOperatorInputListLength([sql_input, tail], suffix_list_len), 
-       sqlValueSqlOperatorInputListLength(value, sql_input_list_len). 
-
 //keeping track of all initial inputs as they all have sensitivity score 1
 .decl isInitialInput (ingress_point: AccessPath)
 
@@ -73,18 +58,24 @@ isSqlInput(value, sql_input) :- isSqlOperator([_, _, value, input_list, _]),
 
 //base cases (index 0)
 //for initial inputs, sensitivity is 1
-sqlValueHasSensitivityScoreAtIndex(value, 1, 0) :- sqlValueHasSqlInputAtIndex(value, sql_input, 0),
+sqlValueHasSensitivityScoreAtIndex(value, 1, 0) :- isSqlOperator(operation), 
+      operation = [_, _, value, _, _],
+      operationHasOperandAtIndex(operation, sql_input, 0),
       isInitialInput(sql_input).
 
 //for all others, get the final sensitivity score
-sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, 0) :- sqlValueHasSqlInputAtIndex(value, sql_input, 0),
-       sqlValueSensitivity(sql_input, sensitivity_score).      
+sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, 0) :- isSqlOperator(operation), 
+      operation = [_, _, value, _, _],
+      operationHasOperandAtIndex(operation, sql_input, 0),
+      sqlValueSensitivity(sql_input, sensitivity_score).      
 
 //inductive cases 
 //keep track at the score at each index, only update if the new input score is higher
 sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, index) :- 
       isSqlValue(value),
-      sqlValueHasSqlInputAtIndex(value, sql_input, index), 
+      isSqlOperator(operation), 
+      operation = [_, _, value, _, _],
+      operationHasOperandAtIndex(operation, sql_input, index),
       isSqlInput(value, sql_input), 
       sqlValueSensitivity(sql_input, input_sensitivity_score), 
       sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, index-1),
@@ -93,7 +84,9 @@ sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, index) :-
 
 sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, index) :- 
       isSqlValue(value),
-      sqlValueHasSqlInputAtIndex(value, sql_input, index), 
+      isSqlOperator(operation), 
+      operation = [_, _, value, _, _],
+      operationHasOperandAtIndex(operation, sql_input, index),
       isSqlInput(value, sql_input), 
       sqlValueSensitivity(sql_input, sensitivity_score), 
       sqlValueHasSensitivityScoreAtIndex(value, prev_sensitivity_score, index-1), 
@@ -104,7 +97,7 @@ sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, index) :-
 .decl sqlFunctionSensitivity(operator: symbol, sensitivity_score: number)
 
 sqlFunctionSensitivity("sql.where", 1) :- isSqlOperator([_, "sql.where", _, _, _]). 
-sqlFunctionSensitivity("sql.filter", 1) :- isSqlOperator([_, "sql.where", _, _, _]). 
+sqlFunctionSensitivity("sql.filter", 1) :- isSqlOperator([_, "sql.filter", _, _, _]). 
 sqlFunctionSensitivity("sql.group_by", 2) :- isSqlOperator([_,"sql.group_by", _, _, _]). 
 sqlFunctionSensitivity("sql.select", 1) :- isSqlOperator([_, "sql.select", _, _, _]). 
 
@@ -112,9 +105,10 @@ sqlFunctionSensitivity("sql.select", 1) :- isSqlOperator([_, "sql.select", _, _,
 //final value sensitivity score, the max of input multiplied by the function sensitivity 
 .decl sqlValueSensitivity(value: AccessPath, sensitivity_score: number)
 sqlValueSensitivity(value, sensitivity_score) :- 
-      isSqlOperator([_, operator, value, _, _]), 
+      isSqlOperator(operation), 
+      operation = [_, operator, value, _, _], 
       sqlFunctionSensitivity(operator, function_sensitvity), 
-      sqlValueSqlOperatorInputListLength(value, input_list_length),
+      operationOperandListLength(operation, input_list_length), 
       sqlValueHasSensitivityScoreAtIndex(value, input_sensitivity, input_list_length-1), 
       sensitivity_score = input_sensitivity * function_sensitvity.
 
