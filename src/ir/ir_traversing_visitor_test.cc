@@ -44,15 +44,7 @@ class NonDefaultConstructorVisitor
 
   WrappedInt GetDefaultValue() override { return WrappedInt(1); }
 
-  WrappedInt FoldResult(WrappedInt accumulator, const Module& parent,
-                        WrappedInt child_result) override {
-    return WrappedInt(*accumulator + *child_result);
-  }
-  WrappedInt FoldResult(WrappedInt accumulator, const Block& parent,
-                        WrappedInt child_result) override {
-    return WrappedInt(*accumulator + *child_result);
-  }
-  WrappedInt FoldResult(WrappedInt accumulator, const Operation& parent,
+  WrappedInt FoldResult(WrappedInt accumulator,
                         WrappedInt child_result) override {
     return WrappedInt(*accumulator + *child_result);
   }
@@ -222,8 +214,7 @@ class ReturningVisitor
     if (pre_visits_) result.push_back((void*)std::addressof(module));
     return result;
   }
-  ResultType FoldResult(ResultType result, const Module& module,
-                        ResultType child_result) override {
+  ResultType FoldResult(ResultType result, ResultType child_result) override {
     result.insert(result.end(), child_result.begin(), child_result.end());
     return result;
   }
@@ -238,11 +229,6 @@ class ReturningVisitor
     return result;
   }
 
-  ResultType FoldResult(ResultType result, const Block& block,
-                        ResultType child_result) override {
-    result.insert(result.end(), child_result.begin(), child_result.end());
-    return result;
-  }
   ResultType PostVisit(const Block& block, ResultType result) override {
     if (post_visits_) result.push_back((void*)std::addressof(block));
     return result;
@@ -254,11 +240,6 @@ class ReturningVisitor
     return result;
   }
 
-  ResultType FoldResult(ResultType result, const Operation& operation,
-                        ResultType child_result) override {
-    result.insert(result.end(), child_result.begin(), child_result.end());
-    return result;
-  }
   ResultType PostVisit(const Operation& operation, ResultType result) override {
     if (post_visits_) result.push_back((void*)std::addressof(operation));
     return result;

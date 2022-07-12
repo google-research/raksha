@@ -45,6 +45,12 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   // Should be over-ridden if the Result is not default constructable.
   virtual Result GetDefaultValue() { return DefaultValueGetter<Result>::Get(); }
 
+  // Used to accumulate child results from the node's children.
+  // Should discard or merge `child_result` into the `accumulator`.
+  virtual Result FoldResult(Result accumulator,
+                            Result child_result) {
+    return accumulator;
+  }
   // Invoked before all the children of `module` is visited.
   virtual Result PreVisit(const Module& module) {
     return GetDefaultValue();
@@ -52,12 +58,6 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   // Invoked after all the children of `module` is visited.
   virtual Result PostVisit(const Module& module, Result in_order_result) {
     return in_order_result;
-  }
-  // Used to accumulate child results from the Module's children.
-  // Should discard or merge `child_result` into the `accumulator`.
-  virtual Result FoldResult(Result accumulator, const Module& parent,
-                            Result child_result) {
-    return accumulator;
   }
   // Invoked before all the children of `block` is visited.
   virtual Result PreVisit(const Block& block) {
@@ -67,12 +67,6 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   virtual Result PostVisit(const Block& block, Result in_order_result) {
     return in_order_result;
   }
-  // Used to accumulate child results from the Block's children.
-  // Should discard or merge `child_result` into the `accumulator`.
-  virtual Result FoldResult(Result accumulator, const Block& parent,
-                            Result child_result) {
-    return accumulator;
-  }
   // Invoked before all the children of `operation` is visited.
   virtual Result PreVisit(const Operation& operation) {
     return GetDefaultValue();
@@ -81,20 +75,13 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
   virtual Result PostVisit(const Operation& operation, Result in_order_result) {
     return in_order_result;
   }
-  // Used to accumulate child results from the Operation's children.
-  // Should discard or merge `child_result` into the `accumulator`.
-  virtual Result FoldResult(Result accumulator, const Operation& parent,
-                            Result child_result) {
-    return accumulator;
-  }
 
   Result Visit(const Module& module) final override {
     Result pre_visit_result = PreVisit(module);
     Result fold_result = common::utils::fold(
         module.blocks(), std::move(pre_visit_result),
-        [this, &module](Result acc, const std::unique_ptr<Block>& block) {
-          return FoldResult(acc, module,
-                                      block->Accept(*this));
+        [this](Result acc, const std::unique_ptr<Block>& block) {
+          return FoldResult(acc, block->Accept(*this));
         });
     return PostVisit(module, fold_result);
   }
@@ -103,9 +90,8 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
     Result pre_visit_result = PreVisit(block);
     Result fold_result = common::utils::fold(
         block.operations(), std::move(pre_visit_result),
-        [this, &block](Result acc, const std::unique_ptr<Operation>& operation) {
-          return FoldResult(acc, block,
-                         operation->Accept(*this));
+        [this](Result acc, const std::unique_ptr<Operation>& operation) {
+          return FoldResult(acc, operation->Accept(*this));
         });
     return PostVisit(block, fold_result);
   }
@@ -114,7 +100,7 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
     Result result = PreVisit(operation);
     const Module* module = operation.impl_module();
     if (module != nullptr) {
-      result = FoldResult(std::move(result), operation, module->Accept<Derived, Result>(*this));
+      result = FoldResult(std::move(result), module->Accept<Derived, Result>(*this));
     }
     return PostVisit(operation, result);
   }
