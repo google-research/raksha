@@ -37,9 +37,9 @@ sqlOperatorInputListLength([head, tail], tailLen + 1) :-
 //assign the length of each input to the corresponding sqlValue
 .decl sqlValueSqlOperatorInputListLength(value: AccessPath, input_list_length: number)
 
-sqlValueSqlOperatorInputListLength(value, len) :-
-  isSqlValue(value), sqlValueHasSqlInputList(value, input_list),
-  sqlOperatorInputListLength(input_list, len).
+sqlValueSqlOperatorInputListLength(value, len) :- isSqlOperator(operation),
+                                                  operation = [_, _, value, _, _], 
+                                                 operationOperandListLength(operation, len).
 
 //indexing the input per value 
 .decl sqlValueHasSqlInputAtIndex(value: AccessPath, sql_input: AccessPath, index:number)
@@ -49,7 +49,7 @@ sqlValueHasSqlInputAtIndex(value, sql_input, sql_input_list_len - suffix_list_le
        sqlOperatorInputListLength([sql_input, tail], suffix_list_len), 
        sqlValueSqlOperatorInputListLength(value, sql_input_list_len). 
 
-//keeping track of all initial inputs as they all have sennsitivity score 1
+//keeping track of all initial inputs as they all have sensitivity score 1
 .decl isInitialInput (ingress_point: AccessPath)
 
 //helper functions to flatten input lists
@@ -104,6 +104,7 @@ sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, index) :-
 .decl sqlFunctionSensitivity(operator: symbol, sensitivity_score: number)
 
 sqlFunctionSensitivity("sql.where", 1) :- isSqlOperator([_, "sql.where", _, _, _]). 
+sqlFunctionSensitivity("sql.filter", 1) :- isSqlOperator([_, "sql.where", _, _, _]). 
 sqlFunctionSensitivity("sql.group_by", 2) :- isSqlOperator([_,"sql.group_by", _, _, _]). 
 sqlFunctionSensitivity("sql.select", 1) :- isSqlOperator([_, "sql.select", _, _, _]). 
 
