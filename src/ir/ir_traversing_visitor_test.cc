@@ -24,6 +24,51 @@
 namespace raksha::ir {
 namespace {
 
+class WrappedInt {
+ public:
+  WrappedInt() = delete;
+  WrappedInt(uint64_t val) : val_(val) {}
+
+  int64_t operator*() const { return val_; }
+
+ private:
+  uint64_t val_;
+};
+
+// Just a small test visitor that collects the nodes as they are visited to make
+// sure that  Pre and Post visits happened correctly.
+class NonDefaultConstructorVisitor
+    : public IRTraversingVisitor<NonDefaultConstructorVisitor, WrappedInt> {
+ public:
+  NonDefaultConstructorVisitor() {}
+
+  WrappedInt GetDefaultValue() override { return WrappedInt(1); }
+
+  WrappedInt FoldResult(WrappedInt accumulator, const Module& parent,
+                        WrappedInt child_result) override {
+    return WrappedInt(*accumulator + *child_result);
+  }
+  WrappedInt FoldResult(WrappedInt accumulator, const Block& parent,
+                        WrappedInt child_result) override {
+    return WrappedInt(*accumulator + *child_result);
+  }
+  WrappedInt FoldResult(WrappedInt accumulator, const Operation& parent,
+                        WrappedInt child_result) override {
+    return WrappedInt(*accumulator + *child_result);
+  }
+};
+
+TEST(IRTraversingVisitorTest,
+     GetDefaultValueWorksForNonDefaultConstructableValues) {
+  Module global_module;
+  global_module.AddBlock(std::make_unique<Block>());
+  global_module.AddBlock(std::make_unique<Block>());
+
+  NonDefaultConstructorVisitor counting_visitor;
+  const WrappedInt result = global_module.Accept(counting_visitor);
+  EXPECT_THAT(*result, testing::Eq(3));
+}
+
 enum class TraversalType { kPre = 0x1, kPost = 0x2, kBoth = 0x3 };
 // Just a small test visitor that collects the nodes as they are visited to make
 // sure that  Pre and Post visits happened correctly.

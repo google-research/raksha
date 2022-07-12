@@ -23,6 +23,16 @@
 
 namespace raksha::ir {
 
+template<class Result, class Enable = void>
+struct DefaultValueGetter {
+  static Result Get() { LOG(FATAL) << "Override required for non-default-constructible type."; }
+};
+
+template<class Result>
+struct DefaultValueGetter<Result, std::enable_if_t<std::is_default_constructible_v<Result>>> {
+  static Result Get() { return Result(); }
+};
+
 // A visitor that also traverses the children of a node and allows performing
 // different actions before (PreVisit) and after (PostVisit) the children are
 // visited. Override any of the `PreVisit` and `PostVisit` methods as needed.
@@ -33,7 +43,7 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result> {
 
   // Gives a default value for all 'PreVisit's to start with.
   // Should be over-ridden if the Result is not default constructable.
-  virtual Result GetDefaultValue() { return Result(); }
+  virtual Result GetDefaultValue() { return DefaultValueGetter<Result>::Get(); }
 
   // Invoked before all the children of `module` is visited.
   virtual Result PreVisit(const Module& module) {
