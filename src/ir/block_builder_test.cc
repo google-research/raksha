@@ -20,7 +20,7 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/ir_context.h"
-#include  "third_party/raksha/src/ir/ir_printer.h"
+#include "src/ir/ir_printer.h"
 #include "src/ir/ssa_names.h"
 #include "src/ir/types/entity_type.h"
 #include "src/ir/types/type.h"
