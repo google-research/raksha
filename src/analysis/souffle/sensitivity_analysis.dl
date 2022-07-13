@@ -113,15 +113,12 @@ sqlValueSensitivity(value, sensitivity_score) :-
       sensitivity_score = input_sensitivity * function_sensitvity.
 
 
-isInitialInput("revenue_table").
+// isOperation(["template_owner", "sql.where", "revenue_table_where1", ["revenue_table", nil], nil]).
+// isOperation(["template_owner", "sql.group_by", "revenue_table_group_by", ["revenue_table", nil], nil]).
+// isOperation(["template_owner", "sql.where", "revenue_table_where2", ["revenue_table", nil], nil]).
+// isOperation(["template_owner", "sql.select", "user", ["revenue_table_where1", ["revenue_table_group_by", ["revenue_table_where2", nil]]], nil]).
+// isOperation(["template_owner", "sql.select", "address", ["revenue_table_where1", ["revenue_table_group_by", nil]], nil]).
 
-#ifndef test
-#define test 
+//isInitialInput("revenue_table").
 
-.decl actualResult(value: AccessPath, sensitivity_score: number)
-actualResult(value, sensitivity_score) :- sqlValueSensitivity(value, sensitivity_score).
-
-.decl expectedResult(value: AccessPath, sensitivity_score: number)
-
-#endif
 #endif // SENSITIVITY_ANALYSIS_DL_

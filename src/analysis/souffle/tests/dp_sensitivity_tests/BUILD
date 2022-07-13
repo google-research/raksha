@@ -16,7 +16,7 @@
 #-------------------------------------------------------------------------------
 load(
     "//build_defs:test_helpers.bzl",
-    "run_sensitivity_analysis_compare_results",
+    "output_rule_diff_test",
 )
 
 package(
@@ -24,8 +24,10 @@ package(
     licenses = ["notice"],
 )
 
-run_sensitivity_analysis_compare_results(
+output_rule_diff_test(
     name = "sensitivity_analysis_unit_test",
+    expected_contents_csv = ":expectedResult.csv",
     input_files = glob(["*.facts"]),
+    output_fact = "sqlValueSensitivity",
     test_bin = ["//src/analysis/souffle:sensitivity_analysis_test"],
 )
