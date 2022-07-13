@@ -35,16 +35,14 @@ absl::StatusOr<std::filesystem::path> CreateTemporaryDirectory() {
         "Unable to access temporary file directory: %s", error_code.message()));
   }
 
-  const int BUFFER_SIZE = 1024;
-  char new_temp_path[BUFFER_SIZE];
-  snprintf(new_temp_path, BUFFER_SIZE, "%s/XXXXXX", temp_path.c_str());
-  if (::mkdtemp(new_temp_path) == nullptr) {
+  std::string target_dir = absl::StrFormat("%s/XXXXXX", temp_path);
+  if (::mkdtemp(target_dir.data()) == nullptr) {
     return absl::FailedPreconditionError(
-        absl::StrFormat("Unable to create directory `%s`: %s", new_temp_path,
+        absl::StrFormat("Unable to create target directory `%s`: %s", target_dir,
                         strerror(errno)));
   }
 
-  return new_temp_path;
+  return std::filesystem::path(target_dir);
 }
 
 }  // namespace raksha::common::utils

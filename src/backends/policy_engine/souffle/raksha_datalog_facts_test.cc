@@ -133,22 +133,23 @@ TEST_F(DumpFactsToDirectoryTest, CreatesEmptyRelationsIfRequested) {
 TEST_F(DumpFactsToDirectoryTest, CreatesFilesInRequestedDirectory) {
   std::vector<std::string> empty_relations = {"check", "claim"};
 
-  char filename[] = "/tmp/foo.XXXXXX";
-  ASSERT_NE(::mkdtemp(filename), nullptr);
-  std::filesystem::path desired_path(filename);
+  absl::StatusOr<std::filesystem::path> tempdir_statusor =
+      common::utils::CreateTemporaryDirectory();
+  CHECK(tempdir_statusor.ok());
 
+  std::filesystem::path target_dir = *tempdir_statusor;
   absl::Status status =
-      facts_.DumpFactsToDirectory(desired_path, empty_relations);
+      facts_.DumpFactsToDirectory(target_dir, empty_relations);
   ASSERT_TRUE(status.ok());
 
   auto directory_iter =
-      std::filesystem::directory_iterator(desired_path.string());
-  auto files = GetFilesInDirectory(desired_path);
+      std::filesystem::directory_iterator(target_dir.string());
+  auto files = GetFilesInDirectory(target_dir);
   EXPECT_THAT(files, testing::UnorderedElementsAre(
                          "isOperation.facts", "check.facts", "claim.facts"));
-  CheckFileContentsInDirectory(desired_path, empty_relations);
+  CheckFileContentsInDirectory(target_dir, empty_relations);
 
-  ASSERT_TRUE(std::filesystem::remove_all(desired_path));
+  ASSERT_TRUE(std::filesystem::remove_all(target_dir));
 }
 
 TEST_F(DumpFactsToDirectoryTest, ReturnsErrorIfRequestedDirectoryDoesNotExist) {
