@@ -8,9 +8,6 @@
 
 .input isOperation(delimiter=";")
 .input isInitialInput(delimiter=";")
-.input expectedResult(delimiter=";")
-.output actualResult(delimiter=";")
-.output expectedResult(delimiter=";")
-
+.output sqlValueSensitivity(delimiter=";")
 
 #endif SENSITIVITY_ANALYSIS_UNIT_TEST_INTERFACE_DL_
