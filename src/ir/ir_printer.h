@@ -56,34 +56,38 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     return out.str();
   }
 
-  void PreVisit(const Module& module) override {
+  Unit PreVisit(const Module& module) override {
     out_ << Indent()
          << absl::StreamFormat("module %s {\n",
                                ssa_names_->GetOrCreateID(module));
     IncreaseIndent();
+    return Unit();
   }
 
-  void PostVisit(const Module& module) override {
+  Unit PostVisit(const Module& module, Unit result) override {
     DecreaseIndent();
     out_ << Indent()
          << absl::StreamFormat("}  // module %s\n",
                                ssa_names_->GetOrCreateID(module));
+    return result;
   }
 
-  void PreVisit(const Block& block) override {
+  Unit PreVisit(const Block& block) override {
     out_ << Indent()
          << absl::StreamFormat("block %s {\n", ssa_names_->GetOrCreateID(block));
     IncreaseIndent();
+    return Unit();
   }
 
-  void PostVisit(const Block& block) override {
+  Unit PostVisit(const Block& block, Unit result) override {
     DecreaseIndent();
     out_ << Indent()
          << absl::StreamFormat("}  // block %s\n",
                                ssa_names_->GetOrCreateID(block));
+    return result;
   }
 
-  void PreVisit(const Operation& operation) override {
+  Unit PreVisit(const Operation& operation) override {
     constexpr absl::string_view kOperationFormat = "%s = %s [%s](%s)";
     SsaNames::ID this_ssa_name = ssa_names_->GetOrCreateID(operation);
 
@@ -109,13 +113,15 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     } else {
       out_ << "\n";
     }
+    return Unit();
   }
 
-  void PostVisit(const Operation& operation) override {
+  Unit PostVisit(const Operation& operation, Unit result) override {
     if (operation.impl_module()) {
       DecreaseIndent();
       out_ << Indent() << "}\n";
     }
+    return result;
   }
 
   // Returns a pretty-printed map where entries are sorted by the key.

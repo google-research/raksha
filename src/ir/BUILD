@@ -121,7 +121,11 @@ cc_test(
 cc_library(
     name = "ir_traversing_visitor",
     hdrs = ["ir_traversing_visitor.h"],
-    deps = [":module"],
+    deps = [
+        ":module",
+        "//src/common/utils:fold",
+        "//src/common/utils:types",
+    ],
 )
 
 cc_test(
@@ -178,6 +182,7 @@ cc_library(
         ":operator",
         ":ssa_names",
         ":value",
+        "//src/common/utils:types",
         "//src/ir/attributes:attribute",
         "//src/ir/types",
         "@absl//absl/container:flat_hash_map",

@@ -66,14 +66,14 @@ TEST_F(DataDeclCollectionTest, AddDeclReturnsAddedDecl) {
             "TestCount");
 }
 
-TEST_F(DataDeclCollectionTest, DuplicateAddDeclCausesFaiure) {
+TEST_F(DataDeclCollectionTest, DuplicateAddDeclCausesFailure) {
   collection_.AddDecl("count", type_factory_.MakePrimitiveType());
   EXPECT_DEATH(
       { collection_.AddDecl("count", type_factory_.MakePrimitiveType()); },
       "Adding a duplicate declaration for `count`.");
 }
 
-TEST_F(DataDeclCollectionTest, FindDeclReturnsExisingDecl) {
+TEST_F(DataDeclCollectionTest, FindDeclReturnsExistingDecl) {
   collection_.AddDecl(
       "city", DataDeclTest::MakeTestEntityType(type_factory_, "TestCity"));
 
