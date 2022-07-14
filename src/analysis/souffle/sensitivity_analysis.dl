@@ -14,26 +14,6 @@ isSqlOperator([owner, operator, result, input_list, attribute_list]) :- isOperat
 .decl isSqlValue(value: AccessPath)
 isSqlValue(value) :- isSqlOperator([_, _, value, _, _]).
 
-//connecting each value to its input list 
-.decl sqlValueHasSqlInputList(value: AccessPath, sql_input: OperandList)
-sqlValueHasSqlInputList(value, input_list) :- isSqlOperator([_, _, value, input_list, _]). 
-
-//keeping track of the suffix of each input list
-//used in finding the maximm sensitvity 
-.decl sqlValueHasSqlInputListSuffix(value: AccessPath, partialList: OperandList)
-
-sqlValueHasSqlInputListSuffix(value, input_list) :-
-  sqlValueHasSqlInputList(value, input_list).
-sqlValueHasSqlInputListSuffix(value, tail) :-
-  sqlValueHasSqlInputListSuffix(value, [_, tail]).
-
-//calculate the length of each sql operator input list by iterating starting from the end
-.decl sqlOperatorInputListLength(input_list: OperandList, list_length: number)
-
-sqlOperatorInputListLength(nil, 0).
-sqlOperatorInputListLength([head, tail], tailLen + 1) :-
-  sqlValueHasSqlInputListSuffix(_, [head, tail]), sqlOperatorInputListLength(tail, tailLen).
-
 //keeping track of all initial inputs as they all have sensitivity score 1
 .decl isInitialInput (ingress_point: AccessPath)
 
@@ -111,14 +91,5 @@ sqlValueSensitivity(value, sensitivity_score) :-
       operationOperandListLength(operation, input_list_length), 
       sqlValueHasSensitivityScoreAtIndex(value, input_sensitivity, input_list_length-1), 
       sensitivity_score = input_sensitivity * function_sensitvity.
-
-
-// isOperation(["template_owner", "sql.where", "revenue_table_where1", ["revenue_table", nil], nil]).
-// isOperation(["template_owner", "sql.group_by", "revenue_table_group_by", ["revenue_table", nil], nil]).
-// isOperation(["template_owner", "sql.where", "revenue_table_where2", ["revenue_table", nil], nil]).
-// isOperation(["template_owner", "sql.select", "user", ["revenue_table_where1", ["revenue_table_group_by", ["revenue_table_where2", nil]]], nil]).
-// isOperation(["template_owner", "sql.select", "address", ["revenue_table_where1", ["revenue_table_group_by", nil]], nil]).
-
-//isInitialInput("revenue_table").
 
 #endif // SENSITIVITY_ANALYSIS_DL_
