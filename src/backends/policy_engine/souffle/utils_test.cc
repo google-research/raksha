@@ -29,8 +29,10 @@ namespace raksha::backends::policy_engine::souffle {
 namespace {
 
 TEST(WriteFactsToBadDirectory, WriteFactsToBadDirectory) {
-  absl::Status result = WriteFactsStringToFactsFile(
-      std::filesystem::path(std::tmpnam(nullptr)), "SomeRelation", "");
+  std::filesystem::path bad_path("nosuchpath");
+  ASSERT_FALSE(std::filesystem::exists(bad_path));
+
+  absl::Status result = WriteFactsStringToFactsFile(bad_path, "SomeRelation", "");
   EXPECT_FALSE(result.ok());
   EXPECT_TRUE(IsFailedPrecondition(result));
 }

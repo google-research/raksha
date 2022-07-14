@@ -17,6 +17,7 @@
 #include "src/common/utils/filesystem.h"
 
 #include <cstdio>
+#include <errno.h>
 
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
@@ -34,14 +35,14 @@ absl::StatusOr<std::filesystem::path> CreateTemporaryDirectory() {
         "Unable to access temporary file directory: %s", error_code.message()));
   }
 
-  absl::string_view temp_file = std::tmpnam(nullptr);
-  std::filesystem::path new_temp_path = temp_path / temp_file;
-  if (!std::filesystem::create_directory(new_temp_path, error_code)) {
+  std::string target_dir = absl::StrFormat("%s/XXXXXX", temp_path);
+  if (::mkdtemp(target_dir.data()) == nullptr) {
     return absl::FailedPreconditionError(
-        absl::StrFormat("Unable to create directory `%s`: %s", new_temp_path,
-                        error_code.message()));
+        absl::StrFormat("Unable to create target directory `%s`: %s", target_dir,
+                        strerror(errno)));
   }
-  return new_temp_path;
+
+  return std::filesystem::path(target_dir);
 }
 
 }  // namespace raksha::common::utils
