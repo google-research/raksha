@@ -23,21 +23,23 @@
 
 namespace raksha::ir {
 
-template<class Result, class Enable = void>
-struct DefaultValueGetter {
-  static Result Get() { LOG(FATAL) << "Override required for non-default-constructible type."; }
-};
-
-template<class Result>
-struct DefaultValueGetter<Result, std::enable_if_t<std::is_default_constructible_v<Result>>> {
-  static Result Get() { return Result(); }
-};
-
 // A visitor that also traverses the children of a node and allows performing
 // different actions before (PreVisit) and after (PostVisit) the children are
 // visited. Override any of the `PreVisit` and `PostVisit` methods as needed.
 template <typename Derived, typename Result = Unit>
 class IRTraversingVisitor : public IRVisitor<Derived, Result> {
+ private:
+  template<class ValueType, class Enable = void>
+  struct DefaultValueGetter {
+    // TODO(cypher1, jopra): See https://github.com/google-research/raksha/issues/618
+    static ValueType Get() { LOG(FATAL) << "Override required for non-default-constructible type."; }
+  };
+
+  template<class ValueType>
+  struct DefaultValueGetter<ValueType, std::enable_if_t<std::is_default_constructible_v<ValueType>>> {
+    static ValueType Get() { return ValueType(); }
+  };
+
  public:
   virtual ~IRTraversingVisitor() {}
 

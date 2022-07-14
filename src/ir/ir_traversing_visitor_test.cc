@@ -35,8 +35,7 @@ class WrappedInt {
   uint64_t val_;
 };
 
-// Just a small test visitor that collects the nodes as they are visited to make
-// sure that  Pre and Post visits happened correctly.
+// A small test visitor that checks behavior when using non default constructable return values.
 class NonDefaultConstructorVisitor
     : public IRTraversingVisitor<NonDefaultConstructorVisitor, WrappedInt> {
  public:
@@ -58,7 +57,7 @@ TEST(IRTraversingVisitorTest,
 
   NonDefaultConstructorVisitor counting_visitor;
   const WrappedInt result = global_module.Accept(counting_visitor);
-  EXPECT_THAT(*result, testing::Eq(3));
+  EXPECT_EQ(*result, 3);
 }
 
 enum class TraversalType { kPre = 0x1, kPost = 0x2, kBoth = 0x3 };
