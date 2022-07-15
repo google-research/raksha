@@ -20,6 +20,7 @@
 #include "src/analysis/souffle/sql_output.dl"
 #include "src/analysis/souffle/taint.dl"
 #include "src/analysis/souffle/tag_transforms.dl"
+#include "src/analysis/souffle/sensitivity_analysis.dl"
 
 // An interface used for running and getting results from the policy verifier.
 // Does not concern itself with authorization logic facts, considers only
