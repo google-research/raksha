@@ -118,7 +118,6 @@ isDiffPrivacyMechanism(value, epsilon) :- isSqlInput(value, sqlInput),
 epsilonDiffPrivacy(value, epsilon) :- isDiffPrivacyMechanism(value, _),
       epsilon = sum y : { isDiffPrivacyMechanism(value, y)}. 
 
-
 violatesPolicy(value) :- isSqlOperator([_, _, value, _, _]), 
       !sqlValueSensitivity(value, _),
       epsilonDiffPrivacy(value, number), 
