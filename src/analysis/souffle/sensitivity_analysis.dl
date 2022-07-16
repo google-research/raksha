@@ -98,6 +98,29 @@ sqlValueSensitivity(value, sensitivity_score) :-
       sqlOperationHasSensitivityScoreAtIndex(operation, input_sensitivity, input_list_length-1), 
       sensitivity_score = input_sensitivity * function_sensitvity.
 
-violatesPolicy(value) :- sqlValueSensitivity(value, sensitivity_score), 
-      sensitivity_score >=2.
+.decl isGlobalEpsilon(epsilon: number)
+//TODO: is there a way to set a deafault option?
+isGlobalEpsilon(epsilon) :- isOperation([_, "global_epsilon", _, _, [["epsilon", $NumberAttributePayload(epsilon)], _]]).
+
+.decl isDiffPrivacyMechanism(value: AccessPath, epsilon: number)
+isDiffPrivacyMechanism(value, epsilon) :- isOperation([_, "privacy_mechanism", value, _, [["epsilon", $NumberAttributePayload(epsilon)], _]]). 
+
+//sequential composition
+.decl epsilonDiffPrivacy(value: AccessPath, epsilon: number)
+epsilonDiffPrivacy(value, epsilon) :- isDiffPrivacyMechanism(value, _),
+      epsilon = sum y : { isDiffPrivacyMechanism(value, y)}. 
+
+violatesPolicy(value) :- isSqlOperator([_, _, value, _, _]), 
+      !sqlValueSensitivity(value, _),
+      epsilonDiffPrivacy(value, number), 
+      isGlobalEpsilon(global_epsilon),
+      number > global_epsilon;
+      isGlobalEpsilon(global_epsilon),  
+      sqlValueSensitivity(value, sensitivity_score), 
+      epsilonDiffPrivacy(value, epsilon), 
+      global_epsilon <= epsilon * sensitivity_score; 
+      isSqlOperator([_, _, value, _, _]),
+      !epsilonDiffPrivacy(value, _).
+
+
 #endif // SENSITIVITY_ANALYSIS_DL_

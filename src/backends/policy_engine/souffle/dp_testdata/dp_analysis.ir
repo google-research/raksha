@@ -1,6 +1,7 @@
 module m0 {
   block b0 {
         %0 = core.input [name: "revenue_table"] ()  
+        %epsilon = global_epsilon [epsilon: "2"] ()
         %1 = sql.filter [column: "revenue"] (%0.out) // { revenue > 100 }
         %location = sql.column_access [column: "location"] (%1.out)
         %2 = sql.group_by[] (%1.out, %location.out) // (%0, location)
