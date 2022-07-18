@@ -110,21 +110,28 @@ isDiffPrivacyMechanism(value, epsilon) :- isOperation([_, "privacy_mechanism", v
 isDiffPrivacyMechanism(value, epsilon) :- isSqlInput(value, sqlInput),
       isDiffPrivacyMechanism(sqlInput, epsilon). 
 
-//sequential composition
+// sequential composition
 .decl epsilonDiffPrivacy(value: AccessPath, epsilon: number)
 epsilonDiffPrivacy(value, epsilon) :- isDiffPrivacyMechanism(value, _),
       epsilon = sum y : { isDiffPrivacyMechanism(value, y)}. 
 
+// DP Policies are violated when: 
+// 1. There is a privacy mechanism applied to value, the value does not need sensitivity analysis, and 
+//       the epsilon in the privacy mechanism is smaller than the global epsilon 
+// 2. There is a privacy mechanism applied to value, the value has a particular sensitivity score, and  
+//       the global epsilon is smaller than sensitvity * privacy mechanism epsilon
+// 3. There is no privacy mechanism on a value that has a particular sensitivity score
 violatesPolicy(value) :- isSqlOperator([_, _, value, _, _]), 
       !sqlValueSensitivity(value, _),
       epsilonDiffPrivacy(value, number), 
       isGlobalEpsilon(global_epsilon),
-      number > global_epsilon;
+      global_epsilon < number;
       isGlobalEpsilon(global_epsilon),  
       sqlValueSensitivity(value, sensitivity_score), 
       epsilonDiffPrivacy(value, epsilon), 
-      global_epsilon <= epsilon * sensitivity_score; 
+      global_epsilon < epsilon * sensitivity_score; 
       isSqlOperator([_, _, value, _, _]),
+      sqlValueSensitivity(value, _),
       !epsilonDiffPrivacy(value, _).
 
 
