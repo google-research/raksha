@@ -15,7 +15,7 @@ isSqlOperation([owner, operator, result, input_list, attribute_list]) :- isOpera
 isSqlValue(value) :- isSqlOperation([_, _, value, _, _]).
 
 // keeping track of all initial inputs as they all have sensitivity score 1
-.decl isInitialInput (ingress_point: AccessPath)
+.decl isInitialInput(ingress_point: AccessPath)
 
 // helper functions to flatten input lists
 .decl intermediateFlatten(list:OperandList, sublist:OperandList, list_element:AccessPath)
