@@ -10,4 +10,4 @@
 .input isInitialInput(delimiter=";")
 .output sqlValueSensitivity(delimiter=";")
 
-#endif SENSITIVITY_ANALYSIS_UNIT_TEST_INTERFACE_DL_
+#endif

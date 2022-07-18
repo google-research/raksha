@@ -22,5 +22,6 @@ package(
 
 exports_files([
     "dp_policy_rules.txt",
-    "dp_analysis.ir",
+    "dp_analysis_passing.ir",
+    "dp_analysis_failing.ir",
 ])
