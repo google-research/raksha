@@ -156,6 +156,7 @@ gen_souffle_cxx_code(
         "authorization_logic.dl",
         "check_predicate.dl",
         "dataflow_graph.dl",
+        "epsilon_analysis.dl",
         "operations.dl",
         "sensitivity_analysis.dl",
         "sql_output.dl",
