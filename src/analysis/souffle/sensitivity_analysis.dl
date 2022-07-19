@@ -80,12 +80,14 @@ sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, index) :-
 // TODO: add other cases 
 .decl sqlFunctionSensitivity(operator: Operator, sensitivity_score: number)
 
-sqlFunctionSensitivity("sql.where", 1) :- isSqlOperator([_, "sql.where", _, _, _]). 
-sqlFunctionSensitivity("sql.filter", 1) :- isSqlOperator([_, "sql.filter", _, _, _]). 
-sqlFunctionSensitivity("sql.group_by", 2) :- isSqlOperator([_,"sql.group_by", _, _, _]). 
-sqlFunctionSensitivity("sql.select", 1) :- isSqlOperator([_, "sql.select", _, _, _]). 
-sqlFunctionSensitivity("sql.column_access", 1) :- isSqlOperator([_, "sql.column_access", _, _, _]). 
-sqlFunctionSensitivity("sql.output", 1) :- isSqlOperator([_, "sql.output", _, _, _]). 
+sqlFunctionSensitivity(operator, 1) :- operator = "sql.filter";
+      operator = "sql.where";
+      operator = "sql.select";
+      operator = "sql.column_access";
+      operator = "sql.output".
+
+sqlFunctionSensitivity(operator, 2) :- operator = "sql.group_by". 
+
 
 //final value sensitivity score, the max of input multiplied by the function sensitivity 
 .decl sqlValueSensitivity(value: AccessPath, sensitivity_score: number)
