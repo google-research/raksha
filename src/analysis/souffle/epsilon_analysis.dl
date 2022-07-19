@@ -12,7 +12,8 @@ isDiffPrivacyMechanism(value, epsilon) :- isOperation([_, "privacy_mechanism", v
 
 //propagate privacy mechanism for now
 //not sure yet what the literature says how this should be done 
-isDiffPrivacyMechanism(value, epsilon) :- isSqlInput(value, sqlInput),
+isDiffPrivacyMechanism(value, epsilon) :- isSqlInput(operation, sqlInput),
+      operationHasResult(operation, value),
       isDiffPrivacyMechanism(sqlInput, epsilon). 
 
 // sequential composition
@@ -28,7 +29,7 @@ sqlValueSensitivity(value, 1) :- isDiffPrivacyMechanism(value, _).
 // 2. There is a privacy mechanism applied to value, the value has a particular sensitivity score, and  
 //       the global epsilon is smaller than sensitvity * privacy mechanism epsilon
 // 3. There is no privacy mechanism on a value that has a particular sensitivity score
-violatesPolicy(value) :- isSqlOperator([_, _, value, _, _]), 
+violatesPolicy(value) :- isSqlOperation([_, _, value, _, _]), 
       !sqlValueSensitivity(value, _),
       epsilonDiffPrivacy(value, privacy_mechanism_epsilon), 
       isGlobalEpsilon(global_epsilon),
@@ -37,7 +38,7 @@ violatesPolicy(value) :- isSqlOperator([_, _, value, _, _]),
       sqlValueSensitivity(value, sensitivity_score), 
       epsilonDiffPrivacy(value, privacy_mechanism_epsilon), 
       global_epsilon < privacy_mechanism_epsilon * sensitivity_score; 
-      isSqlOperator([_, _, value, _, _]),
+      isSqlOperation([_, _, value, _, _]),
       sqlValueSensitivity(value, _),
       !epsilonDiffPrivacy(value, _).
 
