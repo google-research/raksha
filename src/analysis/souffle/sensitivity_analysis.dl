@@ -8,11 +8,14 @@
 // one isSqlOperator fact per each sql operator, currently supporting one output
 // referring to results as 'value' (sqlValue declared below) as per the discussion in the doc 
 .decl isSqlOperation(sqlOperation: Operation)
-isSqlOperation([owner, operator, result, input_list, attribute_list]) :- isOperation([owner, operator, result, input_list, attribute_list]), match("sql.*", operator). 
+isSqlOperation(operation) :- isOperation(operation), 
+      operationHasOperator(operation, operator), 
+      match("sql.*", operator). 
 
 
 .decl isSqlValue(value: AccessPath)
-isSqlValue(value) :- isSqlOperation([_, _, value, _, _]).
+isSqlValue(value) :- isSqlOperation(operation),
+      operationHasResult(operation, value).
 
 // keeping track of all initial inputs as they all have sensitivity score 1
 .decl isInitialInput(ingress_point: AccessPath)
@@ -20,7 +23,9 @@ isSqlValue(value) :- isSqlOperation([_, _, value, _, _]).
 // helper functions to flatten input lists
 .decl intermediateFlatten(list:OperandList, sublist:OperandList, list_element:AccessPath)
 
-intermediateFlatten(list, sublist, list_element) :- isSqlOperation([_, _, _, list, _]), list = [list_element, sublist].
+intermediateFlatten(list, sublist, list_element) :- isSqlOperation(operation), 
+      operationHasOperandList(operation, list), 
+      list = [list_element, sublist].
 intermediateFlatten(list, sublist, list_element) :- intermediateFlatten(list, [list_element, sublist], _).
 
 .decl flatten(list:OperandList, list_element:AccessPath)
@@ -35,7 +40,7 @@ isSqlInput(operation, sql_input) :- isSqlOperation(operation),
 
 // keeping track of sensitivity score per each input at index 
 // used to calculate the maximum input sensitivity 
-// decomposed into base and inductive cases because recursrive aggregates are not supported yet 
+// decomposed into base and inductive cases because recursive aggregates are not supported yet 
 // for the compiler case in souffle
 .decl sqlOperationHasSensitivityScoreAtIndex(operation: Operation, sensitivity_score: number, index: number) 
 
@@ -83,7 +88,8 @@ sqlFunctionSensitivity("sql.select", 1) :- isSqlOperation([_, "sql.select", _, _
 .decl sqlValueSensitivity(value: AccessPath, sensitivity_score: number)
 sqlValueSensitivity(value, sensitivity_score) :- 
       isSqlOperation(operation), 
-      operation = [_, operator, value, _, _], 
+      operationHasOperator(operation, operator), 
+      operationHasResult(operation, value), 
       sqlFunctionSensitivity(operator, function_sensitvity), 
       operationOperandListLength(operation, input_list_length), 
       sqlOperationHasSensitivityScoreAtIndex(operation, input_sensitivity, input_list_length-1), 
