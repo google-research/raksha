@@ -100,4 +100,4 @@ sqlValueSensitivity(value, sensitivity_score) :-
       sqlOperationHasSensitivityScoreAtIndex(operation, input_sensitivity, input_list_length-1), 
       sensitivity_score = input_sensitivity * function_sensitvity.
 
-#endif // SENSITIVITY_ANALYSIS_DL_
+#endif // SRC_SOUFFLE_ANALYSIS_SENSITIVITY_ANALYSIS_DL_
