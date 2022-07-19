@@ -76,13 +76,12 @@ sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, index) :-
 
 // function sensitivity scores per each sql operator as defined in PINQ
 // TODO: add other cases 
-.decl sqlFunctionSensitivity(operator: symbol, sensitivity_score: number)
+.decl sqlFunctionSensitivity(operator: Operator, sensitivity_score: number)
 
-sqlFunctionSensitivity("sql.where", 1) :- isSqlOperation([_, "sql.where", _, _, _]). 
-sqlFunctionSensitivity("sql.filter", 1) :- isSqlOperation([_, "sql.filter", _, _, _]). 
-sqlFunctionSensitivity("sql.group_by", 2) :- isSqlOperation([_,"sql.group_by", _, _, _]). 
-sqlFunctionSensitivity("sql.select", 1) :- isSqlOperation([_, "sql.select", _, _, _]). 
-
+sqlFunctionSensitivity(operator, 1) :- operator = "sql.filter"; 
+      operator = "sql.where"; 
+      operator = "sql.select".
+sqlFunctionSensitivity(operator, 2) :- operator = "sql.group_by". 
 
 // final value sensitivity score, the max of input multiplied by the function sensitivity 
 .decl sqlValueSensitivity(value: AccessPath, sensitivity_score: number)
