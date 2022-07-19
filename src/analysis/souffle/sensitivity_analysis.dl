@@ -27,51 +27,46 @@ intermediateFlatten(list, sublist, list_element) :- intermediateFlatten(list, [l
 flatten(list, list_element) :- intermediateFlatten(list, _, list_element).
 
 // flattening each individual input per value
-.decl isSqlInput(value: AccessPath, sql_input: AccessPath)
+.decl isSqlInput(operation: Operation, sql_input: AccessPath)
 
-isSqlInput(value, sql_input) :- isSqlOperation([_, _, value, input_list, _]), 
-                              flatten(input_list, sql_input). 
+isSqlInput(operation, sql_input) :- isSqlOperation(operation), 
+      operationHasOperandList(operation, input_list), 
+      flatten(input_list, sql_input). 
 
 // keeping track of sensitivity score per each input at index 
 // used to calculate the maximum input sensitivity 
 // decomposed into base and inductive cases because recursrive aggregates are not supported yet 
 // for the compiler case in souffle
-.decl sqlValueHasSensitivityScoreAtIndex(value: AccessPath, sensitivity_score: number, index: number) 
+.decl sqlOperationHasSensitivityScoreAtIndex(operation: Operation, sensitivity_score: number, index: number) 
 
 // base cases (index 0)
 // for initial inputs, sensitivity is 1
-sqlValueHasSensitivityScoreAtIndex(value, 1, 0) :- isSqlOperation(operation), 
-      operation = [_, _, value, _, _],
+sqlOperationHasSensitivityScoreAtIndex(operation, 1, 0) :- isSqlOperation(operation), 
       operationHasOperandAtIndex(operation, sql_input, 0),
       isInitialInput(sql_input).
 
 //for all others, get the final sensitivity score
-sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, 0) :- isSqlOperation(operation), 
-      operation = [_, _, value, _, _],
+sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, 0) :- isSqlOperation(operation), 
       operationHasOperandAtIndex(operation, sql_input, 0),
       sqlValueSensitivity(sql_input, sensitivity_score).      
 
 // inductive cases 
 // keep track at the score at each index, only update if the new input score is higher
-sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, index) :- 
-      isSqlValue(value),
+sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, index) :- 
       isSqlOperation(operation), 
-      operation = [_, _, value, _, _],
       operationHasOperandAtIndex(operation, sql_input, index),
-      isSqlInput(value, sql_input), 
+      isSqlInput(operation, sql_input), 
       sqlValueSensitivity(sql_input, input_sensitivity_score), 
-      sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, index-1),
+      sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, index-1),
       sensitivity_score >= input_sensitivity_score. 
 
 
-sqlValueHasSensitivityScoreAtIndex(value, sensitivity_score, index) :- 
-      isSqlValue(value),
+sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, index) :- 
       isSqlOperation(operation), 
-      operation = [_, _, value, _, _],
       operationHasOperandAtIndex(operation, sql_input, index),
       isSqlInput(value, sql_input), 
       sqlValueSensitivity(sql_input, sensitivity_score), 
-      sqlValueHasSensitivityScoreAtIndex(value, prev_sensitivity_score, index-1), 
+      sqlOperationHasSensitivityScoreAtIndex(operation, prev_sensitivity_score, index-1), 
       sensitivity_score >= prev_sensitivity_score. 
 
 // function sensitivity scores per each sql operator as defined in PINQ
@@ -91,7 +86,7 @@ sqlValueSensitivity(value, sensitivity_score) :-
       operation = [_, operator, value, _, _], 
       sqlFunctionSensitivity(operator, function_sensitvity), 
       operationOperandListLength(operation, input_list_length), 
-      sqlValueHasSensitivityScoreAtIndex(value, input_sensitivity, input_list_length-1), 
+      sqlOperationHasSensitivityScoreAtIndex(operation, input_sensitivity, input_list_length-1), 
       sensitivity_score = input_sensitivity * function_sensitvity.
 
 #endif // SRC_ANALYSIS_SOUFFLE_SENSITIVITY_ANALYSIS_DL_
