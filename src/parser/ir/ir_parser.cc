@@ -22,6 +22,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -46,7 +47,7 @@ namespace raksha::ir {
 using ir_parser_generator::IrLexer;
 using ir_parser_generator::IrParser;
 
-void IrProgramParser::ConstructOperation(
+IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
     IrParser::OperationContext& operation_context,
     BlockBuilder& block_builder) {
   // Operator
@@ -83,45 +84,65 @@ void IrProgramParser::ConstructOperation(
                          Attribute::Create<Int64Attribute>(parsed_int)});
     }
   }
-  // Grammar rule for value is one of the 2 options below
-  //->ANY
-  //->VALUE_ID (a stored value or a operation result or a block argument)
-  ValueList inputs =
-      (operation_context.argumentList() == nullptr)
-          ? ValueList()
-          : utils::MapIter<Value>(
-                operation_context.argumentList()->value(),
-                [this](IrParser::ValueContext* value_context) {
-                  if (dynamic_cast<IrParser::AnyValueContext*>(value_context)) {
-                    return Value(value::Any());
-                  }
-                  auto* named_value_context =
-                      dynamic_cast<IrParser::NamedValueContext*>(value_context);
-                  const std::string& value_id =
-                      CHECK_NOTNULL(named_value_context)->VALUE_ID()->getText();
-                  // Operation Result Value
-                  auto find_value_id_operation = value_map_.find(value_id);
-                  CHECK(find_value_id_operation != value_map_.end())
-                      << "Value not found" << value_id;
-                  return find_value_id_operation->second;
-                });
-  // Operation rule: VALUE_ID '=' ID '['(attributeList)?']''('(argumentList)?')'
-  // mapping between Result(Ex:%0) and corresponding operation.
-  const Operation& op = block_builder.AddOperation(
-      *CHECK_NOTNULL(context_->GetOperator(operation_context.ID()->getText())),
-      std::move(attributes), std::move(inputs), nullptr);
-  const Value& v = Value(value::OperationResult(op, "out"));
-  value_map_.insert({absl::StrCat(operation_context.VALUE_ID()->getText()), v});
-  ssa_names_->AddID(v, operation_context.VALUE_ID()->getText());
-  ssa_names_->AddID(op, operation_context.VALUE_ID()->getText());
+
+  // value_names stores the string of inputs
+  std::vector<std::string> value_names;
+  if (operation_context.argumentList() != nullptr) {
+    for (IrParser::ValueContext* value_context :
+         operation_context.argumentList()->value()) {
+      if (dynamic_cast<IrParser::AnyValueContext*>(value_context)) {
+        value_names.push_back("<<ANY>>");
+        continue;
+      }
+      auto* named_value_context =
+          dynamic_cast<IrParser::NamedValueContext*>(value_context);
+      // Operation Result Value
+      value_names.push_back(
+          CHECK_NOTNULL(named_value_context)->VALUE_ID()->getText());
+    }
+  }
+
+  auto op = std::make_unique<Operation>(
+      nullptr,
+      *CHECK_NOTNULL(
+          context_->GetOperator(operation_context.ID()->getText())),
+      std::move(attributes), ValueList(), nullptr);
+  return IrProgramParser::ConstructOperationResult{
+      .op_name = operation_context.VALUE_ID()->getText(),
+      .operation = std::move(op),
+      .input_names = std::move(value_names)};
 }
 
 void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
   BlockBuilder builder;
+  absl::flat_hash_map<std::string, Value> value_map;
+  std::vector<ConstructOperationResult> construct_operation_results;
+
   for (IrParser::OperationContext* operation_context :
        block_context.operation()) {
-    IrProgramParser::ConstructOperation(*CHECK_NOTNULL(operation_context),
-                                        builder);
+    auto construct_operation_result = IrProgramParser::ConstructOperation(
+        *CHECK_NOTNULL(operation_context), builder);
+    const Value& v = Value(
+        value::OperationResult(*construct_operation_result.operation, "out"));
+    value_map.insert({construct_operation_result.op_name, v});
+    ssa_names_->AddID(*construct_operation_result.operation,
+                      construct_operation_result.op_name);
+    ssa_names_->AddID(v, construct_operation_result.op_name);
+    construct_operation_results.push_back(
+        std::move(construct_operation_result));
+  }
+
+  for (auto& [op_name, op, input_names] : construct_operation_results) {
+    for (const auto& op_value : input_names) {
+      if (op_value == "<<ANY>>") {
+        op->AddInput(Value(value::Any()));
+        continue;
+      }
+      auto find_value = value_map.find(op_value);
+      CHECK(find_value != value_map.end()) << "Value not found " << op_value;
+      op->AddInput(find_value->second);
+    }
+    builder.AddOperation(std::move(op));
   }
   const Block& b = module_->AddBlock(builder.build());
   block_map_.insert({block_context.ID()->getText(), std::addressof(b)});

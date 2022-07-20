@@ -61,6 +61,8 @@ class Operation {
   Result Accept(IRVisitor<Derived, Result>& visitor) const {
     return visitor.Visit(*this);
   }
+  void AddInput(const Value& value) { inputs_.push_back(value); }
+  void set_parent(const Block* parent) { parent_ = parent; }
 
  private:
   // The parent block if any to which this operation belongs to.

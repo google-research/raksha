@@ -57,6 +57,16 @@ class BlockBuilder {
     return *block_->operations_.back();
   }
 
+  // Sets parent of operation and adds an operation to the block and returns
+  // the operation.
+  const Operation& AddOperation(std::unique_ptr<Operation> op) {
+    CHECK(op->parent() == nullptr)
+        << "Parent pointer already defined. Cannot set parent again!";
+    op->set_parent(block_.get());
+    block_->operations_.push_back(std::move(op));
+    return *block_->operations_.back();
+  }
+
   // Allows an operation to be added to the block using a `T::Create` method as
   // long as the following hold:
   //   - `T` is a derived class of `Operation`.

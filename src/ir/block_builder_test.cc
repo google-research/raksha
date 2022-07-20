@@ -26,7 +26,6 @@
 #include "src/ir/types/type.h"
 #include "src/ir/types/type_factory.h"
 
-
 namespace raksha::ir {
 namespace {
 
@@ -130,7 +129,8 @@ TEST_F(BlockBuilderDeathTest, AddResultsVerifiesOutputIsDeclared) {
 
 TEST_F(BlockBuilderTest, AddOperationUpdatesOperationList) {
   BlockBuilder builder;
-  const Operator& core_plus = *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+  const Operator& core_plus =
+      *CHECK_NOTNULL(context_.GetOperator("core.plus"));
   const Operator& core_minus =
       *CHECK_NOTNULL(context_.GetOperator("core.plus"));
   const Operator& core_merge =
@@ -152,6 +152,48 @@ TEST_F(BlockBuilderTest, AddOperationUpdatesOperationList) {
                   testing::Pointer(testing::Eq(minus_op)),
                   testing::Pointer(testing::Eq(merge_op)),
                   testing::Pointer(testing::Eq(merge_op_with_module))));
+}
+
+TEST_F(BlockBuilderTest, AddOperationOfUniquePtrUpdatesOperationList) {
+  BlockBuilder builder;
+  const Operator& core_plus =
+      *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+  const Operator& core_minus =
+      *CHECK_NOTNULL(context_.GetOperator("core.minus"));
+  const Operator& core_merge =
+      *CHECK_NOTNULL(context_.GetOperator("core.merge"));
+
+  const Operation* plus_op =
+      std::addressof(builder.AddOperation(std::make_unique<Operation>(
+          nullptr, core_plus, NamedAttributeMap(), ValueList(), nullptr)));
+  const Operation* minus_op =
+      std::addressof(builder.AddOperation(std::make_unique<Operation>(
+          nullptr, core_minus, NamedAttributeMap(), ValueList(), nullptr)));
+  const Operation* merge_op =
+      std::addressof(builder.AddOperation(std::make_unique<Operation>(
+          nullptr, core_merge, NamedAttributeMap(), ValueList(), nullptr)));
+  const Operation* merge_op_with_module = std::addressof(builder.AddOperation(
+      std::make_unique<Operation>(nullptr, core_merge, NamedAttributeMap(),
+                                  ValueList(), std::make_unique<Module>())));
+
+  auto block = builder.build();
+  EXPECT_THAT(block->operations(),
+              testing::ElementsAre(
+                  testing::Pointer(testing::Eq(plus_op)),
+                  testing::Pointer(testing::Eq(minus_op)),
+                  testing::Pointer(testing::Eq(merge_op)),
+                  testing::Pointer(testing::Eq(merge_op_with_module))));
+}
+
+TEST_F(BlockBuilderTest, SetParentPtrErrorsWithPredefinedParent) {
+  BlockBuilder builder;
+  auto block = builder.build();
+  const Operator& core_merge =
+      *CHECK_NOTNULL(context_.GetOperator("core.merge"));
+  EXPECT_DEATH(builder.AddOperation(std::make_unique<Operation>(
+                   block.get(), core_merge, NamedAttributeMap(), ValueList(),
+                   std::make_unique<Module>())),
+               "Parent pointer already defined. Cannot set parent again!");
 }
 
 TEST_F(BlockBuilderTest, AddImplementationPassesSelfAndResultBlock) {
@@ -182,11 +224,11 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
         builder.AddResult("primitive_output",
                           Value(value::OperationResult(op, "primitive_value")));
         ssa_names.AddID(Value(value::OperationResult(op, "primitive_value")),
-                           "primitive_value");
+                        "primitive_value");
         builder.AddResult("entity_output",
                           Value(value::OperationResult(op, "entity_value")));
         ssa_names.AddID(Value(value::OperationResult(op, "entity_value")),
-                           "entity_value");
+                        "entity_value");
       });
 
   auto block = builder.build();
