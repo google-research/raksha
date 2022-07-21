@@ -1,0 +1,13 @@
+#ifndef SRC_ANALYSIS_SOUFFLE_SENSITIVITY_ANALYSIS_UNIT_TEST_INTERFACE_DL_
+#define SRC_ANALYSIS_SOUFFLE_SENSITIVITY_ANALYSIS_UNIT_TEST_INTERFACE_DL_
+
+#include "src/analysis/souffle/sensitivity_analysis.dl"
+
+// An interface used for unit testing of the sensitivity analysis. 
+// Only outputs value sensitivities
+
+.input isOperation(delimiter=";")
+.input isInitialInput(delimiter=";")
+.output sqlValueSensitivity(delimiter=";")
+
+#endif

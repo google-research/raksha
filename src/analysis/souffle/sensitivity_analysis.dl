@@ -1,0 +1,97 @@
+#ifndef SRC_ANALYSIS_SOUFFLE_SENSITIVITY_ANALYSIS_DL_
+#define SRC_ANALYSIS_SOUFFLE_SENSITIVITY_ANALYSIS_DL_
+// this file defines the calculations for sensitivity analysis 
+// to be used in dp calculations
+
+#include "src/analysis/souffle/taint.dl"
+
+// one isSqlOperator fact per each sql operator, currently supporting one output
+// referring to results as 'value' (sqlValue declared below) as per the discussion in the doc 
+.decl isSqlOperation(sqlOperation: Operation)
+isSqlOperation(operation) :- isOperation(operation), 
+      operationHasOperator(operation, operator), 
+      match("sql.*", operator). 
+
+
+.decl isSqlValue(value: AccessPath)
+isSqlValue(value) :- isSqlOperation(operation),
+      operationHasResult(operation, value).
+
+// keeping track of all initial inputs as they all have sensitivity score 1
+.decl isInitialInput(ingress_point: AccessPath)
+
+// helper functions to flatten input lists
+.decl intermediateFlatten(list:OperandList, sublist:OperandList, list_element:AccessPath)
+
+intermediateFlatten(list, sublist, list_element) :- isSqlOperation(operation), 
+      operationHasOperandList(operation, list), 
+      list = [list_element, sublist].
+intermediateFlatten(list, sublist, list_element) :- intermediateFlatten(list, [list_element, sublist], _).
+
+.decl flatten(list:OperandList, list_element:AccessPath)
+flatten(list, list_element) :- intermediateFlatten(list, _, list_element).
+
+// flattening each individual input per value
+.decl isSqlInput(operation: Operation, sql_input: AccessPath)
+
+isSqlInput(operation, sql_input) :- isSqlOperation(operation), 
+      operationHasOperandList(operation, input_list), 
+      flatten(input_list, sql_input). 
+
+// keeping track of sensitivity score per each input at index 
+// used to calculate the maximum input sensitivity 
+// decomposed into base and inductive cases because recursive aggregates are not supported yet 
+// for the compiler case in souffle
+.decl sqlOperationHasSensitivityScoreAtIndex(operation: Operation, sensitivity_score: number, index: number) 
+
+// base cases (index 0)
+// for initial inputs, sensitivity is 1
+sqlOperationHasSensitivityScoreAtIndex(operation, 1, 0) :- isSqlOperation(operation), 
+      operationHasOperandAtIndex(operation, sql_input, 0),
+      isInitialInput(sql_input).
+
+//for all others, get the final sensitivity score
+sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, 0) :- isSqlOperation(operation), 
+      operationHasOperandAtIndex(operation, sql_input, 0),
+      sqlValueSensitivity(sql_input, sensitivity_score).      
+
+// inductive cases 
+// keep track at the score at each index, only update if the new input score is higher
+sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, index) :- 
+      isSqlOperation(operation), 
+      operationHasOperandAtIndex(operation, sql_input, index),
+      isSqlInput(operation, sql_input), 
+      sqlValueSensitivity(sql_input, input_sensitivity_score), 
+      sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, index-1),
+      sensitivity_score >= input_sensitivity_score. 
+
+
+sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, index) :- 
+      isSqlOperation(operation), 
+      operationHasOperandAtIndex(operation, sql_input, index),
+      isSqlInput(value, sql_input), 
+      sqlValueSensitivity(sql_input, sensitivity_score), 
+      sqlOperationHasSensitivityScoreAtIndex(operation, prev_sensitivity_score, index-1), 
+      sensitivity_score >= prev_sensitivity_score. 
+
+// function sensitivity scores per each sql operator as defined in PINQ
+// TODO: add other cases 
+.decl sqlFunctionSensitivity(operator: Operator, sensitivity_score: number)
+
+sqlFunctionSensitivity(operator, 1) :- operator = "sql.filter"; 
+      operator = "sql.where"; 
+      operator = "sql.select".
+sqlFunctionSensitivity(operator, 2) :- operator = "sql.group_by". 
+
+// final value sensitivity score, the max of input multiplied by the function sensitivity 
+.decl sqlValueSensitivity(value: AccessPath, sensitivity_score: number)
+sqlValueSensitivity(value, sensitivity_score) :- 
+      isSqlOperation(operation), 
+      operationHasOperator(operation, operator), 
+      operationHasResult(operation, value), 
+      sqlFunctionSensitivity(operator, function_sensitvity), 
+      operationOperandListLength(operation, input_list_length), 
+      sqlOperationHasSensitivityScoreAtIndex(operation, input_sensitivity, input_list_length-1), 
+      sensitivity_score = input_sensitivity * function_sensitvity.
+
+#endif // SRC_ANALYSIS_SOUFFLE_SENSITIVITY_ANALYSIS_DL_
