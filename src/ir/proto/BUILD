@@ -21,6 +21,7 @@ load(
 )
 
 package(
+    default_visibility = ["//src/ir:__subpackages__"],
     features = ["layering_check"],
     licenses = ["notice"],
 )
