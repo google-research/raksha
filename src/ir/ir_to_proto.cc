@@ -42,9 +42,9 @@ proto::Block IRToProto::BlockToProto(const Block& block) {
     const uint64_t new_operation_id = GetID(*operation);
     operation_proto->set_id(new_operation_id);
   }
-  for (const std::pair<std::string, Value> result : block.results()) {
+  for (const auto& [block_id, result_name]: block.results()) {
     block_proto.mutable_results()->mutable_values()->insert(
-        {result.first, ValueToProto(result.second)});
+        {block_id, ValueToProto(result_name)});
   }
   return block_proto;
 }
@@ -57,9 +57,9 @@ proto::Operation IRToProto::OperationToProto(const Operation& operation) {
   for (const auto& input : operation.inputs()) {
     operation_proto.mutable_inputs()->Add(ValueToProto(input));
   }
-  for (const auto& attribute : operation.attributes()) {
+  for (const auto& [attribute_name, attribute_value] : operation.attributes()) {
     operation_proto.mutable_attributes()->mutable_attributes()->insert(
-        {attribute.first, AttributeToProto(attribute.second)});
+        {attribute_name, AttributeToProto(attribute_value)});
   }
   // TODO(#619): Consider preserving results and impl_module.
   return operation_proto;
