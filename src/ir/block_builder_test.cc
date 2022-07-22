@@ -209,6 +209,43 @@ TEST_F(BlockBuilderTest, AddImplementationPassesSelfAndResultBlock) {
   EXPECT_EQ(block.get(), passed_in_block);
 }
 
+TEST_F(BlockBuilderTest, GetBlockPtrReturnsCorrectBlockPtr) {
+  // Ensures that building a block doesn't move the block.
+  // This is important to maintain pointers to blocks that are still being
+  // constructed.
+  BlockBuilder builder;
+  Block* block_ptr = builder.GetBlockPtr();
+  auto block = builder.build();
+  EXPECT_EQ(block_ptr, block.get());
+}
+
+TEST_F(BlockBuilderTest, AddImplementationDoesNotChangeBlockAddress) {
+  BlockBuilder builder;
+  Block* passed_in_block;
+  Block* block_ptr = builder.GetBlockPtr();
+  builder.AddImplementation([&builder, &passed_in_block](
+                                BlockBuilder& this_builder, Block& this_block) {
+    passed_in_block = std::addressof(this_block);
+    EXPECT_EQ(std::addressof(builder), std::addressof(this_builder));
+  });
+
+  EXPECT_EQ(block_ptr, passed_in_block);
+  auto block = builder.build();
+  EXPECT_EQ(block.get(), passed_in_block);
+  EXPECT_EQ(block_ptr, block.get());
+}
+
+TEST_F(BlockBuilderTest, AddOperationDoesNotChangeBlockAddress) {
+  BlockBuilder builder;
+  Block* block_ptr = builder.GetBlockPtr();
+  const Operator& core_plus = *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+  const Operation& op = builder.AddOperation(core_plus, {}, {});
+  auto block = builder.build();
+  EXPECT_THAT(block->operations(),
+              testing::ElementsAre(testing::Pointer(testing::Eq(&op))));
+  EXPECT_EQ(block_ptr, block.get());
+}
+
 TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
   BlockBuilder builder;
   SsaNames ssa_names;
@@ -265,6 +302,27 @@ class TestOperation : public Operation {
   }
 };
 
+TEST_F(BlockBuilderTest, AllowsAdditionOfPreConstructedOperation) {
+  BlockBuilder builder;
+  const Operator& core_plus = *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+  std::unique_ptr<Operation> plus_op_ptr =
+      std::make_unique<Operation>(core_plus);
+  const Operation* plus_op =
+      std::addressof(builder.AddOperation(std::move(plus_op_ptr)));
+
+  const Operator& core_minus =
+      *CHECK_NOTNULL(context_.GetOperator("core.minus"));
+  std::unique_ptr<Operation> minus_op_ptr =
+      std::make_unique<Operation>(core_minus);
+  const Operation* minus_op =
+      std::addressof(builder.AddOperation(std::move(minus_op_ptr)));
+
+  auto block = builder.build();
+  EXPECT_THAT(block->operations(),
+              testing::ElementsAre(testing::Pointer(testing::Eq(plus_op)),
+                                   testing::Pointer(testing::Eq(minus_op))));
+}
+
 TEST_F(BlockBuilderTest, AllowsAdditionOfOperationWithCustomCreateMethod) {
   BlockBuilder builder;
   const Operation* plus_op = std::addressof(
@@ -300,6 +358,15 @@ TEST_F(BlockBuilderDeathTest, InvokingBuildMoreThanOnceFails) {
   EXPECT_DEATH({ builder.build(); },
                "Attempt to build a `BlockBuilder` that has already been"
                " built.");
+}
+
+TEST_F(BlockBuilderDeathTest, InvokingGetBlockPtrAfterBuildFails) {
+  BlockBuilder builder;
+  std::unique_ptr<Block> block1 = builder.build();
+  EXPECT_DEATH(
+      { builder.GetBlockPtr(); },
+      "Attempt to get block pointer from a `BlockBuilder` that has already been"
+      " built.");
 }
 
 }  // namespace
