@@ -329,3 +329,54 @@ cc_test(
         "@absl//absl/hash:hash_testing",
     ],
 )
+
+cc_library(
+    name = "proto_to_ir",
+    srcs = ["proto_to_ir.cc"],
+    hdrs = ["proto_to_ir.h"],
+    deps = [
+        ":block_builder",
+        ":ir_context",
+        ":module",
+        ":ssa_names",
+        ":value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+        "//src/ir/attributes:string_attribute",
+        "//src/ir/proto:ir_cc_proto",
+        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_library(
+    name = "ir_to_proto",
+    srcs = ["ir_to_proto.cc"],
+    hdrs = ["ir_to_proto.h"],
+    deps = [
+        ":ir_context",
+        ":module",
+        ":ssa_names",
+        ":value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+        "//src/ir/attributes:string_attribute",
+        "//src/ir/proto:ir_cc_proto",
+        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_test(
+    name = "ir_to_proto_test",
+    srcs = ["ir_to_proto_test.cc"],
+    copts = ["-fexceptions"],
+    deps = [
+        ":ir_printer",
+        ":ir_to_proto",
+        ":proto_to_ir",
+        "//src/common/proto:protobuf",
+        "//src/common/proto:proto_message_differencer",
+        "//src/common/testing:gtest",
+        "//src/ir/proto:ir_cc_proto",
+        "//src/parser/ir:ir_parser",
+    ],
+)
