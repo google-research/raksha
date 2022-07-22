@@ -187,11 +187,11 @@ TEST_F(BlockBuilderTest, AddOperationOfUniquePtrUpdatesOperationList) {
 
 TEST_F(BlockBuilderTest, SetParentPtrErrorsWithPredefinedParent) {
   BlockBuilder builder;
-  auto block = builder.build();
+  auto block = builder.GetBlockPtr();
   const Operator& core_merge =
       *CHECK_NOTNULL(context_.GetOperator("core.merge"));
   EXPECT_DEATH(builder.AddOperation(std::make_unique<Operation>(
-                   block.get(), core_merge, NamedAttributeMap(), ValueList(),
+                   block, core_merge, NamedAttributeMap(), ValueList(),
                    std::make_unique<Module>())),
                "Parent pointer already defined. Cannot set parent again!");
 }
