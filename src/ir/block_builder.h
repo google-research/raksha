@@ -114,6 +114,18 @@ class BlockBuilder {
     return std::move(block_);
   }
 
+  // A way to get non-owning access to the block (for reference by operations)
+  // while the block is still under construction.
+  Block* GetBlockPtr() {
+    // The following check makes sure that we don't attempt to call
+    // `unsafe_get_block_ptr` on an empty `BlockBuilder` by checking that
+    // `block_` is not `nullptr`.
+    CHECK(block_) << "Attempt to get block pointer from a `BlockBuilder` that "
+                     "has already been"
+                     " built.";
+    return block_.get();
+  }
+
  private:
   std::unique_ptr<Block> block_;
 };
