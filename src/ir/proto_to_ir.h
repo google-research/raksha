@@ -21,8 +21,8 @@
 #include "src/ir/ir_context.h"
 #include "src/ir/module.h"
 #include "src/ir/proto/raksha_ir.pb.h"
-#include "src/ir/value.h"
 #include "src/ir/ssa_names.h"
+#include "src/ir/value.h"
 
 namespace raksha::ir {
 
@@ -54,22 +54,25 @@ class ProtoToIR {
     // Move objects into their 'owning' objects.
     state.PostVisit(*module, root.top_level_module());
 
-    // TODO: Check that the construction correctly handled ownership of all
-    // referenced objects. Currently empty builders are left behind... filter?
-    for(const auto& block_it : state.blocks_) {
-      CHECK(block_it.second.IsBuilt()) << "Block " << block_it.first << " was not built and placed in it's module.";
+    // Check that the construction correctly handled ownership of all referenced
+    // objects.
+    for (const auto& block_it : state.blocks_) {
+      CHECK(block_it.second.IsBuilt())
+          << "Block " << block_it.first
+          << " was not built and placed in it's module.";
     }
-    for(const auto& operation_it : state.operations_) {
-      CHECK(operation_it.second.get() == nullptr) << "Operation " << operation_it.first << " was not moved into it's module.";
+    for (const auto& operation_it : state.operations_) {
+      CHECK(operation_it.second.get() == nullptr)
+          << "Operation " << operation_it.first
+          << " was not moved into it's module.";
     }
-    return Result{
-      .module = std::move(module),
-      .ssa_names = std::move(ssa_names)
-    };
+    return Result{.module = std::move(module),
+                  .ssa_names = std::move(ssa_names)};
   }
 
  private:
-  ProtoToIR(IRContext& context, SsaNames& ssa_names) : context_{context}, ssa_names_{ssa_names} {}
+  ProtoToIR(IRContext& context, SsaNames& ssa_names)
+      : context_{context}, ssa_names_{ssa_names} {}
 
   // Disable copy (and move) semantics.
   ProtoToIR(const ProtoToIR&) = delete;

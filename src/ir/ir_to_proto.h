@@ -72,13 +72,9 @@ class IRToProto {
   const ID GetID(const T& thing_to_get_value_for) {
     // Ensure that each ptr has a single unique ID.
     const void* ptr = &thing_to_get_value_for;
-    const auto used_ids_it = used_ids_.find(ptr);
-    if (used_ids_it != used_ids_.end()) {
-      return used_ids_it->second;
-    }
-    const ID id = ++last_used_id_;
-    used_ids_.insert({ptr, id});
-    return id;
+    auto insert_result = used_ids_.insert({ptr, last_used_id_ + 1});
+    if (!insert_result.second) { return insert_result.first->second; }
+    return ++last_used_id_;
   }
 
   absl::flat_hash_map<const void*, ID> used_ids_;
