@@ -369,6 +369,7 @@ cc_test(
     name = "ir_to_proto_test",
     srcs = ["ir_to_proto_test.cc"],
     copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
     deps = [
         ":ir_printer",
         ":ir_to_proto",
