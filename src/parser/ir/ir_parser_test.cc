@@ -27,7 +27,7 @@ TEST_P(IrParserTest, SimpleTestOperation) {
   auto input_program_text = GetParam();
   IrProgramParser ir_parser;
   auto result = ir_parser.ParseProgram(input_program_text);
-  EXPECT_EQ(IRPrinter::ToString(*result.module, std::move((result.ssa_names))),
+  EXPECT_EQ(IRPrinter::ToString(*result.module, *result.ssa_names),
             input_program_text);
 }
 
