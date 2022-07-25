@@ -25,7 +25,7 @@ isInitialInput(as(ingress_point, AccessPath)) :- isOperation([_, "core.input", i
 //helper functions to flatten input lists
 .decl intermediateFlatten(list:OperandList, sublist:OperandList, list_element:AccessPath)
 
-intermediateFlatten(list, sublist, list_element) :- isSqlOperation(operation), 
+intermediateFlatten(list, sublist, list_element) :- isOperation(operation), 
       operationHasOperandList(operation, list), 
       list = [list_element, sublist].
 intermediateFlatten(list, sublist, list_element) :- intermediateFlatten(list, [list_element, sublist], _).
