@@ -4,43 +4,58 @@
 #include "src/analysis/souffle/sensitivity_analysis.dl" 
 
 .decl isGlobalEpsilon(epsilon: number)
-//TODO: is there a way to set a deafault option?
 isGlobalEpsilon(epsilon) :- isOperation([_, "global_epsilon", _, _, [["epsilon", $NumberAttributePayload(epsilon)], _]]).
 
-.decl isDiffPrivacyMechanism(value: AccessPath, epsilon: number)
-isDiffPrivacyMechanism(value, epsilon) :- isOperation([_, "privacy_mechanism", value, _, [["epsilon", $NumberAttributePayload(epsilon)], _]]). 
+.decl isDiffPrivacyMechanism(operation: Operation)
+isDiffPrivacyMechanism(operation) :- isOperation(operation), 
+    operationHasOperator(operation, "privacy_mechanism"). 
 
-//propagate privacy mechanism for now
-//not sure yet what the literature says how this should be done 
-isDiffPrivacyMechanism(value, epsilon) :- isSqlInput(operation, sqlInput),
-      operationHasResult(operation, value),
-      isDiffPrivacyMechanism(sqlInput, epsilon). 
+.decl diffPrivacyMechanismHasEpsilon(operation: Operation, epsilon: number)
+diffPrivacyMechanismHasEpsilon(operation, epsilon) :- isDiffPrivacyMechanism(operation),
+    operationHasAttribute(operation, ["epsilon", $NumberAttributePayload(epsilon)]).
+
+
+//propagating privacy mechanisms backwards to input 
+.decl isSqlPath(sql_input: AccessPath, sql_output: AccessPath)
+
+isSqlPath(sql_input, sql_output):- isSqlOperation(operation), 
+    isSqlInput(operation, sql_input),
+    operationHasResult(operation, sql_output); 
+    isDiffPrivacyMechanism(operation), 
+    operationHasOperandList(operation, input_list), 
+    flatten(input_list, sql_input),
+    operationHasResult(operation, sql_output).  
+
+isSqlPath(sql_input, sql_output):- isSqlOperation(operation), 
+    isSqlInput(operation, sql_input), 
+    operationHasResult(operation, intermediate_output), 
+    isSqlPath(intermediate_output, sql_output);
+    isDiffPrivacyMechanism(operation), 
+    operationHasOperandList(operation, input_list), 
+    flatten(input_list, sql_input), 
+    isSqlPath(sql_input, intermediate_output),
+    isSqlPath(intermediate_output, sql_output). 
 
 // sequential composition
 .decl epsilonDiffPrivacy(value: AccessPath, epsilon: number)
-epsilonDiffPrivacy(value, epsilon) :- isDiffPrivacyMechanism(value, _),
-      epsilon = sum y : { isDiffPrivacyMechanism(value, y)}. 
+epsilonDiffPrivacy(value, epsilon) :- isSqlPath(value, sql_output),
+      isDiffPrivacyMechanism(operation), 
+      operationHasResult(operation, sql_output), 
+      epsilon = sum y : { diffPrivacyMechanismHasEpsilon(operation, y)}. 
 
-sqlValueSensitivity(value, 1) :- isDiffPrivacyMechanism(value, _).
+sqlValueSensitivity(value, 1) :- isDiffPrivacyMechanism(operation), 
+    operationHasResult(operation, value).
 
-// DP Policies are violated when: 
-// 1. There is a privacy mechanism applied to value, the value does not need sensitivity analysis, and 
-//       the epsilon in the privacy mechanism is smaller than the global epsilon 
-// 2. There is a privacy mechanism applied to value, the value has a particular sensitivity score, and  
-//       the global epsilon is smaller than sensitvity * privacy mechanism epsilon
-// 3. There is no privacy mechanism on a value that has a particular sensitivity score
-violatesPolicy(value) :- isSqlOperation([_, _, value, _, _]), 
-      !sqlValueSensitivity(value, _),
-      epsilonDiffPrivacy(value, privacy_mechanism_epsilon), 
-      isGlobalEpsilon(global_epsilon),
-      global_epsilon < privacy_mechanism_epsilon;
-      isGlobalEpsilon(global_epsilon),  
-      sqlValueSensitivity(value, sensitivity_score), 
-      epsilonDiffPrivacy(value, privacy_mechanism_epsilon), 
-      global_epsilon < privacy_mechanism_epsilon * sensitivity_score; 
-      isSqlOperation([_, _, value, _, _]),
-      sqlValueSensitivity(value, _),
-      !epsilonDiffPrivacy(value, _).
+// [WIP] DP Policies are violated when: 
+// the local epsilon for a value used in sqlOperations as input (the value in isSqlPath)
+// times the sensitivity of said sqlOperation is less than the global epsilon 
+violatesPolicy(value) :- isSqlPath(value, sql_output), 
+    isSqlOperation(operation), 
+    operationHasResult(operation, sql_output), 
+    sqlValueSensitivity(sql_output, sensitivity), 
+    epsilonDiffPrivacy(value, epsilon), 
+    isGlobalEpsilon(global_epsilon),
+    global_epsilon < epsilon * sensitivity.
 
 
 #endif //SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_

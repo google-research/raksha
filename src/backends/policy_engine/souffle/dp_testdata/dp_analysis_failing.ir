@@ -1,11 +1,12 @@
 module m0 {
   block b0 {
         %0 = core.input [name: "revenue_table"] ()  
+         //epsilon does not take into account sens analysis
+        %1 = sql.filter [column: "revenue"] (%0) // { revenue > 100 }
         %epsilon = global_epsilon [epsilon: 2] ()
-        %dp_data = privacy_mechanism [epsilon: 2] (%0) //epsilon does not take into account sens analysis
-        %1 = sql.filter [column: "revenue"] (%dp_data) // { revenue > 100 }
-        %location = sql.column_access [column: "location"] (%1)
-        %2 = sql.group_by[] (%1, %location) // (%0, location)
+        %dp_data = privacy_mechanism [epsilon: 2] (%1)
+        %location = sql.column_access [column: "location"] (%dp_data)
+        %2 = sql.group_by[] (%dp_data, %location) // (%0, location)
         %user = sql.column_access [column: "user"] (%2)
         %address = sql.column_access [column: "address"] (%2)
         %4 = sql.output [] (%user) // Select user, address from …
