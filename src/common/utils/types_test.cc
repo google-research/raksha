@@ -23,20 +23,6 @@
 namespace raksha {
 namespace {
 
-TEST(TypesTest, SelectTypeTrue) {
-  SelectType<true, int, std::string>::Result a = 3;
-  ASSERT_EQ(typeid(&a), typeid(int *));
-  ASSERT_NE(typeid(&a), typeid(std::string *));
-  EXPECT_EQ(a, 3);
-}
-
-TEST(TypesTest, SelectTypeFalse) {
-  SelectType<false, int, std::string>::Result a = "Hi";
-  ASSERT_EQ(typeid(&a), typeid(std::string *));
-  ASSERT_NE(typeid(&a), typeid(int *));
-  EXPECT_EQ(a, "Hi");
-}
-
 TEST(TypesTest, CopyConstTypeTrue) {
   CopyConst<true, int> a = 3;
   ASSERT_EQ(typeid(&a), typeid(const int *));

@@ -16,32 +16,15 @@
 #ifndef SRC_COMMON_UTILS_TYPES_H_
 #define SRC_COMMON_UTILS_TYPES_H_
 
+#include <type_traits>
 #include <variant>
 
 namespace raksha {
 // Type alias for monostate that sounds less scary.
 using Unit = std::monostate;
 
-// An implementation of a static, type-level, 'if'.
-// Useful for writing typesafe, code generically (especially for generic constness).
-// Based on SAT's laser (specifically 'misc_utils.h').
-template <bool Flag, typename T, typename F>
-struct SelectType {
-    using Result = T;
-};
-
-template <typename T, typename F>
-struct SelectType<true, T, F> {
-    using Result = T;
-};
-
-template <typename T, typename F>
-struct SelectType<false, T, F> {
-    using Result = F;
-};
-
 template <bool IsConst, typename T>
-using CopyConst = typename SelectType<IsConst, const T, T>::Result;
+using CopyConst = typename std::conditional_t<IsConst, std::add_const_t<T>, T>;
 
 }
 
