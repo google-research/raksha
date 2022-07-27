@@ -43,19 +43,22 @@ epsilonDiffPrivacy(value, epsilon) :- isSqlPath(value, sql_output),
       operationHasResult(operation, sql_output), 
       epsilon = sum y : { diffPrivacyMechanismHasEpsilon(operation, y)}. 
 
-sqlValueSensitivity(value, 1) :- isDiffPrivacyMechanism(operation), 
-    operationHasResult(operation, value).
+
+sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation), 
+    operationHasResult(operation, value),
+    operationHasOperandAtIndex(operation, sql_input, 0), //assuming isDiffPrivacyMechanism always has one input 
+    sqlValueSensitivity(sql_input, sensitivity).
 
 // [WIP] DP Policies are violated when: 
 // the local epsilon for a value used in sqlOperations as input (the value in isSqlPath)
-// times the sensitivity of said sqlOperation is less than the global epsilon 
-violatesPolicy(value) :- isSqlPath(value, sql_output), 
-    isSqlOperation(operation), 
+// times the sensitivity of said sqlOperation when it's an aggregationOperation is less than the global epsilon 
+violatesPolicy(value) :- isAggregationOperation(operation), 
     operationHasResult(operation, sql_output), 
-    sqlValueSensitivity(sql_output, sensitivity), 
+    isSqlPath(value, sql_output), 
+    sqlValueSensitivity(sql_output, sensitivity),
     epsilonDiffPrivacy(value, epsilon), 
     isGlobalEpsilon(global_epsilon),
-    global_epsilon < epsilon * sensitivity.
+    global_epsilon < epsilon * sensitivity. 
 
 
 #endif //SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_

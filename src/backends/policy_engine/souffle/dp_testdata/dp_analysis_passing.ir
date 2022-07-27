@@ -2,13 +2,11 @@ module m0 {
   block b0 {
         %0 = core.input [name: "revenue_table"] ()  
         %epsilon = global_epsilon [epsilon: 3] ()
-        %dp_data = privacy_mechanism [epsilon: 1] (%0) //epsilon set to take into account sens. analysis 
-        %1 = sql.filter [column: "revenue"] (%dp_data) // { revenue > 100 }
+        %1 = sql.filter [column: "revenue"] (%0) // { revenue > 100 }
         %location = sql.column_access [column: "location"] (%1)
         %2 = sql.group_by[] (%1, %location) // (%0, location)
-        %user = sql.column_access [column: "user"] (%2)
-        %address = sql.column_access [column: "address"] (%2)
-        %4 = sql.output [] (%user) // Select user, address from …
-        %5 = sql.output [] (%address)
+        %dp_data = privacy_mechanism [epsilon: 1] (%2) //epsilon set to take into account sens. analysis 
+        %3 = sql.average [] (%dp_data)
+        %4 = sql.output [] (%3) // Report the noisy average
     }
 }

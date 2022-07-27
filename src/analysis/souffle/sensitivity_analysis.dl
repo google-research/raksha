@@ -16,19 +16,20 @@ isSqlOperation(operation) :- isOperation(operation),
 
 .decl isTransformationOperation(sql_operation: Operation)
 isTransformationOperation(operation) :- isSqlOperation(operation), 
-      operationHasOperator(operation, "sql.where"); 
-      isSqlOperation(operation), 
-      operationHasOperator(operation, "sql.group_by"), 
-      isSqlOperation(operation), 
-      operationHasOperator(operation, "sql.select").
+      (
+            operationHasOperator(operation, "sql.where"); 
+            operationHasOperator(operation, "sql.group_by"); 
+            operationHasOperator(operation, "sql.select")
+      ).
 
-.decl isAggregationOperator(sql_operation: Operation)
-isAggregationOperator(operation) :- isSqlOperation(operation), 
-      operationHasOperator(operation, "sql.sum"); 
-      isSqlOperation(operation), 
-      operationHasOperator(operation, "sql.count"), 
-      isSqlOperation(operation), 
-      operationHasOperator(operation, "sql.max").
+.decl isAggregationOperation(sql_operation: Operation)
+isAggregationOperation(operation) :- isSqlOperation(operation), 
+      (
+            operationHasOperator(operation, "sql.sum"); 
+            operationHasOperator(operation, "sql.count"); 
+            operationHasOperator(operation, "sql.max");
+            operationHasOperator(operation, "sql.average")
+      ).
 
 .decl isSqlValue(value: AccessPath)
 isSqlValue(value) :- isSqlOperation(operation),
@@ -41,7 +42,7 @@ isInitialInput(as(ingress_point, AccessPath)) :- isOperation([_, "core.input", i
 //helper functions to flatten input lists
 .decl intermediateFlatten(list:OperandList, sublist:OperandList, list_element:AccessPath)
 
-intermediateFlatten(list, sublist, list_element) :- isSqlOperation(operation), 
+intermediateFlatten(list, sublist, list_element) :- isOperation(operation), 
       operationHasOperandList(operation, list), 
       list = [list_element, sublist].
 intermediateFlatten(list, sublist, list_element) :- intermediateFlatten(list, [list_element, sublist], _).
@@ -100,7 +101,8 @@ sqlFunctionSensitivity(operator, 1) :- operator = "sql.filter";
       operator = "sql.where";
       operator = "sql.select";
       operator = "sql.column_access";
-      operator = "sql.output".
+      operator = "sql.output";
+      operator = "sql.average".
 
 sqlFunctionSensitivity(operator, 2) :- operator = "sql.group_by". 
 
