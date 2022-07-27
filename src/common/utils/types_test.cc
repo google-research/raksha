@@ -13,19 +13,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_COMMON_UTILS_TYPES_H_
-#define SRC_COMMON_UTILS_TYPES_H_
+#include "src/common/utils/types.h"
 
-#include <type_traits>
-#include <variant>
+#include <iostream>
+#include <string>
+
+#include "src/common/testing/gtest.h"
 
 namespace raksha {
-// Type alias for monostate that sounds less scary.
-using Unit = std::monostate;
+namespace {
 
-template <bool IsConst, typename T>
-using CopyConst = typename std::conditional_t<IsConst, std::add_const_t<T>, T>;
-
+TEST(TypesTest, CopyConstTypeTrue) {
+  CopyConst<true, int> a = 3;
+  ASSERT_EQ(typeid(&a), typeid(const int *));
+  ASSERT_NE(typeid(&a), typeid(int *));
+  EXPECT_EQ(a, 3);
 }
 
-#endif  // SRC_COMMON_UTILS_TYPES_H_
+TEST(TypesTest, CopyConstTypeFalse) {
+  CopyConst<false, int> a = 4;
+  EXPECT_EQ(a, 4);
+  ASSERT_EQ(typeid(&a), typeid(int *));
+  ASSERT_NE(typeid(&a), typeid(const int *));
+  a++;
+  EXPECT_EQ(a, 5);
+}
+
+}  // namespace
+}  // namespace raksha
