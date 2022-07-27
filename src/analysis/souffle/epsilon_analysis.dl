@@ -3,19 +3,23 @@
 
 #include "src/analysis/souffle/sensitivity_analysis.dl" 
 
+#define GLOBAL_EPSILON_OPERATOR as("global_epsilon", Operator)
+#define PRIVACY_MECHANISM_OPERATOR as("privacy_mechanism", Operator)
+
 .decl isGlobalEpsilon(epsilon: number)
-isGlobalEpsilon(epsilon) :- isOperation([_, "global_epsilon", _, _, [["epsilon", $NumberAttributePayload(epsilon)], _]]).
+isGlobalEpsilon(epsilon) :- isOperation(operation), 
+    operationHasOperator(operation, GLOBAL_EPSILON_OPERATOR),
+    operationHasAttribute(operation, ["epsilon", $NumberAttributePayload(epsilon)]).
 
 .decl isDiffPrivacyMechanism(operation: Operation)
 isDiffPrivacyMechanism(operation) :- isOperation(operation), 
-    operationHasOperator(operation, "privacy_mechanism"). 
+    operationHasOperator(operation, PRIVACY_MECHANISM_OPERATOR). 
 
 .decl diffPrivacyMechanismHasEpsilon(operation: Operation, epsilon: number)
 diffPrivacyMechanismHasEpsilon(operation, epsilon) :- isDiffPrivacyMechanism(operation),
     operationHasAttribute(operation, ["epsilon", $NumberAttributePayload(epsilon)]).
 
-
-//propagating privacy mechanisms backwards to input 
+// We propagate privacy mechanisms backwards to inputs as per the PINQ paper.  
 .decl isSqlPath(sql_input: AccessPath, sql_output: AccessPath)
 
 isSqlPath(sql_input, sql_output):- isSqlOperation(operation), 
@@ -36,22 +40,22 @@ isSqlPath(sql_input, sql_output):- isSqlOperation(operation),
     isSqlPath(sql_input, intermediate_output),
     isSqlPath(intermediate_output, sql_output). 
 
-// sequential composition
+// Sequential composition: the epsilons of differential privacy mechanisms on
+// input value are added. 
 .decl epsilonDiffPrivacy(value: AccessPath, epsilon: number)
 epsilonDiffPrivacy(value, epsilon) :- isSqlPath(value, sql_output),
       isDiffPrivacyMechanism(operation), 
       operationHasResult(operation, sql_output), 
       epsilon = sum y : { diffPrivacyMechanismHasEpsilon(operation, y)}. 
 
-
 sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation), 
     operationHasResult(operation, value),
-    operationHasOperandAtIndex(operation, sql_input, 0), //assuming isDiffPrivacyMechanism always has one input 
+    operationHasOperandAtIndex(operation, sql_input, 0), // assuming isDiffPrivacyMechanism always has one input 
     sqlValueSensitivity(sql_input, sensitivity).
 
 // [WIP] DP Policies are violated when: 
-// the local epsilon for a value used in sqlOperations as input (the value in isSqlPath)
-// times the sensitivity of said sqlOperation when it's an aggregationOperation is less than the global epsilon 
+// The local epsilon for a value used in an aggregation operation as input (the value in isSqlPath)
+// times the sensitivity of said ggregation operation is less than the global epsilon. 
 violatesPolicy(value) :- isAggregationOperation(operation), 
     operationHasResult(operation, sql_output), 
     isSqlPath(value, sql_output), 
@@ -59,6 +63,5 @@ violatesPolicy(value) :- isAggregationOperation(operation),
     epsilonDiffPrivacy(value, epsilon), 
     isGlobalEpsilon(global_epsilon),
     global_epsilon < epsilon * sensitivity. 
-
 
 #endif //SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_
