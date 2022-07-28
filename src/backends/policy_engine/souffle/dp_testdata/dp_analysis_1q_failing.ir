@@ -1,3 +1,4 @@
+//modeling a single query that fails the dp analysis
 module m0 {
   block b0 {
         %0 = core.input [name: "revenue_table"] ()  
