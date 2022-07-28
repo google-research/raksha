@@ -6,20 +6,26 @@
 #define GLOBAL_EPSILON_OPERATOR as("global_epsilon", Operator)
 #define PRIVACY_MECHANISM_OPERATOR as("privacy_mechanism", Operator)
 
+// Global epsilon is a value determined by users of Raksha. 
+// We could eventually set one as the default. 
 .decl isGlobalEpsilon(epsilon: number)
 isGlobalEpsilon(epsilon) :- isOperation(operation), 
     operationHasOperator(operation, GLOBAL_EPSILON_OPERATOR),
     operationHasAttribute(operation, ["epsilon", $NumberAttributePayload(epsilon)]).
 
+// We track every mechanism that adds noise. 
+// Right now, we are not tracking the type of noise (e.g. via Laplace of Gaussian mechanisms).
 .decl isDiffPrivacyMechanism(operation: Operation)
 isDiffPrivacyMechanism(operation) :- isOperation(operation), 
     operationHasOperator(operation, PRIVACY_MECHANISM_OPERATOR). 
 
+// The epsilon of each privacy mechanism is tracked and later attached to values. 
 .decl diffPrivacyMechanismHasEpsilon(operation: Operation, epsilon: number)
 diffPrivacyMechanismHasEpsilon(operation, epsilon) :- isDiffPrivacyMechanism(operation),
     operationHasAttribute(operation, ["epsilon", $NumberAttributePayload(epsilon)]).
 
-// We propagate privacy mechanisms backwards to inputs as per the PINQ paper.  
+// We propagate privacy mechanisms backwards to inputs as per the PINQ paper.
+// This relation tracks every input to its (direct and indirect) outputs.   
 .decl isSqlPath(sql_input: AccessPath, sql_output: AccessPath)
 
 isSqlPath(sql_input, sql_output):- isSqlOperation(operation), 
@@ -53,7 +59,7 @@ sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation),
     operationHasOperandAtIndex(operation, sql_input, 0), // assuming isDiffPrivacyMechanism always has one input 
     sqlValueSensitivity(sql_input, sensitivity).
 
-// [WIP] DP Policies are violated when: 
+// DP Policies are violated when: 
 // 1. The local epsilon for a value used in an aggregation operation as input (the value in isSqlPath)
 //    times the sensitivity of said ggregation operation is less than the global epsilon. 
 // 2. The local epsilon for an input to an aggregation operation is greater than the global epsilon. 
