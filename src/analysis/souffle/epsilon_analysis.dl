@@ -54,14 +54,18 @@ sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation),
     sqlValueSensitivity(sql_input, sensitivity).
 
 // [WIP] DP Policies are violated when: 
-// The local epsilon for a value used in an aggregation operation as input (the value in isSqlPath)
-// times the sensitivity of said ggregation operation is less than the global epsilon. 
+// 1. The local epsilon for a value used in an aggregation operation as input (the value in isSqlPath)
+//    times the sensitivity of said ggregation operation is less than the global epsilon. 
+// 2. The local epsilon for an input to an aggregation operation is greater than the global epsilon. 
 violatesPolicy(value) :- isAggregationOperation(operation), 
     operationHasResult(operation, sql_output), 
     isSqlPath(value, sql_output), 
-    sqlValueSensitivity(sql_output, sensitivity),
     epsilonDiffPrivacy(value, epsilon), 
     isGlobalEpsilon(global_epsilon),
-    global_epsilon < epsilon * sensitivity. 
+    (
+        sqlValueSensitivity(sql_output, sensitivity),
+        global_epsilon < epsilon * sensitivity; 
+        global_epsilon < epsilon
+    ). 
 
 #endif //SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_
