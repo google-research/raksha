@@ -100,18 +100,12 @@ sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, 0) :- isSql
 // We keep track at the score at each index, and ensure that the sensitivity score at index is only 
 // updated if the input at index has sensitivity score greater than the previous sensitivity score.
 // Otherwise, the prev_index sensitivity score is copied at index. 
-sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, prev_index+1) :- 
-      isSqlOperation(operation), 
-      operationHasOperandAtIndex(operation, sql_input, prev_index+1),
-      isSqlInput(operation, sql_input), 
-      ( 
-            sqlValueSensitivity(sql_input, input_sensitivity_score), 
-            sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, prev_index), 
-            sensitivity_score >= input_sensitivity_score; // ensure the prev_index sensitivity_score is higher than that of the input 
-            sqlValueSensitivity(sql_input, sensitivity_score), 
-            sqlOperationHasSensitivityScoreAtIndex(operation, prev_sensitivity_score, prev_index), 
-            sensitivity_score >= prev_sensitivity_score // ensure the input sensitvity_score is higher than that of prev_index 
-      ). 
+sqlOperationHasSensitivityScoreAtIndex(operation, max(prev_sensitivity_score, input_sensitivity_score), prev_index + 1) :-
+  isSqlOperation(operation),
+  operationHasOperandAtIndex(operation, sql_input, prev_index + 1),
+  isSqlInput(operation, sql_input),
+  sqlValueSensitivity(sql_input, input_sensitivity_score),
+  sqlOperationHasSensitivityScoreAtIndex(operation, prev_sensitivity_score, prev_index). 
 
 // Function sensitivity scores per each sql operator as defined in PINQ
 // TODO: add other cases 
