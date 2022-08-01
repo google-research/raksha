@@ -30,25 +30,17 @@ diffPrivacyMechanismHasEpsilon(operation, as(epsilon, Epsilon)) :- isDiffPrivacy
 // This relation tracks every input to its (direct and indirect) outputs.   
 .decl sqlPath(sql_input: AccessPath, sql_output: AccessPath)
 
-sqlPath(sql_input, sql_output):- isSqlOperation(operation), 
-    isSqlInput(operation, sql_input),
-    operationHasResult(operation, sql_output).
+sqlPath(sql_input, sql_input):- isSqlInput(operation, sql_input).
 
-sqlPath(dp_input, dp_output) :- isDiffPrivacyMechanism(operation), 
+sqlPath(dp_input, dp_input) :- isDiffPrivacyMechanism(operation), 
     operationHasOperandList(operation, input_list), 
-    flatten(input_list, dp_input),
-    operationHasResult(operation, dp_output).  
+    flatten(input_list, dp_input).
 
-sqlPath(sql_input, sql_output):- isSqlOperation(operation), 
-    isSqlInput(operation, sql_input), 
-    operationHasResult(operation, intermediate_output), 
-    sqlPath(intermediate_output, sql_output).
-
-sqlPath(dp_input, dp_output) :- isDiffPrivacyMechanism(operation), 
+sqlPath(path_start, path_end) :- sqlPath(path_start, intermediate),
     operationHasOperandList(operation, input_list), 
-    flatten(input_list, sql_input), 
-    sqlPath(dp_input, intermediate_output),
-    sqlPath(intermediate_output, dp_output). 
+    flatten(input_list, intermediate),
+    operationHasResult(operation, path_end).
+
 
 // Sequential composition: the epsilons of differential privacy mechanisms on
 // input value are added. 
