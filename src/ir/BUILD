@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
+load("//build_defs:package_groups.oss.bzl", "frontend_packages")
+
 package(
     default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
@@ -23,6 +25,7 @@ package(
 cc_library(
     name = "block_builder",
     hdrs = ["block_builder.h"],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":module",
         ":value",
@@ -69,10 +72,7 @@ cc_test(
 cc_library(
     name = "ir_context",
     hdrs = ["ir_context.h"],
-    visibility = [
-        "//:__pkg__",
-        "//src:__subpackages__",
-    ],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":module",
         ":operator",
@@ -142,9 +142,8 @@ cc_test(
 cc_library(
     name = "operator",
     hdrs = ["operator.h"],
-    deps = [
-        "@absl//absl/strings",
-    ],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
+    deps = ["@absl//absl/strings"],
 )
 
 cc_test(
@@ -177,6 +176,7 @@ cc_library(
         "ir_visitor.h",
         "module.h",
     ],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":data_decl",
         ":operator",
@@ -202,6 +202,7 @@ cc_test(
 cc_library(
     name = "ssa_names",
     hdrs = ["ssa_names.h"],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":operator",
         ":value",
@@ -243,6 +244,7 @@ cc_test(
 cc_library(
     name = "value",
     hdrs = ["value.h"],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":storage",
         "//src/common/utils:overloaded",

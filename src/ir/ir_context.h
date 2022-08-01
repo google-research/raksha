@@ -58,6 +58,11 @@ class IRContext {
     return operators_.RegisterNode(std::move(op));
   }
 
+  // Helper method that constructs the `std::unique_ptr` for the caller.
+  const Operator &RegisterOperator(Operator op) {
+    return RegisterOperator(std::make_unique<Operator>(std::move(op)));
+  }
+
   // Returns the Operator with a particular name. If there is no
   // operator with that name, fail.
   const Operator *GetOperator(absl::string_view operators_name) const {
