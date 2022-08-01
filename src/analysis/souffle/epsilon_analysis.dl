@@ -6,6 +6,8 @@
 #define GLOBAL_EPSILON_OPERATOR as("global_epsilon", Operator)
 #define PRIVACY_MECHANISM_OPERATOR as("privacy_mechanism", Operator)
 
+.type Epsilon <: number
+
 // Global epsilon is a value determined by users of Raksha. 
 // We could eventually set one as the default. 
 .decl isGlobalEpsilon(epsilon: number)
@@ -20,36 +22,38 @@ isDiffPrivacyMechanism(operation) :- isOperation(operation),
     operationHasOperator(operation, PRIVACY_MECHANISM_OPERATOR). 
 
 // The epsilon of each privacy mechanism is tracked and later attached to values. 
-.decl diffPrivacyMechanismHasEpsilon(operation: Operation, epsilon: number)
-diffPrivacyMechanismHasEpsilon(operation, epsilon) :- isDiffPrivacyMechanism(operation),
+.decl diffPrivacyMechanismHasEpsilon(operation: Operation, epsilon: Epsilon)
+diffPrivacyMechanismHasEpsilon(operation, as(epsilon, Epsilon)) :- isDiffPrivacyMechanism(operation),
     operationHasAttribute(operation, ["epsilon", $NumberAttributePayload(epsilon)]).
 
 // We propagate privacy mechanisms backwards to inputs as per the PINQ paper.
 // This relation tracks every input to its (direct and indirect) outputs.   
-.decl isSqlPath(sql_input: AccessPath, sql_output: AccessPath)
+.decl sqlPath(sql_input: AccessPath, sql_output: AccessPath)
 
-isSqlPath(sql_input, sql_output):- isSqlOperation(operation), 
+sqlPath(sql_input, sql_output):- isSqlOperation(operation), 
     isSqlInput(operation, sql_input),
-    operationHasResult(operation, sql_output); 
-    isDiffPrivacyMechanism(operation), 
-    operationHasOperandList(operation, input_list), 
-    flatten(input_list, sql_input),
-    operationHasResult(operation, sql_output).  
+    operationHasResult(operation, sql_output).
 
-isSqlPath(sql_input, sql_output):- isSqlOperation(operation), 
+sqlPath(dp_input, dp_output) :- isDiffPrivacyMechanism(operation), 
+    operationHasOperandList(operation, input_list), 
+    flatten(input_list, dp_input),
+    operationHasResult(operation, dp_output).  
+
+sqlPath(sql_input, sql_output):- isSqlOperation(operation), 
     isSqlInput(operation, sql_input), 
     operationHasResult(operation, intermediate_output), 
-    isSqlPath(intermediate_output, sql_output);
-    isDiffPrivacyMechanism(operation), 
+    sqlPath(intermediate_output, sql_output).
+
+sqlPath(dp_input, dp_output) :- isDiffPrivacyMechanism(operation), 
     operationHasOperandList(operation, input_list), 
     flatten(input_list, sql_input), 
-    isSqlPath(sql_input, intermediate_output),
-    isSqlPath(intermediate_output, sql_output). 
+    sqlPath(dp_input, intermediate_output),
+    sqlPath(intermediate_output, dp_output). 
 
 // Sequential composition: the epsilons of differential privacy mechanisms on
 // input value are added. 
-.decl epsilonDiffPrivacy(value: AccessPath, epsilon: number)
-epsilonDiffPrivacy(value, epsilon) :- isSqlPath(value, sql_output),
+.decl epsilonDiffPrivacy(value: AccessPath, epsilon: Epsilon)
+epsilonDiffPrivacy(value, epsilon) :- sqlPath(value, sql_output),
       isDiffPrivacyMechanism(operation), 
       operationHasResult(operation, sql_output), 
       epsilon = sum y : { diffPrivacyMechanismHasEpsilon(operation, y)}. 
@@ -65,7 +69,7 @@ sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation),
 // 2. The local epsilon for an input to an aggregation operation is greater than the global epsilon. 
 violatesPolicy(value) :- isAggregationOperation(operation), 
     operationHasResult(operation, sql_output), 
-    isSqlPath(value, sql_output), 
+    sqlPath(value, sql_output), 
     epsilonDiffPrivacy(value, epsilon), 
     isGlobalEpsilon(global_epsilon),
     (
