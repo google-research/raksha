@@ -65,8 +65,8 @@ violatesPolicy(value) :- isAggregationOperation(operation),
     epsilonDiffPrivacy(value, epsilon), 
     isGlobalEpsilon(global_epsilon),
     (
-        sqlValueSensitivity(sql_output, sensitivity),
-        global_epsilon < epsilon * sensitivity; 
+        (sqlValueSensitivity(sql_output, sensitivity),
+        global_epsilon < epsilon * sensitivity); 
         global_epsilon < epsilon
     ). 
 
