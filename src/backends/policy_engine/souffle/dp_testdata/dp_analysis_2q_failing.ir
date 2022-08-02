@@ -1,8 +1,8 @@
 // Modeling two queries that fail the dp analysis because the total epsilon (2 + 2 = 4)
-// is greater than the global epsilon (3). 
+// is greater than the global epsilon (3).
 module m0 {
   block b0 {
-        %0 = core.input [name: "revenue_table"] ()  
+        %0 = core.input [name: "revenue_table"] ()
         %epsilon = global_epsilon [epsilon: 3] ()
         //first query
         %1 = sql.filter [column: "revenue"] (%0) // { revenue > 100 }

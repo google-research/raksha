@@ -1,8 +1,8 @@
-// Modeling a single query that fails the dp analysis because the actual epsilon, 4 is greater than 
+// Modeling a single query that fails the dp analysis because the actual epsilon, 4 is greater than
 // the global epsilon
 module m0 {
   block b0 {
-        %0 = core.input [name: "revenue_table"] ()  
+        %0 = core.input [name: "revenue_table"] ()
          //epsilon does not take into account sens analysis
         %1 = sql.filter [column: "revenue"] (%0) // { revenue > 100 }
         %epsilon = global_epsilon [epsilon: 2] ()

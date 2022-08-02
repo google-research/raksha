@@ -1,7 +1,7 @@
 // Modeling a single query that passes the dp analysis: the actual epsilon 2 is smaller than the global epsilon
 module m0 {
   block b0 {
-        %0 = core.input [name: "revenue_table"] ()  
+        %0 = core.input [name: "revenue_table"] ()
         %epsilon = global_epsilon [epsilon: 3] ()
         %1 = sql.filter [column: "revenue"] (%0) // { revenue > 100 }
         %location = sql.column_access [column: "location"] (%1)

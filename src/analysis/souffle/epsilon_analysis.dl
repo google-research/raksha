@@ -1,73 +1,73 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_
 #define SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_
 
-#include "src/analysis/souffle/sensitivity_analysis.dl" 
+#include "src/analysis/souffle/sensitivity_analysis.dl"
 
 #define GLOBAL_EPSILON_OPERATOR as("global_epsilon", Operator)
 #define PRIVACY_MECHANISM_OPERATOR as("privacy_mechanism", Operator)
 
 .type Epsilon <: number
 
-// Global epsilon is a value determined by users of Raksha. 
-// We could eventually set one as the default. 
+// Global epsilon is a value determined by users of Raksha.
+// We could eventually set one as the default.
 .decl isGlobalEpsilon(epsilon: number)
-isGlobalEpsilon(epsilon) :- isOperation(operation), 
+isGlobalEpsilon(epsilon) :- isOperation(operation),
     operationHasOperator(operation, GLOBAL_EPSILON_OPERATOR),
     operationHasAttribute(operation, ["epsilon", $NumberAttributePayload(epsilon)]).
 
-// We track every mechanism that adds noise. 
+// We track every mechanism that adds noise.
 // Right now, we are not tracking the type of noise (e.g. via Laplace of Gaussian mechanisms).
 .decl isDiffPrivacyMechanism(operation: Operation)
-isDiffPrivacyMechanism(operation) :- isOperation(operation), 
-    operationHasOperator(operation, PRIVACY_MECHANISM_OPERATOR). 
+isDiffPrivacyMechanism(operation) :- isOperation(operation),
+    operationHasOperator(operation, PRIVACY_MECHANISM_OPERATOR).
 
-// The epsilon of each privacy mechanism is tracked and later attached to values. 
+// The epsilon of each privacy mechanism is tracked and later attached to values.
 .decl diffPrivacyMechanismHasEpsilon(operation: Operation, epsilon: Epsilon)
 diffPrivacyMechanismHasEpsilon(operation, as(epsilon, Epsilon)) :- isDiffPrivacyMechanism(operation),
     operationHasAttribute(operation, ["epsilon", $NumberAttributePayload(epsilon)]).
 
 // We propagate privacy mechanisms backwards to inputs as per the PINQ paper.
-// This relation tracks every input to its (direct and indirect) outputs.   
+// This relation tracks every input to its (direct and indirect) outputs.
 .decl sqlPath(sql_input: AccessPath, sql_output: AccessPath)
 
 sqlPath(sql_input, sql_input):- isSqlInput(operation, sql_input).
 
-sqlPath(dp_input, dp_input) :- isDiffPrivacyMechanism(operation), 
-    operationHasOperandList(operation, input_list), 
+sqlPath(dp_input, dp_input) :- isDiffPrivacyMechanism(operation),
+    operationHasOperandList(operation, input_list),
     flatten(input_list, dp_input).
 
 sqlPath(path_start, path_end) :- sqlPath(path_start, intermediate),
-    operationHasOperandList(operation, input_list), 
+    operationHasOperandList(operation, input_list),
     flatten(input_list, intermediate),
     operationHasResult(operation, path_end).
 
 
 // Sequential composition: the epsilons of differential privacy mechanisms on
-// input value are added. 
+// input value are added.
 .decl epsilonDiffPrivacy(value: AccessPath, epsilon: Epsilon)
 epsilonDiffPrivacy(value, epsilon) :- sqlPath(value, sql_output),
-      isDiffPrivacyMechanism(operation), 
-      operationHasResult(operation, sql_output), 
-      epsilon = sum y : { diffPrivacyMechanismHasEpsilon(operation, y)}. 
+      isDiffPrivacyMechanism(operation),
+      operationHasResult(operation, sql_output),
+      epsilon = sum y : { diffPrivacyMechanismHasEpsilon(operation, y)}.
 
-sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation), 
+sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation),
     operationHasResult(operation, value),
-    operationHasOperandAtIndex(operation, sql_input, 0), // assuming isDiffPrivacyMechanism always has one input 
+    operationHasOperandAtIndex(operation, sql_input, 0), // assuming isDiffPrivacyMechanism always has one input
     sqlValueSensitivity(sql_input, sensitivity).
 
-// DP Policies are violated when: 
+// DP Policies are violated when:
 // 1. The local epsilon for a value used in an aggregation operation as input (the value in isSqlPath)
-//    times the sensitivity of said ggregation operation is less than the global epsilon. 
-// 2. The local epsilon for an input to an aggregation operation is greater than the global epsilon. 
-violatesPolicy(value) :- isAggregationOperation(operation), 
-    operationHasResult(operation, sql_output), 
-    sqlPath(value, sql_output), 
-    epsilonDiffPrivacy(value, epsilon), 
+//    times the sensitivity of said ggregation operation is less than the global epsilon.
+// 2. The local epsilon for an input to an aggregation operation is greater than the global epsilon.
+violatesPolicy(value) :- isAggregationOperation(operation),
+    operationHasResult(operation, sql_output),
+    sqlPath(value, sql_output),
+    epsilonDiffPrivacy(value, epsilon),
     isGlobalEpsilon(global_epsilon),
     (
         (sqlValueSensitivity(sql_output, sensitivity),
-        global_epsilon < epsilon * sensitivity); 
+        global_epsilon < epsilon * sensitivity);
         global_epsilon < epsilon
-    ). 
+    ).
 
 #endif //SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_

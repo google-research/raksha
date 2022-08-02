@@ -1,8 +1,8 @@
-// Modeling two queries that pass the dp analysis because the total noise added (1 + 2  = 3) on 
-// the initial input is equal to the the global epsilon even after multiplied by the senstivity 
+// Modeling two queries that pass the dp analysis because the total noise added (1 + 2  = 3) on
+// the initial input is equal to the the global epsilon even after multiplied by the senstivity
 module m0 {
   block b0 {
-        %0 = core.input [name: "revenue_table"] ()  
+        %0 = core.input [name: "revenue_table"] ()
         %epsilon = global_epsilon [epsilon: 3] ()
         //first query
         %1 = sql.filter [column: "revenue"] (%0) // { revenue > 100 }
@@ -13,7 +13,7 @@ module m0 {
         %4 = sql.output [] (%3) // Report the noisy average
         //second query
         %5 = sql.column_access [colum: "profit"] (%0)
-        %6 = privacy_mechanism [epsilon: 1] (%5) 
+        %6 = privacy_mechanism [epsilon: 1] (%5)
         %7 = sql.average [] (%6)
         %8 = sql.output [] (%7)
     }
