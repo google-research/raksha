@@ -47,9 +47,20 @@ class IRContext {
 
   types::TypeFactory &type_factory() { return type_factory_; }
 
+  // Expose the Operators for inspection.
+  const absl::flat_hash_map<std::string, std::unique_ptr<Operator>> &Operators()
+      const {
+    return operators_.nodes();
+  }
+
   // Register an operator and return the stored operator instances.
   const Operator &RegisterOperator(std::unique_ptr<Operator> op) {
     return operators_.RegisterNode(std::move(op));
+  }
+
+  // Helper method that constructs the `std::unique_ptr` for the caller.
+  const Operator &RegisterOperator(Operator op) {
+    return RegisterOperator(std::make_unique<Operator>(std::move(op)));
   }
 
   // Returns the Operator with a particular name. If there is no
@@ -111,6 +122,10 @@ class IRContext {
     // Returns true if the node is registered with this context.
     bool IsRegisteredNode(absl::string_view node_name) const {
       return nodes_.find(node_name) != nodes_.end();
+    }
+
+    const absl::flat_hash_map<std::string, std::unique_ptr<Node>> &nodes() const {
+      return nodes_;
     }
 
    private:

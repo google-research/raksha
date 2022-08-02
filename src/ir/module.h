@@ -43,6 +43,12 @@ class Operation {
         inputs_(std::move(inputs)),
         impl_module_(std::move(impl_module)) {}
 
+  Operation(const Operator& op, NamedAttributeMap attributes, ValueList inputs,
+            std::unique_ptr<Module> impl_module = nullptr)
+      : Operation(nullptr, op, attributes, inputs, std::move(impl_module)) {}
+
+  Operation(const Operator& op) : Operation(nullptr, op, {}, {}) {}
+
   // Disable copy (and move) semantics.
   Operation(const Operation&) = delete;
   Operation& operator=(const Operation&) = delete;
@@ -58,9 +64,19 @@ class Operation {
   std::string ToString(SsaNames& ssa_names) const;
 
   template <typename Derived, typename Result>
-  Result Accept(IRVisitor<Derived, Result>& visitor) const {
+  Result Accept(IRVisitor<Derived, Result, false>& visitor) {
     return visitor.Visit(*this);
   }
+
+  template <typename Derived, typename Result>
+  Result Accept(IRVisitor<Derived, Result, true>& visitor) const {
+    return visitor.Visit(*this);
+  }
+  void AddInput(const Value& value) { inputs_.push_back(value); }
+  void AddAttribute(const std::string name, const Attribute& value) {
+    attributes_.emplace(name, value);
+  }
+  void set_parent(const Block* parent) { parent_ = parent; }
 
  private:
   // The parent block if any to which this operation belongs to.
@@ -96,7 +112,12 @@ class Block {
   const Module* parent_module() const { return parent_module_; }
 
   template <typename Derived, typename Result>
-  Result Accept(IRVisitor<Derived, Result>& visitor) const {
+  Result Accept(IRVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(IRVisitor<Derived, Result, true>& visitor) const {
     return visitor.Visit(*this);
   }
 
@@ -148,7 +169,12 @@ class Module {
   const BlockListType& blocks() const { return blocks_; }
 
   template <typename Derived, typename Result>
-  Result Accept(IRVisitor<Derived, Result>& visitor) const {
+  Result Accept(IRVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(IRVisitor<Derived, Result, true>& visitor) const {
     return visitor.Visit(*this);
   }
 

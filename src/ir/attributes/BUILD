@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
+load("//build_defs:package_groups.oss.bzl", "frontend_packages")
+
 package(
     default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
@@ -23,6 +25,7 @@ package(
 cc_library(
     name = "attribute",
     hdrs = ["attribute.h"],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         "//src/common/utils:intrusive_ptr",
         "@absl//absl/container:flat_hash_map",
@@ -46,6 +49,7 @@ cc_test(
 cc_library(
     name = "int_attribute",
     hdrs = ["int_attribute.h"],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":attribute",
         "//src/common/utils:intrusive_ptr",
@@ -65,6 +69,7 @@ cc_test(
 cc_library(
     name = "string_attribute",
     hdrs = ["string_attribute.h"],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":attribute",
         "//src/common/utils:intrusive_ptr",

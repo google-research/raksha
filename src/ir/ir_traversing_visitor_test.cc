@@ -28,7 +28,10 @@ class WrappedInt {
  public:
   WrappedInt() = delete;
   WrappedInt(uint64_t val) : val_(val) {}
-
+  // Delete the copy constructor to ensure that only moves are used.
+  WrappedInt(const WrappedInt&) = delete;
+  // Have to explicitly enable moves.
+  WrappedInt(WrappedInt&&) = default;
   int64_t operator*() const { return val_; }
 
  private:

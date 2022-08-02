@@ -44,6 +44,7 @@ cc_library(
         ":ir_parser_generator",
         "//src/common/logging",
         "//src/common/utils:map_iter",
+        "//src/common/utils:overloaded",
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:module",

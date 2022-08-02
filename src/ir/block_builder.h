@@ -31,41 +31,61 @@ class BlockBuilder {
   BlockBuilder() : block_(std::make_unique<Block>()) {}
 
   BlockBuilder& AddInput(absl::string_view name, types::Type type) {
+    CHECK(!IsBuilt())
+        << "Attempt to use a `BlockBuilder` that has already been built.";
     block_->inputs_.AddDecl(name, std::move(type));
     return *this;
   }
 
   BlockBuilder& AddOutput(absl::string_view name, types::Type type) {
+    CHECK(!IsBuilt())
+        << "Attempt to use a `BlockBuilder` that has already been built.";
     block_->outputs_.AddDecl(name, std::move(type));
     return *this;
   }
 
   BlockBuilder& AddResult(absl::string_view name, Value output) {
+    CHECK(!IsBuilt())
+        << "Attempt to use a `BlockBuilder` that has already been built.";
     CHECK(block_->outputs_.FindDecl(name) != nullptr)
         << "Output '" << name << "' is not declared in the block.";
     block_->results_.insert({std::string(name), output});
     return *this;
   }
 
-  // Adds an operation to the block and returns the operation.
+  // Constructs and adds an operation to the block and returns the operation.
   const Operation& AddOperation(const Operator& op,
                                 NamedAttributeMap attributes, ValueList inputs,
                                 std::unique_ptr<Module> impl_module = nullptr) {
-    block_->operations_.push_back(
-        std::make_unique<Operation>(block_.get(), op, std::move(attributes),
-                                    std::move(inputs), std::move(impl_module)));
+    return AddOperation(std::make_unique<Operation>(
+        op, std::move(attributes), std::move(inputs), std::move(impl_module)));
+  }
+
+  // Sets parent of operation and adds an operation to the block and returns
+  // the operation.
+  const Operation& AddOperation(std::unique_ptr<Operation> op) {
+    CHECK(!IsBuilt())
+        << "Attempt to use a `BlockBuilder` that has already been built.";
+    CHECK(op != nullptr) << "`AddOperation` received a nullptr.";
+    CHECK(op->parent() == nullptr)
+        << "`AddOperation` received an operation with its Parent pointer "
+           "already defined. Cannot set parent again!";
+    op->set_parent(block_.get());
+    block_->operations_.push_back(std::move(op));
     return *block_->operations_.back();
   }
 
   // Allows an operation to be added to the block using a `T::Create` method as
   // long as the following hold:
   //   - `T` is a derived class of `Operation`.
-  //   - `T::create` takes a pointer to parent block as a first arguemnt.
+  //   - `T::create` takes a pointer to parent block as a first argument.
   // This method also checks that T::Create does not return a nullptr and
   // sets the parent block correctly.
   template <typename T, typename... Args,
             std::enable_if_t<std::is_base_of<Operation, T>::value, bool> = true>
   const Operation& AddOperation(Args&&... a) {
+    CHECK(!IsBuilt())
+        << "Attempt to use a `BlockBuilder` that has already been built.";
     std::unique_ptr<Operation> result =
         T::Create(block_.get(), std::forward<Args>(a)...);
     CHECK(result != nullptr)
@@ -88,6 +108,8 @@ class BlockBuilder {
   //
   BlockBuilder& AddImplementation(
       std::function<void(BlockBuilder&, Block&)> builder) {
+    CHECK(!IsBuilt())
+        << "Attempt to use a `BlockBuilder` that has already been built.";
     builder(*this, *block_);
     return *this;
   }
@@ -103,6 +125,20 @@ class BlockBuilder {
                      " built.";
     return std::move(block_);
   }
+
+  // A way to get non-owning access to the block (for reference by operations)
+  // while the block is still under construction.
+  Block* GetBlockPtr() {
+    // The following check makes sure that we don't attempt to call
+    // `unsafe_get_block_ptr` on an empty `BlockBuilder` by checking that
+    // `block_` is not `nullptr`.
+    CHECK(block_) << "Attempt to get block pointer from a `BlockBuilder` that "
+                     "has already been"
+                     " built.";
+    return block_.get();
+  }
+
+  bool IsBuilt() const { return block_.get() == nullptr; }
 
  private:
   std::unique_ptr<Block> block_;

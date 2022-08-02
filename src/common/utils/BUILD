@@ -26,6 +26,15 @@ cc_library(
     deps = [],
 )
 
+cc_test(
+    name = "types_test",
+    srcs = ["types_test.cc"],
+    deps = [
+        ":types",
+        "//src/common/testing:gtest",
+    ],
+)
+
 cc_library(
     name = "intrusive_ptr",
     hdrs = ["intrusive_ptr.h"],

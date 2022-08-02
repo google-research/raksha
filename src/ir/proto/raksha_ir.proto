@@ -25,14 +25,19 @@ package raksha.ir.proto;
 message Module {
   // Assign each block in the module an ID that is unique across the TU. This
   // allows blocks to be indicated uniquely in `BlockArgumentValue`s.
-  map<uint64, Block> blocks = 1;
+  repeated BlockWithId blocks = 1;
+}
+
+message BlockWithId {
+  uint64 id = 1;
+  Block block = 2;
 }
 
 message Block {
   // A mapping from the ID for an operation in the block to that operation.
   // This allows values produced by this `Operation` to "point" to the
   // `Operation` that produced them within the block.
-  map<uint64, Operation> operations = 1;
+  repeated OperationWithId operations = 1;
   NamedValueMap results = 2;
 }
 
@@ -49,6 +54,11 @@ message NamedAttributeMap {
 
 message NamedValueMap {
   map<string, Value> values = 1;
+}
+
+message OperationWithId {
+  uint64 id = 1;
+  Operation operation = 2;
 }
 
 message Operation {

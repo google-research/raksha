@@ -73,6 +73,7 @@ intermediateFlatten(list, sublist, list_element) :- isOperation(operation),
 flatten(list, list_element) :- intermediateFlatten(list, _, list_element).
 
 // Flattening each individual input per value. 
+
 .decl isSqlInput(operation: Operation, sql_input: AccessPath)
 
 isSqlInput(operation, sql_input) :- isSqlOperation(operation), 
@@ -87,14 +88,17 @@ isSqlInput(operation, sql_input) :- isSqlOperation(operation),
 
 // Base cases (index 0).
 // Sesnitivity score for initial inputs is 1. 
+
 sqlOperationHasSensitivityScoreAtIndex(operation, 1, 0) :- isSqlOperation(operation), 
       operationHasOperandAtIndex(operation, sql_input, 0),
       isInitialInput(sql_input).
 
 // For all other inputs, we get the final sensitivity score. 
+
 sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, 0) :- isSqlOperation(operation), 
       operationHasOperandAtIndex(operation, sql_input, 0),
       sqlValueSensitivity(sql_input, sensitivity_score).      
+
 
 // Inductive cases.  
 // We keep track at the score at each index, and ensure that the sensitivity score at index is only 
@@ -124,6 +128,7 @@ sqlFunctionSensitivity(SQL_GROUP_BY_OPERATOR, 2).
 // The final value sensitivity score, equal to the max of input 
 // multiplied by the function sensitivity.
 .decl sqlValueSensitivity(value: AccessPath, sensitivity_score: SensitvityScore)
+
 sqlValueSensitivity(value, sensitivity_score) :- 
       isSqlOperation(operation), 
       operationHasOperator(operation, operator), 
@@ -133,4 +138,4 @@ sqlValueSensitivity(value, sensitivity_score) :-
       sqlOperationHasSensitivityScoreAtIndex(operation, input_sensitivity, input_list_length-1), 
       sensitivity_score = input_sensitivity * function_sensitvity.
 
-#endif // SRC_SOUFFLE_ANALYSIS_SENSITIVITY_ANALYSIS_DL_
+#endif // SRC_ANALYSIS_SOUFFLE_SENSITIVITY_ANALYSIS_DL_
