@@ -1,97 +1,134 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_SENSITIVITY_ANALYSIS_DL_
 #define SRC_ANALYSIS_SOUFFLE_SENSITIVITY_ANALYSIS_DL_
-// this file defines the calculations for sensitivity analysis 
+
+// this file defines the calculations for sensitivity analysis
 // to be used in dp calculations
-
 #include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/sql_output.dl"
 
-// one isSqlOperator fact per each sql operator, currently supporting one output
-// referring to results as 'value' (sqlValue declared below) as per the discussion in the doc 
+#define CORE_INPUT_OPERATOR as("core.input", Operator)
+#define SQL_WHERE_OPERATOR as("sql.where", Operator)
+#define SQL_GROUP_BY_OPERATOR as("sql.group_by", Operator)
+#define SQL_SELECT_OPERATOR as("sql.select", Operator)
+#define SQL_FILTER_OPERATOR as("sql.filter", Operator)
+#define SQL_COLUMN_ACCESS_OPERATOR as("sql.column_access", Operator)
+#define SQL_OUTPUT_OPERATOR as("sql.output", Operator)
+#define SQL_SUM_OPERATOR as("sql.sum", Operator)
+#define SQL_COUNT_OPERATOR as("sql.count", Operator)
+#define SQL_MAX_OPERATOR as("sql.max", Operator)
+#define SQL_AVERAGE_OPERATOR as("sql.average", Operator)
+
+.type SensitivityScore <: number
+
+// One isSqlOperator fact per each sql operator, currently supporting one output.
+// We refer to results as 'value' (sqlValue declared below)
 .decl isSqlOperation(sqlOperation: Operation)
-isSqlOperation(operation) :- isOperation(operation), 
-      operationHasOperator(operation, operator), 
-      match("sql.*", operator). 
+isSqlOperation(operation) :- isOperation(operation),
+      operationHasOperator(operation, operator),
+      substr(operator, 0, 4) = "sql.".
 
+.decl isTransformationOperator(op: Operator)
+isTransformationOperator(SQL_WHERE_OPERATOR).
+isTransformationOperator(SQL_GROUP_BY_OPERATOR).
+isTransformationOperator(SQL_FILTER_OPERATOR).
+isTransformationOperator(SQL_SELECT_OPERATOR).
+
+// Transformation operations may come before aggregation operations.
+// Their sensitivity score varies based on their output.
+.decl isTransformationOperation(sql_operation: Operation)
+isTransformationOperation(operation) :- isSqlOperation(operation),
+      operationHasOperator(operation, operator),
+      isTransformationOperator(operator).
+
+.decl isAggregationOperator(op: Operator)
+isAggregationOperator(SQL_SUM_OPERATOR).
+isAggregationOperator(SQL_AVERAGE_OPERATOR).
+isAggregationOperator(SQL_COUNT_OPERATOR).
+isAggregationOperator(SQL_MAX_OPERATOR).
+// Aggregation operations point to where noise needs to be added.
+.decl isAggregationOperation(sql_operation: Operation)
+isAggregationOperation(operation) :- isSqlOperation(operation),
+      operationHasOperator(operation, operator),
+      isAggregationOperator(operator).
 
 .decl isSqlValue(value: AccessPath)
 isSqlValue(value) :- isSqlOperation(operation),
       operationHasResult(operation, value).
 
-// keeping track of all initial inputs as they all have sensitivity score 1
-.decl isInitialInput(ingress_point: AccessPath)
+// Keeping track of all initial inputs.
+.decl isInitialInput (ingress_point: AccessPath)
+isInitialInput(as(ingress_point, AccessPath)) :- isOperation(operation),
+      operationHasOperator(operation, CORE_INPUT_OPERATOR),
+      operationHasResult(operation, ingress_point),
+      operationHasAttribute(operation, [_, $StringAttributePayload(_)]).
 
-// helper functions to flatten input lists
-.decl intermediateFlatten(list:OperandList, sublist:OperandList, list_element:AccessPath)
+// Helper functions to flatten input/operand lists.
+.decl intermediateFlatten(list:OperandList, sublist:OperandList, contains_element:AccessPath)
 
-intermediateFlatten(list, sublist, list_element) :- isSqlOperation(operation), 
-      operationHasOperandList(operation, list), 
-      list = [list_element, sublist].
-intermediateFlatten(list, sublist, list_element) :- intermediateFlatten(list, [list_element, sublist], _).
+intermediateFlatten(list, sublist, contains_element) :- operationHasOperandList(operation, list),
+      operationHasOperandListSuffix(operation, [contains_element, sublist]).
 
-.decl flatten(list:OperandList, list_element:AccessPath)
-flatten(list, list_element) :- intermediateFlatten(list, _, list_element).
+.decl flatten(list:OperandList, contains_element:AccessPath)
+flatten(list, contains_element) :- intermediateFlatten(list, _, contains_element).
 
-// flattening each individual input per value
+// Flattening each individual input per value.
 .decl isSqlInput(operation: Operation, sql_input: AccessPath)
 
-isSqlInput(operation, sql_input) :- isSqlOperation(operation), 
-      operationHasOperandList(operation, input_list), 
-      flatten(input_list, sql_input). 
+isSqlInput(operation, sql_input) :- isSqlOperation(operation),
+      operationHasOperandList(operation, input_list),
+      flatten(input_list, sql_input).
 
-// keeping track of sensitivity score per each input at index 
-// used to calculate the maximum input sensitivity 
-// decomposed into base and inductive cases because recursive aggregates are not supported yet 
-// for the compiler case in souffle
-.decl sqlOperationHasSensitivityScoreAtIndex(operation: Operation, sensitivity_score: number, index: number) 
+// The final value sensitivity, equal to the max of input times function sensitivity.
+.decl sqlValueSensitivity(value: AccessPath, sensitivity_score: SensitivityScore)
+sqlValueSensitivity(value, sensitivity_score) :-
+      isSqlOperation(operation),
+      operationHasOperator(operation, operator),
+      operationHasResult(operation, value),
+      sqlFunctionSensitivity(operator, function_sensitvity),
+      operationOperandListLength(operation, input_list_length),
+      sqlOperationHasSensitivityScoreAtIndex(operation, input_sensitivity, input_list_length-1),
+      sensitivity_score = input_sensitivity * function_sensitvity.
 
-// base cases (index 0)
-// for initial inputs, sensitivity is 1
-sqlOperationHasSensitivityScoreAtIndex(operation, 1, 0) :- isSqlOperation(operation), 
+// Keeping track of sensitivity score per each input at index, where index is the depth from
+// initial inputs. This relation is used to calculate the maximum input sensitivity.
+// It's decomposed into base and inductive cases because recursive aggregates are not supported yet
+// for the compiler case in souffle. The operation is used as a proxy for its result (AccessPath).
+.decl sqlOperationHasSensitivityScoreAtIndex(operation: Operation, sensitivity_score: SensitivityScore, index: number)
+
+// Base cases (index 0).
+// Sesnitivity score for initial inputs is 1.
+sqlOperationHasSensitivityScoreAtIndex(operation, 1, 0) :- isSqlOperation(operation),
       operationHasOperandAtIndex(operation, sql_input, 0),
       isInitialInput(sql_input).
 
-//for all others, get the final sensitivity score
-sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, 0) :- isSqlOperation(operation), 
+// For all other inputs, we get the final sensitivity score.
+sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, 0) :- isSqlOperation(operation),
       operationHasOperandAtIndex(operation, sql_input, 0),
-      sqlValueSensitivity(sql_input, sensitivity_score).      
+      sqlValueSensitivity(sql_input, sensitivity_score).
 
-// inductive cases 
-// keep track at the score at each index, only update if the new input score is higher
-sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, index) :- 
-      isSqlOperation(operation), 
-      operationHasOperandAtIndex(operation, sql_input, index),
-      isSqlInput(operation, sql_input), 
-      sqlValueSensitivity(sql_input, input_sensitivity_score), 
-      sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, index-1),
-      sensitivity_score >= input_sensitivity_score. 
+// Inductive cases.
+// We keep track at the score at each index, and ensure that the sensitivity score at index is only
+// updated if the input at index has sensitivity score greater than the previous sensitivity score.
+// Otherwise, the prev_index sensitivity score is copied at index.
+sqlOperationHasSensitivityScoreAtIndex(operation, max(prev_sensitivity_score, input_sensitivity_score), prev_index + 1) :-
+  isSqlOperation(operation),
+  operationHasOperandAtIndex(operation, sql_input, prev_index + 1),
+  isSqlInput(operation, sql_input),
+  sqlValueSensitivity(sql_input, input_sensitivity_score),
+  sqlOperationHasSensitivityScoreAtIndex(operation, prev_sensitivity_score, prev_index).
 
+// Function sensitivity scores per each sql operator as defined in PINQ
+// TODO: add other cases
+.decl sqlFunctionSensitivity(operator: Operator, sensitivity_score: SensitivityScore)
 
-sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, index) :- 
-      isSqlOperation(operation), 
-      operationHasOperandAtIndex(operation, sql_input, index),
-      isSqlInput(value, sql_input), 
-      sqlValueSensitivity(sql_input, sensitivity_score), 
-      sqlOperationHasSensitivityScoreAtIndex(operation, prev_sensitivity_score, index-1), 
-      sensitivity_score >= prev_sensitivity_score. 
+sqlFunctionSensitivity(operator, 1) :-
+      isAggregationOperation(operation),
+      operationHasOperator(operation, operator).
+sqlFunctionSensitivity(SQL_FILTER_OPERATOR, 1).
+sqlFunctionSensitivity(SQL_WHERE_OPERATOR, 1).
+sqlFunctionSensitivity(SQL_SELECT_OPERATOR, 1).
+sqlFunctionSensitivity(SQL_COLUMN_ACCESS_OPERATOR, 1).
+sqlFunctionSensitivity(SQL_OUTPUT_OPERATOR, 1).
+sqlFunctionSensitivity(SQL_GROUP_BY_OPERATOR, 2).
 
-// function sensitivity scores per each sql operator as defined in PINQ
-// TODO: add other cases 
-.decl sqlFunctionSensitivity(operator: Operator, sensitivity_score: number)
-
-sqlFunctionSensitivity(operator, 1) :- operator = "sql.filter"; 
-      operator = "sql.where"; 
-      operator = "sql.select".
-sqlFunctionSensitivity(operator, 2) :- operator = "sql.group_by". 
-
-// final value sensitivity score, the max of input multiplied by the function sensitivity 
-.decl sqlValueSensitivity(value: AccessPath, sensitivity_score: number)
-sqlValueSensitivity(value, sensitivity_score) :- 
-      isSqlOperation(operation), 
-      operationHasOperator(operation, operator), 
-      operationHasResult(operation, value), 
-      sqlFunctionSensitivity(operator, function_sensitvity), 
-      operationOperandListLength(operation, input_list_length), 
-      sqlOperationHasSensitivityScoreAtIndex(operation, input_sensitivity, input_list_length-1), 
-      sensitivity_score = input_sensitivity * function_sensitvity.
-
-#endif // SRC_ANALYSIS_SOUFFLE_SENSITIVITY_ANALYSIS_DL_
+#endif // SRC_SOUFFLE_ANALYSIS_SENSITIVITY_ANALYSIS_DL_

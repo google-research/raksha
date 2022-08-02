@@ -1,0 +1,15 @@
+// Modeling a single query that fails the dp analysis because the actual epsilon, 4 is greater than
+// the global epsilon
+module m0 {
+  block b0 {
+        %0 = core.input [name: "revenue_table"] ()
+         //epsilon does not take into account sens analysis
+        %1 = sql.filter [column: "revenue"] (%0) // { revenue > 100 }
+        %epsilon = global_epsilon [epsilon: 2] ()
+        %location = sql.column_access [column: "location"] (%1)
+        %2 = sql.group_by[] (%1, %location)
+        %dp_data = privacy_mechanism [epsilon: 2] (%2) //epsilon set not to take into account sens. analysis (actual epsilon is 4)
+        %3 = sql.average[] (%dp_data)
+        %4 = sql.output [] (%3) // Report the noisy average
+    }
+}
