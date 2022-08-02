@@ -63,14 +63,13 @@ isInitialInput(as(ingress_point, AccessPath)) :- isOperation(operation),
       operationHasAttribute(operation, [_, $StringAttributePayload(_)]).
 
 // Helper functions to flatten input/operand lists.
-.decl intermediateFlatten(list:OperandList, sublist:OperandList, list_element:AccessPath)
+.decl intermediateFlatten(list:OperandList, sublist:OperandList, contains_element:AccessPath)
 
-intermediateFlatten(list, sublist, list_element) :- isOperation(operation),
-      operationHasOperandList(operation, list),
-      operationHasOperandListSuffix(operation, [list_element, sublist]).
+intermediateFlatten(list, sublist, contains_element) :- operationHasOperandList(operation, list),
+      operationHasOperandListSuffix(operation, [contains_element, sublist]).
 
-.decl flatten(list:OperandList, list_element:AccessPath)
-flatten(list, list_element) :- intermediateFlatten(list, _, list_element).
+.decl flatten(list:OperandList, contains_element:AccessPath)
+flatten(list, contains_element) :- intermediateFlatten(list, _, contains_element).
 
 // Flattening each individual input per value.
 .decl isSqlInput(operation: Operation, sql_input: AccessPath)
@@ -79,8 +78,7 @@ isSqlInput(operation, sql_input) :- isSqlOperation(operation),
       operationHasOperandList(operation, input_list),
       flatten(input_list, sql_input).
 
-// The final value sensitivity score, equal to the max of input
-// multiplied by the function sensitivity.
+// The final value sensitivity, equal to the max of input times function sensitivity.
 .decl sqlValueSensitivity(value: AccessPath, sensitivity_score: SensitivityScore)
 sqlValueSensitivity(value, sensitivity_score) :-
       isSqlOperation(operation),
@@ -91,12 +89,10 @@ sqlValueSensitivity(value, sensitivity_score) :-
       sqlOperationHasSensitivityScoreAtIndex(operation, input_sensitivity, input_list_length-1),
       sensitivity_score = input_sensitivity * function_sensitvity.
 
-// Keeping track of sensitivity score per each input at index.
-// This is used to calculate the maximum input sensitivity.
-// It's decomposed into base and inductive cases because recursive
-// aggregates are not supported yet for the compiler case in souffle.
-// The operation is used as a proxy for the AccessPath that is the result of
-// said operation.
+// Keeping track of sensitivity score per each input at index, where index is the depth from
+// initial inputs. This relation is used to calculate the maximum input sensitivity.
+// It's decomposed into base and inductive cases because recursive aggregates are not supported yet
+// for the compiler case in souffle. The operation is used as a proxy for its result (AccessPath).
 .decl sqlOperationHasSensitivityScoreAtIndex(operation: Operation, sensitivity_score: SensitivityScore, index: number)
 
 // Base cases (index 0).
