@@ -25,11 +25,11 @@ filegroup(
     name = "auth_logic",
     testonly = True,
     srcs = [
-        "empty_auth_logic",
+        "empty_auth_logic.authlogic",
         "empty_auth_logic.dl",
-        "says_owns_tag",
+        "says_owns_tag.authlogic",
         "says_owns_tag.dl",
-        "simple_auth_logic",
+        "simple_auth_logic.authlogic",
         "simple_auth_logic.dl",
     ],
 )
@@ -44,7 +44,7 @@ filegroup(
     name = "ok_claim_propagates",
     srcs = [
         "ok_claim_propagates.arcs",
-        "ok_claim_propagates.auth",
+        "ok_claim_propagates.authlogic",
         "ok_claim_propagates.dl",
         ":ok_claim_propagates_proto",
     ],
