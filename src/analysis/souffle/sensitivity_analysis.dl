@@ -107,7 +107,7 @@ sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, 0) :- isSql
       sqlValueSensitivity(sql_input, sensitivity_score).
 
 // Inductive cases.
-// We keep track at the score at each index, and ensure that the sensitivity score at index is only
+// We keep track of the score at each index, and ensure that the sensitivity score at index is only
 // updated if the input at index has sensitivity score greater than the previous sensitivity score.
 // Otherwise, the prev_index sensitivity score is copied at index.
 sqlOperationHasSensitivityScoreAtIndex(operation, max(prev_sensitivity_score, input_sensitivity_score), prev_index + 1) :-
