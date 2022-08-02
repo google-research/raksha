@@ -52,9 +52,31 @@ fn sanitize_filepath(name: String) -> String {
     name.replace("\"", "")
 }
 
+fn construct_id(ctx: &IdContextAll) -> String {
+    match ctx {
+        IdContextAll::ConstantContext(const_ctx) =>
+            const_ctx.CONSTANT_BODY().unwrap().get_text(),
+        IdContextAll::MultilineConstantContext(ml_ctx) =>
+            ml_ctx.MULTILINE_CONSTANT_BODY().unwrap().get_text().replace("\n", ""),
+        IdContextAll::VariableContext(v_ctx) =>
+            v_ctx.VARIABLE().unwrap().get_text(),
+        _ => {panic!("construct_id tried to build error")}
+    }
+}
+
 fn construct_principal(ctx: &PrincipalContext) -> AstPrincipal {
-    let name_ = sanitize_id(ctx.id().unwrap().get_text());
+    let name_ = construct_id(&ctx.id().unwrap());
     AstPrincipal { name: name_ }
+}
+
+fn construct_pred_arg(ctx: &Pred_argContextAll) -> String {
+    match ctx {
+        Pred_argContextAll::IdArgContext(id_ctx) =>
+            construct_id(&id_ctx.id().unwrap()),
+        Pred_argContextAll::NumlitContext(n_ctx) =>
+            n_ctx.NUMLITERAL().unwrap().get_text(),
+        _ => {panic!("construct_pred_arg tried to build error")}
+    }
 }
 
 fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
@@ -62,10 +84,10 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
         Some(_) => Sign::Negated,
         None => Sign::Positive 
     };
-    let name_ = sanitize_id(ctx.id().unwrap().get_text());
+    let name_ = construct_id(&ctx.id().unwrap());
     let args_ = (&ctx).pred_arg_all()
         .iter()
-        .map(|arg_ctx| sanitize_id(arg_ctx.get_text()))
+        .map(|arg_ctx| construct_pred_arg(arg_ctx))
         .collect();
     AstPredicate {
         sign: sign_,
@@ -160,9 +182,9 @@ fn construct_rvalue(ctx: &RvalueContextAll) -> AstRValue {
         RvalueContextAll::BinopRvalueContext(bctx) => {
             AstRValue::ArithCompareRValue {
                 arith_comp: AstArithmeticComparison {
-                    lnum: sanitize_id(bctx.pred_arg(0).unwrap().get_text()),
+                    lnum: construct_pred_arg(&bctx.pred_arg(0).unwrap()),
                     op: construct_binop(&bctx.binop().unwrap()),
-                    rnum: sanitize_id(bctx.pred_arg(1).unwrap().get_text())
+                    rnum: construct_pred_arg(&bctx.pred_arg(1).unwrap())
                 }
             }
         }
@@ -197,7 +219,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
         SaysAssertionContextAll::SaysSingleContext(ctx_prime) => {
             let prin = construct_principal(&ctx_prime.principal().unwrap());
             let assertions = vec![construct_assertion(&ctx_prime.assertion().unwrap())];
-            let export_file = ctx_prime.id().map(|p| sanitize_filepath(p.get_text()));
+            let export_file = ctx_prime.id().map(|p| construct_id(&p));
             AstSaysAssertion {
                 prin,
                 assertions,
@@ -211,7 +233,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
                 .iter()
                 .map(|x| construct_assertion(x))
                 .collect();
-            let export_file = ctx_prime.id().map(|p| sanitize_filepath(p.get_text()));
+            let export_file = ctx_prime.id().map(|p| construct_id(&p));
             AstSaysAssertion {
                 prin,
                 assertions,
@@ -223,7 +245,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
 }
 
 fn construct_query(ctx: &QueryContext) -> AstQuery {
-    let name = sanitize_id(ctx.id().unwrap().get_text());
+    let name = construct_id(&ctx.id().unwrap());
     let principal = construct_principal(&ctx.principal().unwrap());
     let fact = construct_fact(&ctx.fact().unwrap());
     AstQuery {
@@ -236,12 +258,12 @@ fn construct_query(ctx: &QueryContext) -> AstQuery {
 fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
     match ctx {
         KeyBindContextAll::BindprivContext(ctx_prime) => AstKeybind {
-            filename: sanitize_filepath(ctx_prime.id().unwrap().get_text()),
+            filename: construct_id(&ctx_prime.id().unwrap()),
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: false,
         },
         KeyBindContextAll::BindpubContext(ctx_prime) => AstKeybind {
-            filename: sanitize_filepath(ctx_prime.id().unwrap().get_text()),
+            filename: construct_id(&ctx_prime.id().unwrap()),
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: true,
         },
@@ -252,7 +274,7 @@ fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
 fn construct_import(ctx: &ImportAssertionContext) -> AstImport {
     AstImport {
         principal: construct_principal(&ctx.principal().unwrap()),
-        filename: sanitize_filepath(ctx.id().unwrap().get_text()),
+        filename: construct_id(&ctx.id().unwrap()),
     }
 }
 
@@ -271,15 +293,15 @@ fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
 
 fn construct_relation_declaration(ctx: &RelationDeclarationContext) -> 
         AstRelationDeclaration {
-    let predicate_name_ = sanitize_id(ctx.id().unwrap().get_text());
+    let predicate_name_ = ctx.VARIABLE(0).unwrap().get_text();
     // Note that ID_all() in the generated antlr-rust code is buggy,
     // (because all {LEX_RULE}_all() generations are buggy)
     // so rather than using a more idomatic iterator, "while Some(...)" is
     // used to populate this vector.
     let mut arg_names = Vec::new();
-    let mut idx = 0;
+    let mut idx = 1;
     while let Some(param_name) = ctx.VARIABLE(idx) {
-        arg_names.push(sanitize_id(param_name.get_text()));
+        arg_names.push(param_name.get_text());
         idx += 1;
     }
     let types : Vec<AstType> = ctx.authLogicType_all()

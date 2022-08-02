@@ -26,9 +26,9 @@ grammar AuthLogic;
 // Parser
 //-----------------------------------------------------------------------------
 id 
-    : CONSTANT
-    | MULTILINE_CONSTANT 
-    | VARIABLE
+    : VARIABLE #variable
+    | '"' CONSTANT_BODY '"' #constant
+    | '"""' MULTILINE_CONSTANT_BODY '"""'  #multilineConstant
     ; 
 
 // Principals are only superficially syntactically distinct from IDs at the
@@ -39,8 +39,8 @@ principal
     ;
 
 pred_arg
-    : id
-    | NUMLITERAL
+    : id #idArg
+    | NUMLITERAL #numlit
     ;
 
 predicate
@@ -114,7 +114,7 @@ authLogicType
     ;
 
 relationDeclaration
-    : '.decl' ATTRIBUTE? id '(' VARIABLE ':' authLogicType (',' VARIABLE ':' authLogicType)* ')'
+    : '.decl' ATTRIBUTE? VARIABLE '(' VARIABLE ':' authLogicType (',' VARIABLE ':' authLogicType)* ')'
     ;
 
 program
@@ -146,8 +146,8 @@ ATTRIBUTE: 'attribute';
 // Identifiers wrapped in quotes are constants whereas
 // identifiers without quotes are variables.
 VARIABLE : [_a-zA-Z][_a-zA-Z0-9/.#:]*; 
-CONSTANT : '"' [_a-zA-Z+-][@_a-zA-Z0-9/.#:+=-]* '"';
-MULTILINE_CONSTANT : '"""' [\n _a-zA-Z+-][\n _a-zA-Z0-9/.#:+=-]* '"""';
+CONSTANT_BODY : [_a-zA-Z+-][@_a-zA-Z0-9/.#:+=-]*;
+MULTILINE_CONSTANT_BODY : [\n _a-zA-Z+-][\n _a-zA-Z0-9/.#:+=-]*;
 NUMLITERAL : [0-9]+;
 
 NEG: '!';
