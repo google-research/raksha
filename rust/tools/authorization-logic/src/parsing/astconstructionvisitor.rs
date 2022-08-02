@@ -38,8 +38,22 @@ pub fn parse_program(prog_text: &str) -> AstProgram {
     construct_program(&parse_result)
 }
 
+// The authorization logic frontend supports newlines
+// in the names of constants, but souffle does not. As
+// an easy way to support this, we delete newlines from
+// constant names. Since multiline literals/constants
+// are represented with triple quotes, we replace
+// triple quotes with single here.
+fn sanitize_id(name: String) -> String {
+    name.replace("\n", "").replace("\"\"\"", "\"")
+}
+
+fn sanitize_filepath(name: String) -> String {
+    name.replace("\"", "")
+}
+
 fn construct_principal(ctx: &PrincipalContext) -> AstPrincipal {
-    let name_ = ctx.ID().unwrap().get_text();
+    let name_ = sanitize_id(ctx.id().unwrap().get_text());
     AstPrincipal { name: name_ }
 }
 
@@ -48,10 +62,10 @@ fn construct_predicate(ctx: &PredicateContext) -> AstPredicate {
         Some(_) => Sign::Negated,
         None => Sign::Positive 
     };
-    let name_ = ctx.ID().unwrap().get_text();
+    let name_ = sanitize_id(ctx.id().unwrap().get_text());
     let args_ = (&ctx).pred_arg_all()
         .iter()
-        .map(|arg_ctx| arg_ctx.get_text())
+        .map(|arg_ctx| sanitize_id(arg_ctx.get_text()))
         .collect();
     AstPredicate {
         sign: sign_,
@@ -146,9 +160,9 @@ fn construct_rvalue(ctx: &RvalueContextAll) -> AstRValue {
         RvalueContextAll::BinopRvalueContext(bctx) => {
             AstRValue::ArithCompareRValue {
                 arith_comp: AstArithmeticComparison {
-                    lnum: bctx.pred_arg(0).unwrap().get_text(),
+                    lnum: sanitize_id(bctx.pred_arg(0).unwrap().get_text()),
                     op: construct_binop(&bctx.binop().unwrap()),
-                    rnum: bctx.pred_arg(1).unwrap().get_text()
+                    rnum: sanitize_id(bctx.pred_arg(1).unwrap().get_text())
                 }
             }
         }
@@ -183,7 +197,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
         SaysAssertionContextAll::SaysSingleContext(ctx_prime) => {
             let prin = construct_principal(&ctx_prime.principal().unwrap());
             let assertions = vec![construct_assertion(&ctx_prime.assertion().unwrap())];
-            let export_file = ctx_prime.ID().map(|p| p.get_text().replace("\"", ""));
+            let export_file = ctx_prime.id().map(|p| sanitize_filepath(p.get_text()));
             AstSaysAssertion {
                 prin,
                 assertions,
@@ -197,7 +211,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
                 .iter()
                 .map(|x| construct_assertion(x))
                 .collect();
-            let export_file = ctx_prime.ID().map(|p| p.get_text().replace("\"", ""));
+            let export_file = ctx_prime.id().map(|p| sanitize_filepath(p.get_text()));
             AstSaysAssertion {
                 prin,
                 assertions,
@@ -209,7 +223,7 @@ fn construct_says_assertion(ctx: &SaysAssertionContextAll) -> AstSaysAssertion {
 }
 
 fn construct_query(ctx: &QueryContext) -> AstQuery {
-    let name = ctx.ID().unwrap().get_text();
+    let name = sanitize_id(ctx.id().unwrap().get_text());
     let principal = construct_principal(&ctx.principal().unwrap());
     let fact = construct_fact(&ctx.fact().unwrap());
     AstQuery {
@@ -222,12 +236,12 @@ fn construct_query(ctx: &QueryContext) -> AstQuery {
 fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
     match ctx {
         KeyBindContextAll::BindprivContext(ctx_prime) => AstKeybind {
-            filename: ctx_prime.ID().unwrap().get_text().replace("\"", ""),
+            filename: sanitize_filepath(ctx_prime.id().unwrap().get_text()),
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: false,
         },
         KeyBindContextAll::BindpubContext(ctx_prime) => AstKeybind {
-            filename: ctx_prime.ID().unwrap().get_text().replace("\"", ""),
+            filename: sanitize_filepath(ctx_prime.id().unwrap().get_text()),
             principal: construct_principal(&ctx_prime.principal().unwrap()),
             is_pub: true,
         },
@@ -238,7 +252,7 @@ fn construct_keybinding(ctx: &KeyBindContextAll) -> AstKeybind {
 fn construct_import(ctx: &ImportAssertionContext) -> AstImport {
     AstImport {
         principal: construct_principal(&ctx.principal().unwrap()),
-        filename: ctx.ID().unwrap().get_text().replace("\"", ""),
+        filename: sanitize_filepath(ctx.id().unwrap().get_text()),
     }
 }
 
@@ -249,7 +263,7 @@ fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
         AuthLogicTypeContextAll::PrincipalTypeContext(_ctx_prime) =>
             AstType::PrincipalType,
         AuthLogicTypeContextAll::CustomTypeContext(ctx_prime) => {
-            AstType::CustomType { type_name: ctx_prime.ID().unwrap().get_text() }
+            AstType::CustomType { type_name: ctx_prime.id().unwrap().get_text() }
         }
         _ => { panic!("construct_type tried to build error"); }
     }
@@ -257,15 +271,15 @@ fn construct_type(ctx: &AuthLogicTypeContextAll) -> AstType {
 
 fn construct_relation_declaration(ctx: &RelationDeclarationContext) -> 
         AstRelationDeclaration {
-    let predicate_name_ = ctx.ID(0).unwrap().get_text();
+    let predicate_name_ = sanitize_id(ctx.id().unwrap().get_text());
     // Note that ID_all() in the generated antlr-rust code is buggy,
     // (because all {LEX_RULE}_all() generations are buggy)
     // so rather than using a more idomatic iterator, "while Some(...)" is
     // used to populate this vector.
     let mut arg_names = Vec::new();
-    let mut idx = 1;
-    while let Some(param_name) = ctx.ID(idx) {
-        arg_names.push(param_name.get_text());
+    let mut idx = 0;
+    while let Some(param_name) = ctx.VARIABLE(idx) {
+        arg_names.push(sanitize_id(param_name.get_text()));
         idx += 1;
     }
     let types : Vec<AstType> = ctx.authLogicType_all()
