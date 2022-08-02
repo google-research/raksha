@@ -26,7 +26,6 @@
 #include "src/ir/types/type.h"
 #include "src/ir/types/type_factory.h"
 
-
 namespace raksha::ir {
 namespace {
 
@@ -130,7 +129,8 @@ TEST_F(BlockBuilderDeathTest, AddResultsVerifiesOutputIsDeclared) {
 
 TEST_F(BlockBuilderTest, AddOperationUpdatesOperationList) {
   BlockBuilder builder;
-  const Operator& core_plus = *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+  const Operator& core_plus =
+      *CHECK_NOTNULL(context_.GetOperator("core.plus"));
   const Operator& core_minus =
       *CHECK_NOTNULL(context_.GetOperator("core.plus"));
   const Operator& core_merge =
@@ -154,6 +154,48 @@ TEST_F(BlockBuilderTest, AddOperationUpdatesOperationList) {
                   testing::Pointer(testing::Eq(merge_op_with_module))));
 }
 
+TEST_F(BlockBuilderTest, AddOperationOfUniquePtrUpdatesOperationList) {
+  BlockBuilder builder;
+  const Operator& core_plus =
+      *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+  const Operator& core_minus =
+      *CHECK_NOTNULL(context_.GetOperator("core.minus"));
+  const Operator& core_merge =
+      *CHECK_NOTNULL(context_.GetOperator("core.merge"));
+
+  const Operation* plus_op =
+      std::addressof(builder.AddOperation(std::make_unique<Operation>(
+          nullptr, core_plus, NamedAttributeMap(), ValueList(), nullptr)));
+  const Operation* minus_op =
+      std::addressof(builder.AddOperation(std::make_unique<Operation>(
+          nullptr, core_minus, NamedAttributeMap(), ValueList(), nullptr)));
+  const Operation* merge_op =
+      std::addressof(builder.AddOperation(std::make_unique<Operation>(
+          nullptr, core_merge, NamedAttributeMap(), ValueList(), nullptr)));
+  const Operation* merge_op_with_module = std::addressof(builder.AddOperation(
+      std::make_unique<Operation>(nullptr, core_merge, NamedAttributeMap(),
+                                  ValueList(), std::make_unique<Module>())));
+
+  auto block = builder.build();
+  EXPECT_THAT(block->operations(),
+              testing::ElementsAre(
+                  testing::Pointer(testing::Eq(plus_op)),
+                  testing::Pointer(testing::Eq(minus_op)),
+                  testing::Pointer(testing::Eq(merge_op)),
+                  testing::Pointer(testing::Eq(merge_op_with_module))));
+}
+
+TEST_F(BlockBuilderTest, SetParentPtrErrorsWithPredefinedParent) {
+  BlockBuilder builder;
+  auto block = builder.GetBlockPtr();
+  const Operator& core_merge =
+      *CHECK_NOTNULL(context_.GetOperator("core.merge"));
+  EXPECT_DEATH(builder.AddOperation(std::make_unique<Operation>(
+                   block, core_merge, NamedAttributeMap(), ValueList(),
+                   std::make_unique<Module>())),
+               "Parent pointer already defined. Cannot set parent again!");
+}
+
 TEST_F(BlockBuilderTest, AddImplementationPassesSelfAndResultBlock) {
   BlockBuilder builder;
   Block* passed_in_block;
@@ -165,6 +207,43 @@ TEST_F(BlockBuilderTest, AddImplementationPassesSelfAndResultBlock) {
 
   auto block = builder.build();
   EXPECT_EQ(block.get(), passed_in_block);
+}
+
+TEST_F(BlockBuilderTest, GetBlockPtrReturnsCorrectBlockPtr) {
+  // Ensures that building a block doesn't move the block.
+  // This is important to maintain pointers to blocks that are still being
+  // constructed.
+  BlockBuilder builder;
+  Block* block_ptr = builder.GetBlockPtr();
+  auto block = builder.build();
+  EXPECT_EQ(block_ptr, block.get());
+}
+
+TEST_F(BlockBuilderTest, AddImplementationDoesNotChangeBlockAddress) {
+  BlockBuilder builder;
+  Block* passed_in_block;
+  Block* block_ptr = builder.GetBlockPtr();
+  builder.AddImplementation([&builder, &passed_in_block](
+                                BlockBuilder& this_builder, Block& this_block) {
+    passed_in_block = std::addressof(this_block);
+    EXPECT_EQ(std::addressof(builder), std::addressof(this_builder));
+  });
+
+  EXPECT_EQ(block_ptr, passed_in_block);
+  auto block = builder.build();
+  EXPECT_EQ(block.get(), passed_in_block);
+  EXPECT_EQ(block_ptr, block.get());
+}
+
+TEST_F(BlockBuilderTest, AddOperationDoesNotChangeBlockAddress) {
+  BlockBuilder builder;
+  Block* block_ptr = builder.GetBlockPtr();
+  const Operator& core_plus = *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+  const Operation& op = builder.AddOperation(core_plus, {}, {});
+  auto block = builder.build();
+  EXPECT_THAT(block->operations(),
+              testing::ElementsAre(testing::Pointer(testing::Eq(&op))));
+  EXPECT_EQ(block_ptr, block.get());
 }
 
 TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
@@ -182,11 +261,11 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
         builder.AddResult("primitive_output",
                           Value(value::OperationResult(op, "primitive_value")));
         ssa_names.AddID(Value(value::OperationResult(op, "primitive_value")),
-                           "primitive_value");
+                        "primitive_value");
         builder.AddResult("entity_output",
                           Value(value::OperationResult(op, "entity_value")));
         ssa_names.AddID(Value(value::OperationResult(op, "entity_value")),
-                           "entity_value");
+                        "entity_value");
       });
 
   auto block = builder.build();
@@ -223,6 +302,27 @@ class TestOperation : public Operation {
   }
 };
 
+TEST_F(BlockBuilderTest, AllowsAdditionOfPreConstructedOperation) {
+  BlockBuilder builder;
+  const Operator& core_plus = *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+  std::unique_ptr<Operation> plus_op_ptr =
+      std::make_unique<Operation>(core_plus);
+  const Operation* plus_op =
+      std::addressof(builder.AddOperation(std::move(plus_op_ptr)));
+
+  const Operator& core_minus =
+      *CHECK_NOTNULL(context_.GetOperator("core.minus"));
+  std::unique_ptr<Operation> minus_op_ptr =
+      std::make_unique<Operation>(core_minus);
+  const Operation* minus_op =
+      std::addressof(builder.AddOperation(std::move(minus_op_ptr)));
+
+  auto block = builder.build();
+  EXPECT_THAT(block->operations(),
+              testing::ElementsAre(testing::Pointer(testing::Eq(plus_op)),
+                                   testing::Pointer(testing::Eq(minus_op))));
+}
+
 TEST_F(BlockBuilderTest, AllowsAdditionOfOperationWithCustomCreateMethod) {
   BlockBuilder builder;
   const Operation* plus_op = std::addressof(
@@ -258,6 +358,15 @@ TEST_F(BlockBuilderDeathTest, InvokingBuildMoreThanOnceFails) {
   EXPECT_DEATH({ builder.build(); },
                "Attempt to build a `BlockBuilder` that has already been"
                " built.");
+}
+
+TEST_F(BlockBuilderDeathTest, InvokingGetBlockPtrAfterBuildFails) {
+  BlockBuilder builder;
+  std::unique_ptr<Block> block1 = builder.build();
+  EXPECT_DEATH(
+      { builder.GetBlockPtr(); },
+      "Attempt to get block pointer from a `BlockBuilder` that has already been"
+      " built.");
 }
 
 }  // namespace

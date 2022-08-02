@@ -27,13 +27,13 @@ TEST_P(IrParserTest, SimpleTestOperation) {
   auto input_program_text = GetParam();
   IrProgramParser ir_parser;
   auto result = ir_parser.ParseProgram(input_program_text);
-  EXPECT_EQ(IRPrinter::ToString(*result.module, std::move((result.ssa_names))),
+  EXPECT_EQ(IRPrinter::ToString(*result.module, *result.ssa_names),
             input_program_text);
 }
 
 INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
                          ::testing::Values(
-R"(module m0 {
+                             R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -41,7 +41,7 @@ R"(module m0 {
   }  // block b1
 }  // module m0
 )",
-R"(module m0 {
+                             R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -50,34 +50,45 @@ R"(module m0 {
   }  // block b1
 }  // module m0
 )",
-R"(module m0 {
+                             R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
   block b1 {
-    %1 = core.plus [access: "private", transform: "no"](%0, <<ANY>>)
+    %1 = core.plus [access: "private", transform: "no"](%1, <<ANY>>)
   }  // block b1
 }  // module m0
 )",
-R"(module m0 {
+                             R"(module m0 {
   block b0 {
     %0 = core.select []()
     %1 = core.merge [](<<ANY>>, <<ANY>>)
   }  // block b0
   block b1 {
-    %2 = core.plus [access: "private", transform: "no"](%0, <<ANY>>)
-    %3 = core.mult [access: "private", transform: 45](%0, %2)
+    %2 = core.plus [access: "private", transform: "no"](%3, <<ANY>>)
+    %3 = core.mult [access: "private", transform: 45](%3, %2)
   }  // block b1
 }  // module m0
 )",
-R"(module m0 {
+                             R"(module m0 {
   block b0 {
     %0 = core.select []()
     %1 = core.merge [](<<ANY>>, <<ANY>>)
   }  // block b0
   block b1 {
+    %2 = core.plus [access: "private", transform: "no"](%3, <<ANY>>)
+    %3 = core.mult [lhs: 10, rhs: "59"](<<ANY>>, %2)
+  }  // block b1
+}  // module m0
+)",
+                             R"(module m0 {
+  block b0 {
+    %0 = core.plus [access: "private", transform: "no"](%1, <<ANY>>)
+    %1 = core.plus []()
+  }  // block b0
+  block b1 {
+    %0 = core.plus [access: "private", transform: "no"](%2, <<ANY>>)
     %2 = core.plus [access: "private", transform: "no"](%0, <<ANY>>)
-    %3 = core.mult [lhs: 10, rhs: "59"](%0, %2)
   }  // block b1
 }  // module m0
 )"));
@@ -92,10 +103,22 @@ TEST(IrParseTest, ValueNotFoundCausesFailure) {
   }  // block b1
 }  // module m0
 )";
-
   IrProgramParser ir_parser;
   EXPECT_DEATH(ir_parser.ParseProgram(input_program_text), "Value not found");
+}
 
+TEST(IrParseTest, ValueAccessedBetweenBlockCausesFailure) {
+  auto input_program_text = R"(module m0 {
+  block b0 {
+     %0 = core.plus []()
+  }  // block b0
+  block b1 {
+      %1 = core.plus [access: "private", transform: "no"](%0, <<ANY>>)
+  }  // block b1
+}  // module m0
+)";
+  IrProgramParser ir_parser;
+  EXPECT_DEATH(ir_parser.ParseProgram(input_program_text), "Value not found");
 }
 
 TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {

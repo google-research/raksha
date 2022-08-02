@@ -13,10 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #-----------------------------------------------------------------------------
+load("@build_bazel_rules_nodejs//:index.bzl", "nodejs_binary")
 
 licenses(["notice"])
-
-load("@build_bazel_rules_nodejs//:index.bzl", "nodejs_binary")
 
 package(default_visibility = ["//visibility:public"])
 

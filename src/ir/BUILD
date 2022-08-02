@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
+load("//build_defs:package_groups.oss.bzl", "frontend_packages")
+
 package(
     default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
@@ -23,6 +25,7 @@ package(
 cc_library(
     name = "block_builder",
     hdrs = ["block_builder.h"],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":module",
         ":value",
@@ -69,10 +72,7 @@ cc_test(
 cc_library(
     name = "ir_context",
     hdrs = ["ir_context.h"],
-    visibility = [
-        "//:__pkg__",
-        "//src:__subpackages__",
-    ],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":module",
         ":operator",
@@ -142,9 +142,8 @@ cc_test(
 cc_library(
     name = "operator",
     hdrs = ["operator.h"],
-    deps = [
-        "@absl//absl/strings",
-    ],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
+    deps = ["@absl//absl/strings"],
 )
 
 cc_test(
@@ -177,6 +176,7 @@ cc_library(
         "ir_visitor.h",
         "module.h",
     ],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":data_decl",
         ":operator",
@@ -202,6 +202,7 @@ cc_test(
 cc_library(
     name = "ssa_names",
     hdrs = ["ssa_names.h"],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":operator",
         ":value",
@@ -243,6 +244,7 @@ cc_test(
 cc_library(
     name = "value",
     hdrs = ["value.h"],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":storage",
         "//src/common/utils:overloaded",
@@ -327,5 +329,57 @@ cc_test(
         ":access_path_selectors",
         "//src/common/testing:gtest",
         "@absl//absl/hash:hash_testing",
+    ],
+)
+
+cc_library(
+    name = "proto_to_ir",
+    srcs = ["proto_to_ir.cc"],
+    hdrs = ["proto_to_ir.h"],
+    deps = [
+        ":block_builder",
+        ":ir_context",
+        ":module",
+        ":ssa_names",
+        ":value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+        "//src/ir/attributes:string_attribute",
+        "//src/ir/proto:ir_cc_proto",
+        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_library(
+    name = "ir_to_proto",
+    srcs = ["ir_to_proto.cc"],
+    hdrs = ["ir_to_proto.h"],
+    deps = [
+        ":ir_context",
+        ":module",
+        ":ssa_names",
+        ":value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+        "//src/ir/attributes:string_attribute",
+        "//src/ir/proto:ir_cc_proto",
+        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_test(
+    name = "ir_to_proto_test",
+    srcs = ["ir_to_proto_test.cc"],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    deps = [
+        ":ir_printer",
+        ":ir_to_proto",
+        ":proto_to_ir",
+        "//src/common/proto:proto_message_differencer",
+        "//src/common/proto:protobuf",
+        "//src/common/testing:gtest",
+        "//src/ir/proto:ir_cc_proto",
+        "//src/parser/ir:ir_parser",
     ],
 )
