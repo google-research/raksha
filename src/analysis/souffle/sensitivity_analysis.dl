@@ -1,8 +1,8 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_SENSITIVITY_ANALYSIS_DL_
 #define SRC_ANALYSIS_SOUFFLE_SENSITIVITY_ANALYSIS_DL_
 
-// this file defines the calculations for sensitivity analysis
-// to be used in dp calculations
+// This file defines the calculations for sensitivity analysis
+// to be used in dp calculations.
 #include "src/analysis/souffle/taint.dl"
 #include "src/analysis/souffle/sql_output.dl"
 
@@ -84,10 +84,10 @@ sqlValueSensitivity(value, sensitivity_score) :-
       isSqlOperation(operation),
       operationHasOperator(operation, operator),
       operationHasResult(operation, value),
-      sqlFunctionSensitivity(operator, function_sensitvity),
+      sqlFunctionSensitivity(operator, function_sensitivity),
       operationOperandListLength(operation, input_list_length),
       sqlOperationHasSensitivityScoreAtIndex(operation, input_sensitivity, input_list_length-1),
-      sensitivity_score = input_sensitivity * function_sensitvity.
+      sensitivity_score = input_sensitivity * function_sensitivity.
 
 // Keeping track of sensitivity score per each input at index, where index is the depth from
 // initial inputs. This relation is used to calculate the maximum input sensitivity.
@@ -96,7 +96,7 @@ sqlValueSensitivity(value, sensitivity_score) :-
 .decl sqlOperationHasSensitivityScoreAtIndex(operation: Operation, sensitivity_score: SensitivityScore, index: number)
 
 // Base cases (index 0).
-// Sesnitivity score for initial inputs is 1.
+// Sensitivity score for initial inputs is 1.
 sqlOperationHasSensitivityScoreAtIndex(operation, 1, 0) :- isSqlOperation(operation),
       operationHasOperandAtIndex(operation, sql_input, 0),
       isInitialInput(sql_input).
@@ -118,7 +118,7 @@ sqlOperationHasSensitivityScoreAtIndex(operation, max(prev_sensitivity_score, in
   sqlOperationHasSensitivityScoreAtIndex(operation, prev_sensitivity_score, prev_index).
 
 // Function sensitivity scores per each sql operator as defined in PINQ
-// TODO: add other cases
+// TODO(sejfia): add other cases
 .decl sqlFunctionSensitivity(operator: Operator, sensitivity_score: SensitivityScore)
 
 sqlFunctionSensitivity(operator, 1) :-
