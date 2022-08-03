@@ -21,6 +21,36 @@
 # it wants to stop the commit.
 
 RETURN="0"
+SOURCE_FILES_PATTERNS=(
+  # Exclude documentation.
+  ':!*.md'
+  ':!**/README'
+
+  # Exclude data/input files.
+  ':!*.arcs'
+  ':!*.facts'
+  ':!*.csv'
+  ':!*.txt'
+
+  # Exclude test files.
+  ':!*.authlogic'
+  ':!*.raksha'
+  ':!*.ir'
+
+  # Exclude (generated) build and config files.
+  ':(exclude,glob).*'
+  ':!*.bazel'
+  ':!*.yaml'
+  ':(exclude,top)WORKSPACE'
+  ':(exclude,top)Dockerfile'
+
+  # Exclude special case files and directories.
+  ':(exclude,top)build_defs'
+  ':(exclude,top)third_party'
+  ':(exclude,top)images'
+  ':(exclude,top)gcb'
+  ':(exclude,top)rust'
+)
 
 error() {
   RETURN="1"
@@ -31,7 +61,7 @@ check_file_for_missing_license() {
   if [ -d $file ]; then
     return # This is a directory
   fi
-  header=$(grep -E "LICENSE" $file)
+  header=$(grep -E "https?:.*LICENSE" $file)
   if [ ! "$header" == "" ]; then
     # TODO: Check that the year of the license is correct.
     return # There was a LICENSE found.
@@ -55,14 +85,8 @@ check_changed_files_for_missing_license() {
   done
 }
 
-check_all_for_missing_license() {
-  for file in $(git ls-files); do
-    check_file_for_missing_license $file
-  done
-}
-
-check_source_for_missing_license() {
-  for file in $(git ls-files | grep -E -v "(\.md|\.arcs|\.bazel|\.dl|\.facts|\.csv|\.txt|\.yaml|\.authlogic|\.raksha|\.ir)" | grep -E -v "(WORKSPACE|build_defs|Dockerfile|third_party|images|gcb|rust)" | grep -E -v "^\."); do
+check_files_for_missing_license() {
+  for file in $(git ls-files -- $@); do
     check_file_for_missing_license $file
   done
 }
@@ -78,11 +102,11 @@ case $CMD in
     ;;
   all ) # Used for manually checking 'all' files.
     echo "Checking licenses in all tracked files..."
-    check_all_for_missing_license
+    check_files_for_missing_license "."
     ;;
   source ) # Used for manually checking 'source' files.
     echo "Checking licenses in 'source' files..."
-    check_source_for_missing_license
+    check_files_for_missing_license ${SOURCE_FILES_PATTERNS[@]}
     ;;
   help )
     cat << EOF
