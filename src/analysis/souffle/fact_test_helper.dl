@@ -55,7 +55,7 @@ ownsTag(principal, tag) :- isPrincipal(principal), isTag(tag).
 // All recipes with a TEST_CASE head shall be seen as a condition that must be met for the test to
 // pass.
 #define TEST_CASE(test_aspect_name) \
-  allTestsAndCaseNum(test_aspect_name, $ /*autoinc*/) :- 1 = 1. \
+  allTestsAndCaseNum(test_aspect_name, autoinc()) :- 1 = 1. \
   testPasses(test_aspect_name)
 
 #define CHECK_TAG_PRESENT(access_path, owner, tag) \
