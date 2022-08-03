@@ -41,9 +41,9 @@ rules_proto_grpc_cpp_repos()
 #--------------------
 http_archive(
     name = "rules_foreign_cc",
-    sha256 = "6041f1374ff32ba711564374ad8e007aef77f71561a7ce784123b9b4b88614fc",
-    strip_prefix = "rules_foreign_cc-0.8.0",
-    url = "https://github.com/bazelbuild/rules_foreign_cc/archive/refs/tags/0.8.0.tar.gz",
+    sha256 = "e14a159c452a68a97a7c59fa458033cc91edb8224516295b047a95555140af5f",
+    strip_prefix = "rules_foreign_cc-0.4.0",
+    url = "https://github.com/bazelbuild/rules_foreign_cc/archive/0.4.0.tar.gz",
 )
 
 load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
