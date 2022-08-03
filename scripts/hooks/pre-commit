@@ -66,6 +66,10 @@ check_file_for_missing_license() {
     # TODO: Check that the year of the license is correct.
     return # There was a LICENSE found.
   fi
+  generated_file=$(grep -E "^// GENERATED FILE, DO NOT EDIT!$" $file)
+  if [ ! "$generated_file" == "" ]; then
+    return # This is a generated file and should not be updated.
+  fi
   year=$(git log "$file" | head -n 1 | cut -d' ' -f 6)
   if [ -z $year ]; then
     year="<unknown>"
