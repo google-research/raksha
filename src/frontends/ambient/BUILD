@@ -19,6 +19,10 @@ load(
     "gen_souffle_cxx_code",
     "souffle_cc_library",
 )
+load(
+    "//src/analysis/souffle:dl_file_lists.bzl",
+    "core_dl_files",
+)
 
 licenses(["notice"])
 
@@ -58,14 +62,7 @@ genrule(
 gen_souffle_cxx_code(
     name = "policy_checker_cxx",
     src = ":multimic_disallowed_usage_dl",
-    included_dl_scripts = [
-        "//src/analysis/souffle:attributes.dl",
-        "//src/analysis/souffle:authorization_logic.dl",
-        "//src/analysis/souffle:check_predicate.dl",
-        "//src/analysis/souffle:dataflow_graph.dl",
-        "//src/analysis/souffle:operations.dl",
-        "//src/analysis/souffle:taint.dl",
-        "//src/analysis/souffle:tags.dl",
+    included_dl_scripts = core_dl_files + [
         "//src/analysis/souffle:may_will.dl",
     ],
 )

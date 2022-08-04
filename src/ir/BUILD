@@ -72,7 +72,7 @@ cc_test(
 cc_library(
     name = "ir_context",
     hdrs = ["ir_context.h"],
-    visibility = ["//src:__subpackages__"] + frontend_packages,
+    visibility = ["//:__subpackages__"] + frontend_packages,
     deps = [
         ":module",
         ":operator",

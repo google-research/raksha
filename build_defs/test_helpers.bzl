@@ -15,6 +15,7 @@
 #----------------------------------------------------------------------------
 
 load("//build_defs:souffle.bzl", "gen_souffle_cxx_code", "souffle_cc_library")
+load("//src/analysis/souffle:dl_file_lists.bzl", "core_dl_files_plus_fact_test_helper")
 
 def extracted_datalog_string_test(
         name,
@@ -65,16 +66,7 @@ def extracted_datalog_string_test(
         name = name + "_cxx",
         src = name + "_dl",
         for_test = True,
-        included_dl_scripts = [
-            "//src/analysis/souffle:attributes.dl",
-            "//src/analysis/souffle:authorization_logic.dl",
-            "//src/analysis/souffle:check_predicate.dl",
-            "//src/analysis/souffle:dataflow_graph.dl",
-            "//src/analysis/souffle:operations.dl",
-            "//src/analysis/souffle:taint.dl",
-            "//src/analysis/souffle:tags.dl",
-            "//src/analysis/souffle:fact_test_helper.dl",
-        ],
+        included_dl_scripts = core_dl_files_plus_fact_test_helper,
     )
 
     souffle_cc_library(

@@ -21,6 +21,12 @@ load(
     "souffle_cc_binary",
     "souffle_cc_library",
 )
+load(
+    "//src/analysis/souffle:dl_file_lists.bzl",
+    "core_dl_files",
+    "core_dl_files_except_taint",
+    "core_dl_files_plus_fact_test_helper_local",
+)
 
 package(
     default_visibility = ["//src:__subpackages__"],
@@ -50,29 +56,14 @@ cc_test(
 gen_souffle_cxx_code(
     name = "taint_cxx",
     src = "taint.dl",
-    included_dl_scripts = [
-        "attributes.dl",
-        "authorization_logic.dl",
-        "check_predicate.dl",
-        "dataflow_graph.dl",
-        "operations.dl",
-        "tags.dl",
-    ],
+    included_dl_scripts = core_dl_files_except_taint,
 )
 
 gen_souffle_cxx_code(
     name = "tag_check_and_expectation_for_test",
     src = "tag_check_and_expectation_interface.dl",
     for_test = True,
-    included_dl_scripts = [
-        "attributes.dl",
-        "authorization_logic.dl",
-        "check_predicate.dl",
-        "dataflow_graph.dl",
-        "operations.dl",
-        "tags.dl",
-        "taint.dl",
-    ],
+    included_dl_scripts = core_dl_files,
 )
 
 souffle_cc_binary(
@@ -81,20 +72,16 @@ souffle_cc_binary(
     src = ":tag_check_and_expectation_for_test",
 )
 
+sql_dl_files = core_dl_files + [
+    "sql_output.dl",
+    "tag_transforms.dl",
+]
+
 gen_souffle_cxx_code(
     name = "sql_verifier_tag_unit_test_for_test",
     src = "sql_verifier_tag_unit_test_interface.dl",
     for_test = True,
-    included_dl_scripts = [
-        "attributes.dl",
-        "authorization_logic.dl",
-        "check_predicate.dl",
-        "dataflow_graph.dl",
-        "operations.dl",
-        "tag_transforms.dl",
-        "tags.dl",
-        "taint.dl",
-    ],
+    included_dl_scripts = sql_dl_files,
 )
 
 souffle_cc_binary(
@@ -107,17 +94,8 @@ gen_souffle_cxx_code(
     name = "sensitivity_analysis_test_for_test",
     src = "sensitivity_analysis_unit_test_interface.dl",
     for_test = True,
-    included_dl_scripts = [
-        "attributes.dl",
-        "authorization_logic.dl",
-        "check_predicate.dl",
-        "dataflow_graph.dl",
-        "operations.dl",
+    included_dl_scripts = sql_dl_files + [
         "sensitivity_analysis.dl",
-        "sql_output.dl",
-        "tag_transforms.dl",
-        "tags.dl",
-        "taint.dl",
     ],
 )
 
@@ -130,17 +108,7 @@ souffle_cc_binary(
 gen_souffle_cxx_code(
     name = "sql_verifier_unit_test_code",
     src = "sql_verifier_unit_test_interface.dl",
-    included_dl_scripts = [
-        "attributes.dl",
-        "authorization_logic.dl",
-        "check_predicate.dl",
-        "dataflow_graph.dl",
-        "operations.dl",
-        "sql_output.dl",
-        "tag_transforms.dl",
-        "tags.dl",
-        "taint.dl",
-    ],
+    included_dl_scripts = sql_dl_files,
 )
 
 souffle_cc_binary(
@@ -151,18 +119,9 @@ souffle_cc_binary(
 gen_souffle_cxx_code(
     name = "datalog_policy_verifier_cxx",
     src = "policy_verifier_interface.dl",
-    included_dl_scripts = [
-        "attributes.dl",
-        "authorization_logic.dl",
-        "check_predicate.dl",
-        "dataflow_graph.dl",
+    included_dl_scripts = sql_dl_files + [
         "epsilon_analysis.dl",
-        "operations.dl",
         "sensitivity_analysis.dl",
-        "sql_output.dl",
-        "tag_transforms.dl",
-        "tags.dl",
-        "taint.dl",
     ],
 )
 
@@ -176,14 +135,6 @@ souffle_cc_library(
     src = ":taint_cxx",
 )
 
-exports_files([
-    "attributes.dl",
-    "authorization_logic.dl",
-    "check_predicate.dl",
-    "dataflow_graph.dl",
-    "fact_test_helper.dl",
-    "operations.dl",
-    "tags.dl",
-    "taint.dl",
+exports_files(core_dl_files_plus_fact_test_helper_local + [
     "may_will.dl",
 ])
