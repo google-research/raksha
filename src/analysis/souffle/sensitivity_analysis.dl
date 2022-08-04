@@ -9,18 +9,26 @@
 #define CORE_INPUT_OPERATOR as("core.input", Operator)
 #define SQL_WHERE_OPERATOR as("sql.where", Operator)
 #define SQL_GROUP_BY_OPERATOR as("sql.group_by", Operator)
+#define SQL_ORDER_BY_OPERATOR as("sql.order_by", Operator)
 #define SQL_SELECT_OPERATOR as("sql.select", Operator)
+#define SQL_SELECT_DISTINCT_OPERATOR as("sql.select_distinct", Operator)
 #define SQL_FILTER_OPERATOR as("sql.filter", Operator)
 #define SQL_COLUMN_ACCESS_OPERATOR as("sql.column_access", Operator)
 #define SQL_OUTPUT_OPERATOR as("sql.output", Operator)
 #define SQL_SUM_OPERATOR as("sql.sum", Operator)
 #define SQL_COUNT_OPERATOR as("sql.count", Operator)
 #define SQL_MAX_OPERATOR as("sql.max", Operator)
+#define SQL_MIN_OPERATOR as("sql.min", Operator)
 #define SQL_AVERAGE_OPERATOR as("sql.average", Operator)
+#define SQL_MEDIAN_OPERATOR as("sql.median", Operator)
+#define SQL_STDDEV_OPERATOR as("sql.stddev", Operator)
+#define SQL_PERCENTILE_CONT_OPERATOR as("sql.percentile_cont", Operator)
+#define SQL_VARIANCE_OPERATOR as("sql.variance", Operator)
 
 .type SensitivityScore <: number
 
-// One isSqlOperator fact per each sql operator, currently supporting one output.
+// One isSqlOperation fact per each sql operator,
+// currently supporting one output.
 // We refer to results as 'value' (sqlValue declared below)
 .decl isSqlOperation(sqlOperation: Operation)
 isSqlOperation(operation) :- isOperation(operation),
@@ -32,6 +40,9 @@ isTransformationOperator(SQL_WHERE_OPERATOR).
 isTransformationOperator(SQL_GROUP_BY_OPERATOR).
 isTransformationOperator(SQL_FILTER_OPERATOR).
 isTransformationOperator(SQL_SELECT_OPERATOR).
+isTransformationOperator(SQL_SELECT_DISTINCT_OPERATOR).
+isTransformationOperator(SQL_GROUP_BY_OPERATOR).
+isTransformationOperator(SQL_ORDER_BY_OPERATOR).
 
 // Transformation operations may come before aggregation operations.
 // Their sensitivity score varies based on their output.
@@ -45,6 +56,13 @@ isAggregationOperator(SQL_SUM_OPERATOR).
 isAggregationOperator(SQL_AVERAGE_OPERATOR).
 isAggregationOperator(SQL_COUNT_OPERATOR).
 isAggregationOperator(SQL_MAX_OPERATOR).
+isAggregationOperator(SQL_MIN_OPERATOR).
+isAggregationOperator(SQL_AVERAGE_OPERATOR).
+isAggregationOperator(SQL_MEDIAN_OPERATOR).
+isAggregationOperator(SQL_STDDEV_OPERATOR).
+isAggregationOperator(SQL_PERCENTILE_CONT_OPERATOR).
+isAggregationOperator(SQL_VARIANCE_OPERATOR).
+
 // Aggregation operations point to where noise needs to be added.
 .decl isAggregationOperation(sql_operation: Operation)
 isAggregationOperation(operation) :- isSqlOperation(operation),
@@ -129,6 +147,8 @@ sqlFunctionSensitivity(SQL_WHERE_OPERATOR, 1).
 sqlFunctionSensitivity(SQL_SELECT_OPERATOR, 1).
 sqlFunctionSensitivity(SQL_COLUMN_ACCESS_OPERATOR, 1).
 sqlFunctionSensitivity(SQL_OUTPUT_OPERATOR, 1).
+sqlFunctionSensitivity(SQL_ORDER_BY_OPERATOR, 1).
+sqlFunctionSensitivity(SQL_SELECT_DISTINCT_OPERATOR, 2).
 sqlFunctionSensitivity(SQL_GROUP_BY_OPERATOR, 2).
 
 #endif // SRC_SOUFFLE_ANALYSIS_SENSITIVITY_ANALYSIS_DL_

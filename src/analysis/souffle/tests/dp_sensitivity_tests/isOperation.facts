@@ -1,5 +1,8 @@
 ["template_owner", "sql.where", "revenue_table_where1", ["revenue_table", nil], nil]
+["template_owner", "sql.order_by", "revenue_table_order_by", ["revenue_table", nil], nil]
 ["template_owner", "sql.group_by", "revenue_table_group_by", ["revenue_table", nil], nil]
 ["template_owner", "sql.where", "revenue_table_where2", ["revenue_table", nil], nil]
 ["template_owner", "sql.select", "user", ["revenue_table_where1", ["revenue_table_group_by", ["revenue_table_where2", nil]]], nil]
 ["template_owner", "sql.select", "address", ["revenue_table_where1", ["revenue_table_group_by", nil]], nil]
+["template_owner", "sql.select_distinct", "location", ["revenue_table_where1", ["revenue_table_group_by", nil]], nil]
+
