@@ -67,6 +67,10 @@ INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
   block b1 {
     %2 = core.plus [access: "private", transform: "no"](%3, <<ANY>>)
     %3 = core.mult [access: "private", transform: 45](%3, %2)
+    %4 = core.floating_value [value: 8]()
+    %5 = core.floating_value [value: 1]()
+    %6 = core.mult_floating [access: "private", transform: "no"](%4, %5)
+    %4 = core.floating_value [value: 8]()
   }  // block b1
 }  // module m0
 )",
@@ -78,6 +82,7 @@ INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
   block b1 {
     %2 = core.plus [access: "private", transform: "no"](%3, <<ANY>>)
     %3 = core.mult [lhs: 10, rhs: "59"](<<ANY>>, %2)
+    %4 = core.mult_floating [lhs: 3l, rhs: -0.5l]()
   }  // block b1
 }  // module m0
 )",

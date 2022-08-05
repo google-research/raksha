@@ -17,8 +17,6 @@
 #define SRC_IR_IR_TO_PROTO_H_
 
 #include "src/ir/attributes/attribute.h"
-#include "src/ir/attributes/int_attribute.h"
-#include "src/ir/attributes/string_attribute.h"
 #include "src/ir/ir_context.h"
 #include "src/ir/module.h"
 #include "src/ir/proto/raksha_ir.pb.h"
