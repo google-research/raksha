@@ -66,7 +66,7 @@ TEST_P(OperationTest, AccessorsAndToStringReturnCorrectValue) {
   EXPECT_EQ(&operation.op(), op);
   EXPECT_EQ(operation.attributes(), attributes);
   EXPECT_EQ(operation.inputs(), inputs);
-  EXPECT_THAT(string_reps, testing::Eq(IRPrinter::ToString(operation)));
+  EXPECT_EQ(IRPrinter::ToString(operation), string_reps);
 }
 
 INSTANTIATE_TEST_SUITE_P(
