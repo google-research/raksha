@@ -24,7 +24,8 @@ RETURN="0"
 SOURCE_FILES_PATTERNS=(
   # Exclude documentation.
   ':!*.md'
-  ':!**/README'
+  ':!README'
+  ':!LICENSE'
 
   # Exclude data/input files.
   ':!*.arcs'
@@ -63,7 +64,10 @@ check_file_for_missing_license() {
   fi
   has_google_copyright=$(grep -E "Copyright 20[0-9][0-9] Google LLC" $file)
   if [ ! "$has_google_copyright" == "" ]; then
-    # TODO: Check that the year of the license is correct.
+    return # There was a LICENSE found.
+  fi
+  has_bazel_copyright=$(grep -E "Copyright 20[0-9][0-9] The Bazel Authors. All rights reserved." $file)
+  if [ ! "$has_bazel_copyright" == "" ]; then
     return # There was a LICENSE found.
   fi
   generated_file=$(grep -E "^// GENERATED FILE, DO NOT EDIT!$" $file)
