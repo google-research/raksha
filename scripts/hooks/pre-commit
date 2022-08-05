@@ -1,0 +1,139 @@
+#!/bin/sh
+#-------------------------------------------------------------------------------
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#-------------------------------------------------------------------------------
+#
+# Called by "git commit" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message if
+# it wants to stop the commit.
+
+RETURN="0"
+SOURCE_FILES_PATTERNS=(
+  # Exclude documentation.
+  ':!*.md'
+  ':!README'
+  ':!LICENSE'
+
+  # Exclude data/input files.
+  ':!*.arcs'
+  ':!*.facts'
+  ':!*.csv'
+  ':!*.txt'
+
+  # Exclude test files.
+  ':!*.authlogic'
+  ':!*.raksha'
+  ':!*.ir'
+
+  # Exclude (generated) build and config files.
+  ':(exclude,glob).*'
+  ':!*.bazel'
+  ':!*.yaml'
+  ':(exclude,top)WORKSPACE'
+  ':(exclude,top)Dockerfile'
+
+  # Exclude special case files and directories.
+  ':(exclude,top)build_defs'
+  ':(exclude,top)third_party'
+  ':(exclude,top)images'
+  ':(exclude,top)gcb'
+  ':(exclude,top)rust'
+)
+
+error() {
+  RETURN="1"
+  echo -e "$1"
+}
+
+check_file_for_missing_license() {
+  if [ -d $file ]; then
+    return # This is a directory
+  fi
+  has_google_copyright=$(grep -E "Copyright 20[0-9][0-9] Google LLC" $file)
+  if [ ! "$has_google_copyright" == "" ]; then
+    return # There was a LICENSE found.
+  fi
+  has_bazel_copyright=$(grep -E "Copyright 20[0-9][0-9] The Bazel Authors. All rights reserved." $file)
+  if [ ! "$has_bazel_copyright" == "" ]; then
+    return # There was a LICENSE found.
+  fi
+  generated_file=$(grep -E "^// GENERATED FILE, DO NOT EDIT!$" $file)
+  if [ ! "$generated_file" == "" ]; then
+    return # This is a generated file and should not be updated.
+  fi
+  year=$(git log "$file" | tail -n 1 | cut -d' ' -f 6)
+  if [ -z $year ]; then
+    year="<unknown>"
+  fi
+  error "UNKNOWN OR MISSING LICENSE in $file  First tracked in $year"
+}
+
+check_changed_files_for_missing_license() {
+  if git rev-parse --verify HEAD >/dev/null 2>&1; then
+    against=HEAD
+  else
+    # Initial commit: diff against an empty tree object
+    against=$(git hash-object -t tree /dev/null)
+  fi
+  for file in $(git diff --cached --name-only --diff-filter=ACMR -z $against | tr '\0' '\n'); do
+    check_file_for_missing_license $file
+  done
+}
+
+check_files_for_missing_license() {
+  for file in $(git ls-files -- $@); do
+    check_file_for_missing_license $file
+  done
+}
+
+# Redirect output to stderr.
+exec 1>&2
+
+CMD=$1
+case $CMD in
+  "" ) # Default pre-commit check.
+    echo "Checking licenses in changed files..."
+    check_changed_files_for_missing_license
+    ;;
+  all ) # Used for manually checking 'all' files.
+    echo "Checking licenses in all tracked files..."
+    check_files_for_missing_license "."
+    ;;
+  source ) # Used for manually checking 'source' files.
+    echo "Checking licenses in 'source' files..."
+    check_files_for_missing_license ${SOURCE_FILES_PATTERNS[@]}
+    ;;
+  help )
+    cat << EOF
+Checks all changed files for missing licenses.
+
+USAGE:
+    pre-commit [all|source|help]
+
+COMMANDS:
+    all   	Check all tracked files, instead of only changed files.
+    source	Check all tracked source files, instead of only changed files.
+    help  	Prints this help message.
+EOF
+    exit 1
+    ;;
+  *)
+    echo -e "pre-commit: unexpected command -- '$CMD'.\nTry 'pre-commit help' for more information."
+    exit 1
+esac
+
+echo "Done."
+exit "$RETURN"
