@@ -22,7 +22,8 @@ grammar Ir;
 
 stringLiteral : NUMLITERAL | ID;
 attribute
-    : ID ':' NUMLITERAL #numAttribute
+    : ID ':' DOUBLELITERAL #doubleAttribute
+    | ID ':' NUMLITERAL #numAttribute
     | ID ':' '"'stringLiteral'"' #stringAttribute
     ;
 attributeList
@@ -36,7 +37,7 @@ argumentList
     : value (',' value)*
     ;
 operation
-    : VALUE_ID '=' ID '['(attributeList)?']''('(argumentList)?')'
+    : VALUE_ID '=' ID '['attributeList?']''('argumentList?')'
     ;
 block
     : BLOCK ID '{' (operation)+ '}'
@@ -57,10 +58,14 @@ ANY: '<<ANY>>';
 BLOCK: 'block';
 MODULE: 'module';
 
-
+SIGN : '+' | '-';
 NUMLITERAL : [0-9]+;
+FRACTIONAL_PART : '.' [0-9]*;
+EXPONENT: ('e'|'E') SIGN? [0-9]+;
+DOUBLELITERAL : SIGN? NUMLITERAL FRACTIONAL_PART? EXPONENT? ('l' | 'f');
+
 ID : [0-9_a-zA-Z/.]+;
-VALUE_ID : ('%')? ID;
+VALUE_ID : '%'? ID;
 
 
 WHITESPACE_IGNORE

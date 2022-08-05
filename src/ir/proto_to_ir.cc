@@ -20,6 +20,7 @@
 #include <variant>
 #include <optional>
 
+#include "src/ir/attributes/double_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 
@@ -248,6 +249,9 @@ value::OperationResult ProtoToIR::ToIR(
 }
 
 Attribute ProtoToIR::ToIR(const proto::AttributePayload& attribute_payload) {
+  if (attribute_payload.has_double_payload()) {
+    return Attribute::Create<DoubleAttribute>(attribute_payload.double_payload());
+  }
   if (attribute_payload.has_int64_payload()) {
     return Attribute::Create<Int64Attribute>(attribute_payload.int64_payload());
   }

@@ -40,9 +40,30 @@ cc_test(
     deps = [
         ":attribute",
         ":int_attribute",
+        ":double_attribute",
         ":string_attribute",
         "//src/common/testing:gtest",
         "//src/common/utils:intrusive_ptr",
+    ],
+)
+
+cc_library(
+    name = "double_attribute",
+    hdrs = ["double_attribute.h"],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
+    deps = [
+        ":attribute",
+        "//src/common/utils:intrusive_ptr",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "double_attribute_test",
+    srcs = ["double_attribute_test.cc"],
+    deps = [
+        ":double_attribute",
+        "//src/common/testing:gtest",
     ],
 )
 

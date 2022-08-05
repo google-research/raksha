@@ -17,6 +17,7 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/attributes/double_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/ir_printer.h"
@@ -90,9 +91,10 @@ INSTANTIATE_TEST_SUITE_P(
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"const1", Attribute::Create<StringAttribute>("a")},
-                            {"const2", Attribute::Create<Int64Attribute>(42)}},
+                            {"const2", Attribute::Create<Int64Attribute>(42)},
+                            {"const3", Attribute::Create<DoubleAttribute>(3.1415)}},
                            {},
-                           "%0 = core.minus [const1: \"a\", const2: 42]()\n"}),
+                           "%0 = core.minus [const1: \"a\", const2: 42, const3: 3.1415]()\n"}),
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"const", Attribute::Create<Int64Attribute>(10)}},
