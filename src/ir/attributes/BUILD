@@ -41,6 +41,7 @@ cc_test(
         ":attribute",
         ":double_attribute",
         ":int_attribute",
+        ":double_attribute",
         ":string_attribute",
         "//src/common/testing:gtest",
         "//src/common/utils:intrusive_ptr",

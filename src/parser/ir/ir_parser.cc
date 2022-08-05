@@ -93,6 +93,19 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
       }
       auto* num_attribute_context =
           dynamic_cast<IrParser::NumAttributeContext*>(attribute_context);
+      if (auto* double_attribute_context =
+              dynamic_cast<IrParser::DoubleAttributeContext*>(
+                  attribute_context)) {
+          double parsed_double = 0;
+          auto text = CHECK_NOTNULL(double_attribute_context)->DOUBLELITERAL()->getText();
+          // Discard the suffix (l or f).
+          auto text_without_suffix = std::string(text.begin(), text.end()-1);
+          bool conversion_succeeds = absl::SimpleAtod(text_without_suffix, &parsed_double);
+          CHECK(conversion_succeeds == true);
+          attributes.insert({CHECK_NOTNULL(double_attribute_context)->ID()->getText(),
+                             Attribute::Create<DoubleAttribute>(parsed_double)});
+        continue;
+      }
       int64_t parsed_int = 0;
       bool conversion_succeeds = absl::SimpleAtoi(
           CHECK_NOTNULL(num_attribute_context)->NUMLITERAL()->getText(),
