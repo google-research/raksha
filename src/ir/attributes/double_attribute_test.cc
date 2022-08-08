@@ -35,9 +35,9 @@ TEST_P(DoubleAttributeTest, KindAndToStringWorks) {
 }
 
 INSTANTIATE_TEST_SUITE_P(DoubleAttributeTest, DoubleAttributeTest,
-                         testing::Values(std::make_pair(10.5, "10.5"),
-                                         std::make_pair(-30.01, "-30.01"),
-                                         std::make_pair(0.999, "0.999")));
+                         testing::Values(std::make_pair(10.5, "10.5l"),
+                                         std::make_pair(-30.01, "-30.01l"),
+                                         std::make_pair(0.999, "0.999l")));
 
 constexpr double kExampleDoubles[] = {10.5, -30.01, 0.999};
 

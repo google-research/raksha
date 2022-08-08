@@ -94,7 +94,7 @@ INSTANTIATE_TEST_SUITE_P(
                             {"const2", Attribute::Create<Int64Attribute>(42)},
                             {"const3", Attribute::Create<DoubleAttribute>(3.1415)}},
                            {},
-                           "%0 = core.minus [const1: \"a\", const2: 42, const3: 3.1415]()\n"}),
+                           "%0 = core.minus [const1: \"a\", const2: 42, const3: 3.1415l]()\n"}),
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"const", Attribute::Create<Int64Attribute>(10)}},
