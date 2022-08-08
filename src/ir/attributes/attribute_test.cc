@@ -17,6 +17,7 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/intrusive_ptr.h"
+#include "src/ir/attributes/double_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 
@@ -40,6 +41,13 @@ TYPED_TEST_SUITE(AttributeTest, AttributeTypes);
 //   - A directly created instance of `intrusive_ptr<T>`, which is used to
 //     compare against the value returned by Attribute::As<T>().
 //
+template <>
+std::pair<Attribute, intrusive_ptr<const DoubleAttribute>>
+CreateTestAttribute() {
+  return std::make_pair(Attribute::Create<DoubleAttribute>(0.31415),
+                        DoubleAttribute::Create(0.31415));
+}
+
 template <>
 std::pair<Attribute, intrusive_ptr<const Int64Attribute>>
 CreateTestAttribute() {
@@ -75,7 +83,11 @@ AttributeWithId kExampleAttributes[] = {
     AttributeWithId(1, Attribute::Create<Int64Attribute>(10)),
     AttributeWithId(1, Attribute::Create<Int64Attribute>(10)),
     AttributeWithId(2, Attribute::Create<StringAttribute>("World")),
-    AttributeWithId(3, Attribute::Create<Int64Attribute>(30))};
+    AttributeWithId(3, Attribute::Create<Int64Attribute>(30)),
+    AttributeWithId(4, Attribute::Create<DoubleAttribute>(0.3)),
+    AttributeWithId(4, Attribute::Create<DoubleAttribute>(0.3)),
+    AttributeWithId(5, Attribute::Create<DoubleAttribute>(-0.3)),
+};
 
 INSTANTIATE_TEST_SUITE_P(
     AttributeEqualityTest, AttributeEqualityTest,
@@ -87,11 +99,15 @@ TYPED_TEST(AttributeTest, ConstructorAndAsConversionWorksCorrectly) {
   intrusive_ptr<const TypeParam> expected_typed_attribute =
       attr.template GetIf<TypeParam>();
   ASSERT_NE(expected_typed_attribute, nullptr);
-  // TODO(#336): Replace `ToString` with comparator.
-  EXPECT_EQ(expected_typed_attribute->ToString(), typed_attribute->ToString());
+  EXPECT_EQ(*expected_typed_attribute, *typed_attribute);
 }
 
-TEST(AttributeAsMethodTest, IncorrectTypeReturnsNullptr) {
+TEST(AttributeAsMethodTest, IncorrectTypeReturnsNullptrDoubleIsNotString) {
+  auto [double_attribute, _] = CreateTestAttribute<DoubleAttribute>();
+  EXPECT_EQ(double_attribute.GetIf<StringAttribute>(), nullptr);
+}
+
+TEST(AttributeAsMethodTest, IncorrectTypeReturnsNullptrIntIsNotString) {
   auto [int_attribute, _] = CreateTestAttribute<Int64Attribute>();
   EXPECT_EQ(int_attribute.GetIf<StringAttribute>(), nullptr);
 }
