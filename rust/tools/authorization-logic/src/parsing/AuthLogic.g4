@@ -25,20 +25,26 @@ grammar AuthLogic;
 //-----------------------------------------------------------------------------
 // Parser
 //-----------------------------------------------------------------------------
+id 
+    : CONSTANT
+    | MULTILINE_CONSTANT 
+    | VARIABLE
+    ; 
+
 // Principals are only superficially syntactically distinct from IDs at the
 // moment, but they are separate syntactic objects because the principal
 // syntax could plausibly change later.
 principal
-    : ID
+    : id 
     ;
 
 pred_arg
-    : ID
+    : id
     | NUMLITERAL
     ;
 
 predicate
-    : (NEG)? ID '(' pred_arg (',' pred_arg )* ')'
+    : (NEG)? id '(' pred_arg (',' pred_arg )* ')'
     ;
 
 verbphrase
@@ -82,33 +88,33 @@ assertion
 // The IDs following "Export" are path names where JSON files containing
 // private or public keys are stored
 saysAssertion
-    : principal SAYS assertion (EXPORT ID)? #saysSingle
-    | principal SAYS '{' assertion+ '}' (EXPORT ID)?  #saysMulti
+    : principal SAYS assertion (EXPORT id)? #saysSingle
+    | principal SAYS '{' assertion+ '}' (EXPORT id)?  #saysMulti
     ;
 
 keyBind
-    : BINDEX principal ID #bindpriv
-    | BINDIM principal ID #bindpub
+    : BINDEX principal id #bindpriv
+    | BINDIM principal id #bindpub
     ;
 
 query
-    : ID '=' QUERY principal SAYS fact '?'
+    : id '=' QUERY principal SAYS fact '?'
     ;
 
 // The ID here refers to a filename containing a signed policy statement.
 importAssertion
-    : IMPORT principal SAYS ID
+    : IMPORT principal SAYS id
     ;
 
 // The name "type" would cause name collisions in the code that antlr generates
 authLogicType
     : NUMBERTYPE #numberType
     | PRINCIPALTYPE #principalType
-    | ID #customType
+    | id #customType
     ;
 
 relationDeclaration
-    : '.decl' ATTRIBUTE? ID '(' ID ':' authLogicType (',' ID ':' authLogicType)* ')'
+    : '.decl' ATTRIBUTE? id '(' VARIABLE ':' authLogicType (',' VARIABLE ':' authLogicType)* ')'
     ;
 
 program
@@ -139,7 +145,9 @@ ATTRIBUTE: 'attribute';
 
 // Identifiers wrapped in quotes are constants whereas
 // identifiers without quotes are variables.
-ID : ('"')? [_a-zA-Z][_a-zA-Z0-9/.#:]* ('"')?;
+VARIABLE : [_a-zA-Z][_a-zA-Z0-9/.#:]*; 
+CONSTANT : '"' [_a-zA-Z][@_a-zA-Z0-9/.#:-]* '"';
+MULTILINE_CONSTANT : '"""' [\n _a-zA-Z+-][\n _a-zA-Z0-9/.#:+=-]* '"""';
 NUMLITERAL : [0-9]+;
 
 NEG: '!';

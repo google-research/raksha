@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Google LLC.
+ * Copyright 2022 Google LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-mod test_claim_importing;
-mod test_export_signatures;
-mod test_queries;
-mod test_signing;
-mod test_decl_skip;
-mod test_dots_and_quotes;
-mod test_hyphen_ids;
-mod test_negation;
-mod test_multimic_no_overrides;
-mod test_multimic_overrides;
-mod test_num_string_names;
-mod test_num_compare;
-mod test_relation_declarations;
-mod test_type_error;
-mod test_multiverse_handling;
+#[cfg(test)]
+mod test {
+    use crate::{
+        compilation_top_level::*, utils::*,
+    };
+
+    #[test]
+    pub fn test_hyphen_ids() {
+        utils::setup_directories_for_bazeltest(vec!["test_inputs"], vec!["test_outputs"]);
+        // The point of this test is to just see if it parses or if an
+        // error is thrown.
+        compile("test_inputs/hyphenIDs",
+                "test_outputs/hyphenIDs.dl",
+                &Vec::new());
+    }
+
+}

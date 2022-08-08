@@ -13,21 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#[cfg(test)]
-mod test {
-    use crate::{
-        compilation_top_level::*, utils::*,
-    };
-
-    #[test]
-    pub fn test_num_string_names() {
-        utils::setup_directories_for_bazeltest(vec!["test_inputs"], vec!["test_outputs"]);
-        // The point of this test is to just see if it parses or if an
-        // error is thrown.
-        compile("test_inputs/numStringsInNames",
-                "test_outputs/numStringsInNames.dl",
-                &Vec::new());
-    }
-
+.decl ourFavoritePublicKeyIs(k : Key)
+.decl ourFavoriteTrustedBuilderIs(b : Builder)
+.decl variablesInsteadOfConstantsWithHyhensAreOKToo(v : TestVariable)
+"OakTeam" says {
+    ourFavoritePublicKeyIs(
+"""-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErnyr7XY6gxXPnqRGYEpv5lDsbBeX
+izVFLckaF/cbgBuzx7kfmf1qi2j+3DDOQYgISQOj9/LYt4c1cxbt+XtG4g==
+-----END PUBLIC KEY-----""").
+    ourFavoriteTrustedBuilderIs("https://github.com/project-oak/transparent-release").
+    ourFavoriteTrustedBuilderIs("https://github.com/Attestations/GitHubHostedActions@v1").
 }
