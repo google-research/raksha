@@ -62,7 +62,14 @@ SIGN : '+' | '-';
 NUMLITERAL : [0-9]+;
 FRACTIONAL_PART : '.' [0-9]*;
 EXPONENT: ('e'|'E') SIGN? [0-9]+;
-DOUBLELITERAL : SIGN? NUMLITERAL FRACTIONAL_PART? EXPONENT? ('l' | 'f');
+DOUBLE_TAIL
+    : (FRACTIONAL_PART EXPONENT? ('l' | 'f')?)
+    | (FRACTIONAL_PART? EXPONENT ('l' | 'f')?)
+    | (FRACTIONAL_PART? EXPONENT? ('l' | 'f'))
+    ;
+
+// Either require a decimal point or an exponent or a trailing suffix (but allow both).
+DOUBLELITERAL : SIGN? NUMLITERAL DOUBLE_TAIL;
 
 ID : [0-9_a-zA-Z/.]+;
 VALUE_ID : '%'? ID;

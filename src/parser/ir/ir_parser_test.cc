@@ -21,9 +21,9 @@
 
 namespace raksha::ir {
 
-class IrParserTest : public testing::TestWithParam<absl::string_view> {};
+class IrParserRoundtripTest : public testing::TestWithParam<absl::string_view> {};
 
-TEST_P(IrParserTest, SimpleTestOperation) {
+TEST_P(IrParserRoundtripTest, SimpleTestOperation) {
   auto input_program_text = GetParam();
   IrProgramParser ir_parser;
   auto result = ir_parser.ParseProgram(input_program_text);
@@ -31,7 +31,7 @@ TEST_P(IrParserTest, SimpleTestOperation) {
             input_program_text);
 }
 
-INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
+INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
                          ::testing::Values(
                              R"(module m0 {
   block b0 {
@@ -97,6 +97,71 @@ INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
   }  // block b1
 }  // module m0
 )"));
+
+struct ParserInputAndExpectedOutput {
+  absl::string_view input;
+  absl::string_view output;
+};
+
+class IrParserNormalizingTest : public testing::TestWithParam<ParserInputAndExpectedOutput> {};
+
+TEST_P(IrParserNormalizingTest, DoublesAreNormalizedInTestOperations) {
+  auto program_text = GetParam();
+  IrProgramParser ir_parser;
+  auto result = ir_parser.ParseProgram(program_text.input);
+  EXPECT_EQ(IRPrinter::ToString(*result.module, *result.ssa_names),
+            program_text.output);
+}
+
+static const ParserInputAndExpectedOutput kNormalizedIR[] = {
+                             {
+                                 .input = R"(module m0 {
+  block b0 {
+    %0 = core.plus []()
+  }  // block b0
+  block b1 {
+  }  // block b1
+}  // module m0
+)",
+                                 .output = R"(module m0 {
+  block b0 {
+    %0 = core.plus []()
+  }  // block b0
+  block b1 {
+  }  // block b1
+}  // module m0
+)",
+                             },
+                             {
+                                 .input = R"(module m0 {
+  block b0 {
+    %0 = core.select []()
+    %1 = core.merge [](<<ANY>>, <<ANY>>)
+  }  // block b0
+  block b1 {
+    %2 = core.plus [access: "private", transform: "no"](%3, <<ANY>>)
+    %3 = core.mult [lhs: 10e0, rhs: "59"](<<ANY>>, %2)
+    %4 = core.mult_floating [lhs: 3e-2l, rhs: -0.5, other: 1E+100, no_sign_exponent: 0.1e10]()
+  }  // block b1
+}  // module m0
+)",
+                                 .output = R"(module m0 {
+  block b0 {
+    %0 = core.select []()
+    %1 = core.merge [](<<ANY>>, <<ANY>>)
+  }  // block b0
+  block b1 {
+    %2 = core.plus [access: "private", transform: "no"](%3, <<ANY>>)
+    %3 = core.mult [lhs: 10l, rhs: "59"](<<ANY>>, %2)
+    %4 = core.mult_floating [lhs: 0.03l, no_sign_exponent: 1e+09l, other: 1e+100l, rhs: -0.5l]()
+  }  // block b1
+}  // module m0
+)",
+}
+};
+
+INSTANTIATE_TEST_SUITE_P(IrParserNormalizingTest, IrParserNormalizingTest,
+    ::testing::ValuesIn(kNormalizedIR));
 
 TEST(IrParseTest, ValueNotFoundCausesFailure) {
   auto input_program_text = R"(module m0 {
