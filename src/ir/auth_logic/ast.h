@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "absl/hash/hash.h"
+#include "src/ir/auth_logic/auth_logic_ast_visitor.h"
 #include "src/ir/datalog/program.h"
 
 namespace raksha::ir::auth_logic {
@@ -33,6 +34,16 @@ class Principal {
  public:
   explicit Principal(std::string name) : name_(std::move(name)) {}
   const std::string& name() const { return name_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+    return visitor.Visit(*this);
+  }
 
  private:
   std::string name_;
@@ -46,6 +57,16 @@ class Attribute {
       : principal_(principal), predicate_(predicate) {}
   const Principal& principal() const { return principal_; }
   const datalog::Predicate& predicate() const { return predicate_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+    return visitor.Visit(*this);
+  }
 
  private:
   Principal principal_;
@@ -61,6 +82,16 @@ class CanActAs {
         right_principal_(std::move(right_principal)) {}
   const Principal& left_principal() const { return left_principal_; }
   const Principal& right_principal() const { return right_principal_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+    return visitor.Visit(*this);
+  }
 
  private:
   Principal left_principal_;
@@ -85,6 +116,16 @@ class BaseFact {
   explicit BaseFact(BaseFactVariantType value) : value_(std::move(value)){};
   const BaseFactVariantType& GetValue() const { return value_; }
 
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
  private:
   BaseFactVariantType value_;
 };
@@ -103,6 +144,16 @@ class Fact {
 
   const BaseFact& base_fact() const { return base_fact_; }
 
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
  private:
   std::forward_list<Principal> delegation_chain_;
   BaseFact base_fact_;
@@ -117,6 +168,16 @@ class ConditionalAssertion {
       : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
   const Fact& lhs() const { return lhs_; }
   const std::vector<BaseFact>& rhs() const { return rhs_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+    return visitor.Visit(*this);
+  }
 
  private:
   Fact lhs_;
@@ -135,6 +196,16 @@ class Assertion {
   explicit Assertion(AssertionVariantType value) : value_(std::move(value)) {}
   const AssertionVariantType& GetValue() const { return value_; }
 
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
  private:
   AssertionVariantType value_;
 };
@@ -146,6 +217,16 @@ class SaysAssertion {
       : principal_(std::move(principal)), assertions_(std::move(assertions)){};
   const Principal& principal() const { return principal_; }
   const std::vector<Assertion>& assertions() const { return assertions_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+    return visitor.Visit(*this);
+  }
 
  private:
   Principal principal_;
@@ -163,6 +244,16 @@ class Query {
   const std::string& name() const { return name_; }
   const Principal& principal() const { return principal_; }
   const Fact& fact() const { return fact_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+    return visitor.Visit(*this);
+  }
 
  private:
   std::string name_;
@@ -190,6 +281,16 @@ class Program {
   }
 
   const std::vector<Query>& queries() const { return queries_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+    return visitor.Visit(*this);
+  }
 
  private:
   std::vector<datalog::RelationDeclaration> relation_declarations_;
