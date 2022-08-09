@@ -24,8 +24,8 @@ package(
 cc_library(
     name = "ast",
     hdrs = [
-        "auth_logic_ast_visitor.h",
         "ast.h",
+        "auth_logic_ast_visitor.h",
     ],
     visibility = ["//visibility:private"],
     deps = [
