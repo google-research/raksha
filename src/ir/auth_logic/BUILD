@@ -24,12 +24,14 @@ package(
 cc_library(
     name = "ast",
     hdrs = [
+        "auth_logic_ast_visitor.h",
         "ast.h",
     ],
     visibility = ["//visibility:private"],
     deps = [
         "//src/common/logging",
         "//src/common/utils:overloaded",
+        "//src/common/utils:types",
         "//src/ir/datalog:program",
         "@absl//absl/hash",
         "@absl//absl/strings:str_format",
