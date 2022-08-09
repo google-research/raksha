@@ -35,7 +35,7 @@ class PrincipalNameCollectorVisitor
 
   absl::flat_hash_set<std::string> FoldResult(
       absl::flat_hash_set<std::string> acc,
-      absl::flat_hash_set<std::string> child_result) {
+      absl::flat_hash_set<std::string> child_result) override {
     acc.merge(std::move(child_result));
     return std::move(acc);
   }
