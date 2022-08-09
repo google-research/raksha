@@ -39,8 +39,8 @@ cc_test(
     srcs = ["attribute_test.cc"],
     deps = [
         ":attribute",
-        ":int_attribute",
         ":double_attribute",
+        ":int_attribute",
         ":string_attribute",
         "//src/common/testing:gtest",
         "//src/common/utils:intrusive_ptr",
