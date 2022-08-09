@@ -83,8 +83,11 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
           double parsed_double = 0;
           auto text = CHECK_NOTNULL(double_attribute_context)->DOUBLELITERAL()->getText();
           // Discard the suffix (l or f).
-          auto text_without_suffix = std::string(text.begin(), text.end()-1);
-          bool conversion_succeeds = absl::SimpleAtod(text_without_suffix, &parsed_double);
+          auto last_char_it = text.rbegin();
+          if (last_char_it != text.rend() && (*last_char_it == 'l' || *last_char_it == 'r')) {
+              text = std::string(text.begin(), text.end()-1);
+          }
+          bool conversion_succeeds = absl::SimpleAtod(text, &parsed_double);
           CHECK(conversion_succeeds == true);
           attributes.insert({CHECK_NOTNULL(double_attribute_context)->ID()->getText(),
                              Attribute::Create<DoubleAttribute>(parsed_double)});
