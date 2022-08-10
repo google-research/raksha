@@ -37,7 +37,20 @@ class Value {
   virtual ~Value() {}
 };
 
-// Corresponds to Souffle's `number` type.
+// Corresponds to Souffle's `RamFloat` type.
+class Double : public Value {
+ public:
+  explicit Double(double value) : double_value_(value) {}
+
+  std::string ToDatalogString() const override {
+    return absl::StrFormat(R"(%g)", double_value_);
+  }
+
+ private:
+  double double_value_;
+};
+
+// Corresponds to Souffle's `Signed` type.
 class Number : public Value {
  public:
   explicit Number(int64_t value) : number_value_(value) {}
@@ -50,7 +63,7 @@ class Number : public Value {
   int64_t number_value_;
 };
 
-// Corresponds to Souffle's `symbol` type.
+// Corresponds to Souffle's `Symbol` type.
 class Symbol : public Value {
  public:
   explicit Symbol(absl::string_view value) : symbol_value_(value) {}

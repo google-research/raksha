@@ -28,6 +28,27 @@ using testing::Combine;
 using testing::TestWithParam;
 using testing::ValuesIn;
 
+class DoubleTest : public TestWithParam<double> {};
+
+TEST_P(DoubleTest, DoubleTest) {
+  double num = GetParam();
+  Double double_value = Double(num);
+  std::string datalog_str = double_value.ToDatalogString();
+  double parsed_double = 0;
+  bool conversion_succeeds = absl::SimpleAtod(datalog_str, &parsed_double);
+  ASSERT_TRUE(conversion_succeeds)
+    << "Failed to convert " << datalog_str << " into a double (from " << num << ").";
+  ASSERT_EQ(parsed_double, num)
+    << "Failed to convert " << datalog_str << " into a double equal to " << num << ".";
+}
+
+static double kSampleDoubleValues[] = {0.0, 1.0, 2.0, -0.5, 45.1,
+                                         999e100,
+                                         -999e100};
+
+INSTANTIATE_TEST_SUITE_P(DoubleTest, DoubleTest,
+                         ValuesIn(kSampleDoubleValues));
+
 class NumberTest : public TestWithParam<int64_t> {};
 
 TEST_P(NumberTest, NumberTest) {
