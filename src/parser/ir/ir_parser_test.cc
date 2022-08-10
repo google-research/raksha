@@ -119,16 +119,12 @@ static const ParserInputAndExpectedOutput kNormalizedIR[] = {
   block b0 {
     %0 = core.plus []()
   }  // block b0
-  block b1 {
-  }  // block b1
 }  // module m0
 )",
                                  .output = R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
-  block b1 {
-  }  // block b1
 }  // module m0
 )",
                              },
