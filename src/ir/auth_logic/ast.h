@@ -36,12 +36,12 @@ class Principal {
   const std::string& name() const { return name_; }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
     return visitor.Visit(*this);
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
@@ -59,12 +59,12 @@ class Attribute {
   const datalog::Predicate& predicate() const { return predicate_; }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
     return visitor.Visit(*this);
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
@@ -84,12 +84,12 @@ class CanActAs {
   const Principal& right_principal() const { return right_principal_; }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
     return visitor.Visit(*this);
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
@@ -117,12 +117,12 @@ class BaseFact {
   const BaseFactVariantType& GetValue() const { return value_; }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
     return visitor.Visit(*this);
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
@@ -145,12 +145,12 @@ class Fact {
   const BaseFact& base_fact() const { return base_fact_; }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
     return visitor.Visit(*this);
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
@@ -170,12 +170,12 @@ class ConditionalAssertion {
   const std::vector<BaseFact>& rhs() const { return rhs_; }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
     return visitor.Visit(*this);
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
@@ -197,12 +197,12 @@ class Assertion {
   const AssertionVariantType& GetValue() const { return value_; }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
     return visitor.Visit(*this);
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
@@ -219,12 +219,12 @@ class SaysAssertion {
   const std::vector<Assertion>& assertions() const { return assertions_; }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
     return visitor.Visit(*this);
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
@@ -246,12 +246,12 @@ class Query {
   const Fact& fact() const { return fact_; }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
     return visitor.Visit(*this);
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
@@ -283,12 +283,12 @@ class Program {
   const std::vector<Query>& queries() const { return queries_; }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, false>& visitor) {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
     return visitor.Visit(*this);
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, true>& visitor) const {
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 

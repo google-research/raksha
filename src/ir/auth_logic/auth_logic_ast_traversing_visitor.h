@@ -33,7 +33,7 @@ namespace raksha::ir::auth_logic {
 // A visitor that also traverses the children of a node and allows performing
 // different actions before (PreVisit) and after (PostVisit) the children are
 // visited. Override any of the `PreVisit` and `PostVisit` methods as needed.
-template <typename Derived, typename Result = Unit, bool IsConst = true>
+template <typename Derived, typename Result = Unit, AstNodeMutability IsConst = AstNodeMutability::Immutable>
 class AuthLogicAstTraversingVisitor
     : public AuthLogicAstVisitor<Derived, Result, IsConst> {
  private:
@@ -80,21 +80,21 @@ class AuthLogicAstTraversingVisitor
                            Result in_order_result) {
     return in_order_result;
   }
-  // Invoked before all the children of `canActAs` are visited.
-  virtual Result PreVisit(CopyConst<IsConst, CanActAs>& canActAs) {
+  // Invoked before all the children of `can_act_as` are visited.
+  virtual Result PreVisit(CopyConst<IsConst, CanActAs>& can_act_as) {
     return GetDefaultValue();
   }
   // Invoked after all the children of `canActAs` are visited.
-  virtual Result PostVisit(CopyConst<IsConst, CanActAs>& canActAs,
+  virtual Result PostVisit(CopyConst<IsConst, CanActAs>& can_act_as,
                            Result in_order_result) {
     return in_order_result;
   }
   // Invoked before all the children of `baseFact` are visited.
-  virtual Result PreVisit(CopyConst<IsConst, BaseFact>& baseFact) {
+  virtual Result PreVisit(CopyConst<IsConst, BaseFact>& base_fact) {
     return GetDefaultValue();
   }
   // Invoked after all the children of `baseFact` are visited.
-  virtual Result PostVisit(CopyConst<IsConst, BaseFact>& baseFact,
+  virtual Result PostVisit(CopyConst<IsConst, BaseFact>& base_fact,
                            Result in_order_result) {
     return in_order_result;
   }
@@ -109,12 +109,12 @@ class AuthLogicAstTraversingVisitor
   }
   // Invoked before all the children of `conditionalAssertion` are visited.
   virtual Result PreVisit(
-      CopyConst<IsConst, ConditionalAssertion>& conditionalAssertion) {
+      CopyConst<IsConst, ConditionalAssertion>& conditional_assertion) {
     return GetDefaultValue();
   }
   // Invoked after all the children of `conditionalAssertion` are visited.
   virtual Result PostVisit(
-      CopyConst<IsConst, ConditionalAssertion>& conditionalAssertion,
+      CopyConst<IsConst, ConditionalAssertion>& conditional_assertion,
       Result in_order_result) {
     return in_order_result;
   }
@@ -128,11 +128,11 @@ class AuthLogicAstTraversingVisitor
     return in_order_result;
   }
   // Invoked before all the children of `saysAssertion` are visited.
-  virtual Result PreVisit(CopyConst<IsConst, SaysAssertion>& saysAssertion) {
+  virtual Result PreVisit(CopyConst<IsConst, SaysAssertion>& says_assertion) {
     return GetDefaultValue();
   }
   // Invoked after all the children of `saysAssertion` are visited.
-  virtual Result PostVisit(CopyConst<IsConst, SaysAssertion>& saysAssertion,
+  virtual Result PostVisit(CopyConst<IsConst, SaysAssertion>& says_assertion,
                            Result in_order_result) {
     return in_order_result;
   }
@@ -161,7 +161,7 @@ class AuthLogicAstTraversingVisitor
   // of the Datalog IR.
 
   virtual Result Visit(
-      CopyConst<IsConst, datalog::RelationDeclaration>& relationDeclaration) {
+      CopyConst<IsConst, datalog::RelationDeclaration>& relation_declaration) {
     return GetDefaultValue();
   }
 
@@ -187,30 +187,30 @@ class AuthLogicAstTraversingVisitor
     return PostVisit(attribute, std::move(fold_result));
   }
 
-  Result Visit(CopyConst<IsConst, CanActAs>& canActAs) final override {
-    Result pre_visit_result = PreVisit(canActAs);
+  Result Visit(CopyConst<IsConst, CanActAs>& can_act_as) final override {
+    Result pre_visit_result = PreVisit(can_act_as);
     Result fold_result =
         FoldResult(FoldResult(std::move(pre_visit_result),
-                              canActAs.left_principal().Accept(*this)),
-                   canActAs.right_principal().Accept(*this));
-    return PostVisit(canActAs, std::move(fold_result));
+                              can_act_as.left_principal().Accept(*this)),
+                   can_act_as.right_principal().Accept(*this));
+    return PostVisit(can_act_as, std::move(fold_result));
   }
 
-  Result Visit(CopyConst<IsConst, BaseFact>& baseFact) final override {
-    Result pre_visit_result = PreVisit(baseFact);
+  Result Visit(CopyConst<IsConst, BaseFact>& base_fact) final override {
+    Result pre_visit_result = PreVisit(base_fact);
     Result variant_visit_result = std::visit(
         raksha::utils::overloaded{
             [this](const datalog::Predicate& pred) {
               return VariantVisit(pred);
             },
             [this](const Attribute& attrib) { return VariantVisit(attrib); },
-            [this](const CanActAs& canActAs) {
-              return VariantVisit(canActAs);
+            [this](const CanActAs& can_act_as) {
+              return VariantVisit(can_act_as);
             }},
-        baseFact.GetValue());
+        base_fact.GetValue());
     Result fold_result = FoldResult(std::move(pre_visit_result),
                                     std::move(variant_visit_result));
-    return PostVisit(baseFact, std::move(fold_result));
+    return PostVisit(base_fact, std::move(fold_result));
   }
 
   Result Visit(CopyConst<IsConst, Fact>& fact) final override {
@@ -225,17 +225,17 @@ class AuthLogicAstTraversingVisitor
     return PostVisit(fact, std::move(fold_result));
   }
 
-  Result Visit(CopyConst<IsConst, ConditionalAssertion>& conditionalAssertion)
+  Result Visit(CopyConst<IsConst, ConditionalAssertion>& conditional_assertion)
       final override {
-    Result pre_visit_result = PreVisit(conditionalAssertion);
+    Result pre_visit_result = PreVisit(conditional_assertion);
     Result lhs_result = FoldResult(std::move(pre_visit_result),
-                                   conditionalAssertion.lhs().Accept(*this));
+                                   conditional_assertion.lhs().Accept(*this));
     Result fold_result = common::utils::fold(
-        conditionalAssertion.rhs(), std::move(lhs_result),
-        [this](Result acc, CopyConst<IsConst, BaseFact> baseFact) {
-          return FoldResult(std::move(acc), baseFact.Accept(*this));
+        conditional_assertion.rhs(), std::move(lhs_result),
+        [this](Result acc, CopyConst<IsConst, BaseFact> base_fact) {
+          return FoldResult(std::move(acc), base_fact.Accept(*this));
         });
-    return PostVisit(conditionalAssertion, std::move(fold_result));
+    return PostVisit(conditional_assertion, std::move(fold_result));
   }
 
   Result Visit(CopyConst<IsConst, Assertion>& assertion) final override {
@@ -243,8 +243,8 @@ class AuthLogicAstTraversingVisitor
     Result variant_visit_result =
         std::visit(raksha::utils::overloaded{
                        [this](const Fact& fact) { return VariantVisit(fact); },
-                       [this](const ConditionalAssertion& condAssertion) {
-                         return VariantVisit(condAssertion);
+                       [this](const ConditionalAssertion& cond_assertion) {
+                         return VariantVisit(cond_assertion);
                        }},
                    assertion.GetValue());
     Result fold_result = FoldResult(std::move(pre_visit_result),
@@ -253,16 +253,16 @@ class AuthLogicAstTraversingVisitor
   }
 
   Result Visit(
-      CopyConst<IsConst, SaysAssertion>& saysAssertion) final override {
-    Result pre_visit_result = PreVisit(saysAssertion);
+      CopyConst<IsConst, SaysAssertion>& says_assertion) final override {
+    Result pre_visit_result = PreVisit(says_assertion);
     Result principal_result = FoldResult(
-        std::move(pre_visit_result), saysAssertion.principal().Accept(*this));
+        std::move(pre_visit_result), says_assertion.principal().Accept(*this));
     Result fold_result = common::utils::fold(
-        saysAssertion.assertions(), std::move(principal_result),
+        says_assertion.assertions(), std::move(principal_result),
         [this](Result acc, CopyConst<IsConst, Assertion> assertion) {
           return FoldResult(std::move(acc), assertion.Accept(*this));
         });
-    return PostVisit(saysAssertion, fold_result);
+    return PostVisit(says_assertion, fold_result);
   }
 
   Result Visit(CopyConst<IsConst, Query>& query) final override {
@@ -278,15 +278,15 @@ class AuthLogicAstTraversingVisitor
     Result declarations_result = common::utils::fold(
         program.relation_declarations(), std::move(pre_visit_result),
         [this](Result acc, CopyConst<IsConst, datalog::RelationDeclaration>
-                               relationDeclaration) {
+                               relation_declaration) {
           // TODO(#644 aferr) Fix this to accept once once relationDeclaration
           // has been refactored into ast.h
-          return FoldResult(std::move(acc), Visit(relationDeclaration));
+          return FoldResult(std::move(acc), Visit(relation_declaration));
         });
     Result says_assertions_result = common::utils::fold(
         program.says_assertions(), std::move(declarations_result),
-        [this](Result acc, CopyConst<IsConst, SaysAssertion> saysAssertion) {
-          return FoldResult(std::move(acc), saysAssertion.Accept(*this));
+        [this](Result acc, CopyConst<IsConst, SaysAssertion> says_assertion) {
+          return FoldResult(std::move(acc), says_assertion.Accept(*this));
         });
     Result queries_result = common::utils::fold(
         program.queries(), std::move(says_assertions_result),
@@ -306,15 +306,14 @@ class AuthLogicAstTraversingVisitor
     return Visit(predicate);
   }
   Result VariantVisit(Attribute attribute) { return attribute.Accept(*this); }
-  Result VariantVisit(CanActAs canActAs) { return canActAs.Accept(*this); }
+  Result VariantVisit(CanActAs can_act_as) { return can_act_as.Accept(*this); }
 
   // For AssertionVariantType
   Result VariantVisit(Fact fact) { return fact.Accept(*this); }
-  Result VariantVisit(ConditionalAssertion conditionalAssertion) {
-    return conditionalAssertion.Accept(*this);
+  Result VariantVisit(ConditionalAssertion conditional_assertion) {
+    return conditional_assertion.Accept(*this);
   }
 
- private:
 };
 
 }  // namespace raksha::ir::auth_logic
