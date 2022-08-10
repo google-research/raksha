@@ -75,8 +75,6 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
                      ->getText())});
         continue;
       }
-      auto* num_attribute_context =
-          dynamic_cast<IrParser::NumAttributeContext*>(attribute_context);
       if (auto* double_attribute_context =
               dynamic_cast<IrParser::DoubleAttributeContext*>(
                   attribute_context)) {
@@ -93,6 +91,8 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
                              Attribute::Create<DoubleAttribute>(parsed_double)});
         continue;
       }
+      auto* num_attribute_context =
+          dynamic_cast<IrParser::NumAttributeContext*>(attribute_context);
       int64_t parsed_int = 0;
       bool conversion_succeeds = absl::SimpleAtoi(
           CHECK_NOTNULL(num_attribute_context)->NUMLITERAL()->getText(),
