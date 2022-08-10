@@ -36,18 +36,16 @@ TEST_P(DoubleTest, DoubleTest) {
   std::string datalog_str = double_value.ToDatalogString();
   double parsed_double = 0;
   bool conversion_succeeds = absl::SimpleAtod(datalog_str, &parsed_double);
-  ASSERT_TRUE(conversion_succeeds)
-    << "Failed to convert " << datalog_str << " into a double (from " << num << ").";
-  ASSERT_EQ(parsed_double, num)
-    << "Failed to convert " << datalog_str << " into a double equal to " << num << ".";
+  ASSERT_TRUE(conversion_succeeds) << "Failed to convert " << datalog_str
+                                   << " into a double (from " << num << ").";
+  ASSERT_EQ(parsed_double, num) << "Failed to convert " << datalog_str
+                                << " into a double equal to " << num << ".";
 }
 
-static double kSampleDoubleValues[] = {0.0, 1.0, 2.0, -0.5, 45.1,
-                                         999e100,
-                                         -999e100};
+static double kSampleDoubleValues[] = {0.0,  1.0,     2.0,     -0.5,
+                                       45.1, 999e100, -999e100};
 
-INSTANTIATE_TEST_SUITE_P(DoubleTest, DoubleTest,
-                         ValuesIn(kSampleDoubleValues));
+INSTANTIATE_TEST_SUITE_P(DoubleTest, DoubleTest, ValuesIn(kSampleDoubleValues));
 
 class NumberTest : public TestWithParam<int64_t> {};
 
