@@ -69,12 +69,27 @@ class UniverseRelationInsertion {
     }
   }
 
+  // Determine if an identifier (which may be an argument of a predicate
+  // or a principal name) is a constant or variable. TODO it may be
+  // better to refactor the AST so that "constantness" is determined
+  // at parse time rather than here since this information is
+  // available at parse time.
+  static bool IsNameConstant(std::string &id) {
+    // TODO
+    return false;
+  }
+
+// This class implements one public method that, given a Program,
+// returns a set (so the elements are unique) of relation declarations
+// for the universes that are needed based on the types of
+// elements that are mentioned in the original declarations
+// of the program.
   class UniverseDeclarationGenerationVisitor
       : public AuthLogicAstTraversingVisitor<
             UniverseDeclarationGenerationVisitor,
             absl::flat_hash_set<datalog::RelationDeclaration>> {
    public:
-    absl::flat_hash_set<datalog::RelationDeclaration> GetUniverseDeclarations(
+    static absl::flat_hash_set<datalog::RelationDeclaration> GetUniverseDeclarations(
         const Program& prog) {
       absl::flat_hash_set<datalog::RelationDeclaration> ret =
           prog.Accept(*this);
