@@ -216,11 +216,8 @@ class AuthLogicAstTraversingVisitor
     Result pre_visit_result = PreVisit(fact);
     Result base_fact_result =
         CombineResult(std::move(pre_visit_result), fact.base_fact().Accept(*this));
-    Result fold_result = common::utils::fold(
-        fact.delegation_chain(), std::move(base_fact_result),
-        [this](Result acc, CopyConst<IsConst, Principal> principal) {
-          return CombineResult(std::move(acc), principal.Accept(*this));
-        });
+    Result fold_result = FoldAccept<Principal, std::forward_list<Principal>>(
+      fact.delegation_chain(), base_fact_result);
     return PostVisit(fact, std::move(fold_result));
   }
 
@@ -229,11 +226,8 @@ class AuthLogicAstTraversingVisitor
     Result pre_visit_result = PreVisit(conditional_assertion);
     Result lhs_result = CombineResult(std::move(pre_visit_result),
                                    conditional_assertion.lhs().Accept(*this));
-    Result fold_result = common::utils::fold(
-        conditional_assertion.rhs(), std::move(lhs_result),
-        [this](Result acc, CopyConst<IsConst, BaseFact> base_fact) {
-          return CombineResult(std::move(acc), base_fact.Accept(*this));
-        });
+    Result fold_result = FoldAccept<BaseFact, std::vector<BaseFact>>(
+        conditional_assertion.rhs(), lhs_result);
     return PostVisit(conditional_assertion, std::move(fold_result));
   }
 
@@ -256,11 +250,8 @@ class AuthLogicAstTraversingVisitor
     Result pre_visit_result = PreVisit(says_assertion);
     Result principal_result = CombineResult(
         std::move(pre_visit_result), says_assertion.principal().Accept(*this));
-    Result fold_result = common::utils::fold(
-        says_assertion.assertions(), std::move(principal_result),
-        [this](Result acc, CopyConst<IsConst, Assertion> assertion) {
-          return CombineResult(std::move(acc), assertion.Accept(*this));
-    });
+    Result fold_result = FoldAccept<Assertion, std::vector<Assertion>>
+      (says_assertion.assertions(), principal_result);
     return PostVisit(says_assertion, fold_result);
   }
 
@@ -282,16 +273,11 @@ class AuthLogicAstTraversingVisitor
           // has been refactored into ast.h
           return CombineResult(std::move(acc), Visit(relation_declaration));
         });
-    Result says_assertions_result = common::utils::fold(
-        program.says_assertions(), std::move(declarations_result),
-        [this](Result acc, CopyConst<IsConst, SaysAssertion> says_assertion) {
-          return CombineResult(std::move(acc), says_assertion.Accept(*this));
-        });
-    Result queries_result = common::utils::fold(
-        program.queries(), std::move(says_assertions_result),
-        [this](Result acc, CopyConst<IsConst, Query> query) {
-          return CombineResult(std::move(acc), query.Accept(*this));
-        });
+    Result says_assertions_result = FoldAccept<SaysAssertion,
+      std::vector<SaysAssertion>>(program.says_assertions(), 
+      declarations_result);
+    Result queries_result = FoldAccept<Query, std::vector<Query>>(
+        program.queries(), says_assertions_result);
     return PostVisit(program, queries_result);
   }
 
@@ -311,6 +297,15 @@ class AuthLogicAstTraversingVisitor
   Result VariantVisit(Fact fact) { return fact.Accept(*this); }
   Result VariantVisit(ConditionalAssertion conditional_assertion) {
     return conditional_assertion.Accept(*this);
+  }
+
+ private:
+  template<class Element, class Container>
+  Result FoldAccept(Container container, Result initial) {
+    return common::utils::fold(container, std::move(initial),
+      [this](Result acc, CopyConst<IsConst, Element> element) {
+        return CombineResult(std::move(acc), element.Accept(*this));
+    });
   }
 
 };
