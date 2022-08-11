@@ -214,11 +214,11 @@ class AuthLogicAstTraversingVisitor
 
   Result Visit(CopyConst<IsConst, Fact>& fact) final override {
     Result pre_visit_result = PreVisit(fact);
+    Result deleg_result = FoldAccept<Principal, std::forward_list<Principal>>(
+      fact.delegation_chain(), pre_visit_result);
     Result base_fact_result =
-        CombineResult(std::move(pre_visit_result), fact.base_fact().Accept(*this));
-    Result fold_result = FoldAccept<Principal, std::forward_list<Principal>>(
-      fact.delegation_chain(), base_fact_result);
-    return PostVisit(fact, std::move(fold_result));
+        CombineResult(std::move(deleg_result), fact.base_fact().Accept(*this));
+    return PostVisit(fact, std::move(base_fact_result));
   }
 
   Result Visit(CopyConst<IsConst, ConditionalAssertion>& conditional_assertion)

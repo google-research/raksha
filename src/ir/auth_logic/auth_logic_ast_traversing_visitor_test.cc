@@ -20,6 +20,7 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/datalog/program.h"
+#include <iostream>
 
 namespace raksha::ir::auth_logic {
 namespace {
@@ -29,8 +30,6 @@ class PrincipalNameCollectorVisitor
     : public AuthLogicAstTraversingVisitor<PrincipalNameCollectorVisitor,
                                            absl::flat_hash_set<std::string>> {
  public:
-  PrincipalNameCollectorVisitor() {}
-
   absl::flat_hash_set<std::string> GetDefaultValue() override { return {}; }
 
   absl::flat_hash_set<std::string> CombineResult (
@@ -74,6 +73,153 @@ TEST(AuthLogicAstTraversingVisitorTest, PrincipalNameCollectorTest) {
                                                      "PrincipalC"};
   EXPECT_EQ(result, expected);
 }
+
+enum class TraversalType { kPre = 0x1, kPost = 0x2, kBoth = 0x3 };
+class TraversalOrderVisitor 
+  : public AuthLogicAstTraversingVisitor<TraversalOrderVisitor> {
+ public:
+      TraversalOrderVisitor(TraversalType traversal_type)
+      : pre_visits_(traversal_type == TraversalType::kPre ||
+                    traversal_type == TraversalType::kBoth),
+        post_visits_(traversal_type == TraversalType::kPost ||
+                     traversal_type == TraversalType::kBoth) {}
+
+  Unit PreVisit(const Principal& prin) override {
+    if (pre_visits_) {
+      std::cout << "pre principal " << std::addressof(prin) << std::endl;
+      nodes_.push_back(std::addressof(prin));
+    }
+    return Unit();
+  }
+  Unit PostVisit(const Principal& prin, Unit result) override {
+    if (post_visits_) nodes_.push_back(std::addressof(prin));
+    return result;
+  }
+
+  Unit PreVisit(const Attribute& attrib) override {
+    if (pre_visits_) nodes_.push_back(std::addressof(attrib));
+    return Unit();
+  }
+  Unit PostVisit(const Attribute& attrib, Unit result) override {
+    if (post_visits_) nodes_.push_back(std::addressof(attrib));
+    return result;
+  }
+
+  Unit PreVisit(const CanActAs& canActAs) override {
+    if (pre_visits_) nodes_.push_back(std::addressof(canActAs));
+    return Unit();
+  }
+  Unit PostVisit(const CanActAs& canActAs, Unit result) override {
+    if (post_visits_) nodes_.push_back(std::addressof(canActAs));
+    return result;
+  }
+
+  Unit PreVisit(const BaseFact& baseFact) override {
+    if (pre_visits_) {
+      std::cout << "pre baseFact " << std::addressof(baseFact)
+        << std::endl;
+      nodes_.push_back(std::addressof(baseFact));
+    }
+    return Unit();
+  }
+  Unit PostVisit(const BaseFact& baseFact, Unit result) override {
+    if (post_visits_) nodes_.push_back(std::addressof(baseFact));
+    return result;
+  }
+
+  Unit PreVisit(const Fact& fact) override {
+    if (pre_visits_) {
+      std::cout << "pre Fact " << std::addressof(fact)
+        << std::endl;
+      nodes_.push_back(std::addressof(fact));
+    }
+    return Unit();
+  }
+  Unit PostVisit(const Fact& fact, Unit result) override {
+    if (post_visits_) nodes_.push_back(std::addressof(fact));
+    return result;
+  }
+
+  Unit PreVisit(const ConditionalAssertion& condAssertion) override {
+    if (pre_visits_) nodes_.push_back(std::addressof(condAssertion));
+    return Unit();
+  }
+  Unit PostVisit(const ConditionalAssertion& condAssertion, Unit result) override {
+    if (post_visits_) nodes_.push_back(std::addressof(condAssertion));
+    return result;
+  }
+
+  Unit PreVisit(const Assertion& assertion) override {
+    if (pre_visits_) nodes_.push_back(std::addressof(assertion));
+    return Unit();
+  }
+  Unit PostVisit(const Assertion& assertion, Unit result) override {
+    if (post_visits_) nodes_.push_back(std::addressof(assertion));
+    return result;
+  }
+
+  Unit PreVisit(const SaysAssertion& saysAssertion) override {
+    if (pre_visits_) nodes_.push_back(std::addressof(saysAssertion));
+    return Unit();
+  }
+  Unit PostVisit(const SaysAssertion& saysAssertion, Unit result) override {
+    if (post_visits_) nodes_.push_back(std::addressof(saysAssertion));
+    return result;
+  }
+
+  Unit PreVisit(const Query& query) override {
+    if (pre_visits_) nodes_.push_back(std::addressof(query));
+    return Unit();
+  }
+  Unit PostVisit(const Query& query, Unit result) override {
+    if (post_visits_) nodes_.push_back(std::addressof(query));
+    return result;
+  }
+
+  Unit PreVisit(const Program& program) override {
+    if (pre_visits_) nodes_.push_back(std::addressof(program));
+    return Unit();
+  }
+  Unit PostVisit(const Program& program, Unit result) override {
+    if (post_visits_) nodes_.push_back(std::addressof(program));
+    return result;
+  }
+
+  const std::vector<const void*>& nodes() const { return nodes_; }
+
+ private:
+  bool pre_visits_;
+  bool post_visits_;
+  std::vector<const void*> nodes_;
+};
+
+TEST(AuthLogicAstTraversingVisitorTest, SimpleTraversalTest) {
+  Principal prinA = Principal("PrincipalA");
+  Principal prinB = Principal("PrincipalB");
+  Principal prinC = Principal("PrincipalC");
+
+  datalog::Predicate pred1 = datalog::Predicate("pred1", {}, datalog::kPositive);
+  datalog::Predicate pred2 = datalog::Predicate("pred2", {}, datalog::kPositive);
+
+  BaseFact baseFact1 = BaseFact(pred1);
+  BaseFact baseFact2 = BaseFact(pred2);
+  
+  Fact fact1 = Fact({}, baseFact1);
+  Fact fact2 = Fact({}, baseFact2);
+
+  Assertion ast1 = Assertion(fact1);
+
+  TraversalOrderVisitor preorder_visitor(TraversalType::kPre);
+  fact1.Accept(preorder_visitor);
+  EXPECT_THAT(
+    preorder_visitor.nodes(),
+    testing::ElementsAre(
+      std::addressof(fact1),
+      std::addressof(fact1.base_fact()))
+  );
+
+}
+
 
 }  // namespace
 }  // namespace raksha::ir::auth_logic

@@ -33,6 +33,7 @@ cc_library(
         "//src/common/utils:overloaded",
         "//src/common/utils:types",
         "//src/ir/datalog:program",
+        "//src/common/utils:map_iter",
         "@absl//absl/hash",
         "@absl//absl/strings:str_format",
     ],
