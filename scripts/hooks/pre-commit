@@ -34,6 +34,7 @@ SOURCE_FILES_PATTERNS=(
   ':!*.txt'
 
   # Exclude test files.
+  ':!*.auth'
   ':!*.authlogic'
   ':!*.raksha'
   ':!*.ir'
