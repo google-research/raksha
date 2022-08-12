@@ -37,6 +37,7 @@ SOURCE_FILES_PATTERNS=(
   ':!*.authlogic'
   ':!*.raksha'
   ':!*.ir'
+  ':!**/testdata/**'
 
   # Exclude (generated) build and config files.
   ':(exclude,glob).*'
