@@ -49,7 +49,7 @@ TEST_P(AuthorizationLogicDatalogFactsTest, InvokesRustToolAndGeneratesOutput) {
   fs::path test_data_dir = utils::test::GetTestDataDir(
       "src/frontends/arcs/xform_to_datalog/testdata");
   auto auth_facts =
-      AuthorizationLogicDatalogFacts::create(test_data_dir.c_str(), param);
+      AuthorizationLogicDatalogFacts::create(test_data_dir.c_str(), absl::StrCat(param, ".auth"));
   ASSERT_TRUE(auth_facts.has_value());
 
   std::vector<std::string> actual_datalog =

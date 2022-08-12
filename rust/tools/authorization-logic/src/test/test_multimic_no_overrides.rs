@@ -23,7 +23,7 @@ mod test {
     fn test_multimic_no_overrides_scenario1() {
         utils::setup_directories_for_bazeltest(vec!["raksha_examples"], vec!["test_outputs"]);
         run_query_test(QueryTest {
-            filename: "multimic.authlogic",
+            filename: "multimic",
             input_dir: "raksha_examples/multimic-no-overrides",
             output_dir: "test_outputs",
             query_expects: vec![
@@ -43,7 +43,7 @@ mod test {
     fn test_multimic_no_overrides_scenario2() {
           utils::setup_directories_for_bazeltest(vec!["raksha_examples"], vec!["test_outputs"]);
           run_query_test(QueryTest {
-            filename: "multimic.authlogic",
+            filename: "multimic",
             input_dir: "raksha_examples/multimic-no-overrides",
             output_dir: "test_outputs",
             query_expects: vec![

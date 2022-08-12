@@ -58,13 +58,13 @@ TEST(AuthorizationLogicTest, InvokesRustToolAndGeneratesOutput) {
       utils::test::GetTestDataDir("src/frontends/arcs/xform_to_datalog/testdata");
   fs::path output_dir = fs::temp_directory_path();
   int res = GenerateDatalogFactsFromAuthorizationLogic(
-      "simple_auth_logic", test_data_dir.c_str(), output_dir.c_str(),
+      "simple_auth_logic.auth", test_data_dir.c_str(), output_dir.c_str(),
       kRelationsToNotDeclare);
 
   ASSERT_EQ(res, 0) << "Invoking authorization logic compiler failed.";
 
   std::vector<std::string> actual_datalog =
-      utils::test::ReadFileLines(output_dir / "simple_auth_logic.dl");
+      utils::test::ReadFileLines(output_dir / "simple_auth_logic.auth.dl");
   std::vector<std::string> expected_datalog =
       utils::test::ReadFileLines(test_data_dir / "simple_auth_logic.dl");
 
@@ -75,7 +75,7 @@ TEST(AuthorizationLogicTest, InvokesRustToolAndGeneratesOutput) {
 
 TEST(AuthorizationLogicTest, ErrorsInRustToolReturnsNonZeroValue) {
   // Force the tool to return error by specifying non-existent files.
-  int res = GenerateDatalogFactsFromAuthorizationLogic("simple_auth_logic",
+  int res = GenerateDatalogFactsFromAuthorizationLogic("simple_auth_logic.auth",
                                                        "blah", "blah", {});
   ASSERT_EQ(res, 1);
 }

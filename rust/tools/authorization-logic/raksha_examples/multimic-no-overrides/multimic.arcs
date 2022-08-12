@@ -11,7 +11,7 @@ particle MicIn
   // MicIn says hasTag("audio", unidentified_people::userSpeech)
   // NOTE: at runtime, this also receives facts that add tags for the 
   // identified users from "MobileDeviceRuntime" (see also comment in 
-  // multimic.authlogic).
+  // multimic.auth).
 
 // Storage credentials can be in the form of authorization logic facts
 // and guarded by the may/will check. So I didn't include credentials checking 

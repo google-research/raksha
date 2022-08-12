@@ -64,10 +64,8 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(ManifestDatalogFacts(),
                         *(AuthorizationLogicDatalogFacts::create(
                             utils::test::GetTestDataDir(path),
-                            "empty_auth_logic")),
-                        R"(// GENERATED FILE, DO NOT EDIT!
-
-#include "src/analysis/souffle/taint.dl"
+                            "empty_auth_logic.auth")),
+                        R"(#include "src/analysis/souffle/taint.dl"
 #include "src/analysis/souffle/may_will.dl"
 
 // Rules for detecting policy failures.
@@ -114,10 +112,8 @@ grounded_dummy("dummy_var").
                             particle_spec.get(), {}, {})}),
                         *(AuthorizationLogicDatalogFacts::create(
                             utils::test::GetTestDataDir(path),
-                            "simple_auth_logic")),
-                        R"(// GENERATED FILE, DO NOT EDIT!
-
-#include "src/analysis/souffle/taint.dl"
+                            "simple_auth_logic.auth")),
+                        R"(#include "src/analysis/souffle/taint.dl"
 #include "src/analysis/souffle/may_will.dl"
 
 // Rules for detecting policy failures.
