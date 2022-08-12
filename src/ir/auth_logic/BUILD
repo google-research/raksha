@@ -30,10 +30,10 @@ cc_library(
     visibility = ["//visibility:private"],
     deps = [
         "//src/common/logging",
+        "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
         "//src/common/utils:types",
         "//src/ir/datalog:program",
-        "//src/common/utils:map_iter",
         "@absl//absl/hash",
         "@absl//absl/strings:str_format",
     ],
