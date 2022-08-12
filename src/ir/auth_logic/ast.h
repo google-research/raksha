@@ -25,9 +25,9 @@
 #include <vector>
 
 #include "absl/hash/hash.h"
+#include "src/common/utils/map_iter.h"
 #include "src/ir/auth_logic/auth_logic_ast_visitor.h"
 #include "src/ir/datalog/program.h"
-#include "src/common/utils/map_iter.h"
 
 namespace raksha::ir::auth_logic {
 
@@ -42,15 +42,14 @@ class Principal {
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() {
-    return name_;
-  }
+  std::string DebugPrint() const { return name_; }
 
  private:
   std::string name_;
@@ -71,13 +70,14 @@ class Attribute {
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() {
+  std::string DebugPrint() const {
     return absl::StrCat(principal_.name(), predicate_.DebugPrint());
   }
 
@@ -102,15 +102,16 @@ class CanActAs {
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() {
+  std::string DebugPrint() const {
     return absl::StrCat(left_principal_.DebugPrint(), " canActAs ",
-      right_principal_.DebugPrint());
+                        right_principal_.DebugPrint());
   }
 
  private:
@@ -142,16 +143,18 @@ class BaseFact {
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() {
-    return absl::StrCat("BaseFact(",
-      std::visit([](auto & obj) {return obj.DebugPrint();}, this->value_),
-      ")");
+  std::string DebugPrint() const {
+    return absl::StrCat(
+        "BaseFact(",
+        std::visit([](auto& obj) { return obj.DebugPrint(); }, this->value_),
+        ")");
   }
 
  private:
@@ -178,19 +181,20 @@ class Fact {
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() {
+  std::string DebugPrint() const {
     std::vector<std::string> delegations;
-    for (Principal& delegatee: delegation_chain_) {
+    for (const Principal& delegatee : delegation_chain_) {
       delegations.push_back(delegatee.DebugPrint());
     }
     return absl::StrCat("deleg: { ", absl::StrJoin(delegations, ", "), " }",
-      base_fact_.DebugPrint());
+                        base_fact_.DebugPrint());
   }
 
  private:
@@ -214,19 +218,20 @@ class ConditionalAssertion {
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() {
+  std::string DebugPrint() const {
     std::vector<std::string> rhs_strings;
-    for (BaseFact& base_fact : rhs_) {
+    for (const BaseFact& base_fact : rhs_) {
       rhs_strings.push_back(base_fact.DebugPrint());
     }
     return absl::StrCat(lhs_.DebugPrint(), ":-",
-      absl::StrJoin(rhs_strings, ", "));
+                        absl::StrJoin(rhs_strings, ", "));
   }
 
  private:
@@ -252,16 +257,18 @@ class Assertion {
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() {
-    return absl::StrCat("Assertion(",
-      std::visit([](auto & obj) {return obj.DebugPrint();}, this->value_),
-      ")");
+  std::string DebugPrint() const {
+    return absl::StrCat(
+        "Assertion(",
+        std::visit([](auto& obj) { return obj.DebugPrint(); }, this->value_),
+        ")");
   }
 
  private:
@@ -282,19 +289,20 @@ class SaysAssertion {
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() {
+  std::string DebugPrint() const {
     std::vector<std::string> assertion_strings;
-    for (Assertion& assertion: assertions_) {
+    for (const Assertion& assertion : assertions_) {
       assertion_strings.push_back(assertion.DebugPrint());
     }
     return absl::StrCat(principal_.DebugPrint(), "says {\n",
-      absl::StrJoin(assertion_strings, "\n"), "}");
+                        absl::StrJoin(assertion_strings, "\n"), "}");
   }
 
  private:
@@ -320,15 +328,16 @@ class Query {
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() {
+  std::string DebugPrint() const {
     return absl::StrCat("Query(", name_, principal_.DebugPrint(),
-      fact_.DebugPrint(), ")");
+                        fact_.DebugPrint(), ")");
   }
 
  private:
@@ -364,30 +373,31 @@ class Program {
   }
 
   template <typename Derived, typename Result>
-  Result Accept(AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
   }
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() {
+  std::string DebugPrint() const {
     std::vector<std::string> relation_decl_strings;
-    for (datalog::RelationDeclaration& rel_decl: relation_declarations_) {
+    for (const datalog::RelationDeclaration& rel_decl :
+         relation_declarations_) {
       relation_decl_strings.push_back(rel_decl.DebugPrint());
     }
     std::vector<std::string> says_assertion_strings;
-    for (SaysAssertion& says_assertion: says_assertions_) {
+    for (const SaysAssertion& says_assertion : says_assertions_) {
       says_assertion_strings.push_back(says_assertion.DebugPrint());
     }
     std::vector<std::string> query_strings;
-    for (Query& query: queries_) {
+    for (const Query& query : queries_) {
       query_strings.push_back(query.DebugPrint());
     }
     return absl::StrCat("Program(\n",
-      absl::StrJoin(relation_decl_strings, "\n"),
-      absl::StrJoin(says_assertion_strings, "\n"),
-      absl::StrJoin(query_strings, "\n"),
-    ")");
+                        absl::StrJoin(relation_decl_strings, "\n"),
+                        absl::StrJoin(says_assertion_strings, "\n"),
+                        absl::StrJoin(query_strings, "\n"), ")");
   }
 
  private:

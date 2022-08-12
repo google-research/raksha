@@ -33,7 +33,8 @@ namespace raksha::ir::auth_logic {
 // A visitor that also traverses the children of a node and allows performing
 // different actions before (PreVisit) and after (PostVisit) the children are
 // visited. Override any of the `PreVisit` and `PostVisit` methods as needed.
-template <typename Derived, typename Result = Unit, AstNodeMutability IsConst = AstNodeMutability::Immutable>
+template <typename Derived, typename Result = Unit,
+          AstNodeMutability IsConst = AstNodeMutability::Immutable>
 class AuthLogicAstTraversingVisitor
     : public AuthLogicAstVisitor<Derived, Result, IsConst> {
  private:
@@ -179,10 +180,10 @@ class AuthLogicAstTraversingVisitor
     Result pre_visit_result = PreVisit(attribute);
     Result fold_result =
         CombineResult(CombineResult(std::move(pre_visit_result),
-                              attribute.principal().Accept(*this)),
-                   // TODO(#644 aferr): fix this to use predicate().Accept once
-                   // predicate has been refactored into ast.h
-                   Visit(attribute.predicate()));
+                                    attribute.principal().Accept(*this)),
+                      // TODO(#644 aferr): fix this to use predicate().Accept
+                      // once predicate has been refactored into ast.h
+                      Visit(attribute.predicate()));
     return PostVisit(attribute, std::move(fold_result));
   }
 
@@ -190,8 +191,8 @@ class AuthLogicAstTraversingVisitor
     Result pre_visit_result = PreVisit(can_act_as);
     Result fold_result =
         CombineResult(CombineResult(std::move(pre_visit_result),
-                              can_act_as.left_principal().Accept(*this)),
-                   can_act_as.right_principal().Accept(*this));
+                                    can_act_as.left_principal().Accept(*this)),
+                      can_act_as.right_principal().Accept(*this));
     return PostVisit(can_act_as, std::move(fold_result));
   }
 
@@ -208,14 +209,14 @@ class AuthLogicAstTraversingVisitor
             }},
         base_fact.GetValue());
     Result fold_result = CombineResult(std::move(pre_visit_result),
-                                    std::move(variant_visit_result));
+                                       std::move(variant_visit_result));
     return PostVisit(base_fact, std::move(fold_result));
   }
 
   Result Visit(CopyConst<IsConst, Fact>& fact) final override {
     Result pre_visit_result = PreVisit(fact);
     Result deleg_result = FoldAccept<Principal, std::forward_list<Principal>>(
-      fact.delegation_chain(), pre_visit_result);
+        fact.delegation_chain(), pre_visit_result);
     Result base_fact_result =
         CombineResult(std::move(deleg_result), fact.base_fact().Accept(*this));
     return PostVisit(fact, std::move(base_fact_result));
@@ -224,8 +225,8 @@ class AuthLogicAstTraversingVisitor
   Result Visit(CopyConst<IsConst, ConditionalAssertion>& conditional_assertion)
       final override {
     Result pre_visit_result = PreVisit(conditional_assertion);
-    Result lhs_result = CombineResult(std::move(pre_visit_result),
-                                   conditional_assertion.lhs().Accept(*this));
+    Result lhs_result = CombineResult(
+        std::move(pre_visit_result), conditional_assertion.lhs().Accept(*this));
     Result fold_result = FoldAccept<BaseFact, std::vector<BaseFact>>(
         conditional_assertion.rhs(), lhs_result);
     return PostVisit(conditional_assertion, std::move(fold_result));
@@ -241,7 +242,7 @@ class AuthLogicAstTraversingVisitor
                        }},
                    assertion.GetValue());
     Result fold_result = CombineResult(std::move(pre_visit_result),
-                                    std::move(variant_visit_result));
+                                       std::move(variant_visit_result));
     return PostVisit(assertion, std::move(fold_result));
   }
 
@@ -250,16 +251,17 @@ class AuthLogicAstTraversingVisitor
     Result pre_visit_result = PreVisit(says_assertion);
     Result principal_result = CombineResult(
         std::move(pre_visit_result), says_assertion.principal().Accept(*this));
-    Result fold_result = FoldAccept<Assertion, std::vector<Assertion>>
-      (says_assertion.assertions(), principal_result);
+    Result fold_result = FoldAccept<Assertion, std::vector<Assertion>>(
+        says_assertion.assertions(), principal_result);
     return PostVisit(says_assertion, fold_result);
   }
 
   Result Visit(CopyConst<IsConst, Query>& query) final override {
     Result pre_visit_result = PreVisit(query);
-    Result fold_result = CombineResult(std::move(pre_visit_result),
-                                    CombineResult(query.principal().Accept(*this),
-                                               query.fact().Accept(*this)));
+    Result fold_result =
+        CombineResult(std::move(pre_visit_result),
+                      CombineResult(query.principal().Accept(*this),
+                                    query.fact().Accept(*this)));
     return PostVisit(query, fold_result);
   }
 
@@ -273,9 +275,9 @@ class AuthLogicAstTraversingVisitor
           // has been refactored into ast.h
           return CombineResult(std::move(acc), Visit(relation_declaration));
         });
-    Result says_assertions_result = FoldAccept<SaysAssertion,
-      std::vector<SaysAssertion>>(program.says_assertions(), 
-      declarations_result);
+    Result says_assertions_result =
+        FoldAccept<SaysAssertion, std::vector<SaysAssertion>>(
+            program.says_assertions(), declarations_result);
     Result queries_result = FoldAccept<Query, std::vector<Query>>(
         program.queries(), says_assertions_result);
     return PostVisit(program, queries_result);
@@ -300,14 +302,14 @@ class AuthLogicAstTraversingVisitor
   }
 
  private:
-  template<class Element, class Container>
+  template <class Element, class Container>
   Result FoldAccept(Container container, Result initial) {
-    return common::utils::fold(container, std::move(initial),
-      [this](Result acc, CopyConst<IsConst, Element> element) {
-        return CombineResult(std::move(acc), element.Accept(*this));
-    });
+    return common::utils::fold(
+        container, std::move(initial),
+        [this](Result acc, CopyConst<IsConst, Element> element) {
+          return CombineResult(std::move(acc), element.Accept(*this));
+        });
   }
-
 };
 
 }  // namespace raksha::ir::auth_logic
