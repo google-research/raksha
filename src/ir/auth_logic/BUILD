@@ -42,7 +42,10 @@ cc_library(
     hdrs = [
         "lowering_ast_datalog.h",
     ],
-    visibility = ["//visibility:private"],
+    visibility = [
+        "//src/backends/policy_engine/souffle:__subpackages__",
+        "//src/ir/auth_logic:__subpackages__",
+    ],
     deps = [
         ":ast",
         "//src/common/logging",

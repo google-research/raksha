@@ -35,7 +35,9 @@ using ProgramFactory = ::souffle::ProgramFactory;
 // These are from Raksha's "souffle" subpackage.
 using DatalogLoweringVisitor = souffle::DatalogLoweringVisitor;
 
-static constexpr char kDatalogPolicyEngine[] = "datalog_policy_verifier_cxx";
+static constexpr char kDatalogPolicyEngine[] =
+    "datalog_policy_verifier_datalog_cxx";
+
 static constexpr char kViolatesPolicyRelation[] = "violatesPolicy";
 
 static bool IsModulePolicyCompliantHelper(
@@ -59,7 +61,6 @@ static bool IsModulePolicyCompliantHelper(
 
   program->loadAll(facts_directory.string());
   program->run();
-
   Relation* hasPolicyViolation =
       CHECK_NOTNULL(program->getRelation(kViolatesPolicyRelation));
 

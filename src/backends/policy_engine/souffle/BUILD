@@ -13,13 +13,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #----------------------------------------------------------------------------
-
+load(
+    "//build_defs:raksha_policy_verifier.bzl",
+    "policy_check",
+)
 load("//build_defs:package_groups.oss.bzl", "frontend_packages")
 
 package(
     default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
     licenses = ["notice"],
+)
+
+cc_binary(
+    name = "raksha_policy_datalog_emitter",
+    srcs = ["raksha_policy_datalog_emitter.cc"],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    deps = [
+        ":utils",
+        "//src/ir/auth_logic:ast_construction",
+        "//src/ir/auth_logic:lowering_ast_datalog",
+        "//src/ir/auth_logic:souffle_emitter",
+        "@absl//absl/flags:flag",
+        "@absl//absl/flags:parse",
+        "@absl//absl/flags:usage",
+        "@absl//absl/status:statusor",
+    ],
+)
+
+policy_check(
+    name = "datalog_policy_verifier",
+    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:policy.txt"],
 )
 
 cc_binary(
@@ -155,8 +180,8 @@ cc_library(
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":datalog_lowering_visitor",
+        ":datalog_policy_verifier",
         ":utils",
-        "//src/analysis/souffle:datalog_policy_verifier_lib",
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:policy_checker",
         "//src/common/utils:filesystem",

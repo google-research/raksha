@@ -25,7 +25,7 @@ load(
     "//src/analysis/souffle:dl_file_lists.bzl",
     "core_dl_files",
     "core_dl_files_except_taint",
-    "core_dl_files_plus_fact_test_helper_local",
+    "policy_verifier_dl_files_local",
 )
 
 package(
@@ -135,6 +135,4 @@ souffle_cc_library(
     src = ":taint_cxx",
 )
 
-exports_files(core_dl_files_plus_fact_test_helper_local + [
-    "may_will.dl",
-])
+exports_files(policy_verifier_dl_files_local)

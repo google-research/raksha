@@ -28,20 +28,30 @@ namespace raksha::ir::auth_logic {
 
 class SouffleEmitter {
  public:
-  static std::string EmitProgram(
-      const datalog::Program& program,
-      const absl::flat_hash_set<std::string>& skip_declarations) {
+  static std::string EmitProgram(const datalog::Program& program) {
     SouffleEmitter emitter;
     std::string body = emitter.EmitProgramBody(program);
     std::string outputs = emitter.EmitOutputs(program);
 
-    std::string declarations =
-        emitter.EmitRelationDeclarations(program, skip_declarations);
-    std::string type_declarations =
-        emitter.EmitTypeDeclarations(program, skip_declarations);
+    std::string declarations = emitter.EmitRelationDeclarations(program);
+    std::string type_declarations = emitter.EmitTypeDeclarations(program);
     return absl::StrCat(std::move(type_declarations), "\n",
                         std::move(declarations), "\n", std::move(body), "\n",
                         std::move(outputs));
+  }
+
+  const absl::flat_hash_set<std::string>& GetRelationsToNotDeclare() {
+    static const auto* const kRelationsToNotDeclare =
+        new absl::flat_hash_set<std::string>{
+            "Principal",    "Tag",
+            "AccessPath",   "says_isAccessPath",
+            "says_isTag",   "says_isPrincipal",
+            "says_ownsTag", "says_ownsAccessPath",
+            "says_hasTag",  "says_removeTag",
+            "says_may",     "says_will",
+            "isAccessPath", "isTag",
+            "isPrincipal",  "Operation"};
+    return *kRelationsToNotDeclare;
   }
 
  private:
@@ -131,13 +141,12 @@ class SouffleEmitter {
         });
   }
 
-  std::string EmitRelationDeclarations(
-      const datalog::Program& program,
-      const absl::flat_hash_set<std::string>& skip_declarations) {
+  std::string EmitRelationDeclarations(const datalog::Program& program) {
     std::vector<std::string> declaration_strings;
     for (const auto& declaration : program.relation_declarations()) {
-      if (skip_declarations.find(declaration.relation_name()) !=
-          skip_declarations.end())
+      CHECK(!GetRelationsToNotDeclare().empty());
+      if (GetRelationsToNotDeclare().find(declaration.relation_name()) !=
+          GetRelationsToNotDeclare().end())
         continue;
       declaration_strings.push_back(
           absl::StrCat(".decl ", declaration.relation_name(), "(",
@@ -147,22 +156,22 @@ class SouffleEmitter {
     return absl::StrJoin(declaration_strings, "\n");
   }
 
-  std::string EmitTypeDeclarations(
-      const datalog::Program& program,
-      const absl::flat_hash_set<std::string>& skip_declarations) {
+  std::string EmitTypeDeclarations(const datalog::Program& program) {
     absl::flat_hash_set<std::string> type_names;
     for (const auto& declaration : program.relation_declarations()) {
       for (const auto& argument : declaration.arguments()) {
         if (argument.argument_type().kind() !=
             datalog::ArgumentType::Kind::kCustom)
           continue;
-        if (skip_declarations.find(argument.argument_name()) !=
-            skip_declarations.end())
+        if (GetRelationsToNotDeclare().find(argument.argument_type().name()) !=
+            GetRelationsToNotDeclare().end())
           continue;
         type_names.insert(absl::StrCat(
             ".type ", argument.argument_type().name(), " <: symbol"));
       }
     }
+    // TODO (#633) work around till we add number types in C++ version.
+    type_names.insert(absl::StrCat(".type Number", " <: symbol"));
     std::vector<absl::string_view> sorted_type_names(type_names.begin(),
                                                      type_names.end());
     std::sort(sorted_type_names.begin(), sorted_type_names.end());

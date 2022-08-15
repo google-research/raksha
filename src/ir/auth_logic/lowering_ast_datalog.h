@@ -204,8 +204,8 @@ class LoweringToDatalogPass {
   // Queries are like predicates with arity 0. Souffle does not have predicates
   // with arity 0, so we represent them as having one argument which is a
   // constant.
-  static inline datalog::Predicate kDummyPredicate =
-      datalog::Predicate("grounded_dummy", {"dummy_var"}, datalog::kPositive);
+  static inline datalog::Predicate kDummyPredicate = datalog::Predicate(
+      "grounded_dummy", {R"("dummy_var")"}, datalog::kPositive);
 
   std::vector<datalog::RelationDeclaration> TransformAttributeDeclarations(
       const std::vector<datalog::RelationDeclaration>& relation_declarations);

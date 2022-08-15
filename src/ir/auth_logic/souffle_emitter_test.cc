@@ -16,6 +16,9 @@
 
 #include "src/ir/auth_logic/souffle_emitter.h"
 
+#include <iostream>
+#include <string>
+
 #include "src/common/testing/gtest.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/auth_logic/lowering_ast_datalog.h"
@@ -61,28 +64,30 @@ Program BuildRelationDeclarationProgram(SaysAssertion assertion) {
 TEST(EmitterTestSuite, EmptyAuthLogicTest) {
   std::string expected =
       R"(.type DummyType <: symbol
+.type Number <: symbol
 .decl grounded_dummy(dummy_param : DummyType)
 .decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
 .decl says_isNumber(speaker : Principal, x : Number)
-grounded_dummy(dummy_var).
+grounded_dummy("dummy_var").
 )";
   std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(Program({}, {}, {})), {});
+      LoweringToDatalogPass::Lower(Program({}, {}, {})));
   EXPECT_EQ(actual, expected);
 }
 
 TEST(EmitterTestSuite, SimpleTest) {
   std::string expected =
       R"(.type DummyType <: symbol
+.type Number <: symbol
 .decl grounded_dummy(dummy_param : DummyType)
 .decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
 .decl says_isNumber(speaker : Principal, x : Number)
 says_foo(TestPrincipal, bar, baz).
-grounded_dummy(dummy_var).
+grounded_dummy("dummy_var").
 )";
 
   std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildPredicateTestProgram()), {});
+      LoweringToDatalogPass::Lower(BuildPredicateTestProgram()));
 
   EXPECT_EQ(actual, expected);
 }
@@ -93,12 +98,13 @@ Program BuildCanSayProgram() {
       Assertion(Fact({Principal("PrincipalA")},
                      BaseFact(datalog::Predicate("grantAccess", {"secretFile"},
                                                  datalog::kPositive))))));
-};
+}
 
 TEST(EmitterTestSuite, CanSayTest) {
   std::string expected =
       R"(.type DummyType <: symbol
 .type FileName <: symbol
+.type Number <: symbol
 .decl grounded_dummy(dummy_param : DummyType)
 .decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
 .decl says_canSay_grantAccess(speaker : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
@@ -106,12 +112,11 @@ TEST(EmitterTestSuite, CanSayTest) {
 .decl says_isNumber(speaker : Principal, x : Number)
 says_grantAccess(TestSpeaker, secretFile) :- says_grantAccess(x__1, secretFile), says_canSay_grantAccess(TestSpeaker, x__1, secretFile).
 says_canSay_grantAccess(TestSpeaker, PrincipalA, secretFile).
-grounded_dummy(dummy_var).
+grounded_dummy("dummy_var").
 )";
-  const absl::flat_hash_set<std::string> skip_declarations = {{}};
+
   std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildCanSayProgram()),
-      std::move(skip_declarations));
+      LoweringToDatalogPass::Lower(BuildCanSayProgram()));
 
   EXPECT_EQ(actual, expected);
 }
@@ -129,6 +134,7 @@ TEST(EmitterTestSuite, DoubleCanSayTest) {
   std::string expected =
       R"(.type DummyType <: symbol
 .type FileName <: symbol
+.type Number <: symbol
 .decl grounded_dummy(dummy_param : DummyType)
 .decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
 .decl says_canSay_canSay_grantAccess(speaker : Principal, delegatee2 : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
@@ -138,11 +144,11 @@ TEST(EmitterTestSuite, DoubleCanSayTest) {
 says_grantAccess(TestSpeaker, secretFile) :- says_grantAccess(x__1, secretFile), says_canSay_grantAccess(TestSpeaker, x__1, secretFile).
 says_canSay_grantAccess(TestSpeaker, PrincipalA, secretFile) :- says_canSay_grantAccess(x__2, PrincipalA, secretFile), says_canSay_canSay_grantAccess(TestSpeaker, x__2, PrincipalA, secretFile).
 says_canSay_canSay_grantAccess(TestSpeaker, PrincipalB, PrincipalA, secretFile).
-grounded_dummy(dummy_var).
+grounded_dummy("dummy_var").
 )";
 
   std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildDoubleCanSayProgram()), {});
+      LoweringToDatalogPass::Lower(BuildDoubleCanSayProgram()));
 
   EXPECT_EQ(actual, expected);
 }
