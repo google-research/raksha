@@ -130,6 +130,20 @@ souffle_cc_library(
     src = ":datalog_policy_verifier_cxx",
 )
 
+gen_souffle_cxx_code(
+    name = "dp_policy_verifier_cxx",
+    src = "dp_policy_verifier_interface.dl",
+    included_dl_scripts = sql_dl_files + [
+        "epsilon_analysis.dl",
+        "sensitivity_analysis.dl",
+    ],
+)
+
+souffle_cc_library(
+    name = "dp_policy_verifier_lib",
+    src = ":dp_policy_verifier_cxx",
+)
+
 souffle_cc_library(
     name = "taint_dl",
     src = ":taint_cxx",

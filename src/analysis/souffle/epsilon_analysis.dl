@@ -6,14 +6,24 @@
 #define GLOBAL_EPSILON_OPERATOR as("global_epsilon", Operator)
 #define PRIVACY_MECHANISM_OPERATOR as("privacy_mechanism", Operator)
 
+.type GlobalDPParameter <: symbol
+
+#define GLOBAL_EPSILON_PARAMETER as("GlobalEpsilon", GlobalDPParameter)
 .type Epsilon <: number
+.type Delta <: symbol
+
+.type DPParameterValue = EpsilonValue { value: Epsilon}
+    | DeltaValue { value: Delta}
+
+.type DPParameterPolicyRule = [ dpParameter: GlobalDPParameter,  result: DPParameterValue]
+
+.decl isDPParameterPolicyRule(rule: DPParameterPolicyRule)
+
 
 // Global epsilon is a value determined by users of Raksha.
 // We could eventually set one as the default.
-.decl isGlobalEpsilon(epsilon: number)
-isGlobalEpsilon(epsilon) :- isOperation(operation),
-    operationHasOperator(operation, GLOBAL_EPSILON_OPERATOR),
-    operationHasAttribute(operation, ["epsilon", $NumberAttributePayload(epsilon)]).
+.decl isGlobalEpsilon(epsilon: Epsilon)
+isGlobalEpsilon(as(epsilon, Epsilon)) :- isDPParameterPolicyRule([GLOBAL_EPSILON_PARAMETER, $EpsilonValue(epsilon)]).
 
 // We track every mechanism that adds noise.
 // Right now, we are not tracking the type of noise (e.g. via Laplace of Gaussian mechanisms).
@@ -41,14 +51,20 @@ sqlPath(path_start, path_end) :- sqlPath(path_start, intermediate),
     flatten(input_list, intermediate),
     operationHasResult(operation, path_end).
 
-
 // Sequential composition: the epsilons of differential privacy mechanisms on
 // input value are added.
 .decl epsilonDiffPrivacy(value: AccessPath, epsilon: Epsilon)
-epsilonDiffPrivacy(value, epsilon) :- sqlPath(value, sql_output),
-      isDiffPrivacyMechanism(operation),
-      operationHasResult(operation, sql_output),
-      epsilon = sum y : { diffPrivacyMechanismHasEpsilon(operation, y)}.
+epsilonDiffPrivacy(value, epsilon) :- sqlPath(value, _),
+    epsilon = sum y: { epsilonDiffPrivacyIntermediate(value, _, y)}.
+
+// Intermediate relation used to grab all the privacy mechanisms that go back
+// to any given sqlInput
+.decl epsilonDiffPrivacyIntermediate(value: AccessPath, sql_output: AccessPath, epsilon: Epsilon)
+epsilonDiffPrivacyIntermediate(value, sql_output, epsilon) :- sqlPath(value, sql_output),
+    isDiffPrivacyMechanism(operation),
+    operationHasResult(operation, sql_output),
+    diffPrivacyMechanismHasEpsilon(operation, epsilon).
+
 
 sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation),
     operationHasResult(operation, value),
