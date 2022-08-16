@@ -1,0 +1,16 @@
+// Modeling a single query that fails the dp analysis: the actual delta (1) is
+// smaller then the global delta. Note that the real deltas are much smaller than
+// this but for now we'll use integers.
+module m0 {
+  block b0 {
+        %0 = core.input [name: "revenue_table"] ()
+        %1 = sql.filter [column: "revenue"] (%0) // { revenue > 100 }
+        %location = sql.column_access [column: "location"] (%1)
+        %2 = sql.group_by[] (%1, %location) // (%0, location)
+        // epsilon set to take into account sens. analysis (actual epsilon is 2)
+        // delta set equal to global delta
+        %dp_data = privacy_mechanism [epsilon: 1, delta: 1] (%2)
+        %3 = sql.average [] (%dp_data)
+        %4 = sql.output [] (%3) // Report the noisy average
+    }
+}

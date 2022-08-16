@@ -3,17 +3,18 @@
 
 #include "src/analysis/souffle/sensitivity_analysis.dl"
 
-#define GLOBAL_EPSILON_OPERATOR as("global_epsilon", Operator)
 #define PRIVACY_MECHANISM_OPERATOR as("privacy_mechanism", Operator)
 
 .type GlobalDPParameter <: symbol
 
 #define GLOBAL_EPSILON_PARAMETER as("GlobalEpsilon", GlobalDPParameter)
 .type Epsilon <: number
-.type Delta <: symbol
 
-.type DPParameterValue = EpsilonValue { value: Epsilon}
-    | DeltaValue { value: Delta}
+#define GLOBAL_DELTA_PARAMETER as ("GlobalDelta", GlobalDPParameter)
+.type Delta <: number
+
+.type DPParameterValue = EpsilonValue { value: Epsilon }
+    | DeltaValue { value: Delta }
 
 .type DPParameterPolicyRule = [ dpParameter: GlobalDPParameter,  result: DPParameterValue]
 
@@ -25,6 +26,10 @@
 .decl isGlobalEpsilon(epsilon: Epsilon)
 isGlobalEpsilon(as(epsilon, Epsilon)) :- isDPParameterPolicyRule([GLOBAL_EPSILON_PARAMETER, $EpsilonValue(epsilon)]).
 
+.decl isGlobalDelta(delta: Delta)
+
+isGlobalDelta(as(delta, Delta)) :- isDPParameterPolicyRule([GLOBAL_DELTA_PARAMETER, $DeltaValue(delta)]).
+
 // We track every mechanism that adds noise.
 // Right now, we are not tracking the type of noise (e.g. via Laplace of Gaussian mechanisms).
 .decl isDiffPrivacyMechanism(operation: Operation)
@@ -35,6 +40,10 @@ isDiffPrivacyMechanism(operation) :- isOperation(operation),
 .decl diffPrivacyMechanismHasEpsilon(operation: Operation, epsilon: Epsilon)
 diffPrivacyMechanismHasEpsilon(operation, as(epsilon, Epsilon)) :- isDiffPrivacyMechanism(operation),
     operationHasAttribute(operation, ["epsilon", $NumberAttributePayload(epsilon)]).
+
+.decl diffPrivacyMechanismHasDelta(operation: Operation, delta: Delta)
+diffPrivacyMechanismHasDelta(operation, as(delta, Delta)) :- isDiffPrivacyMechanism(operation),
+    operationHasAttribute(operation, ["delta", $NumberAttributePayload(delta)]).
 
 // We propagate privacy mechanisms backwards to inputs as per the PINQ paper.
 // This relation tracks every input to its (direct and indirect) outputs.
@@ -66,15 +75,35 @@ epsilonDiffPrivacyIntermediate(value, sql_output, epsilon) :- sqlPath(value, sql
     diffPrivacyMechanismHasEpsilon(operation, epsilon).
 
 
+// The deltas of differential privacy are also added as per Dwork and Roth
+// (https://www.cis.upenn.edu/~aaroth/Papers/privacybook.pdf). In addition,
+// Abuah, Darais, and Near describe the role of delta in advanced composition
+// (https://arxiv.org/pdf/2105.01632.pdf)
+.decl deltaDiffPrivacy(value: AccessPath, delta: Delta)
+deltaDiffPrivacy(value, delta) :- sqlPath(value, _),
+    delta = sum y : {deltaDiffPrivacyIntermediate(value, _, y)}.
+
+// Intermediate relation used to grab all the privacy mechanisms that go back
+// to any given sqlInput
+.decl deltaDiffPrivacyIntermediate(value: AccessPath, sql_output: AccessPath, delta: Delta)
+deltaDiffPrivacyIntermediate(value, sql_output, delta) :- sqlPath(value, sql_output),
+    isDiffPrivacyMechanism(operation),
+    operationHasResult(operation, sql_output),
+    diffPrivacyMechanismHasDelta(operation, delta).
+
 sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation),
     operationHasResult(operation, value),
     operationHasOperandAtIndex(operation, sql_input, 0), // assuming isDiffPrivacyMechanism always has one input
     sqlValueSensitivity(sql_input, sensitivity).
 
 // DP Policies are violated when:
-// 1. The local epsilon for a value used in an aggregation operation as input (the value in isSqlPath)
-//    times the sensitivity of said ggregation operation is less than the global epsilon.
-// 2. The local epsilon for an input to an aggregation operation is greater than the global epsilon.
+// 1. The global epsilon is less than the local epsilon for a value used in an
+//    aggregation operation as input (the value in isSqlPath)
+//    times the sensitivity of said agregation operation.
+// 2. The global epsilon is less than the local epsilon for an input to an
+//    aggregation operation.
+// 3. The global delta for an input to an aggregation operation is smaller than
+//    the local delta.
 violatesPolicy(value) :- isAggregationOperation(operation),
     operationHasResult(operation, sql_output),
     sqlPath(value, sql_output),
@@ -84,6 +113,12 @@ violatesPolicy(value) :- isAggregationOperation(operation),
         (sqlValueSensitivity(sql_output, sensitivity),
         global_epsilon < epsilon * sensitivity);
         global_epsilon < epsilon
-    ).
+    );
+    isAggregationOperation(operation),
+    operationHasResult(operation, sql_output),
+    sqlPath(value, sql_output),
+    deltaDiffPrivacy(value, delta),
+    isGlobalDelta(global_delta),
+    global_delta < delta.
 
 #endif //SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_
