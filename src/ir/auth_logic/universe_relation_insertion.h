@@ -54,13 +54,11 @@ namespace raksha::ir::auth_logic {
 class UniverseRelationInsertion {
  public:
   // A map from the names of principal / predicate argument literals
-  // to typings.
+  // (the constants wrapped in quotes) to typings.
   using TypeEnv = absl::flat_hash_map<std::string, datalog::ArgumentType>;
   // A map from predicate names to predicate declarations.
   using DeclEnv =
       absl::flat_hash_map<std::string, datalog::RelationDeclaration>;
-  // A Set of relation declarations
-  using DeclSet = absl::flat_hash_set<datalog::RelationDeclaration>;
 
   static Program InsertUniverseRelations(const Program& prog) {
     // Generate relation declaration environment
@@ -202,11 +200,22 @@ class UniverseRelationInsertion {
     // the numeric RVALUEs and add them to the type environment
     // with type ArgumentType(kNumber, "Number")
     // (Related to #637).
+    // This is a workaround that makes use of the fact that
+    // numeric comparisons are represented as predicates
+    // with a name that matches the operator:
+    // (https://github.com/google-research/raksha/blob/be6ef8e1e1a20735a06637c12db9ed0b87e3d2a2/src/ir/auth_logic/ast_construction.cc#L92)
+    static inline bool PredicateIsNumericOperator(const datalog::Predicate& pred) {
+      if (pred.name() == "<" || pred.name() == "<" ||
+        pred.name() == "=" || pred.name() == "!=" ||
+        pred.name() == "<=" || pred.name() == ">=") {
+          return true;
+      } else {
+        return false;
+      }
+    }
 
     Unit PreVisit(const Principal& principal) {
-      AddTyping(principal.name(),
-                datalog::ArgumentType(datalog::ArgumentType::Kind::kPrincipal,
-                                      "Principal"));
+      AddTyping(principal.name(), datalog::ArgumentType::MakePrincipalType());
       return Unit();
     }
 
@@ -215,11 +224,29 @@ class UniverseRelationInsertion {
         LOG(FATAL) << "predicate: " << pred.name()
                    << "was used but not declared";
       }
-      datalog::RelationDeclaration decl = decl_env_.find(pred.name())->second;
-      for (auto arg : decl.arguments()) {
-        AddTyping(std::string{arg.argument_name()}, arg.argument_type());
+
+      if (PredicateIsNumericOperator(pred)) {
+        // This is part of the workaround for handling numeric comparisons
+        // given that the operators use the same AST nodes as predicates.
+        for (auto arg : pred.args() ) {
+          AddTyping(arg, datalog::ArgumentType::MakeNumberType());
+        }
+        return Unit();
+      } else {
+        // This is the case where this is a normal predicate rather
+        // than a numeric operator
+        datalog::RelationDeclaration decl = decl_env_.find(pred.name())->second;
+        // The relation declarations give the types for each position in the
+        // predicate. For the xth argument in the predicate, we want to
+        // assign it the type for the xth parameter in the relation declaration.
+        // So to do this, we iterate through the list of arguments in the
+        // predicate and the list of parameters in the declaration using
+        // the indices of the arguments iterator of the predicate.
+        for (unsigned i = 0; i <= pred.args().size(); i++) {
+          AddTyping(pred.args()[i], decl.arguments()[i].argument_type());
+        }
+        return Unit();
       }
-      return Unit();
     }
 
     TypeEnv type_env_;
