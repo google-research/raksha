@@ -34,9 +34,11 @@ SOURCE_FILES_PATTERNS=(
   ':!*.txt'
 
   # Exclude test files.
+  ':!*.auth'
   ':!*.authlogic'
   ':!*.raksha'
   ':!*.ir'
+  ':!**/testdata/**'
 
   # Exclude (generated) build and config files.
   ':(exclude,glob).*'
@@ -88,7 +90,7 @@ check_changed_files_for_missing_license() {
     # Initial commit: diff against an empty tree object
     against=$(git hash-object -t tree /dev/null)
   fi
-  for file in $(git diff --cached --name-only --diff-filter=ACMR -z $against | tr '\0' '\n'); do
+  for file in $(git diff --cached --name-only --diff-filter=ACMR -z $against -- $@ | tr '\0' '\n'); do
     check_file_for_missing_license $file
   done
 }
@@ -106,7 +108,7 @@ CMD=$1
 case $CMD in
   "" ) # Default pre-commit check.
     echo "Checking licenses in changed files..."
-    check_changed_files_for_missing_license
+    check_changed_files_for_missing_license ${SOURCE_FILES_PATTERNS[@]}
     ;;
   all ) # Used for manually checking 'all' files.
     echo "Checking licenses in all tracked files..."
