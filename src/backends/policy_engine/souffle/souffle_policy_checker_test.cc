@@ -15,7 +15,7 @@
 //----------------------------------------------------------------------------
 #include "src/backends/policy_engine/souffle/souffle_policy_checker.h"
 
-#include "src/backends/policy_engine/policy.h"
+#include "src/backends/policy_engine/sql_policy_rule_policy.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/ops/literal_op.h"
 #include "src/frontends/sql/ops/sql_output_op.h"
@@ -30,7 +30,7 @@ namespace {
 TEST(SoufflePolicyCheckerTest, ReturnsTrue) {
   SoufflePolicyChecker checker;
   ir::Module module;
-  EXPECT_TRUE(checker.IsModulePolicyCompliant(module, Policy("")));
+  EXPECT_TRUE(checker.IsModulePolicyCompliant(module, SqlPolicyRulePolicy("")));
 }
 
 TEST(SoufflePolicyCheckerTest, ReturnsFalse) {
@@ -61,11 +61,11 @@ TEST(SoufflePolicyCheckerTest, ReturnsFalse) {
   // Expect that the module is not policy compliant because it puts taint
   // directly into a sql output op.
   EXPECT_FALSE(checker.IsModulePolicyCompliant(
-      module,
-      Policy(R"(["taint_rule", $AddConfidentialityTag("taint"), nil])")));
+      module, SqlPolicyRulePolicy(
+                  R"(["taint_rule", $AddConfidentialityTag("taint"), nil])")));
   // But expect that without any policy rules, the tag transform will not fire
   // and it will be policy compliant.
-  EXPECT_TRUE(checker.IsModulePolicyCompliant(module, Policy("")));
+  EXPECT_TRUE(checker.IsModulePolicyCompliant(module, SqlPolicyRulePolicy("")));
 }
 
 }  // anonymous namespace

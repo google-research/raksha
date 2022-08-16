@@ -26,6 +26,7 @@
 #include "absl/status/statusor.h"
 #include "src/backends/policy_engine/policy.h"
 #include "src/backends/policy_engine/souffle/souffle_policy_checker.h"
+#include "src/backends/policy_engine/sql_policy_rule_policy.h"
 #include "src/common/logging/logging.h"
 #include "src/parser/ir/ir_parser.h"
 
@@ -59,10 +60,9 @@ absl::StatusOr<std::string> ReadFileContents(std::filesystem::path file_path) {
 
 }  // namespace
 
-using raksha::backends::policy_engine::Policy;
 using raksha::backends::policy_engine::SoufflePolicyChecker;
+using raksha::backends::policy_engine::SqlPolicyRulePolicy;
 using raksha::ir::IrProgramParser;
-using raksha::ir::Module;
 
 int main(int argc, char* argv[]) {
   google::InitGoogleLogging("check_policy_compliance");
@@ -87,11 +87,10 @@ int main(int argc, char* argv[]) {
   }
 
   // Invoke policy checker and return result.
-  SoufflePolicyChecker checker;
   IrProgramParser irParser;
   auto [context, module, ssa_names] = irParser.ParseProgram(*ir_string);
-  Policy policy(*sql_policy_rules);
-  if (checker.IsModulePolicyCompliant(*module, policy)) {
+  SqlPolicyRulePolicy policy(*sql_policy_rules);
+  if (SoufflePolicyChecker().IsModulePolicyCompliant(*module, policy)) {
     LOG(ERROR) << "Policy check succeeded!";
     return 0;
   } else {

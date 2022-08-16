@@ -18,6 +18,7 @@
 
 #include "google/protobuf/text_format.h"
 #include "src/backends/policy_engine/policy.h"
+#include "src/backends/policy_engine/sql_policy_rule_policy.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/sql_ir.pb.h"
 #include "src/ir/ir_printer.h"
@@ -29,9 +30,10 @@ TEST(SimpleExpectedPassTest, SimpleExpectedPassTest) {
   std::string textproto =
       R"(id_expression_pairs: [ { id: 1 expression: { literal: { literal_str: "hello" } } } ])";
   ExpressionArena expression_arena;
-  EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(textproto,
-                                                            &expression_arena));
-  EXPECT_TRUE(verify(expression_arena, backends::policy_engine::Policy("")));
+  EXPECT_TRUE(
+      google::protobuf::TextFormat::ParseFromString(textproto, &expression_arena));
+  EXPECT_TRUE(verify(expression_arena,
+                     backends::policy_engine::SqlPolicyRulePolicy("")));
 }
 
 TEST(SimpleExpectedFailTest, SimpleExpectedFailTest) {
@@ -42,14 +44,15 @@ id_expression_pairs: [
   { id: 2 expression: { tag_transform: { transform_rule_name: "add_tag" transformed_node: 1 } } } ])";
 
   ExpressionArena expression_arena;
-  EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(textproto,
-                                                            &expression_arena));
+  EXPECT_TRUE(
+      google::protobuf::TextFormat::ParseFromString(textproto, &expression_arena));
   EXPECT_FALSE(
       verify(expression_arena,
-             backends::policy_engine::Policy(
+             backends::policy_engine::SqlPolicyRulePolicy(
                  R"(["add_tag", $AddConfidentialityTag("tag"), nil])")));
 
-  EXPECT_TRUE(verify(expression_arena, backends::policy_engine::Policy("")));
+  EXPECT_TRUE(verify(expression_arena,
+                     backends::policy_engine::SqlPolicyRulePolicy("")));
 }
 
 }  // namespace raksha::frontends::sql

@@ -14,6 +14,11 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
+load(
+    "//build_defs:package_groups.oss.bzl",
+    "frontend_packages",
+)
+
 package(
     default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
@@ -26,8 +31,22 @@ cc_library(
     visibility = [
         "//:__pkg__",
         "//src:__subpackages__",
+    ] + frontend_packages,
+    deps = ["@absl//absl/strings"],
+)
+
+cc_library(
+    name = "sql_policy_rule_policy",
+    hdrs = ["sql_policy_rule_policy.h"],
+    visibility = [
+        "//:__pkg__",
+        "//src:__subpackages__",
+    ] + frontend_packages,
+    deps = [
+        ":policy",
+        "@absl//absl/status",
+        "@absl//absl/strings",
     ],
-    deps = ["@absl//absl/status"],
 )
 
 cc_library(

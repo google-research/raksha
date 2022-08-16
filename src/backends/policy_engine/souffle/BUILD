@@ -55,6 +55,7 @@ cc_binary(
     deps = [
         ":souffle_policy_checker",
         "//src/backends/policy_engine:policy",
+        "//src/backends/policy_engine:sql_policy_rule_policy",
         "//src/common/logging",
         "//src/parser/ir:ir_parser",
         "@absl//absl/flags:flag",
@@ -185,8 +186,8 @@ cc_library(
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:policy_checker",
         "//src/common/utils:filesystem",
-        "//src/ir:ir_printer",
         "//src/ir:module",
+        "@absl//absl/container:inlined_vector",
         "@absl//absl/strings",
         "@souffle//:souffle_include_lib",
     ],
@@ -198,6 +199,7 @@ cc_test(
     deps = [
         ":souffle_policy_checker",
         "//src/backends/policy_engine:policy",
+        "//src/backends/policy_engine:sql_policy_rule_policy",
         "//src/common/logging",
         "//src/common/testing:gtest",
         "//src/frontends/sql/ops:literal_op",

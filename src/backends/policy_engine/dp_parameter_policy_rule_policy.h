@@ -37,16 +37,17 @@ class Policy {
   // into the analysis itself. Thus, it is only appropriate to place the checker
   // to be called into the `Policy` as if the data compiled in were opaque
   // members of this object.
-  virtual std::string GetPolicyAnalysisCheckerName() const = 0;
+  virtual absl::string_view GetPolicyAnalysisCheckerName() const = 0;
 
   // Gets the name of the Datalog fact populated by this policy. If this policy
   // does not populate any facts, (it is all compiled into the analysis) this
   // can be absent.
-  virtual std::optional<std::string> GetPolicyFactName() const = 0;
+  virtual std::optional<absl::string_view> GetPolicyFactName() const = 0;
 
   // Gets the string representation of the datalog facts included in this
   // policy. If this policy does not populate any facts, (it is all compiled
   // into the analysis) this can be absent.
+
   virtual std::optional<std::string> GetPolicyString() const = 0;
 };
 

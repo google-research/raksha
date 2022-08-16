@@ -35,18 +35,22 @@ using ProgramFactory = ::souffle::ProgramFactory;
 // These are from Raksha's "souffle" subpackage.
 using DatalogLoweringVisitor = souffle::DatalogLoweringVisitor;
 
-static constexpr char kDatalogPolicyEngine[] =
-    "datalog_policy_verifier_datalog_cxx";
-
 static constexpr char kViolatesPolicyRelation[] = "violatesPolicy";
 
 static bool IsModulePolicyCompliantHelper(
     const ir::Module& module, const Policy& policy,
     const std::filesystem::path& facts_directory) {
-  absl::Status output_policy_status = souffle::WriteFactsStringToFactsFile(
-      facts_directory, "isSqlPolicyRule", policy.is_sql_policy_rule_facts());
-  CHECK(output_policy_status.ok())
-      << "Unexpected error while outputting policy: " << output_policy_status;
+  // Output the facts contained in the policy if they exist.
+  if (std::optional<std::string> optional_policy_fact_name =
+          policy.GetPolicyFactName()) {
+    std::optional<std::string> optional_policy_string =
+        policy.GetPolicyString();
+    CHECK(optional_policy_string);
+    absl::Status output_policy_status = souffle::WriteFactsStringToFactsFile(
+        facts_directory, *optional_policy_fact_name, *optional_policy_string);
+    CHECK(output_policy_status.ok())
+        << "Unexpected error while outputting policy: " << output_policy_status;
+  }
 
   DatalogLoweringVisitor datalog_lowering_visitor;
   module.Accept(datalog_lowering_visitor);
@@ -56,8 +60,9 @@ static bool IsModulePolicyCompliantHelper(
   CHECK(output_module_status.ok())
       << "Unexpected error while outputting module: " << output_module_status;
 
-  std::unique_ptr<SouffleProgram> program(CHECK_NOTNULL(
-      ProgramFactory::newInstance(std::string(kDatalogPolicyEngine))));
+  std::unique_ptr<SouffleProgram> program(
+      CHECK_NOTNULL(ProgramFactory::newInstance(
+          std::string(policy.GetPolicyAnalysisCheckerName()))));
 
   program->loadAll(facts_directory.string());
   program->run();

@@ -110,6 +110,7 @@ cc_test(
         ":driver",
         ":sql_ir_cc_proto",
         "//src/backends/policy_engine:policy",
+        "//src/backends/policy_engine:sql_policy_rule_policy",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir:ir_printer",

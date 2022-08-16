@@ -28,7 +28,7 @@ namespace raksha::frontends::sql {
 // The driver for the SQL analysis, to be attached to a third-party parsing
 // frontend.
 bool verify(const ExpressionArena &arena,
-            backends::policy_engine::Policy policy);
+            const backends::policy_engine::Policy &policy);
 
 }  // namespace raksha::frontends::sql
 

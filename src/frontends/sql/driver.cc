@@ -24,15 +24,14 @@
 namespace raksha::frontends::sql {
 
 bool verify(const ExpressionArena &arena,
-            backends::policy_engine::Policy policy) {
+            const backends::policy_engine::Policy &policy) {
   ir::IRContext ir_context;
   DecoderContext decoder_context(ir_context);
   DecodeExpressionArena(arena, decoder_context);
   decoder_context.BuildTopLevelBlock();
   const ir::Module &module = decoder_context.global_module();
-  backends::policy_engine::SoufflePolicyChecker souffle_policy_checker;
-  return souffle_policy_checker.IsModulePolicyCompliant(module,
-                                                        std::move(policy));
+  return backends::policy_engine::SoufflePolicyChecker()
+      .IsModulePolicyCompliant(module, policy);
 }
 
 }  // namespace raksha::frontends::sql
