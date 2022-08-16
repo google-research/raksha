@@ -80,7 +80,13 @@ class UniverseRelationInsertion {
           universe_condition_transformer.AddUniverseConditions(says_assertion));
     }
 
-    return Program(prog.relation_declarations(), new_says_assertions,
+    // Add declarations for universe relations.
+    auto universe_declarations = GetUniverseDeclarations(prog);
+    auto new_declarations = prog.relation_declarations();
+    new_declarations.insert(new_declarations.end(),
+      universe_declarations.begin(), universe_declarations.end());
+
+    return Program(new_declarations, new_says_assertions,
                    prog.queries());
   }
 
