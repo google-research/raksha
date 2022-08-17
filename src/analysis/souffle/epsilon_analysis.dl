@@ -7,28 +7,23 @@
 
 .type GlobalDPParameter <: symbol
 
-#define GLOBAL_EPSILON_PARAMETER as("GlobalEpsilon", GlobalDPParameter)
 .type Epsilon <: number
 
-#define GLOBAL_DELTA_PARAMETER as ("GlobalDelta", GlobalDPParameter)
 .type Delta <: number
 
 .type DPParameterValue = EpsilonValue { value: Epsilon }
     | DeltaValue { value: Delta }
 
-.type DPParameterPolicyRule = [ dpParameter: GlobalDPParameter,  result: DPParameterValue]
-
-.decl isDPParameterPolicyRule(rule: DPParameterPolicyRule)
-
+.decl isDPParameter(rule: DPParameterValue)
 
 // Global epsilon is a value determined by users of Raksha.
 // We could eventually set one as the default.
 .decl isGlobalEpsilon(epsilon: Epsilon)
-isGlobalEpsilon(as(epsilon, Epsilon)) :- isDPParameterPolicyRule([GLOBAL_EPSILON_PARAMETER, $EpsilonValue(epsilon)]).
+isGlobalEpsilon(epsilon) :- isDPParameter($EpsilonValue(epsilon)).
 
 .decl isGlobalDelta(delta: Delta)
 
-isGlobalDelta(as(delta, Delta)) :- isDPParameterPolicyRule([GLOBAL_DELTA_PARAMETER, $DeltaValue(delta)]).
+isGlobalDelta(delta) :- isDPParameter($DeltaValue(delta)).
 
 // We track every mechanism that adds noise.
 // Right now, we are not tracking the type of noise (e.g. via Laplace of Gaussian mechanisms).

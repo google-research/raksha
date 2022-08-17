@@ -1,2 +1,2 @@
-["GlobalEpsilon", $EpsilonValue(4)]
-["GlobalDelta", $DeltaValue(1)]
+$EpsilonValue(4)
+$DeltaValue(1)

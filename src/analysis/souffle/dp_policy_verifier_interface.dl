@@ -21,13 +21,12 @@
 
 // An interface used for running and getting results from the policy verifier.
 // Does not concern itself with authorization logic facts, considers only
-// `Operation`s and `SqlPolicyRule`s (`SqlPolicyRule`s are overly sql-focused,
-// and will probably be replaced with a more general form of `Operation`
-// implementation specification in the future). Returns as output the
-// violatesPolicy relation, which indicates whether there were failures in a way
-// that is easy to read across the Souffle C++ interface.
+// `Operation`s and `DPParameterValue`s, which indicate the global tolerance for
+// some DP parameter value on a query. Returns as output the violatesPolicy
+// relation, which indicates whether there were failures in a way that is easy
+// to read across the Souffle C++ interface.
 .input isOperation(delimiter=";")
-.input isDPParameterPolicyRule(delimiter=";")
+.input isDPParameter(delimiter=";")
 .output violatesPolicy(delimiter=";")
 
 #endif
