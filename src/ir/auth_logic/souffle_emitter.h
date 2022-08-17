@@ -40,7 +40,7 @@ class SouffleEmitter {
                         std::move(outputs));
   }
 
-  const absl::flat_hash_set<std::string>& GetRelationsToNotDeclare() {
+  static const absl::flat_hash_set<std::string>& GetRelationsToNotDeclare() {
     static const auto* const kRelationsToNotDeclare =
         new absl::flat_hash_set<std::string>{
             "Principal",    "Tag",
