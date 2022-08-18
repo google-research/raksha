@@ -84,10 +84,10 @@ class UniverseRelationInsertion {
     auto universe_declarations = GetUniverseDeclarations(prog);
     auto new_declarations = prog.relation_declarations();
     new_declarations.insert(new_declarations.end(),
-      universe_declarations.begin(), universe_declarations.end());
+                            universe_declarations.begin(),
+                            universe_declarations.end());
 
-    return Program(new_declarations, new_says_assertions,
-                   prog.queries());
+    return Program(new_declarations, new_says_assertions, prog.queries());
   }
 
  private:
@@ -143,14 +143,14 @@ class UniverseRelationInsertion {
       return type_env.find(argument_name)->second;
     }
   }
-    
+
   static datalog::RelationDeclaration GetDeclarationOrFatal(
-    const DeclEnv& decl_env, const std::string& predicate_name) {
+      const DeclEnv& decl_env, const std::string& predicate_name) {
     if (decl_env.find(predicate_name) == decl_env.end()) {
       LOG(FATAL) << "could not find declaration for relation" << predicate_name;
     } else {
       return decl_env.find(predicate_name)->second;
-    } 
+    }
   }
 
   // This generates a set of says assertions that populate all the
@@ -228,11 +228,11 @@ class UniverseRelationInsertion {
     // numeric comparisons are represented as predicates
     // with a name that matches the operator:
     // (https://github.com/google-research/raksha/blob/be6ef8e1e1a20735a06637c12db9ed0b87e3d2a2/src/ir/auth_logic/ast_construction.cc#L92)
-    static inline bool PredicateIsNumericOperator(const datalog::Predicate& pred) {
-      if (pred.name() == "<" || pred.name() == "<" ||
-        pred.name() == "=" || pred.name() == "!=" ||
-        pred.name() == "<=" || pred.name() == ">=") {
-          return true;
+    static inline bool PredicateIsNumericOperator(
+        const datalog::Predicate& pred) {
+      if (pred.name() == "<" || pred.name() == "<" || pred.name() == "=" ||
+          pred.name() == "!=" || pred.name() == "<=" || pred.name() == ">=") {
+        return true;
       } else {
         return false;
       }
@@ -247,15 +247,15 @@ class UniverseRelationInsertion {
       if (PredicateIsNumericOperator(pred)) {
         // This is part of the workaround for handling numeric comparisons
         // given that the operators use the same AST nodes as predicates.
-        for (auto arg : pred.args() ) {
+        for (auto arg : pred.args()) {
           AddTyping(arg, datalog::ArgumentType::MakeNumberType());
         }
         return Unit();
       } else {
         // This is the case where this is a normal predicate rather
         // than a numeric operator
-        datalog::RelationDeclaration decl = GetDeclarationOrFatal(
-          decl_env_, pred.name());
+        datalog::RelationDeclaration decl =
+            GetDeclarationOrFatal(decl_env_, pred.name());
         // The relation declarations give the types for each position in the
         // predicate. For the xth argument in the predicate, we want to
         // assign it the type for the xth parameter in the relation declaration.
@@ -374,7 +374,6 @@ class UniverseRelationInsertion {
     }
 
    private:
-
     Assertion AddUniverseConditions(const Assertion& assertion) {
       return std::visit(
           [this](const auto& variant) {
@@ -428,7 +427,7 @@ class UniverseRelationInsertion {
       }
     }
 
-    // Add universe conditions for the non-constant arguments 
+    // Add universe conditions for the non-constant arguments
     std::vector<BaseFact> Visit(const datalog::Predicate& pred) override {
       auto decl = GetDeclarationOrFatal(decl_env_, pred.name());
       std::vector<BaseFact> conditions;
@@ -436,7 +435,7 @@ class UniverseRelationInsertion {
         auto arg = pred.args()[i];
         if (!IsNameConstant(arg)) {
           conditions.push_back(MakeUniverseMembershipFact(
-            arg, decl.arguments()[i].argument_type()));
+              arg, decl.arguments()[i].argument_type()));
         }
       }
       return conditions;
