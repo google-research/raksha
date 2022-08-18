@@ -342,11 +342,14 @@ cc_library(
         ":module",
         ":ssa_names",
         ":value",
+        "//src/common/proto:json_util",
+        "//src/common/proto:protobuf",
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "//src/ir/proto:ir_cc_proto",
         "@absl//absl/container:flat_hash_map",
+        "@absl//absl/status:statusor",
     ],
 )
 

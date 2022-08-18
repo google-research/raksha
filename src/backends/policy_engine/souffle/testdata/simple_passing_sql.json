@@ -1,0 +1,115 @@
+{
+  "topLevelModule": {
+    "blocks": [
+      {
+        "id": "6",
+        "block": {
+          "operations": [
+            {
+              "id": "1",
+              "operation": {
+                "operatorName": "sql.merge",
+                "attributes": {
+                  "attributes": {
+                    "control_input_start_index": {
+                      "int64Payload": "0"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "2",
+              "operation": {
+                "operatorName": "sql.tag_transform",
+                "inputs": [
+                  {
+                    "operationResultValue": {
+                      "operationId": "1",
+                      "outputName": "out"
+                    }
+                  }
+                ],
+                "attributes": {
+                  "attributes": {
+                    "rule_name": {
+                      "stringPayload": "set_restricted"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "3",
+              "operation": {
+                "operatorName": "sql.tag_transform",
+                "inputs": [
+                  {
+                    "operationResultValue": {
+                      "operationId": "2",
+                      "outputName": "out"
+                    }
+                  }
+                ],
+                "attributes": {
+                  "attributes": {
+                    "rule_name": {
+                      "stringPayload": "set_ssn_integrity"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "4",
+              "operation": {
+                "operatorName": "sql.tag_transform",
+                "inputs": [
+                  {
+                    "operationResultValue": {
+                      "operationId": "3",
+                      "outputName": "out"
+                    }
+                  }
+                ],
+                "attributes": {
+                  "attributes": {
+                    "rule_name": {
+                      "stringPayload": "remove_restricted_for_ssn"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": "5",
+              "operation": {
+                "operatorName": "sql.sql_output",
+                "inputs": [
+                  {
+                    "operationResultValue": {
+                      "operationId": "4",
+                      "outputName": "out"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "frontend": "Raksha.IRToProto",
+  "operators": [
+    {
+      "name": "sql.merge"
+    },
+    {
+      "name": "sql.tag_transform"
+    },
+    {
+      "name": "sql.sql_output"
+    }
+  ]
+}

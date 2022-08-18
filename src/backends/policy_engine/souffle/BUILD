@@ -69,6 +69,7 @@ cc_binary(
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:sql_policy_rule_policy",
         "//src/common/logging",
+        "//src/ir:proto_to_ir",
         "//src/parser/ir:ir_parser",
         "@absl//absl/flags:flag",
         "@absl//absl/flags:parse",
@@ -83,6 +84,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "pass",
+        "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
         "datalog_simple_policy_verifier_pass_datalog_cxx",
@@ -100,6 +102,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "fail",
+        "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
         "datalog_simple_policy_verifier_fail_datalog_cxx",
@@ -117,6 +120,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "pass",
+        "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple_passing_sql.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
     ],
@@ -128,17 +132,48 @@ sh_test(
 )
 
 sh_test(
+    name = "check_policy_compliance_proto_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "proto",
+        "$(location //src/backends/policy_engine/souffle/testdata:simple_passing_sql.json)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:simple_passing_sql.json",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+)
+
+sh_test(
     name = "check_policy_compliance_fail_test",
     srcs = ["check_policy_compliance_test.sh"],
     args = [
         "$(location :check_policy_compliance)",
         "fail",
+        "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple_failing_sql.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
     ],
     data = [
         ":check_policy_compliance",
         "//src/backends/policy_engine/souffle/testdata:simple_failing_sql.ir",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+)
+
+sh_test(
+    name = "check_policy_compliance_badargs_test",
+    srcs = ["check_policy_compliance_errors.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+    ],
+    data = [
+        ":check_policy_compliance",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
     ],
 )
