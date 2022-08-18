@@ -13,47 +13,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#include "src/ir/attributes/double_attribute.h"
+#include "src/ir/attributes/float_attribute.h"
 
 #include "src/common/testing/gtest.h"
 
 namespace raksha::ir {
 namespace {
 
-TEST(DoubleAttributeKindTest, ConstantkAttributeKindIsDouble) {
-  EXPECT_EQ(DoubleAttribute::kAttributeKind, AttributeBase::Kind::kDouble);
+TEST(FloatAttributeKindTest, ConstantkAttributeKindIsFloat) {
+  EXPECT_EQ(FloatAttribute::kAttributeKind, AttributeBase::Kind::kFloat);
 }
 
-class DoubleAttributeTest
+class FloatAttributeTest
     : public testing::TestWithParam<std::pair<double, absl::string_view>> {};
 
-TEST_P(DoubleAttributeTest, KindAndToStringWorks) {
+TEST_P(FloatAttributeTest, KindAndToStringWorks) {
   const auto& [value, string_rep] = GetParam();
-  auto double_attribute = DoubleAttribute::Create(value);
-  EXPECT_EQ(double_attribute->kind(), DoubleAttribute::kAttributeKind);
-  EXPECT_EQ(double_attribute->ToString(), string_rep);
+  auto float_attribute = FloatAttribute::Create(value);
+  EXPECT_EQ(float_attribute->kind(), FloatAttribute::kAttributeKind);
+  EXPECT_EQ(float_attribute->ToString(), string_rep);
 }
 
-INSTANTIATE_TEST_SUITE_P(DoubleAttributeTest, DoubleAttributeTest,
+INSTANTIATE_TEST_SUITE_P(FloatAttributeTest, FloatAttributeTest,
                          testing::Values(std::make_pair(10.5, "10.5l"),
                                          std::make_pair(-30.01, "-30.01l"),
                                          std::make_pair(0.999, "0.999l")));
 
-constexpr double kExampleDoubles[] = {10.5, -30.01, 0.999};
+constexpr double kExampleFloats[] = {10.5, -30.01, 0.999};
 
-class DoubleAttributeComparatorTest
+class FloatAttributeComparatorTest
     : public testing::TestWithParam<std::tuple<double, double>> {};
 
-TEST_P(DoubleAttributeComparatorTest, EqualityWorksAsExpected) {
+TEST_P(FloatAttributeComparatorTest, EqualityWorksAsExpected) {
   const auto& [lhs, rhs] = GetParam();
-  auto lhs_attribute = DoubleAttribute::Create(lhs);
-  auto rhs_attribute = DoubleAttribute::Create(rhs);
+  auto lhs_attribute = FloatAttribute::Create(lhs);
+  auto rhs_attribute = FloatAttribute::Create(rhs);
   EXPECT_EQ(*lhs_attribute == *rhs_attribute, lhs == rhs);
 }
 
-INSTANTIATE_TEST_SUITE_P(DoubleAttributeComparatorTest, DoubleAttributeComparatorTest,
-                         testing::Combine(testing::ValuesIn(kExampleDoubles),
-                                          testing::ValuesIn(kExampleDoubles)));
+INSTANTIATE_TEST_SUITE_P(FloatAttributeComparatorTest, FloatAttributeComparatorTest,
+                         testing::Combine(testing::ValuesIn(kExampleFloats),
+                                          testing::ValuesIn(kExampleFloats)));
 
 }  // namespace
 }  // namespace raksha::ir

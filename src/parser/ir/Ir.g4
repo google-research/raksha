@@ -22,7 +22,7 @@ grammar Ir;
 
 stringLiteral : NUMLITERAL | ID;
 attribute
-    : ID ':' DOUBLELITERAL #doubleAttribute
+    : ID ':' FLOATLITERAL #floatAttribute
     | ID ':' NUMLITERAL #numAttribute
     | ID ':' '"'stringLiteral'"' #stringAttribute
     ;
@@ -62,14 +62,14 @@ SIGN : '+' | '-';
 NUMLITERAL : [0-9]+;
 FRACTIONAL_PART : '.' [0-9]*;
 EXPONENT: ('e'|'E') SIGN? [0-9]+;
-DOUBLE_TAIL
+FLOAT_TAIL
     : (FRACTIONAL_PART EXPONENT? 'l'?)
     | (FRACTIONAL_PART? EXPONENT 'l'?)
     | (FRACTIONAL_PART? EXPONENT? 'l')
     ;
 
 // Either require a decimal point or an exponent or a trailing suffix (but allow both).
-DOUBLELITERAL : SIGN? NUMLITERAL DOUBLE_TAIL;
+FLOATLITERAL : SIGN? NUMLITERAL FLOAT_TAIL;
 
 ID : [0-9_a-zA-Z/.]+;
 VALUE_ID : '%'? ID;

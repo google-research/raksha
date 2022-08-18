@@ -38,16 +38,16 @@ class Value {
 };
 
 // Corresponds to Souffle's `float` type.
-class Double : public Value {
+class Float : public Value {
  public:
-  explicit Double(double value) : double_value_(value) {}
+  explicit Float(double value) : float_value_(value) {}
 
   std::string ToDatalogString() const override {
-    return absl::StrFormat(R"(%lg)", double_value_);
+    return absl::StrFormat(R"(%lg)", float_value_);
   }
 
  private:
-  double double_value_;
+  double float_value_;
 };
 
 // Corresponds to Souffle's `number` type.

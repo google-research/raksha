@@ -17,7 +17,7 @@
 
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/intrusive_ptr.h"
-#include "src/ir/attributes/double_attribute.h"
+#include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 
@@ -42,10 +42,10 @@ TYPED_TEST_SUITE(AttributeTest, AttributeTypes);
 //     compare against the value returned by Attribute::As<T>().
 //
 template <>
-std::pair<Attribute, intrusive_ptr<const DoubleAttribute>>
+std::pair<Attribute, intrusive_ptr<const FloatAttribute>>
 CreateTestAttribute() {
-  return std::make_pair(Attribute::Create<DoubleAttribute>(0.31415),
-                        DoubleAttribute::Create(0.31415));
+  return std::make_pair(Attribute::Create<FloatAttribute>(0.31415),
+                        FloatAttribute::Create(0.31415));
 }
 
 template <>
@@ -84,9 +84,9 @@ AttributeWithId kExampleAttributes[] = {
     AttributeWithId(1, Attribute::Create<Int64Attribute>(10)),
     AttributeWithId(2, Attribute::Create<StringAttribute>("World")),
     AttributeWithId(3, Attribute::Create<Int64Attribute>(30)),
-    AttributeWithId(4, Attribute::Create<DoubleAttribute>(0.3)),
-    AttributeWithId(4, Attribute::Create<DoubleAttribute>(0.3)),
-    AttributeWithId(5, Attribute::Create<DoubleAttribute>(-0.3)),
+    AttributeWithId(4, Attribute::Create<FloatAttribute>(0.3)),
+    AttributeWithId(4, Attribute::Create<FloatAttribute>(0.3)),
+    AttributeWithId(5, Attribute::Create<FloatAttribute>(-0.3)),
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -102,9 +102,9 @@ TYPED_TEST(AttributeTest, ConstructorAndAsConversionWorksCorrectly) {
   EXPECT_EQ(*expected_typed_attribute, *typed_attribute);
 }
 
-TEST(AttributeAsMethodTest, IncorrectTypeReturnsNullptrDoubleIsNotString) {
-  auto [double_attribute, _] = CreateTestAttribute<DoubleAttribute>();
-  EXPECT_EQ(double_attribute.GetIf<StringAttribute>(), nullptr);
+TEST(AttributeAsMethodTest, IncorrectTypeReturnsNullptrFloatIsNotString) {
+  auto [float_attribute, _] = CreateTestAttribute<FloatAttribute>();
+  EXPECT_EQ(float_attribute.GetIf<StringAttribute>(), nullptr);
 }
 
 TEST(AttributeAsMethodTest, IncorrectTypeReturnsNullptrIntIsNotString) {

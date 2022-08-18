@@ -26,7 +26,7 @@ namespace raksha::ir {
 // Base class for attributes associated with IR elements.
 class AttributeBase : public RefCounted<AttributeBase> {
  public:
-  enum class Kind { kInt64, kString, kDouble };
+  enum class Kind { kInt64, kString, kFloat };
   AttributeBase(Kind kind) : kind_(kind) {}
   virtual ~AttributeBase() {}
 

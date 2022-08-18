@@ -45,7 +45,7 @@ message AttributePayload {
   oneof AttributePayloadKind {
     int64 int64_payload = 1;
     string string_payload = 2;
-    double double_payload = 3;
+    double float_payload = 3;
   }
 }
 
