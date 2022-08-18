@@ -16,8 +16,7 @@
 #ifndef SRC_IR_AUTH_LOGIC_AST_TRAVERSING_VISITOR_H_
 #define SRC_IR_AUTH_LOGIC_AST_TRAVERSING_VISITOR_H_
 
-#include <glog/logging.h>
-
+#include "src/common/logging/logging.h"
 #include "src/common/utils/fold.h"
 #include "src/common/utils/overloaded.h"
 #include "src/common/utils/types.h"
