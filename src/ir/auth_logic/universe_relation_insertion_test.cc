@@ -45,8 +45,13 @@ Program BuildTestProgram1() {
 Program BuildTestProgram1Expected() {
   // Output:
   // .decl hasToolOutput(someApp: App, property: Property)
-  // .decl isApp(someApp: App)
+  // .decl isApp(x: App)
+  // .decl isPrincipal(x: Principal)
+  // .decl isProperty(x: Property)
+  // .decl isNumber(x: Number)
   // "DPTool" says hasToolOutput(anyApp, "DP") :- isApp(anyApp).
+  // "DPTool" says isPrincipal("DPTool").
+  // "DPTool" says isProperty("Property").
   datalog::RelationDeclaration has_tool_output_decl(
       "hasToolOutput", false,
       {
