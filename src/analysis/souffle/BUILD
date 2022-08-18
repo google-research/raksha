@@ -34,6 +34,13 @@ package(
     licenses = ["notice"],
 )
 
+cc_library(
+    name = "logfunctors",
+    srcs = [
+        "functors.cc",
+    ],
+)
+
 cc_test(
     name = "cpp_interface_test",
     srcs = ["cpp_interface_test.cc"],
@@ -117,17 +124,35 @@ souffle_cc_binary(
 )
 
 gen_souffle_cxx_code(
+    name = "math_test_for_test",
+    src = "math_unit_test_interface.dl",
+    for_test = True,
+    included_dl_scripts = sql_dl_files + [
+        "math.dl",
+    ],
+)
+
+souffle_cc_binary(
+    name = "math_test",
+    testonly = True,
+    src = ":math_test_for_test",
+    additional_deps = ["logfunctors"],
+)
+
+gen_souffle_cxx_code(
     name = "datalog_policy_verifier_cxx",
     src = "policy_verifier_interface.dl",
     included_dl_scripts = sql_dl_files + [
         "epsilon_analysis.dl",
         "sensitivity_analysis.dl",
+        "math.dl",
     ],
 )
 
 souffle_cc_library(
     name = "datalog_policy_verifier_lib",
     src = ":datalog_policy_verifier_cxx",
+    additional_deps = ["logfunctors"],
 )
 
 gen_souffle_cxx_code(

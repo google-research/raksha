@@ -25,32 +25,14 @@ cc_library(
     name = "ast",
     hdrs = [
         "ast.h",
-        "auth_logic_ast_visitor.h",
     ],
     visibility = ["//visibility:private"],
     deps = [
         "//src/common/logging",
-        "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
-        "//src/common/utils:types",
         "//src/ir/datalog:program",
         "@absl//absl/hash",
         "@absl//absl/strings:str_format",
-    ],
-)
-
-cc_library(
-    name = "auth_logic_ast_traversing_visitor",
-    hdrs = [
-        "auth_logic_ast_traversing_visitor.h",
-        "auth_logic_ast_visitor.h",
-    ],
-    deps = [
-        ":ast",
-        "//src/common/logging",
-        "//src/common/utils:fold",
-        "//src/common/utils:overloaded",
-        "//src/common/utils:types",
     ],
 )
 
@@ -112,18 +94,6 @@ cc_test(
     deps = [
         ":ast",
         "//src/common/testing:gtest",
-    ],
-)
-
-cc_test(
-    name = "ast_visitor_test",
-    srcs = ["auth_logic_ast_traversing_visitor_test.cc"],
-    deps = [
-        ":ast",
-        ":auth_logic_ast_traversing_visitor",
-        "//src/common/testing:gtest",
-        "//src/ir/datalog:program",
-        "@absl//absl/container:flat_hash_set",
     ],
 )
 

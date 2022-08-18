@@ -86,7 +86,8 @@ def souffle_cc_library(
         name,
         src,
         testonly = None,
-        visibility = None):
+        visibility = None,
+        additional_deps = []):
     """Generates a C++ interface for the given datalog file.
 
     Args:
@@ -94,6 +95,7 @@ def souffle_cc_library(
       src: String; The datalog program.
       testonly: bool; Whether the generated rules should be testonly.
       visibility: List; List of visibilities.
+      additional_deps: List; List of additional dependencies (e.g. functors).
     """
     native.cc_library(
         name = name,
@@ -115,7 +117,7 @@ def souffle_cc_library(
         defines = [
             "__EMBEDDED_SOUFFLE__",
         ],
-        deps = ["@souffle//:souffle_include_lib"],
+        deps = ["@souffle//:souffle_include_lib"] + additional_deps,
         alwayslink = True,
         visibility = visibility,
     )
@@ -124,7 +126,8 @@ def souffle_cc_binary(
         name,
         src,
         testonly = None,
-        visibility = None):
+        visibility = None,
+        additional_deps = []):
     """Generates an executable for the given datalog file.
 
     Args:
@@ -132,6 +135,7 @@ def souffle_cc_binary(
       src: String; The datalog program.
       testonly: bool; Whether the generated rules should be testonly.
       visibility: List; List of visibilities.
+      additional_deps: List; List of additional dependencies (e.g. functors).
     """
     native.cc_binary(
         name = name,
@@ -150,6 +154,6 @@ def souffle_cc_binary(
         # -fno-exceptions with a binary that uses -fexceptions makes Clang
         # upset.
         features = ["-use_header_modules"],
-        deps = ["@souffle//:souffle_include_lib"],
+        deps = ["@souffle//:souffle_include_lib"] + additional_deps,
         visibility = visibility,
     )

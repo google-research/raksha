@@ -13,28 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_IR_IR_VISITOR_H_
-#define SRC_IR_IR_VISITOR_H_
+#ifndef SRC_ANALYSIS_SOUFFLE_MATH_DL_
+#define SRC_ANALYSIS_SOUFFLE_MATH_DL_
 
-#include "src/common/utils/types.h"
+// This file is used for math operations needed to be carried out through
+// functors. As of now, we have a logarithm (base 10) function defined.
 
-namespace raksha::ir {
+.functor log_wrapper(symbol):symbol
 
-class Module;
-class Block;
-class Operation;
+.decl logResult(argument: float, result:symbol)
 
-// An interface for the visitor class. We will also pass in the `Derived` class
-// as template argument if we want to support CRTP at a later point.
-template <typename Derived, typename Result=Unit, bool IsConst=true>
-class IRVisitor {
- public:
-  virtual ~IRVisitor() {}
-  virtual Result Visit(CopyConst<IsConst, Module>& module) = 0;
-  virtual Result Visit(CopyConst<IsConst, Block>& operation) = 0;
-  virtual Result Visit(CopyConst<IsConst, Operation>& operation) = 0;
-};
+.decl isLogInput(argument: symbol)
 
-}  // namespace raksha::ir
+logResult(to_float(argument), result) :- isLogInput(argument), result = @log_wrapper(argument).
 
-#endif  // SRC_IR_IR_VISITOR_H_
+#endif
