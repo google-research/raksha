@@ -31,7 +31,7 @@ class IRVisitor {
  public:
   virtual ~IRVisitor() {}
   virtual Result Visit(CopyConst<IsConst, Module>& module) = 0;
-  virtual Result Visit(CopyConst<IsConst, Block>& operation) = 0;
+  virtual Result Visit(CopyConst<IsConst, Block>& block) = 0;
   virtual Result Visit(CopyConst<IsConst, Operation>& operation) = 0;
 };
 

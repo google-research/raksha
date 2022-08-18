@@ -25,6 +25,8 @@
 #include <vector>
 
 #include "absl/hash/hash.h"
+#include "src/common/utils/map_iter.h"
+#include "src/ir/auth_logic/auth_logic_ast_visitor.h"
 #include "src/ir/datalog/program.h"
 
 namespace raksha::ir::auth_logic {
@@ -33,6 +35,21 @@ class Principal {
  public:
   explicit Principal(std::string name) : name_(std::move(name)) {}
   const std::string& name() const { return name_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
+  // A potentially ugly print of the state in this class
+  // for debugging/testing only
+  std::string DebugPrint() const { return name_; }
 
  private:
   std::string name_;
@@ -46,6 +63,23 @@ class Attribute {
       : principal_(principal), predicate_(predicate) {}
   const Principal& principal() const { return principal_; }
   const datalog::Predicate& predicate() const { return predicate_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
+  // A potentially ugly print of the state in this class
+  // for debugging/testing only
+  std::string DebugPrint() const {
+    return absl::StrCat(principal_.name(), predicate_.DebugPrint());
+  }
 
  private:
   Principal principal_;
@@ -61,6 +95,24 @@ class CanActAs {
         right_principal_(std::move(right_principal)) {}
   const Principal& left_principal() const { return left_principal_; }
   const Principal& right_principal() const { return right_principal_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
+  // A potentially ugly print of the state in this class
+  // for debugging/testing only
+  std::string DebugPrint() const {
+    return absl::StrCat(left_principal_.DebugPrint(), " canActAs ",
+                        right_principal_.DebugPrint());
+  }
 
  private:
   Principal left_principal_;
@@ -85,6 +137,26 @@ class BaseFact {
   explicit BaseFact(BaseFactVariantType value) : value_(std::move(value)){};
   const BaseFactVariantType& GetValue() const { return value_; }
 
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
+  // A potentially ugly print of the state in this class
+  // for debugging/testing only
+  std::string DebugPrint() const {
+    return absl::StrCat(
+        "BaseFact(",
+        std::visit([](auto& obj) { return obj.DebugPrint(); }, this->value_),
+        ")");
+  }
+
  private:
   BaseFactVariantType value_;
 };
@@ -103,6 +175,28 @@ class Fact {
 
   const BaseFact& base_fact() const { return base_fact_; }
 
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
+  // A potentially ugly print of the state in this class
+  // for debugging/testing only
+  std::string DebugPrint() const {
+    std::vector<std::string> delegations;
+    for (const Principal& delegatee : delegation_chain_) {
+      delegations.push_back(delegatee.DebugPrint());
+    }
+    return absl::StrCat("deleg: { ", absl::StrJoin(delegations, ", "), " }",
+                        base_fact_.DebugPrint());
+  }
+
  private:
   std::forward_list<Principal> delegation_chain_;
   BaseFact base_fact_;
@@ -117,6 +211,28 @@ class ConditionalAssertion {
       : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
   const Fact& lhs() const { return lhs_; }
   const std::vector<BaseFact>& rhs() const { return rhs_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
+  // A potentially ugly print of the state in this class
+  // for debugging/testing only
+  std::string DebugPrint() const {
+    std::vector<std::string> rhs_strings;
+    for (const BaseFact& base_fact : rhs_) {
+      rhs_strings.push_back(base_fact.DebugPrint());
+    }
+    return absl::StrCat(lhs_.DebugPrint(), ":-",
+                        absl::StrJoin(rhs_strings, ", "));
+  }
 
  private:
   Fact lhs_;
@@ -135,6 +251,26 @@ class Assertion {
   explicit Assertion(AssertionVariantType value) : value_(std::move(value)) {}
   const AssertionVariantType& GetValue() const { return value_; }
 
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
+  // A potentially ugly print of the state in this class
+  // for debugging/testing only
+  std::string DebugPrint() const {
+    return absl::StrCat(
+        "Assertion(",
+        std::visit([](auto& obj) { return obj.DebugPrint(); }, this->value_),
+        ")");
+  }
+
  private:
   AssertionVariantType value_;
 };
@@ -146,6 +282,28 @@ class SaysAssertion {
       : principal_(std::move(principal)), assertions_(std::move(assertions)){};
   const Principal& principal() const { return principal_; }
   const std::vector<Assertion>& assertions() const { return assertions_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
+  // A potentially ugly print of the state in this class
+  // for debugging/testing only
+  std::string DebugPrint() const {
+    std::vector<std::string> assertion_strings;
+    for (const Assertion& assertion : assertions_) {
+      assertion_strings.push_back(assertion.DebugPrint());
+    }
+    return absl::StrCat(principal_.DebugPrint(), "says {\n",
+                        absl::StrJoin(assertion_strings, "\n"), "}");
+  }
 
  private:
   Principal principal_;
@@ -163,6 +321,24 @@ class Query {
   const std::string& name() const { return name_; }
   const Principal& principal() const { return principal_; }
   const Fact& fact() const { return fact_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
+  // A potentially ugly print of the state in this class
+  // for debugging/testing only
+  std::string DebugPrint() const {
+    return absl::StrCat("Query(", name_, principal_.DebugPrint(),
+                        fact_.DebugPrint(), ")");
+  }
 
  private:
   std::string name_;
@@ -190,6 +366,39 @@ class Program {
   }
 
   const std::vector<Query>& queries() const { return queries_; }
+
+  template <typename Derived, typename Result>
+  Result Accept(AuthLogicAstVisitor<Derived, Result, Mutable>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(
+      AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
+    return visitor.Visit(*this);
+  }
+
+  // A potentially ugly print of the state in this class
+  // for debugging/testing only
+  std::string DebugPrint() const {
+    std::vector<std::string> relation_decl_strings;
+    for (const datalog::RelationDeclaration& rel_decl :
+         relation_declarations_) {
+      relation_decl_strings.push_back(rel_decl.DebugPrint());
+    }
+    std::vector<std::string> says_assertion_strings;
+    for (const SaysAssertion& says_assertion : says_assertions_) {
+      says_assertion_strings.push_back(says_assertion.DebugPrint());
+    }
+    std::vector<std::string> query_strings;
+    for (const Query& query : queries_) {
+      query_strings.push_back(query.DebugPrint());
+    }
+    return absl::StrCat("Program(\n",
+                        absl::StrJoin(relation_decl_strings, "\n"),
+                        absl::StrJoin(says_assertion_strings, "\n"),
+                        absl::StrJoin(query_strings, "\n"), ")");
+  }
 
  private:
   std::vector<datalog::RelationDeclaration> relation_declarations_;
