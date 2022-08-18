@@ -52,7 +52,9 @@ class DatalogFacts {
 
   // The prefix that should be added to the datalog program.
   static constexpr char kDatalogFileFormat[] =
-      R"(#include "src/analysis/souffle/taint.dl"
+      R"(// GENERATED FILE, DO NOT EDIT!
+
+#include "src/analysis/souffle/taint.dl"
 #include "src/analysis/souffle/may_will.dl"
 
 // Rules for detecting policy failures.

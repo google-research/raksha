@@ -1,3 +1,5 @@
+// GENERATED FILE, DO NOT EDIT!
+
 #include "src/analysis/souffle/taint.dl"
 #include "src/analysis/souffle/may_will.dl"
 
