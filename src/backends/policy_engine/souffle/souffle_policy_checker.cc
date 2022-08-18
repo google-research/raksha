@@ -16,6 +16,8 @@
 
 #include "src/backends/policy_engine/souffle/souffle_policy_checker.h"
 
+#include <cstdlib>
+
 #include "souffle/SouffleInterface.h"
 #include "src/backends/policy_engine/policy.h"
 #include "src/backends/policy_engine/souffle/datalog_lowering_visitor.h"
@@ -64,6 +66,8 @@ static bool IsModulePolicyCompliantHelper(
       CHECK_NOTNULL(ProgramFactory::newInstance(
           std::string(policy.GetPolicyAnalysisCheckerName()))));
 
+  int64_t setenv_result = setenv("SOUFFLE_ALLOW_SIGNALS", "NO", 1);
+  CHECK(setenv_result == 0) << "Could not set `SOUFFLE_ALLOW_SIGNALS";
   program->loadAll(facts_directory.string());
   program->run();
   Relation* hasPolicyViolation =
