@@ -39,7 +39,7 @@ cc_test(
     srcs = ["attribute_test.cc"],
     deps = [
         ":attribute",
-        ":double_attribute",
+        ":float_attribute",
         ":int_attribute",
         ":string_attribute",
         "//src/common/testing:gtest",
@@ -48,8 +48,8 @@ cc_test(
 )
 
 cc_library(
-    name = "double_attribute",
-    hdrs = ["double_attribute.h"],
+    name = "float_attribute",
+    hdrs = ["float_attribute.h"],
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":attribute",
@@ -59,10 +59,10 @@ cc_library(
 )
 
 cc_test(
-    name = "double_attribute_test",
-    srcs = ["double_attribute_test.cc"],
+    name = "float_attribute_test",
+    srcs = ["float_attribute_test.cc"],
     deps = [
-        ":double_attribute",
+        ":float_attribute",
         "//src/common/testing:gtest",
     ],
 )

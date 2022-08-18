@@ -14,7 +14,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "src/ir/attributes/double_attribute.h"
+#include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/ir_to_proto.h"
@@ -112,9 +112,9 @@ proto::OperationResultValue IRToProto::OperationResultToProto(
 proto::AttributePayload IRToProto::AttributeToProto(
     const Attribute& attribute) {
   proto::AttributePayload payload;
-  const auto double_ptr = attribute.GetIf<DoubleAttribute>();
-  if (double_ptr != nullptr) {
-    payload.set_double_payload(double_ptr->value());
+  const auto float_ptr = attribute.GetIf<FloatAttribute>();
+  if (float_ptr != nullptr) {
+    payload.set_float_payload(float_ptr->value());
     return payload;
   }
   const auto int_ptr = attribute.GetIf<Int64Attribute>();

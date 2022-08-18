@@ -105,7 +105,7 @@ struct ParserInputAndExpectedOutput {
 
 class IrParserNormalizingTest : public testing::TestWithParam<ParserInputAndExpectedOutput> {};
 
-TEST_P(IrParserNormalizingTest, DoublesAreNormalizedInTestOperations) {
+TEST_P(IrParserNormalizingTest, FloatsAreNormalizedInTestOperations) {
   auto program_text = GetParam();
   IrProgramParser ir_parser;
   auto result = ir_parser.ParseProgram(program_text.input);

@@ -22,7 +22,7 @@
 
 namespace raksha::utils {
 
-enum class Kind { kInt, kLong, kDouble, kString } kind;
+enum class Kind { kInt, kLong, kFloat, kString } kind;
 using VariantType = std::variant<int, long, double, std::string>;
 
 class OverloadedTest
@@ -34,14 +34,14 @@ TEST_P(OverloadedTest, DispatchesToCorrectType) {
       std::visit(overloaded{[](int l) { return Kind::kInt; },
                             [](long l) { return Kind::kLong; },
                             [](const std::string& s) { return Kind::kString; },
-                            [](double d) { return Kind::kDouble; }},
+                            [](double d) { return Kind::kFloat; }},
                  variant);
   EXPECT_EQ(kind, expected_kind);
 }
 
 INSTANTIATE_TEST_SUITE_P(OverloadedTest, OverloadedTest,
                          testing::Values(std::make_pair(10, Kind::kInt),
-                                         std::make_pair(2.0, Kind::kDouble),
+                                         std::make_pair(2.0, Kind::kFloat),
                                          std::make_pair(5L, Kind::kLong),
                                          std::make_pair("hello",
                                                         Kind::kString)));

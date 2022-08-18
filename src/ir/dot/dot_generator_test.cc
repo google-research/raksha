@@ -18,7 +18,7 @@
 #include "absl/strings/str_split.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/attribute.h"
-#include "src/ir/attributes/double_attribute.h"
+#include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/block_builder.h"
@@ -127,7 +127,7 @@ TEST_F(DotGeneratorTest, CreatesNodesForOperations) {
 TEST_F(DotGeneratorTest, CreatesAttributesInNodesForOperation) {
   // module m0 {
   //   block b0 {
-  //     %0 = core.plus [double: 4.5l, string:"something", ttl:10]()
+  //     %0 = core.plus [float: 4.5l, string:"something", ttl:10]()
   //   }  // block b0
   // }  // module m0
   BlockBuilder builder;
@@ -136,7 +136,7 @@ TEST_F(DotGeneratorTest, CreatesAttributesInNodesForOperation) {
       NamedAttributeMap(
           {{"string", Attribute::Create<StringAttribute>("something")},
            {"ttl", Attribute::Create<Int64Attribute>(10)},
-           {"double", Attribute::Create<DoubleAttribute>(4.5)}}),
+           {"float", Attribute::Create<FloatAttribute>(4.5)}}),
       {});
   global_module().AddBlock(builder.build());
   const auto& dot_graph_lines =
@@ -145,7 +145,7 @@ TEST_F(DotGeneratorTest, CreatesAttributesInNodesForOperation) {
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
           R"(b0 [shape=Mrecord])",
-          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.plus [double: 4.5l, string: "something", ttl: 10] </TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
+          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1">&nbsp;</TD></TR><TR><TD COLSPAN="1">core.plus [float: 4.5l, string: "something", ttl: 10] </TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
 TEST_F(DotGeneratorTest, CreatesInputPortsInNodesForOperation) {

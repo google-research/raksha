@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_IR_ATTRIBUTES_DOUBLE_ATTRIBUTE_H_
-#define SRC_IR_ATTRIBUTES_DOUBLE_ATTRIBUTE_H_
+#ifndef SRC_IR_ATTRIBUTES_FLOAT_ATTRIBUTE_H_
+#define SRC_IR_ATTRIBUTES_FLOAT_ATTRIBUTE_H_
 
 #include "absl/strings/str_format.h"
 #include "src/common/utils/intrusive_ptr.h"
@@ -22,22 +22,22 @@
 
 namespace raksha::ir {
 
-class DoubleAttribute;
-bool operator==(const DoubleAttribute& lhs, const DoubleAttribute& rhs);
+class FloatAttribute;
+bool operator==(const FloatAttribute& lhs, const FloatAttribute& rhs);
 
-class DoubleAttribute : public AttributeBase {
+class FloatAttribute : public AttributeBase {
  public:
-  static constexpr Kind kAttributeKind = Kind::kDouble;
+  static constexpr Kind kAttributeKind = Kind::kFloat;
 
-  static intrusive_ptr<const DoubleAttribute> Create(double value) {
-    return intrusive_ptr<const DoubleAttribute>(new DoubleAttribute(value));
+  static intrusive_ptr<const FloatAttribute> Create(double value) {
+    return intrusive_ptr<const FloatAttribute>(new FloatAttribute(value));
   }
 
   double value() const { return value_; }
 
   bool IsEqual(const AttributeBase& other) const override {
     if (this->kind() != other.kind()) return false;
-    return *this == static_cast<const DoubleAttribute&>(other);
+    return *this == static_cast<const FloatAttribute&>(other);
   }
 
   std::string ToString() const override {
@@ -45,16 +45,16 @@ class DoubleAttribute : public AttributeBase {
   }
 
  private:
-  DoubleAttribute(double value)
+  FloatAttribute(double value)
       : AttributeBase(kAttributeKind), value_(value) {}
 
   double value_;
 };
 
-inline bool operator==(const DoubleAttribute& lhs, const DoubleAttribute& rhs) {
+inline bool operator==(const FloatAttribute& lhs, const FloatAttribute& rhs) {
   return lhs.value() == rhs.value();
 }
 
 }  // namespace raksha::ir
 
-#endif  // SRC_IR_ATTRIBUTES_DOUBLE_ATTRIBUTE_H_
+#endif  // SRC_IR_ATTRIBUTES_FLOAT_ATTRIBUTE_H_

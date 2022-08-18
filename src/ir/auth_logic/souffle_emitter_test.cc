@@ -121,7 +121,7 @@ grounded_dummy("dummy_var").
   EXPECT_EQ(actual, expected);
 }
 
-Program BuildDoubleCanSayProgram() {
+Program BuildFloatCanSayProgram() {
   BaseFact inner_base_fact(
       datalog::Predicate("grantAccess", {"secretFile"}, datalog::kPositive));
   Fact cansay_fact({Principal("PrincipalA"), Principal("PrincipalB")},
@@ -130,7 +130,7 @@ Program BuildDoubleCanSayProgram() {
       Principal("TestSpeaker"), Assertion(Fact(std::move(cansay_fact)))));
 }
 
-TEST(EmitterTestSuite, DoubleCanSayTest) {
+TEST(EmitterTestSuite, FloatCanSayTest) {
   std::string expected =
       R"(.type DummyType <: symbol
 .type FileName <: symbol
@@ -148,7 +148,7 @@ grounded_dummy("dummy_var").
 )";
 
   std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildDoubleCanSayProgram()));
+      LoweringToDatalogPass::Lower(BuildFloatCanSayProgram()), {});
 
   EXPECT_EQ(actual, expected);
 }

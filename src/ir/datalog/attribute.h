@@ -42,16 +42,16 @@ class Attribute
     explicit String(absl::string_view symbol) : String(Symbol(symbol)) {}
   };
 
-  class Double : public AttributePayload {
+  class Float : public AttributePayload {
    public:
-    explicit Double(datalog::Double number)
-        : AttributePayload(kDoubleAttributePayloadName) {
-      // NOTE: unique_ptr<datalog::Double> and **not** unique_ptr<Double>!
+    explicit Float(datalog::Float number)
+        : AttributePayload(kFloatAttributePayloadName) {
+      // NOTE: unique_ptr<datalog::Float> and **not** unique_ptr<Float>!
       arguments_.push_back(
-          std::make_unique<datalog::Double>(std::move(number)));
+          std::make_unique<datalog::Float>(std::move(number)));
     }
 
-    explicit Double(double number) : Double(datalog::Double(number)) {}
+    explicit Float(double number) : Float(datalog::Float(number)) {}
   };
 
   class Number : public AttributePayload {
@@ -69,8 +69,8 @@ class Attribute
  private:
   static constexpr absl::string_view kStringAttributePayloadName =
       "StringAttributePayload";
-  static constexpr absl::string_view kDoubleAttributePayloadName =
-      "DoubleAttributePayload";
+  static constexpr absl::string_view kFloatAttributePayloadName =
+      "FloatAttributePayload";
   static constexpr absl::string_view kNumberAttributePayloadName =
       "NumberAttributePayload";
 };

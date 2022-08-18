@@ -20,7 +20,7 @@
 #include "src/common/utils/fold.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/ir/attributes/attribute.h"
-#include "src/ir/attributes/double_attribute.h"
+#include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/datalog/operation.h"
@@ -42,8 +42,8 @@ using DatalogAttributePayload = ir::datalog::AttributePayload;
 
 static DatalogAttributePayload GetPayloadForAttribute(ir::Attribute attr,
                                                       ir::SsaNames &ssa_names) {
-  if (auto double_attr = attr.GetIf<ir::DoubleAttribute>()) {
-    return DatalogAttribute::Number(double_attr->value());
+  if (auto float_attr = attr.GetIf<ir::FloatAttribute>()) {
+    return DatalogAttribute::Number(float_attr->value());
   } else if (auto int_attr = attr.GetIf<ir::Int64Attribute>()) {
     return DatalogAttribute::Number(int_attr->value());
   } else if (auto string_attr = attr.GetIf<ir::StringAttribute>()) {

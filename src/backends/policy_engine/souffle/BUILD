@@ -248,7 +248,7 @@ cc_library(
         "//src/ir:operator",
         "//src/ir:ssa_names",
         "//src/ir/attributes:attribute",
-        "//src/ir/attributes:double_attribute",
+        "//src/ir/attributes:float_attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "//src/ir/datalog:input_relation_fact",
