@@ -43,7 +43,7 @@ class Double : public Value {
   explicit Double(double value) : double_value_(value) {}
 
   std::string ToDatalogString() const override {
-    return absl::StrFormat(R"(%g)", double_value_);
+    return absl::StrFormat(R"(%lg)", double_value_);
   }
 
  private:

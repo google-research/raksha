@@ -41,7 +41,7 @@ class DoubleAttribute : public AttributeBase {
   }
 
   std::string ToString() const override {
-    return absl::StrFormat("%gl", value_);
+    return absl::StrFormat("%lgl", value_);
   }
 
  private:
