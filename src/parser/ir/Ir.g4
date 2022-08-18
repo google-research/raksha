@@ -63,9 +63,9 @@ NUMLITERAL : [0-9]+;
 FRACTIONAL_PART : '.' [0-9]*;
 EXPONENT: ('e'|'E') SIGN? [0-9]+;
 DOUBLE_TAIL
-    : (FRACTIONAL_PART EXPONENT? ('l' | 'f')?)
-    | (FRACTIONAL_PART? EXPONENT ('l' | 'f')?)
-    | (FRACTIONAL_PART? EXPONENT? ('l' | 'f'))
+    : (FRACTIONAL_PART EXPONENT? 'l'?)
+    | (FRACTIONAL_PART? EXPONENT 'l'?)
+    | (FRACTIONAL_PART? EXPONENT? 'l')
     ;
 
 // Either require a decimal point or an exponent or a trailing suffix (but allow both).
