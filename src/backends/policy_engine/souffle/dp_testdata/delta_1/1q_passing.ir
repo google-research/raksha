@@ -1,6 +1,9 @@
-// Modeling a single query that fails the dp analysis: the actual delta (1) is
+// Modeling a single query that fails the dp analysis: the local delta (1) is
 // equal to the global delta. Note that the real deltas are much smaller than
 // this but for now we'll use integers.
+// Queries:  SELECT AVG(revenue) (epsilon = 1, delta = 1)
+//           FROM revenue_table
+//           GROUP_BY location
 module m0 {
   block b0 {
         %0 = core.input [name: "revenue_table"] ()

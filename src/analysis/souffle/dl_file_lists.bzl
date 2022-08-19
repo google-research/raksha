@@ -21,6 +21,7 @@ policy_verifier_include_dl_files_local = core_dl_files_plus_fact_test_helper_loc
     "tag_transforms.dl",
     "epsilon_analysis.dl",
     "sensitivity_analysis.dl",
+    "math.dl",
 ]
 
 policy_verifier_dl_files_local = policy_verifier_include_dl_files_local + [

@@ -1,10 +1,16 @@
 // Modeling two queries that fail the dp analysis because the total epsilon
 // ((2 + 1) * 2 (for sensitivity) = 6 ) is greater than the global epsilon (2).
+// Queries:  SELECT AVG(revenue) (epsilon = 1)
+//           FROM revenue_table
+//           GROUP_BY location
+//
+//           SELECT AVG(profit) (epsilon = 2)
+//           FROM revenue_table
 module m0 {
   block b0 {
         %0 = core.input [name: "revenue_table"] ()
         //first query
-        %1 = sql.filter [column: "revenue"] (%0) // { revenue > 100 }
+        %1 = sql.filter [column: "revenue"] (%0)
         %location = sql.column_access [column: "location"] (%1)
         %2 = sql.group_by[] (%1, %location) // (%0, location)
         %dp_data = privacy_mechanism [epsilon: 1] (%2)
