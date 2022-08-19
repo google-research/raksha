@@ -1,5 +1,11 @@
 // Modeling two queries that fail the dp analysis because the total delta added
 // on the initial input (1+2=3) is greater than the global delta (2)
+// Queries:  SELECT AVG(revenue) (epsilon = 1, delta = 1)
+//           FROM revenue_table
+//           GROUP_BY location
+//
+//           SELECT AVG(profit) (epsilon = 1, delta = 2)
+//           FROM revenue_table
 module m0 {
   block b0 {
         %0 = core.input [name: "revenue_table"] ()

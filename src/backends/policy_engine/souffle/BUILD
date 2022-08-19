@@ -54,6 +54,7 @@ cc_binary(
     features = ["-use_header_modules"],
     deps = [
         ":souffle_policy_checker",
+        "//src/analysis/souffle:logfunctors",
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:sql_policy_rule_policy",
         "//src/common/logging",
@@ -198,6 +199,7 @@ cc_test(
     srcs = ["souffle_policy_checker_test.cc"],
     deps = [
         ":souffle_policy_checker",
+        "//src/analysis/souffle:logfunctors",
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:sql_policy_rule_policy",
         "//src/common/logging",

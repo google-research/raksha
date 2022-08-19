@@ -21,10 +21,10 @@
 
 .functor log_wrapper(symbol):symbol
 
-.decl logResult(argument: float, result:symbol)
+.decl logResult(argument: float, result:float)
 
 .decl isLogInput(argument: symbol)
 
-logResult(to_float(argument), result) :- isLogInput(argument), result = @log_wrapper(argument).
+logResult(to_float(argument), to_float(result)) :- isLogInput(argument), result = @log_wrapper(argument).
 
 #endif

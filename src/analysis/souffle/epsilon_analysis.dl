@@ -1,7 +1,28 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
 #ifndef SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_
 #define SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_
 
+// This file tracks the epsilon and delta parameters, global and local, and
+// throws a violationPolicy when the global parameters are strictly smaller
+// than the local ones
+
 #include "src/analysis/souffle/sensitivity_analysis.dl"
+#include "src/analysis/souffle/math.dl"
 
 #define PRIVACY_MECHANISM_OPERATOR as("privacy_mechanism", Operator)
 
@@ -11,8 +32,13 @@
 
 .type Delta <: number
 
+.type kThreshold <: number
+
+// Type representing different differential privacy parameters (such as epsilon
+// and delta).
 .type DPParameterValue = EpsilonValue { value: Epsilon }
     | DeltaValue { value: Delta }
+
 
 .decl isDPParameter(rule: DPParameterValue)
 
@@ -26,19 +52,33 @@ isGlobalEpsilon(epsilon) :- isDPParameter($EpsilonValue(epsilon)).
 isGlobalDelta(delta) :- isDPParameter($DeltaValue(delta)).
 
 // We track every mechanism that adds noise.
-// Right now, we are not tracking the type of noise (e.g. via Laplace of Gaussian mechanisms).
+// Right now, we are not tracking the type of noise (e.g. via Laplace or
+// Gaussian mechanisms).
 .decl isDiffPrivacyMechanism(operation: Operation)
 isDiffPrivacyMechanism(operation) :- isOperation(operation),
     operationHasOperator(operation, PRIVACY_MECHANISM_OPERATOR).
 
-// The epsilon of each privacy mechanism is tracked and later attached to values.
+// The epsilon of each privacy mechanism is tracked and later attached
+// to values.
 .decl diffPrivacyMechanismHasEpsilon(operation: Operation, epsilon: Epsilon)
-diffPrivacyMechanismHasEpsilon(operation, as(epsilon, Epsilon)) :- isDiffPrivacyMechanism(operation),
-    operationHasAttribute(operation, ["epsilon", $NumberAttributePayload(epsilon)]).
+diffPrivacyMechanismHasEpsilon(operation, as(epsilon, Epsilon)) :-
+    isDiffPrivacyMechanism(operation),
+    operationHasAttribute(
+        operation,
+        ["epsilon", $NumberAttributePayload(epsilon)]).
+
 
 .decl diffPrivacyMechanismHasDelta(operation: Operation, delta: Delta)
-diffPrivacyMechanismHasDelta(operation, as(delta, Delta)) :- isDiffPrivacyMechanism(operation),
+diffPrivacyMechanismHasDelta(operation, as(delta, Delta)) :-
+    isDiffPrivacyMechanism(operation),
     operationHasAttribute(operation, ["delta", $NumberAttributePayload(delta)]).
+
+.decl diffPrivacyMechanismHasKThreshold(
+    operation: Operation, k_threshold: kThreshold)
+diffPrivacyMechanismHasKThreshold(operation, as(k_threshold, kThreshold)) :-
+    isDiffPrivacyMechanism(Operation),
+    operationHasAttribute(
+        operation, ["k_threshold", $NumberAttributePayload(k_threshold)]).
 
 // We propagate privacy mechanisms backwards to inputs as per the PINQ paper.
 // This relation tracks every input to its (direct and indirect) outputs.
@@ -63,8 +103,11 @@ epsilonDiffPrivacy(value, epsilon) :- sqlPath(value, _),
 
 // Intermediate relation used to grab all the privacy mechanisms that go back
 // to any given sqlInput
-.decl epsilonDiffPrivacyIntermediate(value: AccessPath, sql_output: AccessPath, epsilon: Epsilon)
-epsilonDiffPrivacyIntermediate(value, sql_output, epsilon) :- sqlPath(value, sql_output),
+.decl epsilonDiffPrivacyIntermediate(value: AccessPath,
+    sql_output: AccessPath,
+    epsilon: Epsilon)
+epsilonDiffPrivacyIntermediate(value, sql_output, epsilon) :-
+    sqlPath(value, sql_output),
     isDiffPrivacyMechanism(operation),
     operationHasResult(operation, sql_output),
     diffPrivacyMechanismHasEpsilon(operation, epsilon).
@@ -80,16 +123,27 @@ deltaDiffPrivacy(value, delta) :- sqlPath(value, _),
 
 // Intermediate relation used to grab all the privacy mechanisms that go back
 // to any given sqlInput
-.decl deltaDiffPrivacyIntermediate(value: AccessPath, sql_output: AccessPath, delta: Delta)
-deltaDiffPrivacyIntermediate(value, sql_output, delta) :- sqlPath(value, sql_output),
+.decl deltaDiffPrivacyIntermediate(value: AccessPath,
+    sql_output: AccessPath,
+    delta: Delta)
+deltaDiffPrivacyIntermediate(value, sql_output, delta) :-
+    sqlPath(value, sql_output),
     isDiffPrivacyMechanism(operation),
     operationHasResult(operation, sql_output),
     diffPrivacyMechanismHasDelta(operation, delta).
 
 sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation),
     operationHasResult(operation, value),
-    operationHasOperandAtIndex(operation, sql_input, 0), // assuming isDiffPrivacyMechanism always has one input
+    // assuming isDiffPrivacyMechanism always has one input
+    operationHasOperandAtIndex(operation, sql_input, 0),
     sqlValueSensitivity(sql_input, sensitivity).
+
+// When we get a mechanism with both delta and k_threshold, we pass 2 * delta
+// as input to the log_wrapper.
+// TODO: need to verify if delta automatically implies a need for k.
+ isLogInput(to_string(2 * delta)) :- isDiffPrivacyMechanism(operation),
+    diffPrivacyMechanismHasDelta(operation, delta),
+    diffPrivacyMechanismHasKThreshold(operation, _).
 
 // DP Policies are violated when:
 // 1. The global epsilon is less than the local epsilon for a value used in an
@@ -114,6 +168,17 @@ violatesPolicy(value) :- isAggregationOperation(operation),
     sqlPath(value, sql_output),
     deltaDiffPrivacy(value, delta),
     isGlobalDelta(global_delta),
-    global_delta < delta.
+    global_delta < delta;
+    isDiffPrivacyMechanism(operation),
+    operationHasResult(operation, value),
+    diffPrivacyMechanismHasDelta(operation, delta),
+    diffPrivacyMechanismHasEpsilon(operation, epsilon),
+    diffPrivacyMechanismHasKThreshold(operation, k_threshold),
+    logResult(to_float(2*delta), result),
+    // the actual formula is preceeded by a negation sign but because we are
+    // still using the type number and not float that does not make sense
+    // testing wise.
+    // TODO: need to fix when floats are incorporated.
+    to_float(k_threshold) < (1 / to_float(epsilon)) * result.
 
 #endif //SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_
