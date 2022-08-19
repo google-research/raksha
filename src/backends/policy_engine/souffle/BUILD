@@ -15,6 +15,10 @@
 #----------------------------------------------------------------------------
 
 load("//build_defs:package_groups.oss.bzl", "frontend_packages")
+load(
+    "//build_defs:raksha_policy_verifier.bzl",
+    "policy_check",
+)
 
 package(
     default_visibility = ["//src:__subpackages__"],
@@ -39,6 +43,21 @@ cc_binary(
     ],
 )
 
+policy_check(
+    name = "datalog_policy_verifier",
+    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:empty_policy.txt"],
+)
+
+policy_check(
+    name = "datalog_simple_policy_verifier_pass",
+    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:simple_passing_policy.txt"],
+)
+
+policy_check(
+    name = "datalog_simple_policy_verifier_fail",
+    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:simple_failing_policy.txt"],
+)
+
 cc_binary(
     name = "check_policy_compliance",
     srcs = ["check_policy_compliance.cc"],
@@ -46,6 +65,7 @@ cc_binary(
     features = ["-use_header_modules"],
     deps = [
         ":souffle_policy_checker",
+        "//src/backends/policy_engine:auth_logic_policy",
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:sql_policy_rule_policy",
         "//src/common/logging",
@@ -54,6 +74,40 @@ cc_binary(
         "@absl//absl/flags:parse",
         "@absl//absl/flags:usage",
         "@absl//absl/status:statusor",
+    ],
+)
+
+sh_test(
+    name = "check_simple_policy_compliance_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "datalog_simple_policy_verifier_pass_datalog_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:simple.ir",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+)
+
+sh_test(
+    name = "check_simple_policy_compliance_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "datalog_simple_policy_verifier_fail_datalog_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:simple.ir",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
     ],
 )
 
@@ -173,6 +227,9 @@ cc_library(
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":datalog_lowering_visitor",
+        ":datalog_policy_verifier",
+        ":datalog_simple_policy_verifier_fail",
+        ":datalog_simple_policy_verifier_pass",
         ":utils",
         "//src/analysis/souffle:datalog_policy_verifier_lib",
         "//src/analysis/souffle:dp_policy_verifier_lib",

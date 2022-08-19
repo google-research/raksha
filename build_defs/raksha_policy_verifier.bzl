@@ -54,12 +54,14 @@ def policy_check(name, auth_logic_files, visibility = None):
     auth_logic_file = auth_logic_files[0]
 
     # Generate datalog
+    datalog_target_name = "%s_verifier_interface_datalog" % name
     datalog_source_target_name = "%s_datalog" % name
     datalog_library_target_name = "%s" % name
     datalog_cxx_source_target_name = "%s_datalog_cxx" % name
     datalog_cxx_source_target = ":%s" % datalog_cxx_source_target_name
 
     generated_datalog_file_from_auth_logic = "%s_auth_logic.dl" % name
+    generated_datalog_file_from_policy_verifier_interface_and_auth_logic = "%s_policy_interface_auth_logic.dl" % name
 
     native.genrule(
         name = datalog_source_target_name,
@@ -73,11 +75,21 @@ def policy_check(name, auth_logic_files, visibility = None):
         tools = ["//src/backends/policy_engine/souffle:raksha_policy_datalog_emitter"],
     )
 
+    native.genrule(
+        name = datalog_target_name,
+        srcs = [
+            generated_datalog_file_from_auth_logic,
+            "//src/analysis/souffle:policy_verifier_interface.dl",
+        ],
+        outs = [generated_datalog_file_from_policy_verifier_interface_and_auth_logic],
+        cmd = "cat $(location //src/analysis/souffle:policy_verifier_interface.dl) $(location %s) > $@" % generated_datalog_file_from_auth_logic,
+    )
+
     # Generate souffle C++ library
     gen_souffle_cxx_code(
         name = datalog_cxx_source_target_name,
-        src = "//src/analysis/souffle:policy_verifier_interface.dl",
-        included_dl_scripts = policy_verifier_include_dl_files + [generated_datalog_file_from_auth_logic],
+        src = generated_datalog_file_from_policy_verifier_interface_and_auth_logic,
+        included_dl_scripts = policy_verifier_include_dl_files,
         visibility = visibility,
     )
     souffle_cc_library(

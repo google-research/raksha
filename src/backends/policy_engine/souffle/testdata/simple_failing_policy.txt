@@ -1,0 +1,7 @@
+"sql" says {
+  hasTag("%0", "sql", "RawAudio").
+  //Not removing confidentiality tag by commenting out below line would ensure that test fails
+  //removeTag("%2", "sql", "RawAudio").
+}
+
+

@@ -24,6 +24,8 @@ exports_files([
     "sql_policy_rules.txt",
     "simple_passing_sql.ir",
     "simple_failing_sql.ir",
+    "empty_policy.txt",
+    "simple_passing_policy.txt",
+    "simple_failing_policy.txt",
     "simple.ir",
-    "policy.txt",
 ])

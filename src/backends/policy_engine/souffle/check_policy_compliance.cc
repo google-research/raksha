@@ -24,6 +24,7 @@
 #include "absl/flags/parse.h"
 #include "absl/flags/usage.h"
 #include "absl/status/statusor.h"
+#include "src/backends/policy_engine/auth_logic_policy.h"
 #include "src/backends/policy_engine/policy.h"
 #include "src/backends/policy_engine/souffle/souffle_policy_checker.h"
 #include "src/backends/policy_engine/sql_policy_rule_policy.h"
@@ -31,12 +32,14 @@
 #include "src/parser/ir/ir_parser.h"
 
 ABSL_FLAG(std::string, ir, "", "the IR file");
-ABSL_FLAG(std::string, sql_policy_rules, "",
+ABSL_FLAG(std::optional<std::string>, sql_policy_rules, "",
           "file containing the SQL policy rules");
+ABSL_FLAG(std::optional<std::string>, policy_engine, "",
+          "name of the policy engine");
 
 constexpr char kUsageMessage[] =
-    "This tool takes an IR representation of a system and returns whether it "
-    "is policy compliant.";
+    "This tool takes an IR representation of a system, policy engine and "
+    "returns whether it is policy compliant.";
 
 namespace {
 
@@ -60,6 +63,7 @@ absl::StatusOr<std::string> ReadFileContents(std::filesystem::path file_path) {
 
 }  // namespace
 
+using raksha::backends::policy_engine::AuthLogicPolicy;
 using raksha::backends::policy_engine::SoufflePolicyChecker;
 using raksha::backends::policy_engine::SqlPolicyRulePolicy;
 using raksha::ir::IrProgramParser;
@@ -68,7 +72,6 @@ int main(int argc, char* argv[]) {
   google::InitGoogleLogging("check_policy_compliance");
   absl::SetProgramUsageMessage(kUsageMessage);
   absl::ParseCommandLine(argc, argv);
-
   // Parse the given IR file.
   absl::StatusOr<std::string> ir_string =
       ReadFileContents(absl::GetFlag(FLAGS_ir));
@@ -79,8 +82,9 @@ int main(int argc, char* argv[]) {
 
   // Read the sql policy rules file.
   absl::StatusOr<std::string> sql_policy_rules =
-      ReadFileContents(absl::GetFlag(FLAGS_sql_policy_rules));
-  if (!ir_string.ok()) {
+      ReadFileContents(absl::GetFlag(FLAGS_sql_policy_rules).value());
+  if (absl::GetFlag(FLAGS_sql_policy_rules).has_value() &&
+      !sql_policy_rules.ok()) {
     LOG(ERROR) << "Error reading sql policy rules file: "
                << sql_policy_rules.status();
     return 2;
@@ -88,9 +92,23 @@ int main(int argc, char* argv[]) {
 
   // Invoke policy checker and return result.
   IrProgramParser irParser;
+  bool policyCheckSucceeded = false;
   auto [context, module, ssa_names] = irParser.ParseProgram(*ir_string);
-  SqlPolicyRulePolicy policy(*sql_policy_rules);
-  if (SoufflePolicyChecker().IsModulePolicyCompliant(*module, policy)) {
+  if (absl::GetFlag(FLAGS_policy_engine).has_value()) {
+    AuthLogicPolicy policy(absl::GetFlag(FLAGS_policy_engine).value());
+    policyCheckSucceeded =
+        SoufflePolicyChecker().IsModulePolicyCompliant(*module, policy);
+  } else if (absl::GetFlag(FLAGS_sql_policy_rules).has_value()) {
+    SqlPolicyRulePolicy policy(*sql_policy_rules);
+    policyCheckSucceeded =
+        SoufflePolicyChecker().IsModulePolicyCompliant(*module, policy);
+  } else {
+    LOG(ERROR) << "Both sql_policy_rules and authorzation logic generated "
+                  "datalog policy engine are undefined";
+    return 2;
+  }
+
+  if (policyCheckSucceeded) {
     LOG(ERROR) << "Policy check succeeded!";
     return 0;
   } else {
