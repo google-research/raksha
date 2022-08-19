@@ -57,3 +57,22 @@ cc_library(
         "//src/ir:module",
     ],
 )
+
+cc_library(
+    name = "dp_parameter_policy",
+    hdrs = ["dp_parameter_policy.h"],
+    deps = [
+        ":policy",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "dp_parameter_policy_test",
+    srcs = ["dp_parameter_policy_test.cc"],
+    deps = [
+        ":dp_parameter_policy",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)

@@ -32,7 +32,7 @@ class SqlPolicyRulePolicy : public Policy {
       : is_sql_policy_rule_facts_(std::move(is_sql_policy_rule_facts)) {}
 
   std::string GetPolicyAnalysisCheckerName() const override {
-    return "datalog_policy_verifier_datalog_cxx";
+    return "datalog_policy_verifier_cxx";
   }
 
   std::optional<std::string> GetPolicyFactName() const override {

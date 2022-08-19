@@ -13,10 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #----------------------------------------------------------------------------
-load(
-    "//build_defs:raksha_policy_verifier.bzl",
-    "policy_check",
-)
+
 load("//build_defs:package_groups.oss.bzl", "frontend_packages")
 
 package(
@@ -40,11 +37,6 @@ cc_binary(
         "@absl//absl/flags:usage",
         "@absl//absl/status:statusor",
     ],
-)
-
-policy_check(
-    name = "datalog_policy_verifier",
-    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:policy.txt"],
 )
 
 cc_binary(
@@ -181,8 +173,9 @@ cc_library(
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":datalog_lowering_visitor",
-        ":datalog_policy_verifier",
         ":utils",
+        "//src/analysis/souffle:datalog_policy_verifier_lib",
+        "//src/analysis/souffle:dp_policy_verifier_lib",
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:policy_checker",
         "//src/common/utils:filesystem",
@@ -198,16 +191,20 @@ cc_test(
     srcs = ["souffle_policy_checker_test.cc"],
     deps = [
         ":souffle_policy_checker",
-        "//src/backends/policy_engine:policy",
+        "//src/backends/policy_engine:dp_parameter_policy",
         "//src/backends/policy_engine:sql_policy_rule_policy",
-        "//src/common/logging",
         "//src/common/testing:gtest",
         "//src/frontends/sql/ops:literal_op",
         "//src/frontends/sql/ops:sql_output_op",
         "//src/frontends/sql/ops:tag_transform_op",
         "//src/ir:block_builder",
         "//src/ir:ir_context",
-        "//src/ir:ir_printer",
+        "//src/ir:module",
+        "//src/ir:value",
+        "//src/ir/attributes:attribute",
+        "//src/ir/attributes:int_attribute",
+        "//src/ir/attributes:string_attribute",
+        "//src/parser/ir:ir_parser",
     ],
 )
 
