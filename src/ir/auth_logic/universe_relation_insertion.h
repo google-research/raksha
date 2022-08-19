@@ -118,7 +118,7 @@ class UniverseRelationInsertion {
 
   // Determine if an identifier (which may be an argument of a predicate
   // or a principal name) is a constant or variable.
-  // TODO(aferr) it would be better to refactor the AST so that
+  // TODO(#673 aferr) it would be better to refactor the AST so that
   // identifiers are a separate AST node with constant and non-constant
   // children determined at parse time rather than here since
   // this information is available at parse time.
@@ -219,11 +219,10 @@ class UniverseRelationInsertion {
       }
     }
 
-    // TODO once an AST node for numbers as RVALUEs in numeric
+    // (TODO: #672) once an AST node for numbers as RVALUEs in numeric
     // comparisons is added, this visitor should also visit
     // the numeric RVALUEs and add them to the type environment
     // with type ArgumentType(kNumber, "Number")
-    // (Related to #637).
     // This is a workaround that makes use of the fact that
     // numeric comparisons are represented as predicates
     // with a name that matches the operator:
