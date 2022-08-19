@@ -143,9 +143,9 @@ http_archive(
 
 http_archive(
     name = "absl",
-    sha256 = "dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4",
-    strip_prefix = "abseil-cpp-20211102.0",
-    urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20211102.0.tar.gz"],
+    sha256 = "4208129b49006089ba1d6710845a45e31c59b0ab6bff9e5788a87f55c5abd602",
+    strip_prefix = "abseil-cpp-20220623.0",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20220623.0.tar.gz"],
 )
 
 # Bazel platform rules.
