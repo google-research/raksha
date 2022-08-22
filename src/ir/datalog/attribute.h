@@ -56,6 +56,14 @@ class Attribute
 
   class Number : public AttributePayload {
    public:
+    template<typename T>
+    Number(T value) = delete;
+
+    Number(double value) = delete;
+    Number(float value) = delete;
+    Number(datalog::Float value) = delete;
+
+    explicit Number(int number): Number(datalog::Number(number)) {}
     explicit Number(datalog::Number number)
         : AttributePayload(kNumberAttributePayloadName) {
       // NOTE: unique_ptr<datalog::Number> and **not** unique_ptr<Number>!

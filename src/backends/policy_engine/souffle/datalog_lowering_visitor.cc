@@ -43,7 +43,7 @@ using DatalogAttributePayload = ir::datalog::AttributePayload;
 static DatalogAttributePayload GetPayloadForAttribute(ir::Attribute attr,
                                                       ir::SsaNames &ssa_names) {
   if (auto float_attr = attr.GetIf<ir::FloatAttribute>()) {
-    return DatalogAttribute::Number(float_attr->value());
+    return DatalogAttribute::Float(float_attr->value());
   } else if (auto int_attr = attr.GetIf<ir::Int64Attribute>()) {
     return DatalogAttribute::Number(int_attr->value());
   } else if (auto string_attr = attr.GetIf<ir::StringAttribute>()) {
