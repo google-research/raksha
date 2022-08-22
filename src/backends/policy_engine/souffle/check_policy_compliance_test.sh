@@ -22,19 +22,23 @@ FAIL_RESULT="fail"
 function printUsageAndExit() {
   echo "Usage: "
   echo "  check_policy_compliance_test.sh \ "
-  echo "     <cmd> ${PASS_RESULT}|${FAIL_RESULT} <ir_file> <sql_policy_rules_file> <policy_engine>"
+  echo "     <cmd> ${PASS_RESULT}|${FAIL_RESULT} <ir|proto> <file> <sql_policy_rules_file> <policy_engine>"
   exit 1
 }
 
-if [ $# -ne 5 || $# -ne 4]; then
+MAX_NUM_ARGS=6
+MIN_NUM_ARGS=5
+
+if [ $# -ne ${MAX_NUM_ARGS} || $# -ne ${MIN_NUM_ARGS}]; then
   printUsageAndExit
 fi
 
 CMD_ARG=$1
 EXPECTATION_ARG=$2
-IR_FILE_ARG=$3
-SQL_POLICY_RULES_FILE_ARG=$4
-POLICY_ENGINE=$5
+TYPE_ARG=$3
+FILE_ARG=$4
+SQL_POLICY_RULES_FILE_ARG=$5
+POLICY_ENGINE=$6
 
 if
   [ "${EXPECTATION_ARG}" != "${PASS_RESULT}" ] &&
@@ -45,9 +49,10 @@ fi
 # A simple script to test the `check_policy_compliance` command line tool.
 ROOT_DIR=${TEST_SRCDIR}/${TEST_WORKSPACE}
 CMD=${ROOT_DIR}/${CMD_ARG}
-IR_FILE=${ROOT_DIR}/${IR_FILE_ARG}
+FILE=${ROOT_DIR}/${FILE_ARG}
 SQL_POLICY_RULES_FILE=${ROOT_DIR}/${SQL_POLICY_RULES_FILE_ARG}
-$CMD --ir=$IR_FILE --sql_policy_rules=$SQL_POLICY_RULES_FILE --policy_engine=$POLICY_ENGINE
+
+$CMD --$TYPE_ARG=$FILE --sql_policy_rules=$SQL_POLICY_RULES_FILE --policy_engine=$POLICY_ENGINE
 CMD_RESULT=$?
 if [ ${CMD_RESULT} -eq 0 ]; then
   ACTUAL_RESULT="${PASS_RESULT}"

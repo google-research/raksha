@@ -30,6 +30,11 @@ alias(
 )
 
 alias(
+    name = "json_util",
+    actual = "@com_google_protobuf//:protobuf_headers",
+)
+
+alias(
     name = "proto_message_differencer",
     actual = "@com_google_protobuf//:protobuf_headers",
 )

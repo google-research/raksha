@@ -16,6 +16,7 @@
 #ifndef SRC_IR_PROTO_TO_IR_H_
 #define SRC_IR_PROTO_TO_IR_H_
 
+#include "google/protobuf/util/json_util.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/block_builder.h"
 #include "src/ir/ir_context.h"
@@ -23,6 +24,7 @@
 #include "src/ir/proto/raksha_ir.pb.h"
 #include "src/ir/ssa_names.h"
 #include "src/ir/value.h"
+#include "absl/status/statusor.h"
 
 namespace raksha::ir {
 
@@ -33,6 +35,20 @@ class ProtoToIR {
     std::unique_ptr<Module> module;
     std::unique_ptr<SsaNames> ssa_names;
   };
+
+  static absl::StatusOr<Result> Convert(IRContext& context,
+                        absl::string_view irTranslationUnitJsonProto) {
+      proto::IrTranslationUnit irTranslationUnit;
+      auto status = google::protobuf::util::JsonStringToMessage(irTranslationUnitJsonProto,
+                                                                &irTranslationUnit);
+      if (!status.ok()) {
+          LOG(ERROR) << "Json IR proto is corrupt " << status;
+          return absl::InvalidArgumentError("Json IR proto is corrupt");
+      }
+
+      return Convert(context, irTranslationUnit);
+  }
+
   static Result Convert(IRContext& context,
                         const proto::IrTranslationUnit& root) {
     // Store the operators in the context.
