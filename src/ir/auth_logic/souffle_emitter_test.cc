@@ -148,7 +148,7 @@ grounded_dummy("dummy_var").
 )";
 
   std::string actual = SouffleEmitter::EmitProgram(
-      LoweringToDatalogPass::Lower(BuildFloatCanSayProgram()), {});
+      LoweringToDatalogPass::Lower(BuildFloatCanSayProgram()));
 
   EXPECT_EQ(actual, expected);
 }
