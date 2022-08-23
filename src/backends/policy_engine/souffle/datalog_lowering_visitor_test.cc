@@ -18,6 +18,9 @@
 
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/attributes/float_attribute.h"
+#include "src/ir/attributes/int_attribute.h"
+#include "src/ir/attributes/string_attribute.h"
 #include "src/ir/block_builder.h"
 #include "src/ir/datalog/value.h"
 #include "src/ir/module.h"
@@ -81,16 +84,23 @@ static const IrAndDatalogOperationPairs kIrAndDatalogOperations[] = {
     {.ir_operation = test_factory.CreateOperation(
          nullptr, kLiteralOperator,
          ir::NamedAttributeMap(
-             {{"literal",
-               ir::Attribute::Create<ir::StringAttribute>("number_5")}}),
+             {
+               {"float", ir::Attribute::Create<ir::FloatAttribute>(2.1)},
+               {"literal", ir::Attribute::Create<ir::StringAttribute>("number_5")},
+               {"number", ir::Attribute::Create<ir::Int64Attribute>(3)},
+             }),
          ir::ValueList()),
      .datalog_is_operation = test_factory.CreateDatalogOperation(
          ir::datalog::Symbol("sql"), ir::datalog::Symbol("sql.ReadLiteral"),
          ir::datalog::Symbol("%0"), ir::datalog::OperandList(),
          ir::datalog::AttributeList(
-             ir::datalog::Attribute("literal",
-                                    ir::datalog::Attribute::String("number_5")),
-             ir::datalog::AttributeList()))},
+             ir::datalog::Attribute("float", ir::datalog::Attribute::Float(2.1)),
+         ir::datalog::AttributeList(
+             ir::datalog::Attribute("literal", ir::datalog::Attribute::String("number_5")),
+         ir::datalog::AttributeList(
+           ir::datalog::Attribute("number", ir::datalog::Attribute::Number(3)),
+             ir::datalog::AttributeList()))))
+    },
     {.ir_operation = test_factory.CreateOperation(
          nullptr, kMergeOpOperator, ir::NamedAttributeMap({}),
          ir::ValueList(

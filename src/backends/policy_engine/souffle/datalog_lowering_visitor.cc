@@ -74,10 +74,15 @@ Unit DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
   // Convert each `Attribute` to the analogous record in datalog and put into an
   // `AttributeList`.
   const ir::NamedAttributeMap &ir_attr_map = operation.attributes();
+
+  // Convert to std::vector for sorting (this avoids exposing flat_hash_map ordering to datalog).
+  std::vector<std::pair<std::string, ir::Attribute>> attribute_vec(ir_attr_map.begin(), ir_attr_map.end());
+  std::sort(attribute_vec.begin(), attribute_vec.end(),
+      [](auto& left, auto& right){ return left.first > right.first; }
+  );
   DatalogAttributeList attribute_list = common::utils::fold(
-      ir_attr_map, DatalogAttributeList(),
-      [&ssa_names](DatalogAttributeList list_so_far,
-                   std::pair<std::string, ir::Attribute> name_attr_pair) {
+      attribute_vec, DatalogAttributeList(),
+      [&ssa_names](DatalogAttributeList list_so_far, std::pair<std::string, ir::Attribute> name_attr_pair) {
         return DatalogAttributeList(
             DatalogAttribute(std::move(name_attr_pair.first),
                              GetPayloadForAttribute(
