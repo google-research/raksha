@@ -61,7 +61,7 @@ class DeclarationEnvironment {
   }
 
   datalog::RelationDeclaration GetDeclarationOrFatal(
-      const std::string& relation_name);
+      absl::string_view relation_name);
 
  private:
   // Generates a new mapping from relation names to relation declarations
@@ -93,7 +93,7 @@ class TypeEnvironment {
  public:
   TypeEnvironment(DeclarationEnvironment decl_env, const Program& prog);
 
-  datalog::ArgumentType GetTypingOrFatal(const std::string& argument_name);
+  datalog::ArgumentType GetTypingOrFatal(absl::string_view argument_name);
 
   // This generates a set of says assertions that populate all the
   // universes for all the speakers given the type environment. Essentially,
