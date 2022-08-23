@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef SRC_IR_AUTH_LOGIC_UNIVERSE_RELATION_INSERTION_H_
+#define SRC_IR_AUTH_LOGIC_UNIVERSE_RELATION_INSERTION_H_
+
 /*
 This file contains a translation that populates the universe relations.
 Universe relations are facts of the form `isSymbol(x)` that are used to
@@ -39,9 +42,6 @@ described in `ast.h` and produces a new instance of the data structure in
 `ast.h`. It should come before the translation in `lowering_ast_datalog.h`.
 */
 
-#ifndef SRC_IR_AUTH_LOGIC_UNIVERSE_RELATION_INSERTION_H_
-#define SRC_IR_AUTH_LOGIC_UNIVERSE_RELATION_INSERTION_H_
-
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_cat.h"
@@ -60,10 +60,11 @@ class DeclarationEnvironment {
     inner_map_.insert({std::string{rel_decl.relation_name()}, rel_decl});
   }
 
-  datalog::RelationDeclaration
-  GetDeclarationOrFatal(const std::string& relation_name);
+  datalog::RelationDeclaration GetDeclarationOrFatal(
+      const std::string& relation_name);
+
  private:
-  // Generates a new mapping from relation names to relation declarations 
+  // Generates a new mapping from relation names to relation declarations
   // implemented as a flat_hash_map. It is used in the implementation of
   // the constructor for DeclarationEnvironment. This is implemented
   // as a nested class so that it can access the DeclarationEnvironment's
@@ -72,9 +73,9 @@ class DeclarationEnvironment {
       : public AuthLogicAstTraversingVisitor<
             RelationDeclarationEnvironmentVisitor> {
    public:
-    RelationDeclarationEnvironmentVisitor(DeclarationEnvironment& enclosing_env) 
-      : enclosing_env_(enclosing_env) {}
-   
+    RelationDeclarationEnvironmentVisitor(DeclarationEnvironment& enclosing_env)
+        : enclosing_env_(enclosing_env) {}
+
    private:
     Unit Visit(const datalog::RelationDeclaration& rel_decl) {
       enclosing_env_.AddDeclaration(rel_decl);
@@ -90,10 +91,9 @@ class DeclarationEnvironment {
 // (the constants wrapped in quotes) to typings.
 class TypeEnvironment {
  public:
-
   TypeEnvironment(DeclarationEnvironment decl_env, const Program& prog);
 
-  datalog::ArgumentType GetTypingOrFatal(const std::string& argument_name); 
+  datalog::ArgumentType GetTypingOrFatal(const std::string& argument_name);
 
   // This generates a set of says assertions that populate all the
   // universes for all the speakers given the type environment. Essentially,
@@ -102,9 +102,9 @@ class TypeEnvironment {
   // adds the constant to the universe for each speaker.
   std::vector<SaysAssertion> GetUniverseDefiningFacts();
 
-  const absl::flat_hash_map<std::string, datalog::ArgumentType>&
-  inner_map() const {
-   return inner_map_;
+  const absl::flat_hash_map<std::string, datalog::ArgumentType>& inner_map()
+      const {
+    return inner_map_;
   }
 
  private:
@@ -118,15 +118,13 @@ class TypeEnvironment {
   // a DeclarationEnvironment.
   // This is a nested class because it needs to access the private
   // fields of the TypeEnvironment in the constructor implementation.
-  class TypeEnvironmentGenerationVisitor 
-    : public AuthLogicAstTraversingVisitor<
-      TypeEnvironmentGenerationVisitor> {
+  class TypeEnvironmentGenerationVisitor
+      : public AuthLogicAstTraversingVisitor<TypeEnvironmentGenerationVisitor> {
    public:
     TypeEnvironmentGenerationVisitor(DeclarationEnvironment decl_env,
-      TypeEnvironment& enclosing_env)
-        : decl_env_(decl_env),
-          enclosing_env_(enclosing_env) {}
-  
+                                     TypeEnvironment& enclosing_env)
+        : decl_env_(decl_env), enclosing_env_(enclosing_env) {}
+
    private:
     Unit PreVisit(const Principal& principal);
     Unit Visit(const datalog::Predicate& pred);

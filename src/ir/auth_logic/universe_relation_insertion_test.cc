@@ -133,10 +133,9 @@ TEST_P(ProgramDebugStringEquivalenceTest,
       UnorderedElementsAreArray(GetDebugVector(expected_program.queries())));
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    Something, ProgramDebugStringEquivalenceTest,
-    testing::Values(ProgramEquivalenceTestData{
-        UniverseRelationInsertion::InsertUniverseRelations(BuildTestProgram1()),
-        BuildTestProgram1Expected()}));
+INSTANTIATE_TEST_SUITE_P(Something, ProgramDebugStringEquivalenceTest,
+                         testing::Values(ProgramEquivalenceTestData{
+                             InsertUniverseRelations(BuildTestProgram1()),
+                             BuildTestProgram1Expected()}));
 
 }  // namespace raksha::ir::auth_logic
