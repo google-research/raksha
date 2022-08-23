@@ -57,9 +57,8 @@ cc_library(
 
 cc_library(
     name = "universe_relation_insertion",
-    hdrs = [
-        "universe_relation_insertion.h",
-    ],
+    srcs = ["universe_relation_insertion.cc"],
+    hdrs = ["universe_relation_insertion.h"],
     visibility = ["//visibility:private"],
     deps = [
         ":ast",
