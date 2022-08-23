@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #----------------------------------------------------------------------------
-
-load("//build_defs:package_groups.oss.bzl", "frontend_packages")
 load(
     "//build_defs:raksha_policy_verifier.bzl",
-    "policy_check",
+    "policy_library",
+    "raksha_policy_verifier_library",
 )
+load("//build_defs:package_groups.oss.bzl", "frontend_packages")
 
 package(
     default_visibility = ["//src:__subpackages__"],
@@ -43,19 +43,35 @@ cc_binary(
     ],
 )
 
-policy_check(
+policy_library(
     name = "datalog_policy_verifier",
-    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:empty_policy.txt"],
+    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:empty_policy.auth"],
 )
 
-policy_check(
+raksha_policy_verifier_library(
+    name = "datalog_multiple_policy_verifier_pass",
+    policies = [
+        "//src/backends/policy_engine/souffle/testdata:multiple_passing_policy_1.auth",
+        "//src/backends/policy_engine/souffle/testdata:multiple_passing_policy_2.auth",
+    ],
+)
+
+raksha_policy_verifier_library(
+    name = "datalog_multiple_policy_verifier_fail",
+    policies = [
+        "//src/backends/policy_engine/souffle/testdata:multiple_passing_policy_1.auth",
+        "//src/backends/policy_engine/souffle/testdata:empty_policy.auth",
+    ],
+)
+
+policy_library(
     name = "datalog_simple_policy_verifier_pass",
-    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:simple_passing_policy.txt"],
+    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:simple_passing_policy.auth"],
 )
 
-policy_check(
+policy_library(
     name = "datalog_simple_policy_verifier_fail",
-    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:simple_failing_policy.txt"],
+    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:simple_failing_policy.auth"],
 )
 
 cc_binary(
@@ -75,6 +91,42 @@ cc_binary(
         "@absl//absl/flags:parse",
         "@absl//absl/flags:usage",
         "@absl//absl/status:statusor",
+    ],
+)
+
+sh_test(
+    name = "check_multiple_policy_compliance_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "ir",
+        "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "datalog_multiple_policy_verifier_pass_datalog_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:simple.ir",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+)
+
+sh_test(
+    name = "check_multiple_policy_compliance_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "ir",
+        "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "datalog_multiple_policy_verifier_fail_datalog_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:simple.ir",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
     ],
 )
 
@@ -262,6 +314,8 @@ cc_library(
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":datalog_lowering_visitor",
+        ":datalog_multiple_policy_verifier_fail",
+        ":datalog_multiple_policy_verifier_pass",
         ":datalog_policy_verifier",
         ":datalog_simple_policy_verifier_fail",
         ":datalog_simple_policy_verifier_pass",

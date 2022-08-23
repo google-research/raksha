@@ -32,16 +32,18 @@ def raksha_policy_verifier_library(name, policies, visibility = None):
       visibility: List of visibilities
     """
 
-    # TODO (@harshamandadi) rule that handles testing with multiple policies.
-    # May be a modified version of third_party/raksha/src/backends/policy_engine/souffle/check_policy_compliance_test_auth_logic.sh
-    auth_file = policies[0]
-    policy_check(
-        name,
-        auth_logic_file = auth_file,
-        visibility = visibility,
+    auth_logic_file = "%s_combined_auth_logic" % name
+    concat_all_auth_logic_target_name = "%s_concat_all_auth" % name
+    native.genrule(
+        name = concat_all_auth_logic_target_name,
+        srcs = policies,
+        outs = [auth_logic_file],
+        cmd = "cat $(SRCS) > $@",
     )
+    auth_logic_files = [auth_logic_file]
+    policy_library(name, auth_logic_files, visibility)
 
-def policy_check(name, auth_logic_files, visibility = None):
+def policy_library(name, auth_logic_files, visibility = None):
     """ Generates a cc_library rule for verifying policy compliance.
 
     Args:

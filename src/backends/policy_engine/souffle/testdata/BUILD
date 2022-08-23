@@ -25,8 +25,10 @@ exports_files([
     "simple_passing_sql.ir",
     "simple_passing_sql.json",
     "simple_failing_sql.ir",
-    "empty_policy.txt",
-    "simple_passing_policy.txt",
-    "simple_failing_policy.txt",
+    "empty_policy.auth",
+    "simple_passing_policy.auth",
+    "simple_failing_policy.auth",
     "simple.ir",
+    "multiple_passing_policy_1.auth",
+    "multiple_passing_policy_2.auth",
 ])
