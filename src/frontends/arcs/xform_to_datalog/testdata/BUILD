@@ -25,11 +25,11 @@ filegroup(
     name = "auth_logic",
     testonly = True,
     srcs = [
-        "empty_auth_logic",
+        "empty_auth_logic.auth",
         "empty_auth_logic.dl",
-        "says_owns_tag",
+        "says_owns_tag.auth",
         "says_owns_tag.dl",
-        "simple_auth_logic",
+        "simple_auth_logic.auth",
         "simple_auth_logic.dl",
     ],
 )

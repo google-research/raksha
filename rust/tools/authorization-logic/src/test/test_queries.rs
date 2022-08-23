@@ -50,12 +50,13 @@ pub mod test {
     pub fn run_query_test(t: QueryTest) {
         let resolved_in_dir = utils::get_resolved_path(&t.input_dir.to_string());
         let resolved_out_dir = utils::get_resolved_path(&t.output_dir.to_string());
+        let out_path = format!("{}/{}.dl", &resolved_out_dir, t.filename.to_string());
         input_to_souffle_file(
-            &format!("{}/{}", &resolved_in_dir, &t.filename.to_string()),
-            &format!("{}/{}.dl", &resolved_out_dir, &t.filename.to_string())
+            &format!("{}/{}.auth", &resolved_in_dir, &t.filename.to_string()),
+            &out_path
         );
         run_souffle(
-            &format!("{}/{}.dl", resolved_out_dir, t.filename),
+            &out_path,
             &resolved_out_dir,
         );
         for (qname, intended_result) in t.query_expects {

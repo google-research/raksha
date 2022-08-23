@@ -19,13 +19,13 @@ licenses(["notice"])
 
 policy_check(
     name = "delegation_granted",
-    auth_logic = "ok_claim_propagates_delegation_granted.authlogic",
+    auth_logic = "ok_claim_propagates_delegation_granted.auth",
     dataflow_graph = "ok_claim_propagates.arcs",
 )
 
 policy_check(
     name = "delegation_not_granted",
-    auth_logic = "ok_claim_propagates_delegation_not_granted.authlogic",
+    auth_logic = "ok_claim_propagates_delegation_not_granted.auth",
     dataflow_graph = "ok_claim_propagates.arcs",
     expect_failure = True,
 )

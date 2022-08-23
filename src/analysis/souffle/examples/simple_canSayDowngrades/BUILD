@@ -19,20 +19,20 @@ licenses(["notice"])
 
 policy_check(
     name = "delegation_granted",
-    auth_logic = "ok_claim_propagates_downgrade_granted.authlogic",
+    auth_logic = "ok_claim_propagates_downgrade_granted.auth",
     dataflow_graph = "ok_claim_propagates.arcs",
 )
 
 policy_check(
     name = "delegation_not_granted",
-    auth_logic = "ok_claim_propagates_downgrade_not_granted.authlogic",
+    auth_logic = "ok_claim_propagates_downgrade_not_granted.auth",
     dataflow_graph = "ok_claim_propagates.arcs",
     expect_failure = True,
 )
 
 policy_check(
     name = "delegation_granted_by_non_owner",
-    auth_logic = "ok_claim_propagates_downgrade_granted_by_non_owner.authlogic",
+    auth_logic = "ok_claim_propagates_downgrade_granted_by_non_owner.auth",
     dataflow_graph = "ok_claim_propagates.arcs",
     expect_failure = True,
 )

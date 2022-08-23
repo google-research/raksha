@@ -64,7 +64,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(ManifestDatalogFacts(),
                         *(AuthorizationLogicDatalogFacts::create(
                             utils::test::GetTestDataDir(path),
-                            "empty_auth_logic")),
+                            "empty_auth_logic.auth")),
                         R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "src/analysis/souffle/taint.dl"
@@ -114,7 +114,7 @@ grounded_dummy("dummy_var").
                             particle_spec.get(), {}, {})}),
                         *(AuthorizationLogicDatalogFacts::create(
                             utils::test::GetTestDataDir(path),
-                            "simple_auth_logic")),
+                            "simple_auth_logic.auth")),
                         R"(// GENERATED FILE, DO NOT EDIT!
 
 #include "src/analysis/souffle/taint.dl"
