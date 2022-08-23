@@ -335,6 +335,8 @@ cc_library(
 cc_test(
     name = "souffle_policy_checker_test",
     srcs = ["souffle_policy_checker_test.cc"],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
     deps = [
         ":souffle_policy_checker",
         "//src/backends/policy_engine:dp_parameter_policy",
