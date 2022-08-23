@@ -1,6 +1,11 @@
-// Modeling two queries that pass the dp analysis because the total noise added
-// on the initial input is equal to the the global epsilon (4) even after
-// multiplied by the senstivity ((1+1)*2 (for sens) = 2).
+// Modeling two queries that pass the dp analysis because the total delta is
+// equal to the global delta.
+// Queries:  SELECT AVG(revenue) (epsilon = 1, delta = 1)
+//           FROM revenue_table
+//           GROUP_BY location
+//
+//           SELECT AVG(profit) (epsilon = 1, delta = 1)
+//           FROM revenue_table
 module m0 {
   block b0 {
         %0 = core.input [name: "revenue_table"] ()

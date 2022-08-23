@@ -13,8 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
+
 #ifndef SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_
 #define SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_
+
+// This file tracks the epsilon and delta parameters, global and local, and
+// throws a violationPolicy when the global parameters are strictly smaller
+// than the local ones
 
 #include "src/analysis/souffle/sensitivity_analysis.dl"
 
@@ -26,6 +31,8 @@
 
 .type Delta <: number
 
+// Type representing different differential privacy parameters (such as epsilon
+// and delta).
 .type DPParameterValue = EpsilonValue { value: Epsilon }
     | DeltaValue { value: Delta }
 
@@ -41,18 +48,24 @@ isGlobalEpsilon(epsilon) :- isDPParameter($EpsilonValue(epsilon)).
 isGlobalDelta(delta) :- isDPParameter($DeltaValue(delta)).
 
 // We track every mechanism that adds noise.
-// Right now, we are not tracking the type of noise (e.g. via Laplace of Gaussian mechanisms).
+// Right now, we are not tracking the type of noise (e.g. via Laplace or
+// Gaussian mechanisms).
 .decl isDiffPrivacyMechanism(operation: Operation)
 isDiffPrivacyMechanism(operation) :- isOperation(operation),
     operationHasOperator(operation, PRIVACY_MECHANISM_OPERATOR).
 
-// The epsilon of each privacy mechanism is tracked and later attached to values.
+// The epsilon of each privacy mechanism is tracked and later attached
+// to values.
 .decl diffPrivacyMechanismHasEpsilon(operation: Operation, epsilon: Epsilon)
-diffPrivacyMechanismHasEpsilon(operation, as(epsilon, Epsilon)) :- isDiffPrivacyMechanism(operation),
-    operationHasAttribute(operation, ["epsilon", $NumberAttributePayload(epsilon)]).
+diffPrivacyMechanismHasEpsilon(operation, as(epsilon, Epsilon)) :-
+    isDiffPrivacyMechanism(operation),
+    operationHasAttribute(
+        operation,
+        ["epsilon", $NumberAttributePayload(epsilon)]).
 
 .decl diffPrivacyMechanismHasDelta(operation: Operation, delta: Delta)
-diffPrivacyMechanismHasDelta(operation, as(delta, Delta)) :- isDiffPrivacyMechanism(operation),
+diffPrivacyMechanismHasDelta(operation, as(delta, Delta)) :-
+    isDiffPrivacyMechanism(operation),
     operationHasAttribute(operation, ["delta", $NumberAttributePayload(delta)]).
 
 // We propagate privacy mechanisms backwards to inputs as per the PINQ paper.
@@ -78,8 +91,11 @@ epsilonDiffPrivacy(value, epsilon) :- sqlPath(value, _),
 
 // Intermediate relation used to grab all the privacy mechanisms that go back
 // to any given sqlInput
-.decl epsilonDiffPrivacyIntermediate(value: AccessPath, sql_output: AccessPath, epsilon: Epsilon)
-epsilonDiffPrivacyIntermediate(value, sql_output, epsilon) :- sqlPath(value, sql_output),
+.decl epsilonDiffPrivacyIntermediate(value: AccessPath,
+    sql_output: AccessPath,
+    epsilon: Epsilon)
+epsilonDiffPrivacyIntermediate(value, sql_output, epsilon) :-
+    sqlPath(value, sql_output),
     isDiffPrivacyMechanism(operation),
     operationHasResult(operation, sql_output),
     diffPrivacyMechanismHasEpsilon(operation, epsilon).
@@ -95,15 +111,19 @@ deltaDiffPrivacy(value, delta) :- sqlPath(value, _),
 
 // Intermediate relation used to grab all the privacy mechanisms that go back
 // to any given sqlInput
-.decl deltaDiffPrivacyIntermediate(value: AccessPath, sql_output: AccessPath, delta: Delta)
-deltaDiffPrivacyIntermediate(value, sql_output, delta) :- sqlPath(value, sql_output),
+.decl deltaDiffPrivacyIntermediate(value: AccessPath,
+    sql_output: AccessPath,
+    delta: Delta)
+deltaDiffPrivacyIntermediate(value, sql_output, delta) :-
+    sqlPath(value, sql_output),
     isDiffPrivacyMechanism(operation),
     operationHasResult(operation, sql_output),
     diffPrivacyMechanismHasDelta(operation, delta).
 
 sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation),
     operationHasResult(operation, value),
-    operationHasOperandAtIndex(operation, sql_input, 0), // assuming isDiffPrivacyMechanism always has one input
+    // assuming isDiffPrivacyMechanism always has one input
+    operationHasOperandAtIndex(operation, sql_input, 0),
     sqlValueSensitivity(sql_input, sensitivity).
 
 // DP Policies are violated when:

@@ -1,6 +1,9 @@
 // Modeling a single query that fails the dp analysis: the actual delta (3) is
 // larger than the global delta (2). Note that the real deltas are much smaller
 // than this but for now we'll use integers.
+// Queries:  SELECT AVG(revenue) (epsilon = 1, delta = 3)
+//           FROM revenue_table
+//           GROUP_BY location
 module m0 {
   block b0 {
         %0 = core.input [name: "revenue_table"] ()

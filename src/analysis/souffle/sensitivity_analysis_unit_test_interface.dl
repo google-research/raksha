@@ -18,7 +18,7 @@
 
 #include "src/analysis/souffle/sensitivity_analysis.dl"
 
-// An interface used for unit testing of the sensitivity analysis. 
+// An interface used for unit testing of the sensitivity analysis.
 // Only outputs value sensitivities
 
 .input isOperation(delimiter=";")
