@@ -286,16 +286,9 @@ void TypeEnvironment::AddTyping(std::string arg_name,
     // so do nothing if this argument is not a constant.
     return;
   }
-  if (inner_map_.find(arg_name) == inner_map_.end()) {
-    // No typing for this constant was found yet,
-    // so add it.
-    inner_map_.insert({arg_name, arg_type});
-  } else if (inner_map_.find(arg_name)->second != arg_type) {
-    // If there is already a typing for this constant,
-    // but it is different from the one used here,
-    // throw a type error and abort.
-    LOG(FATAL) << "type error for constant: " << arg_name;
-  }
+  auto insert_result = inner_map_.insert({arg_name, arg_type});
+  CHECK(insert_result.second)
+      << "Type error for constant: " << insert_result.first->first;
 }
 
 Unit TypeEnvironment::TypeEnvironmentGenerationVisitor::PreVisit(

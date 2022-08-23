@@ -95,13 +95,6 @@ class TypeEnvironment {
 
   datalog::ArgumentType GetTypingOrFatal(absl::string_view argument_name);
 
-  // This generates a set of says assertions that populate all the
-  // universes for all the speakers given the type environment. Essentially,
-  // it loops through the list of constant principals, and then all the
-  // constants of all types, and then generates a SaysAssertion that
-  // adds the constant to the universe for each speaker.
-  std::vector<SaysAssertion> GetUniverseDefiningFacts();
-
   const absl::flat_hash_map<std::string, datalog::ArgumentType>& inner_map()
       const {
     return inner_map_;
