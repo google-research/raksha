@@ -16,6 +16,8 @@
 #ifndef SRC_IR_AUTH_LOGIC_AST_TRAVERSING_VISITOR_H_
 #define SRC_IR_AUTH_LOGIC_AST_TRAVERSING_VISITOR_H_
 
+#include <utility>
+
 #include "src/common/logging/logging.h"
 #include "src/common/utils/fold.h"
 #include "src/common/utils/overloaded.h"
@@ -188,10 +190,13 @@ class AuthLogicAstTraversingVisitor
 
   Result Visit(CopyConst<IsConst, CanActAs>& can_act_as) final override {
     Result pre_visit_result = PreVisit(can_act_as);
-    Result fold_result =
-        CombineResult(CombineResult(std::move(pre_visit_result),
-                                    can_act_as.left_principal().Accept(*this)),
-                      can_act_as.right_principal().Accept(*this));
+    Result left_result = can_act_as.left_principal().Accept(*this);
+    Result right_result = can_act_as.right_principal().Accept(*this);
+    // Run the child visitors before hand so that the results are not affected
+    // by the order of evaluation of arguments to CombineResult.
+    Result fold_result = CombineResult(
+        CombineResult(std::move(pre_visit_result), std::move(left_result)),
+        right_result);
     return PostVisit(can_act_as, std::move(fold_result));
   }
 
@@ -257,10 +262,13 @@ class AuthLogicAstTraversingVisitor
 
   Result Visit(CopyConst<IsConst, Query>& query) final override {
     Result pre_visit_result = PreVisit(query);
-    Result fold_result =
-        CombineResult(std::move(pre_visit_result),
-                      CombineResult(query.principal().Accept(*this),
-                                    query.fact().Accept(*this)));
+    Result principal_result = query.principal().Accept(*this);
+    Result fact_result = query.fact().Accept(*this);
+    // Run the child visitors before hand so that the results are not affected
+    // by the order of evaluation of arguments to CombineResult.
+    Result fold_result = CombineResult(
+        std::move(pre_visit_result),
+        CombineResult(std::move(principal_result), std::move(fact_result)));
     return PostVisit(query, fold_result);
   }
 
