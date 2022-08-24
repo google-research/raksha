@@ -29,6 +29,7 @@
 #include "src/common/utils/map_iter.h"
 #include "src/ir/auth_logic/auth_logic_ast_visitor.h"
 #include "src/ir/datalog/program.h"
+#include "absl/strings/str_join.h"
 
 namespace raksha::ir::auth_logic {
 
