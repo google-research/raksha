@@ -31,6 +31,20 @@ TEST_P(IrParserTest, SimpleTestOperation) {
             input_program_text);
 }
 
+TEST(IrParserTest, SimpleTestOperationWithOutSsaNames) {
+  std::string input_program_text = R"(module m0 {
+  block b0 {
+    %0 = core.merge [](<<ANY>>, <<ANY>>)
+    %1 = core.merge [](<<ANY>>, <<ANY>>)
+    %2 = core.plus [access: "private", transform: "no"](%1, <<ANY>>)
+  }  // block b0
+}  // module m0
+)";
+  IrProgramParser ir_parser;
+  auto result = ir_parser.ParseProgram(input_program_text);
+  EXPECT_EQ(IRPrinter::ToString(*result.module), input_program_text);
+}
+
 INSTANTIATE_TEST_SUITE_P(IrParserTest, IrParserTest,
                          ::testing::Values(
                              R"(module m0 {

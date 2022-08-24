@@ -108,6 +108,10 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
          << absl::StreamFormat(kOperationFormat, this_ssa_name,
                                operation.op().name(), attributes_string,
                                inputs_string);
+
+    const Value& v = Value(value::OperationResult(operation, "out"));
+    ssa_names_.GetOrCreateID(v);
+
     if (operation.impl_module()) {
       out_ << " {\n";
       IncreaseIndent();
