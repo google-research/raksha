@@ -57,14 +57,14 @@ cc_library(
 
 cc_library(
     name = "universe_relation_insertion",
-    hdrs = [
-        "universe_relation_insertion.h",
-    ],
+    srcs = ["universe_relation_insertion.cc"],
+    hdrs = ["universe_relation_insertion.h"],
     visibility = ["//visibility:private"],
     deps = [
         ":ast",
         ":auth_logic_ast_traversing_visitor",
         "//src/common/logging",
+        "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",
     ],
 )

@@ -105,7 +105,7 @@ class UniverseDeclarationGenerationVisitor
       const datalog::RelationDeclaration& relation_declaration) override {
     DeclSet universe_declarations;
     for (const auto& argument : relation_declaration.arguments()) {
-      universe_declarations.emplace(
+      universe_declarations.insert(
           TypeToUniverseDeclaration(argument.argument_type()));
     }
     return universe_declarations;
