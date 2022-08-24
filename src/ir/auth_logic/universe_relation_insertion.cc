@@ -29,29 +29,10 @@ bool IsNameConstant(absl::string_view id) {
   if (id[0] == '"') {
     return true;
   } else {
+    int unused_output;
     // Numeric literals are constants and this is
     // a numeric literal if all the characters are numbers.
-    for (char c : id) {
-      if (!isdigit(c)) return false;
-    }
-    return true;
-  }
-}
-
-// (TODO: #672) once an AST node for numbers as RVALUEs in numeric
-// comparisons is added, this visitor should also visit
-// the numeric RVALUEs and add them to the type environment
-// with type ArgumentType(kNumber, "Number")
-// This is a workaround that makes use of the fact that
-// numeric comparisons are represented as predicates
-// with a name that matches the operator:
-// (https://github.com/google-research/raksha/blob/be6ef8e1e1a20735a06637c12db9ed0b87e3d2a2/src/ir/auth_logic/ast_construction.cc#L92)
-static inline bool PredicateIsNumericOperator(const datalog::Predicate& pred) {
-  if (pred.name() == "<" || pred.name() == "<" || pred.name() == "=" ||
-      pred.name() == "!=" || pred.name() == "<=" || pred.name() == ">=") {
-    return true;
-  } else {
-    return false;
+    return absl::SimpleAtoi(id, &unused_output);
   }
 }
 
@@ -106,7 +87,7 @@ std::vector<SaysAssertion> GetUniverseDefiningFacts(
   return universe_defining_says_assertions;
 }
 
-// This visitor is used only to implmenet GetUniverseDeclarations
+// This visitor is used only to implement GetUniverseDeclarations
 class UniverseDeclarationGenerationVisitor
     : public AuthLogicAstTraversingVisitor<
           UniverseDeclarationGenerationVisitor,
@@ -198,10 +179,10 @@ class UniverseConditionTransformer
   }
 
   Assertion AddUniverseConditions(const ConditionalAssertion& cond_assertion) {
-    std::vector<BaseFact> conditions =
-        GetUniverseConditions(cond_assertion.lhs().base_fact());
+    Fact lhs = cond_assertion.lhs();
+    std::vector<BaseFact> conditions = GetUniverseConditions(lhs.base_fact());
     absl::c_copy(cond_assertion.rhs(), std::back_inserter(conditions));
-    return Assertion(ConditionalAssertion(cond_assertion.lhs(), conditions));
+    return Assertion(ConditionalAssertion(lhs, conditions));
   }
 
   // This method, given a BaseFact appearing in the LHS of an assertion,
@@ -210,8 +191,7 @@ class UniverseConditionTransformer
   // The visitor works only on subtrees of the AST that are
   // these BaseFacts on the LHS and returns a set of BaseFacts with
   // the universe conditions.
-  inline std::vector<BaseFact> GetUniverseConditions(
-      const BaseFact& base_fact) {
+  std::vector<BaseFact> GetUniverseConditions(const BaseFact& base_fact) {
     return base_fact.Accept(*this);
   }
 
@@ -236,8 +216,9 @@ class UniverseConditionTransformer
     datalog::RelationDeclaration decl =
         decl_env_.GetDeclarationOrFatal(pred.name());
     std::vector<BaseFact> conditions;
-    for (unsigned i = 0; i < pred.args().size(); i++) {
-      auto arg = pred.args()[i];
+    std::vector<std::string> args = pred.args();
+    for (size_t i = 0; i < args.size(); i++) {
+      std::string arg = args[i];
       if (!IsNameConstant(arg)) {
         conditions.push_back(MakeUniverseMembershipFact(
             arg, decl.arguments()[i].argument_type()));
@@ -258,11 +239,10 @@ DeclarationEnvironment::DeclarationEnvironment(const Program& prog) {
 
 datalog::RelationDeclaration DeclarationEnvironment::GetDeclarationOrFatal(
     absl::string_view relation_name) {
-  if (inner_map_.find(relation_name) == inner_map_.end()) {
-    LOG(FATAL) << "could not find declaration for relation" << relation_name;
-  } else {
-    return inner_map_.find(relation_name)->second;
-  }
+  auto find_result = inner_map_.find(relation_name);
+  CHECK(find_result != inner_map_.end())
+      << "could not find declaration for relation " << relation_name;
+  return find_result->second;
 }
 
 TypeEnvironment::TypeEnvironment(DeclarationEnvironment decl_env,
@@ -279,14 +259,14 @@ datalog::ArgumentType TypeEnvironment::GetTypingOrFatal(
   return find_result->second;
 }
 
-void TypeEnvironment::AddTyping(std::string arg_name,
+void TypeEnvironment::AddTyping(absl::string_view arg_name,
                                 datalog::ArgumentType arg_type) {
   if (!IsNameConstant(arg_name)) {
     // This pass is only meant to find typings for constants,
     // so do nothing if this argument is not a constant.
     return;
   }
-  auto insert_result = inner_map_.insert({arg_name, arg_type});
+  auto insert_result = inner_map_.insert({std::string(arg_name), arg_type});
   CHECK(insert_result.second)
       << "Type error for constant: " << insert_result.first->first;
 }
@@ -300,7 +280,7 @@ Unit TypeEnvironment::TypeEnvironmentGenerationVisitor::PreVisit(
 
 Unit TypeEnvironment::TypeEnvironmentGenerationVisitor::Visit(
     const datalog::Predicate& pred) {
-  if (PredicateIsNumericOperator(pred)) {
+  if (pred.IsNumericOperator()) {
     // This is part of the workaround for handling numeric comparisons
     // given that the operators use the same AST nodes as predicates.
     for (auto arg : pred.args()) {
@@ -318,7 +298,7 @@ Unit TypeEnvironment::TypeEnvironmentGenerationVisitor::Visit(
     // So to do this, we iterate through the list of arguments in the
     // predicate and the list of parameters in the declaration using
     // the indices of the arguments iterator of the predicate.
-    for (unsigned i = 0; i < pred.args().size(); i++) {
+    for (size_t i = 0; i < pred.args().size(); i++) {
       enclosing_env_.AddTyping(pred.args()[i],
                                decl.arguments()[i].argument_type());
     }

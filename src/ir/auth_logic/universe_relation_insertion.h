@@ -101,7 +101,7 @@ class TypeEnvironment {
   }
 
  private:
-  void AddTyping(std::string arg_name, datalog::ArgumentType arg_type);
+  void AddTyping(absl::string_view arg_name, datalog::ArgumentType arg_type);
 
   // This visitor aids in the construction of the TypeEnvironment.
   // It populates a mapping (flat_hash_map) of constant (literal)

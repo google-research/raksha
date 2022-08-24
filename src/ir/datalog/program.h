@@ -66,6 +66,21 @@ class Predicate {
     return this->name() < otherPredicate.name();
   }
 
+    // (TODO: #672) once an AST node for numbers as RVALUEs in numeric
+    // comparisons is added, this visitor should also visit
+    // the numeric RVALUEs and add them to the type environment
+    // with type ArgumentType(kNumber, "Number")
+    // This is a workaround that makes use of the fact that
+    // numeric comparisons are represented as predicates
+    // with a name that matches the operator:
+    // (https://github.com/google-research/raksha/blob/be6ef8e1e1a20735a06637c12db9ed0b87e3d2a2/src/ir/auth_logic/ast_construction.cc#L92)
+  bool IsNumericOperator() const {
+    const absl::flat_hash_set<std::string> numeric_operators = {
+      "<", ">", "=", "!=", "<=", ">="
+    };
+    return numeric_operators.contains(name_);
+  }
+
  private:
   std::string name_;
   std::vector<std::string> args_;
