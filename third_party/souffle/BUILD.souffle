@@ -73,6 +73,9 @@ cc_library(
     hdrs = glob(["src/**/*.h"]) + [":parser_gen"],
     copts = [
         "-std=c++17",
+        # without this flag an error is thrown when building 
+        # @souffle:souffle_static
+        "-fexceptions",
         # We don't want warnings in 3rd party packages to obscure issues in our
         # own code that we are more likely to need to fix.
         "-w",
@@ -118,5 +121,20 @@ cc_binary(
         "-w",
     ],
     linkopts = ["-pthread"],
+    deps = [":souffle_lib"],
+)
+
+cc_binary(
+    name = "souffle_static",
+    linkstatic = True,
+    srcs = ["src/main.cpp"],
+    copts = [
+        "-std=c++17",
+        "-fexceptions",
+        # We don't want warnings in 3rd party packages to obscure issues in our
+        # own code that we are more likely to need to fix.
+        "-w",
+    ],
+    linkopts = ["-pthread", "-static", "-static-libgcc", "-static-libstdc++"],
     deps = [":souffle_lib"],
 )
