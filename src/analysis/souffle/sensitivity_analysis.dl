@@ -22,6 +22,8 @@
 #include "src/analysis/souffle/sql_output.dl"
 
 #define CORE_INPUT_OPERATOR as("core.input", Operator)
+#define SQL_INPUT_TABLE_COLUMN_OPERATOR as ("sql.input_table_column", Operator)
+#define SQL_FUNCTION_CALL_OPERATOR as("sql.function_call", Operator)
 #define SQL_WHERE_OPERATOR as("sql.where", Operator)
 #define SQL_GROUP_BY_OPERATOR as("sql.group_by", Operator)
 #define SQL_ORDER_BY_OPERATOR as("sql.order_by", Operator)
@@ -68,7 +70,6 @@ isTransformationOperation(operation) :- isSqlOperation(operation),
 
 .decl isAggregationOperator(op: Operator)
 isAggregationOperator(SQL_SUM_OPERATOR).
-isAggregationOperator(SQL_AVERAGE_OPERATOR).
 isAggregationOperator(SQL_COUNT_OPERATOR).
 isAggregationOperator(SQL_MAX_OPERATOR).
 isAggregationOperator(SQL_MIN_OPERATOR).
@@ -84,16 +85,25 @@ isAggregationOperation(operation) :- isSqlOperation(operation),
       operationHasOperator(operation, operator),
       isAggregationOperator(operator).
 
+isAggregationOperation(operation) :- isSqlOperation(operation),
+      operationHasOperator(operation, SQL_FUNCTION_CALL_OPERATOR),
+      operationHasAttribute(operation,
+        ["function_kind", $StringAttributePayload("aggregate")]).
+
 .decl isSqlValue(value: AccessPath)
 isSqlValue(value) :- isSqlOperation(operation),
       operationHasResult(operation, value).
 
+.decl isInputOperator(op: Operator)
+isInputOperator(CORE_INPUT_OPERATOR).
+isInputOperator(SQL_INPUT_TABLE_COLUMN_OPERATOR).
+
 // Keeping track of all initial inputs.
 .decl isInitialInput (ingress_point: AccessPath)
 isInitialInput(as(ingress_point, AccessPath)) :- isOperation(operation),
-      operationHasOperator(operation, CORE_INPUT_OPERATOR),
-      operationHasResult(operation, ingress_point),
-      operationHasAttribute(operation, [_, $StringAttributePayload(_)]).
+      operationHasOperator(operation, operator),
+      isInputOperator(operator),
+      operationHasResult(operation, ingress_point).
 
 // Helper functions to flatten input/operand lists.
 .decl intermediateFlatten(list:OperandList, sublist:OperandList,

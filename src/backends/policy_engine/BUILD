@@ -75,6 +75,7 @@ cc_library(
 cc_library(
     name = "dp_parameter_policy",
     hdrs = ["dp_parameter_policy.h"],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":policy",
         "@absl//absl/strings:str_format",
