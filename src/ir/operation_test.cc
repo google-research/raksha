@@ -17,6 +17,7 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/ir_printer.h"
@@ -65,7 +66,7 @@ TEST_P(OperationTest, AccessorsAndToStringReturnCorrectValue) {
   EXPECT_EQ(&operation.op(), op);
   EXPECT_EQ(operation.attributes(), attributes);
   EXPECT_EQ(operation.inputs(), inputs);
-  EXPECT_THAT(string_reps, testing::Eq(IRPrinter::ToString(operation)));
+  EXPECT_EQ(IRPrinter::ToString(operation), string_reps);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -90,9 +91,10 @@ INSTANTIATE_TEST_SUITE_P(
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"const1", Attribute::Create<StringAttribute>("a")},
-                            {"const2", Attribute::Create<Int64Attribute>(42)}},
+                            {"const2", Attribute::Create<Int64Attribute>(42)},
+                            {"const3", Attribute::Create<FloatAttribute>(3.1415)}},
                            {},
-                           "%0 = core.minus [const1: \"a\", const2: 42]()\n"}),
+                           "%0 = core.minus [const1: \"a\", const2: 42, const3: 3.1415l]()\n"}),
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"const", Attribute::Create<Int64Attribute>(10)}},

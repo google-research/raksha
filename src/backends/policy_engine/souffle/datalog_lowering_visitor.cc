@@ -20,6 +20,7 @@
 #include "src/common/utils/fold.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/ir/attributes/attribute.h"
+#include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/datalog/operation.h"
@@ -41,7 +42,9 @@ using DatalogAttributePayload = ir::datalog::AttributePayload;
 
 static DatalogAttributePayload GetPayloadForAttribute(ir::Attribute attr,
                                                       ir::SsaNames &ssa_names) {
-  if (auto int_attr = attr.GetIf<ir::Int64Attribute>()) {
+  if (auto float_attr = attr.GetIf<ir::FloatAttribute>()) {
+    return DatalogAttribute::Float(float_attr->value());
+  } else if (auto int_attr = attr.GetIf<ir::Int64Attribute>()) {
     return DatalogAttribute::Number(int_attr->value());
   } else if (auto string_attr = attr.GetIf<ir::StringAttribute>()) {
     return DatalogAttribute::String(string_attr->value());
@@ -71,10 +74,15 @@ Unit DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
   // Convert each `Attribute` to the analogous record in datalog and put into an
   // `AttributeList`.
   const ir::NamedAttributeMap &ir_attr_map = operation.attributes();
+
+  // Convert to std::vector for sorting (this avoids exposing flat_hash_map ordering to datalog).
+  std::vector<std::pair<std::string, ir::Attribute>> attribute_vec(ir_attr_map.begin(), ir_attr_map.end());
+  std::sort(attribute_vec.begin(), attribute_vec.end(),
+      [](auto& left, auto& right){ return left.first > right.first; }
+  );
   DatalogAttributeList attribute_list = common::utils::fold(
-      ir_attr_map, DatalogAttributeList(),
-      [&ssa_names](DatalogAttributeList list_so_far,
-                   std::pair<std::string, ir::Attribute> name_attr_pair) {
+      attribute_vec, DatalogAttributeList(),
+      [&ssa_names](DatalogAttributeList list_so_far, std::pair<std::string, ir::Attribute> name_attr_pair) {
         return DatalogAttributeList(
             DatalogAttribute(std::move(name_attr_pair.first),
                              GetPayloadForAttribute(

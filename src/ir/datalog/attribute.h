@@ -42,8 +42,28 @@ class Attribute
     explicit String(absl::string_view symbol) : String(Symbol(symbol)) {}
   };
 
+  class Float : public AttributePayload {
+   public:
+    explicit Float(datalog::Float number)
+        : AttributePayload(kFloatAttributePayloadName) {
+      // NOTE: unique_ptr<datalog::Float> and **not** unique_ptr<Float>!
+      arguments_.push_back(
+          std::make_unique<datalog::Float>(std::move(number)));
+    }
+
+    explicit Float(double number) : Float(datalog::Float(number)) {}
+  };
+
   class Number : public AttributePayload {
    public:
+    template<typename T>
+    Number(T value) = delete;
+
+    Number(double value) = delete;
+    Number(float value) = delete;
+    Number(datalog::Float value) = delete;
+
+    explicit Number(int number): Number(datalog::Number(number)) {}
     explicit Number(datalog::Number number)
         : AttributePayload(kNumberAttributePayloadName) {
       // NOTE: unique_ptr<datalog::Number> and **not** unique_ptr<Number>!
@@ -57,6 +77,8 @@ class Attribute
  private:
   static constexpr absl::string_view kStringAttributePayloadName =
       "StringAttributePayload";
+  static constexpr absl::string_view kFloatAttributePayloadName =
+      "FloatAttributePayload";
   static constexpr absl::string_view kNumberAttributePayloadName =
       "NumberAttributePayload";
 };

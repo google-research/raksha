@@ -28,6 +28,25 @@ using testing::Combine;
 using testing::TestWithParam;
 using testing::ValuesIn;
 
+class FloatTest : public TestWithParam<double> {};
+
+TEST_P(FloatTest, FloatTest) {
+  double num = GetParam();
+  Float float_value = Float(num);
+  std::string datalog_str = float_value.ToDatalogString();
+  double parsed_float = 0;
+  bool conversion_succeeds = absl::SimpleAtod(datalog_str, &parsed_float);
+  ASSERT_TRUE(conversion_succeeds) << "Failed to convert " << datalog_str
+                                   << " into a float (from " << num << ").";
+  ASSERT_EQ(parsed_float, num) << "Failed to convert " << datalog_str
+                                << " into a float equal to " << num << ".";
+}
+
+static double kSampleFloatValues[] = {0.0,  1.0,     2.0,     -0.5,
+                                       45.1, 999e100, -999e100};
+
+INSTANTIATE_TEST_SUITE_P(FloatTest, FloatTest, ValuesIn(kSampleFloatValues));
+
 class NumberTest : public TestWithParam<int64_t> {};
 
 TEST_P(NumberTest, NumberTest) {

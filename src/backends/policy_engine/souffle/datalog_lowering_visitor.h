@@ -21,8 +21,6 @@
 #include "src/common/utils/types.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/attributes/attribute.h"
-#include "src/ir/attributes/int_attribute.h"
-#include "src/ir/attributes/string_attribute.h"
 #include "src/ir/datalog/operation.h"
 #include "src/ir/ir_traversing_visitor.h"
 #include "src/ir/module.h"

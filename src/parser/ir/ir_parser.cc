@@ -31,6 +31,7 @@
 #include "src/common/logging/logging.h"
 #include "src/common/utils/map_iter.h"
 #include "src/ir/attributes/attribute.h"
+#include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/block_builder.h"
@@ -56,6 +57,7 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
         std::make_unique<Operator>(operation_context.ID()->getText()));
   }
   // Grammar rule for attributes is either
+  //   -> ID ':' FLOATLITERAL (a double-precision floating point number type) or
   //   -> ID ':' NUMLITERAL (a number type) or
   //   -> ID ':' '"'ID'"' (a string type)
   NamedAttributeMap attributes;
@@ -71,6 +73,22 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
                  CHECK_NOTNULL(string_attribute_context)
                      ->stringLiteral()
                      ->getText())});
+        continue;
+      }
+      if (auto* float_attribute_context =
+              dynamic_cast<IrParser::FloatAttributeContext*>(
+                  attribute_context)) {
+          double parsed_float = 0;
+          auto text = CHECK_NOTNULL(float_attribute_context)->FLOATLITERAL()->getText();
+          // Discard the suffix (l or f).
+          auto last_char_it = text.rbegin();
+          if (last_char_it != text.rend() && *last_char_it == 'l') {
+              text = std::string(text.begin(), text.end()-1);
+          }
+          bool conversion_succeeds = absl::SimpleAtod(text, &parsed_float);
+          CHECK(conversion_succeeds == true);
+          attributes.insert({CHECK_NOTNULL(float_attribute_context)->ID()->getText(),
+                             Attribute::Create<FloatAttribute>(parsed_float)});
         continue;
       }
       auto* num_attribute_context =

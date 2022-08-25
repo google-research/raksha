@@ -39,10 +39,31 @@ cc_test(
     srcs = ["attribute_test.cc"],
     deps = [
         ":attribute",
+        ":float_attribute",
         ":int_attribute",
         ":string_attribute",
         "//src/common/testing:gtest",
         "//src/common/utils:intrusive_ptr",
+    ],
+)
+
+cc_library(
+    name = "float_attribute",
+    hdrs = ["float_attribute.h"],
+    visibility = ["//src:__subpackages__"] + frontend_packages,
+    deps = [
+        ":attribute",
+        "//src/common/utils:intrusive_ptr",
+        "@absl//absl/strings:str_format",
+    ],
+)
+
+cc_test(
+    name = "float_attribute_test",
+    srcs = ["float_attribute_test.cc"],
+    deps = [
+        ":float_attribute",
+        "//src/common/testing:gtest",
     ],
 )
 

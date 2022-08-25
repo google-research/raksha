@@ -52,6 +52,7 @@ cc_library(
         "//src/ir:ssa_names",
         "//src/ir:value",
         "//src/ir/attributes:attribute",
+        "//src/ir/attributes:float_attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "//src/ir/types",

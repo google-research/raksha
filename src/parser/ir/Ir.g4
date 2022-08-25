@@ -22,7 +22,8 @@ grammar Ir;
 
 stringLiteral : NUMLITERAL | ID;
 attribute
-    : ID ':' NUMLITERAL #numAttribute
+    : ID ':' FLOATLITERAL #floatAttribute
+    | ID ':' NUMLITERAL #numAttribute
     | ID ':' '"'stringLiteral'"' #stringAttribute
     ;
 attributeList
@@ -36,7 +37,7 @@ argumentList
     : value (',' value)*
     ;
 operation
-    : VALUE_ID '=' ID '['(attributeList)?']''('(argumentList)?')'
+    : VALUE_ID '=' ID '['attributeList?']''('argumentList?')'
     ;
 block
     : BLOCK ID '{' (operation)+ '}'
@@ -57,10 +58,21 @@ ANY: '<<ANY>>';
 BLOCK: 'block';
 MODULE: 'module';
 
-
+SIGN : '+' | '-';
 NUMLITERAL : [0-9]+;
+FRACTIONAL_PART : '.' [0-9]*;
+EXPONENT: ('e'|'E') SIGN? [0-9]+;
+FLOAT_TAIL
+    : (FRACTIONAL_PART EXPONENT? 'l'?)
+    | (FRACTIONAL_PART? EXPONENT 'l'?)
+    | (FRACTIONAL_PART? EXPONENT? 'l')
+    ;
+
+// Either require a decimal point or an exponent or a trailing suffix (but allow both).
+FLOATLITERAL : SIGN? NUMLITERAL FLOAT_TAIL;
+
 ID : [0-9_a-zA-Z/.]+;
-VALUE_ID : ('%')? ID;
+VALUE_ID : '%'? ID;
 
 
 WHITESPACE_IGNORE

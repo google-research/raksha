@@ -51,6 +51,7 @@ cc_test(
         "//src/ir:ir_printer",
         "//src/ir:module",
         "//src/ir/attributes:attribute",
+        "//src/ir/attributes:float_attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "@absl//absl/strings",

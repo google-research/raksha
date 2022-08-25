@@ -37,6 +37,19 @@ class Value {
   virtual ~Value() {}
 };
 
+// Corresponds to Souffle's `float` type.
+class Float : public Value {
+ public:
+  explicit Float(double value) : float_value_(value) {}
+
+  std::string ToDatalogString() const override {
+    return absl::StrFormat(R"(%lg)", float_value_);
+  }
+
+ private:
+  double float_value_;
+};
+
 // Corresponds to Souffle's `number` type.
 class Number : public Value {
  public:
