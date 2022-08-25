@@ -13,18 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_ANALYSIS_SOUFFLE_MATH_DL_
-#define SRC_ANALYSIS_SOUFFLE_MATH_DL_
+#ifndef THIRD_PARTY_RAKSHA_SRC_ANALYSIS_SOUFFLE_FUNCTORS_H_
+#define THIRD_PARTY_RAKSHA_SRC_ANALYSIS_SOUFFLE_FUNCTORS_H_
 
-// This file is used for math operations needed to be carried out through
-// functors. As of now, we have a logarithm (base 10) function defined.
+#include "souffle/RecordTable.h"
+#include "souffle/SymbolTable.h"
+souffle::RamDomain log_wrapper_cxx(souffle::SymbolTable *symbolTable,
+                                   souffle::RecordTable *recordTable,
+                                   souffle::RamDomain n);
 
-.functor log_wrapper(n: float):symbol stateful
-
-.decl logResult(argument: float, result: float)
-
-.decl isLogInput(argument: float)
-
-logResult(argument, to_float(result)) :- isLogInput(argument), result = @log_wrapper(argument).
-
-#endif
+#endif  // THIRD_PARTY_RAKSHA_SRC_ANALYSIS_SOUFFLE_FUNCTORS_H_

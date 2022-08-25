@@ -14,22 +14,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //---------------------------------------------------------------------------
-#include <cmath>
+
+#include "functors.h"
+
 #include <cfloat>
+#include <cmath>
 #include <string>
 
+#include "src/common/logging/logging.h"
+
 extern "C" {
+souffle::RamDomain log_wrapper(souffle::SymbolTable *symbolTable,
+                               souffle::RecordTable *recordTable,
+                               souffle::RamDomain n) {
+  CHECK(symbolTable && "NULL symbol table");
+  CHECK(recordTable && "NULL record table");
+  souffle::RamFloat n_float = souffle::ramBitCast<souffle::RamFloat>(n);
+  auto result = std::log10(n_float);
+  return symbolTable->encode(std::to_string(result));
+}
+}
 
-  const char* log_wrapper(const char* n) {
-      std::string s(n);
-      float f = stof(s);
-
-      // TODO(#665): Need to fix. This way of converting string to char* leaks memory
-      // but it's currently the least worst option.
-      std::string strResult = std::to_string(std::log10(f));
-      char * charResult = new char[strResult.size() + 1];
-      std::copy(strResult.begin(), strResult.end(), charResult);
-      charResult[strResult.size()] = '\0';
-      return charResult;
-  }
+souffle::RamDomain log_wrapper_cxx(souffle::SymbolTable *symbolTable,
+                                   souffle::RecordTable *recordTable,
+                                   souffle::RamDomain n) {
+  return log_wrapper(symbolTable, recordTable, n);
 }
