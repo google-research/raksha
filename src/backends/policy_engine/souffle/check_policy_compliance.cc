@@ -14,6 +14,7 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -25,6 +26,7 @@
 #include "absl/flags/usage.h"
 #include "absl/status/statusor.h"
 #include "src/backends/policy_engine/auth_logic_policy.h"
+#include "src/backends/policy_engine/dp_parameter_policy.h"
 #include "src/backends/policy_engine/policy.h"
 #include "src/backends/policy_engine/souffle/souffle_policy_checker.h"
 #include "src/backends/policy_engine/sql_policy_rule_policy.h"
@@ -35,6 +37,10 @@
 ABSL_FLAG(std::optional<std::string>, ir, std::nullopt, "the IR file");
 ABSL_FLAG(std::optional<std::string>, sql_policy_rules, std::nullopt,
           "file containing the SQL policy rules");
+ABSL_FLAG(std::optional<uint64_t>, epsilon_dp_parameter, std::nullopt,
+          "global epsilon value");
+ABSL_FLAG(std::optional<uint64_t>, delta_dp_parameter, std::nullopt,
+          "global delta value");
 ABSL_FLAG(std::optional<std::string>, proto, std::nullopt, "the proto file");
 ABSL_FLAG(std::optional<std::string>, policy_engine, std::nullopt,
           "name of the policy engine");
@@ -112,6 +118,7 @@ absl::StatusOr<IrGraphComponents> GetIrGraphComponentsFromProtoPath(
 }  // namespace
 
 using raksha::backends::policy_engine::AuthLogicPolicy;
+using raksha::backends::policy_engine::DpParameterPolicy;
 using raksha::backends::policy_engine::SoufflePolicyChecker;
 using raksha::backends::policy_engine::SqlPolicyRulePolicy;
 using raksha::ir::IrProgramParser;
@@ -120,15 +127,6 @@ int main(int argc, char* argv[]) {
   google::InitGoogleLogging("check_policy_compliance");
   absl::SetProgramUsageMessage(kUsageMessage);
   absl::ParseCommandLine(argc, argv);
-
-  // Read the sql policy rules file.
-  absl::StatusOr<std::string> sql_policy_rules =
-      ReadFileContents(absl::GetFlag(FLAGS_sql_policy_rules).value());
-  if (absl::GetFlag(FLAGS_sql_policy_rules).has_value() && !sql_policy_rules.ok()) {
-    LOG(ERROR) << "Error reading sql policy rules file: "
-               << sql_policy_rules.status();
-    return UnwrapExitCode(ReturnCode::ERROR);
-  }
 
   const std::optional<std::string> ir_path = absl::GetFlag(FLAGS_ir);
   const std::optional<std::string> proto_path = absl::GetFlag(FLAGS_proto);
@@ -152,22 +150,39 @@ int main(int argc, char* argv[]) {
     return UnwrapExitCode(ReturnCode::ERROR);
   }
 
-  // Invoke policy checker and return result.
   bool policyCheckSucceeded = false;
+
+  // Invoke policy checker and return result.
   if (absl::GetFlag(FLAGS_policy_engine).has_value()) {
     AuthLogicPolicy policy(absl::GetFlag(FLAGS_policy_engine).value());
-    policyCheckSucceeded =
-        SoufflePolicyChecker().IsModulePolicyCompliant(*components.value().ir_module, policy);
+    policyCheckSucceeded = SoufflePolicyChecker().IsModulePolicyCompliant(
+        *components.value().ir_module, policy);
   } else if (absl::GetFlag(FLAGS_sql_policy_rules).has_value()) {
+    // Read the sql policy rules file.
+    absl::StatusOr<std::string> sql_policy_rules =
+        ReadFileContents(absl::GetFlag(FLAGS_sql_policy_rules).value());
+    if (absl::GetFlag(FLAGS_sql_policy_rules).has_value() &&
+        !sql_policy_rules.ok()) {
+      LOG(ERROR) << "Error reading sql policy rules file: "
+                 << sql_policy_rules.status();
+      return UnwrapExitCode(ReturnCode::ERROR);
+    }
     SqlPolicyRulePolicy policy(*sql_policy_rules);
-    policyCheckSucceeded =
-        SoufflePolicyChecker().IsModulePolicyCompliant(*components.value().ir_module, policy);
+    policyCheckSucceeded = SoufflePolicyChecker().IsModulePolicyCompliant(
+        *components.value().ir_module, policy);
+  } else if (absl::GetFlag(FLAGS_epsilon_dp_parameter).has_value() &&
+             (absl::GetFlag(FLAGS_delta_dp_parameter).has_value())) {
+    uint64_t global_epsilon = absl::GetFlag(FLAGS_epsilon_dp_parameter).value();
+    uint64_t global_delta = absl::GetFlag(FLAGS_delta_dp_parameter).value();
+    DpParameterPolicy policy(global_epsilon, global_delta);
+    policyCheckSucceeded = SoufflePolicyChecker().IsModulePolicyCompliant(
+        *components.value().ir_module, policy);
   } else {
-    LOG(ERROR) << "Both sql_policy_rules and authorzation logic generated "
-                  "datalog policy engine are undefined";
+    LOG(ERROR) << "Required policy parameter not found. Please specify one of "
+                  "--auth_logic, --sql_policy_rule, or both "
+                  "--dp_parameter_epsilon and dp_parameter_delta";
     return 2;
   }
-
   if (policyCheckSucceeded) {
     LOG(ERROR) << "Policy check succeeded!";
     return UnwrapExitCode(ReturnCode::PASS);

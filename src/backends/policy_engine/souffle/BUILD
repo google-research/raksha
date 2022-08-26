@@ -82,6 +82,7 @@ cc_binary(
     deps = [
         ":souffle_policy_checker",
         "//src/backends/policy_engine:auth_logic_policy",
+        "//src/backends/policy_engine:dp_parameter_policy",
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:sql_policy_rule_policy",
         "//src/common/logging",
