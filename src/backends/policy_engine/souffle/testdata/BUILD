@@ -31,4 +31,7 @@ exports_files([
     "simple.ir",
     "multiple_passing_policy_1.auth",
     "multiple_passing_policy_2.auth",
+    "arcsjs_policy_rules.txt",
+    "simple_failing_arcsjs.ir",
+    "simple_passing_arcsjs.ir",
 ])

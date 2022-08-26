@@ -168,7 +168,41 @@ sh_test(
 )
 
 sh_test(
-    name = "check_policy_compliance_pass_test",
+    name = "check_policy_compliance_pass_test_arcsjs",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "ir",
+        "$(location //src/backends/policy_engine/souffle/testdata:simple_passing_arcsjs.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
+        "//src/backends/policy_engine/souffle/testdata:simple_passing_arcsjs.ir",
+    ],
+)
+
+sh_test(
+    name = "check_policy_compliance_fail_test_arcsjs",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "ir",
+        "$(location //src/backends/policy_engine/souffle/testdata:simple_failing_arcsjs.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
+        "//src/backends/policy_engine/souffle/testdata:simple_failing_arcsjs.ir",
+    ],
+)
+
+sh_test(
+    name = "check_policy_compliance_pass_test_sql",
     srcs = ["check_policy_compliance_test.sh"],
     args = [
         "$(location :check_policy_compliance)",
@@ -202,7 +236,7 @@ sh_test(
 )
 
 sh_test(
-    name = "check_policy_compliance_fail_test",
+    name = "check_policy_compliance_fail_test_sql",
     srcs = ["check_policy_compliance_test.sh"],
     args = [
         "$(location :check_policy_compliance)",
