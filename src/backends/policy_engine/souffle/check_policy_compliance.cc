@@ -180,7 +180,7 @@ int main(int argc, char* argv[]) {
   } else {
     LOG(ERROR) << "Required policy parameter not found. Please specify one of "
                   "--auth_logic, --sql_policy_rule, or both "
-                  "--dp_parameter_epsilon and dp_parameter_delta";
+                  "--epsilon_dp_parameter and --delta_dp_parameter";
     return 2;
   }
   if (policyCheckSucceeded) {
