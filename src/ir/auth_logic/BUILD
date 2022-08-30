@@ -141,6 +141,7 @@ cc_library(
         "//src/ir/auth_logic:ast",
         "//src/ir/datalog:program",
         "//src/policy/auth_logic:auth_logic_cc_generator",
+        "@absl//absl/strings",
     ],
 )
 

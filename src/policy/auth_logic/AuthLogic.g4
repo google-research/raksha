@@ -25,20 +25,20 @@ grammar AuthLogic;
 //-----------------------------------------------------------------------------
 // Parser
 //-----------------------------------------------------------------------------
-// Principals are only superficially syntactically distinct from IDs at the
-// moment, but they are separate syntactic objects because the principal
-// syntax could plausibly change later.
+
 principal
-    : ID
+    : STRING_LITERAL
     ;
 
 pred_arg
-    : ID
-    | NUMLITERAL
+    : STRING_LITERAL        #constant
+    | MULTILINE_STRING_LITERAL #multilineConstant
+    | VARIABLE      #variable
+    | NUMLITERAL    #number
     ;
 
 predicate
-    : (NEG)? ID '(' pred_arg (',' pred_arg )* ')'
+    : (NEG)? VARIABLE '(' pred_arg (',' pred_arg )* ')'
     ;
 
 verbphrase
@@ -46,7 +46,7 @@ verbphrase
     // work the same as (predicate(principal, <args>)), but it does
     // not exactly. Expressions of the form (principal predicate(args))
     // can be passed to other principals using canActAs.
-    : predicate #predphrase 
+    : predicate #predphrase
     | CANACTAS principal #actsAsPhrase
     ;
 
@@ -79,36 +79,36 @@ assertion
     | fact ':-' rvalue (',' rvalue )* '.' #hornClauseAssertion
     ;
 
-// The IDs following "Export" are path names where JSON files containing
+// The VARIABLEs following "Export" are path names where JSON files containing
 // private or public keys are stored
 saysAssertion
-    : principal SAYS assertion (EXPORT ID)? #saysSingle
-    | principal SAYS '{' assertion+ '}' (EXPORT ID)?  #saysMulti
+    : principal SAYS assertion (EXPORT VARIABLE)? #saysSingle
+    | principal SAYS '{' assertion+ '}' (EXPORT VARIABLE)?  #saysMulti
     ;
 
 keyBind
-    : BINDEX principal ID #bindpriv
-    | BINDIM principal ID #bindpub
+    : BINDEX principal VARIABLE #bindpriv
+    | BINDIM principal VARIABLE #bindpub
     ;
 
 query
-    : ID '=' QUERY principal SAYS fact '?'
+    : VARIABLE '=' QUERY principal SAYS fact '?'
     ;
 
-// The ID here refers to a filename containing a signed policy statement.
+// The VARIABLE here refers to a filename containing a signed policy statement.
 importAssertion
-    : IMPORT principal SAYS ID
+    : IMPORT principal SAYS VARIABLE
     ;
 
 // The name "type" would cause name collisions in the code that antlr generates
 authLogicType
     : NUMBERTYPE #numberType
     | PRINCIPALTYPE #principalType
-    | ID #customType
+    | VARIABLE #customType
     ;
 
 relationDeclaration
-    : '.decl' ATTRIBUTE? ID '(' ID ':' authLogicType (',' ID ':' authLogicType)* ')'
+    : '.decl' ATTRIBUTE? VARIABLE '(' VARIABLE ':' authLogicType (',' VARIABLE ':' authLogicType)* ')'
     ;
 
 program
@@ -137,10 +137,13 @@ NUMBERTYPE: 'Number';
 PRINCIPALTYPE: 'Principal';
 ATTRIBUTE: 'attribute';
 
-// TODO (#661) Separate out quotes and % from ID and tokenize them.
+// TODO (#661) Separate out quotes and % from VARIABLE and tokenize them.
 // Identifiers wrapped in quotes are constants whereas
 // identifiers without quotes are variables.
-ID : ('"')? [_a-zA-Z%][_a-zA-Z0-9/.#:]* ('"')?;
+VARIABLE : [_a-zA-Z][_a-zA-Z0-9/.#:]*;
+STRING_LITERAL : '"' [_a-zA-Z%][@_a-zA-Z0-9/.#:-]* '"';
+MULTILINE_STRING_LITERAL : '"""' [\n _a-zA-Z+-][\n _a-zA-Z0-9/.#:+=-]* '"""';
+
 NUMLITERAL : [0-9]+;
 
 NEG: '!';
