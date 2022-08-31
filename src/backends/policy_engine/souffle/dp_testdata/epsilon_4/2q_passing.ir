@@ -1,6 +1,6 @@
 // Modeling two queries that pass the dp analysis because the total noise added
 // on the initial input is equal to the the global epsilon (4) even after
-// multiplied by the senstivity ((1+1)*2 (for sens) = 2).
+// multiplied by the senstivity ((1*2) + 1 = 3).
 // Queries:  SELECT AVG(revenue) (epsilon = 1)
 //           FROM revenue_table
 //           GROUP_BY location

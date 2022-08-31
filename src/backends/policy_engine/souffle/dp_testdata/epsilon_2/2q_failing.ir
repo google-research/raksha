@@ -1,5 +1,5 @@
 // Modeling two queries that fail the dp analysis because the total epsilon
-// ((2 + 1) * 2 (for sensitivity) = 6 ) is greater than the global epsilon (2).
+// ((1 * 2) + 2 (for sensitivity) = 4) is greater than the global epsilon (2).
 // Queries:  SELECT AVG(revenue) (epsilon = 1)
 //           FROM revenue_table
 //           GROUP_BY location

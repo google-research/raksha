@@ -94,12 +94,12 @@ epsilonDiffPrivacy(value, epsilon) :- sqlPath(value, _),
 .decl epsilonDiffPrivacyIntermediate(value: AccessPath,
     sql_output: AccessPath,
     epsilon: Epsilon)
-epsilonDiffPrivacyIntermediate(value, sql_output, epsilon) :-
+epsilonDiffPrivacyIntermediate(value, sql_output, epsilon*sensitivity) :-
     sqlPath(value, sql_output),
     isDiffPrivacyMechanism(operation),
     operationHasResult(operation, sql_output),
+    sqlValueSensitivity(sql_output, sensitivity),
     diffPrivacyMechanismHasEpsilon(operation, epsilon).
-
 
 // The deltas of differential privacy are also added as per Dwork and Roth
 // (https://www.cis.upenn.edu/~aaroth/Papers/privacybook.pdf). In addition,
@@ -139,11 +139,7 @@ violatesPolicy(value) :- isAggregationOperation(operation),
     sqlPath(value, sql_output),
     epsilonDiffPrivacy(value, epsilon),
     isGlobalEpsilon(global_epsilon),
-    (
-        (sqlValueSensitivity(sql_output, sensitivity),
-        global_epsilon < epsilon * sensitivity);
-        global_epsilon < epsilon
-    );
+    global_epsilon < epsilon;
     isAggregationOperation(operation),
     operationHasResult(operation, sql_output),
     sqlPath(value, sql_output),
