@@ -66,12 +66,6 @@ class Predicate {
     return this->name() < otherPredicate.name();
   }
 
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string DebugPrint() const {
-    return absl::StrCat(sign_, name_, absl::StrJoin(args_, ", "));
-  }
-
  private:
   std::string name_;
   std::vector<std::string> args_;
@@ -90,7 +84,10 @@ class ArgumentType {
   Kind kind() const { return kind_; }
   absl::string_view name() const { return name_; }
 
-  std::string DebugPrint() const { return absl::StrCat(kind_, name_); }
+  bool operator==(const ArgumentType& otherType) const {
+    return this->kind_ == otherType.kind() &&
+      this->kind_ == Kind::kCustom ? this->name_ == otherType.name() : true;
+  }
 
  private:
   Kind kind_;
@@ -105,10 +102,9 @@ class Argument {
   absl::string_view argument_name() const { return argument_name_; }
   ArgumentType argument_type() const { return argument_type_; }
 
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string DebugPrint() const {
-    return absl::StrCat(argument_name_, " : ", argument_type_.DebugPrint());
+  bool operator==(const Argument& otherArgument) const {
+    return this->argument_name_ == otherArgument.argument_name() &&
+    this->argument_type_ == otherArgument.argument_type();
   }
 
  private:
@@ -127,17 +123,11 @@ class RelationDeclaration {
   absl::string_view relation_name() const { return relation_name_; }
   bool is_attribute() const { return is_attribute_; }
   const std::vector<Argument>& arguments() const { return arguments_; }
-
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string DebugPrint() const {
-    std::vector<std::string> arg_strings;
-    arg_strings.reserve(arguments_.size());
-    for (const Argument& arg : arguments_) {
-      arg_strings.push_back(arg.DebugPrint());
-    }
-    return absl::StrCat(".decl ", relation_name_, is_attribute_,
-                        absl::StrJoin(arg_strings, ", "));
+  
+  bool operator==(const RelationDeclaration& otherDeclaration) const {
+    return this->relation_name_ == otherDeclaration.relation_name() &&
+    this->is_attribute_ == otherDeclaration.is_attribute() &&
+    this->arguments_ == otherDeclaration.arguments();
   }
 
  private:
@@ -158,6 +148,11 @@ class Rule {
   const Predicate& lhs() const { return lhs_; }
   const std::vector<Predicate>& rhs() const { return rhs_; }
 
+  bool operator==(const Rule& otherRule) const {
+    return this->lhs_ == otherRule.lhs() &&
+    this->rhs_ == otherRule.rhs();
+  }
+
  private:
   Predicate lhs_;
   std::vector<Predicate> rhs_;
@@ -175,6 +170,13 @@ class Program {
   }
   const std::vector<Rule>& rules() const { return rules_; }
   const std::vector<std::string>& outputs() const { return outputs_; }
+
+  bool operator==(const Program& otherProgram) const {
+    return this->relation_declarations_ == 
+      otherProgram.relation_declarations() &&
+      this->rules_ == otherProgram.rules() &&
+      this->outputs_ == otherProgram.outputs();
+  }
 
  private:
   std::vector<RelationDeclaration> relation_declarations_;
