@@ -1,0 +1,67 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+// TODO(#664): Rename and generalize operators or copy operators into arcsjs
+// namespace.
+
+// This is an expression of the following (hypothetical) arcsjs recipe:
+// Here, private data from 'private_texts' is (wrongly) exfiltrated.
+
+/*
+export const SimpleRecipe = {
+  $meta: {
+    description: 'A very simple recipe',
+  },
+  $stores: {
+    private_texts: {
+      $type: '[Text]',
+      $tags: ['private'],
+      $value: [],
+    }
+    ignored_data: {
+      $type: '[Text]',
+      $tags: ['public'],
+      $value: [],
+    }
+    output: {
+      $type: '[Text]',
+      $tags: ['public'],
+      $value: [],
+    }
+  },
+  exfil_particle: {
+    $kind: './Library/ExfilParticle',
+    $inputs: {
+      {bar: 'private_texts'},
+      {foo: 'ignored_data'}
+    },
+    $outputs: {
+      {baz: 'output'},
+    },
+  }
+}
+*/
+
+module m0 {
+  block b0 {
+    %0 = arcsjs.create_store [name: "SimpleRecipe.private_texts", type: "[Text]"]()
+    %1 = arcsjs.create_store [name: "SimpleRecipe.ignored_data", type: "[Text]"]()
+    %2 = sql.tag_transform [rule_name: "set_restricted"](%0) // claim private
+    %3 = arcsjs.particle [name: "SimpleRecipe.exfil_particle", input_0: "bar", input_1: "foo"](%2, %1)
+    // Policy check fails because we are not removing the restricted tag.
+    %4 = sql.sql_output [handle_name: "baz"](%3) // TODO: Update to arcsjs.connect_output / a service call etc.
+  }  // block b0
+}  // module m0

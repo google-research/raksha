@@ -1,0 +1,3 @@
+["set_restricted", $AddConfidentialityTag("restricted"), nil]
+["set_user_action_integrity", $AddIntegrityTag("UserAction"), nil]
+["remove_restricted_for_user_action", $RemoveConfidentialityTag("restricted"), nil]
