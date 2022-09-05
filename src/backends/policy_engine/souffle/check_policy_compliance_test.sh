@@ -29,8 +29,7 @@ function printUsageAndExit() {
 MAX_NUM_ARGS=6
 MIN_NUM_ARGS=5
 
-if [ $# -le ${MAX_NUM_ARGS} || $# -ge ${MIN_NUM_ARGS}]; then
-  echo "Found $# arguments, but expected between ${MIN_NUM_ARGS} and ${MAX_NUM_ARGS}."
+if [ $# -ne ${MAX_NUM_ARGS} || $# -ne ${MIN_NUM_ARGS}]; then
   printUsageAndExit
 fi
 
