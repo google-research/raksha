@@ -101,6 +101,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "pass",
+        "sql_policy_analysis",
         "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
@@ -119,6 +120,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "fail",
+        "sql_policy_analysis",
         "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
@@ -137,6 +139,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "pass",
+        "sql_policy_analysis",
         "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
@@ -155,6 +158,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "fail",
+        "sql_policy_analysis",
         "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
@@ -173,6 +177,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "pass",
+        "sql_policy_analaysis",
         "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple_passing_arcsjs.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
@@ -207,6 +212,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "pass",
+        "sql_policy_analysis",
         "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple_passing_sql.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
@@ -224,6 +230,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "pass",
+        "sql_policy_analysis",
         "proto",
         "$(location //src/backends/policy_engine/souffle/testdata:simple_passing_sql.json)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
@@ -241,6 +248,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "fail",
+        "sql_policy_analysis",
         "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple_failing_sql.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
@@ -262,6 +270,294 @@ sh_test(
     data = [
         ":check_policy_compliance",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+)
+
+sh_test(
+    name = "check_1q_epsilon2_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_passing.ir)",
+        "2",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_passing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_2q_epsilon2_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:2q_passing.ir)",
+        "2",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:2q_passing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_1q_epsilon2_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_failing.ir)",
+        "2",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_failing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_2q_epsilon2_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:2q_failing.ir)",
+        "2",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:2q_failing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_1q_epsilon4_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_4:1q_passing.ir)",
+        "4",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:1q_passing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_2q_epsilon4_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_4:2q_passing.ir)",
+        "4",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:2q_passing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_1q_epsilon4_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_4:1q_failing.ir)",
+        "4",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:1q_failing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_2q_epsilon4_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_4:2q_failing.ir)",
+        "4",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:2q_failing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_1q_delta1_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_1:1q_passing.ir)",
+        "4",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_1:1q_passing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_2q_delta1_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_1:2q_passing.ir)",
+        "4",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_1:2q_passing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_1q_delta1_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_1:1q_failing.ir)",
+        "4",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_1:1q_failing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_2q_delta1_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_1:2q_failing.ir)",
+        "4",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_1:2q_failing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_1q_delta2_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_2:1q_passing.ir)",
+        "4",
+        "2",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_2:1q_passing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_2q_delta2_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_2:2q_passing.ir)",
+        "4",
+        "2",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_2:2q_passing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_1q_delta2_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_2:1q_failing.ir)",
+        "4",
+        "2",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_2:1q_failing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_2q_delta2_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_2:2q_failing.ir)",
+        "4",
+        "2",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_2:2q_failing.ir",
     ],
 )
 
