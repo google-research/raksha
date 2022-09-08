@@ -14,6 +14,6 @@ module m0 {
         // delta set equal to global delta
         %dp_data = privacy_mechanism [epsilon: 1, delta: 1] (%2)
         %3 = sql.average [] (%dp_data)
-        %4 = sql.output [] (%3) // Report the noisy average
+        %4 = sql.sql_output [] (%3) // Report the noisy average
     }
 }
