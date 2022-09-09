@@ -20,18 +20,6 @@ package(
     licenses = ["notice"],
 )
 
-exports_files([
-    "sql_policy_rules.txt",
-    "simple_passing_sql.ir",
-    "simple_passing_sql.json",
-    "simple_failing_sql.ir",
-    "empty_policy.auth",
-    "simple_passing_policy.auth",
-    "simple_failing_policy.auth",
-    "simple.ir",
-    "multiple_passing_policy_1.auth",
-    "multiple_passing_policy_2.auth",
-    "arcsjs_policy_rules.txt",
-    "simple_failing_arcsjs.ir",
-    "simple_passing_arcsjs.ir",
-])
+exports_files(
+    glob(["*.*"]),
+)

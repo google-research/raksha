@@ -69,9 +69,15 @@ def gen_souffle_cxx_code(
 
     macro_str = macro_str_prefix + " ".join(macro_list) + macro_str_suffix
 
+    # Ignore duplicates in the included scripts (as frontends may shared scripts).
+    uniq_included_dl_scripts = []
+    for dl_script in included_dl_scripts:
+        if dl_script not in uniq_included_dl_scripts:
+            uniq_included_dl_scripts.append(dl_script)
+
     native.genrule(
         name = name,
-        srcs = [src] + included_dl_scripts,
+        srcs = [src] + uniq_included_dl_scripts,
         outs = [cc_file],
         testonly = testonly,
         cmd =

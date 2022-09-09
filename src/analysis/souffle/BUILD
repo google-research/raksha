@@ -113,7 +113,12 @@ souffle_cc_binary(
     src = ":tag_check_and_expectation_for_test",
 )
 
-sql_dl_files = core_dl_files + [
+arcsjs_dl_files = [
+    "arcsjs_operators.dl",
+    "tag_transforms.dl",
+]
+
+sql_dl_files = [
     "sql_output.dl",
     "tag_transforms.dl",
 ]
@@ -122,7 +127,7 @@ gen_souffle_cxx_code(
     name = "sql_verifier_tag_unit_test_for_test",
     src = "sql_verifier_tag_unit_test_interface.dl",
     for_test = True,
-    included_dl_scripts = sql_dl_files,
+    included_dl_scripts = core_dl_files + sql_dl_files,
 )
 
 souffle_cc_binary(
@@ -135,7 +140,7 @@ gen_souffle_cxx_code(
     name = "sensitivity_analysis_test_for_test",
     src = "sensitivity_analysis_unit_test_interface.dl",
     for_test = True,
-    included_dl_scripts = sql_dl_files + [
+    included_dl_scripts = core_dl_files + sql_dl_files + [
         "sensitivity_analysis.dl",
     ],
 )
@@ -149,7 +154,7 @@ souffle_cc_binary(
 gen_souffle_cxx_code(
     name = "sql_verifier_unit_test_code",
     src = "sql_verifier_unit_test_interface.dl",
-    included_dl_scripts = sql_dl_files,
+    included_dl_scripts = core_dl_files + sql_dl_files,
 )
 
 souffle_cc_binary(
@@ -161,7 +166,7 @@ gen_souffle_cxx_code(
     name = "math_test_for_test",
     src = "math_unit_test_interface.dl",
     for_test = True,
-    included_dl_scripts = sql_dl_files + [
+    included_dl_scripts = core_dl_files + sql_dl_files + [
         "math.dl",
     ],
 )
@@ -176,7 +181,7 @@ souffle_cc_binary(
 gen_souffle_cxx_code(
     name = "datalog_policy_verifier_cxx",
     src = "policy_verifier_interface.dl",
-    included_dl_scripts = sql_dl_files + [
+    included_dl_scripts = core_dl_files + sql_dl_files + arcsjs_dl_files + [
         "epsilon_analysis.dl",
         "sensitivity_analysis.dl",
         "math.dl",
@@ -192,7 +197,7 @@ souffle_cc_library(
 gen_souffle_cxx_code(
     name = "dp_policy_verifier_cxx",
     src = "dp_policy_verifier_interface.dl",
-    included_dl_scripts = sql_dl_files + [
+    included_dl_scripts = core_dl_files + sql_dl_files + [
         "epsilon_analysis.dl",
         "sensitivity_analysis.dl",
     ],

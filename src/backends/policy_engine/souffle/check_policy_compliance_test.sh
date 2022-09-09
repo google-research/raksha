@@ -19,7 +19,7 @@
 PASS_RESULT="pass"
 FAIL_RESULT="fail"
 DP_ANALYSIS="dp_analysis"
-SQL_POLICY_ANALYSIS = "sql_policy_analysis"
+SQL_POLICY_ANALYSIS="sql_policy_analysis"
 
 function printUsageAndExit() {
   echo "Usage: "

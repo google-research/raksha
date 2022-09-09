@@ -1,0 +1,86 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+// TODO(#664): Rename and generalize operators or copy operators into arcsjs
+// namespace.
+
+// This is an expression of the following (hypothetical) arcsjs recipe:
+
+/*
+export const ConsentRecipe = {
+  $meta: {
+    description: 'A very simple recipe',
+  },
+  $stores: {
+    private_texts: {
+      $type: '[Text]',
+      $tags: ['private'],
+      $value: [],
+    }
+    downgrade_intent: {
+      $type: 'Intent',
+      $tags: [],
+      $value: [],
+    }
+    output: {
+      $type: '[Text]',
+      $tags: ['public'],
+      $value: [],
+    }
+  },
+  exfil_particle: {
+    $kind: './Library/ExfilWithConsentParticle',
+    $inputs: {
+      {secrets: 'private_texts'}
+    },
+    $outputs: {
+      {share: 'output'},
+      {intent: 'downgrade_intent'},
+    },
+  }
+}
+*/
+
+/*
+The following IR, assumes that 'arcsjs.user_consent_to_downgrade':
+  - Shows the user the intent information, i.e.:
+    - Who:
+      A list of parties to be shared with or (newly) allowed to see the data.
+    - What:
+      What data is being shared/downgraded i.e.
+        - A description of the data contents
+        - the tag(s) to downgrade from
+        - the tag(s) to downgrade to
+    - Why:
+      The purpose for the share/downgrade.
+    - When/How:
+      The data handling policy of those parties.
+  - Gates the output of the associated data on a user action.
+  - Releases the associated data with confidentiality tags downgraded.
+*/
+
+module m0 {
+  block b0 {
+    %0 = arcsjs.create_store [name: "ConsentRecipe.private_texts", type: "Text"]()
+    %1 = sql.tag_transform [rule_name: "set_private"](%0) // claim private
+    %2 = arcsjs.particle [name: "ConsentRecipe.exfil_particle", input_0: "secrets"](%1)
+    %3 = arcsjs.select_field [name: "share"](%2)
+    %4 = arcsjs.select_field [name: "downgrade_intent"](%2)
+    %5 = arcsjs.user_consent_to_downgrade [downgrade_from: "auth_data", downgrade_to: "public"](%3, %4)
+    // Policy check fails because the user consented to declassify auth_data, but not private data.
+    %6 = sql.sql_output [](%5) // TODO: Update to arcsjs.connect_output / a service call etc.
+  }  // block b0
+}  // module m0

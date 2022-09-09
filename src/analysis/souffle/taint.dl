@@ -24,6 +24,13 @@
 #include "src/analysis/souffle/operations.dl"
 
 //-----------------------------------------------------------------------------
+// Output Relation Declarations
+//-----------------------------------------------------------------------------
+
+// This is the universal 'result' relation that all backends should implement.
+.decl violatesPolicy(path: AccessPath)
+
+//-----------------------------------------------------------------------------
 // Relation Declarations
 //-----------------------------------------------------------------------------
 

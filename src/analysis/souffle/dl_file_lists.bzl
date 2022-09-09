@@ -33,6 +33,7 @@ core_dl_files_plus_fact_test_helper_local = core_dl_files_local + ["fact_test_he
 policy_verifier_include_dl_files_local = core_dl_files_plus_fact_test_helper_local + [
     "may_will.dl",
     "sql_output.dl",
+    "arcsjs_operators.dl",
     "tag_transforms.dl",
     "epsilon_analysis.dl",
     "sensitivity_analysis.dl",

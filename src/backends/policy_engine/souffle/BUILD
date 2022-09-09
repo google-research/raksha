@@ -177,7 +177,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "pass",
-        "sql_policy_analaysis",
+        "sql_policy_analysis",
         "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple_passing_arcsjs.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
@@ -195,6 +195,7 @@ sh_test(
     args = [
         "$(location :check_policy_compliance)",
         "fail",
+        "sql_policy_analysis",
         "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:simple_failing_arcsjs.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
@@ -203,6 +204,114 @@ sh_test(
         ":check_policy_compliance",
         "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
         "//src/backends/policy_engine/souffle/testdata:simple_failing_arcsjs.ir",
+    ],
+)
+
+sh_test(
+    name = "check_policy_compliance_user_action_pass_test_arcsjs",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "sql_policy_analysis",
+        "ir",
+        "$(location //src/backends/policy_engine/souffle/testdata:user_action_passing_arcsjs.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
+        "//src/backends/policy_engine/souffle/testdata:user_action_passing_arcsjs.ir",
+    ],
+)
+
+sh_test(
+    name = "check_policy_compliance_user_action_fail_test_arcsjs_modified_after_consent",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "sql_policy_analysis",
+        "ir",
+        "$(location //src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_modified_after_consent.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
+        "//src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_modified_after_consent.ir",
+    ],
+)
+
+sh_test(
+    name = "check_policy_compliance_user_action_fail_test_arcsjs_no_consent",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "sql_policy_analysis",
+        "ir",
+        "$(location //src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_no_consent.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
+        "//src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_no_consent.ir",
+    ],
+)
+
+sh_test(
+    name = "check_policy_compliance_user_action_fail_test_arcsjs_no_intent",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "sql_policy_analysis",
+        "ir",
+        "$(location //src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_no_intent.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
+        "//src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_no_intent.ir",
+    ],
+)
+
+sh_test(
+    name = "check_policy_compliance_user_action_fail_test_arcsjs_partial_downgrade",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "sql_policy_analysis",
+        "ir",
+        "$(location //src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_partial_downgrade.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
+        "//src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_partial_downgrade.ir",
+    ],
+)
+
+sh_test(
+    name = "check_policy_compliance_user_action_fail_test_arcsjs_wrong_downgrade",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "sql_policy_analysis",
+        "ir",
+        "$(location //src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_wrong_downgrade.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
+        "//src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_wrong_downgrade.ir",
     ],
 )
 

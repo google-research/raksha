@@ -1,0 +1,195 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+#ifndef SRC_ANALYSIS_SOUFFLE_ARCSJS_OPERATORS_DL_
+#define SRC_ANALYSIS_SOUFFLE_ARCSJS_OPERATORS_DL_
+
+#include "src/analysis/souffle/taint.dl"
+
+// Note: this will need to change when we integrate auth logic into the ARCSJS
+// verifier.
+// TODO(#663): Rename or remove DEFAULT_ARCSJS_OWNER.
+#define DEFAULT_ARCSJS_OWNER as("sql", Principal)
+// TODO(#664): Rename/move code shared with SQL into Raksha or Core namespace.
+// TODO(#664): Rename/move code not shared with SQL into ArcsJs namespace.
+#define ARCSJS_OUTPUT_OPERATOR as("arcsjs.arcsjs_output", Operator)
+#define ARCSJS_USER_CONSENT_TO_DOWNGRADE \
+  as("arcsjs.user_consent_to_downgrade", Operator)
+#define ARCSJS_DOWNGRADE_FROM "downgrade_from"
+#define ARCSJS_DOWNGRADE_TO "downgrade_to"
+#define ARCSJS_PUBLIC_TAG as("public", Tag)
+
+#define ARCSJS_USER_CONSENT_TO_DOWNGRADE_DATA_INDEX 0
+#define ARCSJS_USER_CONSENT_TO_DOWNGRADE_INTENT_INDEX 1
+
+// Consent to downgrade transforms are special in their propagation of tags:
+//    - they propagate all other confidentiality tags from their 'data' argument,
+//    - *but* downgrade from one user-accepted tag to another.
+//    - they propagate all integrity tags from their 'data' argument.
+//    - they propagate no confidentiality tags from their 'intent' argument.
+//    - they propagate no integrity tags from their 'intent' argument.
+//
+// NOTE: There is a burden on the runtime to check that:
+//    - the intent is shown to the user.
+//    - the data is only progagated on a user action that explicitly consents to
+//        the downgrade intent.
+//    - the intent matches BOTH the downgrade_from and downgrade_to tags.
+hasSpecialEdgeRules(ARCSJS_USER_CONSENT_TO_DOWNGRADE).
+
+.decl isArcsJsUserConsentToDowngradeOperation(
+  arcsJsUserConsentToDowngradeOperation: Operation
+)
+
+isArcsJsUserConsentToDowngradeOperation(op) :-
+  isOperation(op),
+  operationHasOperator(op, ARCSJS_USER_CONSENT_TO_DOWNGRADE).
+
+// Downgrade from:
+.decl arcsJsUserConsentToDowngradeOperationFromTag(
+  arcsJsUserConsentToDowngradeOperation: Operation,
+  downgrade_from: Tag
+)
+
+arcsJsUserConsentToDowngradeOperationFromTag(op, as(downgrade_from_tag, Tag)) :-
+  isArcsJsUserConsentToDowngradeOperation(op),
+  operationHasAttribute(
+    op,
+    [ARCSJS_DOWNGRADE_FROM, $StringAttributePayload(downgrade_from_tag)]
+  ).
+
+isTag(downgrade_from_tag) :-
+  arcsJsUserConsentToDowngradeOperationFromTag(_, downgrade_from_tag).
+
+// Downgrade to:
+.decl arcsJsUserConsentToDowngradeOperationToTag(
+  arcsJsUserConsentToDowngradeOperation: Operation,
+  downgrade_to_tag: Tag
+)
+
+arcsJsUserConsentToDowngradeOperationToTag(op, as(downgrade_to_tag, Tag)) :-
+  isArcsJsUserConsentToDowngradeOperation(op),
+  operationHasAttribute(
+    op,
+    [ARCSJS_DOWNGRADE_TO, $StringAttributePayload(downgrade_to_tag)]
+  ).
+
+isTag(downgrade_to_tag) :-
+  arcsJsUserConsentToDowngradeOperationToTag(_, downgrade_to_tag).
+
+// Data argument
+.decl arcsJsUserConsentToDowngradeOperationData(
+  arcsJsUserConsentToDowngradeOperation: Operation,
+  data_input: AccessPath
+)
+
+arcsJsUserConsentToDowngradeOperationData(op, data_input) :-
+  isArcsJsUserConsentToDowngradeOperation(op),
+  operationHasOperandAtIndex(
+    op,
+    data_input,
+    ARCSJS_USER_CONSENT_TO_DOWNGRADE_DATA_INDEX
+  ).
+
+// Intent argument
+.decl arcsJsUserConsentToDowngradeOperationIntent(
+  arcsJsUserConsentToDowngradeOperation: Operation,
+  intent_input: AccessPath
+)
+
+arcsJsUserConsentToDowngradeOperationIntent(op, intent_input) :-
+  isArcsJsUserConsentToDowngradeOperation(op),
+  operationHasOperandAtIndex(
+    op,
+    intent_input,
+    ARCSJS_USER_CONSENT_TO_DOWNGRADE_INTENT_INDEX
+  ).
+
+resolvedEdge(DEFAULT_ARCSJS_OWNER, dataInput, dataOutput) :-
+  isArcsJsUserConsentToDowngradeOperation(operation),
+  operationHasOperandAtIndex(
+    operation,
+    dataInput,
+    ARCSJS_USER_CONSENT_TO_DOWNGRADE_DATA_INDEX
+  ),
+  operationHasResult(operation, dataOutput).
+
+mayHaveTag(result, DEFAULT_ARCSJS_OWNER, downgrade_to_tag) :-
+  arcsJsUserConsentToDowngradeOperationToTag(op, downgrade_to_tag),
+  downgrade_to_tag != ARCSJS_PUBLIC_TAG,
+  operationHasResult(op, result).
+
+removeTag(result, DEFAULT_ARCSJS_OWNER, downgrade_from_tag) :-
+  arcsJsUserConsentToDowngradeOperationFromTag(op, downgrade_from_tag),
+  operationHasResult(op, result).
+
+.decl arcsJsUserConsentInvalid(sqlOutputOperation: Operation)
+
+arcsJsUserConsentInvalid(op) :-
+  isArcsJsUserConsentToDowngradeOperation(op),
+  !arcsJsUserConsentValid(op).
+
+.decl arcsJsUserConsentValid(sqlOutputOperation: Operation)
+
+arcsJsUserConsentValid(op) :-
+  isArcsJsUserConsentToDowngradeOperation(op),
+  // TODO(#709): Support delegation (user action passed from another particle).
+  // TODO(#710): Check that the intent is associated with the downgrade tags
+  //    and data.
+  arcsJsUserConsentToDowngradeOperationData(op, _),
+  arcsJsUserConsentToDowngradeOperationIntent(op, _),
+  arcsJsUserConsentToDowngradeOperationFromTag(op, downgrade_from_tag),
+  arcsJsUserConsentToDowngradeOperationToTag(op, downgrade_to_tag),
+  downgrade_from_tag != downgrade_to_tag.
+
+.decl isArcsJsOutput(arcsJsOutputOperation: Operation)
+
+isArcsJsOutput(op) :-
+  isOperation(op),
+  operationHasOperator(op, ARCSJS_OUTPUT_OPERATOR).
+
+.decl arcsJsOutputHasConfidentialTag(arcsJsOutputOperation: Operation)
+
+arcsJsOutputHasConfidentialTag(op) :-
+  isArcsJsOutput(op),
+  operationHasResult(op, result),
+  isTag(tag),
+  mayHaveTag(result, _, tag).
+
+.decl arcsJsOutputResult(arcsJsOutputOperation: Operation, passOrFail: symbol)
+
+arcsJsOutputResult(op, "FAIL") :- arcsJsOutputHasConfidentialTag(op).
+arcsJsOutputResult(op, "PASS") :-
+  isArcsJsOutput(op),
+  !arcsJsOutputHasConfidentialTag(op).
+
+.decl arcsJsUserConsentResult(
+  arcsJsOutputOperation: Operation,
+  passOrFail: symbol
+)
+arcsJsUserConsentResult(op, "FAIL") :- arcsJsUserConsentInvalid(op).
+arcsJsUserConsentResult(op, "PASS") :- arcsJsUserConsentValid(op).
+
+violatesPolicy(path) :- arcsJsOutputHasConfidentialTag([_, _, path, _, _]).
+violatesPolicy(path) :-
+  arcsJsUserConsentInvalid(op),
+  operationHasResult(op, path).
+
+#undef DEFAULT_ARCSJS_OWNER
+#undef ARCSJS_OUTPUT_OPERATOR
+#undef ARCSJS_USER_CONSENT_TO_DOWNGRADE
+#undef ARCSJS_DOWNGRADE_FROM
+#undef ARCSJS_DOWNGRADE_TO
+
+#endif // SRC_ANALYSIS_SOUFFLE_ARCSJS_OPERATORS_DL_
