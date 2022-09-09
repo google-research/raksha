@@ -57,17 +57,15 @@ def gen_souffle_cxx_code(
 
     macro_list = []
     if for_test:
-        macro_list += ["TEST=1"]
+        macro_list.append("TEST=1")
     if all_principals_own_all_tags:
-        macro_list += ["ALL_PRINCIPALS_OWN_ALL_TAGS=1"]
+        macro_list.append("ALL_PRINCIPALS_OWN_ALL_TAGS=1")
 
     macro_str_prefix = ""
     macro_str_suffix = ""
-    first = True
-    for macro in macro_list:
+    if macro_list:
         macro_str_prefix = "--macro='"
         macro_str_suffix = "'"
-        break
 
     macro_str = macro_str_prefix + " ".join(macro_list) + macro_str_suffix
 
