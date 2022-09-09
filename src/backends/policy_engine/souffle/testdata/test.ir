@@ -1,0 +1,9 @@
+module m0 {
+  block b0 {
+    %0= SmartMicrophone.audio [mode: "audio"]()
+    %1 = DemoApplication.audioIn [mode: "audio"] (%0)
+    %2 = DemoApplication.audioOut [mode: "audio"] (%1)
+    %3 = DemoApplicationASR.audio [mode: "audio"] (%2)
+    %4 = test.test_output [](%3)
+  }  // block b0
+}  // module m0

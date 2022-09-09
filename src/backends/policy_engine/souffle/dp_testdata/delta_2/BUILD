@@ -13,6 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #----------------------------------------------------------------------------
+load(
+    "//build_defs:raksha_policy_verifier.bzl",
+    "raksha_policy_verifier_library",
+)
 
 package(
     default_visibility = ["//src:__subpackages__"],
@@ -27,3 +31,90 @@ exports_files([
     "2q_passing.ir",
     "2q_failing.ir",
 ])
+
+raksha_policy_verifier_library(
+    name = "dp_policy_verifier_delta_2_with_auth_logic_lib",
+    additional_dl_files = [
+        "//src/analysis/souffle:sql_output.dl",
+        "//src/analysis/souffle:epsilon_analysis.dl",
+        "//src/analysis/souffle:sensitivity_analysis.dl",
+    ],
+    policies = [":policy.auth"],
+    policy_verifier_interfaces = ["//src/analysis/souffle:dp_policy_verifier_interface.dl"],
+)
+
+sh_test(
+    name = "check_dp_policy_compliance_delta_1q_fail_test",
+    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
+    args = [
+        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
+        "fail",
+        "sql_policy_analysis",
+        "ir",
+        "$(location :1q_failing.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "dp_policy_verifier_delta_2_with_auth_logic_lib_cxx",
+    ],
+    data = [
+        ":1q_failing.ir",
+        "//src/backends/policy_engine/souffle:check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+)
+
+sh_test(
+    name = "check_dp_policy_compliance_delta_2q_fail_test",
+    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
+    args = [
+        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
+        "fail",
+        "sql_policy_analysis",
+        "ir",
+        "$(location :2q_failing.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "dp_policy_verifier_delta_2_with_auth_logic_lib_cxx",
+    ],
+    data = [
+        ":2q_failing.ir",
+        "//src/backends/policy_engine/souffle:check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+)
+
+sh_test(
+    name = "check_dp_policy_compliance_delta_1q_pass_test",
+    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
+    args = [
+        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
+        "pass",
+        "sql_policy_analysis",
+        "ir",
+        "$(location :1q_passing.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "dp_policy_verifier_delta_2_with_auth_logic_lib_cxx",
+    ],
+    data = [
+        ":1q_passing.ir",
+        "//src/backends/policy_engine/souffle:check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+)
+
+sh_test(
+    name = "check_dp_policy_compliance_delta_2q_pass_test",
+    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
+    args = [
+        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
+        "pass",
+        "sql_policy_analysis",
+        "ir",
+        "$(location :2q_passing.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "dp_policy_verifier_delta_2_with_auth_logic_lib_cxx",
+    ],
+    data = [
+        ":2q_passing.ir",
+        "//src/backends/policy_engine/souffle:check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+)

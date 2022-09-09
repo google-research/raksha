@@ -25,7 +25,11 @@ load(
     "//src/analysis/souffle:dl_file_lists.bzl",
     "core_dl_files",
     "core_dl_files_except_taint",
-    "policy_verifier_dl_files_local",
+    "export_dl_files_local",
+)
+load(
+    "//build_defs:raksha_policy_verifier.bzl",
+    "raksha_policy_verifier_library",
 )
 
 package(
@@ -115,7 +119,6 @@ souffle_cc_binary(
 
 arcsjs_dl_files = [
     "arcsjs_operators.dl",
-    "tag_transforms.dl",
 ]
 
 sql_dl_files = [
@@ -178,20 +181,17 @@ souffle_cc_binary(
     additional_deps = ["logfunctors"],
 )
 
-gen_souffle_cxx_code(
-    name = "datalog_policy_verifier_cxx",
-    src = "policy_verifier_interface.dl",
-    included_dl_scripts = core_dl_files + sql_dl_files + arcsjs_dl_files + [
-        "epsilon_analysis.dl",
-        "sensitivity_analysis.dl",
-        "math.dl",
+raksha_policy_verifier_library(
+    name = "datalog_policy_verifier",
+    additional_dl_files = [
+        ":arcsjs_operators.dl",
+        ":epsilon_analysis.dl",
+        ":sensitivity_analysis.dl",
+        ":math.dl",
     ],
-)
-
-souffle_cc_library(
-    name = "datalog_policy_verifier_lib",
-    src = ":datalog_policy_verifier_cxx",
-    additional_deps = ["logfunctors"],
+    additional_souffle_cc_lib_dependencies = ["logfunctors"],
+    policies = ["//src/backends/policy_engine/souffle/testdata:empty_policy.auth"],
+    policy_verifier_interfaces = [":policy_verifier_interface.dl"],
 )
 
 gen_souffle_cxx_code(
@@ -213,4 +213,4 @@ souffle_cc_library(
     src = ":taint_cxx",
 )
 
-exports_files(policy_verifier_dl_files_local)
+exports_files(export_dl_files_local)

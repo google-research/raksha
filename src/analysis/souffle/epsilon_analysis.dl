@@ -38,14 +38,20 @@
 
 .decl isDPParameter(rule: DPParameterValue)
 
+// Need following relations to be declared while using policies based on
+// authorization logic are used to set global values
+.decl says_isGlobalEpsilon(speaker: Principal, global_epsilon: Epsilon)
+.decl says_isGlobalDelta(speaker: Principal, global_delta: Delta)
+
 // Global epsilon is a value determined by users of Raksha.
 // We could eventually set one as the default.
 .decl isGlobalEpsilon(epsilon: Epsilon)
 isGlobalEpsilon(epsilon) :- isDPParameter($EpsilonValue(epsilon)).
+isGlobalEpsilon(epsilon) :- says_isGlobalEpsilon(_, epsilon).
 
 .decl isGlobalDelta(delta: Delta)
-
 isGlobalDelta(delta) :- isDPParameter($DeltaValue(delta)).
+isGlobalDelta(delta) :- says_isGlobalDelta(_, delta).
 
 // We track every mechanism that adds noise.
 // Right now, we are not tracking the type of noise (e.g. via Laplace or

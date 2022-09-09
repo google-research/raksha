@@ -33,14 +33,21 @@ core_dl_files_plus_fact_test_helper_local = core_dl_files_local + ["fact_test_he
 policy_verifier_include_dl_files_local = core_dl_files_plus_fact_test_helper_local + [
     "may_will.dl",
     "sql_output.dl",
-    "arcsjs_operators.dl",
     "tag_transforms.dl",
-    "epsilon_analysis.dl",
-    "sensitivity_analysis.dl",
 ]
 
 policy_verifier_dl_files_local = policy_verifier_include_dl_files_local + [
     "policy_verifier_interface.dl",
+    "test_policy_verifier_interface.dl",
+    "dp_policy_verifier_interface.dl",
+]
+
+export_dl_files_local = policy_verifier_dl_files_local + [
+    "test_output.dl",
+    "sql_output.dl",
+    "epsilon_analysis.dl",
+    "sensitivity_analysis.dl",
+    "math.dl",
 ]
 
 absolute_target_path = "//src/analysis/souffle:"
@@ -63,4 +70,9 @@ core_dl_files_plus_fact_test_helper = [
 policy_verifier_include_dl_files = [
     absolute_target_path + target
     for target in policy_verifier_include_dl_files_local
+]
+
+export_dl_files = [
+    absolute_target_path + target
+    for target in export_dl_files_local
 ]

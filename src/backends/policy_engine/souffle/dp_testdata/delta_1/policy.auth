@@ -1,0 +1,4 @@
+"sql" says {
+  isGlobalEpsilon(4).
+  isGlobalDelta(1).
+}

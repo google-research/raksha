@@ -15,7 +15,6 @@
 #----------------------------------------------------------------------------
 load(
     "//build_defs:raksha_policy_verifier.bzl",
-    "policy_library",
     "raksha_policy_verifier_library",
 )
 load("//build_defs:package_groups.oss.bzl", "frontend_packages")
@@ -43,35 +42,38 @@ cc_binary(
     ],
 )
 
-policy_library(
-    name = "datalog_policy_verifier",
-    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:empty_policy.auth"],
-)
-
 raksha_policy_verifier_library(
     name = "datalog_multiple_policy_verifier_pass",
+    additional_dl_files = ["//src/analysis/souffle/tests:test_output.dl"],
     policies = [
         "//src/backends/policy_engine/souffle/testdata:multiple_passing_policy_1.auth",
         "//src/backends/policy_engine/souffle/testdata:multiple_passing_policy_2.auth",
     ],
+    policy_verifier_interfaces = ["//src/analysis/souffle/tests:test_policy_verifier_interface.dl"],
 )
 
 raksha_policy_verifier_library(
     name = "datalog_multiple_policy_verifier_fail",
+    additional_dl_files = ["//src/analysis/souffle/tests:test_output.dl"],
     policies = [
         "//src/backends/policy_engine/souffle/testdata:multiple_passing_policy_1.auth",
         "//src/backends/policy_engine/souffle/testdata:empty_policy.auth",
     ],
+    policy_verifier_interfaces = ["//src/analysis/souffle/tests:test_policy_verifier_interface.dl"],
 )
 
-policy_library(
+raksha_policy_verifier_library(
     name = "datalog_simple_policy_verifier_pass",
-    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:simple_passing_policy.auth"],
+    additional_dl_files = ["//src/analysis/souffle/tests:test_output.dl"],
+    policies = ["//src/backends/policy_engine/souffle/testdata:simple_passing_policy.auth"],
+    policy_verifier_interfaces = ["//src/analysis/souffle/tests:test_policy_verifier_interface.dl"],
 )
 
-policy_library(
+raksha_policy_verifier_library(
     name = "datalog_simple_policy_verifier_fail",
-    auth_logic_files = ["//src/backends/policy_engine/souffle/testdata:simple_failing_policy.auth"],
+    additional_dl_files = ["//src/analysis/souffle/tests:test_output.dl"],
+    policies = ["//src/backends/policy_engine/souffle/testdata:simple_failing_policy.auth"],
+    policy_verifier_interfaces = ["//src/analysis/souffle/tests:test_policy_verifier_interface.dl"],
 )
 
 cc_binary(
@@ -103,14 +105,14 @@ sh_test(
         "pass",
         "sql_policy_analysis",
         "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:test.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "datalog_multiple_policy_verifier_pass_datalog_cxx",
+        "datalog_multiple_policy_verifier_pass_cxx",
     ],
     data = [
         ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:simple.ir",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+        "//src/backends/policy_engine/souffle/testdata:test.ir",
     ],
 )
 
@@ -122,14 +124,14 @@ sh_test(
         "fail",
         "sql_policy_analysis",
         "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:test.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "datalog_multiple_policy_verifier_fail_datalog_cxx",
+        "datalog_multiple_policy_verifier_fail_cxx",
     ],
     data = [
         ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:simple.ir",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+        "//src/backends/policy_engine/souffle/testdata:test.ir",
     ],
 )
 
@@ -141,14 +143,14 @@ sh_test(
         "pass",
         "sql_policy_analysis",
         "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:test.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "datalog_simple_policy_verifier_pass_datalog_cxx",
+        "datalog_simple_policy_verifier_pass_cxx",
     ],
     data = [
         ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:simple.ir",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+        "//src/backends/policy_engine/souffle/testdata:test.ir",
     ],
 )
 
@@ -160,14 +162,14 @@ sh_test(
         "fail",
         "sql_policy_analysis",
         "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:simple.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:test.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "datalog_simple_policy_verifier_fail_datalog_cxx",
+        "datalog_simple_policy_verifier_fail_cxx",
     ],
     data = [
         ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:simple.ir",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+        "//src/backends/policy_engine/souffle/testdata:test.ir",
     ],
 )
 
@@ -762,14 +764,17 @@ cc_library(
         ":datalog_lowering_visitor",
         ":datalog_multiple_policy_verifier_fail",
         ":datalog_multiple_policy_verifier_pass",
-        ":datalog_policy_verifier",
         ":datalog_simple_policy_verifier_fail",
         ":datalog_simple_policy_verifier_pass",
         ":utils",
-        "//src/analysis/souffle:datalog_policy_verifier_lib",
+        "//src/analysis/souffle:datalog_policy_verifier",
         "//src/analysis/souffle:dp_policy_verifier_lib",
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:policy_checker",
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_1:dp_policy_verifier_delta_1_with_auth_logic_lib",
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_2:dp_policy_verifier_delta_2_with_auth_logic_lib",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:dp_policy_verifier_epsilon_2_with_auth_logic_lib",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:dp_policy_verifier_epsilon_4_with_auth_logic_lib",
         "//src/common/utils:filesystem",
         "//src/ir:module",
         "@absl//absl/container:inlined_vector",
@@ -824,3 +829,5 @@ cc_test(
         "@absl//absl/status:statusor",
     ],
 )
+
+exports_files(["check_policy_compliance_test.sh"])

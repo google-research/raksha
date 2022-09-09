@@ -1,0 +1,3 @@
+"sql" says {
+  isGlobalEpsilon(4).
+}
