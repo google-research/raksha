@@ -42,15 +42,21 @@
 #define SQL_PERCENTILE_CONT_OPERATOR as("sql.percentile_cont", Operator)
 #define SQL_VARIANCE_OPERATOR as("sql.variance", Operator)
 
+#define ANY as("<<ANY>>", symbol)
+
 .type SensitivityScore <: number
 
+.decl isSqlOperationPrefix(prefix: symbol)
+isSqlOperationPrefix("sql.").
+isSqlOperationPrefix("googlesql.").
 // One isSqlOperation fact per each sql operator,
 // currently supporting one output.
 // We refer to results as 'value' (sqlValue declared below)
 .decl isSqlOperation(sqlOperation: Operation)
 isSqlOperation(operation) :- isOperation(operation),
       operationHasOperator(operation, operator),
-      substr(operator, 0, 4) = "sql.".
+      isSqlOperationPrefix(prefix),
+      substr(operator, 0, strlen(prefix))= prefix.
 
 .decl isTransformationOperator(op: Operator)
 isTransformationOperator(SQL_WHERE_OPERATOR).
@@ -129,15 +135,20 @@ isSqlInput(operation, sql_input) :- isSqlOperation(operation),
 .decl sqlValueSensitivity(value: AccessPath,
       sensitivity_score: SensitivityScore)
 sqlValueSensitivity(value, sensitivity_score) :-
-      isSqlOperation(operation),
-      operationHasOperator(operation, operator),
+      isOperation(operation),
       operationHasResult(operation, value),
-      sqlFunctionSensitivity(operator, function_sensitivity),
       operationOperandListLength(operation, input_list_length),
       sqlOperationHasSensitivityScoreAtIndex(operation,
                                              input_sensitivity,
                                              input_list_length-1),
-      sensitivity_score = input_sensitivity * function_sensitivity.
+                                              operationHasOperator(operation, operator),
+      (
+            sqlFunctionSensitivity(operator, function_sensitivity),
+            sensitivity_score = input_sensitivity * function_sensitivity;
+            !sqlFunctionSensitivity(operator, _),
+            sensitivity_score = input_sensitivity
+      ).
+
 
 // Keeping track of sensitivity score per each input at index, where index is
 // the depth from initial inputs. This relation is used to calculate the maximum
@@ -151,13 +162,14 @@ sqlValueSensitivity(value, sensitivity_score) :-
 // Base cases (index 0).
 // Sensitivity score for initial inputs is 1.
 sqlOperationHasSensitivityScoreAtIndex(operation, 1, 0) :-
-      isSqlOperation(operation),
+      isOperation(operation),
       operationHasOperandAtIndex(operation, sql_input, 0),
-      isInitialInput(sql_input).
+      (isInitialInput(sql_input);
+      sql_input = ANY).
 
 // For all other inputs, we get the final sensitivity score.
 sqlOperationHasSensitivityScoreAtIndex(operation, sensitivity_score, 0) :-
-      isSqlOperation(operation),
+      isOperation(operation),
       operationHasOperandAtIndex(operation, sql_input, 0),
       sqlValueSensitivity(sql_input, sensitivity_score).
 
@@ -170,12 +182,17 @@ sqlOperationHasSensitivityScoreAtIndex(
       operation,
       max(prev_sensitivity_score, input_sensitivity_score),
       prev_index + 1) :-
-            isSqlOperation(operation),
+            isOperation(operation),
             operationHasOperandAtIndex(operation, sql_input, prev_index + 1),
-  isSqlInput(operation, sql_input),
-  sqlValueSensitivity(sql_input, input_sensitivity_score),
-  sqlOperationHasSensitivityScoreAtIndex(
-      operation, prev_sensitivity_score, prev_index).
+            isSqlInput(operation, sql_input),
+            sqlOperationHasSensitivityScoreAtIndex(
+            operation, prev_sensitivity_score, prev_index),
+            ( sqlValueSensitivity(sql_input, input_sensitivity_score);
+              (sql_input = ANY;
+              isInitialInput(sql_input)),
+              input_sensitivity_score = 1
+            ).
+
 
 // Function sensitivity scores per each sql operator as defined in PINQ
 .decl sqlFunctionSensitivity(
@@ -192,5 +209,6 @@ sqlFunctionSensitivity(SQL_OUTPUT_OPERATOR, 1).
 sqlFunctionSensitivity(SQL_ORDER_BY_OPERATOR, 1).
 sqlFunctionSensitivity(SQL_SELECT_DISTINCT_OPERATOR, 2).
 sqlFunctionSensitivity(SQL_GROUP_BY_OPERATOR, 2).
+sqlFunctionSensitivity(SQL_FUNCTION_CALL_OPERATOR, 1).
 
 #endif // SRC_SOUFFLE_ANALYSIS_SENSITIVITY_ANALYSIS_DL_

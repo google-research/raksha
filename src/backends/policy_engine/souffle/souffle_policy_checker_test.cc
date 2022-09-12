@@ -98,15 +98,14 @@ TEST(SoufflePolicyCheckerTest, DpPolicyRuleReturnsTrue) {
 TEST(SoufflePolicyCheckerTest, DpPolicyRuleReturnsFalse) {
   SoufflePolicyChecker checker;
   ir::IrProgramParser ir_parser;
-  ir::IrProgramParser::Result parse_result =
-  ir_parser.ParseProgram(R"(
+  ir::IrProgramParser::Result parse_result = ir_parser.ParseProgram(R"(
 module m0 {
 block b0 {
 %0 = core.input[name: "MyTable"]()
 %1 = sql.group_by[](%0)
 %2 = privacy_mechanism[epsilon: 5](%1)
 %3 = sql.average[](%2)
-%4 = sql.output[](%3)
+%4 = sql.sql_output[](%3)
 } })");
 
   const ir::Module &module = *parse_result.module;
