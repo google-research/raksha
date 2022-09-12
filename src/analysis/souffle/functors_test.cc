@@ -23,7 +23,8 @@
 namespace raksha::analsis::souffle {
 
 namespace {
-class LogFunctorTest : public testing::TestWithParam<std::tuple<float, float>> {
+class LogFunctorTest
+    : public testing::TestWithParam<std::tuple<double, double>> {
  protected:
   ::souffle::SymbolTableImpl symbol_table_;
   ::souffle::SpecializedRecordTable<1> record_table_;
@@ -40,7 +41,7 @@ TEST_P(LogFunctorTest, LogFunctorTest) {
 }
 
 // tuples of input and expected result for the LogFunctorTest case
-constexpr std::tuple<float, float> kLogArgumentsAndReults[] = {
+constexpr std::tuple<double, double> kLogArgumentsAndReults[] = {
     {10, 1}, {45.6787987, 1.659715}, {2, 0.301030}, {5, 0.698970}, {100, 2}};
 
 INSTANTIATE_TEST_SUITE_P(LogFunctorTest, LogFunctorTest,

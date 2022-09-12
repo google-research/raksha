@@ -53,6 +53,7 @@ cc_library(
     # -fno-exceptions, and combining a precompiled header with -fno-exceptions
     # with a binary that uses -fexceptions makes Clang upset.
     features = ["-use_header_modules"],
+    local_defines = ["RAM_DOMAIN_SIZE=64"],
     deps = [
         "//src/common/logging",
         "@souffle//:souffle_include_lib",
@@ -72,6 +73,7 @@ cc_test(
     # -fno-exceptions, and combining a precompiled header with -fno-exceptions
     # with a binary that uses -fexceptions makes Clang upset.
     features = ["-use_header_modules"],
+    local_defines = ["RAM_DOMAIN_SIZE=64"],
     deps = [
         ":logfunctors",
         "//src/common/testing:gtest",

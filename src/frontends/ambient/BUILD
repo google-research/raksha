@@ -80,6 +80,7 @@ cc_library(
     # with a binary that uses -fexceptions makes Clang upset.
     features = ["-use_header_modules"],
     linkopts = ["-pthread"],
+    local_defines = ["RAM_DOMAIN_SIZE=64"],
     deps = [
         ":policy_checker_dl",
         "//src/common/logging",

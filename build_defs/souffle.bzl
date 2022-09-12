@@ -81,8 +81,8 @@ def gen_souffle_cxx_code(
         outs = [cc_file],
         testonly = testonly,
         cmd =
-            "$(location @souffle//:souffle) {include_str} {macros} -g $@ $(location {src_rule})".format(include_str = include_opts_str, macros = macro_str, src_rule = src),
-        tools = ["@souffle//:souffle"],
+            "$(location @souffle//:souffle_64_bit) {include_str} {macros} -g $@ $(location {src_rule})".format(include_str = include_opts_str, macros = macro_str, src_rule = src),
+        tools = ["@souffle//:souffle_64_bit"],
         visibility = visibility,
     )
 
@@ -121,6 +121,7 @@ def souffle_cc_library(
         defines = [
             "__EMBEDDED_SOUFFLE__",
         ],
+        local_defines = ["RAM_DOMAIN_SIZE=64"],
         deps = ["@souffle//:souffle_include_lib"] + additional_deps,
         alwayslink = True,
         visibility = visibility,
@@ -159,5 +160,6 @@ def souffle_cc_binary(
         # upset.
         features = ["-use_header_modules"],
         deps = ["@souffle//:souffle_include_lib"] + additional_deps,
+        local_defines = ["RAM_DOMAIN_SIZE=64"],
         visibility = visibility,
     )
