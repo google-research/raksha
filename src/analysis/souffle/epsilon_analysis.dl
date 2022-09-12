@@ -60,6 +60,9 @@ isGlobalDelta(delta) :- says_isGlobalDelta(_, delta).
 isDiffPrivacyMechanism(operation) :- isOperation(operation),
     operationHasOperator(operation, PRIVACY_MECHANISM_OPERATOR).
 
+isSqlInput(operation, sql_input) :- isDiffPrivacyMechanism(operation),
+      operationHasOperandList(operation, input_list),
+      flatten(input_list, sql_input).
 // The epsilon of each privacy mechanism is tracked and later attached
 // to values.
 .decl diffPrivacyMechanismHasEpsilon(operation: Operation, epsilon: Epsilon)
@@ -92,9 +95,12 @@ sqlPath(path_start, path_end) :- sqlPath(path_start, intermediate),
 // Sequential composition: the epsilons of differential privacy mechanisms on
 // input value are added.
 .decl epsilonDiffPrivacy(value: AccessPath, epsilon: Epsilon)
-epsilonDiffPrivacy(value, epsilon) :- sqlPath(value, _),
-    epsilon = sum y: { epsilonDiffPrivacyIntermediate(value, _, y)}.
-
+epsilonDiffPrivacy(value, epsilon) :- isInitialInput(value),
+    epsilon = sum y: {
+            isSqlOutput(operation),
+            operationHasResult(operation, sql_output),
+            sqlPath(intermediate_value, sql_output),
+            epsilonDiffPrivacyIntermediate(value, intermediate_value, y)}.
 // Intermediate relation used to grab all the privacy mechanisms that go back
 // to any given sqlInput
 .decl epsilonDiffPrivacyIntermediate(value: AccessPath,
@@ -125,12 +131,6 @@ deltaDiffPrivacyIntermediate(value, sql_output, delta) :-
     isDiffPrivacyMechanism(operation),
     operationHasResult(operation, sql_output),
     diffPrivacyMechanismHasDelta(operation, delta).
-
-sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation),
-    operationHasResult(operation, value),
-    // assuming isDiffPrivacyMechanism always has one input
-    operationHasOperandAtIndex(operation, sql_input, 0),
-    sqlValueSensitivity(sql_input, sensitivity).
 
 // DP Policies are violated when:
 // 1. The global epsilon is less than the local epsilon for a value used in an
