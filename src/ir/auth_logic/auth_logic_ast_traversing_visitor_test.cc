@@ -17,6 +17,7 @@
 #include "src/ir/auth_logic/auth_logic_ast_traversing_visitor.h"
 
 #include <iostream>
+#include <variant>
 
 #include "absl/container/btree_set.h"
 #include "src/common/testing/gtest.h"
@@ -86,102 +87,102 @@ class TraversalOrderVisitor
                      traversal_type == TraversalType::kBoth) {}
 
   Unit PreVisit(const Principal& prin) override {
-    if (pre_visits_) nodes_.push_back(prin.DebugPrint());
+    if (pre_visits_) nodes_.push_back(std::addressof(prin));
     return Unit();
   }
   Unit PostVisit(const Principal& prin, Unit result) override {
-    if (post_visits_) nodes_.push_back(prin.DebugPrint());
+    if (post_visits_) nodes_.push_back(std::addressof(prin));
     return result;
   }
 
   Unit PreVisit(const Attribute& attrib) override {
-    if (pre_visits_) nodes_.push_back(attrib.DebugPrint());
+    if (pre_visits_) nodes_.push_back(std::addressof(attrib));
     return Unit();
   }
   Unit PostVisit(const Attribute& attrib, Unit result) override {
-    if (post_visits_) nodes_.push_back(attrib.DebugPrint());
+    if (post_visits_) nodes_.push_back(std::addressof(attrib));
     return result;
   }
 
   Unit PreVisit(const CanActAs& canActAs) override {
-    if (pre_visits_) nodes_.push_back(canActAs.DebugPrint());
+    if (pre_visits_) nodes_.push_back(std::addressof(canActAs));
     return Unit();
   }
   Unit PostVisit(const CanActAs& canActAs, Unit result) override {
-    if (post_visits_) nodes_.push_back(canActAs.DebugPrint());
+    if (post_visits_) nodes_.push_back(std::addressof(canActAs));
     return result;
   }
 
   Unit PreVisit(const BaseFact& baseFact) override {
-    if (pre_visits_) nodes_.push_back(baseFact.DebugPrint());
+    if (pre_visits_) nodes_.push_back(std::addressof(baseFact));
     return Unit();
   }
   Unit PostVisit(const BaseFact& baseFact, Unit result) override {
-    if (post_visits_) nodes_.push_back(baseFact.DebugPrint());
+    if (post_visits_) nodes_.push_back(std::addressof(baseFact));
     return result;
   }
 
   Unit PreVisit(const Fact& fact) override {
-    if (pre_visits_) nodes_.push_back(fact.DebugPrint());
+    if (pre_visits_) nodes_.push_back(std::addressof(fact));
     return Unit();
   }
   Unit PostVisit(const Fact& fact, Unit result) override {
-    if (post_visits_) nodes_.push_back(fact.DebugPrint());
+    if (post_visits_) nodes_.push_back(std::addressof(fact));
     return result;
   }
 
   Unit PreVisit(const ConditionalAssertion& condAssertion) override {
-    if (pre_visits_) nodes_.push_back(condAssertion.DebugPrint());
+    if (pre_visits_) nodes_.push_back(std::addressof(condAssertion));
     return Unit();
   }
   Unit PostVisit(const ConditionalAssertion& condAssertion,
                  Unit result) override {
-    if (post_visits_) nodes_.push_back(condAssertion.DebugPrint());
+    if (post_visits_) nodes_.push_back(std::addressof(condAssertion));
     return result;
   }
 
   Unit PreVisit(const Assertion& assertion) override {
-    if (pre_visits_) nodes_.push_back(assertion.DebugPrint());
+    if (pre_visits_) nodes_.push_back(std::addressof(assertion));
     return Unit();
   }
   Unit PostVisit(const Assertion& assertion, Unit result) override {
-    if (post_visits_) nodes_.push_back(assertion.DebugPrint());
+    if (post_visits_) nodes_.push_back(std::addressof(assertion));
     return result;
   }
 
   Unit PreVisit(const SaysAssertion& saysAssertion) override {
-    if (pre_visits_) nodes_.push_back(saysAssertion.DebugPrint());
+    if (pre_visits_) nodes_.push_back(std::addressof(saysAssertion));
     return Unit();
   }
   Unit PostVisit(const SaysAssertion& saysAssertion, Unit result) override {
-    if (post_visits_) nodes_.push_back(saysAssertion.DebugPrint());
+    if (post_visits_) nodes_.push_back(std::addressof(saysAssertion));
     return result;
   }
 
   Unit PreVisit(const Query& query) override {
-    if (pre_visits_) nodes_.push_back(query.DebugPrint());
+    if (pre_visits_) nodes_.push_back(std::addressof(query));
     return Unit();
   }
   Unit PostVisit(const Query& query, Unit result) override {
-    if (post_visits_) nodes_.push_back(query.DebugPrint());
+    if (post_visits_) nodes_.push_back(std::addressof(query));
     return result;
   }
 
   Unit PreVisit(const Program& program) override {
-    if (pre_visits_) nodes_.push_back(program.DebugPrint());
+    if (pre_visits_) nodes_.push_back(std::addressof(program));
     return Unit();
   }
   Unit PostVisit(const Program& program, Unit result) override {
-    if (post_visits_) nodes_.push_back(program.DebugPrint());
+    if (post_visits_) nodes_.push_back(std::addressof(program));
     return result;
   }
 
-  const std::vector<std::string>& nodes() const { return nodes_; }
+  const std::vector<const void*>& nodes() const { return nodes_; }
 
  private:
   bool pre_visits_;
   bool post_visits_;
-  std::vector<std::string> nodes_;
+  std::vector<const void*> nodes_;
 };
 
 TEST(AuthLogicAstTraversingVisitorTest, SimpleTraversalTest) {
@@ -209,21 +210,64 @@ TEST(AuthLogicAstTraversingVisitorTest, SimpleTraversalTest) {
 
   Program program1({}, {saysAssertion1, saysAssertion2}, {query1, query2});
 
+  const SaysAssertion* saysAssertion1ptr =
+    std::addressof(program1.says_assertions()[0]);
+  const SaysAssertion* saysAssertion2ptr =
+    std::addressof(program1.says_assertions()[1]);
+  const Query* query1ptr =
+    std::addressof(program1.queries()[0]);
+  const Query* query2ptr =
+    std::addressof(program1.queries()[1]);
+  const Assertion* assertion1sa1ptr =
+    std::addressof(saysAssertion1ptr->assertions()[0]);
+  const Assertion* assertion1sa2ptr =
+    std::addressof(saysAssertion2ptr->assertions()[0]);
+  const Assertion* assertion2ptr =
+    std::addressof(saysAssertion2ptr->assertions()[1]);
+  const Fact* fact1sa1ptr = std::addressof(
+    std::get<Fact>(assertion1sa1ptr->GetValue()));
+  const Fact* fact1sa2ptr = std::addressof(
+    std::get<Fact>(assertion1sa2ptr->GetValue()));
+  const Fact* fact2ptr = std::addressof(
+    std::get<Fact>(assertion2ptr->GetValue()));
+
+  const Principal* prinBAssertionptr=
+    std::addressof(fact2ptr->delegation_chain().front());
+  const Principal* prinBQueryptr =
+    std::addressof(query2ptr->fact().delegation_chain().front());
+
+
   TraversalOrderVisitor preorder_visitor(TraversalType::kPre);
   program1.Accept(preorder_visitor);
   EXPECT_THAT(
       preorder_visitor.nodes(),
       testing::ElementsAre(
-          program1.DebugPrint(), saysAssertion1.DebugPrint(),
-          prinA.DebugPrint(), assertion1.DebugPrint(), fact1.DebugPrint(),
-          baseFact1.DebugPrint(), saysAssertion2.DebugPrint(),
-          prinC.DebugPrint(), assertion1.DebugPrint(), fact1.DebugPrint(),
-          baseFact1.DebugPrint(), assertion2.DebugPrint(), fact2.DebugPrint(),
-          prinB.DebugPrint(), baseFact2.DebugPrint(), query1.DebugPrint(),
-          prinA.DebugPrint(), fact1.DebugPrint(), baseFact1.DebugPrint(),
-          query2.DebugPrint(), prinB.DebugPrint(), fact2.DebugPrint(),
-          prinB.DebugPrint(), baseFact2.DebugPrint()));
+          std::addressof(program1),
+          saysAssertion1ptr,
+          std::addressof(saysAssertion1ptr->principal()),
+          assertion1sa1ptr,
+          fact1sa1ptr,
+          std::addressof(fact1sa1ptr->base_fact()),
+          saysAssertion2ptr,
+          std::addressof(saysAssertion2ptr->principal()),
+          assertion1sa2ptr,
+          fact1sa2ptr,
+          std::addressof(fact1sa2ptr->base_fact()),
+          assertion2ptr,
+          fact2ptr,
+          prinBAssertionptr,
+          std::addressof(fact2ptr->base_fact()),
+          query1ptr,
+          std::addressof(query1ptr->principal()),
+          std::addressof(query1ptr->fact()),
+          std::addressof(query1ptr->fact().base_fact()),
+          query2ptr,
+          std::addressof(query2ptr->principal()),
+          std::addressof(query2ptr->fact()),
+          prinBQueryptr,
+          std::addressof(query2ptr->fact().base_fact())));
 
+  /*
   TraversalOrderVisitor postorder_visitor(TraversalType::kPost);
   program1.Accept(postorder_visitor);
   EXPECT_THAT(
@@ -273,6 +317,7 @@ TEST(AuthLogicAstTraversingVisitorTest, SimpleTraversalTest) {
               testing::ElementsAre(canActAs1.DebugPrint(), prinA.DebugPrint(),
                                    prinA.DebugPrint(), prinB.DebugPrint(),
                                    prinB.DebugPrint(), canActAs1.DebugPrint()));
+  */
 }
 
 }  // namespace
