@@ -26,6 +26,7 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
+#include "src/ir/ast_node.h"
 
 namespace raksha::ir::datalog {
 
@@ -34,7 +35,7 @@ enum Sign { kNegated, kPositive };
 
 // Predicate corresponds to a predicate of the form
 // <pred_name>(arg_1, ..., arg_n), and it may or may not be negated
-class Predicate {
+class Predicate : public ASTNode {
  public:
   Predicate(std::string name, std::vector<std::string> args, Sign sign)
       : name_(std::move(name)),
@@ -42,6 +43,8 @@ class Predicate {
         // TODO move surpresses an unused private field error about sign_
         // for now, get rid of this eventually
         sign_(std::move(sign)) {}
+
+  virtual ~Predicate() = default;
 
   const std::string& name() const { return name_; }
   const std::vector<std::string>& args() const { return args_; }
@@ -56,6 +59,15 @@ class Predicate {
     return this->name() == otherPredicate.name() &&
            this->sign() == otherPredicate.sign() &&
            this->args() == otherPredicate.args();
+  }
+
+  bool operator==(const ASTNode& rhs) const override {
+    try {
+      const Predicate& rhsPredicate= dynamic_cast<const Predicate&>(rhs);
+      return *this == rhsPredicate;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
   }
 
   // < operator is needed for btree_set, which is only used for declarations.
@@ -76,11 +88,12 @@ class Predicate {
 // 1. NumberType
 // 2. PrincipalType
 // 3. User defined CustomType (string to store name of the type)
-class ArgumentType {
+class ArgumentType : public ASTNode {
  public:
   enum class Kind { kNumber, kPrincipal, kCustom };
   explicit ArgumentType(Kind kind, absl::string_view name)
       : kind_(kind), name_(name) {}
+  virtual ~ArgumentType() = default;
   Kind kind() const { return kind_; }
   absl::string_view name() const { return name_; }
 
@@ -89,16 +102,26 @@ class ArgumentType {
       this->kind_ == Kind::kCustom ? this->name_ == otherType.name() : true;
   }
 
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const ArgumentType& rhsArgType= dynamic_cast<const ArgumentType&>(rhs);
+      return *this == rhsArgType;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
+
  private:
   Kind kind_;
   std::string name_;
 };
 
-class Argument {
+class Argument : public ASTNode {
  public:
   explicit Argument(std::string_view argument_name, ArgumentType argument_type)
       : argument_name_(argument_name),
         argument_type_(std::move(argument_type)) {}
+  virtual ~Argument() = default;
   absl::string_view argument_name() const { return argument_name_; }
   ArgumentType argument_type() const { return argument_type_; }
 
@@ -107,12 +130,20 @@ class Argument {
     this->argument_type_ == otherArgument.argument_type();
   }
 
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const Argument& rhsArgument= dynamic_cast<const Argument&>(rhs);
+      return *this == rhsArgument;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
  private:
   std::string argument_name_;
   ArgumentType argument_type_;
 };
 
-class RelationDeclaration {
+class RelationDeclaration : public ASTNode {
  public:
   explicit RelationDeclaration(absl::string_view relation_name,
                                bool is_attribute,
@@ -120,6 +151,7 @@ class RelationDeclaration {
       : relation_name_(relation_name),
         is_attribute_(is_attribute),
         arguments_(std::move(arguments)) {}
+  virtual ~RelationDeclaration() = default;
   absl::string_view relation_name() const { return relation_name_; }
   bool is_attribute() const { return is_attribute_; }
   const std::vector<Argument>& arguments() const { return arguments_; }
@@ -130,6 +162,15 @@ class RelationDeclaration {
     this->arguments_ == otherDeclaration.arguments();
   }
 
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const RelationDeclaration& rhsRelDecl = 
+        dynamic_cast<const RelationDeclaration&>(rhs);
+      return *this == rhsRelDecl;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
  private:
   std::string relation_name_;
   bool is_attribute_;
@@ -140,11 +181,12 @@ class RelationDeclaration {
 // side. A Rule is either:
 //    - an unconditional fact which is a predicate
 //    - a conditional assertion
-class Rule {
+class Rule : ASTNode {
  public:
   explicit Rule(Predicate lhs, std::vector<Predicate> rhs)
       : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
   explicit Rule(Predicate lhs) : lhs_(std::move(lhs)) {}
+  virtual ~Rule() = default;
   const Predicate& lhs() const { return lhs_; }
   const std::vector<Predicate>& rhs() const { return rhs_; }
 
@@ -153,18 +195,27 @@ class Rule {
     this->rhs_ == otherRule.rhs();
   }
 
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const Rule& rhsRule = dynamic_cast<const Rule&>(rhs);
+      return *this == rhsRule;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
  private:
   Predicate lhs_;
   std::vector<Predicate> rhs_;
 };
 
-class Program {
+class Program : public ASTNode {
  public:
   Program(std::vector<RelationDeclaration> relation_declarations,
           std::vector<Rule> rules, std::vector<std::string> outputs)
       : relation_declarations_(std::move(relation_declarations)),
         rules_(std::move(rules)),
         outputs_(std::move(outputs)) {}
+  virtual ~Program() = default;
   const std::vector<RelationDeclaration>& relation_declarations() const {
     return relation_declarations_;
   }
@@ -178,6 +229,14 @@ class Program {
       this->outputs_ == otherProgram.outputs();
   }
 
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const Program& rhsProgram= dynamic_cast<const Program&>(rhs);
+      return *this == rhsProgram;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
  private:
   std::vector<RelationDeclaration> relation_declarations_;
   std::vector<Rule> rules_;

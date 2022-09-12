@@ -28,12 +28,14 @@
 #include "src/common/utils/map_iter.h"
 #include "src/ir/auth_logic/auth_logic_ast_visitor.h"
 #include "src/ir/datalog/program.h"
+#include "src/ir/ast_node.h"
 
 namespace raksha::ir::auth_logic {
 
-class Principal {
+class Principal : public ASTNode {
  public:
   explicit Principal(std::string name) : name_(std::move(name)) {}
+  virtual ~Principal() = default;
   const std::string& name() const { return name_; }
 
   template <typename Derived, typename Result>
@@ -48,6 +50,14 @@ class Principal {
   }
 
   bool operator==(const Principal& rhs) const { return name_ == rhs.name(); }
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const Principal& rhsPrincipal = dynamic_cast<const Principal&>(rhs);
+      return *this == rhsPrincipal ;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
 
   bool operator!=(const Principal& rhs) const { return !(*this == rhs); }
 
@@ -57,10 +67,11 @@ class Principal {
 
 // Attribute corresponds to an attribute of a principal with the form
 // <Principal> <pred_name>(arg_1, ..., arg_n)
-class Attribute {
+class Attribute : public ASTNode {
  public:
   explicit Attribute(Principal principal, datalog::Predicate predicate)
       : principal_(principal), predicate_(predicate) {}
+  virtual ~Attribute() = default;
   const Principal& principal() const { return principal_; }
   const datalog::Predicate& predicate() const { return predicate_; }
 
@@ -79,6 +90,15 @@ class Attribute {
     return principal_ == rhs.principal() && predicate_ == rhs.predicate();
   }
 
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const Attribute & rhsAttribute = dynamic_cast<const Attribute&>(rhs);
+      return *this == rhsAttribute;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
+
   bool operator!=(const Attribute& rhs) const { return !(*this == rhs); }
 
  private:
@@ -88,11 +108,12 @@ class Attribute {
 
 // CanActAs corresponds to a canActAs expression of the form
 // <principal_1> canActAs <principal_2>
-class CanActAs {
+class CanActAs : public ASTNode {
  public:
   explicit CanActAs(Principal left_principal, Principal right_principal)
       : left_principal_(std::move(left_principal)),
         right_principal_(std::move(right_principal)) {}
+  virtual ~CanActAs() = default;
   const Principal& left_principal() const { return left_principal_; }
   const Principal& right_principal() const { return right_principal_; }
 
@@ -113,6 +134,14 @@ class CanActAs {
            right_principal_ == rhs.right_principal();
   }
 
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const CanActAs & rhsCanActAs = dynamic_cast<const CanActAs&>(rhs);
+      return *this == rhsCanActAs;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
   bool operator!=(const CanActAs& rhs) const { return !(*this == rhs); }
 
  private:
@@ -128,7 +157,7 @@ class CanActAs {
 //  - A predicate
 //  - An attribute
 //  - A canActAs expression
-class BaseFact {
+class BaseFact : public ASTNode {
  public:
   // BaseFactVariantType gives the different forms of BaseFacts. Client code
   // should use this type to traverse these forms. This type may be changed in
@@ -136,6 +165,7 @@ class BaseFact {
   using BaseFactVariantType =
       std::variant<datalog::Predicate, Attribute, CanActAs>;
   explicit BaseFact(BaseFactVariantType value) : value_(std::move(value)){};
+  virtual ~BaseFact() = default;
   const BaseFactVariantType& GetValue() const { return value_; }
 
   template <typename Derived, typename Result>
@@ -152,7 +182,14 @@ class BaseFact {
   bool operator==(const BaseFact& rhs) const {
     return value_ == rhs.GetValue();
   }
-
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const BaseFact & rhsBaseFact = dynamic_cast<const BaseFact&>(rhs);
+      return *this == rhsBaseFact;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
   bool operator!=(const BaseFact& rhs) const { return !(*this == rhs); }
 
  private:
@@ -161,11 +198,12 @@ class BaseFact {
 
 // Fact corresponds to either a base fact or a an expression of the form
 // <principal> canSay <Fact>
-class Fact {
+class Fact : public ASTNode {
  public:
   Fact(std::forward_list<Principal> delegation_chain, BaseFact base_fact)
       : delegation_chain_(std::move(delegation_chain)),
         base_fact_(std::move(base_fact)) {}
+  virtual ~Fact() = default;
 
   const std::forward_list<Principal>& delegation_chain() const {
     return delegation_chain_;
@@ -188,6 +226,14 @@ class Fact {
     return delegation_chain_ == rhs.delegation_chain() &&
            base_fact_ == rhs.base_fact();
   }
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const Fact & rhsFact = dynamic_cast<const Fact&>(rhs);
+      return *this == rhsFact;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
 
   bool operator!=(const Fact& rhs) const { return !(*this == rhs); }
 
@@ -199,10 +245,11 @@ class Fact {
 // ConditionalAssertion the particular form of assertion that can have
 // conditions which is:
 // <fact> :- <flat_fact_1> ... <flat_fact_n>
-class ConditionalAssertion {
+class ConditionalAssertion : public ASTNode {
  public:
   explicit ConditionalAssertion(Fact lhs, std::vector<BaseFact> rhs)
       : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+  virtual ~ConditionalAssertion() = default;
   const Fact& lhs() const { return lhs_; }
   const std::vector<BaseFact>& rhs() const { return rhs_; }
 
@@ -220,6 +267,14 @@ class ConditionalAssertion {
   bool operator==(const ConditionalAssertion& rhs) const {
     return lhs_ == rhs.lhs() && rhs_ == rhs.rhs();
   }
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const ConditionalAssertion & rhsCondAssertion = dynamic_cast<const ConditionalAssertion&>(rhs);
+      return *this == rhsCondAssertion;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
 
   bool operator!=(const ConditionalAssertion& rhs) const {
     return !(*this == rhs);
@@ -233,13 +288,14 @@ class ConditionalAssertion {
 // Assertions can have two forms:
 //  - Facts
 //  - Conditional assertions
-class Assertion {
+class Assertion : public ASTNode {
  public:
   // AssertionVariantType gives the different forms of Facts. Client code
   // should use this type to traverse these forms. This type may be changed in
   // the future.
   using AssertionVariantType = std::variant<Fact, ConditionalAssertion>;
   explicit Assertion(AssertionVariantType value) : value_(std::move(value)) {}
+  virtual ~Assertion() = default;
   const AssertionVariantType& GetValue() const { return value_; }
 
   template <typename Derived, typename Result>
@@ -256,6 +312,14 @@ class Assertion {
   bool operator==(const Assertion& rhs) const {
     return value_ == rhs.GetValue();
   }
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const Assertion & rhsAssertion = dynamic_cast<const Assertion&>(rhs);
+      return *this == rhsAssertion;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
 
   bool operator!=(const Assertion& rhs) const { return !(*this == rhs); }
 
@@ -264,10 +328,11 @@ class Assertion {
 };
 
 // SaysAssertion prepends an assertion with "<principal> says"
-class SaysAssertion {
+class SaysAssertion : public ASTNode {
  public:
   explicit SaysAssertion(Principal principal, std::vector<Assertion> assertions)
       : principal_(std::move(principal)), assertions_(std::move(assertions)) {}
+  virtual ~SaysAssertion() = default;
   const Principal& principal() const { return principal_; }
   const std::vector<Assertion>& assertions() const { return assertions_; }
 
@@ -285,6 +350,14 @@ class SaysAssertion {
   bool operator==(const SaysAssertion& rhs) const {
     return principal_ == rhs.principal() && assertions_ == rhs.assertions();
   }
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const SaysAssertion & rhsSays = dynamic_cast<const SaysAssertion&>(rhs);
+      return *this == rhsSays;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
 
   bool operator!=(const SaysAssertion& rhs) const { return !(*this == rhs); }
 
@@ -295,12 +368,13 @@ class SaysAssertion {
 
 // A query which can be used to test whether "<principal> says <fact>" is true
 // given the rules and base facts.
-class Query {
+class Query : public ASTNode {
  public:
   explicit Query(std::string name, Principal principal, Fact fact)
       : name_(std::move(name)),
         principal_(std::move(principal)),
         fact_(std::move(fact)) {}
+  virtual ~Query() = default;
   const std::string& name() const { return name_; }
   const Principal& principal() const { return principal_; }
   const Fact& fact() const { return fact_; }
@@ -321,6 +395,14 @@ class Query {
     return name_ == rhs.name() && principal_ == rhs.principal() &&
            fact_ == rhs.fact();
   }
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const Query & rhsQuery = dynamic_cast<const Query&>(rhs);
+      return *this == rhsQuery;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
+  }
 
   bool operator!=(const Query& rhs) const { return !(*this == rhs); }
 
@@ -331,7 +413,7 @@ class Query {
 };
 
 // This is a top-level program.
-class Program {
+class Program : public ASTNode {
  public:
   explicit Program(
       std::vector<datalog::RelationDeclaration> relation_declarations,
@@ -339,6 +421,7 @@ class Program {
       : relation_declarations_(std::move(relation_declarations)),
         says_assertions_(std::move(says_assertions)),
         queries_(std::move(queries)) {}
+  virtual ~Program() = default;
 
   const std::vector<datalog::RelationDeclaration>& relation_declarations()
       const {
@@ -367,6 +450,14 @@ class Program {
     return relation_declarations_ == rhs.relation_declarations() &&
            says_assertions_ == rhs.says_assertions() &&
            queries_ == rhs.queries();
+  }
+  virtual bool operator==(const ASTNode& rhs) const override {
+    try {
+      const Program & rhsProgram = dynamic_cast<const Program&>(rhs);
+      return *this == rhsProgram;
+    } catch(const std::bad_cast& e) {
+      return false;
+    }
   }
 
   bool operator!=(const Program& rhs) const { return !(*this == rhs); }

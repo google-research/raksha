@@ -27,12 +27,14 @@ cc_library(
         "ast.h",
         "auth_logic_ast_visitor.h",
     ],
+    copts = ["-fexceptions"],
     visibility = ["//visibility:private"],
     deps = [
         "//src/common/logging",
         "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
         "//src/common/utils:types",
+        "//src/ir:ast_node",
         "//src/ir/datalog:program",
         "@absl//absl/hash",
         "@absl//absl/strings:str_format",
@@ -45,6 +47,7 @@ cc_library(
         "auth_logic_ast_traversing_visitor.h",
         "auth_logic_ast_visitor.h",
     ],
+    copts = ["-fexceptions"],
     deps = [
         ":ast",
         "//src/common/logging",
@@ -65,6 +68,7 @@ cc_library(
         "//src/backends/policy_engine/souffle:__subpackages__",
         "//src/ir/auth_logic:__subpackages__",
     ],
+    copts = ["-fexceptions"],
     deps = [
         ":ast",
         "//src/common/logging",
@@ -84,6 +88,7 @@ cc_library(
     hdrs = [
         "souffle_emitter.h",
     ],
+    copts = ["-fexceptions"],
     deps = [
         "//src/common/logging",
         "//src/common/utils:map_iter",
@@ -98,6 +103,7 @@ cc_library(
 cc_test(
     name = "ast_equality_test",
     srcs = ["ast_equality_test.cc"],
+    copts = ["-fexceptions"],
     deps = [
         ":ast",
         "//src/common/testing:gtest",
@@ -107,6 +113,7 @@ cc_test(
 cc_test(
     name = "souffle_emitter_test",
     srcs = ["souffle_emitter_test.cc"],
+    copts = ["-fexceptions"],
     deps = [
         ":ast",
         ":lowering_ast_datalog",
@@ -119,6 +126,7 @@ cc_test(
 cc_test(
     name = "ast_test",
     srcs = ["ast_test.cc"],
+    copts = ["-fexceptions"],
     deps = [
         ":ast",
         "//src/common/testing:gtest",
@@ -128,6 +136,7 @@ cc_test(
 cc_test(
     name = "ast_visitor_test",
     srcs = ["auth_logic_ast_traversing_visitor_test.cc"],
+    copts = ["-fexceptions"],
     deps = [
         ":ast",
         ":auth_logic_ast_traversing_visitor",
@@ -159,6 +168,7 @@ cc_library(
     hdrs = [
         "ast_string.h",
     ],
+    copts = ["-fexceptions"],
     deps = [
         ":ast",
         "//src/common/utils:overloaded",
@@ -170,8 +180,8 @@ cc_library(
 cc_test(
     name = "ast_construction_query_test",
     srcs = ["ast_construction_query_test.cc"],
-    copts = ["-fexceptions"],
     features = ["-use_header_modules"],
+    copts = ["-fexceptions"],
     deps = [
         ":ast",
         ":ast_construction",

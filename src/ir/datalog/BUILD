@@ -23,7 +23,9 @@ package(
 cc_library(
     name = "program",
     hdrs = ["program.h"],
+    copts = ["-fexceptions"],
     deps = [
+        "//src/ir:ast_node",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],
@@ -32,6 +34,7 @@ cc_library(
 cc_test(
     name = "predicate_test",
     srcs = ["predicate_test.cc"],
+    copts = ["-fexceptions"],
     deps = [
         ":program",
         "//src/common/testing:gtest",

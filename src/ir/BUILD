@@ -23,6 +23,11 @@ package(
 )
 
 cc_library(
+    name = "ast_node",
+    hdrs = ["ast_node.h"]
+)
+
+cc_library(
     name = "block_builder",
     hdrs = ["block_builder.h"],
     visibility = ["//src:__subpackages__"] + frontend_packages,
