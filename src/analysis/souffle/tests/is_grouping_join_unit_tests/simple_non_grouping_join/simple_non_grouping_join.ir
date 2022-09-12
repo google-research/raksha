@@ -1,0 +1,7 @@
+module m0 {
+  block b0 {
+    %0 = arbitrary[]()
+    %1 = arbitrary2[]()
+    %2 = sql.join[join_type: "INNER"](%0, %1)
+  }
+}

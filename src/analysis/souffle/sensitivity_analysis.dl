@@ -25,6 +25,7 @@
 #define SQL_INPUT_TABLE_COLUMN_OPERATOR as ("sql.input_table_column", Operator)
 #define SQL_FUNCTION_CALL_OPERATOR as("sql.function_call", Operator)
 #define SQL_WHERE_OPERATOR as("sql.where", Operator)
+#define SQL_GROUP_BY_COLUMNS_OPERATOR as ("sql.group_by_columns", Operator)
 #define SQL_GROUP_BY_OPERATOR as("sql.group_by", Operator)
 #define SQL_ORDER_BY_OPERATOR as("sql.order_by", Operator)
 #define SQL_SELECT_OPERATOR as("sql.select", Operator)
@@ -42,6 +43,8 @@
 #define SQL_STDDEV_OPERATOR as("sql.stddev", Operator)
 #define SQL_PERCENTILE_CONT_OPERATOR as("sql.percentile_cont", Operator)
 #define SQL_VARIANCE_OPERATOR as("sql.variance", Operator)
+#define CORE_EQUALS_OPERATOR as("core.equals", Operator)
+#define CORE_LOGICAL_AND_OPERATOR as("core.and", Operator)
 
 #define PRIVACY_MECHANISM_OPERATOR as("privacy_mechanism", Operator)
 
@@ -120,7 +123,7 @@ isInitialInput(as(ingress_point, AccessPath)) :- isOperation(operation),
 
 intermediateFlatten(list, sublist, contains_element) :-
       operationHasOperandList(operation, list),
-      operationHasOperandListSuffix(operation, [contains_element, sublist]).
+      operandListHasOperandListSuffix(list, [contains_element, sublist]).
 
 .decl flatten(list:OperandList, contains_element:AccessPath)
 flatten(list, contains_element) :-
@@ -154,6 +157,167 @@ sqlValueSensitivity(value, sensitivity_score) :-
             sensitivity_score = input_sensitivity
       ).
 
+.decl usesGroupByColumns(ap: AccessPath, column_access_paths: OperandList)
+usesGroupByColumns(result, column_access_paths) :-
+      isOperation(op),
+      operationHasResult(op, result),
+      operationHasOperator(op, SQL_GROUP_BY_COLUMNS_OPERATOR),
+      operationHasOperandList(op, column_access_paths).
+
+// Assign an arbitrary number to each list of group-by columns. This will be
+// used to impose an order for normalization later.
+.decl enumeratedGroupByColumns(group_by_columns: OperandList, num: number)
+enumeratedGroupByColumns(group_by_columns, autoinc()) :-
+      isOperation(op), operationHasOperator(op, SQL_GROUP_BY_COLUMNS_OPERATOR),
+      operationHasOperandList(op, group_by_columns).
+
+#define GROUP_BY_GROUPED_COLUMN_OPERAND_INDEX 0
+#define GROUP_BY_COLUMNS_OPERAND_INDEX 1
+
+.type GroupByKeyColumn = [column_access_paths: OperandList, index: number]
+.decl hasGroupByKeyColumn(ap: AccessPath, groupByKeyColumn: GroupByKeyColumn)
+
+hasGroupByKeyColumn(ap, [group_by_columns, index]) :-
+      isOperation(op),
+      operationHasResult(op, ap),
+      operationHasOperator(op, SQL_GROUP_BY_OPERATOR),
+      operationHasOperandAtIndex(op, grouped_column_input, GROUP_BY_GROUPED_COLUMN_OPERAND_INDEX),
+      operationHasOperandAtIndex(op, group_by_columns_input, GROUP_BY_COLUMNS_OPERAND_INDEX),
+      usesGroupByColumns(group_by_columns_input, group_by_columns),
+      operandListHasOperandAtIndex(group_by_columns, grouped_column_input, index).
+
+.type GroupByKeyColumnPair = [left: GroupByKeyColumn, right: GroupByKeyColumn]
+
+#define BINARY_OPERATION_LHS_OPERAND_INDEX 0
+#define BINARY_OPERATION_RHS_OPERAND_INDEX 1
+
+// A pair of group by key columns coming right out of an equals. This is not yet
+// normalized to have the "lesser" column list on the left hand side.
+.decl hasEqualsGroupByPair(ap: AccessPath, key: GroupByKeyColumnPair)
+hasEqualsGroupByPair(ap, [lhs_group_by_key, rhs_group_by_key]) :-
+      isOperation(op), operationHasOperator(op, CORE_EQUALS_OPERATOR),
+      operationHasOperandAtIndex(op, lhs, BINARY_OPERATION_LHS_OPERAND_INDEX),
+      hasGroupByKeyColumn(lhs, lhs_group_by_key),
+      operationHasOperandAtIndex(op, rhs, BINARY_OPERATION_RHS_OPERAND_INDEX),
+      hasGroupByKeyColumn(rhs, rhs_group_by_key), operationHasResult(op, ap).
+
+.decl accessPathHasCandidateJoinKeyPair(ap: AccessPath, pair: GroupByKeyColumnPair)
+
+// Equals is symmetric, so we can swap the order of the operands as we please.
+// For later checks, it will be useful to have one group by key list on the RHS
+// and the other on the LHS. Normalize before making a candidate join key.
+accessPathHasCandidateJoinKeyPair(ap, [[col_list1, idx1], [col_list2, idx2]]) :-
+      hasEqualsGroupByPair(ap, [[col_list1, idx1], [col_list2, idx2]]),
+      enumeratedGroupByColumns(col_list1, ord1), enumeratedGroupByColumns(col_list2, ord2),
+      ord1 <= ord2.
+
+accessPathHasCandidateJoinKeyPair(ap, [[col_list2, idx2], [col_list1, idx1]]) :-
+      hasEqualsGroupByPair(ap, [[col_list1, idx1], [col_list2, idx2]]),
+      enumeratedGroupByColumns(col_list1, ord1), enumeratedGroupByColumns(col_list2, ord2),
+      ord1 > ord2.
+
+.decl isAndOperation(op: Operation)
+isAndOperation(op) :- isOperation(op), operationHasOperator(op, CORE_LOGICAL_AND_OPERATOR).
+
+// We want to ensure that any `JOIN` we describe as a grouping `JOIN` joins on
+// exactly the key used by its input tables to `GROUP BY`. Part of this is
+// ensuring that no terms going into an `AND` producing a `JOIN` key come from
+// non-`GROUP BY` sources, such as `col1 = "SECRET"`. This relation checks that
+// by ensuring that all inputs have join key pairs.
+.decl allAndOperationInputsHaveJoinKeyPairs(op: Operation)
+.decl andOperationInputsUpToIndexHaveJoinKeyPairs(op: Operation, idx: number)
+
+andOperationInputsUpToIndexHaveJoinKeyPairs(op, 0) :-
+      isAndOperation(op), operationHasOperandAtIndex(op, operand, 0),
+      accessPathHasCandidateJoinKeyPair(operand, _).
+
+andOperationInputsUpToIndexHaveJoinKeyPairs(op, idx + 1) :-
+      isAndOperation(op), operationHasOperandAtIndex(op, operand, idx + 1),
+      accessPathHasCandidateJoinKeyPair(operand, _),
+      andOperationInputsUpToIndexHaveJoinKeyPairs(op, idx).
+
+allAndOperationInputsHaveJoinKeyPairs(op) :-
+      isAndOperation(op), operationHasOperandList(op, operand_list),
+      operandListLength(operand_list, operand_list_length), operand_list_length > 0,
+      andOperationInputsUpToIndexHaveJoinKeyPairs(op, operand_list_length - 1).
+
+accessPathHasCandidateJoinKeyPair(ap, pair) :-
+      isAndOperation(op), allAndOperationInputsHaveJoinKeyPairs(op), operationHasResult(op, ap),
+      operationHasOperand(op, operand), accessPathHasCandidateJoinKeyPair(operand, pair).
+
+#define JOIN_EXPR_INDEX 1
+
+// There's no guarantee that the candidate join keys we produce will actually
+// reach a join. If they do, however, we want to validate them to see whether
+// they cause a join to be a grouping join. This is the collection of access
+// paths that eligible joins take their join keys on.
+.decl isCandidateJoinKeyAccessPath(join_key_ap: AccessPath)
+
+isCandidateJoinKeyAccessPath(join_key_ap) :-
+      isOperation(op), operationHasOperator(op, SQL_JOIN_OPERATOR),
+      operationHasAttribute(op, ["join_type", $StringAttributePayload("INNER")]),
+      operationHasOperandAtIndex(op, join_key_ap, JOIN_EXPR_INDEX).
+
+.decl candidateGroupingJoinKeyAccessPathLhsMapsToMultipleRhs(join_key_ap: AccessPath)
+candidateGroupingJoinKeyAccessPathLhsMapsToMultipleRhs(ap) :-
+      isCandidateJoinKeyAccessPath(ap),
+      accessPathHasCandidateJoinKeyPair(ap, [lhs, rhs1]),
+      accessPathHasCandidateJoinKeyPair(ap, [lhs, rhs2]),
+      rhs1 != rhs2.
+
+.decl candidateGroupingJoinKeyAccessPathRhsMapsToMultipleLhs(join_key_ap: AccessPath)
+candidateGroupingJoinKeyAccessPathRhsMapsToMultipleLhs(ap) :-
+      accessPathHasCandidateJoinKeyPair(ap, [lhs1, rhs]),
+      accessPathHasCandidateJoinKeyPair(ap, [lhs2, rhs]),
+      lhs1 != lhs2.
+
+.decl candidateGroupingJoinKeyAccessPathHasMismatchedOperandLists(ap: AccessPath)
+candidateGroupingJoinKeyAccessPathHasMismatchedOperandLists(ap) :-
+      accessPathHasCandidateJoinKeyPair(ap, [[operand_list1, _], _]),
+      accessPathHasCandidateJoinKeyPair(ap, [[operand_list2, _], _]),
+      operand_list1 != operand_list2.
+
+candidateGroupingJoinKeyAccessPathHasMismatchedOperandLists(ap) :-
+      accessPathHasCandidateJoinKeyPair(ap, [_, [operand_list1, _]]),
+      accessPathHasCandidateJoinKeyPair(ap, [_, [operand_list2, _]]),
+      operand_list1 != operand_list2.
+
+.decl numPairsAtCandidateGroupingJoinKeyAccessPath(ap: AccessPath, num_pairs: number)
+numPairsAtCandidateGroupingJoinKeyAccessPath(ap, num_pairs) :-
+      isCandidateJoinKeyAccessPath(ap),
+      count : {accessPathHasCandidateJoinKeyPair(ap, _)} = num_pairs.
+
+.decl joinKeyAtAccessPathHasDifferentSizeFromSourceGroups(ap: AccessPath)
+joinKeyAtAccessPathHasDifferentSizeFromSourceGroups(ap) :-
+      isCandidateJoinKeyAccessPath(ap),
+      accessPathHasCandidateJoinKeyPair(ap, [[operand_list, _], _]),
+      operandListLength(operand_list, operand_list_length),
+      numPairsAtCandidateGroupingJoinKeyAccessPath(ap, num_pairs),
+      operand_list_length != num_pairs.
+
+ joinKeyAtAccessPathHasDifferentSizeFromSourceGroups(ap) :-
+      isCandidateJoinKeyAccessPath(ap),
+      accessPathHasCandidateJoinKeyPair(ap, [_, [operand_list, _]]),
+      operandListLength(operand_list, operand_list_length),
+      numPairsAtCandidateGroupingJoinKeyAccessPath(ap, num_pairs),
+      operand_list_length != num_pairs.
+
+.decl isValidGroupingJoinKeyAtAccessPath(ap: AccessPath)
+isValidGroupingJoinKeyAtAccessPath(ap) :-
+      isCandidateJoinKeyAccessPath(ap),
+      !joinKeyAtAccessPathHasDifferentSizeFromSourceGroups(ap),
+      !candidateGroupingJoinKeyAccessPathHasMismatchedOperandLists(ap),
+      !candidateGroupingJoinKeyAccessPathLhsMapsToMultipleRhs(ap),
+      !candidateGroupingJoinKeyAccessPathRhsMapsToMultipleLhs(ap).
+
+.decl isGroupingJoin(op: Operation)
+isGroupingJoin(op) :-
+      operationHasOperator(op, SQL_JOIN_OPERATOR),
+      operationHasAttribute(op, ["join_type", $StringAttributePayload("INNER")]),
+      operationHasOperandAtIndex(op, join_expr_ap, JOIN_EXPR_INDEX),
+      accessPathHasCandidateJoinKeyPair(join_expr_ap, _), // Need at least one pair to count.
+      isCandidateJoinKeyAccessPath(join_expr_ap),
+      isValidGroupingJoinKeyAtAccessPath(join_expr_ap).
 
 // Keeping track of sensitivity score per each input at index, where index is
 // the depth from initial inputs. This relation is used to calculate the maximum
