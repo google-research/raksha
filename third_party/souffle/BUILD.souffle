@@ -94,6 +94,47 @@ cc_library(
 )
 
 cc_library(
+    name = "souffle_lib_64_bit",
+    srcs = glob(
+        ["src/**/*.cpp"],
+        exclude = [
+            "src/include/**",
+            "src/tests/**",
+            "src/ram/tests/**",
+            "src/ast/tests/**",
+            "src/interpreter/tests/**",
+            "src/main.cpp",
+            "src/souffle_prof.cpp",
+        ],
+    ) + [
+        ":scanner_gen",
+        ":parser_gen",
+    ],
+    hdrs = glob(["src/**/*.h"]) + [":parser_gen"],
+    copts = [
+        "-std=c++17",
+        # We don't want warnings in 3rd party packages to obscure issues in our
+        # own code that we are more likely to need to fix.
+        "-w",
+    ],
+    includes = [
+        "src",
+        "src/include",
+    ],
+    linkopts = select({
+        "@bazel_tools//src/conditions:linux_x86_64": [
+            "-ldl",
+        ],
+        "//conditions:default": [
+        ],
+    }),
+    local_defines = ["RAM_DOMAIN_SIZE=64"],
+    deps = [
+        "@org_sourceware_libffi//:libffi",
+    ],
+)
+
+cc_library(
   name = "souffle_include_lib",
   hdrs = glob(["src/**/*.h"]),
   copts = [
@@ -119,4 +160,18 @@ cc_binary(
     ],
     linkopts = ["-pthread"],
     deps = [":souffle_lib"],
+)
+
+cc_binary(
+    name = "souffle_64_bit",
+    srcs = ["src/main.cpp"],
+    copts = [
+        "-std=c++17",
+        # We don't want warnings in 3rd party packages to obscure issues in our
+        # own code that we are more likely to need to fix.
+        "-w",
+    ],
+    linkopts = ["-pthread"],
+    local_defines = ["RAM_DOMAIN_SIZE=64"],
+    deps = [":souffle_lib_64_bit"],
 )
