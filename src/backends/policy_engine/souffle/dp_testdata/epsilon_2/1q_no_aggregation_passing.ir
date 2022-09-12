@@ -1,0 +1,14 @@
+// Modeling a single query (that does not use aggegation) that passes the epsilon
+// analysis because the actual epsilon, 2, is equal to the global epsilon
+module m0 {
+  block b0 {
+        %0 = core.input [name: "users"] ()
+         //epsilon does not take into account sens analysis
+        %1 = sql.filter [column: "gender"] (%0) // { }
+        %2 = sql.column_access [column: "location"] (%0)
+        %3 = sql.group_by[] (%1, %2)
+        %dp_data = privacy_mechanism [epsilon: 1] (%3)
+        //epsilon set to take into account sens. analysis (act. epsilon is 2)
+        %4 = sql.sql_output [] (%dp_data) // Report the noisy data
+    }
+}

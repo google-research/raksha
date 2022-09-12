@@ -1,7 +1,7 @@
-// Modeling a single query that fails the dp analysis: the local delta (3) is
-// larger than the global delta (2). Note that the real deltas are much smaller
-// than this but for now we'll use integers.
-// Queries:  SELECT AVG(revenue) (epsilon = 1, delta = 3)
+// Modeling a single query that fails the dp analysis: the k threshold 1 is
+// smaller than 1/epsilon log(2*delta). Note that the real deltas are much
+// smaller than this but for now we'll use integers.
+// Queries:  SELECT revenue (epsilon = 1, delta = 100, k = 1)
 //           FROM revenue_table
 //           GROUP_BY location
 module m0 {
@@ -12,8 +12,7 @@ module m0 {
         %2 = sql.group_by[] (%1, %location) // (%0, location)
         // epsilon set to take into account sens. analysis (actual epsilon is 2)
         // delta set too large
-        %dp_data = privacy_mechanism [epsilon: 1, delta: 3] (%2)
-        %3 = sql.average [] (%dp_data)
-        %4 = sql.sql_output [] (%3) // Report the noisy average
+        %dp_data = privacy_mechanism [epsilon: 1, delta: 100, k_threshold: 1] (%2)
+        %4 = sql.sql_output [] (%dp_data) // Report the noisy average
     }
 }

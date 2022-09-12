@@ -421,6 +421,42 @@ sh_test(
 )
 
 sh_test(
+    name = "check_1q_epsilon2_no_aggregation_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_no_aggregation_failing.ir)",
+        "2",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_no_aggregation_failing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_1q_epsilon2_no_aggregation_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_no_aggregation_passing.ir)",
+        "2",
+        "1",
+        "dp_policy_verifier_cxx",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_no_aggregation_passing.ir",
+    ],
+)
+
+sh_test(
     name = "check_1q_epsilon2_fail_test",
     srcs = ["check_policy_compliance_test.sh"],
     args = [

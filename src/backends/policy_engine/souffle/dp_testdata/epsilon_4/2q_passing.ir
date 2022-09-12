@@ -16,11 +16,11 @@ module m0 {
         %2 = sql.group_by[] (%1, %location) // (%0, location)
         %dp_data = privacy_mechanism [epsilon: 1] (%2) //epsilon set to take into account sens. analysis (the actual epsilon here would be 2)
         %3 = sql.average [] (%dp_data)
-        %4 = sql.output [] (%3) // Report the noisy average
+        %4 = sql.sql_output [] (%3) // Report the noisy average
         //second query
         %5 = sql.column_access [colum: "profit"] (%0)
         %6 = privacy_mechanism [epsilon: 1] (%5)
         %7 = sql.average [] (%6)
-        %8 = sql.output [] (%7)
+        %8 = sql.sql_output [] (%7)
     }
 }

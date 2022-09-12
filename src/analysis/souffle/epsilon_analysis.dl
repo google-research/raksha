@@ -140,13 +140,13 @@ sqlValueSensitivity(value, sensitivity) :- isDiffPrivacyMechanism(operation),
 //    aggregation operation.
 // 3. The global delta for an input to an aggregation operation is smaller than
 //    the local delta.
-violatesPolicy(value) :- isAggregationOperation(operation),
+violatesPolicy(value) :- isSqlOutput(operation),
     operationHasResult(operation, sql_output),
     sqlPath(value, sql_output),
     epsilonDiffPrivacy(value, epsilon),
     isGlobalEpsilon(global_epsilon),
     global_epsilon < epsilon;
-    isAggregationOperation(operation),
+    isSqlOutput(operation),
     operationHasResult(operation, sql_output),
     sqlPath(value, sql_output),
     deltaDiffPrivacy(value, delta),

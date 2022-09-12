@@ -30,6 +30,7 @@ exports_files([
     "1q_failing.ir",
     "2q_passing.ir",
     "2q_failing.ir",
+    "2q_s_failing.ir",
 ])
 
 raksha_policy_verifier_library(
