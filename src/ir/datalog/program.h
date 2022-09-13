@@ -35,7 +35,7 @@ enum Sign { kNegated, kPositive };
 
 // Predicate corresponds to a predicate of the form
 // <pred_name>(arg_1, ..., arg_n), and it may or may not be negated
-class Predicate : public ASTNode {
+class Predicate : public AstNode {
  public:
   Predicate(std::string name, std::vector<std::string> args, Sign sign)
       : name_(std::move(name)),
@@ -61,7 +61,7 @@ class Predicate : public ASTNode {
            this->args() == otherPredicate.args();
   }
 
-  bool operator==(const ASTNode& rhs) const override {
+  bool operator==(const AstNode& rhs) const override {
     try {
       const Predicate& rhsPredicate= dynamic_cast<const Predicate&>(rhs);
       return *this == rhsPredicate;
@@ -88,7 +88,7 @@ class Predicate : public ASTNode {
 // 1. NumberType
 // 2. PrincipalType
 // 3. User defined CustomType (string to store name of the type)
-class ArgumentType : public ASTNode {
+class ArgumentType : public AstNode {
  public:
   enum class Kind { kNumber, kPrincipal, kCustom };
   explicit ArgumentType(Kind kind, absl::string_view name)
@@ -102,7 +102,7 @@ class ArgumentType : public ASTNode {
       this->kind_ == Kind::kCustom ? this->name_ == otherType.name() : true;
   }
 
-  virtual bool operator==(const ASTNode& rhs) const override {
+  virtual bool operator==(const AstNode& rhs) const override {
     try {
       const ArgumentType& rhsArgType= dynamic_cast<const ArgumentType&>(rhs);
       return *this == rhsArgType;
@@ -116,7 +116,7 @@ class ArgumentType : public ASTNode {
   std::string name_;
 };
 
-class Argument : public ASTNode {
+class Argument : public AstNode {
  public:
   explicit Argument(std::string_view argument_name, ArgumentType argument_type)
       : argument_name_(argument_name),
@@ -130,7 +130,7 @@ class Argument : public ASTNode {
     this->argument_type_ == otherArgument.argument_type();
   }
 
-  virtual bool operator==(const ASTNode& rhs) const override {
+  virtual bool operator==(const AstNode& rhs) const override {
     try {
       const Argument& rhsArgument= dynamic_cast<const Argument&>(rhs);
       return *this == rhsArgument;
@@ -143,7 +143,7 @@ class Argument : public ASTNode {
   ArgumentType argument_type_;
 };
 
-class RelationDeclaration : public ASTNode {
+class RelationDeclaration : public AstNode {
  public:
   explicit RelationDeclaration(absl::string_view relation_name,
                                bool is_attribute,
@@ -162,7 +162,7 @@ class RelationDeclaration : public ASTNode {
     this->arguments_ == otherDeclaration.arguments();
   }
 
-  virtual bool operator==(const ASTNode& rhs) const override {
+  virtual bool operator==(const AstNode& rhs) const override {
     try {
       const RelationDeclaration& rhsRelDecl = 
         dynamic_cast<const RelationDeclaration&>(rhs);
@@ -181,7 +181,7 @@ class RelationDeclaration : public ASTNode {
 // side. A Rule is either:
 //    - an unconditional fact which is a predicate
 //    - a conditional assertion
-class Rule : ASTNode {
+class Rule : AstNode {
  public:
   explicit Rule(Predicate lhs, std::vector<Predicate> rhs)
       : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
@@ -195,7 +195,7 @@ class Rule : ASTNode {
     this->rhs_ == otherRule.rhs();
   }
 
-  virtual bool operator==(const ASTNode& rhs) const override {
+  virtual bool operator==(const AstNode& rhs) const override {
     try {
       const Rule& rhsRule = dynamic_cast<const Rule&>(rhs);
       return *this == rhsRule;
@@ -208,7 +208,7 @@ class Rule : ASTNode {
   std::vector<Predicate> rhs_;
 };
 
-class Program : public ASTNode {
+class Program : public AstNode {
  public:
   Program(std::vector<RelationDeclaration> relation_declarations,
           std::vector<Rule> rules, std::vector<std::string> outputs)
@@ -229,7 +229,7 @@ class Program : public ASTNode {
       this->outputs_ == otherProgram.outputs();
   }
 
-  virtual bool operator==(const ASTNode& rhs) const override {
+  virtual bool operator==(const AstNode& rhs) const override {
     try {
       const Program& rhsProgram= dynamic_cast<const Program&>(rhs);
       return *this == rhsProgram;

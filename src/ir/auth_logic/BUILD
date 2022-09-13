@@ -139,6 +139,7 @@ cc_test(
     copts = ["-fexceptions"],
     deps = [
         ":ast",
+        ":ast_string",
         ":auth_logic_ast_traversing_visitor",
         "//src/common/testing:gtest",
         "//src/ir/datalog:program",

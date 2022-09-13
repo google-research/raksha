@@ -20,8 +20,11 @@ namespace raksha::ir {
 // This is the supertype for all nodes in
 // `raksha::ir::datalog::program.h` and 
 // `raksha::ir::auth_logic::ast.h`
-class ASTNode {
-    virtual bool operator==(const ASTNode& otherNode ) const = 0;
+class AstNode {
+    public:
+    virtual bool operator==(const AstNode& otherNode ) const = 0;
+    protected:
+    AstNode() = default;
 };
 
 }; // raksha::ir

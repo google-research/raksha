@@ -22,6 +22,7 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/datalog/program.h"
+#include "src/ir/auth_logic/ast_string.h"
 
 namespace raksha::ir::auth_logic {
 namespace {
@@ -86,102 +87,102 @@ class TraversalOrderVisitor
                      traversal_type == TraversalType::kBoth) {}
 
   Unit PreVisit(const Principal& prin) override {
-    if (pre_visits_) nodes_.push_back(prin);
+    if (pre_visits_) nodes_.push_back(&prin);
     return Unit();
   }
   Unit PostVisit(const Principal& prin, Unit result) override {
-    if (post_visits_) nodes_.push_back(prin);
+    if (post_visits_) nodes_.push_back(&prin);
     return result;
   }
 
   Unit PreVisit(const Attribute& attrib) override {
-    if (pre_visits_) nodes_.push_back(attrib);
+    if (pre_visits_) nodes_.push_back(&attrib);
     return Unit();
   }
   Unit PostVisit(const Attribute& attrib, Unit result) override {
-    if (post_visits_) nodes_.push_back(attrib);
+    if (post_visits_) nodes_.push_back(&attrib);
     return result;
   }
 
   Unit PreVisit(const CanActAs& canActAs) override {
-    if (pre_visits_) nodes_.push_back(canActAs);
+    if (pre_visits_) nodes_.push_back(&canActAs);
     return Unit();
   }
   Unit PostVisit(const CanActAs& canActAs, Unit result) override {
-    if (post_visits_) nodes_.push_back(canActAs);
+    if (post_visits_) nodes_.push_back(&canActAs);
     return result;
   }
 
   Unit PreVisit(const BaseFact& baseFact) override {
-    if (pre_visits_) nodes_.push_back(baseFact);
+    if (pre_visits_) nodes_.push_back(&baseFact);
     return Unit();
   }
   Unit PostVisit(const BaseFact& baseFact, Unit result) override {
-    if (post_visits_) nodes_.push_back(baseFact);
+    if (post_visits_) nodes_.push_back(&baseFact);
     return result;
   }
 
   Unit PreVisit(const Fact& fact) override {
-    if (pre_visits_) nodes_.push_back(fact);
+    if (pre_visits_) nodes_.push_back(&fact);
     return Unit();
   }
   Unit PostVisit(const Fact& fact, Unit result) override {
-    if (post_visits_) nodes_.push_back(fact);
+    if (post_visits_) nodes_.push_back(&fact);
     return result;
   }
 
   Unit PreVisit(const ConditionalAssertion& condAssertion) override {
-    if (pre_visits_) nodes_.push_back(condAssertion);
+    if (pre_visits_) nodes_.push_back(&condAssertion);
     return Unit();
   }
   Unit PostVisit(const ConditionalAssertion& condAssertion,
                  Unit result) override {
-    if (post_visits_) nodes_.push_back(condAssertion);
+    if (post_visits_) nodes_.push_back(&condAssertion);
     return result;
   }
 
   Unit PreVisit(const Assertion& assertion) override {
-    if (pre_visits_) nodes_.push_back(assertion);
+    if (pre_visits_) nodes_.push_back(&assertion);
     return Unit();
   }
   Unit PostVisit(const Assertion& assertion, Unit result) override {
-    if (post_visits_) nodes_.push_back(assertion);
+    if (post_visits_) nodes_.push_back(&assertion);
     return result;
   }
 
   Unit PreVisit(const SaysAssertion& saysAssertion) override {
-    if (pre_visits_) nodes_.push_back(saysAssertion);
+    if (pre_visits_) nodes_.push_back(&saysAssertion);
     return Unit();
   }
   Unit PostVisit(const SaysAssertion& saysAssertion, Unit result) override {
-    if (post_visits_) nodes_.push_back(saysAssertion);
+    if (post_visits_) nodes_.push_back(&saysAssertion);
     return result;
   }
 
   Unit PreVisit(const Query& query) override {
-    if (pre_visits_) nodes_.push_back(query);
+    if (pre_visits_) nodes_.push_back(&query);
     return Unit();
   }
   Unit PostVisit(const Query& query, Unit result) override {
-    if (post_visits_) nodes_.push_back(query);
+    if (post_visits_) nodes_.push_back(&query);
     return result;
   }
 
   Unit PreVisit(const Program& program) override {
-    if (pre_visits_) nodes_.push_back(program);
+    if (pre_visits_) nodes_.push_back(&program);
     return Unit();
   }
   Unit PostVisit(const Program& program, Unit result) override {
-    if (post_visits_) nodes_.push_back(program);
+    if (post_visits_) nodes_.push_back(&program);
     return result;
   }
 
-  const std::vector<ASTNode>& nodes() const { return nodes_; }
+  const std::vector<const AstNode*>& nodes() const { return nodes_; }
 
  private:
   bool pre_visits_;
   bool post_visits_;
-  std::vector<ASTNode> nodes_;
+  std::vector<const AstNode *> nodes_;
 };
 
 TEST(AuthLogicAstTraversingVisitorTest, SimpleTraversalTest) {
@@ -212,6 +213,23 @@ TEST(AuthLogicAstTraversingVisitorTest, SimpleTraversalTest) {
 
   TraversalOrderVisitor preorder_visitor(TraversalType::kPre);
   program1.Accept(preorder_visitor);
+  auto actual_nodes = preorder_visitor.nodes();
+  std::vector<const AstNode*> expected_nodes = {
+    &program1, &saysAssertion1,
+    &prinA, &assertion1, &fact1,
+    &baseFact1, &saysAssertion2,
+    &prinC, &assertion1, &fact1,
+    &baseFact1, &assertion2, &fact2,
+    &prinB, &baseFact2, &query1,
+    &prinA, &fact1, &baseFact1,
+    &query2, &prinB, &fact2,
+    &prinB, &baseFact2
+  };
+  EXPECT_EQ(expected_nodes.size(), actual_nodes.size());
+  for(int i=0; i< actual_nodes.size(); i++) {
+    EXPECT_EQ(*expected_nodes[i], *actual_nodes[i]);
+  }
+  /*
   EXPECT_THAT(
       preorder_visitor.nodes(),
       testing::ElementsAre(
@@ -224,6 +242,7 @@ TEST(AuthLogicAstTraversingVisitorTest, SimpleTraversalTest) {
           prinA, fact1, baseFact1,
           query2, prinB, fact2,
           prinB, baseFact2));
+  */
 
   /*
   TraversalOrderVisitor postorder_visitor(TraversalType::kPost);
