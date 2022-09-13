@@ -133,14 +133,23 @@ deltaDiffPrivacyIntermediate(value, sql_output, delta) :-
     diffPrivacyMechanismHasDelta(operation, delta).
 
 // DP Policies are violated when:
-// 1. The global epsilon is less than the local epsilon for a value used in an
+// 1. There is a global epsilon but no local epsilon per an output path
+// 2. The global epsilon is less than the local epsilon for a value used in an
 //    aggregation operation as input (the value in isSqlPath)
 //    times the sensitivity of said agregation operation.
-// 2. The global epsilon is less than the local epsilon for an input to an
+// 3. The global epsilon is less than the local epsilon for an input to an
 //    aggregation operation.
-// 3. The global delta for an input to an aggregation operation is smaller than
+// 4. The global delta for an input to an aggregation operation is smaller than
 //    the local delta.
-violatesPolicy(value) :- isSqlOutput(operation),
+violatesPolicy(value) :- isInitialInput(value),
+    isSqlOutput(sql_output_operation),
+    operationHasResult(sql_output_operation, sql_output),
+    sqlPath(value, sql_output),
+    isGlobalEpsilon(epsilon),
+    (!isDiffPrivacyMechanism(_);
+    isDiffPrivacyMechanism(operation),
+    !diffPrivacyMechanismHasEpsilon(operation, _));
+    isSqlOutput(operation),
     operationHasResult(operation, sql_output),
     sqlPath(value, sql_output),
     epsilonDiffPrivacy(value, epsilon),

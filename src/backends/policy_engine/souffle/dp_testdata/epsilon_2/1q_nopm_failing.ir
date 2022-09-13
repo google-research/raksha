@@ -1,0 +1,12 @@
+// Modeling a single query that fails the epsilon analysis because there is a
+// query that results in an output, but there is no privacy mechanism
+module m0 {
+  block b0 {
+        %0 = core.input [name: "revenue_table"] ()
+        %1 = sql.filter [column: "revenue"] (%0) // { revenue > 100 }
+        %location = sql.column_access [column: "location"] (%1)
+        %2 = sql.group_by[] (%1, %location)
+        %3 = sql.average[] (%2)
+        %4 = sql.sql_output [] (%3) // Report the noisy average
+    }
+}

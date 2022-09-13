@@ -28,6 +28,7 @@ exports_files([
     "policy.facts",
     "1q_passing.ir",
     "1q_failing.ir",
+    "1q_nopm_failing.ir",
     "1q_no_aggregation_failing.ir",
     "1q_no_aggregation_passing.ir",
     "2q_passing.ir",
