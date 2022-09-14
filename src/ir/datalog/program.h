@@ -78,6 +78,13 @@ class Predicate : public AstNode {
     return this->name() < otherPredicate.name();
   }
 
+
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    return absl::StrCat(sign_, name_, absl::StrJoin(args_, ", "));
+  }
+
  private:
   std::string name_;
   std::vector<std::string> args_;
@@ -111,6 +118,10 @@ class ArgumentType : public AstNode {
     }
   }
 
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override { return absl::StrCat(kind_, name_); }
+
  private:
   Kind kind_;
   std::string name_;
@@ -138,6 +149,13 @@ class Argument : public AstNode {
       return false;
     }
   }
+
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    return absl::StrCat(argument_name_, " : ", argument_type_.DebugPrint());
+  }
+
  private:
   std::string argument_name_;
   ArgumentType argument_type_;
@@ -171,6 +189,19 @@ class RelationDeclaration : public AstNode {
       return false;
     }
   }
+
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    std::vector<std::string> arg_strings;
+    arg_strings.reserve(arguments_.size());
+    for (const Argument& arg : arguments_) {
+      arg_strings.push_back(arg.DebugPrint());
+    }
+    return absl::StrCat(".decl ", relation_name_, is_attribute_,
+                        absl::StrJoin(arg_strings, ", "));
+  }
+
  private:
   std::string relation_name_;
   bool is_attribute_;
@@ -203,6 +234,19 @@ class Rule : AstNode {
       return false;
     }
   }
+
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    std::vector<std::string> rhs_strings;
+    rhs_strings.reserve(rhs_.size());
+    for (const Predicate& pred: rhs_) {
+      rhs_strings.push_back(pred.DebugPrint());
+    }
+    return absl::StrCat(lhs_.DebugPrint(), ":-",
+                        absl::StrJoin(rhs_strings, ", "));
+  }
+
  private:
   Predicate lhs_;
   std::vector<Predicate> rhs_;
@@ -237,6 +281,27 @@ class Program : public AstNode {
       return false;
     }
   }
+
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    std::vector<std::string> relation_decl_strings;
+    relation_decl_strings.reserve(relation_declarations_.size());
+    for (const RelationDeclaration& rel_decl :
+         relation_declarations_) {
+      relation_decl_strings.push_back(rel_decl.DebugPrint());
+    }
+    std::vector<std::string> rule_strings;
+    rule_strings.reserve(rules_.size());
+    for (const Rule& rule: rules_) {
+      rule_strings.push_back(rule.DebugPrint());
+    }
+    return absl::StrCat("Program(\n",
+                        absl::StrJoin(relation_decl_strings, "\n"),
+                        absl::StrJoin(outputs_, "\n"),
+                        absl::StrJoin(rule_strings, "\n"), ")");
+  }
+
  private:
   std::vector<RelationDeclaration> relation_declarations_;
   std::vector<Rule> rules_;

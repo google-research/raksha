@@ -59,6 +59,10 @@ class Principal : public AstNode {
     }
   }
 
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override { return name_; }
+
   bool operator!=(const Principal& rhs) const { return !(*this == rhs); }
 
  private:
@@ -97,6 +101,12 @@ class Attribute : public AstNode {
     } catch(const std::bad_cast& e) {
       return false;
     }
+  }
+
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    return absl::StrCat(principal_.name(), predicate_.DebugPrint());
   }
 
   bool operator!=(const Attribute& rhs) const { return !(*this == rhs); }
@@ -143,6 +153,14 @@ class CanActAs : public AstNode {
     }
   }
   bool operator!=(const CanActAs& rhs) const { return !(*this == rhs); }
+
+
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    return absl::StrCat(left_principal_.DebugPrint(), " canActAs ",
+                        right_principal_.DebugPrint());
+  }
 
  private:
   Principal left_principal_;
@@ -192,6 +210,15 @@ class BaseFact : public AstNode {
   }
   bool operator!=(const BaseFact& rhs) const { return !(*this == rhs); }
 
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    return absl::StrCat(
+        "BaseFact(",
+        std::visit([](auto& obj) { return obj.DebugPrint(); }, this->value_),
+        ")");
+  }
+
  private:
   BaseFactVariantType value_;
 };
@@ -237,6 +264,18 @@ class Fact : public AstNode {
 
   bool operator!=(const Fact& rhs) const { return !(*this == rhs); }
 
+
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    std::vector<std::string> delegations;
+    for (const Principal& delegatee : delegation_chain_) {
+      delegations.push_back(delegatee.DebugPrint());
+    }
+    return absl::StrCat("deleg: { ", absl::StrJoin(delegations, ", "), " }",
+                        base_fact_.DebugPrint());
+  }
+
  private:
   std::forward_list<Principal> delegation_chain_;
   BaseFact base_fact_;
@@ -278,6 +317,18 @@ class ConditionalAssertion : public AstNode {
 
   bool operator!=(const ConditionalAssertion& rhs) const {
     return !(*this == rhs);
+  }
+
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    std::vector<std::string> rhs_strings;
+    rhs_strings.reserve(rhs_.size());
+    for (const BaseFact& base_fact : rhs_) {
+      rhs_strings.push_back(base_fact.DebugPrint());
+    }
+    return absl::StrCat(lhs_.DebugPrint(), ":-",
+                        absl::StrJoin(rhs_strings, ", "));
   }
 
  private:
@@ -323,6 +374,15 @@ class Assertion : public AstNode {
 
   bool operator!=(const Assertion& rhs) const { return !(*this == rhs); }
 
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    return absl::StrCat(
+        "Assertion(",
+        std::visit([](auto& obj) { return obj.DebugPrint(); }, this->value_),
+        ")");
+  }
+
  private:
   AssertionVariantType value_;
 };
@@ -359,6 +419,18 @@ class SaysAssertion : public AstNode {
 
   bool operator!=(const SaysAssertion& rhs) const { return !(*this == rhs); }
 
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    std::vector<std::string> assertion_strings;
+    assertion_strings.reserve(assertions_.size());
+    for (const Assertion& assertion : assertions_) {
+      assertion_strings.push_back(assertion.DebugPrint());
+    }
+    return absl::StrCat(principal_.DebugPrint(), "says {\n",
+                        absl::StrJoin(assertion_strings, "\n"), "}");
+  }
+
  private:
   Principal principal_;
   std::vector<Assertion> assertions_;
@@ -388,7 +460,6 @@ class Query : public AstNode {
     return visitor.Visit(*this);
   }
 
-
   bool operator==(const Query& rhs) const {
     return name_ == rhs.name() && principal_ == rhs.principal() &&
            fact_ == rhs.fact();
@@ -403,6 +474,13 @@ class Query : public AstNode {
   }
 
   bool operator!=(const Query& rhs) const { return !(*this == rhs); }
+
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    return absl::StrCat("Query(", name_, principal_.DebugPrint(),
+                        fact_.DebugPrint(), ")");
+  }
 
  private:
   std::string name_;
@@ -443,7 +521,7 @@ class Program : public AstNode {
     return visitor.Visit(*this);
   }
 
-  // for debugging/testing only
+  // for debugging only
   bool operator==(const Program& rhs) const {
     return relation_declarations_ == rhs.relation_declarations() &&
            says_assertions_ == rhs.says_assertions() &&
@@ -459,6 +537,31 @@ class Program : public AstNode {
   }
 
   bool operator!=(const Program& rhs) const { return !(*this == rhs); }
+
+  // A potentially ugly print of the state in this class
+  // for debugging only
+  std::string DebugPrint() const override {
+    std::vector<std::string> relation_decl_strings;
+    relation_decl_strings.reserve(relation_declarations_.size());
+    for (const datalog::RelationDeclaration& rel_decl :
+         relation_declarations_) {
+      relation_decl_strings.push_back(rel_decl.DebugPrint());
+    }
+    std::vector<std::string> says_assertion_strings;
+    says_assertion_strings.reserve(says_assertions_.size());
+    for (const SaysAssertion& says_assertion : says_assertions_) {
+      says_assertion_strings.push_back(says_assertion.DebugPrint());
+    }
+    std::vector<std::string> query_strings;
+    query_strings.reserve(queries_.size());
+    for (const Query& query : queries_) {
+      query_strings.push_back(query.DebugPrint());
+    }
+    return absl::StrCat("Program(\n",
+                        absl::StrJoin(relation_decl_strings, "\n"),
+                        absl::StrJoin(says_assertion_strings, "\n"),
+                        absl::StrJoin(query_strings, "\n"), ")");
+  }
 
  private:
   std::vector<datalog::RelationDeclaration> relation_declarations_;

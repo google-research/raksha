@@ -23,6 +23,7 @@ namespace raksha::ir {
 class AstNode {
     public:
     virtual bool operator==(const AstNode& otherNode ) const = 0;
+    virtual std::string DebugPrint() const = 0;
     protected:
     AstNode() = default;
 };

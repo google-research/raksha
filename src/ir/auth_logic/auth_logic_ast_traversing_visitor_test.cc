@@ -227,7 +227,13 @@ TEST(AuthLogicAstTraversingVisitorTest, SimpleTraversalTest) {
   };
   EXPECT_EQ(expected_nodes.size(), actual_nodes.size());
   for(int i=0; i< actual_nodes.size(); i++) {
-    EXPECT_EQ(*expected_nodes[i], *actual_nodes[i]);
+    std::cout << "elt: " << i << "==============" << std::endl;
+    std::cout << "expected ptr: " <<
+      expected_nodes[i] << "val: " <<
+      expected_nodes[i]->DebugPrint() << std::endl;
+     std::cout << "actual ptr: " << 
+      actual_nodes[i] << "val: " ; // << actual_nodes[i]->DebugPrint() << std::endl;
+    // EXPECT_EQ(*expected_nodes[i], *actual_nodes[i]);
   }
   /*
   EXPECT_THAT(
