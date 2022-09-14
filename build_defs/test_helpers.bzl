@@ -223,3 +223,26 @@ def output_rule_diff_test(
         data = [expected_contents_csv, ":resultFact"],
         srcs = ["//src/analysis/souffle/tests/arcs_fact_tests:diff_wrapper.sh"],
     )
+
+def convert_ir_to_is_operation_facts(
+        name,
+        ir_file,
+        out_file,
+        visibility = None):
+    """Convert a file containing Raksha IR into Souffle isOperation facts.
+
+    Args:
+      name: String; Name of the file to be produced.
+      ir_file: String; the IR file to be converted.
+      out_file: String; the resulting isOperation facts file.
+      visibility: List; the visibilities of the resulting file.
+    """
+    ir_to_operation_facts_target = "//src/parser/ir:ir_to_operation_facts"
+    native.genrule(
+        name = name + "_generate_is_operation",
+        outs = [out_file],
+        srcs = [ir_file],
+        tools = [ir_to_operation_facts_target],
+        cmd = "$(location {}) --ir_file $< --out $@".format(ir_to_operation_facts_target),
+        visibility = visibility,
+    )

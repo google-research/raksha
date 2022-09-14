@@ -50,6 +50,10 @@ class RakshaDatalogFacts {
       const std::filesystem::path &directory,
       const std::vector<std::string> &empty_relations = {}) const;
 
+  const std::vector<ir::datalog::IsOperationFact> &is_operation_facts() const {
+    return is_operation_facts_;
+  }
+
  private:
   std::vector<ir::datalog::IsOperationFact> is_operation_facts_;
 };

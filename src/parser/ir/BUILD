@@ -71,3 +71,19 @@ cc_test(
         "//src/ir:ir_printer",
     ],
 )
+
+cc_binary(
+    name = "ir_to_operation_facts",
+    srcs = ["ir_to_operation_facts.cc"],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    deps = [
+        ":ir_parser",
+        "//src/backends/policy_engine/souffle:datalog_lowering_visitor",
+        "//src/common/logging",
+        "@absl//absl/flags:flag",
+        "@absl//absl/flags:parse",
+        "@absl//absl/flags:usage",
+        "@absl//absl/strings",
+    ],
+)

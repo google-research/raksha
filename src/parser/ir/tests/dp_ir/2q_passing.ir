@@ -1,0 +1,25 @@
+// Modeling two queries that pass the dp analysis because the total noise added
+// on the initial input is equal to the the global epsilon (2).
+// Queries:  SELECT AVG(revenue) (epsilon = 1)
+//           FROM revenue_table
+//           WHERE location = "US"
+//
+//           SELECT AVG(profit) (epsilon = 1)
+//           FROM revenue_table
+module m0 {
+  block b0 {
+        %0 = core.input [name: "revenue_table"] ()
+        //first query
+        %1 = sql.filter [column: "revenue"] (%0) // { revenue > 100 }
+        %location = sql.column_access [column: "location"] (%1)
+        %2 = sql.where[] (%1, %location) // (%0, location = "US")
+        %dp_data = privacy_mechanism [epsilon: 1] (%2) //epsilon set to take into account sens. analysis (the actual epsilon here would be 2)
+        %3 = sql.average [] (%dp_data)
+        %4 = sql.sql_output [] (%3) // Report the noisy average
+        //second query
+        %5 = sql.column_access [column: "profit"] (%0)
+        %6 = privacy_mechanism [epsilon: 1] (%5)
+        %7 = sql.average [] (%6)
+        %8 = sql.sql_output [] (%7)
+    }
+}

@@ -18,8 +18,8 @@
 #define SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
 
 #include "src/backends/policy_engine/souffle/raksha_datalog_facts.h"
-#include "src/common/utils/types.h"
 #include "src/common/logging/logging.h"
+#include "src/common/utils/types.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/datalog/operation.h"
 #include "src/ir/ir_traversing_visitor.h"
@@ -27,12 +27,14 @@
 #include "src/ir/operator.h"
 #include "src/ir/ssa_names.h"
 
-
 namespace raksha::backends::policy_engine::souffle {
 
 class DatalogLoweringVisitor
     : public ir::IRTraversingVisitor<DatalogLoweringVisitor> {
  public:
+  explicit DatalogLoweringVisitor() = default;
+  explicit DatalogLoweringVisitor(ir::SsaNames ssa_names)
+      : ssa_names_(std::move(ssa_names)) {}
   // We currently don't have any owner information when outputting IR. We don't
   // need it yet, really, but we do need to output something.
   static constexpr absl::string_view kDefaultPrincipal = "sql";
