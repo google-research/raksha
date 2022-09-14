@@ -1,0 +1,14 @@
+// Show a simple grouping JOIN that passes (put into %4). This is a self-JOIN
+// on a single grouped table using a single-column grouping key. Also show a
+// JOIN not being classified as a grouping join in %5.
+
+module m0 {
+  block b0 {
+    %0 = unknown[]()
+    %1 = sql.group_by_columns[](%0)
+    %2 = sql.group_by[](%0, %1)
+    %3 = core.equals[](%2, %2)
+    %4 = sql.join[join_type: "INNER"](%2, %3)
+    %5 = sql.join[join_type: "FULL"](%2, %3)
+  }
+}

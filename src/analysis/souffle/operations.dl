@@ -70,19 +70,19 @@ isOperation([owner, operator, result, [input1, [input2, nil]], attrs])
 
 // Explode the operand lists so that we can extract the heads of each sublist
 // to get a mapping from operations to their operands.
-.decl operationHasOperandListSuffix(operation: Operation, partialList: OperandList)
+.decl operandListHasOperandListSuffix(operand_list: OperandList, partialList: OperandList)
 
-operationHasOperandListSuffix(operation, operandList) :-
-  operationHasOperandList(operation, operandList).
-operationHasOperandListSuffix(operation, tail) :-
-  operationHasOperandListSuffix(operation, [_, tail]).
+operandListHasOperandListSuffix(operand_list, operand_list) :-
+  operationHasOperandList(_, operand_list).
+operandListHasOperandListSuffix(operand_list, tail) :-
+  operandListHasOperandListSuffix(operand_list, [_, tail]).
 
 // `listLength` is the length of the `operandList`.
 .decl operandListLength(operandList: OperandList, listLength: number)
 
 operandListLength(nil, 0).
 operandListLength([head, tail], tailLen + 1) :-
-  operationHasOperandListSuffix(_, [head, tail]), operandListLength(tail, tailLen).
+  operandListHasOperandListSuffix(_, [head, tail]), operandListLength(tail, tailLen).
 
 // `operandListLength` is the length of the `operandList` on the given
 // `operation`.
@@ -98,13 +98,20 @@ operationOperandListLength(operation, len) :-
 
 isAccessPath(operand) :- operationHasOperandAtIndex(_, operand, _).
 
+.decl operandListHasOperandAtIndex(operand_list: OperandList, operand: AccessPath, index: number)
+operandListHasOperandAtIndex(
+  operand_list, operand, operand_list_len - suffix_list_len) :-
+  operandListHasOperandListSuffix(operand_list, [operand, tail]),
+  operandListLength([operand, tail], suffix_list_len),
+  operandListLength(operand_list, operand_list_len).
+
 // To find the index of an operand in an operation, find the sublist that it is
 // the head of in the operation, find the length of that list, and subtract it
 // from the overall length of the operand list in the operation.
-operationHasOperandAtIndex(operation, operand, opListLen - suffixListLen) :-
-  operationHasOperandListSuffix(operation, [operand, tail]),
-  operandListLength([operand, tail], suffixListLen),
-  operationOperandListLength(operation, opListLen).
+operationHasOperandAtIndex(operation, operand, index) :-
+  isOperation(operation),
+  operationHasOperandList(operation, operand_list),
+  operandListHasOperandAtIndex(operand_list, operand, index).
 
 // Ties each operation to its operands. We use this relation in dp analysis.
 .decl operationHasOperand(operation: Operation, operand: AccessPath)
