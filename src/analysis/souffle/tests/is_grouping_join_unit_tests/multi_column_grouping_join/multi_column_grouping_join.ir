@@ -1,0 +1,57 @@
+// Show a grouping JOIN using multiple columns in its key and a few variants
+// that fall short of being a true grouping JOIN.
+
+module m0 {
+  block b0 {
+    %0 = arbitrary[]()
+    %1 = arbitrary[]()
+    %2 = arbitrary[]()
+    %3 = arbitrary[]()
+    %4 = sql.group_by_columns[](%0, %1)
+    %5 = sql.group_by[](%0, %4)
+    %6 = sql.group_by[](%1, %4)
+    %7 = sql.group_by_columns[](%2, %3)
+    %8 = sql.group_by[](%2, %7)
+    %9 = sql.group_by[](%3, %7)
+    %10 = core.equals[](%5, %8)
+    %11 = core.equals[](%6, %9)
+    %12 = core.and[](%10, %11)
+    // These are true grouping JOINs.
+    %13 = sql.join[join_type: "INNER"](%5, %12)
+    %14 = sql.join[join_type: "INNER"](%6, %12)
+    %15 = sql.join[join_type: "INNER"](%8, %12)
+    %16 = sql.join[join_type: "INNER"](%9, %12)
+    // This one fails because it only handles part of the key.
+    %17 = sql.join[join_type: "INNER"](%5, %10)
+    %18 = sql.join[join_type: "INNER"](%5, %11)
+    // Make one that constructs a JOIN key that only considers one element of
+    // the LHS of the join
+    %19 = core.equals[](%5, %9)
+    %20 = core.and[](%10, %19)
+    %21 = sql.join[join_type: "INNER"](%0, %20)
+    // Make one that constructs a JOIN key that only considers one element of
+    // the RHS of the join
+    %22 = core.equals[](%6, %8)
+    %23 = core.and[](%11, %22)
+    %24 = sql.join[join_type: "INNER"](%0, %23)
+    // BUT if we compare the whole key the other way, it should still be a good
+    // JOIN.
+    %25 = core.and[](%19, %22)
+    %26 = sql.join[join_type: "INNER"](%5, %25)
+    %27 = sql.join[join_type: "INNER"](%6, %25)
+    %28 = sql.join[join_type: "INNER"](%8, %25)
+    %29 = sql.join[join_type: "INNER"](%9, %25)
+    // Also, if we happen to compare the group by on the LHS on the RHS, it
+    // should still work.
+    %30 = core.equals[](%8, %5)
+    %31 = core.and[](%30, %11)
+    %32 = sql.join[join_type: "INNER"](%5, %31)
+    %33 = sql.join[join_type: "INNER"](%6, %31)
+    %34 = sql.join[join_type: "INNER"](%8, %31)
+    %35 = sql.join[join_type: "INNER"](%9, %31)
+    // This one `JOIN`s on an additional term and is not a grouping `JOIN`
+    %extra = arbitrary[]()
+    %and_extra = core.and[](%12, %extra)
+    %not_grouping_join_extra = sql.join[join_type: "INNER"](%5, %and_extra)
+  }
+}
