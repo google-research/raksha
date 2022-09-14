@@ -1,0 +1,13 @@
+// Modeling a single query that passes the dp analysis:
+// there is a restricted join that uses bounded user contribution
+module m0 {
+  block b0 {
+        %0 = core.input [name: "revenue_table"] ()
+        %1 = core.input [name: "product_table"] ()
+        %2 = sql.join [column: "keys_to_join1"] (%0, %1)
+        %3 = sql.column_access [column: "revenue"] (%2)
+        %4 = privacy_mechanism [epsilon: 1, kappa: 2] (%3)
+        %5 = sql.average [] (%4)
+        %6 = sql.sql_output [] (%5) // Report the noisy average
+    }
+}

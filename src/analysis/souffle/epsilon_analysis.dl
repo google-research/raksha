@@ -23,8 +23,6 @@
 
 #include "src/analysis/souffle/sensitivity_analysis.dl"
 
-#define PRIVACY_MECHANISM_OPERATOR as("privacy_mechanism", Operator)
-
 .type GlobalDPParameter <: symbol
 
 .type Epsilon <: number
@@ -53,13 +51,6 @@ isGlobalEpsilon(epsilon) :- says_isGlobalEpsilon(_, epsilon).
 isGlobalDelta(delta) :- isDPParameter($DeltaValue(delta)).
 isGlobalDelta(delta) :- says_isGlobalDelta(_, delta).
 
-// We track every mechanism that adds noise.
-// Right now, we are not tracking the type of noise (e.g. via Laplace or
-// Gaussian mechanisms).
-.decl isDiffPrivacyMechanism(operation: Operation)
-isDiffPrivacyMechanism(operation) :- isOperation(operation),
-    operationHasOperator(operation, PRIVACY_MECHANISM_OPERATOR).
-
 isSqlInput(operation, sql_input) :- isDiffPrivacyMechanism(operation),
       operationHasOperandList(operation, input_list),
       flatten(input_list, sql_input).
@@ -76,21 +67,6 @@ diffPrivacyMechanismHasEpsilon(operation, as(epsilon, Epsilon)) :-
 diffPrivacyMechanismHasDelta(operation, as(delta, Delta)) :-
     isDiffPrivacyMechanism(operation),
     operationHasAttribute(operation, ["delta", $NumberAttributePayload(delta)]).
-
-// We propagate privacy mechanisms backwards to inputs as per the PINQ paper.
-// This relation tracks every input to its (direct and indirect) outputs.
-.decl sqlPath(sql_input: AccessPath, sql_output: AccessPath)
-
-sqlPath(sql_input, sql_input):- isSqlInput(operation, sql_input).
-
-sqlPath(dp_input, dp_input) :- isDiffPrivacyMechanism(operation),
-    operationHasOperandList(operation, input_list),
-    flatten(input_list, dp_input).
-
-sqlPath(path_start, path_end) :- sqlPath(path_start, intermediate),
-    operationHasOperandList(operation, input_list),
-    flatten(input_list, intermediate),
-    operationHasResult(operation, path_end).
 
 // Sequential composition: the epsilons of differential privacy mechanisms on
 // input value are added.
@@ -132,6 +108,29 @@ deltaDiffPrivacyIntermediate(value, sql_output, delta) :-
     operationHasResult(operation, sql_output),
     diffPrivacyMechanismHasDelta(operation, delta).
 
+// Helper relation to determine whether a join operation comes from two group
+// by operations, the method used in PINQ to bound the sensitivity of join
+// operations. For now, we are considering two inputs only.
+.decl joinOperationIsGroupingJoin(operation: Operation)
+joinOperationIsGroupingJoin(operation) :- isSqlOperation(operation),
+    operationHasAttribute(operation, ["join_type", $StringAttributePayload("INNER")]),
+    operationHasOperator(operation, SQL_JOIN_OPERATOR),
+    operationHasOperand(operation, sql_input1),
+    operationHasOperand(operation, sql_input2),
+    sql_input1 != sql_input2,
+    isSqlOperation(group_by_operation1),
+    operationHasOperator(group_by_operation1, SQL_GROUP_BY_OPERATOR),
+    operationHasResult(group_by_operation1, sql_input1),
+    isSqlOperation(group_by_operation2),
+    operationHasOperator(group_by_operation2, SQL_GROUP_BY_OPERATOR),
+    operationHasResult(group_by_operation2, sql_input2),
+    isInitialInput(initial_input1),
+    isInitialInput(initial_input2),
+    ( sqlPath(initial_input1, sql_input1),
+      sqlPath(initital_input2, sql_input2);
+      sqlPath(initial_input2, sql_input1),
+      sqlPath(initial_input1, sql_input2)).
+
 // DP Policies are violated when:
 // 1. There is a global epsilon but no local epsilon per an output path
 // 2. The global epsilon is less than the local epsilon for a value used in an
@@ -141,6 +140,7 @@ deltaDiffPrivacyIntermediate(value, sql_output, delta) :-
 //    aggregation operation.
 // 4. The global delta for an input to an aggregation operation is smaller than
 //    the local delta.
+// 5. There is an unrestricted join operation.
 violatesPolicy(value) :- isInitialInput(value),
     isSqlOutput(sql_output_operation),
     operationHasResult(sql_output_operation, sql_output),
@@ -160,6 +160,14 @@ violatesPolicy(value) :- isInitialInput(value),
     sqlPath(value, sql_output),
     deltaDiffPrivacy(value, delta),
     isGlobalDelta(global_delta),
-    global_delta < delta.
+    global_delta < delta;
+    isSqlOperation(operation),
+    operationHasResult(operation, value),
+    operationHasOperator(operation, SQL_JOIN_OPERATOR),
+    !joinOperationHasKappa(operation, _),
+    !joinOperationIsGroupingJoin(operation),
+    sqlPath(value, sql_output),
+    isSqlOutput(sql_output_operation),
+    operationHasResult(sql_output_operation, sql_output).
 
 #endif //SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_

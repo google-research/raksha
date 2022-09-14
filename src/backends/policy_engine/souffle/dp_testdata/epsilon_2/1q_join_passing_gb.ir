@@ -1,0 +1,15 @@
+// Modeling a single query that passes the dp analysis:
+// there is a restricted join that uses GROUP BY operations
+module m0 {
+  block b0 {
+        %0 = core.input [name: "revenue_table"] ()
+        %1 = core.input [name: "product_table"] ()
+        %2 = sql.group_by [column: "keys_to_join1"] (%0)
+        %3 = sql.group_by [column: "keys_to_join2"] (%1)
+        %4 = sql.join [column: "keys_to_join1", join_type: "INNER"] (%2, %3)
+        %5 = sql.column_access [column: "revenue"] (%4)
+        %6 = privacy_mechanism [epsilon: 1] (%5)
+        %7 = sql.average [] (%6)
+        %8 = sql.sql_output [] (%7) // Report the noisy average
+    }
+}

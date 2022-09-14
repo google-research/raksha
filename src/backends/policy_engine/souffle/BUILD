@@ -493,6 +493,57 @@ sh_test(
 )
 
 sh_test(
+    name = "check_1q_join_fail_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "fail",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_join_failing.ir)",
+        "2",
+        "1",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_join_failing.ir",
+    ],
+)
+
+sh_test(
+    name = "check_1q_join_gb_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_join_passing_gb.ir)",
+        "2",
+        "1",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_join_passing_gb.ir",
+    ],
+)
+
+sh_test(
+    name = "check_1q_join_kappa_pass_test",
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        "pass",
+        "dp_analysis",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_join_passing_kappa.ir)",
+        "2",
+        "1",
+    ],
+    data = [
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_join_passing_kappa.ir",
+    ],
+)
+
+sh_test(
     name = "check_2q_epsilon2_fail_test",
     srcs = ["check_policy_compliance_test.sh"],
     args = [

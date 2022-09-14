@@ -30,6 +30,7 @@
 #define SQL_SELECT_OPERATOR as("sql.select", Operator)
 #define SQL_SELECT_DISTINCT_OPERATOR as("sql.select_distinct", Operator)
 #define SQL_FILTER_OPERATOR as("sql.filter", Operator)
+#define SQL_JOIN_OPERATOR as("sql.join", Operator)
 #define SQL_COLUMN_ACCESS_OPERATOR as("sql.column_access", Operator)
 #define SQL_OUTPUT_OPERATOR as("sql.output", Operator)
 #define SQL_SUM_OPERATOR as("sql.sum", Operator)
@@ -41,6 +42,8 @@
 #define SQL_STDDEV_OPERATOR as("sql.stddev", Operator)
 #define SQL_PERCENTILE_CONT_OPERATOR as("sql.percentile_cont", Operator)
 #define SQL_VARIANCE_OPERATOR as("sql.variance", Operator)
+
+#define PRIVACY_MECHANISM_OPERATOR as("privacy_mechanism", Operator)
 
 #define ANY as("<<ANY>>", symbol)
 
@@ -143,9 +146,11 @@ sqlValueSensitivity(value, sensitivity_score) :-
                                              input_list_length-1),
                                               operationHasOperator(operation, operator),
       (
-            sqlFunctionSensitivity(operator, function_sensitivity),
+            (sqlFunctionJoinSensivity(operation, function_sensitivity);
+            sqlFunctionSensitivity(operator, function_sensitivity)),
             sensitivity_score = input_sensitivity * function_sensitivity;
             !sqlFunctionSensitivity(operator, _),
+            !sqlFunctionJoinSensivity(operation, _),
             sensitivity_score = input_sensitivity
       ).
 
@@ -210,5 +215,62 @@ sqlFunctionSensitivity(SQL_ORDER_BY_OPERATOR, 1).
 sqlFunctionSensitivity(SQL_SELECT_DISTINCT_OPERATOR, 2).
 sqlFunctionSensitivity(SQL_GROUP_BY_OPERATOR, 2).
 sqlFunctionSensitivity(SQL_FUNCTION_CALL_OPERATOR, 1).
+
+// We track every mechanism that adds noise.
+// Right now, we are not tracking the type of noise (e.g. via Laplace or
+// Gaussian mechanisms).
+.decl isDiffPrivacyMechanism(operation: Operation)
+isDiffPrivacyMechanism(operation) :- isOperation(operation),
+    operationHasOperator(operation, PRIVACY_MECHANISM_OPERATOR).
+
+// We propagate privacy mechanisms backwards to inputs as per the PINQ paper.
+// This relation tracks every input to its (direct and indirect) outputs.
+.decl sqlPath(sql_input: AccessPath, sql_output: AccessPath)
+
+sqlPath(sql_input, sql_input):- isSqlInput(operation, sql_input).
+
+sqlPath(dp_input, dp_input) :- isDiffPrivacyMechanism(operation),
+    operationHasOperandList(operation, input_list),
+    flatten(input_list, dp_input).
+
+sqlPath(path_start, path_end) :- sqlPath(path_start, intermediate),
+    operationHasOperandList(operation, input_list),
+    flatten(input_list, intermediate),
+    operationHasResult(operation, path_end).
+
+// Helper relation used to get the sensntivity of JOIN operations.
+.decl joinOperationHasKappa(operation: Operation, kappa: number)
+joinOperationHasKappa(operation, kappa) :- isSqlOperation(operation),
+      operationHasOperator(operation, SQL_JOIN_OPERATOR),
+      operationHasResult(operation, result),
+      isDiffPrivacyMechanism(diff_privacy_mechanism),
+      operationHasResult(diff_privacy_mechanism, diff_privacy_mechanism_result),
+      operationHasAttribute(
+            diff_privacy_mechanism, ["kappa", $NumberAttributePayload(kappa)]),
+      sqlPath(result, diff_privacy_mechanism_result).
+
+.decl sqlFunctionJoinSensivity(operation: Operation,
+      sensitivity_score: SensitivityScore)
+// Join operators are special in that they need to somehow limit the
+// contribution of users in them. One way to do this is to specify the of keys
+// on which the join will be performed, group input data based on those keys,
+// and then join the group keys
+// (PINQ https://www.microsoft.com/en-us/research/wp-content/uploads/2009/06/sigmod115-mcsherry.pdf),
+// where the sensitivity score becomes
+// equal to that of GROUP BY. Since the input of this type of JOIN would a
+// GROUP BY anyway, we assign the function senstivity score of the JOIN to be 1.
+// We assign the sensitivity score here, and check whether the grouping is being
+// done when checking for policy violations.
+// The other way is to limit the number (kappa) of grouped partitions a user can
+// contribute to (Google https://arxiv.org/abs/1909.01917), where the
+// sensitivity score becomes equal to kappa. We check if either of these bounds
+// are present in the JOIN operations. This relation can be further extended if
+// new ways of bounding JOIN are found.
+sqlFunctionJoinSensivity(operation, as(sensitivity_score, SensitivityScore)) :-
+      isSqlOperation(operation),
+      operationHasOperator(operation, SQL_JOIN_OPERATOR),
+      ( joinOperationHasKappa(operation, sensitivity_score);
+        !joinOperationHasKappa(operation, _),
+        sensitivity_score = 1).
 
 #endif // SRC_SOUFFLE_ANALYSIS_SENSITIVITY_ANALYSIS_DL_

@@ -1,6 +1,12 @@
 revenue_table_where1;1
 revenue_table_order_by;1
 revenue_table_group_by;2
+revenue_table_join_no_kappa;1
+revenue_table_group_by_join_keys;2
+profit_table_group_by_join_keys;2
+revenue_table_join_no_kapa_group_by;2
+revenue_table_join_kappa;3
+revenue_table_join_kappa_pm;3
 revenue_table_where2;1
 user;2
 address;2
