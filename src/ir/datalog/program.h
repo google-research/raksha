@@ -68,7 +68,7 @@ class Predicate {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const {
+  std::string ToString() const {
     return absl::StrCat(sign_, name_, absl::StrJoin(args_, ", "));
   }
 
@@ -90,7 +90,7 @@ class ArgumentType {
   Kind kind() const { return kind_; }
   absl::string_view name() const { return name_; }
 
-  std::string DebugPrint() const { return absl::StrCat(kind_, name_); }
+  std::string ToString() const { return absl::StrCat(kind_, name_); }
 
  private:
   Kind kind_;
@@ -107,8 +107,8 @@ class Argument {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const {
-    return absl::StrCat(argument_name_, " : ", argument_type_.DebugPrint());
+  std::string ToString() const {
+    return absl::StrCat(argument_name_, " : ", argument_type_.ToString());
   }
 
  private:
@@ -130,11 +130,11 @@ class RelationDeclaration {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const {
+  std::string ToString() const {
     std::vector<std::string> arg_strings;
     arg_strings.reserve(arguments_.size());
     for (const Argument& arg : arguments_) {
-      arg_strings.push_back(arg.DebugPrint());
+      arg_strings.push_back(arg.ToString());
     }
     return absl::StrCat(".decl ", relation_name_, is_attribute_,
                         absl::StrJoin(arg_strings, ", "));
