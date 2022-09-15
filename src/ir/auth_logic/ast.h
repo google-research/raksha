@@ -458,7 +458,6 @@ class Program {
                         absl::StrJoin(query_strings, "\n"), ")");
   }
 
-  // for debugging/testing only
   bool operator==(const Program& rhs) const {
     return relation_declarations_ == rhs.relation_declarations_ &&
            says_assertions_ == rhs.says_assertions_ && queries_ == rhs.queries_;

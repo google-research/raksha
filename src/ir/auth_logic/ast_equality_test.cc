@@ -99,16 +99,15 @@ TEST_P(AttributeEqTest, AttributeEqTest) {
 
 static datalog::Predicate pred1("foo", {"bar", "baz"}, datalog::kPositive);
 static datalog::Predicate pred2("foooo", {"bar", "baz"}, datalog::kPositive);
+static datalog::Predicate pred3("foo", {"bar", "baz"}, datalog::kNegated);
 
 static Attribute attr1(prinA, pred1);
 static Attribute attr2(prinB, pred2);
 static Attribute attr3(prinA, pred2);
 static Attribute attr4(prinB, pred1);
+static Attribute attr5(prinB, pred3);
 static std::pair<Attribute, uint64_t> attributeTestVals[] = {
-    {attr1, 0},
-    {attr2, 1},
-    {attr3, 2},
-    {attr4, 3},
+    {attr1, 0}, {attr2, 1}, {attr3, 2}, {attr4, 3}, {attr5, 4},
 };
 
 INSTANTIATE_TEST_SUITE_P(
