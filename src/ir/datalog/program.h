@@ -87,9 +87,12 @@ class ArgumentType {
   static ArgumentType MakeNumberType() {
     return ArgumentType(Kind::kNumber, "Number");
   }
+<<<<<<< HEAD
   static ArgumentType MakeCustomType(absl::string_view name) {
     return ArgumentType(Kind::kCustom, std::move(name));
   }
+=======
+>>>>>>> 8828a17a (First draft of universe relation pass)
 
   std::string ToString() const { return absl::StrCat(kind_, name_); }
 
@@ -105,6 +108,10 @@ class ArgumentType {
     return this->kind_ == otherType.kind_ && this->kind_ == Kind::kCustom
                ? this->name_ == otherType.name_
                : true;
+  }
+  // This one is just for convenience
+  bool operator!=(const ArgumentType& otherType) const {
+    return !(*this == otherType);
   }
 
  private:
