@@ -40,8 +40,7 @@ class PrincipalNameCollectorVisitor
     return acc;
   }
 
-  absl::btree_set<std::string> PreVisit(
-      const Principal& principal) override {
+  absl::btree_set<std::string> PreVisit(const Principal& principal) override {
     return {principal.name()};
   }
 };
@@ -71,7 +70,7 @@ TEST(AuthLogicAstTraversingVisitorTest, PrincipalNameCollectorTest) {
   const absl::btree_set<std::string> result =
       test_prog.Accept(collector_visitor);
   const absl::btree_set<std::string> expected = {"PrincipalA", "PrincipalB",
-                                                     "PrincipalC"};
+                                                 "PrincipalC"};
   EXPECT_EQ(result, expected);
 }
 

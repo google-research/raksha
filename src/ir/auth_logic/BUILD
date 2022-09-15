@@ -96,6 +96,15 @@ cc_library(
 )
 
 cc_test(
+    name = "ast_equality_test",
+    srcs = ["ast_equality_test.cc"],
+    deps = [
+        ":ast",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_test(
     name = "souffle_emitter_test",
     srcs = ["souffle_emitter_test.cc"],
     deps = [

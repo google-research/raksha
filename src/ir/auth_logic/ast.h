@@ -51,6 +51,10 @@ class Principal {
   // for debugging/testing only
   std::string ToString() const { return name_; }
 
+  bool operator==(const Principal& rhs) const { return name_ == rhs.name_; }
+
+  bool operator!=(const Principal& rhs) const { return !(*this == rhs); }
+
  private:
   std::string name_;
 };
@@ -80,6 +84,12 @@ class Attribute {
   std::string ToString() const {
     return absl::StrCat(principal_.name(), predicate_.ToString());
   }
+
+  bool operator==(const Attribute& rhs) const {
+    return principal_ == rhs.principal_ && predicate_ == rhs.predicate_;
+  }
+
+  bool operator!=(const Attribute& rhs) const { return !(*this == rhs); }
 
  private:
   Principal principal_;
@@ -113,6 +123,13 @@ class CanActAs {
     return absl::StrCat(left_principal_.ToString(), " canActAs ",
                         right_principal_.ToString());
   }
+
+  bool operator==(const CanActAs& rhs) const {
+    return left_principal_ == rhs.left_principal_ &&
+           right_principal_ == rhs.right_principal_;
+  }
+
+  bool operator!=(const CanActAs& rhs) const { return !(*this == rhs); }
 
  private:
   Principal left_principal_;
@@ -157,6 +174,10 @@ class BaseFact {
         ")");
   }
 
+  bool operator==(const BaseFact& rhs) const { return value_ == rhs.value_; }
+
+  bool operator!=(const BaseFact& rhs) const { return !(*this == rhs); }
+
  private:
   BaseFactVariantType value_;
 };
@@ -197,6 +218,13 @@ class Fact {
                         base_fact_.ToString());
   }
 
+  bool operator==(const Fact& rhs) const {
+    return delegation_chain_ == rhs.delegation_chain_ &&
+           base_fact_ == rhs.base_fact_;
+  }
+
+  bool operator!=(const Fact& rhs) const { return !(*this == rhs); }
+
  private:
   std::forward_list<Principal> delegation_chain_;
   BaseFact base_fact_;
@@ -233,6 +261,14 @@ class ConditionalAssertion {
     }
     return absl::StrCat(lhs_.ToString(), ":-",
                         absl::StrJoin(rhs_strings, ", "));
+  }
+
+  bool operator==(const ConditionalAssertion& rhs) const {
+    return lhs_ == rhs.lhs_ && rhs_ == rhs.rhs_;
+  }
+
+  bool operator!=(const ConditionalAssertion& rhs) const {
+    return !(*this == rhs);
   }
 
  private:
@@ -272,6 +308,10 @@ class Assertion {
         ")");
   }
 
+  bool operator==(const Assertion& rhs) const { return value_ == rhs.value_; }
+
+  bool operator!=(const Assertion& rhs) const { return !(*this == rhs); }
+
  private:
   AssertionVariantType value_;
 };
@@ -307,6 +347,12 @@ class SaysAssertion {
                         absl::StrJoin(assertion_strings, "\n"), "}");
   }
 
+  bool operator==(const SaysAssertion& rhs) const {
+    return principal_ == rhs.principal_ && assertions_ == rhs.assertions_;
+  }
+
+  bool operator!=(const SaysAssertion& rhs) const { return !(*this == rhs); }
+
  private:
   Principal principal_;
   std::vector<Assertion> assertions_;
@@ -341,6 +387,13 @@ class Query {
     return absl::StrCat("Query(", name_, principal_.ToString(),
                         fact_.ToString(), ")");
   }
+
+  bool operator==(const Query& rhs) const {
+    return name_ == rhs.name_ && principal_ == rhs.principal_ &&
+           fact_ == rhs.fact_;
+  }
+
+  bool operator!=(const Query& rhs) const { return !(*this == rhs); }
 
  private:
   std::string name_;
@@ -404,6 +457,13 @@ class Program {
                         absl::StrJoin(says_assertion_strings, "\n"),
                         absl::StrJoin(query_strings, "\n"), ")");
   }
+
+  bool operator==(const Program& rhs) const {
+    return relation_declarations_ == rhs.relation_declarations_ &&
+           says_assertions_ == rhs.says_assertions_ && queries_ == rhs.queries_;
+  }
+
+  bool operator!=(const Program& rhs) const { return !(*this == rhs); }
 
  private:
   std::vector<datalog::RelationDeclaration> relation_declarations_;

@@ -92,6 +92,14 @@ class ArgumentType {
 
   std::string ToString() const { return absl::StrCat(kind_, name_); }
 
+  bool operator==(const ArgumentType& otherType) const {
+    // The name field is only compared for arguments of kind kCustom
+    // because the name field is only used for kCustom types (and
+    // not for kPrincipal or kNumber).
+    return this->kind_ == otherType.kind_ &&
+      this->kind_ == Kind::kCustom ? this->name_ == otherType.name_ : true;
+  }
+
  private:
   Kind kind_;
   std::string name_;
@@ -111,6 +119,11 @@ class Argument {
     return absl::StrCat(argument_name_, " : ", argument_type_.ToString());
   }
 
+  bool operator==(const Argument& otherArgument) const {
+    return this->argument_name_ == otherArgument.argument_name_ &&
+    this->argument_type_ == otherArgument.argument_type_;
+  }
+
  private:
   std::string argument_name_;
   ArgumentType argument_type_;
@@ -127,6 +140,12 @@ class RelationDeclaration {
   absl::string_view relation_name() const { return relation_name_; }
   bool is_attribute() const { return is_attribute_; }
   const std::vector<Argument>& arguments() const { return arguments_; }
+  
+  bool operator==(const RelationDeclaration& otherDeclaration) const {
+    return this->relation_name_ == otherDeclaration.relation_name_ &&
+    this->is_attribute_ == otherDeclaration.is_attribute_ &&
+    this->arguments_ == otherDeclaration.arguments_;
+  }
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
@@ -158,6 +177,11 @@ class Rule {
   const Predicate& lhs() const { return lhs_; }
   const std::vector<Predicate>& rhs() const { return rhs_; }
 
+  bool operator==(const Rule& otherRule) const {
+    return this->lhs_ == otherRule.lhs_ &&
+    this->rhs_ == otherRule.rhs_;
+  }
+
  private:
   Predicate lhs_;
   std::vector<Predicate> rhs_;
@@ -175,6 +199,13 @@ class Program {
   }
   const std::vector<Rule>& rules() const { return rules_; }
   const std::vector<std::string>& outputs() const { return outputs_; }
+
+  bool operator==(const Program& otherProgram) const {
+    return this->relation_declarations_ == 
+      otherProgram.relation_declarations_ &&
+      this->rules_ == otherProgram.rules_ &&
+      this->outputs_ == otherProgram.outputs_;
+  }
 
  private:
   std::vector<RelationDeclaration> relation_declarations_;
