@@ -51,7 +51,7 @@ class Principal {
   // for debugging/testing only
   std::string DebugPrint() const { return name_; }
 
-  bool operator==(const Principal& rhs) const { return name_ == rhs.name(); }
+  bool operator==(const Principal& rhs) const { return name_ == rhs.name_; }
 
   bool operator!=(const Principal& rhs) const { return !(*this == rhs); }
 
@@ -86,7 +86,7 @@ class Attribute {
   }
 
   bool operator==(const Attribute& rhs) const {
-    return principal_ == rhs.principal() && predicate_ == rhs.predicate();
+    return principal_ == rhs.principal_ && predicate_ == rhs.predicate_;
   }
 
   bool operator!=(const Attribute& rhs) const { return !(*this == rhs); }
@@ -125,8 +125,8 @@ class CanActAs {
   }
 
   bool operator==(const CanActAs& rhs) const {
-    return left_principal_ == rhs.left_principal() &&
-           right_principal_ == rhs.right_principal();
+    return left_principal_ == rhs.left_principal_ &&
+           right_principal_ == rhs.right_principal_;
   }
 
   bool operator!=(const CanActAs& rhs) const { return !(*this == rhs); }
@@ -174,9 +174,7 @@ class BaseFact {
         ")");
   }
 
-  bool operator==(const BaseFact& rhs) const {
-    return value_ == rhs.GetValue();
-  }
+  bool operator==(const BaseFact& rhs) const { return value_ == rhs.value_; }
 
   bool operator!=(const BaseFact& rhs) const { return !(*this == rhs); }
 
@@ -221,8 +219,8 @@ class Fact {
   }
 
   bool operator==(const Fact& rhs) const {
-    return delegation_chain_ == rhs.delegation_chain() &&
-           base_fact_ == rhs.base_fact();
+    return delegation_chain_ == rhs.delegation_chain_ &&
+           base_fact_ == rhs.base_fact_;
   }
 
   bool operator!=(const Fact& rhs) const { return !(*this == rhs); }
@@ -266,7 +264,7 @@ class ConditionalAssertion {
   }
 
   bool operator==(const ConditionalAssertion& rhs) const {
-    return lhs_ == rhs.lhs() && rhs_ == rhs.rhs();
+    return lhs_ == rhs.lhs_ && rhs_ == rhs.rhs_;
   }
 
   bool operator!=(const ConditionalAssertion& rhs) const {
@@ -310,9 +308,7 @@ class Assertion {
         ")");
   }
 
-  bool operator==(const Assertion& rhs) const {
-    return value_ == rhs.GetValue();
-  }
+  bool operator==(const Assertion& rhs) const { return value_ == rhs.value_; }
 
   bool operator!=(const Assertion& rhs) const { return !(*this == rhs); }
 
@@ -352,7 +348,7 @@ class SaysAssertion {
   }
 
   bool operator==(const SaysAssertion& rhs) const {
-    return principal_ == rhs.principal() && assertions_ == rhs.assertions();
+    return principal_ == rhs.principal_ && assertions_ == rhs.assertions_;
   }
 
   bool operator!=(const SaysAssertion& rhs) const { return !(*this == rhs); }
@@ -393,8 +389,8 @@ class Query {
   }
 
   bool operator==(const Query& rhs) const {
-    return name_ == rhs.name() && principal_ == rhs.principal() &&
-           fact_ == rhs.fact();
+    return name_ == rhs.name_ && principal_ == rhs.principal_ &&
+           fact_ == rhs.fact_;
   }
 
   bool operator!=(const Query& rhs) const { return !(*this == rhs); }
@@ -464,9 +460,8 @@ class Program {
 
   // for debugging/testing only
   bool operator==(const Program& rhs) const {
-    return relation_declarations_ == rhs.relation_declarations() &&
-           says_assertions_ == rhs.says_assertions() &&
-           queries_ == rhs.queries();
+    return relation_declarations_ == rhs.relation_declarations_ &&
+           says_assertions_ == rhs.says_assertions_ && queries_ == rhs.queries_;
   }
 
   bool operator!=(const Program& rhs) const { return !(*this == rhs); }

@@ -31,13 +31,10 @@ class SaysAssertion;
 class Query;
 class Program;
 
-enum AstNodeMutability : bool {
-  Mutable = false,
-  Immutable = true
-};
+enum AstNodeMutability : bool { Mutable = false, Immutable = true };
 
-
-template <typename Derived, typename Result = Unit, AstNodeMutability IsConst = AstNodeMutability::Immutable>
+template <typename Derived, typename Result = Unit,
+          AstNodeMutability IsConst = AstNodeMutability::Immutable>
 class AuthLogicAstVisitor {
  public:
   virtual ~AuthLogicAstVisitor() {}
