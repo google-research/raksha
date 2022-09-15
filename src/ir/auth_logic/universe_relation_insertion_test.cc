@@ -277,12 +277,6 @@ Program BuildTestProgram3Expected() {
                  {assertion1, prina_universe_prina}, {});
 }
 
-template <typename T>
-std::vector<std::string> GetDebugVector(std::vector<T> nodes) {
-  return raksha::utils::MapIter<std::string>(
-      nodes, [](T node) { return node.DebugPrint(); });
-}
-
 struct ProgramEquivalenceTestData {
   Program input_program;
   Program expected_program;
@@ -295,17 +289,17 @@ TEST_P(ProgramDebugStringEquivalenceTest,
        SimpleProgramDebugStringEquivalenceTest) {
   const auto& [input_program, expected_program] = GetParam();
   // declarations
-  EXPECT_THAT(GetDebugVector(input_program.relation_declarations()),
+  EXPECT_THAT(input_program.relation_declarations(),
               UnorderedElementsAreArray(
-                  GetDebugVector(expected_program.relation_declarations())));
+                  expected_program.relation_declarations()));
   // says_assertions
-  EXPECT_THAT(GetDebugVector(input_program.says_assertions()),
+  EXPECT_THAT(input_program.says_assertions(),
               UnorderedElementsAreArray(
-                  GetDebugVector(expected_program.says_assertions())));
+                  expected_program.says_assertions()));
   // queries
   EXPECT_THAT(
-      GetDebugVector(input_program.queries()),
-      UnorderedElementsAreArray(GetDebugVector(expected_program.queries())));
+      input_program.queries(),
+      UnorderedElementsAreArray(expected_program.queries()));
 }
 
 INSTANTIATE_TEST_SUITE_P(
