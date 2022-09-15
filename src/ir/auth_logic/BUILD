@@ -115,7 +115,7 @@ cc_test(
     deps = [
         ":ast",
         "//src/common/testing:gtest",
-    ]
+    ],
 )
 
 cc_test(

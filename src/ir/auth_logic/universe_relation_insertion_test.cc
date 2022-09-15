@@ -289,17 +289,15 @@ TEST_P(ProgramDebugStringEquivalenceTest,
        SimpleProgramDebugStringEquivalenceTest) {
   const auto& [input_program, expected_program] = GetParam();
   // declarations
-  EXPECT_THAT(input_program.relation_declarations(),
-              UnorderedElementsAreArray(
-                  expected_program.relation_declarations()));
+  EXPECT_THAT(
+      input_program.relation_declarations(),
+      UnorderedElementsAreArray(expected_program.relation_declarations()));
   // says_assertions
   EXPECT_THAT(input_program.says_assertions(),
-              UnorderedElementsAreArray(
-                  expected_program.says_assertions()));
+              UnorderedElementsAreArray(expected_program.says_assertions()));
   // queries
-  EXPECT_THAT(
-      input_program.queries(),
-      UnorderedElementsAreArray(expected_program.queries()));
+  EXPECT_THAT(input_program.queries(),
+              UnorderedElementsAreArray(expected_program.queries()));
 }
 
 INSTANTIATE_TEST_SUITE_P(
