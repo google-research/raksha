@@ -56,6 +56,20 @@ cc_library(
 )
 
 cc_library(
+    name = "universe_relation_insertion",
+    hdrs = [
+        "universe_relation_insertion.h",
+    ],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":ast",
+        ":auth_logic_ast_traversing_visitor",
+        "//src/common/logging",
+        "@absl//absl/container:flat_hash_set",
+    ],
+)
+
+cc_library(
     name = "lowering_ast_datalog",
     srcs = ["lowering_ast_datalog.cc"],
     hdrs = [
@@ -101,6 +115,17 @@ cc_test(
     deps = [
         ":ast",
         "//src/common/testing:gtest",
+    ]
+)
+
+cc_test(
+    name = "universe_relation_insertion_test",
+    srcs = ["universe_relation_insertion_test.cc"],
+    deps = [
+        ":ast",
+        ":universe_relation_insertion",
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
     ],
 )
 

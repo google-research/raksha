@@ -93,6 +93,11 @@ class ArgumentType {
 
   std::string ToString() const { return absl::StrCat(kind_, name_); }
 
+  template <typename H>
+  friend H AbslHashValue(H h, const ArgumentType& typ) {
+    return H::combine(std::move(h), typ.name(), typ.kind());
+  }
+  // Equality is needed to use a RelationDeclaration in a flat_hash_set
   bool operator==(const ArgumentType& otherType) const {
     // The name field is only compared for arguments of kind kCustom
     // because the name field is only used for kCustom types (and
@@ -121,6 +126,11 @@ class Argument {
     return this->argument_name_ == otherArgument.argument_name_ &&
            this->argument_type_ == otherArgument.argument_type_;
   }
+  
+  template <typename H>
+  friend H AbslHashValue(H h, const Argument& arg) {
+    return H::combine(std::move(h), arg.argument_name(), arg.argument_type());
+  }
 
  private:
   std::string argument_name_;
@@ -143,6 +153,11 @@ class RelationDeclaration {
     return this->relation_name_ == otherDeclaration.relation_name_ &&
            this->is_attribute_ == otherDeclaration.is_attribute_ &&
            this->arguments_ == otherDeclaration.arguments_;
+  }
+  
+  template <typename H>
+  friend H AbslHashValue(H h, const RelationDeclaration& rd) {
+    return H::combine(std::move(h), rd.relation_name(), rd.is_attribute(), rd.arguments());
   }
 
  private:
