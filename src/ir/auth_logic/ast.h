@@ -49,7 +49,7 @@ class Principal {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const { return name_; }
+  std::string ToString() const { return name_; }
 
  private:
   std::string name_;
@@ -77,8 +77,8 @@ class Attribute {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const {
-    return absl::StrCat(principal_.name(), predicate_.DebugPrint());
+  std::string ToString() const {
+    return absl::StrCat(principal_.name(), predicate_.ToString());
   }
 
  private:
@@ -109,9 +109,9 @@ class CanActAs {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const {
-    return absl::StrCat(left_principal_.DebugPrint(), " canActAs ",
-                        right_principal_.DebugPrint());
+  std::string ToString() const {
+    return absl::StrCat(left_principal_.ToString(), " canActAs ",
+                        right_principal_.ToString());
   }
 
  private:
@@ -150,10 +150,10 @@ class BaseFact {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const {
+  std::string ToString() const {
     return absl::StrCat(
         "BaseFact(",
-        std::visit([](auto& obj) { return obj.DebugPrint(); }, this->value_),
+        std::visit([](auto& obj) { return obj.ToString(); }, this->value_),
         ")");
   }
 
@@ -188,13 +188,13 @@ class Fact {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const {
+  std::string ToString() const {
     std::vector<std::string> delegations;
     for (const Principal& delegatee : delegation_chain_) {
-      delegations.push_back(delegatee.DebugPrint());
+      delegations.push_back(delegatee.ToString());
     }
     return absl::StrCat("deleg: { ", absl::StrJoin(delegations, ", "), " }",
-                        base_fact_.DebugPrint());
+                        base_fact_.ToString());
   }
 
  private:
@@ -225,13 +225,13 @@ class ConditionalAssertion {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const {
+  std::string ToString() const {
     std::vector<std::string> rhs_strings;
     rhs_strings.reserve(rhs_.size());
     for (const BaseFact& base_fact : rhs_) {
-      rhs_strings.push_back(base_fact.DebugPrint());
+      rhs_strings.push_back(base_fact.ToString());
     }
-    return absl::StrCat(lhs_.DebugPrint(), ":-",
+    return absl::StrCat(lhs_.ToString(), ":-",
                         absl::StrJoin(rhs_strings, ", "));
   }
 
@@ -265,10 +265,10 @@ class Assertion {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const {
+  std::string ToString() const {
     return absl::StrCat(
         "Assertion(",
-        std::visit([](auto& obj) { return obj.DebugPrint(); }, this->value_),
+        std::visit([](auto& obj) { return obj.ToString(); }, this->value_),
         ")");
   }
 
@@ -297,13 +297,13 @@ class SaysAssertion {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const {
+  std::string ToString() const {
     std::vector<std::string> assertion_strings;
     assertion_strings.reserve(assertions_.size());
     for (const Assertion& assertion : assertions_) {
-      assertion_strings.push_back(assertion.DebugPrint());
+      assertion_strings.push_back(assertion.ToString());
     }
-    return absl::StrCat(principal_.DebugPrint(), "says {\n",
+    return absl::StrCat(principal_.ToString(), "says {\n",
                         absl::StrJoin(assertion_strings, "\n"), "}");
   }
 
@@ -337,9 +337,9 @@ class Query {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const {
-    return absl::StrCat("Query(", name_, principal_.DebugPrint(),
-                        fact_.DebugPrint(), ")");
+  std::string ToString() const {
+    return absl::StrCat("Query(", name_, principal_.ToString(),
+                        fact_.ToString(), ")");
   }
 
  private:
@@ -382,22 +382,22 @@ class Program {
 
   // A potentially ugly print of the state in this class
   // for debugging/testing only
-  std::string DebugPrint() const {
+  std::string ToString() const {
     std::vector<std::string> relation_decl_strings;
     relation_decl_strings.reserve(relation_declarations_.size());
     for (const datalog::RelationDeclaration& rel_decl :
          relation_declarations_) {
-      relation_decl_strings.push_back(rel_decl.DebugPrint());
+      relation_decl_strings.push_back(rel_decl.ToString());
     }
     std::vector<std::string> says_assertion_strings;
     says_assertion_strings.reserve(says_assertions_.size());
     for (const SaysAssertion& says_assertion : says_assertions_) {
-      says_assertion_strings.push_back(says_assertion.DebugPrint());
+      says_assertion_strings.push_back(says_assertion.ToString());
     }
     std::vector<std::string> query_strings;
     query_strings.reserve(queries_.size());
     for (const Query& query : queries_) {
-      query_strings.push_back(query.DebugPrint());
+      query_strings.push_back(query.ToString());
     }
     return absl::StrCat("Program(\n",
                         absl::StrJoin(relation_decl_strings, "\n"),

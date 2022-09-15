@@ -86,93 +86,93 @@ class TraversalOrderVisitor
                      traversal_type == TraversalType::kBoth) {}
 
   Unit PreVisit(const Principal& prin) override {
-    if (pre_visits_) nodes_.push_back(prin.DebugPrint());
+    if (pre_visits_) nodes_.push_back(prin.ToString());
     return Unit();
   }
   Unit PostVisit(const Principal& prin, Unit result) override {
-    if (post_visits_) nodes_.push_back(prin.DebugPrint());
+    if (post_visits_) nodes_.push_back(prin.ToString());
     return result;
   }
 
   Unit PreVisit(const Attribute& attrib) override {
-    if (pre_visits_) nodes_.push_back(attrib.DebugPrint());
+    if (pre_visits_) nodes_.push_back(attrib.ToString());
     return Unit();
   }
   Unit PostVisit(const Attribute& attrib, Unit result) override {
-    if (post_visits_) nodes_.push_back(attrib.DebugPrint());
+    if (post_visits_) nodes_.push_back(attrib.ToString());
     return result;
   }
 
   Unit PreVisit(const CanActAs& canActAs) override {
-    if (pre_visits_) nodes_.push_back(canActAs.DebugPrint());
+    if (pre_visits_) nodes_.push_back(canActAs.ToString());
     return Unit();
   }
   Unit PostVisit(const CanActAs& canActAs, Unit result) override {
-    if (post_visits_) nodes_.push_back(canActAs.DebugPrint());
+    if (post_visits_) nodes_.push_back(canActAs.ToString());
     return result;
   }
 
   Unit PreVisit(const BaseFact& baseFact) override {
-    if (pre_visits_) nodes_.push_back(baseFact.DebugPrint());
+    if (pre_visits_) nodes_.push_back(baseFact.ToString());
     return Unit();
   }
   Unit PostVisit(const BaseFact& baseFact, Unit result) override {
-    if (post_visits_) nodes_.push_back(baseFact.DebugPrint());
+    if (post_visits_) nodes_.push_back(baseFact.ToString());
     return result;
   }
 
   Unit PreVisit(const Fact& fact) override {
-    if (pre_visits_) nodes_.push_back(fact.DebugPrint());
+    if (pre_visits_) nodes_.push_back(fact.ToString());
     return Unit();
   }
   Unit PostVisit(const Fact& fact, Unit result) override {
-    if (post_visits_) nodes_.push_back(fact.DebugPrint());
+    if (post_visits_) nodes_.push_back(fact.ToString());
     return result;
   }
 
   Unit PreVisit(const ConditionalAssertion& condAssertion) override {
-    if (pre_visits_) nodes_.push_back(condAssertion.DebugPrint());
+    if (pre_visits_) nodes_.push_back(condAssertion.ToString());
     return Unit();
   }
   Unit PostVisit(const ConditionalAssertion& condAssertion,
                  Unit result) override {
-    if (post_visits_) nodes_.push_back(condAssertion.DebugPrint());
+    if (post_visits_) nodes_.push_back(condAssertion.ToString());
     return result;
   }
 
   Unit PreVisit(const Assertion& assertion) override {
-    if (pre_visits_) nodes_.push_back(assertion.DebugPrint());
+    if (pre_visits_) nodes_.push_back(assertion.ToString());
     return Unit();
   }
   Unit PostVisit(const Assertion& assertion, Unit result) override {
-    if (post_visits_) nodes_.push_back(assertion.DebugPrint());
+    if (post_visits_) nodes_.push_back(assertion.ToString());
     return result;
   }
 
   Unit PreVisit(const SaysAssertion& saysAssertion) override {
-    if (pre_visits_) nodes_.push_back(saysAssertion.DebugPrint());
+    if (pre_visits_) nodes_.push_back(saysAssertion.ToString());
     return Unit();
   }
   Unit PostVisit(const SaysAssertion& saysAssertion, Unit result) override {
-    if (post_visits_) nodes_.push_back(saysAssertion.DebugPrint());
+    if (post_visits_) nodes_.push_back(saysAssertion.ToString());
     return result;
   }
 
   Unit PreVisit(const Query& query) override {
-    if (pre_visits_) nodes_.push_back(query.DebugPrint());
+    if (pre_visits_) nodes_.push_back(query.ToString());
     return Unit();
   }
   Unit PostVisit(const Query& query, Unit result) override {
-    if (post_visits_) nodes_.push_back(query.DebugPrint());
+    if (post_visits_) nodes_.push_back(query.ToString());
     return result;
   }
 
   Unit PreVisit(const Program& program) override {
-    if (pre_visits_) nodes_.push_back(program.DebugPrint());
+    if (pre_visits_) nodes_.push_back(program.ToString());
     return Unit();
   }
   Unit PostVisit(const Program& program, Unit result) override {
-    if (post_visits_) nodes_.push_back(program.DebugPrint());
+    if (post_visits_) nodes_.push_back(program.ToString());
     return result;
   }
 
@@ -214,30 +214,30 @@ TEST(AuthLogicAstTraversingVisitorTest, SimpleTraversalTest) {
   EXPECT_THAT(
       preorder_visitor.nodes(),
       testing::ElementsAre(
-          program1.DebugPrint(), saysAssertion1.DebugPrint(),
-          prinA.DebugPrint(), assertion1.DebugPrint(), fact1.DebugPrint(),
-          baseFact1.DebugPrint(), saysAssertion2.DebugPrint(),
-          prinC.DebugPrint(), assertion1.DebugPrint(), fact1.DebugPrint(),
-          baseFact1.DebugPrint(), assertion2.DebugPrint(), fact2.DebugPrint(),
-          prinB.DebugPrint(), baseFact2.DebugPrint(), query1.DebugPrint(),
-          prinA.DebugPrint(), fact1.DebugPrint(), baseFact1.DebugPrint(),
-          query2.DebugPrint(), prinB.DebugPrint(), fact2.DebugPrint(),
-          prinB.DebugPrint(), baseFact2.DebugPrint()));
+          program1.ToString(), saysAssertion1.ToString(),
+          prinA.ToString(), assertion1.ToString(), fact1.ToString(),
+          baseFact1.ToString(), saysAssertion2.ToString(),
+          prinC.ToString(), assertion1.ToString(), fact1.ToString(),
+          baseFact1.ToString(), assertion2.ToString(), fact2.ToString(),
+          prinB.ToString(), baseFact2.ToString(), query1.ToString(),
+          prinA.ToString(), fact1.ToString(), baseFact1.ToString(),
+          query2.ToString(), prinB.ToString(), fact2.ToString(),
+          prinB.ToString(), baseFact2.ToString()));
 
   TraversalOrderVisitor postorder_visitor(TraversalType::kPost);
   program1.Accept(postorder_visitor);
   EXPECT_THAT(
       postorder_visitor.nodes(),
       testing::ElementsAre(
-          prinA.DebugPrint(), baseFact1.DebugPrint(), fact1.DebugPrint(),
-          assertion1.DebugPrint(), saysAssertion1.DebugPrint(),
-          prinC.DebugPrint(), baseFact1.DebugPrint(), fact1.DebugPrint(),
-          assertion1.DebugPrint(), prinB.DebugPrint(), baseFact2.DebugPrint(),
-          fact2.DebugPrint(), assertion2.DebugPrint(),
-          saysAssertion2.DebugPrint(), prinA.DebugPrint(),
-          baseFact1.DebugPrint(), fact1.DebugPrint(), query1.DebugPrint(),
-          prinB.DebugPrint(), prinB.DebugPrint(), baseFact2.DebugPrint(),
-          fact2.DebugPrint(), query2.DebugPrint(), program1.DebugPrint()));
+          prinA.ToString(), baseFact1.ToString(), fact1.ToString(),
+          assertion1.ToString(), saysAssertion1.ToString(),
+          prinC.ToString(), baseFact1.ToString(), fact1.ToString(),
+          assertion1.ToString(), prinB.ToString(), baseFact2.ToString(),
+          fact2.ToString(), assertion2.ToString(),
+          saysAssertion2.ToString(), prinA.ToString(),
+          baseFact1.ToString(), fact1.ToString(), query1.ToString(),
+          prinB.ToString(), prinB.ToString(), baseFact2.ToString(),
+          fact2.ToString(), query2.ToString(), program1.ToString()));
 
   // The bits of syntax not in program1
   Attribute attribute1(prinC, pred2);
@@ -251,28 +251,28 @@ TEST(AuthLogicAstTraversingVisitorTest, SimpleTraversalTest) {
   conditionalAssertion1.Accept(preorder_visitor2);
   EXPECT_THAT(
       preorder_visitor2.nodes(),
-      testing::ElementsAre(conditionalAssertion1.DebugPrint(),
-                           fact3.DebugPrint(), baseFact3.DebugPrint(),
-                           attribute1.DebugPrint(), prinC.DebugPrint(),
-                           baseFact4.DebugPrint(), canActAs1.DebugPrint(),
-                           prinA.DebugPrint(), prinB.DebugPrint()));
+      testing::ElementsAre(conditionalAssertion1.ToString(),
+                           fact3.ToString(), baseFact3.ToString(),
+                           attribute1.ToString(), prinC.ToString(),
+                           baseFact4.ToString(), canActAs1.ToString(),
+                           prinA.ToString(), prinB.ToString()));
 
   TraversalOrderVisitor postorder_visitor2(TraversalType::kPost);
   conditionalAssertion1.Accept(postorder_visitor2);
   EXPECT_THAT(
       postorder_visitor2.nodes(),
-      testing::ElementsAre(prinC.DebugPrint(), attribute1.DebugPrint(),
-                           baseFact3.DebugPrint(), fact3.DebugPrint(),
-                           prinA.DebugPrint(), prinB.DebugPrint(),
-                           canActAs1.DebugPrint(), baseFact4.DebugPrint(),
-                           conditionalAssertion1.DebugPrint()));
+      testing::ElementsAre(prinC.ToString(), attribute1.ToString(),
+                           baseFact3.ToString(), fact3.ToString(),
+                           prinA.ToString(), prinB.ToString(),
+                           canActAs1.ToString(), baseFact4.ToString(),
+                           conditionalAssertion1.ToString()));
 
   TraversalOrderVisitor both_order_visitor(TraversalType::kBoth);
   canActAs1.Accept(both_order_visitor);
   EXPECT_THAT(both_order_visitor.nodes(),
-              testing::ElementsAre(canActAs1.DebugPrint(), prinA.DebugPrint(),
-                                   prinA.DebugPrint(), prinB.DebugPrint(),
-                                   prinB.DebugPrint(), canActAs1.DebugPrint()));
+              testing::ElementsAre(canActAs1.ToString(), prinA.ToString(),
+                                   prinA.ToString(), prinB.ToString(),
+                                   prinB.ToString(), canActAs1.ToString()));
 }
 
 }  // namespace
