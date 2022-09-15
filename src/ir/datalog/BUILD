@@ -24,8 +24,9 @@ cc_library(
     name = "program",
     hdrs = ["program.h"],
     deps = [
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/strings:str_format",
+        "@absl//absl/container:flat_hash_set",
+        "@absl//absl/strings",
+        "@absl//absl/strings:str_format",
     ],
 )
 
@@ -44,6 +45,25 @@ cc_test(
     deps = [
         ":program",
         "//src/common/testing:gtest",
+    ],
+)
+
+cc_test(
+    name = "is_numeric_operator_test",
+    srcs = ["is_numeric_operator_test.cc"],
+    deps = [
+        ":program",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_test(
+    name = "hash_test",
+    srcs = ["hash_test.cc"],
+    deps = [
+        ":program",
+        "//src/common/testing:gtest",
+        "@absl//absl/hash:hash_testing",
     ],
 )
 
