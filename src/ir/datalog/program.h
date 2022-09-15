@@ -93,6 +93,9 @@ class ArgumentType {
   std::string DebugPrint() const { return absl::StrCat(kind_, name_); }
 
   bool operator==(const ArgumentType& otherType) const {
+    // The name field is only compared for arguments of kind kCustom
+    // because the name field is only used for kCustom types (and
+    // not for kPrincipal or kNumber).
     return this->kind_ == otherType.kind() &&
       this->kind_ == Kind::kCustom ? this->name_ == otherType.name() : true;
   }
