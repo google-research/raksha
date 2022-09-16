@@ -278,3 +278,11 @@ http_archive(
     strip_prefix = "antlr4-4.9.3",
     urls = ["https://github.com/antlr/antlr4/archive/4.9.3.tar.gz"],
 )
+
+# RE2
+http_archive(
+    name = "re2",
+    sha256 = "f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f",
+    strip_prefix = "re2-2022-06-01",
+    urls = ["https://github.com/google/re2/archive/refs/tags/2022-06-01.tar.gz"],
+)
