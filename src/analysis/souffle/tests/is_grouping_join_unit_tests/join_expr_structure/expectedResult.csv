@@ -1,0 +1,4 @@
+[sql, sql.join, %join1, [%group_by1_1, [%flat_key, nil]], [[join_type, $StringAttributePayload(INNER)], nil]]
+[sql, sql.join, %join2, [%group_by1_1, [%left_key, nil]], [[join_type, $StringAttributePayload(INNER)], nil]]
+[sql, sql.join, %join3, [%group_by1_1, [%right_key, nil]], [[join_type, $StringAttributePayload(INNER)], nil]]
+[sql, sql.join, %join4, [%group_by1_1, [%weird_full_key, nil]], [[join_type, $StringAttributePayload(INNER)], nil]]

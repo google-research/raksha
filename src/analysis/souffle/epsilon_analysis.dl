@@ -108,29 +108,6 @@ deltaDiffPrivacyIntermediate(value, sql_output, delta) :-
     operationHasResult(operation, sql_output),
     diffPrivacyMechanismHasDelta(operation, delta).
 
-// Helper relation to determine whether a join operation comes from two group
-// by operations, the method used in PINQ to bound the sensitivity of join
-// operations. For now, we are considering two inputs only.
-.decl joinOperationIsGroupingJoin(operation: Operation)
-joinOperationIsGroupingJoin(operation) :- isSqlOperation(operation),
-    operationHasAttribute(operation, ["join_type", $StringAttributePayload("INNER")]),
-    operationHasOperator(operation, SQL_JOIN_OPERATOR),
-    operationHasOperand(operation, sql_input1),
-    operationHasOperand(operation, sql_input2),
-    sql_input1 != sql_input2,
-    isSqlOperation(group_by_operation1),
-    operationHasOperator(group_by_operation1, SQL_GROUP_BY_OPERATOR),
-    operationHasResult(group_by_operation1, sql_input1),
-    isSqlOperation(group_by_operation2),
-    operationHasOperator(group_by_operation2, SQL_GROUP_BY_OPERATOR),
-    operationHasResult(group_by_operation2, sql_input2),
-    isInitialInput(initial_input1),
-    isInitialInput(initial_input2),
-    ( sqlPath(initial_input1, sql_input1),
-      sqlPath(initital_input2, sql_input2);
-      sqlPath(initial_input2, sql_input1),
-      sqlPath(initial_input1, sql_input2)).
-
 // DP Policies are violated when:
 // 1. There is a global epsilon but no local epsilon per an output path
 // 2. The global epsilon is less than the local epsilon for a value used in an
@@ -165,7 +142,7 @@ violatesPolicy(value) :- isInitialInput(value),
     operationHasResult(operation, value),
     operationHasOperator(operation, SQL_JOIN_OPERATOR),
     !joinOperationHasKappa(operation, _),
-    !joinOperationIsGroupingJoin(operation),
+    !isGroupingJoin(operation),
     sqlPath(value, sql_output),
     isSqlOutput(sql_output_operation),
     operationHasResult(sql_output_operation, sql_output).

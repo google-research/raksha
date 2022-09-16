@@ -1,0 +1,1 @@
+[sql, sql.join, %4, [%2, [%3, nil]], [[join_type, $StringAttributePayload(INNER)], nil]]
