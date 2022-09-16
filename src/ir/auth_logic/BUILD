@@ -34,6 +34,7 @@ cc_library(
         "//src/common/utils:overloaded",
         "//src/common/utils:types",
         "//src/ir/datalog:program",
+        "@absl//absl/strings:str_join",
         "@com_google_absl//absl/hash",
         "@com_google_absl//absl/strings",
     ],
@@ -68,6 +69,8 @@ cc_library(
         "@absl//absl/container:flat_hash_set",
     ],
 )
+
+tr
 
 cc_library(
     name = "lowering_ast_datalog",
