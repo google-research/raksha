@@ -183,6 +183,19 @@ souffle_cc_binary(
     additional_deps = ["logfunctors"],
 )
 
+gen_souffle_cxx_code(
+    name = "grouping_join_unit_test_code",
+    src = "is_grouping_join_unit_test_interface.dl",
+    for_test = True,
+    included_dl_scripts = core_dl_files + sql_dl_files + ["sensitivity_analysis.dl"],
+)
+
+souffle_cc_binary(
+    name = "grouping_join_unit_test",
+    testonly = True,
+    src = ":grouping_join_unit_test_code",
+)
+
 raksha_policy_verifier_library(
     name = "datalog_policy_verifier",
     additional_dl_files = [
