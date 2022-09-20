@@ -36,6 +36,7 @@ cc_library(
         "//src/ir/datalog:program",
         "@absl//absl/hash",
         "@absl//absl/strings:str_format",
+        "@absl//absl/strings:str_join",
     ],
 )
 

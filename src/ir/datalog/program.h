@@ -155,8 +155,10 @@ class RelationDeclaration {
     for (const Argument& arg : arguments_) {
       arg_strings.push_back(arg.ToString());
     }
-    return absl::StrCat(".decl ", relation_name_, is_attribute_,
-                        absl::StrJoin(arg_strings, ", "));
+    return absl::StrCat(".decl ", 
+            is_attribute_ ? " attribute " : "",
+            relation_name_, "(",
+                        absl::StrJoin(arg_strings, ", "), ")");
   }
 
  private:
