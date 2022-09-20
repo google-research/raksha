@@ -69,8 +69,6 @@ cc_library(
     ],
 )
 
-tr
-
 cc_library(
     name = "lowering_ast_datalog",
     srcs = ["lowering_ast_datalog.cc"],
