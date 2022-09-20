@@ -30,8 +30,11 @@ namespace raksha::ir::auth_logic {
 std::vector<std::string> binary_operations = {"<", ">", "=", "!=", "<=", ">="};
 
 using AstNodeVariantType =
-    std::variant<datalog::Predicate, BaseFact, Fact, ConditionalAssertion,
-                 Assertion, datalog::Argument>;
+    std::variant<datalog::Predicate, datalog::ArgumentType,
+    datalog::Argument, datalog::RelationDeclaration,
+    Principal, Attribute, CanActAs,
+    BaseFact, Fact, ConditionalAssertion,
+    Assertion, SaysAssertion, Query, Program>;
 
 std::string ToString(AstNodeVariantType Node) {
   return std::visit(
@@ -47,6 +50,35 @@ std::string ToString(AstNodeVariantType Node) {
                 predicate.sign() == datalog::Sign::kNegated ? "!" : "",
                 predicate.name(), "(", absl::StrJoin(predicate.args(), ", "),
                 ")");
+          },
+          [](datalog::ArgumentType argumentType) {
+            return absl::StrCat(argumentType.kind(), argumentType.name());
+          },
+          [](datalog::Argument argument) {
+            return absl::StrJoin(
+                {argument.argument_name(), argument.argument_type().name()},
+                " : ");
+          },
+          [](datalog::RelationDeclaration relationDeclaration) {
+            std::vector<std::string> arg_strings;
+            arg_strings.reserve(relationDeclaration.arguments().size());
+            for (const datalog::Argument& arg : relationDeclaration.arguments()) {
+              arg_strings.push_back(ToString(arg));
+            }
+            return absl::StrCat(".decl ", relationDeclaration.relation_name(), 
+              relationDeclaration.is_attribute(),
+                                absl::StrJoin(arg_strings, ", "));
+          },
+          [](Principal principal) {
+            return principal.name();
+          },
+          [](Attribute attribute) {
+               return absl::StrCat(ToString(attribute.principal()),
+                ToString(attribute.predicate()));
+          },
+          [](CanActAs canActAs) {
+            return absl::StrCat(ToString(canActAs.left_principal()),
+              " canActAs ", ToString(canActAs.right_principal()));
           },
           [](BaseFact basefact) {
             return std::visit(raksha::utils::overloaded{
@@ -96,10 +128,42 @@ std::string ToString(AstNodeVariantType Node) {
                     }},
                 assertion.GetValue());
           },
-          [](datalog::Argument argument) {
-            return absl::StrJoin(
-                {argument.argument_name(), argument.argument_type().name()},
-                " : ");
+          [](SaysAssertion saysAssertion) {
+            std::vector<std::string> assertion_strings;
+            assertion_strings.reserve(saysAssertion.assertions().size());
+            for (const Assertion& assertion : saysAssertion.assertions()) {
+              assertion_strings.push_back(ToString(assertion));
+            }
+            return absl::StrCat(ToString(saysAssertion.principal()), "says {\n",
+                        absl::StrJoin(assertion_strings, "\n"), "}");
+          },
+          [](Query query) {
+            return absl::StrCat("Query(",
+              query.name(), ToString(query.principal()),
+                        ToString(query.fact()), ")");
+          },
+          [](Program program) {
+            std::vector<std::string> relation_decl_strings;
+            relation_decl_strings.reserve(program.relation_declarations().size());
+            for (const datalog::RelationDeclaration& rel_decl :
+                 program.relation_declarations()) {
+              relation_decl_strings.push_back(ToString(rel_decl));
+            }
+            std::vector<std::string> says_assertion_strings;
+            says_assertion_strings.reserve(program.says_assertions().size());
+            for (const SaysAssertion& says_assertion :
+                program.says_assertions()) {
+              says_assertion_strings.push_back(ToString(says_assertion));
+            }
+            std::vector<std::string> query_strings;
+            query_strings.reserve(program.queries().size());
+            for (const Query& query : program.queries()) {
+              query_strings.push_back(ToString(query));
+            }
+            return absl::StrCat("Program(\n",
+                                absl::StrJoin(relation_decl_strings, "\n"),
+                                absl::StrJoin(says_assertion_strings, "\n"),
+                                absl::StrJoin(query_strings, "\n"), ")");
           }},
       Node);
 }
