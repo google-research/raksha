@@ -74,7 +74,7 @@ class UniverseRelationInsertion {
         GetUniverseDefiningFacts(type_env);
     // Transform assertions to include conditions
     // that check the universes
-    UniverseConditionTransformer universe_condition_transformer(type_env);
+    UniverseConditionTransformer universe_condition_transformer(decl_env);
     for (const auto& says_assertion : prog.says_assertions()) {
       new_says_assertions.push_back(
           universe_condition_transformer.AddUniverseConditions(says_assertion));
@@ -133,6 +133,24 @@ class UniverseRelationInsertion {
       }
       return true;
     }
+  }
+
+  static datalog::ArgumentType GetTypingOrFatal(
+      const TypeEnv& type_env, const std::string& argument_name) {
+    if (type_env.find(argument_name) == type_env.end()) {
+      LOG(FATAL) << "could not find typing for argument" << argument_name;
+    } else {
+      return type_env.find(argument_name)->second;
+    }
+  }
+    
+  static datalog::RelationDeclaration GetDeclarationOrFatal(
+    const DeclEnv& decl_env, const std::string& predicate_name) {
+    if (decl_env.find(predicate_name) == decl_env.end()) {
+      LOG(FATAL) << "could not find declaration for relation" << predicate_name;
+    } else {
+      return decl_env.find(predicate_name)->second;
+    } 
   }
 
   // This generates a set of says assertions that populate all the
@@ -226,11 +244,6 @@ class UniverseRelationInsertion {
     }
 
     Unit Visit(const datalog::Predicate& pred) {
-      if (decl_env_.find(pred.name()) == decl_env_.end()) {
-        LOG(FATAL) << "predicate: " << pred.name()
-                   << "was used but not declared";
-      }
-
       if (PredicateIsNumericOperator(pred)) {
         // This is part of the workaround for handling numeric comparisons
         // given that the operators use the same AST nodes as predicates.
@@ -241,14 +254,15 @@ class UniverseRelationInsertion {
       } else {
         // This is the case where this is a normal predicate rather
         // than a numeric operator
-        datalog::RelationDeclaration decl = decl_env_.find(pred.name())->second;
+        datalog::RelationDeclaration decl = GetDeclarationOrFatal(
+          decl_env_, pred.name());
         // The relation declarations give the types for each position in the
         // predicate. For the xth argument in the predicate, we want to
         // assign it the type for the xth parameter in the relation declaration.
         // So to do this, we iterate through the list of arguments in the
         // predicate and the list of parameters in the declaration using
         // the indices of the arguments iterator of the predicate.
-        for (unsigned i = 0; i <= pred.args().size(); i++) {
+        for (unsigned i = 0; i < pred.args().size(); i++) {
           AddTyping(pred.args()[i], decl.arguments()[i].argument_type());
         }
         return Unit();
@@ -328,9 +342,12 @@ class UniverseRelationInsertion {
   // Grounding Condition Transformation
   //----------------------------------------------------------------------------
   // This class transforms SaysAssertions so that if
-  // there are any ungrounded variables on the LHS of an assertion,
+  // there are any potentially ungrounded variables on the LHS of an assertion,
   // conditions are added to the RHS that check that this variable
-  // is in a universe. It implements just one public method,
+  // is in a universe. As a way of safely overapproximating the ungrounded
+  // variables, this just assumes any *non-constant* arguments in the RHS
+  // are ungrounded, and adds conditions for them to the LHS.
+  // It implements just one public method,
   // `AddUniverseConditions(SaysAssertion says_assertion)`
   // that returns a transformed version of the says assertion.
   // Internally, it extends a visitor for a part of this translation
@@ -339,8 +356,8 @@ class UniverseRelationInsertion {
       : public AuthLogicAstTraversingVisitor<UniverseConditionTransformer,
                                              std::vector<BaseFact>> {
    public:
-    UniverseConditionTransformer(const TypeEnv& type_env)
-        : type_env_(type_env) {}
+    UniverseConditionTransformer(const DeclEnv& decl_env)
+        : decl_env_(decl_env) {}
 
     // The `AddUniverseConditions` methods, including this one,
     // are not implemented as actual visits because these methods
@@ -357,14 +374,6 @@ class UniverseRelationInsertion {
     }
 
    private:
-    static datalog::ArgumentType GetTypingOrFatal(
-        const TypeEnv& type_env, const std::string& argument_name) {
-      if (type_env.find(argument_name) == type_env.end()) {
-        LOG(FATAL) << "could not find typing for argument" << argument_name;
-      } else {
-        return type_env.find(argument_name)->second;
-      }
-    }
 
     Assertion AddUniverseConditions(const Assertion& assertion) {
       return std::visit(
@@ -411,7 +420,7 @@ class UniverseRelationInsertion {
     }
 
     std::vector<BaseFact> PreVisit(const Principal& prin) override {
-      if (IsNameConstant(prin.name())) {
+      if (!IsNameConstant(prin.name())) {
         return {MakeUniverseMembershipFact(
             prin.name(), datalog::ArgumentType::MakePrincipalType())};
       } else {
@@ -419,18 +428,21 @@ class UniverseRelationInsertion {
       }
     }
 
+    // Add universe conditions for the non-constant arguments 
     std::vector<BaseFact> Visit(const datalog::Predicate& pred) override {
+      auto decl = GetDeclarationOrFatal(decl_env_, pred.name());
       std::vector<BaseFact> conditions;
-      for (const auto& arg : pred.args()) {
-        if (IsNameConstant(arg)) {
+      for (unsigned i = 0; i < pred.args().size(); i++) {
+        auto arg = pred.args()[i];
+        if (!IsNameConstant(arg)) {
           conditions.push_back(MakeUniverseMembershipFact(
-              arg, GetTypingOrFatal(type_env_, arg)));
+            arg, decl.arguments()[i].argument_type()));
         }
       }
       return conditions;
     }
 
-    TypeEnv type_env_;
+    DeclEnv decl_env_;
   };
 };
 

@@ -87,12 +87,9 @@ class ArgumentType {
   static ArgumentType MakeNumberType() {
     return ArgumentType(Kind::kNumber, "Number");
   }
-<<<<<<< HEAD
   static ArgumentType MakeCustomType(absl::string_view name) {
     return ArgumentType(Kind::kCustom, std::move(name));
   }
-=======
->>>>>>> 8828a17a (First draft of universe relation pass)
 
   std::string ToString() const { return absl::StrCat(kind_, name_); }
 
