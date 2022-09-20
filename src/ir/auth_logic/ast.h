@@ -25,7 +25,6 @@
 #include <vector>
 
 #include "absl/hash/hash.h"
-#include "absl/strings/str_join.h"
 #include "src/common/utils/map_iter.h"
 #include "src/ir/auth_logic/auth_logic_ast_visitor.h"
 #include "src/ir/datalog/program.h"

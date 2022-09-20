@@ -34,7 +34,6 @@ cc_library(
         "//src/common/utils:overloaded",
         "//src/common/utils:types",
         "//src/ir/datalog:program",
-        "@absl//absl/strings:str_join",
         "@com_google_absl//absl/hash",
         "@com_google_absl//absl/strings",
     ],
