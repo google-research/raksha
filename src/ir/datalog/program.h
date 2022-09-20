@@ -96,15 +96,6 @@ class ArgumentType {
   enum class Kind { kNumber, kPrincipal, kCustom };
   Kind kind() const { return kind_; }
   absl::string_view name() const { return name_; }
-  static ArgumentType MakePrincipalType() {
-    return ArgumentType(Kind::kPrincipal, "Principal");
-  }
-  static ArgumentType MakeNumberType() {
-    return ArgumentType(Kind::kNumber, "Number");
-  }
-  static ArgumentType MakeCustomType(absl::string_view name) {
-    return ArgumentType(Kind::kCustom, std::move(name));
-  }
 
   std::string ToString() const { return absl::StrCat(kind_, name_); }
 
