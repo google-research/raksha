@@ -88,8 +88,10 @@ class ArgumentType {
     return ArgumentType(Kind::kNumber, "Number");
   }
   static ArgumentType MakeCustomType(absl::string_view name) {
-    return ArgumentType(Kind::kCustom, name);
+    return ArgumentType(Kind::kCustom, std::move(name));
   }
+
+  std::string ToString() const { return absl::StrCat(kind_, name_); }
 
   bool operator==(const ArgumentType& otherType) const {
     // The name field is only compared for arguments of kind kCustom
