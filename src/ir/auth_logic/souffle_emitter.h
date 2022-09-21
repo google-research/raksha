@@ -28,13 +28,15 @@ namespace raksha::ir::auth_logic {
 
 class SouffleEmitter {
  public:
-  static std::string EmitProgram(const datalog::Program& program) {
+  static std::string EmitProgram(const datalog::Program& program,
+                                 bool skip_declarations = false) {
     SouffleEmitter emitter;
     std::string body = emitter.EmitProgramBody(program);
     std::string outputs = emitter.EmitOutputs(program);
-
-    std::string declarations = emitter.EmitRelationDeclarations(program);
-    std::string type_declarations = emitter.EmitTypeDeclarations(program);
+    std::string declarations =
+        emitter.EmitRelationDeclarations(program, skip_declarations);
+    std::string type_declarations =
+        emitter.EmitTypeDeclarations(program, skip_declarations);
     return absl::StrCat(std::move(type_declarations), "\n",
                         std::move(declarations), "\n", std::move(body), "\n",
                         std::move(outputs));
@@ -141,12 +143,14 @@ class SouffleEmitter {
         });
   }
 
-  std::string EmitRelationDeclarations(const datalog::Program& program) {
+  std::string EmitRelationDeclarations(const datalog::Program& program,
+                                       const bool skip_declarations) {
     std::vector<std::string> declaration_strings;
     for (const auto& declaration : program.relation_declarations()) {
       CHECK(!GetRelationsToNotDeclare().empty());
-      if (GetRelationsToNotDeclare().find(declaration.relation_name()) !=
-          GetRelationsToNotDeclare().end())
+      if (!skip_declarations &&
+          GetRelationsToNotDeclare().find(declaration.relation_name()) !=
+              GetRelationsToNotDeclare().end())
         continue;
       declaration_strings.push_back(
           absl::StrCat(".decl ", declaration.relation_name(), "(",
@@ -156,15 +160,17 @@ class SouffleEmitter {
     return absl::StrJoin(declaration_strings, "\n");
   }
 
-  std::string EmitTypeDeclarations(const datalog::Program& program) {
+  std::string EmitTypeDeclarations(const datalog::Program& program,
+                                   const bool skip_declarations) {
     absl::flat_hash_set<std::string> type_names;
     for (const auto& declaration : program.relation_declarations()) {
       for (const auto& argument : declaration.arguments()) {
-        if (argument.argument_type().kind() !=
-            datalog::ArgumentType::Kind::kCustom)
+        if (!skip_declarations && argument.argument_type().kind() !=
+                                      datalog::ArgumentType::Kind::kCustom)
           continue;
-        if (GetRelationsToNotDeclare().find(argument.argument_type().name()) !=
-            GetRelationsToNotDeclare().end())
+        if (!skip_declarations &&
+            GetRelationsToNotDeclare().find(argument.argument_type().name()) !=
+                GetRelationsToNotDeclare().end())
           continue;
         type_names.insert(absl::StrCat(
             ".type ", argument.argument_type().name(), " <: symbol"));

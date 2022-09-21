@@ -216,3 +216,23 @@ cc_test(
         "@absl//absl/strings",
     ],
 )
+
+sh_test(
+    name = "authorization_logic_prototype",
+    srcs = [
+        "auth_logic_prototype.sh",
+    ],
+    args = [
+        "$(location //src/backends/policy_engine/souffle:raksha_policy_datalog_emitter)",
+        "$(location //src/ir/auth_logic/tests:simple_query.auth)",
+    ],
+    data = [
+        "//src/backends/policy_engine/souffle:raksha_policy_datalog_emitter",
+        "//src/ir/auth_logic/tests:simple_query.auth",
+        "//third_party/mcpp",
+        "//third_party/souffle:main",
+    ],
+    env = {
+        "SOUFFLE_BIN": "$(rootpath //third_party/souffle:main)",
+    },
+)
