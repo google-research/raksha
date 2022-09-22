@@ -292,9 +292,8 @@ LoweringToDatalogPass::TransformAttributeDeclarations(
       [](const datalog::RelationDeclaration& declaration) {
         if (!declaration.is_attribute()) return declaration;
         std::vector<datalog::Argument> transformed_arguments = {
-            datalog::Argument(
-                "attribute_prin",
-                datalog::ArgumentType::MakePrincipalType())};
+            datalog::Argument("attribute_prin",
+                              datalog::ArgumentType::MakePrincipalType())};
         absl::c_copy(declaration.arguments(),
                      std::back_inserter(transformed_arguments));
 
@@ -327,9 +326,9 @@ LoweringToDatalogPass::GetCanSayDeclarations(
     if (type_iterator == type_environment.end()) continue;
     // Adds new relation declaration for each can say delegation
     for (uint64_t i = 1; i <= depth; ++i) {
-      std::vector<datalog::Argument> arguments = {datalog::Argument(
-          absl::StrCat("delegatee", i),
-          datalog::ArgumentType::MakePrincipalType())};
+      std::vector<datalog::Argument> arguments = {
+          datalog::Argument(absl::StrCat("delegatee", i),
+                            datalog::ArgumentType::MakePrincipalType())};
       // for a depth of 1, we add a new can say declaration to the vector of can
       // say declarations by looking at the type_environment mappings (This will
       // give us the relation declaration for the base fact of can_say). Ex: To
@@ -379,8 +378,7 @@ LoweringToDatalogPass::GetSaysExtendRelationDeclarations(
       transformed_declarations,
       [](const datalog::RelationDeclaration& declaration) {
         std::vector<datalog::Argument> arguments = {datalog::Argument(
-            "speaker",
-            datalog::ArgumentType::MakePrincipalType())};
+            "speaker", datalog::ArgumentType::MakePrincipalType())};
         absl::c_copy(declaration.arguments(), std::back_inserter(arguments));
         return datalog::RelationDeclaration(
             absl::StrCat("says_", declaration.relation_name()), false,
@@ -414,18 +412,15 @@ LoweringToDatalogPass::RelationDeclarationToDLIR(
   //.decl canActAs(p1 : Principal, p2 : Principal)
   transformed_declarations.push_back(datalog::RelationDeclaration(
       "canActAs", false,
-      {datalog::Argument(
-           "p1", datalog::ArgumentType::MakePrincipalType()),
-       datalog::Argument(
-           "p2", datalog::ArgumentType::MakePrincipalType())}));
+      {datalog::Argument("p1", datalog::ArgumentType::MakePrincipalType()),
+       datalog::Argument("p2", datalog::ArgumentType::MakePrincipalType())}));
   // Another declaration "isNumber" added aa a work around for
   // universe_translations. To be removed after adding parser for
   // universe_translations. Declaration being added is
   //.decl isNumber(x : Number)
   transformed_declarations.push_back(datalog::RelationDeclaration(
       "isNumber", false,
-      {datalog::Argument(
-          "x", datalog::ArgumentType::MakeNumberType())}));
+      {datalog::Argument("x", datalog::ArgumentType::MakeNumberType())}));
   // The translated declarations are all extended with "says_" and a speaker
   // argument
   std::vector<datalog::RelationDeclaration>
@@ -453,9 +448,8 @@ LoweringToDatalogPass::QueryRelationDeclarationToDLIR(
   //.decl "grounded_dummy"(dummy_param : DummyType)
   query_declarations.push_back(datalog::RelationDeclaration(
       "grounded_dummy", false,
-      {datalog::Argument(
-          "dummy_param",
-          datalog::ArgumentType::MakeCustomType("DummyType"))}));
+      {datalog::Argument("dummy_param",
+                         datalog::ArgumentType::MakeCustomType("DummyType"))}));
   return query_declarations;
 }
 

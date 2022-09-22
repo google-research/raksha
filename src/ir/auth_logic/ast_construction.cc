@@ -164,7 +164,7 @@ static datalog::ArgumentType ConstructArgumentType(
       *CHECK_NOTNULL(dynamic_cast<AuthLogicParser::CustomTypeContext*>(
           &auth_logic_type_context));
   return datalog::ArgumentType::MakeCustomType(
-                               custom_type_context.VARIABLE()->getText());
+      custom_type_context.VARIABLE()->getText());
 }
 
 static datalog::RelationDeclaration ConstructRelationDeclaration(
