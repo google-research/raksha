@@ -38,6 +38,15 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "argument_type_factory_test",
+    srcs = ["argument_type_factory_test.cc"],
+    deps = [
+        ":program",
+        "//src/common/testing:gtest",
+    ],
+)
+
 # This library contains our C++ model of the value types of Souffle.
 cc_library(
     name = "value",
