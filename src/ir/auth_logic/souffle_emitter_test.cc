@@ -52,11 +52,9 @@ Program BuildRelationDeclarationProgram(SaysAssertion assertion) {
       datalog::RelationDeclaration(
           "grantAccess", false,
           {datalog::Argument(
-               "x0", datalog::ArgumentType(
-                         datalog::ArgumentType::Kind::kPrincipal, "Principal")),
+               "x0", datalog::ArgumentType::MakePrincipalType()),
            datalog::Argument(
-               "x1", datalog::ArgumentType(datalog::ArgumentType::Kind::kCustom,
-                                           "FileName"))})};
+               "x1", datalog::ArgumentType::MakeCustomType("FileName"))})};
   return Program(std::move(relation_declaration), std::move(assertion_list),
                  {});
 }
