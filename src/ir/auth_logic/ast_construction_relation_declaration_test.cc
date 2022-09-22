@@ -66,21 +66,21 @@ INSTANTIATE_TEST_SUITE_P(
         RelationDeclarationTestData({R"(.decl someFact(x : CustomType))",
                                      R"(someFact)",
                                      false,
-                                     {R"(x : CustomType)"}}),
+                                     {R"(x : CustomType::CustomType)"}}),
         RelationDeclarationTestData(
             {R"(.decl someOtherFact(x : CustomType, y : Number))",
              R"(someOtherFact)",
              false,
-             {R"(x : CustomType)", R"(y : Number)"}}),
+             {R"(x : CustomType::CustomType)", R"(y : NumberType)"}}),
         RelationDeclarationTestData({R"(.decl thirdFact(p : Principal).)",
                                      R"(thirdFact)",
                                      false,
-                                     {R"(p : Principal)"}}),
+                                     {R"(p : PrincipalType)"}}),
         RelationDeclarationTestData(
             {R"(.decl attribute fourthFact(p : Principal).)",
              R"(fourthFact)",
              true,
-             {R"(p : Principal)"}})
+             {R"(p : PrincipalType)"}})
 
             ));
 
