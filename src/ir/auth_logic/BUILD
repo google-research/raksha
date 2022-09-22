@@ -161,7 +161,6 @@ cc_library(
     ],
     deps = [
         ":ast",
-        "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
         "@com_google_absl//absl/strings",
