@@ -94,7 +94,7 @@ class ArgumentType {
     return ArgumentType(Kind::kNumber, "Number");
   }
   static ArgumentType MakeCustomType(absl::string_view name) {
-    return ArgumentType(Kind::kCustom, std::move(name));
+    return ArgumentType(Kind::kCustom, name);
   }
 
   std::string ToString() const { return absl::StrCat(kind_, name_); }
