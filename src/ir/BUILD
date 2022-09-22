@@ -114,7 +114,10 @@ cc_test(
         ":value",
         "//src/common/testing:gtest",
         "//src/ir/attributes:string_attribute",
+        "//src/parser/ir:ir_parser",
         "@absl//absl/container:flat_hash_set",
+        "@absl//absl/strings",
+        "@re2",
     ],
 )
 

@@ -25,6 +25,12 @@
 namespace raksha::ir {
 namespace {
 
+using testing::Combine;
+using testing::NotNull;
+using testing::TestWithParam;
+using testing::Values;
+using testing::ValuesIn;
+
 struct TestData {
  public:
   TestData()
@@ -47,8 +53,6 @@ struct TestData {
     // Create SSA names to keep tests reproducible.
     ssa_names.GetOrCreateID(first_block);
     ssa_names.GetOrCreateID(second_block);
-    ssa_names.GetOrCreateID(plus_operation);
-    ssa_names.GetOrCreateID(minus_operation);
     ssa_names.GetOrCreateID(Value(first_block_first_arg));
     ssa_names.GetOrCreateID(Value(first_block_second_arg));
     ssa_names.GetOrCreateID(Value(second_block_first_arg));
@@ -121,8 +125,34 @@ TEST(ValueTest, AccessorsReturnCorrectValue) {
             &test_data.output_storage);
 }
 
+class OperationResultTest : public TestWithParam<const Operation *> {};
+
+TEST_P(OperationResultTest, DefaultOperationResultTest) {
+  const Operation &operation = *GetParam();
+  value::OperationResult default_operation_result =
+      value::OperationResult::MakeDefaultOperationResult(operation);
+  EXPECT_EQ(&default_operation_result.operation(), &operation);
+  EXPECT_EQ(default_operation_result.name(), "out");
+}
+
+
+TEST_P(OperationResultTest, DefaultOperationResultValueTest) {
+  const Operation &operation = *GetParam();
+  Value default_result_value =
+      Value::MakeDefaultOperationResultValue(operation);
+  const value::OperationResult *downcast =
+      default_result_value.If<value::OperationResult>();
+  EXPECT_THAT(downcast, NotNull());
+  EXPECT_EQ(&downcast->operation(), &operation);
+  EXPECT_EQ(downcast->name(), "out");
+}
+
+INSTANTIATE_TEST_SUITE_P(OperationResultTest, OperationResultTest,
+                         Values(&test_data.plus_operation,
+                                &test_data.minus_operation));
+
 class ValueToStringTest
-    : public testing::TestWithParam<std::pair<Value, absl::string_view>> {};
+    : public TestWithParam<std::pair<Value, absl::string_view>> {};
 
 TEST_P(ValueToStringTest, ToStringReturnsExpectedFormat) {
   const auto &[value, value_string] = GetParam();
@@ -131,19 +161,19 @@ TEST_P(ValueToStringTest, ToStringReturnsExpectedFormat) {
 
 INSTANTIATE_TEST_SUITE_P(
     ValueToStringTest, ValueToStringTest,
-    testing::Values(
-        std::make_pair(Value(test_data.first_block_first_arg), "%0"),
-        std::make_pair(Value(test_data.first_block_second_arg), "%1"),
-        std::make_pair(Value(test_data.second_block_first_arg), "%2"),
-        std::make_pair(Value(test_data.second_block_second_arg), "%3"),
-        std::make_pair(Value(test_data.plus_operation_result1), "%4"),
-        std::make_pair(Value(test_data.plus_operation_result2), "%5"),
-        std::make_pair(Value(test_data.minus_operation_result1), "%6"),
-        std::make_pair(Value(test_data.minus_operation_result2), "%7"),
-        std::make_pair(Value(test_data.input_stored_value), "store:input:type"),
-        std::make_pair(Value(test_data.output_stored_value),
-                       "store:output:type"),
-        std::make_pair(Value(value::Any()), "<<ANY>>")));
+    Values(std::make_pair(Value(test_data.first_block_first_arg), "%0"),
+           std::make_pair(Value(test_data.first_block_second_arg), "%1"),
+           std::make_pair(Value(test_data.second_block_first_arg), "%2"),
+           std::make_pair(Value(test_data.second_block_second_arg), "%3"),
+           std::make_pair(Value(test_data.plus_operation_result1), "%4"),
+           std::make_pair(Value(test_data.plus_operation_result2), "%5"),
+           std::make_pair(Value(test_data.minus_operation_result1), "%6"),
+           std::make_pair(Value(test_data.minus_operation_result2), "%7"),
+           std::make_pair(Value(test_data.input_stored_value),
+                          "store:input:type"),
+           std::make_pair(Value(test_data.output_stored_value),
+                          "store:output:type"),
+           std::make_pair(Value(value::Any()), "<<ANY>>")));
 
 static std::pair<Value, uint64_t> kSampleValues[] = {
     {Value(test_data.first_block_first_arg), 0},
@@ -160,7 +190,7 @@ static std::pair<Value, uint64_t> kSampleValues[] = {
 };
 
 class ValueEqTest
-    : public testing::TestWithParam<
+    : public TestWithParam<
           std::tuple<std::pair<Value, uint64_t>, std::pair<Value, uint64_t>>> {
 };
 
@@ -173,8 +203,8 @@ TEST_P(ValueEqTest, ValueEqTest) {
 }
 
 INSTANTIATE_TEST_SUITE_P(ValueEqTest, ValueEqTest,
-                         testing::Combine(testing::ValuesIn(kSampleValues),
-                                          testing::ValuesIn(kSampleValues)));
+                         Combine(ValuesIn(kSampleValues),
+                                 ValuesIn(kSampleValues)));
 
 TEST(ValueHashTest, ValueHashTest) {
   std::vector<Value> values;

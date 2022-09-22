@@ -56,7 +56,8 @@ class DotGeneratorHelper : public IRTraversingVisitor<DotGeneratorHelper> {
   // Returns the dot node name for the given `operation`.
   std::string GetNodeName(const Operation& operation) {
     const Block* block = operation.parent();
-    auto id = ssa_names_.GetOrCreateID(operation);
+    auto id = ssa_names_.GetOrCreateID(
+        Value::MakeDefaultOperationResultValue(operation));
     return absl::StrFormat(R"("%s_%s")",
                            block == nullptr ? "g" : GetNodeName(*block), id);
   }

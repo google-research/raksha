@@ -52,9 +52,9 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
     IrParser::OperationContext& operation_context,
     BlockBuilder& block_builder) {
   // Operator
-  if (context_->GetOperator(operation_context.ID()->getText()) == nullptr) {
-    context_->RegisterOperator(
-        std::make_unique<Operator>(operation_context.ID()->getText()));
+  std::string operator_text = operation_context.ID()->getText();
+  if (!context_->IsRegisteredOperator(operator_text)) {
+    context_->RegisterOperator(std::make_unique<Operator>(operator_text));
   }
   // Grammar rule for attributes is either
   //   -> ID ':' FLOATLITERAL (a double-precision floating point number type) or
@@ -78,17 +78,20 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
       if (auto* float_attribute_context =
               dynamic_cast<IrParser::FloatAttributeContext*>(
                   attribute_context)) {
-          double parsed_float = 0;
-          auto text = CHECK_NOTNULL(float_attribute_context)->FLOATLITERAL()->getText();
-          // Discard the suffix (l or f).
-          auto last_char_it = text.rbegin();
-          if (last_char_it != text.rend() && *last_char_it == 'l') {
-              text = std::string(text.begin(), text.end()-1);
-          }
-          bool conversion_succeeds = absl::SimpleAtod(text, &parsed_float);
-          CHECK(conversion_succeeds == true);
-          attributes.insert({CHECK_NOTNULL(float_attribute_context)->ID()->getText(),
-                             Attribute::Create<FloatAttribute>(parsed_float)});
+        double parsed_float = 0;
+        auto text = CHECK_NOTNULL(float_attribute_context)
+                        ->FLOATLITERAL()
+                        ->getText();
+        // Discard the suffix (l or f).
+        auto last_char_it = text.rbegin();
+        if (last_char_it != text.rend() && *last_char_it == 'l') {
+          text = std::string(text.begin(), text.end() - 1);
+        }
+        bool conversion_succeeds = absl::SimpleAtod(text, &parsed_float);
+        CHECK(conversion_succeeds == true);
+        attributes.insert(
+            {CHECK_NOTNULL(float_attribute_context)->ID()->getText(),
+             Attribute::Create<FloatAttribute>(parsed_float)});
         continue;
       }
       auto* num_attribute_context =
@@ -98,8 +101,9 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
           CHECK_NOTNULL(num_attribute_context)->NUMLITERAL()->getText(),
           &parsed_int);
       CHECK(conversion_succeeds == true);
-      attributes.insert({CHECK_NOTNULL(num_attribute_context)->ID()->getText(),
-                         Attribute::Create<Int64Attribute>(parsed_int)});
+      attributes.insert(
+          {CHECK_NOTNULL(num_attribute_context)->ID()->getText(),
+           Attribute::Create<Int64Attribute>(parsed_int)});
     }
   }
 
@@ -140,11 +144,9 @@ void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
        block_context.operation()) {
     auto construct_operation_result = IrProgramParser::ConstructOperation(
         *CHECK_NOTNULL(operation_context), builder);
-    const Value& v = Value(
-        value::OperationResult(*construct_operation_result.operation, "out"));
+    const Value& v = Value::MakeDefaultOperationResultValue(
+        *construct_operation_result.operation);
     value_map.insert({construct_operation_result.op_name, v});
-    ssa_names_->AddID(*construct_operation_result.operation,
-                      construct_operation_result.op_name);
     ssa_names_->AddID(v, construct_operation_result.op_name);
     construct_operation_results.push_back(
         std::move(construct_operation_result));

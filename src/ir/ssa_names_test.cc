@@ -24,24 +24,31 @@ namespace {
 
 template <typename T>
 class SsaNamesTest : public ::testing::Test {
- public:
-  SsaNamesTest() : test_op_("test") {}
-
  protected:
-  Operator test_op_;
   T first_entity_;
   T second_entity_;
 };
 
-// Specialize constructor for Operation as it has no default constructor to
+// Specialize class for Value as it has no default constructor to
 // initialize `first_entity_` and `second_entity_`.
 template <>
-SsaNamesTest<Operation>::SsaNamesTest()
-    : test_op_("test"),
-      first_entity_(nullptr, test_op_, {}, {}),
-      second_entity_(nullptr, test_op_, {}, {}) {}
+class SsaNamesTest<Value> : public ::testing::Test {
+ protected:
+  SsaNamesTest()
+      : dummy_test_operation1_(nullptr, Operator("first"), {}, {}),
+        dummy_test_operation2_(nullptr, Operator("second"), {}, {}),
+        first_entity_(
+            Value::MakeDefaultOperationResultValue(dummy_test_operation1_)),
+        second_entity_(
+            Value::MakeDefaultOperationResultValue(dummy_test_operation2_)) {}
 
-using SsaNamesTestTypes = ::testing::Types<Operation, Block, Module>;
+  Operation dummy_test_operation1_;
+  Operation dummy_test_operation2_;
+  Value first_entity_;
+  Value second_entity_;
+};
+
+using SsaNamesTestTypes = ::testing::Types<Value, Block, Module>;
 TYPED_TEST_SUITE(SsaNamesTest, SsaNamesTestTypes);
 
 TYPED_TEST(SsaNamesTest, GetOrCreateIDReturnsUniqueIDs) {
@@ -60,11 +67,10 @@ TYPED_TEST(SsaNamesTest, AddIDReturnsCorrectIDs) {
   SsaNames::ID second_id = names.AddID(this->second_entity_, "something");
 
   EXPECT_NE(first_id, second_id);
-  EXPECT_DEATH(names.AddID(this->first_entity_, "another_thing"), "another_thing");
+  EXPECT_DEATH(names.AddID(this->first_entity_, "another_thing"),
+               "another_thing");
   EXPECT_EQ(names.GetOrCreateID(this->second_entity_), "something");
 }
-
-
 
 }  // namespace
 }  // namespace raksha::ir

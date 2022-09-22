@@ -92,9 +92,11 @@ INSTANTIATE_TEST_SUITE_P(
                            &OperationTest::minus_op,
                            {{"const1", Attribute::Create<StringAttribute>("a")},
                             {"const2", Attribute::Create<Int64Attribute>(42)},
-                            {"const3", Attribute::Create<FloatAttribute>(3.1415)}},
+                            {"const3",
+                             Attribute::Create<FloatAttribute>(3.1415)}},
                            {},
-                           "%0 = core.minus [const1: \"a\", const2: 42, const3: 3.1415l]()\n"}),
+                           "%0 = core.minus [const1: \"a\", const2: 42, "
+                           "const3: 3.1415l]()\n"}),
         OperationTestData({nullptr,
                            &OperationTest::minus_op,
                            {{"const", Attribute::Create<Int64Attribute>(10)}},
@@ -106,7 +108,7 @@ INSTANTIATE_TEST_SUITE_P(
              {{"const", Attribute::Create<Int64Attribute>(10)}},
              {Value(value::BlockArgument(OperationTest::first_block_, "arg0")),
               Value(value::BlockArgument(OperationTest::first_block_, "arg1"))},
-             "%0 = core.minus [const: 10](%0, %1)\n"})));
+             "%2 = core.minus [const: 10](%0, %1)\n"})));
 
 }  // namespace
 }  // namespace raksha::ir

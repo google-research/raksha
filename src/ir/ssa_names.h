@@ -29,31 +29,20 @@ class Value;
 class SsaNames {
  public:
   using ID = std::string;
-  SsaNames()
-      : block_ids_("b"),
-        module_ids_("m"),
-        value_ids_("%"),
-        operation_ids_("%") {}
+  SsaNames() : block_ids_("b"), module_ids_("m"), value_ids_("%") {}
 
   // Disable copy semantics.
   SsaNames(const SsaNames &) = delete;
   SsaNames &operator=(const SsaNames &) = delete;
   SsaNames(SsaNames &&) = default;
 
-  ID GetOrCreateID(const Operation &operation) {
-    return operation_ids_.GetOrCreateID(&operation);
-  }
-
-  ID AddID(const Operation &operation, ID id) {
-    CHECK(operation_ids_.FindID(&operation)) << "Trying to update new ID " << id << " to an existing operation map";
-    return operation_ids_.UpdateID(&operation, id);
-  }
   ID GetOrCreateID(const Block &block) {
     return block_ids_.GetOrCreateID(&block);
   }
 
   ID AddID(const Block &block, ID id) {
-    CHECK(block_ids_.FindID(&block)) << "Trying to update new ID " << id << " to an existing block map";
+    CHECK(block_ids_.FindID(&block))
+        << "Trying to update new ID " << id << " to an existing block map";
     return block_ids_.UpdateID(&block, id);
   }
 
@@ -61,16 +50,16 @@ class SsaNames {
     return module_ids_.GetOrCreateID(&module);
   }
   ID AddID(const Module &module, ID id) {
-    CHECK(module_ids_.FindID(&module)) << "Trying to update new ID " << id << " to an existing module map";
+    CHECK(module_ids_.FindID(&module))
+        << "Trying to update new ID " << id << " to an existing module map";
     return module_ids_.UpdateID(&module, id);
   }
 
-  ID GetOrCreateID(const Value &value) {
-    return value_ids_.GetOrCreateID(value);
-  }
+  ID GetOrCreateID(Value value) { return value_ids_.GetOrCreateID(value); }
 
-  ID AddID(const Value &value, ID id) {
-    CHECK(value_ids_.FindID(value)) << "Trying to update new ID " << id << " to an existing value map";
+  ID AddID(Value value, ID id) {
+    CHECK(value_ids_.FindID(value))
+        << "Trying to update new ID " << id << " to an existing value map";
     return value_ids_.UpdateID(value, id);
   }
 
@@ -108,7 +97,6 @@ class SsaNames {
   IDManager<const Block *> block_ids_;
   IDManager<const Module *> module_ids_;
   IDManager<Value> value_ids_;
-  IDManager<const Operation *> operation_ids_;
 };
 
 }  // namespace raksha::ir

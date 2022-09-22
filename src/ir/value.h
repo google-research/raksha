@@ -16,8 +16,8 @@
 #ifndef SRC_IR_VALUE_H_
 #define SRC_IR_VALUE_H_
 
-#include <vector>
 #include <variant>
+#include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"
@@ -78,6 +78,14 @@ class BlockArgument : public NamedValue<Block> {
 // Indicates the result of an operation.
 class OperationResult : public NamedValue<Operation> {
  public:
+  // If you have an `Operation` that should produce a single result value, this
+  // factory helper will produce an `OperationResult` with the default output
+  // name "out" for you.
+  static OperationResult MakeDefaultOperationResult(
+      const Operation& operation) {
+    return OperationResult(operation, "out");
+  }
+
   using NamedValue<Operation>::NamedValue;
   const Operation& operation() const { return element(); }
   using NamedValue<Operation>::operator==;
@@ -132,6 +140,15 @@ class Value {
  public:
   using Variants = std::variant<value::BlockArgument, value::OperationResult,
                                 value::StoredValue, value::Any>;
+
+  // If you have an `Operation` that should produce a single result value, this
+  // helper will produce an `OperationResult`-variant `Value` with the default
+  // output name "out" for you.
+  static Value MakeDefaultOperationResultValue(
+      const Operation& op) {
+    return Value(
+        value::OperationResult::MakeDefaultOperationResult(op));
+  }
 
   explicit Value(Variants value) : value_(std::move(value)) {}
 

@@ -31,7 +31,8 @@ namespace raksha::ir {
 class IRPrinter : public IRTraversingVisitor<IRPrinter> {
  public:
   template <typename T>
-  static void ToString(std::ostream& out, const T& entity, SsaNames& ssa_names) {
+  static void ToString(std::ostream& out, const T& entity,
+                       SsaNames& ssa_names) {
     IRPrinter printer(out, ssa_names);
     entity.Accept(printer);
   }
@@ -90,7 +91,6 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
 
   Unit PreVisit(const Operation& operation) override {
     constexpr absl::string_view kOperationFormat = "%s = %s [%s](%s)";
-    SsaNames::ID this_ssa_name = ssa_names_.GetOrCreateID(operation);
 
     // We want the attribute names to print in a stable order. This means that
     // we cannot just print from the attribute map directly. Gather the names
@@ -104,6 +104,13 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
         operation.inputs(), ", ", [this](std::string* out, const Value& value) {
           absl::StrAppend(out, value.ToString(ssa_names_));
         });
+
+    // Produce the result value's SSA name after the inputs. It is technically
+    // correct both ways, and in real programs shouldn't matter, but for unit
+    // tests, producing the result first can produce the surprising result of
+    // the result being numbered before the inputs.
+    SsaNames::ID this_ssa_name = ssa_names_.GetOrCreateID(
+        ir::Value::MakeDefaultOperationResultValue(operation));
     out_ << Indent()
          << absl::StreamFormat(kOperationFormat, this_ssa_name,
                                operation.op().name(), attributes_string,

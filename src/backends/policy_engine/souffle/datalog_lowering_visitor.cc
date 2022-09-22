@@ -24,10 +24,11 @@
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/datalog/operation.h"
+#include "src/ir/ir_printer.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
 #include "src/ir/ssa_names.h"
-#include "src/ir/ir_printer.h"
+#include "src/ir/value.h"
 
 namespace raksha::backends::policy_engine::souffle {
 
@@ -75,14 +76,16 @@ Unit DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
   // `AttributeList`.
   const ir::NamedAttributeMap &ir_attr_map = operation.attributes();
 
-  // Convert to std::vector for sorting (this avoids exposing flat_hash_map ordering to datalog).
-  std::vector<std::pair<std::string, ir::Attribute>> attribute_vec(ir_attr_map.begin(), ir_attr_map.end());
+  // Convert to std::vector for sorting (this avoids exposing flat_hash_map
+  // ordering to datalog).
+  std::vector<std::pair<std::string, ir::Attribute>> attribute_vec(
+      ir_attr_map.begin(), ir_attr_map.end());
   std::sort(attribute_vec.begin(), attribute_vec.end(),
-      [](auto& left, auto& right){ return left.first > right.first; }
-  );
+            [](auto &left, auto &right) { return left.first > right.first; });
   DatalogAttributeList attribute_list = common::utils::fold(
       attribute_vec, DatalogAttributeList(),
-      [&ssa_names](DatalogAttributeList list_so_far, std::pair<std::string, ir::Attribute> name_attr_pair) {
+      [&ssa_names](DatalogAttributeList list_so_far,
+                   std::pair<std::string, ir::Attribute> name_attr_pair) {
         return DatalogAttributeList(
             DatalogAttribute(std::move(name_attr_pair.first),
                              GetPayloadForAttribute(
@@ -91,7 +94,8 @@ Unit DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
       });
   DatalogOperation datalog_operation(
       DatalogSymbol(kDefaultPrincipal), DatalogSymbol(op_name),
-      DatalogSymbol(ssa_names_.GetOrCreateID(operation)),
+      DatalogSymbol(ssa_names_.GetOrCreateID(
+          ir::Value::MakeDefaultOperationResultValue(operation))),
       std::move(operand_list), std::move(attribute_list));
   ssa_names_.GetOrCreateID(ir::Value(ir::value::OperationResult(
       operation, frontends::sql::DecoderContext::kDefaultOutputName)));
