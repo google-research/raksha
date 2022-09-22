@@ -35,7 +35,7 @@ cc_library(
         "//src/common/utils:types",
         "//src/ir/datalog:program",
         "@absl//absl/hash",
-        "@absl//absl/strings:str_format",
+        "@absl//absl/strings",
     ],
 )
 

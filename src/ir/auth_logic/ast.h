@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "absl/hash/hash.h"
+#include "absl/strings/str_join.h"
 #include "src/common/utils/map_iter.h"
 #include "src/ir/auth_logic/auth_logic_ast_visitor.h"
 #include "src/ir/datalog/program.h"
@@ -452,10 +453,12 @@ class Program {
     for (const Query& query : queries_) {
       query_strings.push_back(query.ToString());
     }
-    return absl::StrCat("Program(\n",
-                        absl::StrJoin(relation_decl_strings, "\n"),
-                        absl::StrJoin(says_assertion_strings, "\n"),
-                        absl::StrJoin(query_strings, "\n"), ")");
+    return absl::StrJoin(
+        std::vector<std::string>({"Program(",
+                                  absl::StrJoin(relation_decl_strings, "\n"),
+                                  absl::StrJoin(says_assertion_strings, "\n"),
+                                  absl::StrJoin(query_strings, "\n")}),
+        "\n");
   }
 
   bool operator==(const Program& rhs) const {
