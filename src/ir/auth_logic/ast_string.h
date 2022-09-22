@@ -52,12 +52,19 @@ std::string ToString(AstNodeVariantType Node) {
                 ")");
           },
           [](datalog::ArgumentType argumentType) {
-            return absl::StrCat(argumentType.kind(), argumentType.name());
+            switch(argumentType.kind()) {
+              case datalog::ArgumentType::Kind::kCustom:
+                return absl::StrCat(argumentType.name(), "::CustomType");
+              case datalog::ArgumentType::Kind::kNumber:
+                return std::string("NumberType");
+              case datalog::ArgumentType::Kind::kPrincipal:
+                return std::string("PrincipalType");
+            }
           },
           [](datalog::Argument argument) {
-            return absl::StrJoin(
-                {argument.argument_name(), argument.argument_type().name()},
-                " : ");
+            return absl::StrCat(
+                argument.argument_name(), " : ",
+                ToString(argument.argument_type()));
           },
           [](datalog::RelationDeclaration relationDeclaration) {
             std::vector<std::string> arg_strings;
@@ -65,15 +72,17 @@ std::string ToString(AstNodeVariantType Node) {
             for (const datalog::Argument& arg : relationDeclaration.arguments()) {
               arg_strings.push_back(ToString(arg));
             }
-            return absl::StrCat(".decl ", relationDeclaration.relation_name(), 
-              relationDeclaration.is_attribute(),
-                                absl::StrJoin(arg_strings, ", "));
+            return absl::StrCat(".decl ",
+              relationDeclaration.is_attribute() ? "attribute " : "",
+              relationDeclaration.relation_name(), "(",
+                                absl::StrJoin(arg_strings, ", "), ")");
           },
           [](Principal principal) {
             return principal.name();
           },
           [](Attribute attribute) {
                return absl::StrCat(ToString(attribute.principal()),
+                " ",
                 ToString(attribute.predicate()));
           },
           [](CanActAs canActAs) {
@@ -83,33 +92,27 @@ std::string ToString(AstNodeVariantType Node) {
           [](BaseFact basefact) {
             return std::visit(raksha::utils::overloaded{
                                   [](datalog::Predicate predicate) {
-                                    return ToString(predicate);
+                                    return absl::StrCat("BaseFact(",
+                                      ToString(predicate), ")");
                                   },
                                   [](Attribute attribute) {
-                                    return absl::StrJoin(
-                                        {attribute.principal().name(),
-                                         ToString(attribute.predicate())},
-                                        " ");
+                                    return absl::StrCat("BaseFact(",
+                                      ToString(attribute), ")");
                                   },
                                   [](CanActAs can_act_as) {
-                                    return absl::StrJoin(
-                                        {can_act_as.left_principal().name(),
-                                         can_act_as.right_principal().name()},
-                                        " canActAs ");
+                                    return absl::StrCat("BaseFact(",
+                                      ToString(can_act_as), ")");
                                   }},
                               basefact.GetValue());
           },
           [](Fact fact) {
-            if (fact.delegation_chain().empty()) {
-              return ToString(fact.base_fact());
-            }
             std::string cansay_string = "";
             for (const Principal& delegatees : fact.delegation_chain()) {
               cansay_string =
                   absl::StrJoin({delegatees.name(), cansay_string}, " canSay ");
             }
-            return absl::StrJoin({cansay_string, ToString(fact.base_fact())},
-                                 " ");
+            return absl::StrCat("Fact(", cansay_string,
+              ToString(fact.base_fact()), ")");
           },
           [](ConditionalAssertion conditional_assertion) {
             std::string lhs = ToString(conditional_assertion.lhs());
