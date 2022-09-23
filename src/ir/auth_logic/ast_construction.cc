@@ -154,20 +154,17 @@ static datalog::ArgumentType ConstructArgumentType(
   if (auto* number_type_context =
           dynamic_cast<AuthLogicParser::NumberTypeContext*>(
               &auth_logic_type_context)) {
-    return datalog::ArgumentType(datalog::ArgumentType::Kind::kNumber,
-                                 number_type_context->NUMBERTYPE()->getText());
+    return datalog::ArgumentType::MakeNumberType();
   } else if (auto* principal_type_context =
                  dynamic_cast<AuthLogicParser::PrincipalTypeContext*>(
                      &auth_logic_type_context)) {
-    return datalog::ArgumentType(
-        datalog::ArgumentType::Kind::kPrincipal,
-        principal_type_context->PRINCIPALTYPE()->getText());
+    return datalog::ArgumentType::MakePrincipalType();
   }
   auto& custom_type_context =
       *CHECK_NOTNULL(dynamic_cast<AuthLogicParser::CustomTypeContext*>(
           &auth_logic_type_context));
-  return datalog::ArgumentType(datalog::ArgumentType::Kind::kCustom,
-                               custom_type_context.VARIABLE()->getText());
+  return datalog::ArgumentType::MakeCustomType(
+      custom_type_context.VARIABLE()->getText());
 }
 
 static datalog::RelationDeclaration ConstructRelationDeclaration(

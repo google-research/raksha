@@ -85,10 +85,17 @@ class Predicate {
 class ArgumentType {
  public:
   enum class Kind { kNumber, kPrincipal, kCustom };
-  explicit ArgumentType(Kind kind, absl::string_view name)
-      : kind_(kind), name_(name) {}
   Kind kind() const { return kind_; }
   absl::string_view name() const { return name_; }
+  static ArgumentType MakePrincipalType() {
+    return ArgumentType(Kind::kPrincipal, "Principal");
+  }
+  static ArgumentType MakeNumberType() {
+    return ArgumentType(Kind::kNumber, "Number");
+  }
+  static ArgumentType MakeCustomType(absl::string_view name) {
+    return ArgumentType(Kind::kCustom, name);
+  }
 
   std::string ToString() const { return absl::StrCat(kind_, name_); }
 
@@ -101,6 +108,8 @@ class ArgumentType {
   }
 
  private:
+  explicit ArgumentType(Kind kind, absl::string_view name)
+      : kind_(kind), name_(name) {}
   Kind kind_;
   std::string name_;
 };
