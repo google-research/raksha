@@ -1,0 +1,76 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+#include "src/analysis/souffle/arcsjs_input_and_output.dl"
+#include "src/analysis/souffle/fact_test_helper.dl"
+
+#define CONNECT_INPUT "arcsjs.connect_input"
+#define CONNECT_OUTPUT "arcsjs.connect_output"
+
+#define TEST_N_RESULT_FOR_OPERATION(n, test_name, operation, relation, expected) \
+  TEST_CASE(cat(test_name, cat("_", #relation))) :- \
+    count : { relation(operation, expected) } = n, \
+    count : { relation(operation, _) } = n
+
+#define INPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, operation, particle, store, handle, result) \
+  isOperation(operation). \
+  TEST_N_RESULT_FOR_OPERATION(n_particles, test_name, (operation), arcsJsConnectInputOperationHasParticle, particle). \
+  TEST_N_RESULT_FOR_OPERATION(n_stores, test_name, (operation), arcsJsConnectInputOperationHasStore, store). \
+  TEST_N_RESULT_FOR_OPERATION(n_handles, test_name, (operation), arcsJsConnectInputOperationHasHandleName, handle)
+
+#define INPUT_CREATE_AND_TEST_OPERATION(n_particles, n_stores, n_handles, test_name, owner, operator, result, operandList, attrList, particle, store, handle) \
+  INPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, ([owner, operator, result, (operandList), (attrList)]), particle, store, handle, result)
+
+#define OUTPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, operation, particle, store, handle, result) \
+  isOperation(operation). \
+  TEST_N_RESULT_FOR_OPERATION(n_particles, test_name, (operation), arcsJsConnectOutputOperationHasParticle, particle). \
+  TEST_N_RESULT_FOR_OPERATION(n_stores, test_name, (operation), arcsJsConnectOutputOperationHasStore, store). \
+  TEST_N_RESULT_FOR_OPERATION(n_handles, test_name, (operation), arcsJsConnectOutputOperationHasHandleName, handle)
+
+#define OUTPUT_CREATE_AND_TEST_OPERATION(n_particles, n_stores, n_handles, test_name, owner, operator, result, operandList, attrList, particle, store, handle) \
+  OUTPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, ([owner, operator, result, (operandList), (attrList)]), particle, store, handle, result)
+
+#define ATTR_LIST1 [["name", $StringAttributePayload("foo")], nil]
+#define OPERAND_LIST1 ["operand1", ["operand2", nil]]
+
+INPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test1_input", "somePrincipal", CONNECT_INPUT, "ap1", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "operand2", "foo").
+OUTPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test2_output", "somePrincipal", CONNECT_OUTPUT, "ap1", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "operand2", "foo").
+
+#define ATTR_LIST2 [["name", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
+#define OPERAND_LIST2 ["particle", ["store", nil]]
+
+INPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test3_input_ignores_extra_attrs", "prin", CONNECT_INPUT, "ap2", (OPERAND_LIST2), (ATTR_LIST2), "particle", "store", "hello").
+OUTPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test4_output_ignores_extra_attrs", "prin", CONNECT_OUTPUT, "ap2", (OPERAND_LIST2), (ATTR_LIST2), "particle", "store", "hello").
+
+#define ATTR_LIST3 [["name", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
+#define OPERAND_LIST3 ["input1", ["input2", ["input3", nil]]]
+INPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test5_input_ignores_extra_args", "prin", CONNECT_INPUT, "ap2", (OPERAND_LIST3), (ATTR_LIST3), "input1", "input2", "hello").
+OUTPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test6_output_ignores_extra_args", "prin", CONNECT_OUTPUT, "ap2", (OPERAND_LIST3), (ATTR_LIST3), "input1", "input2", "hello").
+
+#define OPERAND_LIST4 ["input1", ["input2", nil]]
+INPUT_CREATE_AND_TEST_OPERATION(0, 0, 0, "test7_input_requires_tag", "prin", CONNECT_INPUT, "ap2", (OPERAND_LIST4), nil, _, _, _).
+OUTPUT_CREATE_AND_TEST_OPERATION(0, 0, 0, "test8_output_requires_tag", "prin", CONNECT_OUTPUT, "ap2", (OPERAND_LIST4), nil, _, _, _).
+
+#define ATTR_LIST5 [["name", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
+INPUT_CREATE_AND_TEST_OPERATION(0, 0, 0, "test9_input_requires_arg", "prin", CONNECT_INPUT, "ap2", nil, (ATTR_LIST5), _, _, _).
+OUTPUT_CREATE_AND_TEST_OPERATION(0, 0, 0, "test10_output_requires_arg", "prin", CONNECT_OUTPUT, "ap2", nil, (ATTR_LIST5), _, _, _).
+
+#define ATTR_LIST6 [["name", $StringAttributePayload("hello")], [["name", $StringAttributePayload("world")], nil]]
+#define OPERAND_LIST6 ["input1", ["input2", nil]]
+
+INPUT_CREATE_AND_TEST_OPERATION(1, 1, 2, "test11_input_maps_over_handles", "prin", CONNECT_INPUT, "ap2", (OPERAND_LIST6), (ATTR_LIST6), "input1", "input2", _).
+OUTPUT_CREATE_AND_TEST_OPERATION(1, 1, 2, "test12_output_maps_over_handles", "prin", CONNECT_OUTPUT, "ap2", (OPERAND_LIST6), (ATTR_LIST6), "input1", "input2", _).
+

@@ -48,6 +48,11 @@ exports_files([
     included_dl_scripts = [
         ":integrity_tag_prop_helper.dl",
         ":confidentiality_tag_prop_helper.dl",
+        "//src/analysis/souffle:arcsjs_core.dl",
+        "//src/analysis/souffle:arcsjs_check_and_claim.dl",
+        "//src/analysis/souffle:arcsjs_input_and_output.dl",
+        "//src/analysis/souffle:arcsjs_make_public.dl",
+        "//src/analysis/souffle:arcsjs_user_consent_to_downgrade.dl",
         "//src/analysis/souffle:attributes.dl",
         "//src/analysis/souffle:authorization_logic.dl",
         "//src/analysis/souffle:check_predicate.dl",

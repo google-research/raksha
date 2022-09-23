@@ -30,7 +30,15 @@ core_dl_files_plus_sql_output_local = core_dl_files_local + ["sql_output.dl"]
 
 core_dl_files_plus_fact_test_helper_local = core_dl_files_local + ["fact_test_helper.dl"]
 
-policy_verifier_include_dl_files_local = core_dl_files_plus_fact_test_helper_local + [
+arcsjs_dl_files_local = [
+    "arcsjs_core.dl",
+    "arcsjs_check_and_claim.dl",
+    "arcsjs_input_and_output.dl",
+    "arcsjs_make_public.dl",
+    "arcsjs_user_consent_to_downgrade.dl",
+]
+
+policy_verifier_include_dl_files_local = core_dl_files_plus_fact_test_helper_local + arcsjs_dl_files_local + [
     "may_will.dl",
     "sql_output.dl",
     "tag_transforms.dl",

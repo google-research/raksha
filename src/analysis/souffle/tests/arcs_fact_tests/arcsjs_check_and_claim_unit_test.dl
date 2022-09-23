@@ -1,0 +1,79 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+#include "src/analysis/souffle/arcsjs_check_and_claim.dl"
+#include "src/analysis/souffle/fact_test_helper.dl"
+
+/*
+  This macro makes it easy to ensure that:
+  1. the `relation` exists exactly `n` times for the given `operation`,
+  2. and that all of those `n` match the `expected` pattern.
+
+  This checks that there are no unexpected solutions, for the `relation` for the
+  given operation.
+*/ 
+#define TEST_N_RESULT_FOR_OPERATION(n, test_name, operation, relation, expected) \
+  TEST_CASE(cat(test_name, cat("_", #relation))) :- \
+    count : { relation(operation, expected) } = n, \
+    count : { relation(operation, _) } = n
+
+#define CLAIM_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, operation, argument, tag, result) \
+  isOperation(operation). \
+  TEST_N_RESULT_FOR_OPERATION(n_args, test_name, (operation), arcsJsClaimOperationHasArgument, argument). \
+  TEST_N_RESULT_FOR_OPERATION(n_tags, test_name, (operation), arcsJsClaimOperationHasTag, tag)
+
+#define CLAIM_CREATE_AND_TEST_OPERATION(n_args, n_tags, test_name, owner, operator, result, operandList, attrList, argument, tag) \
+  CLAIM_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, result, (operandList), (attrList)]), argument, tag, result)
+
+#define CHECK_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, operation, argument, tag, result) \
+  isOperation(operation). \
+  TEST_N_RESULT_FOR_OPERATION(n_args, test_name, (operation), arcsJsCheckOperationHasArgument, argument). \
+  TEST_N_RESULT_FOR_OPERATION(n_tags, test_name, (operation), arcsJsCheckOperationHasTag, tag)
+
+#define CHECK_CREATE_AND_TEST_OPERATION(n_args, n_tags, test_name, owner, operator, result, operandList, attrList, argument, tag) \
+  CHECK_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, result, (operandList), (attrList)]), argument, tag, result)
+
+#define ATTR_LIST1 [["tag", $StringAttributePayload("private")], nil]
+#define OPERAND_LIST1 ["operand1", nil]
+
+CLAIM_CREATE_AND_TEST_OPERATION(1, 1, "test1_claim", "somePrincipal", "arcsjs.claim", "ap1", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "private").
+CHECK_CREATE_AND_TEST_OPERATION(1, 1, "test2_check", "somePrincipal", "arcsjs.check", "ap1", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "private").
+
+#define ATTR_LIST2 [["tag", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
+#define OPERAND_LIST2 ["input1", nil]
+
+CLAIM_CREATE_AND_TEST_OPERATION(1, 1, "test3_claim_ignores_extra_attrs", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST2), (ATTR_LIST2), "input1", "hello").
+CHECK_CREATE_AND_TEST_OPERATION(1, 1, "test4_check_ignores_extra_attrs", "prin", "arcsjs.check", "ap2", (OPERAND_LIST2), (ATTR_LIST2), "input1", "hello").
+
+#define ATTR_LIST3 [["tag", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
+#define OPERAND_LIST3 ["input1", ["input2", nil]]
+CLAIM_CREATE_AND_TEST_OPERATION(1, 1, "test5_claim_ignores_extra_args", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST3), (ATTR_LIST3), "input1", "hello").
+CHECK_CREATE_AND_TEST_OPERATION(1, 1, "test6_check_ignores_extra_args", "prin", "arcsjs.check", "ap2", (OPERAND_LIST3), (ATTR_LIST3), "input1", "hello").
+
+#define OPERAND_LIST4 ["input1", ["input2", nil]]
+CLAIM_CREATE_AND_TEST_OPERATION(0, 0, "test7_claim_requires_tag", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST4), nil, _, _).
+CHECK_CREATE_AND_TEST_OPERATION(0, 0, "test8_check_requires_tag", "prin", "arcsjs.check", "ap2", (OPERAND_LIST4), nil, _, _).
+
+#define ATTR_LIST5 [["tag", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
+CLAIM_CREATE_AND_TEST_OPERATION(0, 0, "test9_claim_requires_arg", "prin", "arcsjs.claim", "ap2", nil, (ATTR_LIST5), _, _).
+CHECK_CREATE_AND_TEST_OPERATION(0, 0, "test10_check_requires_arg", "prin", "arcsjs.check", "ap2", nil, (ATTR_LIST5), _, _).
+
+#define ATTR_LIST6 [["tag", $StringAttributePayload("hello")], [["tag", $StringAttributePayload("world")], nil]]
+#define OPERAND_LIST6 ["input1", nil]
+
+CLAIM_CREATE_AND_TEST_OPERATION(1, 2, "test11_claim_maps_over_tags", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST6), (ATTR_LIST6), "input1", _).
+CHECK_CREATE_AND_TEST_OPERATION(1, 2, "test12_check_maps_over_tags", "prin", "arcsjs.check", "ap2", (OPERAND_LIST6), (ATTR_LIST6), "input1", _).
+

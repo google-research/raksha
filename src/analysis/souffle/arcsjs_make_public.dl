@@ -1,0 +1,68 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+#ifndef SRC_ANALYSIS_SOUFFLE_ARCSJS_MAKE_PUBLIC_DL_
+#define SRC_ANALYSIS_SOUFFLE_ARCSJS_MAKE_PUBLIC_DL_
+
+#include "src/analysis/souffle/arcsjs_core.dl"
+#include "src/analysis/souffle/taint.dl"
+
+#define ARCSJS_MAKE_PUBLIC_OPERATOR as("arcsjs.make_public", Operator)
+#define ARCSJS_MAKE_PUBLIC_ARGUMENT_INDEX 0
+
+.decl isArcsJsMakePublicOperation(arcsJsMakePublicOperation: Operation)
+isArcsJsMakePublicOperation(op) :-
+  isOperation(op),
+  operationHasOperator(op, ARCSJS_MAKE_PUBLIC_OPERATOR).
+
+.decl arcsJsMakePublicOperationHasArgument(op: Operation, argument: AccessPath)
+arcsJsMakePublicOperationHasArgument(op, argument) :-
+  isArcsJsMakePublicOperation(op),
+  operationHasOperandAtIndex(
+    op,
+    argument,
+    ARCSJS_MAKE_PUBLIC_ARGUMENT_INDEX
+  ).
+
+// Violates policy if `make_public` operation is malformed.
+violatesPolicy(path) :-
+  isArcsJsMakePublicOperation(op),
+  !arcsJsMakePublicOperationHasArgument(op, _),
+  operationHasResult(op, path).
+
+.decl arcsJsMakePublicHasConfidentialTag(
+  arcsJsMakePublicOperation: Operation,
+  argument: AccessPath,
+  tag: Tag
+)
+arcsJsMakePublicHasConfidentialTag(op, argument, tag) :-
+  arcsJsMakePublicOperationHasArgument(op, argument),
+  isTag(tag),
+  tag != ARCSJS_PUBLIC_TAG,
+  mayHaveTag(argument, _, tag).
+
+.decl arcsJsMakePublicResult(arcsJsMakePublicOperation: Operation, passOrFail: symbol)
+
+arcsJsMakePublicResult(op, "FAIL") :- arcsJsMakePublicHasConfidentialTag(op, _, _).
+arcsJsMakePublicResult(op, "PASS") :-
+  isArcsJsMakePublicOperation(op),
+  !arcsJsMakePublicHasConfidentialTag(op, _, _).
+
+violatesPolicy(path) :- arcsJsMakePublicHasConfidentialTag(_, path, _).
+
+#undef ARCSJS_MAKE_PUBLIC_OPERATOR
+#undef ARCSJS_MAKE_PUBLIC_ARGUMENT_INDEX
+
+#endif // SRC_ANALYSIS_SOUFFLE_ARCSJS_MAKE_PUBLIC_DL_

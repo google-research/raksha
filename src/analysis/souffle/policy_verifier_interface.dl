@@ -18,7 +18,11 @@
 #define SRC_ANALYSIS_SOUFFLE_POLICY_VERIFIER_INTERFACE
 
 #include "src/analysis/souffle/sql_output.dl"
-#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/arcsjs_core.dl"
+#include "src/analysis/souffle/arcsjs_check_and_claim.dl"
+#include "src/analysis/souffle/arcsjs_input_and_output.dl"
+#include "src/analysis/souffle/arcsjs_make_public.dl"
+#include "src/analysis/souffle/arcsjs_user_consent_to_downgrade.dl"
 #include "src/analysis/souffle/tag_transforms.dl"
 #include "src/analysis/souffle/epsilon_analysis.dl"
 

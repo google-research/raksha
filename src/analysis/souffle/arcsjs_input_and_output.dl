@@ -1,0 +1,142 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+#ifndef SRC_ANALYSIS_SOUFFLE_ARCSJS_INPUT_AND_OUTPUT_DL_
+#define SRC_ANALYSIS_SOUFFLE_ARCSJS_INPUT_AND_OUTPUT_DL_
+
+#include "src/analysis/souffle/arcsjs_core.dl"
+#include "src/analysis/souffle/taint.dl"
+
+#define ARCSJS_CONNECT_INPUT_OPERATOR as("arcsjs.connect_input", Operator)
+#define ARCSJS_CONNECT_OUTPUT_OPERATOR as("arcsjs.connect_output", Operator)
+#define ARCSJS_CONNECT_INPUT_PARTICLE_ARGUMENT_INDEX 0
+#define ARCSJS_CONNECT_INPUT_STORE_ARGUMENT_INDEX 1
+#define ARCSJS_CONNECT_OUTPUT_PARTICLE_ARGUMENT_INDEX 0
+#define ARCSJS_CONNECT_OUTPUT_STORE_ARGUMENT_INDEX 1
+#define ARCSJS_NAME_ATTRIBUTE "name"
+
+hasSpecialEdgeRules(ARCSJS_CONNECT_INPUT_OPERATOR).
+hasSpecialEdgeRules(ARCSJS_CONNECT_OUTPUT_OPERATOR).
+
+.decl isArcsJsConnectInputOperation(op: Operation)
+isArcsJsConnectInputOperation(op) :-
+  isOperation(op),
+  operationHasOperator(op, ARCSJS_CONNECT_INPUT_OPERATOR).
+
+.decl isArcsJsConnectOutputOperation(op: Operation)
+isArcsJsConnectOutputOperation(op) :-
+  isOperation(op),
+  operationHasOperator(op, ARCSJS_CONNECT_OUTPUT_OPERATOR).
+
+.decl arcsJsConnectInputOperationHasParticle(op: Operation, particle: AccessPath)
+.decl arcsJsConnectInputOperationHasStore(op: Operation, store: AccessPath)
+.decl arcsJsConnectInputOperationHasHandleName(op: Operation, name: symbol)
+arcsJsConnectInputOperationHasParticle(op, particle),
+arcsJsConnectInputOperationHasStore(op, store),
+arcsJsConnectInputOperationHasHandleName(op, name) :-
+  isArcsJsConnectInputOperation(op),
+  operationHasOperandAtIndex(
+    op,
+    particle,
+    ARCSJS_CONNECT_INPUT_PARTICLE_ARGUMENT_INDEX
+  ),
+  operationHasOperandAtIndex(
+    op,
+    store,
+    ARCSJS_CONNECT_INPUT_STORE_ARGUMENT_INDEX
+  ),
+  operationHasResult(op, result),
+  operationHasAttribute(
+    op,
+    [ARCSJS_NAME_ATTRIBUTE, $StringAttributePayload(name)]
+  ).
+
+.decl arcsJsConnectOutputOperationHasParticle(op: Operation, particle: AccessPath)
+.decl arcsJsConnectOutputOperationHasStore(op: Operation, store: AccessPath)
+.decl arcsJsConnectOutputOperationHasHandleName(op: Operation, name: symbol)
+arcsJsConnectOutputOperationHasParticle(op, particle),
+arcsJsConnectOutputOperationHasStore(op, store),
+arcsJsConnectOutputOperationHasHandleName(op, name) :-
+  isArcsJsConnectOutputOperation(op),
+  operationHasOperandAtIndex(
+    op,
+    particle,
+    ARCSJS_CONNECT_INPUT_PARTICLE_ARGUMENT_INDEX
+  ),
+  operationHasOperandAtIndex(
+    op,
+    store,
+    ARCSJS_CONNECT_INPUT_STORE_ARGUMENT_INDEX
+  ),
+  operationHasResult(op, result),
+  operationHasAttribute(
+    op,
+    [ARCSJS_NAME_ATTRIBUTE, $StringAttributePayload(name)]
+  ).
+
+// Connect input goes from store, to handle (result).
+resolvedEdge(DEFAULT_ARCSJS_OWNER, store, result) :-
+  arcsJsConnectInputOperationHasStore(op, store),
+  operationHasResult(op, result).
+
+// Connect input, then goes from to handle (result), to particle.
+resolvedEdge(DEFAULT_ARCSJS_OWNER, result, particle) :-
+  arcsJsConnectInputOperationHasParticle(op, particle),
+  operationHasResult(op, result).
+
+// Connect output goes from particle, to handle (result).
+resolvedEdge(DEFAULT_ARCSJS_OWNER, result, store) :-
+  arcsJsConnectOutputOperationHasStore(op, store),
+  operationHasResult(op, result).
+
+// Connect output, then goes from to handle (result), to store.
+resolvedEdge(DEFAULT_ARCSJS_OWNER, particle, result) :-
+  arcsJsConnectOutputOperationHasParticle(op, particle),
+  operationHasResult(op, result).
+
+.decl policyConformingInput(op: Operation)
+
+policyConformingInput(op) :-
+  isArcsJsConnectInputOperation(op),
+  arcsJsConnectInputOperationHasParticle(op, _),
+  arcsJsConnectInputOperationHasStore(op, _),
+  arcsJsConnectInputOperationHasHandleName(op, _).
+
+violatesPolicy(result) :-
+  isArcsJsConnectInputOperation(op),
+  !policyConformingInput(op),
+  operationHasResult(op, result).
+
+.decl policyConformingOutput(op: Operation)
+policyConformingOutput(op) :-
+  isArcsJsConnectOutputOperation(op),
+  arcsJsConnectOutputOperationHasParticle(op, _),
+  arcsJsConnectOutputOperationHasStore(op, _),
+  arcsJsConnectOutputOperationHasHandleName(op, _).
+
+violatesPolicy(result) :-
+  isArcsJsConnectOutputOperation(op),
+  !policyConformingOutput(op),
+  operationHasResult(op, result).
+
+#undef ARCSJS_CONNECT_INPUT_OPERATOR
+#undef ARCSJS_CONNECT_OUTPUT_OPERATOR
+#undef ARCSJS_CONNECT_INPUT_PARTICLE_ARGUMENT_INDEX
+#undef ARCSJS_CONNECT_INPUT_STORE_ARGUMENT_INDEX
+#undef ARCSJS_CONNECT_OUTPUT_PARTICLE_ARGUMENT_INDEX
+#undef ARCSJS_CONNECT_OUTPUT_STORE_ARGUMENT_INDEX
+#undef ARCSJS_NAME_ATTRIBUTE
+
+#endif // SRC_ANALYSIS_SOUFFLE_ARCSJS_INPUT_AND_OUTPUT_DL_

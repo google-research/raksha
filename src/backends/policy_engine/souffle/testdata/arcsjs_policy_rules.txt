@@ -1,4 +1,0 @@
-["set_private", $AddConfidentialityTag("private"), nil]
-["set_restricted", $AddConfidentialityTag("private"), nil]
-["set_auth_data", $AddConfidentialityTag("auth_data"), nil]
-["set_user_action_integrity", $AddIntegrityTag("UserAction"), nil]

@@ -57,11 +57,17 @@ export const SimpleRecipe = {
 
 module m0 {
   block b0 {
-    %0 = arcsjs.create_store [name: "SimpleRecipe.private_texts", type: "[Text]"]()
-    %1 = arcsjs.create_store [name: "SimpleRecipe.ignored_data", type: "[Text]"]()
-    %2 = sql.tag_transform [rule_name: "set_restricted"](%0) // claim private
-    %3 = arcsjs.particle [name: "SimpleRecipe.exfil_particle", input_0: "bar", input_1: "foo"](%2, %1)
-    // Policy check fails because we are not removing the restricted tag.
-    %4 = sql.sql_output [handle_name: "baz"](%3) // TODO: Update to arcsjs.connect_output / a service call etc.
+    %0 = arcsjs.create_store[name: "SimpleRecipe.private_texts", type: "List_Text"]()
+    %1 = arcsjs.create_store[name: "SimpleRecipe.ignored_data", type: "List_Text"]()
+    %2 = arcsjs.claim[tag: "private"](%0)
+    %3 = arcsjs.create_store[name: "SimpleRecipe.output", type: "List_Text"]()
+
+    %4 = arcsjs.particle[name: "SimpleRecipe.exfil_particle"]()
+    %5 = arcsjs.connect_input[name: "bar"](%4, %0)
+    %6 = arcsjs.connect_input[name: "foo"](%4, %1)
+    %7 = arcsjs.connect_output[name: "baz"](%4, %3)
+
+    // Policy check fails because we are not removing the private tag.
+    %8 = arcsjs.make_public[](%3)
   }  // block b0
 }  // module m0

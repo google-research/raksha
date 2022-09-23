@@ -56,11 +56,16 @@ export const SimpleRecipe = {
 
 module m0 {
   block b0 {
-    %0 = arcsjs.create_store [name: "SimpleRecipe.public_texts", type: "[Text]"]()
-    %1 = arcsjs.create_store [name: "SimpleRecipe.ignored_data", type: "[Text]"]()
-    %2 = sql.tag_transform [rule_name: "set_public"](%0) // claim public
-    %3 = arcsjs.particle [name: "SimpleRecipe.exfil_particle", input_0: "bar", input_1: "foo"](%2, %1)
-    // Policy check passes because we are not declassifying data.
-    %4 = sql.sql_output [handle_name: "baz"](%3) // TODO: Update to arcsjs.connect_output / a service call etc.
+    %0 = arcsjs.create_store[name: "SimpleRecipe.private_texts", type: "List_Text"]()
+    %1 = arcsjs.create_store[name: "SimpleRecipe.ignored_data", type: "List_Text"]()
+    %2 = arcsjs.create_store[name: "SimpleRecipe.output", type: "List_Text"]()
+
+    %3 = arcsjs.particle[name: "SimpleRecipe.exfil_particle"]()
+    %4 = arcsjs.connect_input[name: "bar"](%3, %0)
+    %5 = arcsjs.connect_input[name: "foo"](%3, %1)
+    %6 = arcsjs.connect_output[name: "baz"](%3, %2)
+
+    // Policy check passes because we are not publicizing private data.
+    %7 = arcjs.make_public[](%2)
   }  // block b0
 }  // module m0

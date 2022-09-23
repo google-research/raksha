@@ -1,0 +1,120 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+#ifndef SRC_ANALYSIS_SOUFFLE_ARCSJS_CHECK_AND_CLAIM_DL_
+#define SRC_ANALYSIS_SOUFFLE_ARCSJS_CHECK_AND_CLAIM_DL_
+
+#include "src/analysis/souffle/arcsjs_core.dl"
+#include "src/analysis/souffle/taint.dl"
+
+#define ARCSJS_CLAIM_OPERATOR as("arcsjs.claim", Operator)
+#define ARCSJS_CHECK_OPERATOR as("arcsjs.check", Operator)
+#define ARCSJS_CHECK_ARGUMENT_INDEX 0
+#define ARCSJS_CLAIM_ARGUMENT_INDEX 0
+#define ARCSJS_TAG_ATTRIBUTE "tag"
+
+.decl isArcsJsClaimOperation(arcsJsClaimOperation: Operation)
+isArcsJsClaimOperation(op) :-
+  isOperation(op),
+  operationHasOperator(op, ARCSJS_CLAIM_OPERATOR).
+
+.decl isArcsJsCheckOperation(arcsJsCheckOperation: Operation)
+isArcsJsCheckOperation(op) :-
+  isOperation(op),
+  operationHasOperator(op, ARCSJS_CHECK_OPERATOR).
+
+.decl arcsJsClaimOperationHasTag(op: Operation, tag: Tag)
+.decl arcsJsClaimOperationHasArgument(op: Operation, argument: AccessPath)
+arcsJsClaimOperationHasTag(op, as(tag, Tag)),
+arcsJsClaimOperationHasArgument(op, argument) :-
+  isArcsJsClaimOperation(op),
+  operationHasOperandAtIndex(
+    op,
+    argument,
+    ARCSJS_CLAIM_ARGUMENT_INDEX
+  ),
+  operationHasAttribute(
+    op,
+    [ARCSJS_TAG_ATTRIBUTE, $StringAttributePayload(tag)]
+  ).
+
+.decl arcsJsCheckOperationHasTag(op: Operation, tag: Tag)
+.decl arcsJsCheckOperationHasArgument(op: Operation, argument: AccessPath)
+arcsJsCheckOperationHasTag(op, as(tag, Tag)),
+arcsJsCheckOperationHasArgument(op, argument) :-
+  isArcsJsCheckOperation(op),
+  operationHasOperandAtIndex(
+    op,
+    argument,
+    ARCSJS_CHECK_ARGUMENT_INDEX
+  ),
+  operationHasAttribute(
+    op,
+    [ARCSJS_TAG_ATTRIBUTE, $StringAttributePayload(tag)]
+  ).
+
+isTag(tag) :-
+  arcsJsClaimOperationHasTag(_, tag),
+  tag != ARCSJS_PUBLIC_TAG.
+
+isTag(tag) :-
+  arcsJsCheckOperationHasTag(_, tag),
+  tag != ARCSJS_PUBLIC_TAG.
+
+// Adds `claim`ed tags to the argument of a `claim` operation.
+hasTag(argument, DEFAULT_ARCSJS_OWNER, claimed_tag) :-
+  arcsJsClaimOperationHasTag(op, claimed_tag),
+  claimed_tag != ARCSJS_PUBLIC_TAG,
+  arcsJsClaimOperationHasArgument(op, argument).
+
+.decl arcsJsCheckedResultMissingExpectedTag(op: Operation, result: AccessPath)
+
+// Checks `check`ed tags are present on the argument of a `check` operation.
+arcsJsCheckedResultMissingExpectedTag(op, argument) :-
+  arcsJsCheckOperationHasTag(op, tag),
+  arcsJsCheckOperationHasArgument(op, argument),
+  hasTag(argument, _, tag).
+
+violatesPolicy(path) :-
+  arcsJsCheckedResultMissingExpectedTag(_, path).
+
+.decl policyConformingClaim(op: Operation)
+
+policyConformingClaim(op) :-
+  isArcsJsClaimOperation(op),
+  arcsJsClaimOperationHasArgument(op, _),
+  arcsJsClaimOperationHasTag(op, _).
+
+// Violates policy if claim operations not correctly defined.
+violatesPolicy(result) :-
+  isArcsJsClaimOperation(op),
+  !policyConformingClaim(op),
+  operationHasResult(op, result).
+
+// Violates policy if check operations not correctly defined.
+violatesPolicy(result) :-
+  isArcsJsCheckOperation(op),
+  (
+    !arcsJsCheckOperationHasArgument(op, _);
+    !arcsJsCheckOperationHasTag(op, _)
+  ),
+  operationHasResult(op, result).
+
+#undef ARCSJS_CLAIM_OPERATOR
+#undef ARCSJS_CHECK_OPERATOR
+#undef ARCSJS_CHECK_ARGUMENT_INDEX
+#undef ARCSJS_CLAIM_ARGUMENT_INDEX
+
+#endif // SRC_ANALYSIS_SOUFFLE_ARCSJS_CHECK_AND_CLAIM_DL_
