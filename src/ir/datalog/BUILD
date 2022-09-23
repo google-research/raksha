@@ -40,6 +40,16 @@ cc_test(
 )
 
 cc_test(
+    name = "hash_test",
+    srcs = ["hash_test.cc"],
+    deps = [
+        ":program",
+        "//src/common/testing:gtest",
+        "@absl//absl/hash:hash_testing",
+    ],
+)
+
+cc_test(
     name = "argument_type_factory_test",
     srcs = ["argument_type_factory_test.cc"],
     deps = [

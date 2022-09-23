@@ -108,18 +108,18 @@ class ArgumentType {
 
   std::string ToString() const { return absl::StrCat(kind_, name_); }
 
+  // This is needed because Argument has private members
+  // of type ArgumentType, RelationDeclaration has private
+  // members of type Argument, and RelationDeclaration
+  // appears in an absl::flat_hash_map in the implementation of
+  // DeclarationEnvironment.
   template <typename H>
   friend H AbslHashValue(H h, const ArgumentType& typ) {
-    return H::combine(std::move(h), typ.name(), typ.kind());
+    return H::combine(std::move(h), typ.name_, typ.kind_);
   }
   // Equality is needed to use a RelationDeclaration in a flat_hash_set
   bool operator==(const ArgumentType& otherType) const {
-    // The name field is only compared for arguments of kind kCustom
-    // because the name field is only used for kCustom types (and
-    // not for kPrincipal or kNumber).
-    return this->kind_ == otherType.kind_ && this->kind_ == Kind::kCustom
-               ? this->name_ == otherType.name_
-               : true;
+    return this->kind_ == otherType.kind_ && this->name_ == otherType.name_;
   }
   // This one is just for convenience
   bool operator!=(const ArgumentType& otherType) const {
@@ -146,6 +146,10 @@ class Argument {
            this->argument_type_ == otherArgument.argument_type_;
   }
 
+  // This is needed because RelationDeclaration has private
+  // members of type Argument, and RelationDeclaration
+  // appears in an absl::flat_hash_map in the implementation of
+  // DeclarationEnvironment.
   template <typename H>
   friend H AbslHashValue(H h, const Argument& arg) {
     return H::combine(std::move(h), arg.argument_name(), arg.argument_type());
@@ -186,6 +190,9 @@ class RelationDeclaration {
                         absl::StrJoin(arg_strings, ", "));
   }
 
+  // This is needed because RelationDeclaration appears in
+  // an absl::flat_hash_map as a part of the implementation
+  // of DeclarationEnvironment
   template <typename H>
   friend H AbslHashValue(H h, const RelationDeclaration& rd) {
     return H::combine(std::move(h), rd.relation_name(), rd.is_attribute(),
