@@ -56,6 +56,27 @@ cc_library(
 )
 
 cc_library(
+    name = "declaration_environment",
+    hdrs = ["declaration_environment.h"],
+    deps = [
+        ":ast",
+        "//src/ir/datalog:program",
+        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_library(
+    name = "type_environment",
+    hdrs = ["type_environment.h"],
+    deps = [
+        ":ast",
+        ":declaration_environment",
+        "//src/ir/datalog:program",
+        "@absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_library(
     name = "universe_relation_insertion",
     srcs = ["universe_relation_insertion.cc"],
     hdrs = ["universe_relation_insertion.h"],
@@ -63,6 +84,8 @@ cc_library(
     deps = [
         ":ast",
         ":auth_logic_ast_traversing_visitor",
+        ":declaration_environment",
+        ":type_environment",
         "//src/common/logging",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/container:flat_hash_set",

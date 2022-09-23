@@ -45,88 +45,14 @@ described in `ast.h` and produces a new instance of the data structure in
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_cat.h"
+
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/auth_logic/auth_logic_ast_traversing_visitor.h"
+#include "src/ir/auth_logic/declaration_environment.h"
+#include "src/ir/auth_logic/type_environment.h"
 #include "src/ir/datalog/program.h"
 
 namespace raksha::ir::auth_logic {
-
-// A map from relation names to relation declarations.
-class DeclarationEnvironment {
- public:
-  DeclarationEnvironment(const Program& prog);
-
-  void AddDeclaration(const datalog::RelationDeclaration& rel_decl) {
-    inner_map_.insert({std::string{rel_decl.relation_name()}, rel_decl});
-  }
-
-  datalog::RelationDeclaration GetDeclarationOrFatal(
-      absl::string_view relation_name);
-
- private:
-  // Generates a new mapping from relation names to relation declarations
-  // implemented as a flat_hash_map. It is used in the implementation of
-  // the constructor for DeclarationEnvironment. This is implemented
-  // as a nested class so that it can access the DeclarationEnvironment's
-  // private state during the constructor.
-  class RelationDeclarationEnvironmentVisitor
-      : public AuthLogicAstTraversingVisitor<
-            RelationDeclarationEnvironmentVisitor> {
-   public:
-    RelationDeclarationEnvironmentVisitor(DeclarationEnvironment& enclosing_env)
-        : enclosing_env_(enclosing_env) {}
-
-   private:
-    Unit Visit(const datalog::RelationDeclaration& rel_decl) {
-      enclosing_env_.AddDeclaration(rel_decl);
-      return Unit();
-    }
-    DeclarationEnvironment& enclosing_env_;
-  };
-
-  absl::flat_hash_map<std::string, datalog::RelationDeclaration> inner_map_;
-};
-
-// A map from the names of principal / predicate argument literals
-// (the constants wrapped in quotes) to typings.
-class TypeEnvironment {
- public:
-  TypeEnvironment(DeclarationEnvironment decl_env, const Program& prog);
-
-  datalog::ArgumentType GetTypingOrFatal(absl::string_view argument_name);
-
-  const absl::flat_hash_map<std::string, datalog::ArgumentType>& inner_map()
-      const {
-    return inner_map_;
-  }
-
- private:
-  void AddTyping(absl::string_view arg_name, datalog::ArgumentType arg_type);
-
-  // This visitor aids in the construction of the TypeEnvironment.
-  // It populates a mapping (flat_hash_map) of constant (literal)
-  // names to their types by looking at the relations to which the literals
-  // are applied and declarations of those relations (including the types
-  // of the parameters where they are applied). It takes as input
-  // a DeclarationEnvironment.
-  // This is a nested class because it needs to access the private
-  // fields of the TypeEnvironment in the constructor implementation.
-  class TypeEnvironmentGenerationVisitor
-      : public AuthLogicAstTraversingVisitor<TypeEnvironmentGenerationVisitor> {
-   public:
-    TypeEnvironmentGenerationVisitor(DeclarationEnvironment decl_env,
-                                     TypeEnvironment& enclosing_env)
-        : decl_env_(decl_env), enclosing_env_(enclosing_env) {}
-
-   private:
-    Unit PreVisit(const Principal& principal);
-    Unit Visit(const datalog::Predicate& pred);
-    DeclarationEnvironment decl_env_;
-    TypeEnvironment& enclosing_env_;
-  };
-
-  absl::flat_hash_map<std::string, datalog::ArgumentType> inner_map_;
-};
 
 // Generate a new version of the program transformed to include
 // the universe declarations, universe populating rules,
