@@ -19,17 +19,23 @@
 
 namespace raksha::ir::datalog {
 
-TEST(ArgumentTypeFactoryTest, SimpleFactoryTest) {
+TEST(MakeNumberTypeTest, SimpleMakeNumberTypeTest) {
   ArgumentType number = ArgumentType::MakeNumberType();
+  EXPECT_EQ(number.name(), "Number");
+  EXPECT_EQ(number.kind(), ArgumentType::Kind::kNumber);
+}
+
+TEST(MakePrincipalTypeTest, SimpleMakePrincipalTypeTest) {
   ArgumentType principal = ArgumentType::MakePrincipalType();
+  EXPECT_EQ(principal.name(), "Principal");
+  EXPECT_EQ(principal.kind(), ArgumentType::Kind::kPrincipal);
+}
+
+TEST(MakeCustomTypeTest, SimpleMakeCustomTypeTest) {
   ArgumentType custom1 = ArgumentType::MakeCustomType("Custom1");
   ArgumentType custom2 = ArgumentType::MakeCustomType("Custom2");
-  EXPECT_EQ(number.name(), "Number");
-  EXPECT_EQ(principal.name(), "Principal");
   EXPECT_EQ(custom1.name(), "Custom1");
   EXPECT_EQ(custom2.name(), "Custom2");
-  EXPECT_EQ(number.kind(), ArgumentType::Kind::kNumber);
-  EXPECT_EQ(principal.kind(), ArgumentType::Kind::kPrincipal);
   EXPECT_EQ(custom1.kind(), ArgumentType::Kind::kCustom);
   EXPECT_EQ(custom2.kind(), ArgumentType::Kind::kCustom);
 }
