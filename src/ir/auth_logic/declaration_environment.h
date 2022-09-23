@@ -18,10 +18,9 @@
 #define SRC_IR_AUTH_LOGIC_DECLARATION_ENVIRONMENT_H_
 
 #include "absl/container/flat_hash_map.h"
-
-#include "src/ir/datalog/program.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/auth_logic/auth_logic_ast_traversing_visitor.h"
+#include "src/ir/datalog/program.h"
 
 namespace raksha::ir::auth_logic {
 

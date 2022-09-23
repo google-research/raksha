@@ -45,7 +45,6 @@ described in `ast.h` and produces a new instance of the data structure in
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_cat.h"
-
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/auth_logic/auth_logic_ast_traversing_visitor.h"
 #include "src/ir/auth_logic/declaration_environment.h"
