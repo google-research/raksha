@@ -872,7 +872,7 @@ cc_library(
         ":datalog_simple_policy_verifier_pass",
         ":utils",
         "//src/analysis/souffle:datalog_policy_verifier",
-        "//src/analysis/souffle:dp_policy_verifier_lib",
+        "//src/analysis/souffle:dp_policy_verifier",
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:policy_checker",
         "//src/backends/policy_engine/souffle/dp_testdata/delta_1:dp_policy_verifier_delta_1_with_auth_logic_lib",

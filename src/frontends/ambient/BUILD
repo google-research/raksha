@@ -13,15 +13,10 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-# load("//build_defs:raksha.bzl", "raksha_policy_check")
+
 load(
-    "//build_defs:souffle.bzl",
-    "gen_souffle_cxx_code",
-    "souffle_cc_library",
-)
-load(
-    "//src/analysis/souffle:dl_file_lists.bzl",
-    "core_dl_files",
+    "//build_defs:raksha_policy_verifier.bzl",
+    "raksha_policy_verifier_library",
 )
 
 licenses(["notice"])
@@ -44,11 +39,6 @@ filegroup(
     srcs = ["multimic.dl"],
 )
 
-souffle_cc_library(
-    name = "policy_checker_dl",
-    src = ":policy_checker_cxx",
-)
-
 genrule(
     name = "multimic_disallowed_usage_dl",
     srcs = [
@@ -59,12 +49,12 @@ genrule(
     cmd = "cat $(location :multimic_datalog) $(location disallowed_usage.dl) > $@",
 )
 
-gen_souffle_cxx_code(
-    name = "policy_checker_cxx",
-    src = ":multimic_disallowed_usage_dl",
-    included_dl_scripts = core_dl_files + [
-        "//src/analysis/souffle:may_will.dl",
+raksha_policy_verifier_library(
+    name = "ambient_policy_checker",
+    additional_dl_files = [
     ],
+    policies = ["//src/backends/policy_engine/souffle/testdata:empty_policy.auth"],
+    policy_verifier_interfaces = [":multimic_disallowed_usage_dl"],
 )
 
 cc_library(
@@ -82,7 +72,7 @@ cc_library(
     linkopts = ["-pthread"],
     local_defines = ["RAM_DOMAIN_SIZE=64"],
     deps = [
-        ":policy_checker_dl",
+        ":ambient_policy_checker",
         "//src/common/logging",
         "//src/common/utils:ranges",
         "@absl//absl/container:flat_hash_map",

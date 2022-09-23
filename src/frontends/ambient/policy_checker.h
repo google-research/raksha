@@ -112,7 +112,8 @@ class PolicyChecker {
   absl::flat_hash_set<DataFlowEdge> edges_;
   absl::flat_hash_map<User, SettingsMap> user_settings_;
 
-  static constexpr char kPolicyCheckerProgramName[] = "policy_checker_cxx";
+  static constexpr char kPolicyCheckerProgramName[] =
+      "ambient_policy_checker_cxx";
 };
 
 }  // namespace raksha::ambient

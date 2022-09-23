@@ -57,15 +57,11 @@ edge("R.SmartMicrophone.audio", "R.mic_audio_stream_out").
 
 
 // Authorization Logic
-.type DummyType <: symbol
-.decl grounded_dummy(dummy_param: DummyType)
-.decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
 .decl says_canSay_hasTag(speaker: Principal, delegatee1: Principal, ap: AccessPath, owner: Principal, tag: Tag)
 .decl says_canSay_isEnabled(speaker: Principal, delegatee1: Principal, usage: symbol)
 .decl says_canSay_removeTag(speaker: Principal, delegatee1: Principal, ap: AccessPath, owner: Principal, tag: Tag)
 .decl says_hasPreference(speaker: Principal, usage: symbol, tag: Tag)
 .decl says_isEnabled(speaker: Principal, usage: symbol)
-.decl says_isNumber(speaker: Principal, x: number)
 .decl says_issymbol(speaker: Principal, x: symbol)
 grounded_dummy("dummy_var").
 says_canSay_hasTag("GuestUser", "SystemSettingsManager", ap, "GuestUser", tag) :- says_isAccessPath("GuestUser", ap), says_isTag("GuestUser", tag).

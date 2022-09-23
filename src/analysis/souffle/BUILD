@@ -200,18 +200,15 @@ raksha_policy_verifier_library(
     policy_verifier_interfaces = [":policy_verifier_interface.dl"],
 )
 
-gen_souffle_cxx_code(
-    name = "dp_policy_verifier_cxx",
-    src = "dp_policy_verifier_interface.dl",
-    included_dl_scripts = core_dl_files + sql_dl_files + [
-        "epsilon_analysis.dl",
-        "sensitivity_analysis.dl",
+raksha_policy_verifier_library(
+    name = "dp_policy_verifier",
+    additional_dl_files = [
+        ":epsilon_analysis.dl",
+        ":sensitivity_analysis.dl",
+        ":math.dl",
     ],
-)
-
-souffle_cc_library(
-    name = "dp_policy_verifier_lib",
-    src = ":dp_policy_verifier_cxx",
+    policies = ["//src/backends/policy_engine/souffle/testdata:empty_policy.auth"],
+    policy_verifier_interfaces = [":dp_policy_verifier_interface.dl"],
 )
 
 souffle_cc_library(
