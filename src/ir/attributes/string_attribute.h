@@ -17,7 +17,6 @@
 #define SRC_IR_ATTRIBUTES_STRING_ATTRIBUTE_H_
 
 #include "absl/strings/string_view.h"
-#include "src/common/utils/intrusive_ptr.h"
 #include "src/ir/attributes/attribute.h"
 
 namespace raksha::ir {
@@ -29,8 +28,9 @@ class StringAttribute : public AttributeBase {
  public:
   static constexpr Kind kAttributeKind = Kind::kString;
 
-  static intrusive_ptr<const StringAttribute> Create(absl::string_view value) {
-    return intrusive_ptr<const StringAttribute>(new StringAttribute(value));
+  static std::shared_ptr<const StringAttribute> Create(
+      absl::string_view value) {
+    return std::shared_ptr<const StringAttribute>(new StringAttribute(value));
   }
 
   absl::string_view value() const { return value_; }
@@ -40,7 +40,9 @@ class StringAttribute : public AttributeBase {
     return *this == static_cast<const StringAttribute&>(other);
   }
 
-  std::string ToString() const override { return absl::StrCat("\"", value_, "\""); }
+  std::string ToString() const override {
+    return absl::StrCat("\"", value_, "\"");
+  }
 
  private:
   StringAttribute(absl::string_view value)

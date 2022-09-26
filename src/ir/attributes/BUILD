@@ -27,7 +27,7 @@ cc_library(
     hdrs = ["attribute.h"],
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
-        "//src/common/utils:intrusive_ptr",
+        "//src/common/logging",
         "@absl//absl/container:flat_hash_map",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
@@ -43,7 +43,6 @@ cc_test(
         ":int_attribute",
         ":string_attribute",
         "//src/common/testing:gtest",
-        "//src/common/utils:intrusive_ptr",
     ],
 )
 
@@ -53,7 +52,6 @@ cc_library(
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":attribute",
-        "//src/common/utils:intrusive_ptr",
         "@absl//absl/strings:str_format",
     ],
 )
@@ -73,7 +71,6 @@ cc_library(
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":attribute",
-        "//src/common/utils:intrusive_ptr",
         "@absl//absl/strings:str_format",
     ],
 )
@@ -93,7 +90,6 @@ cc_library(
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":attribute",
-        "//src/common/utils:intrusive_ptr",
         "@absl//absl/strings",
         "@absl//absl/strings:str_format",
     ],

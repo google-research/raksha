@@ -16,13 +16,14 @@
 #ifndef SRC_IR_TYPES_TYPE_H_
 #define SRC_IR_TYPES_TYPE_H_
 
+#include <memory>
+
 #include "absl/container/flat_hash_set.h"
 #include "src/ir/access_path_selectors_set.h"
-#include "src/common/utils/intrusive_ptr.h"
 
 namespace raksha::ir::types {
 
-class TypeBase : public RefCounted<TypeBase> {
+class TypeBase {
  public:
   enum class Kind { kPrimitive, kEntity };
 
@@ -43,14 +44,14 @@ class Type {
 
   // TODO: This should be removed to hide the TypeBase.  method is added as a
   // stop-gap solution to work with the rest of the code base.
-  const TypeBase& type_base() const { return *type_.get(); }
+  const TypeBase& type_base() const { return *type_; }
 
   friend class TypeFactory;
 
  private:
   Type(std::unique_ptr<TypeBase> type) : type_(type.release()) {}
 
-  intrusive_ptr<TypeBase> type_;
+  std::shared_ptr<TypeBase> type_;
 };
 
 }  // namespace raksha::ir::types

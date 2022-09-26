@@ -16,8 +16,9 @@
 #ifndef SRC_IR_ATTRIBUTES_FLOAT_ATTRIBUTE_H_
 #define SRC_IR_ATTRIBUTES_FLOAT_ATTRIBUTE_H_
 
+#include <memory>
+
 #include "absl/strings/str_format.h"
-#include "src/common/utils/intrusive_ptr.h"
 #include "src/ir/attributes/attribute.h"
 
 namespace raksha::ir {
@@ -29,8 +30,8 @@ class FloatAttribute : public AttributeBase {
  public:
   static constexpr Kind kAttributeKind = Kind::kFloat;
 
-  static intrusive_ptr<const FloatAttribute> Create(double value) {
-    return intrusive_ptr<const FloatAttribute>(new FloatAttribute(value));
+  static std::shared_ptr<const FloatAttribute> Create(double value) {
+    return std::shared_ptr<const FloatAttribute>(new FloatAttribute(value));
   }
 
   double value() const { return value_; }
@@ -45,8 +46,7 @@ class FloatAttribute : public AttributeBase {
   }
 
  private:
-  FloatAttribute(double value)
-      : AttributeBase(kAttributeKind), value_(value) {}
+  FloatAttribute(double value) : AttributeBase(kAttributeKind), value_(value) {}
 
   double value_;
 };

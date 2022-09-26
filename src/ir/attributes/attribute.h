@@ -16,15 +16,17 @@
 #ifndef SRC_IR_ATTRIBUTES_ATTRIBUTE_H_
 #define SRC_IR_ATTRIBUTES_ATTRIBUTE_H_
 
+#include <memory>
+
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
-#include "src/common/utils/intrusive_ptr.h"
+#include "src/common/logging/logging.h"
 
 namespace raksha::ir {
 
 // Base class for attributes associated with IR elements.
-class AttributeBase : public RefCounted<AttributeBase> {
+class AttributeBase {
  public:
   enum class Kind { kInt64, kString, kFloat };
   AttributeBase(Kind kind) : kind_(kind) {}
@@ -60,10 +62,10 @@ class Attribute {
   // If this is of type `T` as identified by the `kind`, this method returns a
   // non-null value to the underlying attribute. Otherwise, returns nullptr.
   template <typename T>
-  intrusive_ptr<const T> GetIf() const {
+  std::shared_ptr<const T> GetIf() const {
     return (T::kAttributeKind != value_->kind())
-               ? nullptr
-               : static_cast<const T*>(value_.get());
+               ? std::shared_ptr<const T>()
+               : std::static_pointer_cast<const T>(value_);
   }
 
   // Returns a string representation of the attribute.
@@ -77,11 +79,11 @@ class Attribute {
   template <class T,
             std::enable_if_t<std::is_convertible<T*, AttributeBase*>::value,
                              bool> = true>
-  Attribute(intrusive_ptr<const T> value) : value_(std::move(value)) {
+  Attribute(std::shared_ptr<const T> value) : value_(std::move(value)) {
     CHECK(value_ != nullptr);
   }
 
-  intrusive_ptr<const AttributeBase> value_;
+  std::shared_ptr<const AttributeBase> value_;
 };
 
 // TODO(#336): This will simply become a pointer comparison when we canonicalize

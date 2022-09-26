@@ -16,7 +16,6 @@
 #include "src/ir/attributes/attribute.h"
 
 #include "src/common/testing/gtest.h"
-#include "src/common/utils/intrusive_ptr.h"
 #include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
@@ -26,7 +25,7 @@ namespace {
 // A method to construct a test attribute of a specific attribute type. This
 // method is specialized below for every attribute type that we want to test.
 template <typename T>
-std::pair<Attribute, intrusive_ptr<const T>> CreateTestAttribute();
+std::pair<Attribute, std::shared_ptr<const T>> CreateTestAttribute();
 
 template <typename T>
 class AttributeTest : public testing::Test {};
@@ -37,26 +36,26 @@ TYPED_TEST_SUITE(AttributeTest, AttributeTypes);
 // Example attributes for tests.
 //
 // All specializations return a pair consisting of the following:
-//   - An `Attribute` that wraps the underlying `intrusive_ptr<T>`.
-//   - A directly created instance of `intrusive_ptr<T>`, which is used to
+//   - An `Attribute` that wraps the underlying `std::shared_ptr<T>`.
+//   - A directly created instance of `std::shared_ptr<T>`, which is used to
 //     compare against the value returned by Attribute::As<T>().
 //
 template <>
-std::pair<Attribute, intrusive_ptr<const FloatAttribute>>
+std::pair<Attribute, std::shared_ptr<const FloatAttribute>>
 CreateTestAttribute() {
   return std::make_pair(Attribute::Create<FloatAttribute>(0.31415),
                         FloatAttribute::Create(0.31415));
 }
 
 template <>
-std::pair<Attribute, intrusive_ptr<const Int64Attribute>>
+std::pair<Attribute, std::shared_ptr<const Int64Attribute>>
 CreateTestAttribute() {
   return std::make_pair(Attribute::Create<Int64Attribute>(10),
                         Int64Attribute::Create(10));
 }
 
 template <>
-std::pair<Attribute, intrusive_ptr<const StringAttribute>>
+std::pair<Attribute, std::shared_ptr<const StringAttribute>>
 CreateTestAttribute() {
   return std::make_pair(Attribute::Create<StringAttribute>("Hello World!"),
                         StringAttribute::Create("Hello World!"));
@@ -96,7 +95,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TYPED_TEST(AttributeTest, ConstructorAndAsConversionWorksCorrectly) {
   const auto& [attr, typed_attribute] = CreateTestAttribute<TypeParam>();
-  intrusive_ptr<const TypeParam> expected_typed_attribute =
+  std::shared_ptr<const TypeParam> expected_typed_attribute =
       attr.template GetIf<TypeParam>();
   ASSERT_NE(expected_typed_attribute, nullptr);
   EXPECT_EQ(*expected_typed_attribute, *typed_attribute);
