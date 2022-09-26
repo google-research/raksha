@@ -107,6 +107,8 @@ cc_library(
 cc_test(
     name = "ir_printer_test",
     srcs = ["ir_printer_test.cc"],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
     deps = [
         ":block_builder",
         ":ir_printer",

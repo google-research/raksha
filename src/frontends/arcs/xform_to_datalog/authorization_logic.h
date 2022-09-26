@@ -17,6 +17,7 @@
 #define SRC_FRONTENDS_ARCS_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
 
 #include <filesystem>
+#include <vector>
 
 #include "absl/strings/string_view.h"
 

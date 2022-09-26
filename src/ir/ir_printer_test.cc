@@ -71,7 +71,8 @@ class IRPrinterTest : public TestWithParam<ToStringVariant> {
       }
     }
     // Placate compiler by marking path as unreachable.
-    CHECK(false) << "Unreachable!";
+    LOG(FATAL) << "Unreachable!";
+    return "";
   }
 
  private:
