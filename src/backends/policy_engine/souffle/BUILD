@@ -97,240 +97,87 @@ cc_binary(
     ],
 )
 
-sh_test(
-    name = "check_multiple_policy_compliance_pass_test",
+[sh_test(
+    name = "%s" % test_name,
     srcs = ["check_policy_compliance_test.sh"],
     args = [
         "$(location :check_policy_compliance)",
-        "pass",
+        test_result,
         "sql_policy_analysis",
         "ir",
         "$(location //src/backends/policy_engine/souffle/testdata:test.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "datalog_multiple_policy_verifier_pass_cxx",
+        "%s" % policy_engine,
     ],
     data = [
         ":check_policy_compliance",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
         "//src/backends/policy_engine/souffle/testdata:test.ir",
     ],
-)
+) for test_name, test_result, policy_engine in [
+    ("check_multiple_policy_compliance_pass_test", "pass", "datalog_multiple_policy_verifier_pass_cxx"),
+    ("check_multiple_policy_compliance_fail_test", "fail", "datalog_multiple_policy_verifier_fail_cxx"),
+    ("check_simple_policy_compliance_pass_test", "pass", "datalog_simple_policy_verifier_pass_cxx"),
+    ("check_simple_policy_compliance_fail_test", "fail", "datalog_simple_policy_verifier_fail_cxx"),
+]]
 
-sh_test(
-    name = "check_multiple_policy_compliance_fail_test",
+[sh_test(
+    name = "check_policy_compliance_%s_test" % ir_name,
     srcs = ["check_policy_compliance_test.sh"],
     args = [
         "$(location :check_policy_compliance)",
-        "fail",
+        test_result,
         "sql_policy_analysis",
         "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:test.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "datalog_multiple_policy_verifier_fail_cxx",
+        "$(location //src/backends/policy_engine/souffle/testdata:%s.ir)" % ir_name,
+        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
     ],
     data = [
+        "//src/backends/policy_engine/souffle/testdata:%s.ir" % ir_name,
+        ":check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
+    ],
+) for ir_name, test_result in [
+    ("simple_passing_arcsjs", "pass"),
+    ("simple_failing_arcsjs", "fail"),
+    ("user_action_passing_arcsjs", "pass"),
+    ("user_action_failing_arcsjs_modified_after_consent", "fail"),
+    ("user_action_failing_arcsjs_no_consent", "fail"),
+    ("user_action_failing_arcsjs_no_intent", "fail"),
+    ("user_action_failing_arcsjs_partial_downgrade", "fail"),
+    ("user_action_failing_arcsjs_wrong_downgrade", "fail"),
+]]
+
+[sh_test(
+    name = "check_policy_compliance_%s_test_sql" % test_result,
+    srcs = ["check_policy_compliance_test.sh"],
+    args = [
+        "$(location :check_policy_compliance)",
+        test_result,
+        "sql_policy_analysis",
+        "ir",
+        "$(location //src/backends/policy_engine/souffle/testdata:%s.ir)" % ir_name,
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+    ],
+    data = [
+        "//src/backends/policy_engine/souffle/testdata:%s.ir" % ir_name,
         ":check_policy_compliance",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
-        "//src/backends/policy_engine/souffle/testdata:test.ir",
     ],
-)
+) for ir_name, test_result in [
+    ("simple_passing_sql", "pass"),
+    ("simple_failing_sql", "fail"),
+]]
 
 sh_test(
-    name = "check_simple_policy_compliance_pass_test",
-    srcs = ["check_policy_compliance_test.sh"],
+    name = "check_policy_compliance_badargs_test",
+    srcs = ["check_policy_compliance_errors.sh"],
     args = [
         "$(location :check_policy_compliance)",
-        "pass",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:test.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "datalog_simple_policy_verifier_pass_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
-        "//src/backends/policy_engine/souffle/testdata:test.ir",
-    ],
-)
-
-sh_test(
-    name = "check_simple_policy_compliance_fail_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:test.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "datalog_simple_policy_verifier_fail_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
-        "//src/backends/policy_engine/souffle/testdata:test.ir",
-    ],
-)
-
-sh_test(
-    name = "check_policy_compliance_pass_test_arcsjs",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "pass",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:simple_passing_arcsjs.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
-        "//src/backends/policy_engine/souffle/testdata:simple_passing_arcsjs.ir",
-    ],
-)
-
-sh_test(
-    name = "check_policy_compliance_fail_test_arcsjs",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:simple_failing_arcsjs.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
-        "//src/backends/policy_engine/souffle/testdata:simple_failing_arcsjs.ir",
-    ],
-)
-
-sh_test(
-    name = "check_policy_compliance_user_action_pass_test_arcsjs",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "pass",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:user_action_passing_arcsjs.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
-        "//src/backends/policy_engine/souffle/testdata:user_action_passing_arcsjs.ir",
-    ],
-)
-
-sh_test(
-    name = "check_policy_compliance_user_action_fail_test_arcsjs_modified_after_consent",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_modified_after_consent.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
-        "//src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_modified_after_consent.ir",
-    ],
-)
-
-sh_test(
-    name = "check_policy_compliance_user_action_fail_test_arcsjs_no_consent",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_no_consent.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
-        "//src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_no_consent.ir",
-    ],
-)
-
-sh_test(
-    name = "check_policy_compliance_user_action_fail_test_arcsjs_no_intent",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_no_intent.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
-        "//src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_no_intent.ir",
-    ],
-)
-
-sh_test(
-    name = "check_policy_compliance_user_action_fail_test_arcsjs_partial_downgrade",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_partial_downgrade.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
-        "//src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_partial_downgrade.ir",
-    ],
-)
-
-sh_test(
-    name = "check_policy_compliance_user_action_fail_test_arcsjs_wrong_downgrade",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_wrong_downgrade.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt)",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:arcsjs_policy_rules.txt",
-        "//src/backends/policy_engine/souffle/testdata:user_action_failing_arcsjs_wrong_downgrade.ir",
-    ],
-)
-
-sh_test(
-    name = "check_policy_compliance_pass_test_sql",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "pass",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:simple_passing_sql.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
     ],
     data = [
         ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:simple_passing_sql.ir",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
     ],
 )
@@ -353,429 +200,103 @@ sh_test(
     ],
 )
 
-sh_test(
-    name = "check_policy_compliance_fail_test_sql",
+[sh_test(
+    name = "check_dp_policy_compliance_epsilon_2_%s_test" % ir_name,
     srcs = ["check_policy_compliance_test.sh"],
     args = [
         "$(location :check_policy_compliance)",
-        "fail",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/backends/policy_engine/souffle/testdata:simple_failing_sql.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:simple_failing_sql.ir",
-        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
-    ],
-)
-
-sh_test(
-    name = "check_policy_compliance_badargs_test",
-    srcs = ["check_policy_compliance_errors.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
-    ],
-)
-
-sh_test(
-    name = "check_1q_epsilon2_fail_nopm_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
+        test_result,
         "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_nopm_failing.ir)",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:%s.ir)" % ir_name,
         "2",
         "1",
         "dp_policy_verifier_cxx",
     ],
     data = [
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:%s.ir" % ir_name,
         ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_nopm_failing.ir",
     ],
-)
+) for ir_name, test_result in [
+    ("1q_nopm_failing", "fail"),
+    ("1q_passing", "pass"),
+    ("1q_no_aggregation_failing", "fail"),
+    ("2q_passing", "pass"),
+    ("1q_no_aggregation_passing", "pass"),
+    ("1q_failing", "fail"),
+    ("1q_join_failing", "fail"),
+    ("1q_join_passing_gb", "pass"),
+    ("1q_join_passing_kappa", "pass"),
+    ("2q_failing", "fail"),
+]]
 
-sh_test(
-    name = "check_1q_epsilon2_pass_test",
+[sh_test(
+    name = "check_dp_policy_compliance_epsilon_4_%s_test" % ir_name,
     srcs = ["check_policy_compliance_test.sh"],
     args = [
         "$(location :check_policy_compliance)",
-        "pass",
+        test_result,
         "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_passing.ir)",
-        "2",
-        "1",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_passing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_2q_epsilon2_pass_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "pass",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:2q_passing.ir)",
-        "2",
-        "1",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:2q_passing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_1q_epsilon2_no_aggregation_fail_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_no_aggregation_failing.ir)",
-        "2",
-        "1",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_no_aggregation_failing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_1q_epsilon2_no_aggregation_pass_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "pass",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_no_aggregation_passing.ir)",
-        "2",
-        "1",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_no_aggregation_passing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_1q_epsilon2_fail_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_failing.ir)",
-        "2",
-        "1",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_failing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_1q_join_fail_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_join_failing.ir)",
-        "2",
-        "1",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_join_failing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_1q_join_gb_pass_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "pass",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_join_passing_gb.ir)",
-        "2",
-        "1",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_join_passing_gb.ir",
-    ],
-)
-
-sh_test(
-    name = "check_1q_join_kappa_pass_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "pass",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_join_passing_kappa.ir)",
-        "2",
-        "1",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:1q_join_passing_kappa.ir",
-    ],
-)
-
-sh_test(
-    name = "check_2q_epsilon2_fail_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_2:2q_failing.ir)",
-        "2",
-        "1",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:2q_failing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_1q_epsilon4_pass_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "pass",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_4:1q_passing.ir)",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_4:%s.ir)" % ir_name,
         "4",
         "1",
         "dp_policy_verifier_cxx",
     ],
     data = [
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:%s.ir" % ir_name,
         ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:1q_passing.ir",
     ],
-)
+) for ir_name, test_result in [
+    ("1q_passing", "pass"),
+    ("2q_passing", "pass"),
+    ("1q_failing", "fail"),
+    ("2q_failing", "fail"),
+]]
 
-sh_test(
-    name = "check_2q_epsilon4_pass_test",
+[sh_test(
+    name = "check_dp_policy_compliance_delta_1_%s_test" % ir_name,
     srcs = ["check_policy_compliance_test.sh"],
     args = [
         "$(location :check_policy_compliance)",
-        "pass",
+        test_result,
         "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_4:2q_passing.ir)",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_1:%s.ir)" % ir_name,
         "4",
         "1",
         "dp_policy_verifier_cxx",
     ],
     data = [
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_1:%s.ir" % ir_name,
         ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:2q_passing.ir",
     ],
-)
+) for ir_name, test_result in [
+    ("1q_passing", "pass"),
+    ("2q_passing", "pass"),
+    ("1q_failing", "fail"),
+    ("2q_failing", "fail"),
+]]
 
-sh_test(
-    name = "check_1q_epsilon4_fail_test",
+[sh_test(
+    name = "check_dp_policy_compliance_delta_2_%s_test" % ir_name,
     srcs = ["check_policy_compliance_test.sh"],
     args = [
         "$(location :check_policy_compliance)",
-        "fail",
+        test_result,
         "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_4:1q_failing.ir)",
-        "4",
-        "1",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:1q_failing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_2q_epsilon4_fail_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/epsilon_4:2q_failing.ir)",
-        "4",
-        "1",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:2q_failing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_1q_delta1_pass_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "pass",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_1:1q_passing.ir)",
-        "4",
-        "1",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/delta_1:1q_passing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_2q_delta1_pass_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "pass",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_1:2q_passing.ir)",
-        "4",
-        "1",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/delta_1:2q_passing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_1q_delta1_fail_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_1:1q_failing.ir)",
-        "4",
-        "1",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/delta_1:1q_failing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_2q_delta1_fail_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_1:2q_failing.ir)",
-        "4",
-        "1",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/delta_1:2q_failing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_1q_delta2_pass_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "pass",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_2:1q_passing.ir)",
+        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_2:%s.ir)" % ir_name,
         "4",
         "2",
         "dp_policy_verifier_cxx",
     ],
     data = [
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_2:%s.ir" % ir_name,
         ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/delta_2:1q_passing.ir",
     ],
-)
-
-sh_test(
-    name = "check_2q_delta2_pass_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "pass",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_2:2q_passing.ir)",
-        "4",
-        "2",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/delta_2:2q_passing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_1q_delta2_fail_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_2:1q_failing.ir)",
-        "4",
-        "2",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/delta_2:1q_failing.ir",
-    ],
-)
-
-sh_test(
-    name = "check_2q_delta2_fail_test",
-    srcs = ["check_policy_compliance_test.sh"],
-    args = [
-        "$(location :check_policy_compliance)",
-        "fail",
-        "dp_analysis",
-        "$(location //src/backends/policy_engine/souffle/dp_testdata/delta_2:2q_failing.ir)",
-        "4",
-        "2",
-        "dp_policy_verifier_cxx",
-    ],
-    data = [
-        ":check_policy_compliance",
-        "//src/backends/policy_engine/souffle/dp_testdata/delta_2:2q_failing.ir",
-    ],
-)
+) for ir_name, test_result in [
+    ("1q_passing", "pass"),
+    ("2q_passing", "pass"),
+    ("1q_failing", "fail"),
+    ("2q_failing", "fail"),
+]]
 
 cc_library(
     name = "datalog_lowering_visitor",

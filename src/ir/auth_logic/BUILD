@@ -126,7 +126,7 @@ cc_test(
 )
 
 cc_test(
-    name = "ast_visitor_test",
+    name = "auth_logic_ast_traversing_visitor_test",
     srcs = ["auth_logic_ast_traversing_visitor_test.cc"],
     deps = [
         ":ast",
