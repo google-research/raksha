@@ -151,12 +151,10 @@ static Fact ConstructFact(std::forward_list<Principal> delegation_chain,
 
 static datalog::ArgumentType ConstructArgumentType(
     AuthLogicParser::AuthLogicTypeContext& auth_logic_type_context) {
-  if (auto* number_type_context =
-          dynamic_cast<AuthLogicParser::NumberTypeContext*>(
+  if (dynamic_cast<AuthLogicParser::NumberTypeContext*>(
               &auth_logic_type_context)) {
     return datalog::ArgumentType::MakeNumberType();
-  } else if (auto* principal_type_context =
-                 dynamic_cast<AuthLogicParser::PrincipalTypeContext*>(
+  } else if (dynamic_cast<AuthLogicParser::PrincipalTypeContext*>(
                      &auth_logic_type_context)) {
     return datalog::ArgumentType::MakePrincipalType();
   }
