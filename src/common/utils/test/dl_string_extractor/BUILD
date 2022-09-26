@@ -22,7 +22,7 @@ package(
 cc_library(
     name = "datalog_string",
     hdrs = ["datalog_string.h"],
-    deps = ["@absl//absl/strings"],
+    deps = ["@com_google_absl//absl/strings"],
 )
 
 exports_files([

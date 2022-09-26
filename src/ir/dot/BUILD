@@ -33,10 +33,10 @@ cc_library(
         "//src/ir:ir_printer",
         "//src/ir:ir_traversing_visitor",
         "//src/ir:module",
-        "@absl//absl/container:btree",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/container:flat_hash_set",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/container:btree",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -54,6 +54,6 @@ cc_test(
         "//src/ir/attributes:float_attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )

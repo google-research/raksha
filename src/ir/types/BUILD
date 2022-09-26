@@ -37,9 +37,9 @@ cc_library(
         "//src/common/logging",
         "//src/common/utils:intrusive_ptr",
         "//src/ir:access_path_selectors",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/container:flat_hash_set",
-        "@absl//absl/hash",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/hash",
     ],
 )
 
@@ -64,8 +64,8 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/ir:access_path_selectors",
         "//src/ir/types/proto",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
     ],
 )
 

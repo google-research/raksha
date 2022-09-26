@@ -151,7 +151,7 @@ cc_test(
     deps = [
         ":fold",
         "//src/common/testing:gtest",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -161,10 +161,10 @@ cc_library(
     hdrs = ["filesystem.h"],
     deps = [
         "//src/common/logging",
-        "@absl//absl/status",
-        "@absl//absl/status:statusor",
-        "@absl//absl/strings",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -174,7 +174,7 @@ cc_test(
     deps = [
         ":filesystem",
         "//src/common/testing:gtest",
-        "@absl//absl/status",
-        "@absl//absl/status:statusor",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
     ],
 )
