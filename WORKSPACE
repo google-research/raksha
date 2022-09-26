@@ -286,3 +286,13 @@ http_archive(
     strip_prefix = "re2-2022-06-01",
     urls = ["https://github.com/google/re2/archive/refs/tags/2022-06-01.tar.gz"],
 )
+
+fuzztest_commit_hash = "4a8253b7299cf1764550054fae55f1b58a65bbaa"
+
+# Fuzztest
+http_archive(
+    name = "fuzztest",
+    sha256 = "72ae2d28323748d2c466396fa47038351ae81bedc50b8a3c6f1de6a9f02cde33",
+    strip_prefix = "fuzztest-" + fuzztest_commit_hash,
+    urls = ["https://github.com/google/fuzztest/archive/" + fuzztest_commit_hash + ".zip"],
+)
