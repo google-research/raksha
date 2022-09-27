@@ -148,6 +148,13 @@ http_archive(
     urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20220623.0.tar.gz"],
 )
 
+http_archive(
+    name = "com_google_absl",
+    sha256 = "4208129b49006089ba1d6710845a45e31c59b0ab6bff9e5788a87f55c5abd602",
+    strip_prefix = "abseil-cpp-20220623.0",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20220623.0.tar.gz"],
+)
+
 # Bazel platform rules.
 http_archive(
     name = "platforms",
@@ -282,6 +289,13 @@ http_archive(
 # RE2
 http_archive(
     name = "re2",
+    sha256 = "f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f",
+    strip_prefix = "re2-2022-06-01",
+    urls = ["https://github.com/google/re2/archive/refs/tags/2022-06-01.tar.gz"],
+)
+
+http_archive(
+    name = "com_googlesource_code_re2",
     sha256 = "f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f",
     strip_prefix = "re2-2022-06-01",
     urls = ["https://github.com/google/re2/archive/refs/tags/2022-06-01.tar.gz"],
