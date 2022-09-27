@@ -95,6 +95,18 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "type_environment_test",
+    srcs = ["type_environment_test.cc"],
+    deps = [
+        ":ast",
+        ":declaration_environment",
+        ":type_environment",
+        "//src/common/testing:gtest",
+        "//src/ir/datalog:program",
+    ],
+)
+
 cc_library(
     name = "universe_relation_insertion",
     srcs = ["universe_relation_insertion.cc"],
