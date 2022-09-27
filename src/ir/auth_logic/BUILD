@@ -71,7 +71,10 @@ cc_library(
 cc_library(
     name = "type_environment",
     srcs = ["type_environment.cc"],
-    hdrs = ["type_environment.h"],
+    hdrs = [
+        "is_name_constant.h",
+        "type_environment.h",
+    ],
     deps = [
         ":ast",
         ":auth_logic_ast_traversing_visitor",
@@ -84,7 +87,10 @@ cc_library(
 cc_library(
     name = "universe_relation_insertion",
     srcs = ["universe_relation_insertion.cc"],
-    hdrs = ["universe_relation_insertion.h"],
+    hdrs = [
+        "is_name_constant.h",
+        "universe_relation_insertion.h",
+    ],
     visibility = ["//visibility:private"],
     deps = [
         ":ast",

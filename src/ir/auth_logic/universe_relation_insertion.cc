@@ -16,6 +16,8 @@
 
 #include "src/ir/auth_logic/universe_relation_insertion.h"
 
+#include "src/ir/auth_logic/is_name_constant.h"
+
 namespace raksha::ir::auth_logic {
 
 namespace {
