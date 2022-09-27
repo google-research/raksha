@@ -30,7 +30,7 @@ cc_library(
         ":module",
         ":value",
         "//src/ir/types",
-        "@absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 
@@ -55,7 +55,7 @@ cc_library(
     hdrs = ["data_decl.h"],
     deps = [
         "//src/ir/types",
-        "@absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 
@@ -77,7 +77,7 @@ cc_library(
         ":module",
         ":operator",
         "//src/ir/types",
-        "@absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 
@@ -99,8 +99,8 @@ cc_library(
         ":module",
         ":ssa_names",
         ":value",
-        "@absl//absl/strings",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -117,9 +117,9 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/ir/attributes:string_attribute",
         "//src/parser/ir:ir_parser",
-        "@absl//absl/container:flat_hash_set",
-        "@absl//absl/strings",
-        "@re2",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/strings",
+        "@com_googlesource_code_re2//:re2",
     ],
 )
 
@@ -148,7 +148,7 @@ cc_library(
     name = "operator",
     hdrs = ["operator.h"],
     visibility = ["//src:__subpackages__"] + frontend_packages,
-    deps = ["@absl//absl/strings"],
+    deps = ["@com_google_absl//absl/strings"],
 )
 
 cc_test(
@@ -172,7 +172,7 @@ cc_test(
         "//src/ir/attributes:float_attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
-        "@absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/container:flat_hash_set",
     ],
 )
 
@@ -191,8 +191,8 @@ cc_library(
         "//src/common/utils:types",
         "//src/ir/attributes:attribute",
         "//src/ir/types",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -212,7 +212,7 @@ cc_library(
     deps = [
         ":operator",
         ":value",
-        "@absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 
@@ -232,8 +232,8 @@ cc_library(
     hdrs = ["storage.h"],
     deps = [
         "//src/ir/types",
-        "@absl//absl/strings",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -256,9 +256,9 @@ cc_library(
         "//src/common/utils:overloaded",
         "//src/common/utils:ranges",
         "//src/ir/types",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/status:statusor",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -272,7 +272,7 @@ cc_test(
         ":value",
         "//src/common/testing:gtest",
         "//src/ir/types",
-        "@absl//absl/hash:hash_testing",
+        "@com_google_absl//absl/hash:hash_testing",
     ],
 )
 
@@ -286,11 +286,11 @@ cc_library(
     ],
     deps = [
         "//src/common/logging",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/container:flat_hash_set",
-        "@absl//absl/hash",
-        "@absl//absl/strings",
-        "@absl//absl/types:variant",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/hash",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:variant",
     ],
 )
 
@@ -300,9 +300,9 @@ cc_test(
     deps = [
         ":access_path_selectors",
         "//src/common/testing:gtest",
-        "@absl//absl/hash:hash_testing",
-        "@absl//absl/status:statusor",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/hash:hash_testing",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -312,9 +312,9 @@ cc_test(
     deps = [
         ":access_path_selectors",
         "//src/common/testing:gtest",
-        "@absl//absl/container:btree",
-        "@absl//absl/container:flat_hash_set",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/container:btree",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -324,7 +324,7 @@ cc_test(
     deps = [
         ":access_path_selectors",
         "//src/common/testing:gtest",
-        "@absl//absl/hash:hash_testing",
+        "@com_google_absl//absl/hash:hash_testing",
     ],
 )
 
@@ -334,7 +334,7 @@ cc_test(
     deps = [
         ":access_path_selectors",
         "//src/common/testing:gtest",
-        "@absl//absl/hash:hash_testing",
+        "@com_google_absl//absl/hash:hash_testing",
     ],
 )
 
@@ -355,8 +355,8 @@ cc_library(
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "//src/ir/proto:ir_cc_proto",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/status:statusor",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/status:statusor",
     ],
 )
 
@@ -374,7 +374,7 @@ cc_library(
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "//src/ir/proto:ir_cc_proto",
-        "@absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 

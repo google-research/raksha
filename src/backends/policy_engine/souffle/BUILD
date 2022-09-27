@@ -35,10 +35,10 @@ cc_binary(
         "//src/ir/auth_logic:ast_construction",
         "//src/ir/auth_logic:lowering_ast_datalog",
         "//src/ir/auth_logic:souffle_emitter",
-        "@absl//absl/flags:flag",
-        "@absl//absl/flags:parse",
-        "@absl//absl/flags:usage",
-        "@absl//absl/status:statusor",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/flags:usage",
+        "@com_google_absl//absl/status:statusor",
     ],
 )
 
@@ -90,10 +90,10 @@ cc_binary(
         "//src/common/logging",
         "//src/ir:proto_to_ir",
         "//src/parser/ir:ir_parser",
-        "@absl//absl/flags:flag",
-        "@absl//absl/flags:parse",
-        "@absl//absl/flags:usage",
-        "@absl//absl/status:statusor",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/flags:usage",
+        "@com_google_absl//absl/status:statusor",
     ],
 )
 
@@ -338,7 +338,7 @@ cc_test(
         "//src/ir/attributes:string_attribute",
         "//src/ir/datalog:raksha_relation_interface",
         "//src/ir/datalog:value",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -351,7 +351,7 @@ cc_library(
         "//src/common/logging",
         "//src/ir/datalog:input_relation_fact",
         "//src/ir/datalog:raksha_relation_interface",
-        "@absl//absl/status:statusor",
+        "@com_google_absl//absl/status:statusor",
     ],
 )
 
@@ -367,7 +367,7 @@ cc_test(
         "//src/ir/attributes:attribute",
         "//src/ir/datalog:raksha_relation_interface",
         "//src/ir/datalog:value",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -402,8 +402,8 @@ cc_library(
         "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:dp_policy_verifier_epsilon_4_with_auth_logic_lib",
         "//src/common/utils:filesystem",
         "//src/ir:module",
-        "@absl//absl/container:inlined_vector",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/container:inlined_vector",
+        "@com_google_absl//absl/strings",
         "@souffle//:souffle_include_lib",
     ],
 )
@@ -437,9 +437,9 @@ cc_library(
     srcs = ["utils.cc"],
     hdrs = ["utils.h"],
     deps = [
-        "@absl//absl/status",
-        "@absl//absl/strings",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -451,7 +451,7 @@ cc_test(
         "//src/common/logging",
         "//src/common/testing:gtest",
         "//src/common/utils:filesystem",
-        "@absl//absl/status:statusor",
+        "@com_google_absl//absl/status:statusor",
     ],
 )
 

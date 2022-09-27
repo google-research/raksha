@@ -26,7 +26,7 @@ cc_library(
     deps = [
         "//rust/tools/authorization-logic:authorization_logic_lib",
         "//src/common/logging",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -49,7 +49,7 @@ cc_library(
     deps = [
         ":authorization_logic",
         "//src/common/logging",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -61,7 +61,7 @@ cc_test(
         ":authorization_logic_datalog_facts",
         "//src/common/testing:gtest",
         "//src/common/utils/test:utils",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -73,7 +73,7 @@ cc_library(
         ":manifest_datalog_facts",
         "//src/frontends/arcs",
         "//third_party/arcs/proto:manifest_cc_proto",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -101,8 +101,8 @@ cc_library(
         "//src/ir/types",
         "//src/ir/types/proto",
         "//third_party/arcs/proto:manifest_cc_proto",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -117,7 +117,7 @@ cc_test(
         "//src/frontends/arcs",
         "//src/frontends/arcs/proto:system_spec",
         "//src/ir/types",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -132,9 +132,9 @@ cc_binary(
         "//src/frontends/arcs",
         "//src/frontends/arcs/proto:system_spec",
         "//src/ir/types",
-        "@absl//absl/flags:flag",
-        "@absl//absl/flags:parse",
-        "@absl//absl/flags:usage",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/flags:usage",
     ],
 )
 

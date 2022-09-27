@@ -45,9 +45,9 @@ cc_library(
         "//src/common/logging",
         "//src/frontends/arcs/proto:access_path",
         "//src/ir/types",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/strings",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -60,11 +60,11 @@ cc_library(
     deps = [
         "//src/common/logging",
         "//src/ir:access_path_selectors",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/container:flat_hash_set",
-        "@absl//absl/hash",
-        "@absl//absl/strings",
-        "@absl//absl/types:variant",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/hash",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:variant",
     ],
 )
 
@@ -74,7 +74,7 @@ cc_test(
     deps = [
         ":access_path",
         "//src/common/testing:gtest",
-        "@absl//absl/hash:hash_testing",
+        "@com_google_absl//absl/hash:hash_testing",
     ],
 )
 
@@ -108,7 +108,7 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/frontends/arcs/proto:tag_claim",
         "//src/ir:access_path_selectors",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -123,8 +123,8 @@ cc_test(
         "//src/frontends/arcs/proto:predicate",
         "//src/frontends/arcs/proto:tag_check",
         "//src/ir:access_path_selectors",
-        "@absl//absl/strings",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -134,7 +134,7 @@ cc_test(
     deps = [
         ":access_path",
         "//src/common/testing:gtest",
-        "@absl//absl/hash:hash_testing",
+        "@com_google_absl//absl/hash:hash_testing",
     ],
 )
 
@@ -147,8 +147,8 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/frontends/arcs/proto:access_path",
         "//src/frontends/arcs/proto:derives_from_claim",
-        "@absl//absl/strings",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -159,7 +159,7 @@ cc_library(
     hdrs = ["predicate_textproto_to_rule_body_testdata.h"],
     deps = [
         "//src/common/utils/test/dl_string_extractor:datalog_string",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -173,7 +173,7 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/frontends/arcs/proto:predicate",
         "//third_party/arcs/proto:manifest_cc_proto",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 

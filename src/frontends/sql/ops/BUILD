@@ -34,7 +34,7 @@ cc_library(
         "//src/ir:ir_context",
         "//src/ir:module",
         "//src/ir:value",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -49,7 +49,7 @@ cc_library(
         "//src/ir:value",
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:string_attribute",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -77,8 +77,8 @@ cc_library(
         "//src/ir:value",
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:int_attribute",
-        "@absl//absl/algorithm:container",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -162,7 +162,7 @@ cc_library(
         "//src/ir:ir_context",
         "//src/ir:module",
         "//src/ir:value",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -186,7 +186,7 @@ cc_library(
     name = "op_traits",
     hdrs = ["op_traits.h"],
     deps = [
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 

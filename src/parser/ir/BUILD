@@ -56,7 +56,7 @@ cc_library(
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "//src/ir/types",
-        "@absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 
@@ -81,9 +81,9 @@ cc_binary(
         ":ir_parser",
         "//src/backends/policy_engine/souffle:datalog_lowering_visitor",
         "//src/common/logging",
-        "@absl//absl/flags:flag",
-        "@absl//absl/flags:parse",
-        "@absl//absl/flags:usage",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/flags:usage",
+        "@com_google_absl//absl/strings",
     ],
 )

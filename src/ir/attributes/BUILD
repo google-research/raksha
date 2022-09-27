@@ -28,9 +28,9 @@ cc_library(
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         "//src/common/utils:intrusive_ptr",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/strings",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -54,7 +54,7 @@ cc_library(
     deps = [
         ":attribute",
         "//src/common/utils:intrusive_ptr",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -74,7 +74,7 @@ cc_library(
     deps = [
         ":attribute",
         "//src/common/utils:intrusive_ptr",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -94,8 +94,8 @@ cc_library(
     deps = [
         ":attribute",
         "//src/common/utils:intrusive_ptr",
-        "@absl//absl/strings",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 

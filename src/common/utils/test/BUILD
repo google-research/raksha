@@ -27,6 +27,6 @@ cc_library(
     deps = [
         "//src/common/logging",
         "//src/common/testing:gtest",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
