@@ -30,11 +30,17 @@ class DeclarationEnvironment {
   DeclarationEnvironment(const Program& prog);
 
   void AddDeclaration(const datalog::RelationDeclaration& rel_decl) {
-    inner_map_.insert({std::string{rel_decl.relation_name()}, rel_decl});
+    absl::string_view rel_name = rel_decl.relation_name();
+    if (inner_map_.find(rel_name) == inner_map_.end()) {
+      inner_map_.insert({std::string{rel_decl.relation_name()}, rel_decl});
+    } else {
+      LOG(FATAL) << "Error: found multiple declarations of relation named: "
+                 << rel_name;
+    }
   }
 
   datalog::RelationDeclaration GetDeclarationOrFatal(
-      absl::string_view relation_name);
+      absl::string_view relation_name) const;
 
  private:
   // Generates a new mapping from relation names to relation declarations

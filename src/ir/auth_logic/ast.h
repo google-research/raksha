@@ -31,6 +31,23 @@
 
 namespace raksha::ir::auth_logic {
 
+// Determine if an identifier (which may be an argument of a predicate
+// or a principal name) is a constant or variable.
+// TODO(#673 aferr) it would be better to refactor the AST so that
+// identifiers are a separate AST node with constant and non-constant
+// children determined at parse time rather than here since
+// this information is available at parse time.
+bool IsNameConstant(absl::string_view id) {
+  if (id[0] == '"') {
+    return true;
+  } else {
+    int unused_output;
+    // Numeric literals are constants and this is
+    // a numeric literal if all the characters are numbers.
+    return absl::SimpleAtoi(id, &unused_output);
+  }
+}
+
 class Principal {
  public:
   explicit Principal(std::string name) : name_(std::move(name)) {}
