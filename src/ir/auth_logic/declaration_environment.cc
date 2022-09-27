@@ -18,9 +18,43 @@
 
 namespace raksha::ir::auth_logic {
 
+namespace {
+// Generates a new mapping from relation names to relation declarations
+// implemented as a flat_hash_map. It is used in the implementation of
+// the constructor for DeclarationEnvironment. This is implemented
+// as a nested class so that it can access the DeclarationEnvironment's
+// private state during the constructor.
+class RelationDeclarationEnvironmentVisitor
+    : public AuthLogicAstTraversingVisitor<
+          RelationDeclarationEnvironmentVisitor> {
+ public:
+  RelationDeclarationEnvironmentVisitor(DeclarationEnvironment& enclosing_env)
+      : enclosing_env_(enclosing_env) {}
+
+ private:
+  Unit Visit(const datalog::RelationDeclaration& rel_decl) {
+    enclosing_env_.AddDeclaration(rel_decl);
+    return Unit();
+  }
+  DeclarationEnvironment& enclosing_env_;
+};
+
+}  // namespace
+
 DeclarationEnvironment::DeclarationEnvironment(const Program& prog) {
   RelationDeclarationEnvironmentVisitor rel_visitor(*this);
   prog.Accept(rel_visitor);
+}
+
+void DeclarationEnvironment::AddDeclaration(
+    const datalog::RelationDeclaration& rel_decl) {
+  absl::string_view rel_name = rel_decl.relation_name();
+  if (inner_map_.find(rel_name) == inner_map_.end()) {
+    inner_map_.insert({std::string{rel_decl.relation_name()}, rel_decl});
+  } else {
+    LOG(FATAL) << "Error: found multiple declarations of relation named: "
+               << rel_name;
+  }
 }
 
 datalog::RelationDeclaration DeclarationEnvironment::GetDeclarationOrFatal(

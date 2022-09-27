@@ -18,41 +18,37 @@
 
 namespace raksha::ir::auth_logic {
 
-TypeEnvironment::TypeEnvironment(DeclarationEnvironment decl_env,
-                                 const Program& prog) {
-  TypeEnvironmentGenerationVisitor type_gen_visitor(decl_env, *this);
-  prog.Accept(type_gen_visitor);
-}
+namespace {
 
-datalog::ArgumentType TypeEnvironment::GetTypingOrFatal(
-    absl::string_view argument_name) {
-  auto find_result = inner_map_.find(argument_name);
-  CHECK(find_result != inner_map_.end())
-      << "Could not find typing for argument " << argument_name;
-  return find_result->second;
-}
+// This visitor aids in the construction of the TypeEnvironment.
+// It populates a mapping (flat_hash_map) of constant (literal)
+// names to their types by looking at the relations to which the literals
+// are applied and declarations of those relations (including the types
+// of the parameters where they are applied). It takes as input
+// a DeclarationEnvironment.
+// This is a nested class because it needs to access the private
+// fields of the TypeEnvironment in the constructor implementation.
+class TypeEnvironmentGenerationVisitor
+    : public AuthLogicAstTraversingVisitor<TypeEnvironmentGenerationVisitor> {
+ public:
+  TypeEnvironmentGenerationVisitor(DeclarationEnvironment decl_env,
+                                   TypeEnvironment& enclosing_env)
+      : decl_env_(decl_env), enclosing_env_(enclosing_env) {}
 
-void TypeEnvironment::AddTyping(absl::string_view arg_name,
-                                datalog::ArgumentType arg_type) {
-  if (!IsNameConstant(arg_name)) {
-    // This pass is only meant to find typings for constants,
-    // so do nothing if this argument is not a constant.
-    return;
-  }
-  auto insert_result = inner_map_.insert({std::string(arg_name), arg_type});
-  CHECK(insert_result.second)
-      << "Type error for constant: " << insert_result.first->first;
-}
+ private:
+  Unit PreVisit(const Principal& principal);
+  Unit Visit(const datalog::Predicate& pred);
+  DeclarationEnvironment decl_env_;
+  TypeEnvironment& enclosing_env_;
+};
 
-Unit TypeEnvironment::TypeEnvironmentGenerationVisitor::PreVisit(
-    const Principal& principal) {
+Unit TypeEnvironmentGenerationVisitor::PreVisit(const Principal& principal) {
   enclosing_env_.AddTyping(principal.name(),
                            datalog::ArgumentType::MakePrincipalType());
   return Unit();
 }
 
-Unit TypeEnvironment::TypeEnvironmentGenerationVisitor::Visit(
-    const datalog::Predicate& pred) {
+Unit TypeEnvironmentGenerationVisitor::Visit(const datalog::Predicate& pred) {
   if (pred.IsNumericOperator()) {
     // This is part of the workaround for handling numeric comparisons
     // given that the operators use the same AST nodes as predicates.
@@ -77,6 +73,34 @@ Unit TypeEnvironment::TypeEnvironmentGenerationVisitor::Visit(
     }
     return Unit();
   }
+}
+
+}  // namespace
+
+TypeEnvironment::TypeEnvironment(DeclarationEnvironment decl_env,
+                                 const Program& prog) {
+  TypeEnvironmentGenerationVisitor type_gen_visitor(decl_env, *this);
+  prog.Accept(type_gen_visitor);
+}
+
+datalog::ArgumentType TypeEnvironment::GetTypingOrFatal(
+    absl::string_view argument_name) {
+  auto find_result = inner_map_.find(argument_name);
+  CHECK(find_result != inner_map_.end())
+      << "Could not find typing for argument " << argument_name;
+  return find_result->second;
+}
+
+void TypeEnvironment::AddTyping(absl::string_view arg_name,
+                                datalog::ArgumentType arg_type) {
+  if (!IsNameConstant(arg_name)) {
+    // This pass is only meant to find typings for constants,
+    // so do nothing if this argument is not a constant.
+    return;
+  }
+  auto insert_result = inner_map_.insert({std::string(arg_name), arg_type});
+  CHECK(insert_result.second)
+      << "Type error for constant: " << insert_result.first->first;
 }
 
 }  // namespace raksha::ir::auth_logic

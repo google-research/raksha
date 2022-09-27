@@ -38,31 +38,17 @@ class TypeEnvironment {
     return inner_map_;
   }
 
- private:
+  // Insert a typing for constant value (e.g. "SomeArgument" in quotes
+  // applied to a relation, or a constant principal in any context where
+  // principals may be applied.
+  // - If no typing for this constant already exists, the typing is added
+  // - If a typing for this constant exists but it is the same type as the new
+  // one, nothing happens
+  // - If a typing for this constant exists, and it is a different type from
+  // the new one, an error is thrown.
   void AddTyping(absl::string_view arg_name, datalog::ArgumentType arg_type);
 
-  // This visitor aids in the construction of the TypeEnvironment.
-  // It populates a mapping (flat_hash_map) of constant (literal)
-  // names to their types by looking at the relations to which the literals
-  // are applied and declarations of those relations (including the types
-  // of the parameters where they are applied). It takes as input
-  // a DeclarationEnvironment.
-  // This is a nested class because it needs to access the private
-  // fields of the TypeEnvironment in the constructor implementation.
-  class TypeEnvironmentGenerationVisitor
-      : public AuthLogicAstTraversingVisitor<TypeEnvironmentGenerationVisitor> {
-   public:
-    TypeEnvironmentGenerationVisitor(DeclarationEnvironment decl_env,
-                                     TypeEnvironment& enclosing_env)
-        : decl_env_(decl_env), enclosing_env_(enclosing_env) {}
-
-   private:
-    Unit PreVisit(const Principal& principal);
-    Unit Visit(const datalog::Predicate& pred);
-    DeclarationEnvironment decl_env_;
-    TypeEnvironment& enclosing_env_;
-  };
-
+ private:
   absl::flat_hash_map<std::string, datalog::ArgumentType> inner_map_;
 };
 
