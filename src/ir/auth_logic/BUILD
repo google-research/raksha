@@ -68,6 +68,17 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "declaration_environment_test",
+    srcs = ["declaration_environment_test.cc"],
+    deps = [
+        ":ast",
+        ":declaration_environment",
+        "//src/common/testing:gtest",
+        "//src/ir/datalog:program",
+    ],
+)
+
 cc_library(
     name = "type_environment",
     srcs = ["type_environment.cc"],
