@@ -87,8 +87,8 @@ TypeEnvironment::TypeEnvironment(DeclarationEnvironment decl_env,
 
 datalog::ArgumentType TypeEnvironment::GetTypingOrFatal(
     absl::string_view argument_name) {
-  auto find_result = inner_map_.find(argument_name);
-  CHECK(find_result != inner_map_.end())
+  auto find_result = literal_type_map_.find(argument_name);
+  CHECK(find_result != literal_type_map_.end())
       << "Could not find typing for argument " << argument_name;
   return find_result->second;
 }
@@ -100,7 +100,8 @@ void TypeEnvironment::AddTyping(absl::string_view arg_name,
     // so do nothing if this argument is not a constant.
     return;
   }
-  auto insert_result = inner_map_.insert({std::string(arg_name), arg_type});
+  auto insert_result =
+      literal_type_map_.insert({std::string(arg_name), arg_type});
   CHECK(insert_result.second)
       << "Type error for constant: " << insert_result.first->first;
 }

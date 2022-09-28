@@ -55,7 +55,7 @@ datalog::RelationDeclaration TypeToUniverseDeclaration(
 std::vector<SaysAssertion> GetUniverseDefiningFacts(
     const TypeEnvironment& type_env) {
   std::vector<Principal> constant_principals;
-  for (const auto& typing : type_env.inner_map()) {
+  for (const auto& typing : type_env.literal_type_map()) {
     if (typing.second.kind() == datalog::ArgumentType::Kind::kPrincipal) {
       constant_principals.push_back(Principal(typing.first));
     }
@@ -63,7 +63,7 @@ std::vector<SaysAssertion> GetUniverseDefiningFacts(
 
   std::vector<SaysAssertion> universe_defining_says_assertions;
   for (const auto& prin : constant_principals) {
-    for (const auto& typing : type_env.inner_map()) {
+    for (const auto& typing : type_env.literal_type_map()) {
       universe_defining_says_assertions.push_back(SaysAssertion(
           prin,  // speaker
           {Assertion(Fact(

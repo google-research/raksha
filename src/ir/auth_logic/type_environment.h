@@ -33,9 +33,9 @@ class TypeEnvironment {
 
   datalog::ArgumentType GetTypingOrFatal(absl::string_view argument_name);
 
-  const absl::flat_hash_map<std::string, datalog::ArgumentType>& inner_map()
-      const {
-    return inner_map_;
+  const absl::flat_hash_map<std::string, datalog::ArgumentType>&
+  literal_type_map() const {
+    return literal_type_map_;
   }
 
   // Insert a typing for constant value (e.g. "SomeArgument" in quotes
@@ -49,7 +49,7 @@ class TypeEnvironment {
   void AddTyping(absl::string_view arg_name, datalog::ArgumentType arg_type);
 
  private:
-  absl::flat_hash_map<std::string, datalog::ArgumentType> inner_map_;
+  absl::flat_hash_map<std::string, datalog::ArgumentType> literal_type_map_;
 };
 
 };  // namespace raksha::ir::auth_logic
