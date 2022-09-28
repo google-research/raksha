@@ -48,10 +48,6 @@ class Principal {
     return visitor.Visit(*this);
   }
 
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const { return name_; }
-
   bool operator==(const Principal& rhs) const { return name_ == rhs.name_; }
 
   bool operator!=(const Principal& rhs) const { return !(*this == rhs); }
@@ -78,12 +74,6 @@ class Attribute {
   Result Accept(
       AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
-  }
-
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    return absl::StrCat(principal_.name(), predicate_.ToString());
   }
 
   bool operator==(const Attribute& rhs) const {
@@ -116,13 +106,6 @@ class CanActAs {
   Result Accept(
       AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
-  }
-
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    return absl::StrCat(left_principal_.ToString(), " canActAs ",
-                        right_principal_.ToString());
   }
 
   bool operator==(const CanActAs& rhs) const {
@@ -166,15 +149,6 @@ class BaseFact {
     return visitor.Visit(*this);
   }
 
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    return absl::StrCat(
-        "BaseFact(",
-        std::visit([](auto& obj) { return obj.ToString(); }, this->value_),
-        ")");
-  }
-
   bool operator==(const BaseFact& rhs) const { return value_ == rhs.value_; }
 
   bool operator!=(const BaseFact& rhs) const { return !(*this == rhs); }
@@ -208,17 +182,6 @@ class Fact {
     return visitor.Visit(*this);
   }
 
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    std::vector<std::string> delegations;
-    for (const Principal& delegatee : delegation_chain_) {
-      delegations.push_back(delegatee.ToString());
-    }
-    return absl::StrCat("deleg: { ", absl::StrJoin(delegations, ", "), " }",
-                        base_fact_.ToString());
-  }
-
   bool operator==(const Fact& rhs) const {
     return delegation_chain_ == rhs.delegation_chain_ &&
            base_fact_ == rhs.base_fact_;
@@ -250,18 +213,6 @@ class ConditionalAssertion {
   Result Accept(
       AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
-  }
-
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    std::vector<std::string> rhs_strings;
-    rhs_strings.reserve(rhs_.size());
-    for (const BaseFact& base_fact : rhs_) {
-      rhs_strings.push_back(base_fact.ToString());
-    }
-    return absl::StrCat(lhs_.ToString(), ":-",
-                        absl::StrJoin(rhs_strings, ", "));
   }
 
   bool operator==(const ConditionalAssertion& rhs) const {
@@ -300,15 +251,6 @@ class Assertion {
     return visitor.Visit(*this);
   }
 
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    return absl::StrCat(
-        "Assertion(",
-        std::visit([](auto& obj) { return obj.ToString(); }, this->value_),
-        ")");
-  }
-
   bool operator==(const Assertion& rhs) const { return value_ == rhs.value_; }
 
   bool operator!=(const Assertion& rhs) const { return !(*this == rhs); }
@@ -334,18 +276,6 @@ class SaysAssertion {
   Result Accept(
       AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
-  }
-
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    std::vector<std::string> assertion_strings;
-    assertion_strings.reserve(assertions_.size());
-    for (const Assertion& assertion : assertions_) {
-      assertion_strings.push_back(assertion.ToString());
-    }
-    return absl::StrCat(principal_.ToString(), "says {\n",
-                        absl::StrJoin(assertion_strings, "\n"), "}");
   }
 
   bool operator==(const SaysAssertion& rhs) const {
@@ -380,13 +310,6 @@ class Query {
   Result Accept(
       AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
-  }
-
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    return absl::StrCat("Query(", name_, principal_.ToString(),
-                        fact_.ToString(), ")");
   }
 
   bool operator==(const Query& rhs) const {
@@ -432,33 +355,6 @@ class Program {
   Result Accept(
       AuthLogicAstVisitor<Derived, Result, Immutable>& visitor) const {
     return visitor.Visit(*this);
-  }
-
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    std::vector<std::string> relation_decl_strings;
-    relation_decl_strings.reserve(relation_declarations_.size());
-    for (const datalog::RelationDeclaration& rel_decl :
-         relation_declarations_) {
-      relation_decl_strings.push_back(rel_decl.ToString());
-    }
-    std::vector<std::string> says_assertion_strings;
-    says_assertion_strings.reserve(says_assertions_.size());
-    for (const SaysAssertion& says_assertion : says_assertions_) {
-      says_assertion_strings.push_back(says_assertion.ToString());
-    }
-    std::vector<std::string> query_strings;
-    query_strings.reserve(queries_.size());
-    for (const Query& query : queries_) {
-      query_strings.push_back(query.ToString());
-    }
-    return absl::StrJoin(
-        std::vector<std::string>({"Program(",
-                                  absl::StrJoin(relation_decl_strings, "\n"),
-                                  absl::StrJoin(says_assertion_strings, "\n"),
-                                  absl::StrJoin(query_strings, "\n")}),
-        "\n");
   }
 
   bool operator==(const Program& rhs) const {

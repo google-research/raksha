@@ -66,12 +66,6 @@ class Predicate {
     return this->name() < otherPredicate.name();
   }
 
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    return absl::StrCat(sign_, name_, absl::StrJoin(args_, ", "));
-  }
-
  private:
   std::string name_;
   std::vector<std::string> args_;
@@ -97,8 +91,6 @@ class ArgumentType {
     return ArgumentType(Kind::kCustom, name);
   }
 
-  std::string ToString() const { return absl::StrCat(kind_, name_); }
-
   bool operator==(const ArgumentType& otherType) const {
     // The name field is only compared for arguments of kind kCustom
     // because the name field is only used for kCustom types (and
@@ -122,12 +114,6 @@ class Argument {
         argument_type_(std::move(argument_type)) {}
   absl::string_view argument_name() const { return argument_name_; }
   ArgumentType argument_type() const { return argument_type_; }
-
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    return absl::StrCat(argument_name_, " : ", argument_type_.ToString());
-  }
 
   bool operator==(const Argument& otherArgument) const {
     return this->argument_name_ == otherArgument.argument_name_ &&
@@ -155,19 +141,6 @@ class RelationDeclaration {
     return this->relation_name_ == otherDeclaration.relation_name_ &&
            this->is_attribute_ == otherDeclaration.is_attribute_ &&
            this->arguments_ == otherDeclaration.arguments_;
-  }
-
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    std::vector<std::string> arg_strings;
-    arg_strings.reserve(arguments_.size());
-    for (const Argument& arg : arguments_) {
-      arg_strings.push_back(arg.ToString());
-    }
-    return absl::StrCat(".decl ", is_attribute_ ? " attribute " : "",
-                        relation_name_, "(", absl::StrJoin(arg_strings, ", "),
-                        ")");
   }
 
  private:
