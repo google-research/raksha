@@ -30,23 +30,40 @@ namespace {
 // a DeclarationEnvironment.
 // This is a nested class because it needs to access the private
 // fields of the TypeEnvironment in the constructor implementation.
+
+using LiteralTypeMapType =
+    absl::flat_hash_map<std::string, datalog::ArgumentType>;
 class TypeEnvironmentGenerationVisitor
     : public AuthLogicAstTraversingVisitor<TypeEnvironmentGenerationVisitor> {
  public:
-  TypeEnvironmentGenerationVisitor(DeclarationEnvironment decl_env,
-                                   TypeEnvironment& enclosing_env)
-      : decl_env_(decl_env), enclosing_env_(enclosing_env) {}
+  TypeEnvironmentGenerationVisitor(DeclarationEnvironment decl_env)
+      : decl_env_(decl_env), literal_type_map_({}) {}
+
+  LiteralTypeMapType literal_type_map() { return literal_type_map_; }
 
  private:
+  void AddTyping(absl::string_view arg_name, datalog::ArgumentType arg_type);
   Unit PreVisit(const Principal& principal);
   Unit Visit(const datalog::Predicate& pred);
   DeclarationEnvironment decl_env_;
-  TypeEnvironment& enclosing_env_;
+  LiteralTypeMapType literal_type_map_;
 };
 
+void TypeEnvironmentGenerationVisitor::AddTyping(
+    absl::string_view arg_name, datalog::ArgumentType arg_type) {
+  if (!IsNameConstant(arg_name)) {
+    // This pass is only meant to find typings for constants,
+    // so do nothing if this argument is not a constant.
+    return;
+  }
+  auto insert_result =
+      literal_type_map_.insert({std::string(arg_name), arg_type});
+  CHECK(insert_result.second)
+      << "Type error for constant: " << insert_result.first->first;
+}
+
 Unit TypeEnvironmentGenerationVisitor::PreVisit(const Principal& principal) {
-  enclosing_env_.AddTyping(principal.name(),
-                           datalog::ArgumentType::MakePrincipalType());
+  AddTyping(principal.name(), datalog::ArgumentType::MakePrincipalType());
   return Unit();
 }
 
@@ -55,7 +72,7 @@ Unit TypeEnvironmentGenerationVisitor::Visit(const datalog::Predicate& pred) {
     // This is part of the workaround for handling numeric comparisons
     // given that the operators use the same AST nodes as predicates.
     for (auto arg : pred.args()) {
-      enclosing_env_.AddTyping(arg, datalog::ArgumentType::MakeNumberType());
+      AddTyping(arg, datalog::ArgumentType::MakeNumberType());
     }
     return Unit();
   } else {
@@ -70,8 +87,7 @@ Unit TypeEnvironmentGenerationVisitor::Visit(const datalog::Predicate& pred) {
     // predicate and the list of parameters in the declaration using
     // the indices of the arguments iterator of the predicate.
     for (size_t i = 0; i < pred.args().size(); i++) {
-      enclosing_env_.AddTyping(pred.args()[i],
-                               decl.arguments()[i].argument_type());
+      AddTyping(pred.args()[i], decl.arguments()[i].argument_type());
     }
     return Unit();
   }
@@ -81,8 +97,9 @@ Unit TypeEnvironmentGenerationVisitor::Visit(const datalog::Predicate& pred) {
 
 TypeEnvironment::TypeEnvironment(DeclarationEnvironment decl_env,
                                  const Program& prog) {
-  TypeEnvironmentGenerationVisitor type_gen_visitor(decl_env, *this);
+  TypeEnvironmentGenerationVisitor type_gen_visitor(decl_env);
   prog.Accept(type_gen_visitor);
+  literal_type_map_ = type_gen_visitor.literal_type_map();
 }
 
 datalog::ArgumentType TypeEnvironment::GetTypingOrFatal(
@@ -91,19 +108,6 @@ datalog::ArgumentType TypeEnvironment::GetTypingOrFatal(
   CHECK(find_result != literal_type_map_.end())
       << "Could not find typing for argument " << argument_name;
   return find_result->second;
-}
-
-void TypeEnvironment::AddTyping(absl::string_view arg_name,
-                                datalog::ArgumentType arg_type) {
-  if (!IsNameConstant(arg_name)) {
-    // This pass is only meant to find typings for constants,
-    // so do nothing if this argument is not a constant.
-    return;
-  }
-  auto insert_result =
-      literal_type_map_.insert({std::string(arg_name), arg_type});
-  CHECK(insert_result.second)
-      << "Type error for constant: " << insert_result.first->first;
 }
 
 }  // namespace raksha::ir::auth_logic
