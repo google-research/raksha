@@ -33,15 +33,16 @@ TEST(DeclarationEnvironmentTests, LookupTest) {
 TEST(DeclarationEnvironmentTests, FatalLookupTest) {
   Program prog({}, {}, {});
   DeclarationEnvironment decl_env(prog);
-  EXPECT_DEATH(decl_env.GetDeclarationOrFatal("relation_not_here"), "");
+  EXPECT_DEATH(decl_env.GetDeclarationOrFatal("relation_not_here"),
+    "could not find declaration for relation relation_not_here");
 }
 
 TEST(DeclarationEnvironmentTests, FatalAddTest) {
   datalog::Argument arg1("arg1", datalog::ArgumentType::MakePrincipalType());
   datalog::RelationDeclaration decl1("relname", false, {arg1});
-  Program prog({decl1}, {}, {});
-  DeclarationEnvironment decl_env(prog);
-  EXPECT_DEATH(decl_env.AddDeclaration(decl1), "");
+  datalog::RelationDeclaration decl2("relname", false, {arg1});
+  Program prog({decl1, decl2}, {}, {});
+  EXPECT_DEATH(DeclarationEnvironment decl_env(prog), "Error: found multiple declarations of relation named: relname");
 }
 
 }  // namespace raksha::ir::auth_logic

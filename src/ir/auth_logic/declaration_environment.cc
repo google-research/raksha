@@ -21,40 +21,43 @@ namespace raksha::ir::auth_logic {
 namespace {
 // Generates a new mapping from relation names to relation declarations
 // implemented as a flat_hash_map. It is used in the implementation of
-// the constructor for DeclarationEnvironment. This is implemented
-// as a nested class so that it can access the DeclarationEnvironment's
-// private state during the constructor.
+// the constructor for DeclarationEnvironment. 
+using DeclarationMapType = absl::flat_hash_map<std::string, 
+  datalog::RelationDeclaration>;
 class RelationDeclarationEnvironmentVisitor
     : public AuthLogicAstTraversingVisitor<
           RelationDeclarationEnvironmentVisitor> {
  public:
-  RelationDeclarationEnvironmentVisitor(DeclarationEnvironment& enclosing_env)
-      : enclosing_env_(enclosing_env) {}
+  RelationDeclarationEnvironmentVisitor() : decl_map_({}) {};
+  DeclarationMapType decl_map() { return decl_map_;}
 
  private:
+  void AddDeclaration(const datalog::RelationDeclaration& rel_decl) {
+    absl::string_view rel_name = rel_decl.relation_name();
+    if (decl_map_.find(rel_name) == decl_map_.end()) {
+      decl_map_.insert({std::string{rel_decl.relation_name()}, rel_decl});
+    } else {
+      LOG(FATAL) << "Error: found multiple declarations of relation named: "
+                 << rel_name;
+    }
+  }
+  DeclarationMapType decl_map_;
+  // Note that this visito populates the decl_map_ by side-effects
+  // rather than by returning a declaration map because the AddDeclaration
+  // function needs access to the complete map that has been built
+  // thus far in order to throw errors.
   Unit Visit(const datalog::RelationDeclaration& rel_decl) {
-    enclosing_env_.AddDeclaration(rel_decl);
+    AddDeclaration(rel_decl);
     return Unit();
   }
-  DeclarationEnvironment& enclosing_env_;
 };
 
 }  // namespace
 
 DeclarationEnvironment::DeclarationEnvironment(const Program& prog) {
-  RelationDeclarationEnvironmentVisitor rel_visitor(*this);
+  RelationDeclarationEnvironmentVisitor rel_visitor;
   prog.Accept(rel_visitor);
-}
-
-void DeclarationEnvironment::AddDeclaration(
-    const datalog::RelationDeclaration& rel_decl) {
-  absl::string_view rel_name = rel_decl.relation_name();
-  if (inner_map_.find(rel_name) == inner_map_.end()) {
-    inner_map_.insert({std::string{rel_decl.relation_name()}, rel_decl});
-  } else {
-    LOG(FATAL) << "Error: found multiple declarations of relation named: "
-               << rel_name;
-  }
+  inner_map_ = rel_visitor.decl_map();
 }
 
 datalog::RelationDeclaration DeclarationEnvironment::GetDeclarationOrFatal(

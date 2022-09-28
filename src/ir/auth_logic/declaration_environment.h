@@ -29,10 +29,6 @@ class DeclarationEnvironment {
  public:
   DeclarationEnvironment(const Program& prog);
 
-  // Adds a relation to the environment if there is not already
-  // a relation with that name in the environment, or errors otherwise.
-  void AddDeclaration(const datalog::RelationDeclaration& rel_decl);
-
   datalog::RelationDeclaration GetDeclarationOrFatal(
       absl::string_view relation_name) const;
 
