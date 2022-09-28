@@ -76,9 +76,10 @@ class Predicate {
   // with a name that matches the operator:
   // (https://github.com/google-research/raksha/blob/be6ef8e1e1a20735a06637c12db9ed0b87e3d2a2/src/ir/auth_logic/ast_construction.cc#L92)
   bool IsNumericOperator() const {
-    const absl::flat_hash_set<std::string> numeric_operators = {
-        "<", ">", "=", "!=", "<=", ">="};
-    return numeric_operators.contains(name_);
+    static const auto* const numeric_operators = 
+      new absl::flat_hash_set<std::string>({
+        "<", ">", "=", "!=", "<=", ">="});
+    return numeric_operators->contains(name_);
   }
 
  private:
@@ -121,7 +122,7 @@ class ArgumentType {
   bool operator==(const ArgumentType& otherType) const {
     return this->kind_ == otherType.kind_ && this->name_ == otherType.name_;
   }
-  // This one is just for convenience
+  
   bool operator!=(const ArgumentType& otherType) const {
     return !(*this == otherType);
   }
