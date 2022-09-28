@@ -88,20 +88,14 @@ std::string ToString(AstNodeVariantType Node) {
                                 ToString(canActAs.right_principal()));
           },
           [](BaseFact basefact) {
-            return std::visit(raksha::utils::overloaded{
-                                  [](datalog::Predicate predicate) {
-                                    return absl::StrCat(
-                                        "BaseFact(", ToString(predicate), ")");
-                                  },
-                                  [](Attribute attribute) {
-                                    return absl::StrCat(
-                                        "BaseFact(", ToString(attribute), ")");
-                                  },
-                                  [](CanActAs can_act_as) {
-                                    return absl::StrCat(
-                                        "BaseFact(", ToString(can_act_as), ")");
-                                  }},
-                              basefact.GetValue());
+            return std::visit(
+                raksha::utils::overloaded{
+                    [](datalog::Predicate predicate) {
+                      return ToString(predicate);
+                    },
+                    [](Attribute attribute) { return ToString(attribute); },
+                    [](CanActAs can_act_as) { return ToString(can_act_as); }},
+                basefact.GetValue());
           },
           [](Fact fact) {
             std::string cansay_string = "";
@@ -109,8 +103,7 @@ std::string ToString(AstNodeVariantType Node) {
               cansay_string =
                   absl::StrJoin({delegatees.name(), cansay_string}, " canSay ");
             }
-            return absl::StrCat("Fact(", cansay_string,
-                                ToString(fact.base_fact()), ")");
+            return absl::StrCat(cansay_string, ToString(fact.base_fact()));
           },
           [](ConditionalAssertion conditional_assertion) {
             std::string lhs = ToString(conditional_assertion.lhs());

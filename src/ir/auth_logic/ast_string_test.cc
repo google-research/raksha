@@ -88,60 +88,58 @@ static BaseFact baseFact1(predicate1);
 static BaseFact baseFact2(attribute1);
 static BaseFact baseFact3(canActAs1);
 TEST(BaseFactToStringTest, SimpleBaseFactTest) {
-  EXPECT_EQ(ToString(baseFact1), "BaseFact(predicate1(arg1, arg2))");
-  EXPECT_EQ(ToString(baseFact2), "BaseFact(principal1 predicate1(arg1, arg2))");
-  EXPECT_EQ(ToString(baseFact3), "BaseFact(principal1 canActAs principal2)");
+  EXPECT_EQ(ToString(baseFact1), "predicate1(arg1, arg2)");
+  EXPECT_EQ(ToString(baseFact2), "principal1 predicate1(arg1, arg2)");
+  EXPECT_EQ(ToString(baseFact3), "principal1 canActAs principal2");
 }
 
 static Fact fact1({}, baseFact1);
 static Fact fact2({principal1}, baseFact1);
 TEST(FactToStringTest, SimpleFactTest) {
-  EXPECT_EQ(ToString(fact1), "Fact(BaseFact(predicate1(arg1, arg2)))");
-  EXPECT_EQ(ToString(fact2),
-            "Fact(principal1 canSay BaseFact(predicate1(arg1, arg2)))");
+  EXPECT_EQ(ToString(fact1), "predicate1(arg1, arg2)");
+  EXPECT_EQ(ToString(fact2), "principal1 canSay predicate1(arg1, arg2)");
 }
 
 static ConditionalAssertion condAssertion1(fact1, {baseFact1});
 static ConditionalAssertion condAssertion2(fact1, {baseFact1, baseFact2});
 TEST(ConditionalAssertionToStringTest, SimpleCondAssertionTest) {
   EXPECT_EQ(ToString(condAssertion1),
-            "Fact(BaseFact(predicate1(arg1, arg2))) :- "
-            "BaseFact(predicate1(arg1, arg2))");
-  EXPECT_EQ(
-      ToString(condAssertion2),
-      "Fact(BaseFact(predicate1(arg1, arg2))) :- BaseFact(predicate1(arg1, "
-      "arg2)), BaseFact(principal1 predicate1(arg1, arg2))");
+            "predicate1(arg1, arg2) :- "
+            "predicate1(arg1, arg2)");
+  EXPECT_EQ(ToString(condAssertion2),
+            "predicate1(arg1, arg2) :- predicate1(arg1, "
+            "arg2), principal1 predicate1(arg1, arg2)");
 }
 
 static Assertion assertion1(fact1);
 static Assertion assertion2(condAssertion1);
 TEST(AssertionToStringTest, SimpleAssertionTest) {
-  EXPECT_EQ(ToString(assertion1), "Fact(BaseFact(predicate1(arg1, arg2))).");
+  EXPECT_EQ(ToString(assertion1), "predicate1(arg1, arg2).");
   EXPECT_EQ(ToString(assertion2),
-            "Fact(BaseFact(predicate1(arg1, arg2))) :- "
-            "BaseFact(predicate1(arg1, arg2)).");
+            "predicate1(arg1, arg2) :- "
+            "predicate1(arg1, arg2).");
 }
 
 static SaysAssertion saysAssertion1(principal1, {assertion1});
 static SaysAssertion saysAssertion2(principal2, {assertion1, assertion2});
 TEST(SaysAssertionToStringTest, SimpleSaysAssertionTest) {
   EXPECT_EQ(ToString(saysAssertion1),
-            "principal1 says {\nFact(BaseFact(predicate1(arg1, arg2))).}");
+            "principal1 says {\npredicate1(arg1, arg2).}");
   EXPECT_EQ(ToString(saysAssertion2),
-            "principal2 says {\nFact(BaseFact(predicate1(arg1, "
-            "arg2))).\nFact(BaseFact(predicate1(arg1, arg2))) :- "
-            "BaseFact(predicate1(arg1, arg2)).}");
+            "principal2 says {\npredicate1(arg1, "
+            "arg2).\npredicate1(arg1, arg2) :- "
+            "predicate1(arg1, arg2).}");
 }
 
 static Query query1("query1", principal1, fact1);
 static Query query2("query2", principal2, fact1);
 TEST(QueryToStringTest, SimpleQueryTest) {
   EXPECT_EQ(ToString(query1),
-            "Query(query1 = principal1 says Fact(BaseFact(predicate1(arg1, "
-            "arg2)))?)");
+            "Query(query1 = principal1 says predicate1(arg1, "
+            "arg2)?)");
   EXPECT_EQ(ToString(query2),
-            "Query(query2 = principal2 says Fact(BaseFact(predicate1(arg1, "
-            "arg2)))?)");
+            "Query(query2 = principal2 says predicate1(arg1, "
+            "arg2)?)");
 }
 
 static Program program1({relationDeclaration1}, {saysAssertion1}, {query1});
@@ -149,8 +147,8 @@ TEST(ProgramToStringTest, SimpleProgramTest) {
   EXPECT_EQ(
       ToString(program1),
       "Program(\n.decl rel1(arg1 : NumberType, arg2 : PrincipalType)principal1 "
-      "says {\nFact(BaseFact(predicate1(arg1, arg2))).}Query(query1 = "
-      "principal1 says Fact(BaseFact(predicate1(arg1, arg2)))?))");
+      "says {\npredicate1(arg1, arg2).}Query(query1 = "
+      "principal1 says predicate1(arg1, arg2)?))");
 }
 
 }  // namespace raksha::ir::auth_logic
