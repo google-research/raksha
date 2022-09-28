@@ -40,6 +40,15 @@ cc_test(
 )
 
 cc_test(
+    name = "is_numeric_operator_test",
+    srcs = ["is_numeric_operator_test.cc"],
+    deps = [
+        ":program",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_test(
     name = "hash_test",
     srcs = ["hash_test.cc"],
     deps = [
