@@ -79,6 +79,18 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "is_name_constant_test",
+    srcs = [
+        "is_name_constant.h",
+        "is_name_constant_test.cc",
+    ],
+    deps = [
+        "//src/common/testing:gtest",
+        "@absl//absl/strings",
+    ],
+)
+
 cc_library(
     name = "type_environment",
     srcs = ["type_environment.cc"],

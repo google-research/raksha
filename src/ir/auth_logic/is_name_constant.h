@@ -20,6 +20,8 @@
 #ifndef SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_
 #define SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_
 
+namespace raksha::ir::auth_logic {
+
 // Determine if an identifier (which may be an argument of a predicate
 // or a principal name) is a constant or variable.
 // TODO(#673 aferr) it would be better to refactor the AST so that
@@ -27,7 +29,7 @@
 // children determined at parse time rather than here since
 // this information is available at parse time.
 bool IsNameConstant(absl::string_view id) {
-  if (id[0] == '"') {
+  if (id[0] == '"' && id[id.size()-1] == '"') {
     return true;
   } else {
     int unused_output;
@@ -36,5 +38,7 @@ bool IsNameConstant(absl::string_view id) {
     return absl::SimpleAtoi(id, &unused_output);
   }
 }
+
+}; // namespace raksha::ir::auth_logic
 
 #endif  // SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_
