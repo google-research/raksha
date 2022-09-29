@@ -18,6 +18,7 @@ load("//build_defs:antlr.bzl", "antlr4_cc_combined")
 
 package(
     default_visibility = [
+        "//intelligence/federated_perception:__subpackages__",
         "//src:__subpackages__",
     ],
     features = ["layering_check"],
