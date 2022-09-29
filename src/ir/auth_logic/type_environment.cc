@@ -56,12 +56,24 @@ void TypeEnvironmentGenerationVisitor::AddTyping(
     // so do nothing if this argument is not a constant.
     return;
   }
-  auto insert_result =
-      literal_type_map_.insert({std::string(arg_name), arg_type});
-  CHECK(insert_result.second)
-      << "Type error for constant: " << insert_result.first->first;
-}
+  auto find_result = literal_type_map_.find(arg_name);
+  if (find_result == literal_type_map_.end()) {
+    // There is no entry for this literal in the map, add it:
+    literal_type_map_.insert({std::string(arg_name), arg_type});
+  } else {
+    // There is already an entry for this literal in the map,
+    // check that it has the same type:
+    CHECK(find_result->second == arg_type)
+        << "Type error for constant: " << arg_name;
+  }
 
+  /*
+   auto insert_result =
+       literal_type_map_.insert({std::string(arg_name), arg_type});
+   CHECK(insert_result.second)
+       << "Type error for constant: " << insert_result.first->first;
+   */
+}
 
 // Insert a typing for constant value (e.g. "SomeArgument" in quotes
 // applied to a relation, or a constant principal in any context where

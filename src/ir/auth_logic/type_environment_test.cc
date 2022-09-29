@@ -45,7 +45,7 @@ TEST(TypeEnvironmentTests, FatalGetTypingTest) {
   EXPECT_DEATH(type_env.GetTypingOrFatal("no_argument_here"), "");
 }
 
-TEST(TypeEnvironmentTests, AddTypingTest) {
+TEST(TypeEnvironmentTests, AddTypingTest1) {
   datalog::Argument param1("param1",
                            datalog::ArgumentType::MakeCustomType("SomeCustom"));
   datalog::RelationDeclaration decl1("relname", false, {param1});
@@ -54,16 +54,43 @@ TEST(TypeEnvironmentTests, AddTypingTest) {
       {Assertion(
           Fact({}, BaseFact(datalog::Predicate("relname", {"\"someArgument\""},
                                                datalog::Sign::kPositive))))});
-  Program prog({decl1}, {saysAssertion1}, {});
+  datalog::Argument param2("param2",
+                           datalog::ArgumentType::MakePrincipalType());
+  datalog::RelationDeclaration decl2("relname2", false, {param2});
+  SaysAssertion saysAssertion2(
+      Principal("\"ConstPrincipal\""),
+      {Assertion(
+          Fact({}, BaseFact(datalog::Predicate("relname2", {"\"someArgument\""},
+                                               datalog::Sign::kPositive))))});
+  Program prog({decl1, decl2}, {saysAssertion1, saysAssertion2}, {});
   DeclarationEnvironment decl_env(prog);
+  // This is expected to fail because someArgument is used in two places
+  // with different types
+  EXPECT_DEATH(TypeEnvironment type_env(decl_env, prog),
+               "arg_type Type error for constant: \"someArgument\"");
+}
+
+TEST(TypeEnvironmentTests, AddTypingTest2) {
+  datalog::Argument param1("param1",
+                           datalog::ArgumentType::MakeCustomType("SomeCustom"));
+  datalog::RelationDeclaration decl1("relname", false, {param1});
+  SaysAssertion saysAssertion1(
+      Principal("\"ConstPrincipal\""),
+      {Assertion(
+          Fact({}, BaseFact(datalog::Predicate("relname", {"\"someArgument\""},
+                                               datalog::Sign::kPositive))))});
+  datalog::RelationDeclaration decl2("relname2", false, {param1});
+  SaysAssertion saysAssertion2(
+      Principal("\"OtherPrincipal\""),
+      {Assertion(
+          Fact({}, BaseFact(datalog::Predicate("relname2", {"\"someArgument\""},
+                                               datalog::Sign::kPositive))))});
+  Program prog({decl1, decl2}, {saysAssertion1, saysAssertion2}, {});
+  DeclarationEnvironment decl_env(prog);
+  // This test is just meant to check that there is NOT a failure
+  // during TypeEnv construction even though someArgument is used
+  // in more than one place because it has the same time for all uses
   TypeEnvironment type_env(decl_env, prog);
-  EXPECT_DEATH(type_env.AddTyping(
-                   "\"someArgument\"",
-                   datalog::ArgumentType::MakeCustomType("SomeOtherCustom")),
-               "");
-  EXPECT_DEATH(type_env.AddTyping("\"someArgument\"",
-                                  datalog::ArgumentType::MakeNumberType()),
-               "");
 }
 
 }  // namespace raksha::ir::auth_logic
