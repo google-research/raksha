@@ -38,16 +38,6 @@ class TypeEnvironment {
     return literal_type_map_;
   }
 
-  // Insert a typing for constant value (e.g. "SomeArgument" in quotes
-  // applied to a relation, or a constant principal in any context where
-  // principals may be applied.
-  // - If no typing for this constant already exists, the typing is added
-  // - If a typing for this constant exists but it is the same type as the new
-  // one, nothing happens
-  // - If a typing for this constant exists, and it is a different type from
-  // the new one, an error is thrown.
-  void AddTyping(absl::string_view arg_name, datalog::ArgumentType arg_type);
-
  private:
   absl::flat_hash_map<std::string, datalog::ArgumentType> literal_type_map_;
 };

@@ -62,6 +62,15 @@ void TypeEnvironmentGenerationVisitor::AddTyping(
       << "Type error for constant: " << insert_result.first->first;
 }
 
+
+// Insert a typing for constant value (e.g. "SomeArgument" in quotes
+// applied to a relation, or a constant principal in any context where
+// principals may be applied.
+// - If no typing for this constant already exists, the typing is added
+// - If a typing for this constant exists but it is the same type as the new
+// one, nothing happens
+// - If a typing for this constant exists, and it is a different type from
+// the new one, an error is thrown.
 Unit TypeEnvironmentGenerationVisitor::PreVisit(const Principal& principal) {
   AddTyping(principal.name(), datalog::ArgumentType::MakePrincipalType());
   return Unit();
