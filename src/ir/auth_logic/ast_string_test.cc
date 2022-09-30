@@ -39,18 +39,18 @@ static datalog::ArgumentType principalType(
 static datalog::ArgumentType customType(datalog::ArgumentType::Kind::kCustom,
                                         "someProgrammerType");
 TEST(ArgumentTypeToStringTest, SimpleArgumentTypeTest) {
-  EXPECT_EQ(ToString(numberType), "NumberType");
-  EXPECT_EQ(ToString(principalType), "PrincipalType");
-  EXPECT_EQ(ToString(customType), "someProgrammerType::CustomType");
+  EXPECT_EQ(ToString(numberType), "Number");
+  EXPECT_EQ(ToString(principalType), "Principal");
+  EXPECT_EQ(ToString(customType), "someProgrammerType::Custom");
 }
 
 static datalog::Argument argument1("arg1", numberType);
 static datalog::Argument argument2("arg2", principalType);
 static datalog::Argument argument3("arg3", customType);
 TEST(ArgumentToStringTest, SimpleArgumentTest) {
-  EXPECT_EQ(ToString(argument1), "arg1 : NumberType");
-  EXPECT_EQ(ToString(argument2), "arg2 : PrincipalType");
-  EXPECT_EQ(ToString(argument3), "arg3 : someProgrammerType::CustomType");
+  EXPECT_EQ(ToString(argument1), "arg1 : Number");
+  EXPECT_EQ(ToString(argument2), "arg2 : Principal");
+  EXPECT_EQ(ToString(argument3), "arg3 : someProgrammerType::Custom");
 }
 
 static datalog::RelationDeclaration relationDeclaration1("rel1", false,
@@ -60,9 +60,9 @@ static datalog::RelationDeclaration relationDeclaration2("rel2", true,
                                                          {argument3});
 TEST(RelationDeclarationToStringTest, SimpleDeclarationTest) {
   EXPECT_EQ(ToString(relationDeclaration1),
-            ".decl rel1(arg1 : NumberType, arg2 : PrincipalType)");
+            ".decl rel1(arg1 : Number, arg2 : Principal)");
   EXPECT_EQ(ToString(relationDeclaration2),
-            ".decl attribute rel2(arg3 : someProgrammerType::CustomType)");
+            ".decl attribute rel2(arg3 : someProgrammerType::Custom)");
 }
 
 static Principal principal1("principal1");
@@ -146,7 +146,7 @@ static Program program1({relationDeclaration1}, {saysAssertion1}, {query1});
 TEST(ProgramToStringTest, SimpleProgramTest) {
   EXPECT_EQ(
       ToString(program1),
-      "Program(\n.decl rel1(arg1 : NumberType, arg2 : PrincipalType)principal1 "
+      "Program(\n.decl rel1(arg1 : Number, arg2 : Principal)principal1 "
       "says {\npredicate1(arg1, arg2).}Query(query1 = "
       "principal1 says predicate1(arg1, arg2)?))");
 }
