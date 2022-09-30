@@ -4,6 +4,10 @@ try-import %workspace%/gcb/rbe/remote.bazelrc
 
 build --cxxopt='-std=c++17'
 build --cxxopt='-Werror' --cxxopt='-Wall'
+# This feature disables warnings in include paths from external repos. This is
+# useful because it allows us to ignore non-serious flaws in code for which we
+# are not directly responsible.
+build --features=external_include_paths
 build --cxxopt='-Wno-deprecated-declarations'
 # Why are we doing this when Souffle-generated C++ clearly uses exceptions?
 # Well, Google famously does not like C++ exceptions in its internal codebase,
