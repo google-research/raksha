@@ -135,20 +135,21 @@ static Query query1("query1", principal1, fact1);
 static Query query2("query2", principal2, fact1);
 TEST(QueryToStringTest, SimpleQueryTest) {
   EXPECT_EQ(ToString(query1),
-            "Query(query1 = principal1 says predicate1(arg1, "
-            "arg2)?)");
+            "query1 = principal1 says predicate1(arg1, "
+            "arg2)?");
   EXPECT_EQ(ToString(query2),
-            "Query(query2 = principal2 says predicate1(arg1, "
-            "arg2)?)");
+            "query2 = principal2 says predicate1(arg1, "
+            "arg2)?");
 }
 
 static Program program1({relationDeclaration1}, {saysAssertion1}, {query1});
 TEST(ProgramToStringTest, SimpleProgramTest) {
   EXPECT_EQ(
       ToString(program1),
-      "Program(\n.decl rel1(arg1 : Number, arg2 : Principal)principal1 "
-      "says {\npredicate1(arg1, arg2).}Query(query1 = "
-      "principal1 says predicate1(arg1, arg2)?))");
+      ".decl rel1(arg1 : Number, arg2 : Principal)\n"
+      "principal1 says {\n"
+      "predicate1(arg1, arg2).}\n"
+      "query1 = principal1 says predicate1(arg1, arg2)?");
 }
 
 }  // namespace raksha::ir::auth_logic
