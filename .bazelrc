@@ -5,6 +5,7 @@ try-import %workspace%/gcb/rbe/remote.bazelrc
 build --cxxopt='-std=c++17'
 build --cxxopt='-Werror' --cxxopt='-Wall'
 build --cxxopt='-Wno-deprecated-declarations'
+
 # Why are we doing this when Souffle-generated C++ clearly uses exceptions?
 # Well, Google famously does not like C++ exceptions in its internal codebase,
 # so we will need to explicitly override that in Raksha files everywhere we
@@ -26,6 +27,12 @@ build --host_cxxopt='-Wno-deprecated-declarations'
 # is our attempt to work around that.
 build --cxxopt='-Wno-unknown-warning-option'
 build --host_cxxopt='-Wno-unknown-warning-option'
+# The fuzztest library also has a conflict in one of its `.cc` files in
+# a macro. When https://github.com/google/fuzztest/issues/41 is fixed, we
+# should re-enable this warning.
+build --cxxopt='-Wno-macro-redefined'
+build --host_cxxopt='-Wno-macro-redefined'
+
 # Similarly, we should not set this flag that we're using as a debugging
 # assistant when compiling third party libraries.
 # build --host_cxxopt='-fno-exceptions'
