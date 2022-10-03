@@ -113,6 +113,7 @@ cc_test(
         ":value",
         "//src/common/testing:gtest",
         "@com_google_absl//absl/strings",
+        "@fuzztest//fuzztest",
     ],
 )
 

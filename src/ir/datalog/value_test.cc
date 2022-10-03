@@ -18,12 +18,15 @@
 
 #include <limits>
 
+#include "fuzztest/fuzztest.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
 
 namespace raksha::ir::datalog {
+namespace {
 
+using fuzztest::Arbitrary;
 using testing::Combine;
 using testing::TestWithParam;
 using testing::ValuesIn;
@@ -39,18 +42,25 @@ TEST_P(FloatTest, FloatTest) {
   ASSERT_TRUE(conversion_succeeds) << "Failed to convert " << datalog_str
                                    << " into a float (from " << num << ").";
   ASSERT_EQ(parsed_float, num) << "Failed to convert " << datalog_str
-                                << " into a float equal to " << num << ".";
+                               << " into a float equal to " << num << ".";
 }
 
 static double kSampleFloatValues[] = {0.0,  1.0,     2.0,     -0.5,
-                                       45.1, 999e100, -999e100};
+                                      45.1, 999e100, -999e100};
 
 INSTANTIATE_TEST_SUITE_P(FloatTest, FloatTest, ValuesIn(kSampleFloatValues));
 
-class NumberTest : public TestWithParam<int64_t> {};
+// TODO(https://github.com/google/fuzztest/issues/46) We currently have to wrap
+// our parameters in an additional layer of tuple because of some compatibility
+// issues in the fuzzing library. Once that is fixed, we can simplify this.
+constexpr std::tuple<int64_t> kSampleIntegerValues[] = {
+    {0},
+    {-1},
+    {1},
+    {std::numeric_limits<int64_t>::max()},
+    {std::numeric_limits<int64_t>::min()}};
 
-TEST_P(NumberTest, NumberTest) {
-  int64_t num = GetParam();
+void RoundTripNumberThroughDatalogString(int64_t num) {
   Number number_value = Number(num);
   std::string datalog_str = number_value.ToDatalogString();
   int64_t parsed_int = 0;
@@ -59,25 +69,22 @@ TEST_P(NumberTest, NumberTest) {
   ASSERT_EQ(parsed_int, num);
 }
 
-static int64_t kSampleIntegerValues[] = {0, -1, 1,
-                                         std::numeric_limits<long>::max(),
-                                         std::numeric_limits<long>::min()};
+FUZZ_TEST(NumberTest, RoundTripNumberThroughDatalogString)
+    .WithDomains(Arbitrary<int64_t>())
+    .WithSeeds(kSampleIntegerValues);
 
-INSTANTIATE_TEST_SUITE_P(NumberTest, NumberTest,
-                         ValuesIn(kSampleIntegerValues));
+constexpr std::tuple<absl::string_view> kSampleSymbols[] = {
+    {""}, {"x"}, {"foo"}, {"hello_world"}};
 
-class SymbolTest : public TestWithParam<absl::string_view> {};
-
-TEST_P(SymbolTest, SymbolTest) {
-  absl::string_view symbol = GetParam();
+void RoundTripStringThroughDatalogString(absl::string_view symbol) {
   Symbol symbol_value = Symbol(symbol);
   std::string symbol_str = symbol_value.ToDatalogString();
   ASSERT_EQ(symbol_str, "\"" + std::string(symbol) + "\"");
 }
 
-static absl::string_view kSampleSymbols[] = {"", "x", "foo", "hello_world"};
-
-INSTANTIATE_TEST_SUITE_P(SymbolTest, SymbolTest, ValuesIn(kSampleSymbols));
+FUZZ_TEST(SymbolTest, RoundTripStringThroughDatalogString)
+    .WithDomains(Arbitrary<absl::string_view>())
+    .WithSeeds(kSampleSymbols);
 
 using SimpleRecord = Record<Symbol, Number>;
 
@@ -86,18 +93,26 @@ TEST(SimpleRecordNilTest, SimpleRecordNilTest) {
 }
 
 class SimpleRecordTest
-    : public TestWithParam<std::tuple<absl::string_view, int64_t>> {};
+    : public TestWithParam<
+          std::tuple<std::tuple<absl::string_view>, std::tuple<int64_t>>> {};
 
-TEST_P(SimpleRecordTest, SimpleRecordTest) {
-  const auto [symbol, number] = GetParam();
+void PerformSimpleRecordTest(absl::string_view symbol, int64_t number) {
   SimpleRecord record_value = SimpleRecord(Symbol(symbol), Number(number));
   ASSERT_EQ(record_value.ToDatalogString(),
             absl::StrFormat(R"(["%s", %d])", symbol, number));
 }
 
+TEST_P(SimpleRecordTest, SimpleRecordTest) {
+  PerformSimpleRecordTest(std::get<0>(std::get<0>(GetParam())),
+                          std::get<0>(std::get<1>(GetParam())));
+}
+
 INSTANTIATE_TEST_SUITE_P(SimpleRecordTest, SimpleRecordTest,
                          Combine(ValuesIn(kSampleSymbols),
                                  ValuesIn(kSampleIntegerValues)));
+
+FUZZ_TEST(SimpleRecordTest, PerformSimpleRecordTest)
+    .WithDomains(Arbitrary<absl::string_view>(), Arbitrary<int64_t>());
 
 class NumList : public Record<Number, NumList> {
  public:
@@ -134,14 +149,12 @@ using NumberSymbolPair = Record<Number, Symbol>;
 using NumberSymbolPairPair = Record<NumberSymbolPair, NumberSymbolPair>;
 
 class NumberSymbolPairPairTest
-    : public TestWithParam<std::tuple<std::tuple<int64_t, absl::string_view>,
-                                      std::tuple<int64_t, absl::string_view>>> {
-};
+    : public TestWithParam<
+          std::tuple<std::tuple<int64_t>, std::tuple<absl::string_view>,
+                     std::tuple<int64_t>, std::tuple<absl::string_view>>> {};
 
-TEST_P(NumberSymbolPairPairTest, NumberSymbolPairPairTest) {
-  auto const &[pair1, pair2] = GetParam();
-  auto const [number1, symbol1] = pair1;
-  auto const [number2, symbol2] = pair2;
+void CheckNumberSymbolPairPair(int64_t number1, absl::string_view symbol1,
+                               int64_t number2, absl::string_view symbol2) {
   NumberSymbolPair number_symbol_pair1 =
       NumberSymbolPair(Number(number1), Symbol(symbol1));
   NumberSymbolPair number_symbol_pair2 =
@@ -153,10 +166,21 @@ TEST_P(NumberSymbolPairPairTest, NumberSymbolPairPairTest) {
                             number2, symbol2));
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    NumberSymbolPairPairTest, NumberSymbolPairPairTest,
-    Combine(Combine(ValuesIn(kSampleIntegerValues), ValuesIn(kSampleSymbols)),
-            Combine(ValuesIn(kSampleIntegerValues), ValuesIn(kSampleSymbols))));
+TEST_P(NumberSymbolPairPairTest, NumberSymbolPairPairTest) {
+  auto [num1, str1, num2, str2] = GetParam();
+  CheckNumberSymbolPairPair(std::get<0>(num1), std::get<0>(str1),
+                            std::get<0>(num2), std::get<0>(str2));
+}
+
+INSTANTIATE_TEST_SUITE_P(NumberSymbolPairPairTest, NumberSymbolPairPairTest,
+                         Combine(ValuesIn(kSampleIntegerValues),
+                                 ValuesIn(kSampleSymbols),
+                                 ValuesIn(kSampleIntegerValues),
+                                 ValuesIn(kSampleSymbols)));
+
+FUZZ_TEST(NumberSymbolPairPairTest, CheckNumberSymbolPairPair)
+    .WithDomains(Arbitrary<int64_t>(), Arbitrary<absl::string_view>(),
+                 Arbitrary<int64_t>(), Arbitrary<absl::string_view>());
 
 static constexpr char kNullBranchName[] = "Null";
 static constexpr char kNumberBranchName[] = "Number";
@@ -219,4 +243,5 @@ static const AdtAndExpectedDatalog kAdtAndExpectedDatalog[] = {
 
 INSTANTIATE_TEST_SUITE_P(AdtTest, AdtTest, ValuesIn(kAdtAndExpectedDatalog));
 
+}  // namespace
 }  // namespace raksha::ir::datalog
