@@ -1,4 +1,3 @@
-
 //-------------------------------------------------------------------------------
 // Copyright 2022 Google LLC
 //
@@ -25,83 +24,16 @@
 #include "src/common/utils/overloaded.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/datalog/program.h"
+#include "src/common/utils/map_iter.h"
 
 namespace raksha::ir::auth_logic {
-std::vector<std::string> binary_operations = {"<", ">", "=", "!=", "<=", ">="};
 
 using AstNodeVariantType =
-    std::variant<datalog::Predicate, BaseFact, Fact, ConditionalAssertion,
-                 Assertion, datalog::Argument>;
+    std::variant<datalog::Predicate, datalog::ArgumentType, datalog::Argument,
+                 datalog::RelationDeclaration, Principal, Attribute, CanActAs,
+                 BaseFact, Fact, ConditionalAssertion, Assertion, SaysAssertion,
+                 Query, Program>;
 
-std::string ToString(AstNodeVariantType Node) {
-  return std::visit(
-      raksha::utils::overloaded{
-          [](datalog::Predicate predicate) {
-            if (std::find(binary_operations.begin(), binary_operations.end(),
-                          predicate.name()) != binary_operations.end()) {
-              return absl::StrCat(predicate.args().front(), " ",
-                                  predicate.name(), " ",
-                                  predicate.args().back());
-            }
-            return absl::StrCat(
-                predicate.sign() == datalog::Sign::kNegated ? "!" : "",
-                predicate.name(), "(", absl::StrJoin(predicate.args(), ", "),
-                ")");
-          },
-          [](BaseFact basefact) {
-            return std::visit(raksha::utils::overloaded{
-                                  [](datalog::Predicate predicate) {
-                                    return ToString(predicate);
-                                  },
-                                  [](Attribute attribute) {
-                                    return absl::StrJoin(
-                                        {attribute.principal().name(),
-                                         ToString(attribute.predicate())},
-                                        " ");
-                                  },
-                                  [](CanActAs can_act_as) {
-                                    return absl::StrJoin(
-                                        {can_act_as.left_principal().name(),
-                                         can_act_as.right_principal().name()},
-                                        " canActAs ");
-                                  }},
-                              basefact.GetValue());
-          },
-          [](Fact fact) {
-            if (fact.delegation_chain().empty()) {
-              return ToString(fact.base_fact());
-            }
-            std::string cansay_string = "";
-            for (const Principal& delegatees : fact.delegation_chain()) {
-              cansay_string =
-                  absl::StrJoin({delegatees.name(), cansay_string}, " canSay ");
-            }
-            return absl::StrJoin({cansay_string, ToString(fact.base_fact())},
-                                 " ");
-          },
-          [](ConditionalAssertion conditional_assertion) {
-            std::string lhs = ToString(conditional_assertion.lhs());
-            std::vector<std::string> rhs;
-            for (const BaseFact& base_fact : conditional_assertion.rhs()) {
-              rhs.push_back(ToString(base_fact));
-            }
-            return absl::StrJoin({lhs, absl::StrJoin(rhs, ",")}, " :- ");
-          },
-          [](Assertion assertion) {
-            return std::visit(
-                raksha::utils::overloaded{
-                    [](Fact fact) { return ToString(fact); },
-                    [](ConditionalAssertion conditional_assertion) {
-                      return ToString(conditional_assertion);
-                    }},
-                assertion.GetValue());
-          },
-          [](datalog::Argument argument) {
-            return absl::StrJoin(
-                {argument.argument_name(), argument.argument_type().name()},
-                " : ");
-          }},
-      Node);
-}
+std::string ToString(AstNodeVariantType Node);
 
 }  // namespace raksha::ir::auth_logic

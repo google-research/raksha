@@ -61,30 +61,30 @@ INSTANTIATE_TEST_SUITE_P(
         SaysAssertionTestData({R"("UserA" says { currTimeIs(2022).
                                mayA(NotifyA) :- currTimeIs > 2021. })",
                                R"("UserA")",
-                               {"currTimeIs(2022)",
-                                "mayA(NotifyA) :- currTimeIs > 2021"}}),
+                               {"currTimeIs(2022).",
+                                "mayA(NotifyA) :- currTimeIs > 2021."}}),
         SaysAssertionTestData({R"("UserB" says { currTimeIs(2020).
                                mayB(NotifyB) :- currTimeIs < 2021. })",
                                R"("UserB")",
-                               {"currTimeIs(2020)",
-                                "mayB(NotifyB) :- currTimeIs < 2021"}}),
+                               {"currTimeIs(2020).",
+                                "mayB(NotifyB) :- currTimeIs < 2021."}}),
         SaysAssertionTestData({R"("UserC" says { currTimeIs(2021).
                                mayC(NotifyC) :- currTimeIs = 2021). })",
                                R"("UserC")",
-                               {"currTimeIs(2021)",
-                                "mayC(NotifyC) :- currTimeIs = 2021"}}),
+                               {"currTimeIs(2021).",
+                                "mayC(NotifyC) :- currTimeIs = 2021."}}),
         SaysAssertionTestData({R"("UserC" says { currTimeIs(2021).
                                mayC(NotifyC) :- currTimeIs >= 2021). })",
                                R"("UserC")",
-                               {"currTimeIs(2021)",
-                                "mayC(NotifyC) :- currTimeIs >= 2021"}}),
+                               {"currTimeIs(2021).",
+                                "mayC(NotifyC) :- currTimeIs >= 2021."}}),
         SaysAssertionTestData({R"("UserC" says { currTimeIs("""A20
 21""").
                                mayC(NotifyC) :- """currTime
 Is""" <= 2021). })",
                                R"("UserC")",
-                               {R"(currTimeIs("A2021"))",
-                                R"(mayC(NotifyC) :- "currTimeIs" <= 2021)"}}),
+                               {R"(currTimeIs("A2021").)",
+                                R"(mayC(NotifyC) :- "currTimeIs" <= 2021.)"}}),
         SaysAssertionTestData({
             R"("OakTeam" says { ourFavoritePublicKeyIs("""-----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErnyr7XY6gxXPnqRGYEpv5lDsbBeX
@@ -92,8 +92,8 @@ izVFLckaF/cbgBuzx7kfmf1qi2j+3DDOQYgISQOj9/LYt4c1cxbt+XtG4g==
 -----END PUBLIC KEY-----""").
             ourFavoriteTrustedBuilderIs("https://github.com/project-oak/transparent-release"). })",
             R"("OakTeam")",
-            {R"(ourFavoritePublicKeyIs("-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErnyr7XY6gxXPnqRGYEpv5lDsbBeXizVFLckaF/cbgBuzx7kfmf1qi2j+3DDOQYgISQOj9/LYt4c1cxbt+XtG4g==-----END PUBLIC KEY-----"))",
-             R"(ourFavoriteTrustedBuilderIs("https://github.com/project-oak/transparent-release"))"}}),
+            {R"(ourFavoritePublicKeyIs("-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErnyr7XY6gxXPnqRGYEpv5lDsbBeXizVFLckaF/cbgBuzx7kfmf1qi2j+3DDOQYgISQOj9/LYt4c1cxbt+XtG4g==-----END PUBLIC KEY-----").)",
+             R"(ourFavoriteTrustedBuilderIs("https://github.com/project-oak/transparent-release").)"}}),
         SaysAssertionTestData({
             R"("OakTeam" says { ourFavoritePublicKeyIs("""-----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErnyr7XY6gxXPnqRGYEpv5lDsbBeX
@@ -101,7 +101,7 @@ izVFLckaF/cbgBuzx7kfmf1qi2j+3DDOQYgISQOj9/LYt4c1cxbt+XtG4g==
 -----END PUBLIC KEY-----""").
             ourFavoriteTrustedBuilderIs("https://github.com/Attestations/GitHubHostedActions@v1").})",
             R"("OakTeam")",
-            {R"(ourFavoritePublicKeyIs("-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErnyr7XY6gxXPnqRGYEpv5lDsbBeXizVFLckaF/cbgBuzx7kfmf1qi2j+3DDOQYgISQOj9/LYt4c1cxbt+XtG4g==-----END PUBLIC KEY-----"))",
-             R"(ourFavoriteTrustedBuilderIs("https://github.com/Attestations/GitHubHostedActions@v1"))"}})));
+            {R"(ourFavoritePublicKeyIs("-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErnyr7XY6gxXPnqRGYEpv5lDsbBeXizVFLckaF/cbgBuzx7kfmf1qi2j+3DDOQYgISQOj9/LYt4c1cxbt+XtG4g==-----END PUBLIC KEY-----").)",
+             R"(ourFavoriteTrustedBuilderIs("https://github.com/Attestations/GitHubHostedActions@v1").)"}})));
 
 }  // namespace raksha::ir::auth_logic

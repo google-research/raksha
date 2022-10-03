@@ -156,14 +156,26 @@ cc_library(
 
 cc_library(
     name = "ast_string",
-    hdrs = [
-        "ast_string.h",
-    ],
+    srcs = ["ast_string.cc"],
+    hdrs = ["ast_string.h"],
     deps = [
         ":ast",
+        "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
         "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "ast_string_test",
+    srcs = ["ast_string_test.cc"],
+    deps = [
+        ":ast",
+        ":ast_construction",
+        ":ast_string",
+        "//src/common/testing:gtest",
+        "//src/ir/datalog:program",
     ],
 )
 
