@@ -107,8 +107,6 @@ class ArgumentType {
     return ArgumentType(Kind::kCustom, std::move(name));
   }
 
-  std::string ToString() const { return absl::StrCat(kind_, name_); }
-
   // This is needed because Argument has private members
   // of type ArgumentType, RelationDeclaration has private
   // members of type Argument, and RelationDeclaration
@@ -177,18 +175,6 @@ class RelationDeclaration {
     return this->relation_name_ == otherDeclaration.relation_name_ &&
            this->is_attribute_ == otherDeclaration.is_attribute_ &&
            this->arguments_ == otherDeclaration.arguments_;
-  }
-
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    std::vector<std::string> arg_strings;
-    arg_strings.reserve(arguments_.size());
-    for (const Argument& arg : arguments_) {
-      arg_strings.push_back(arg.ToString());
-    }
-    return absl::StrCat(".decl ", relation_name_, is_attribute_,
-                        absl::StrJoin(arg_strings, ", "));
   }
 
   // This is needed because RelationDeclaration appears in
