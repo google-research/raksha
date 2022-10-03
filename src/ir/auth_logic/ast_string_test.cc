@@ -32,12 +32,9 @@ TEST(PredicateToStringTest, SimplePredicateTest) {
   EXPECT_EQ(ToString(predicate2), "!predicate2(arg1)");
 }
 
-static datalog::ArgumentType numberType(datalog::ArgumentType::Kind::kNumber,
-                                        "");
-static datalog::ArgumentType principalType(
-    datalog::ArgumentType::Kind::kPrincipal, "");
-static datalog::ArgumentType customType(datalog::ArgumentType::Kind::kCustom,
-                                        "someProgrammerType");
+static datalog::ArgumentType numberType = datalog::ArgumentType::MakeNumberType();
+static datalog::ArgumentType principalType = datalog::ArgumentType::MakePrincipalType();
+static datalog::ArgumentType customType = datalog::ArgumentType::MakeCustomType("someProgrammerType");
 TEST(ArgumentTypeToStringTest, SimpleArgumentTypeTest) {
   EXPECT_EQ(ToString(numberType), "Number");
   EXPECT_EQ(ToString(principalType), "Principal");
