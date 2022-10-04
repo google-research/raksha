@@ -40,10 +40,10 @@ std::string TypeToUniverseName(const datalog::ArgumentType& arg_type) {
 
 BaseFact MakeUniverseMembershipFact(absl::string_view element_name,
                                     const datalog::ArgumentType& arg_type) {
-  return BaseFact(
-      datalog::Predicate(TypeToUniverseName(arg_type),  // universe relation
-                         {std::string(element_name)},  // the element to add to universe
-                         datalog::Sign::kPositive));
+  return BaseFact(datalog::Predicate(
+      TypeToUniverseName(arg_type),  // universe relation
+      {std::string(element_name)},   // the element to add to universe
+      datalog::Sign::kPositive));
 }
 
 datalog::RelationDeclaration TypeToUniverseDeclaration(
@@ -130,7 +130,7 @@ GetUniverseDeclarations(const Program& prog) {
 // `AddUniverseConditions(SaysAssertion says_assertion)`
 // that returns a transformed version of the says assertion.
 // Internally, it extends a visitor for a part of this translation.
-// 
+//
 // Example transformation 1:
 // Input:
 // .decl someRelation(x: SomeCustomType)
@@ -152,11 +152,11 @@ GetUniverseDeclarations(const Program& prog) {
 // "PrinX" says someRelation(anyCustom) :- isCustom(anyCustom),
 //             otherRelation(anyCustom).
 
-class UniverseConditionTransformer
-    : public AuthLogicAstTraversingVisitor<UniverseConditionTransformer,
+class GroundingConditionTransformer
+    : public AuthLogicAstTraversingVisitor<GroundingConditionTransformer,
                                            std::vector<BaseFact>> {
  public:
-  UniverseConditionTransformer(const DeclarationEnvironment& decl_env)
+  GroundingConditionTransformer(const DeclarationEnvironment& decl_env)
       : decl_env_(decl_env) {}
 
   // The `AddUniverseConditions` methods, including this one,
@@ -228,7 +228,7 @@ class UniverseConditionTransformer
     std::vector<BaseFact> conditions;
     std::vector<std::string> args = pred.args();
     for (size_t i = 0; i < args.size(); i++) {
-      std::string arg = args[i];
+      absl::string_view arg = args[i];
       if (!IsNameConstant(arg)) {
         conditions.push_back(MakeUniverseMembershipFact(
             arg, decl.arguments()[i].argument_type()));
@@ -252,10 +252,10 @@ Program InsertUniverseRelations(const Program& prog) {
       GetUniverseDefiningFacts(type_env);
   // Transform assertions to include conditions
   // that check the universes
-  UniverseConditionTransformer universe_condition_transformer(decl_env);
+  GroundingConditionTransformer grounding_condition_transformer(decl_env);
   for (const auto& says_assertion : prog.says_assertions()) {
     new_says_assertions.push_back(
-        universe_condition_transformer.AddUniverseConditions(says_assertion));
+        grounding_condition_transformer.AddUniverseConditions(says_assertion));
   }
 
   // Add declarations for universe relations.
