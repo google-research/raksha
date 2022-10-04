@@ -22,6 +22,9 @@ namespace raksha::ir::auth_logic {
 
 TEST(IsNameConstantTest, BasicTest) {
   EXPECT_EQ(IsNameConstant("\"hello\""), true);
+  EXPECT_EQ(IsNameConstant("3"), true);
+  EXPECT_EQ(IsNameConstant("343556"), true);
+  EXPECT_EQ(IsNameConstant("343556lol"), false);
   EXPECT_EQ(IsNameConstant("\"hello"), false);
   EXPECT_EQ(IsNameConstant("hello"), false);
 }
