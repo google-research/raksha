@@ -16,6 +16,7 @@
 
 #include "absl/strings/numbers.h"
 #include "absl/strings/string_view.h"
+#include "absl/strings/match.h"
 
 #ifndef SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_
 #define SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_
@@ -29,7 +30,7 @@ namespace raksha::ir::auth_logic {
 // children determined at parse time rather than here since
 // this information is available at parse time.
 bool IsNameConstant(absl::string_view id) {
-  if (id[0] == '"' && id[id.size()-1] == '"') {
+  if(absl::StartsWith(id, "\"") && absl::EndsWith(id, "\"")) {
     return true;
   } else {
     int unused_output;
