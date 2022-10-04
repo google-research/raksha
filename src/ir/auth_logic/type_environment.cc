@@ -68,12 +68,6 @@ void TypeEnvironmentGenerationVisitor::AddTyping(
         << "Type error for constant: " << arg_name;
   }
 
-  /*
-   auto insert_result =
-       literal_type_map_.insert({std::string(arg_name), arg_type});
-   CHECK(insert_result.second)
-       << "Type error for constant: " << insert_result.first->first;
-   */
 }
 
 // Insert a typing for constant value (e.g. "SomeArgument" in quotes
