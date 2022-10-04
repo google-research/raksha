@@ -31,11 +31,12 @@ namespace {
 // This is a nested class because it needs to access the private
 // fields of the TypeEnvironment in the constructor implementation.
 
-using LiteralTypeMapType =
-    absl::flat_hash_map<std::string, datalog::ArgumentType>;
+
 class TypeEnvironmentGenerationVisitor
     : public AuthLogicAstTraversingVisitor<TypeEnvironmentGenerationVisitor> {
  public:
+using LiteralTypeMapType =
+    absl::flat_hash_map<std::string, datalog::ArgumentType>;
   TypeEnvironmentGenerationVisitor(DeclarationEnvironment decl_env)
       : decl_env_(decl_env), literal_type_map_({}) {}
 
