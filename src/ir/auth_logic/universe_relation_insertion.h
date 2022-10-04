@@ -42,14 +42,7 @@ described in `ast.h` and produces a new instance of the data structure in
 `ast.h`. It should come before the translation in `lowering_ast_datalog.h`.
 */
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
-#include "absl/strings/str_cat.h"
 #include "src/ir/auth_logic/ast.h"
-#include "src/ir/auth_logic/auth_logic_ast_traversing_visitor.h"
-#include "src/ir/auth_logic/declaration_environment.h"
-#include "src/ir/auth_logic/type_environment.h"
-#include "src/ir/datalog/program.h"
 
 namespace raksha::ir::auth_logic {
 

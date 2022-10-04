@@ -16,7 +16,12 @@
 
 #include "src/ir/auth_logic/universe_relation_insertion.h"
 
+#include "absl/container/flat_hash_map.h"
+#include "absl/container/flat_hash_set.h"
+#include "src/ir/auth_logic/auth_logic_ast_traversing_visitor.h"
+#include "src/ir/auth_logic/declaration_environment.h"
 #include "src/ir/auth_logic/is_name_constant.h"
+#include "src/ir/auth_logic/type_environment.h"
 
 namespace raksha::ir::auth_logic {
 
@@ -107,8 +112,7 @@ GetUniverseDeclarations(const Program& prog) {
   // referenced in relation declarations in the front-end
   absl::flat_hash_set<datalog::RelationDeclaration> builtin_universes = {
       TypeToUniverseDeclaration(datalog::ArgumentType::MakeNumberType()),
-      TypeToUniverseDeclaration(datalog::ArgumentType::MakePrincipalType())
-  };
+      TypeToUniverseDeclaration(datalog::ArgumentType::MakePrincipalType())};
   ret.merge(builtin_universes);
   return ret;
 }
