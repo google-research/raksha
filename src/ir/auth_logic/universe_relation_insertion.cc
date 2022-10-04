@@ -27,7 +27,7 @@ namespace raksha::ir::auth_logic {
 
 namespace {
 
-std::string TypeToUniverseName(datalog::ArgumentType arg_type) {
+std::string TypeToUniverseName(const datalog::ArgumentType& arg_type) {
   switch (arg_type.kind()) {
     case datalog::ArgumentType::Kind::kNumber:
       return "isNumber";
@@ -38,16 +38,16 @@ std::string TypeToUniverseName(datalog::ArgumentType arg_type) {
   }
 }
 
-BaseFact MakeUniverseMembershipFact(std::string element_name,
-                                    datalog::ArgumentType arg_type) {
+BaseFact MakeUniverseMembershipFact(absl::string_view element_name,
+                                    const datalog::ArgumentType& arg_type) {
   return BaseFact(
       datalog::Predicate(TypeToUniverseName(arg_type),  // universe relation
-                         {element_name},  // the element to add to universe
+                         {std::string(element_name)},  // the element to add to universe
                          datalog::Sign::kPositive));
 }
 
 datalog::RelationDeclaration TypeToUniverseDeclaration(
-    datalog::ArgumentType arg_type) {
+    const datalog::ArgumentType& arg_type) {
   return datalog::RelationDeclaration(TypeToUniverseName(arg_type), false,
                                       {datalog::Argument("x", arg_type)});
 }
@@ -129,7 +129,29 @@ GetUniverseDeclarations(const Program& prog) {
 // It implements just one public method,
 // `AddUniverseConditions(SaysAssertion says_assertion)`
 // that returns a transformed version of the says assertion.
-// Internally, it extends a visitor for a part of this translation
+// Internally, it extends a visitor for a part of this translation.
+// 
+// Example transformation 1:
+// Input:
+// .decl someRelation(x: SomeCustomType)
+// "PrinX" says someRelation(anyCustom).
+// Output:
+// .decl someRelation(x: SomeCustomType)
+// .decl isCustom(x: SomeCustomType)
+// "PrinX" says someRelation(anyCustom) :- isCustom(anyCustom)
+//
+// Example transformation 2 (illustrating conservativeness):
+// Input:
+// .decl someRelation(x: SomeCustomType)
+// .decl otherRelation(x: SomeCustomType)
+// "PrinX" says someRelation(anyCustom) :- otherRelation(anyCustom).
+// Output:
+// .decl someRelation(x: SomeCustomType)
+// .decl otherRelation(x: SomeCustomType)
+// .decl isCustom(x: SomeCustomType)
+// "PrinX" says someRelation(anyCustom) :- isCustom(anyCustom),
+//             otherRelation(anyCustom).
+
 class UniverseConditionTransformer
     : public AuthLogicAstTraversingVisitor<UniverseConditionTransformer,
                                            std::vector<BaseFact>> {
