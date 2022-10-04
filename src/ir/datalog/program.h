@@ -82,12 +82,6 @@ class Predicate {
     return numeric_operators->contains(name_);
   }
 
-  // A potentially ugly print of the state in this class
-  // for debugging/testing only
-  std::string ToString() const {
-    return absl::StrCat(sign_, name_, absl::StrJoin(args_, ", "));
-  }
-
  private:
   std::string name_;
   std::vector<std::string> args_;
@@ -112,8 +106,6 @@ class ArgumentType {
   static ArgumentType MakeCustomType(absl::string_view name) {
     return ArgumentType(Kind::kCustom, name);
   }
-
-  std::string ToString() const { return absl::StrCat(kind_, name_); }
 
   // This is needed because Argument has private members
   // of type ArgumentType, RelationDeclaration has private
