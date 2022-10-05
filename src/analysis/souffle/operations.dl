@@ -29,7 +29,7 @@
 .type OperandList = [ operand: AccessPath, next: OperandList ]
 
 // An Operation.
-.type Operation = [owner: Principal, operator: Operator, result: AccessPath,
+.type Operation = [actor: Principal, operator: Operator, result: AccessPath,
                    operandList: OperandList, attributes: AttributeList]
 
 // Operation universe.
@@ -45,28 +45,28 @@
 .decl isAttributeList(attributeList: AttributeList)
 
 // Fill the appropriate universes with the pieces of the operation.
-isPrincipal(owner), isOperator(operator), isAccessPath(result),
+isPrincipal(actor), isOperator(operator), isAccessPath(result),
 isOperandList(operandList), isAttributeList(attributeList) :-
-isOperation([owner, operator, result, operandList, attributeList]).
+isOperation([actor, operator, result, operandList, attributeList]).
 
 // Declare mappings from an operation to its fields.
 .decl operationHasResult(operation: Operation, result: AccessPath)
-.decl operationHasOwner(operation: Operation, owner: Principal)
+.decl operationHasActor(operation: Operation, actor: Principal)
 .decl operationHasOperator(operation: Operation, operator: Operator)
 .decl operationHasOperandList(operation: Operation, operandList: OperandList)
 .decl operationHasAttributeList(operation: Operation, attributeList: AttributeList)
 
 // Populate field association relations.
-operationHasResult(operation, result), operationHasOwner(operation, owner),
+operationHasResult(operation, result), operationHasActor(operation, actor),
 operationHasOperator(operation, operator), operationHasOperandList(operation, operands),
 operationHasAttributeList(operation, attributes) :-
-  isPrincipal(owner), isOperator(operator), isAccessPath(result), isOperandList(operands),
+  isPrincipal(actor), isOperator(operator), isAccessPath(result), isOperandList(operands),
   isAttributeList(attributes), isOperation(operation),
-  operation = [owner, operator, result, operands, attributes].
+  operation = [actor, operator, result, operands, attributes].
 
 // BINARY_OPERATION is a convenience macro for the very-common-case of binary operations.
-#define BINARY_OPERATION(owner, operator, result, attrs, input1, input2) \
-isOperation([owner, operator, result, [input1, [input2, nil]], attrs])
+#define BINARY_OPERATION(actor, operator, result, attrs, input1, input2) \
+isOperation([actor, operator, result, [input1, [input2, nil]], attrs])
 
 // Explode the operand lists so that we can extract the heads of each sublist
 // to get a mapping from operations to their operands.

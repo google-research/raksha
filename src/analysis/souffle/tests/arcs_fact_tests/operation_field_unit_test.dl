@@ -21,16 +21,16 @@
   TEST_CASE(cat(test_name, cat("_", #relation))) :- \
     count : { relation(operation, _) } = 1, relation(operation, expected)
 
-#define CREATE_AND_TEST_OPERATOR_INNER(test_name, operation, owner, operator, result, operandList, attrList) \
+#define CREATE_AND_TEST_OPERATOR_INNER(test_name, operation, actor, operator, result, operandList, attrList) \
   isOperation(operation). \
-  TEST_SINGLE_RESULT_FOR_OPERATION(test_name, (operation), operationHasOwner, owner). \
+  TEST_SINGLE_RESULT_FOR_OPERATION(test_name, (operation), operationHasActor, actor). \
   TEST_SINGLE_RESULT_FOR_OPERATION(test_name, (operation), operationHasOperator, operator). \
   TEST_SINGLE_RESULT_FOR_OPERATION(test_name, (operation), operationHasResult, result). \
   TEST_SINGLE_RESULT_FOR_OPERATION(test_name, (operation), operationHasOperandList, (operandList)). \
   TEST_SINGLE_RESULT_FOR_OPERATION(test_name, (operation), operationHasAttributeList, (attrList))
 
-#define CREATE_AND_TEST_OPERATION(test_name, owner, operator, result, operandList, attrList) \
-  CREATE_AND_TEST_OPERATOR_INNER(test_name, ([owner, operator, result, (operandList), (attrList)]), owner, operator, result, (operandList), (attrList))
+#define CREATE_AND_TEST_OPERATION(test_name, actor, operator, result, operandList, attrList) \
+  CREATE_AND_TEST_OPERATOR_INNER(test_name, ([actor, operator, result, (operandList), (attrList)]), actor, operator, result, (operandList), (attrList))
 
 #define OPERAND_LIST1 ["operand1", nil]
 #define ATTR_LIST1 [["attr1", $NumberAttributePayload(1)], nil]
@@ -42,4 +42,4 @@ CREATE_AND_TEST_OPERATION("test1", "somePrincipal", "someOperator", "ap1", (OPER
 CREATE_AND_TEST_OPERATION("test2", "prin", "op", "ap2", nil, (ATTR_LIST2)).
 
 #define OPERAND_LIST2 ["input1", ["input2", nil]]
-CREATE_AND_TEST_OPERATION("test3", "owner", "op2", "ap3", (OPERAND_LIST2), nil).
+CREATE_AND_TEST_OPERATION("test3", "actor", "op2", "ap3", (OPERAND_LIST2), nil).
