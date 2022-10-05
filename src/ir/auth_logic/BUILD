@@ -34,8 +34,8 @@ cc_library(
         "//src/common/utils:overloaded",
         "//src/common/utils:types",
         "//src/ir/datalog:program",
-        "@absl//absl/hash",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/hash",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -64,7 +64,7 @@ cc_library(
         ":auth_logic_ast_traversing_visitor",
         "//src/common/logging",
         "//src/ir/datalog:program",
-        "@absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 
@@ -87,7 +87,7 @@ cc_test(
     ],
     deps = [
         "//src/common/testing:gtest",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -103,7 +103,7 @@ cc_library(
         ":auth_logic_ast_traversing_visitor",
         ":declaration_environment",
         "//src/ir/datalog:program",
-        "@absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 
@@ -133,9 +133,9 @@ cc_library(
         ":declaration_environment",
         ":type_environment",
         "//src/common/logging",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/container:flat_hash_set",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -155,10 +155,10 @@ cc_library(
         "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
-        "@absl//absl/algorithm:container",
-        "@absl//absl/container:flat_hash_map",
-        "@absl//absl/strings",
-        "@absl//absl/strings:str_format",
+        "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -174,8 +174,8 @@ cc_library(
         "//src/ir/auth_logic:ast",
         "//src/ir/auth_logic:lowering_ast_datalog",
         "//src/ir/datalog:program",
-        "@absl//absl/container:flat_hash_set",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -195,7 +195,7 @@ cc_test(
         ":ast",
         ":universe_relation_insertion",
         "//src/common/testing:gtest",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -228,7 +228,7 @@ cc_test(
         ":auth_logic_ast_traversing_visitor",
         "//src/common/testing:gtest",
         "//src/ir/datalog:program",
-        "@absl//absl/container:btree",
+        "@com_google_absl//absl/container:btree",
     ],
 )
 
@@ -245,7 +245,7 @@ cc_library(
         "//src/ir/auth_logic:ast",
         "//src/ir/datalog:program",
         "//src/policy/auth_logic:auth_logic_cc_generator",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -258,7 +258,7 @@ cc_library(
         "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -286,7 +286,7 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -303,7 +303,7 @@ cc_test(
         "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -320,6 +320,6 @@ cc_test(
         "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
-        "@absl//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
