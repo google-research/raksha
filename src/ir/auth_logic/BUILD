@@ -104,6 +104,7 @@ cc_library(
         ":declaration_environment",
         "//src/ir/datalog:program",
         "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
     ],
 )
 
