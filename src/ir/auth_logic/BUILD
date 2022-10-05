@@ -56,6 +56,91 @@ cc_library(
 )
 
 cc_library(
+    name = "declaration_environment",
+    srcs = ["declaration_environment.cc"],
+    hdrs = ["declaration_environment.h"],
+    deps = [
+        ":ast",
+        ":auth_logic_ast_traversing_visitor",
+        "//src/common/logging",
+        "//src/ir/datalog:program",
+        "@com_google_absl//absl/container:flat_hash_map",
+    ],
+)
+
+cc_test(
+    name = "declaration_environment_test",
+    srcs = ["declaration_environment_test.cc"],
+    deps = [
+        ":ast",
+        ":declaration_environment",
+        "//src/common/testing:gtest",
+        "//src/ir/datalog:program",
+    ],
+)
+
+cc_test(
+    name = "is_name_constant_test",
+    srcs = [
+        "is_name_constant.h",
+        "is_name_constant_test.cc",
+    ],
+    deps = [
+        "//src/common/testing:gtest",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "type_environment",
+    srcs = ["type_environment.cc"],
+    hdrs = [
+        "is_name_constant.h",
+        "type_environment.h",
+    ],
+    deps = [
+        ":ast",
+        ":auth_logic_ast_traversing_visitor",
+        ":declaration_environment",
+        "//src/ir/datalog:program",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "type_environment_test",
+    srcs = ["type_environment_test.cc"],
+    deps = [
+        ":ast",
+        ":declaration_environment",
+        ":type_environment",
+        "//src/common/testing:gtest",
+        "//src/ir/datalog:program",
+    ],
+)
+
+cc_library(
+    name = "universe_relation_insertion",
+    srcs = ["universe_relation_insertion.cc"],
+    hdrs = [
+        "is_name_constant.h",
+        "universe_relation_insertion.h",
+    ],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":ast",
+        ":auth_logic_ast_traversing_visitor",
+        ":declaration_environment",
+        ":type_environment",
+        "//src/common/logging",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "lowering_ast_datalog",
     srcs = ["lowering_ast_datalog.cc"],
     hdrs = [
@@ -101,6 +186,17 @@ cc_test(
     deps = [
         ":ast",
         "//src/common/testing:gtest",
+    ],
+)
+
+cc_test(
+    name = "universe_relation_insertion_test",
+    srcs = ["universe_relation_insertion_test.cc"],
+    deps = [
+        ":ast",
+        ":universe_relation_insertion",
+        "//src/common/testing:gtest",
+        "@com_google_absl//absl/strings",
     ],
 )
 
