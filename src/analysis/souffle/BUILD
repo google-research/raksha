@@ -188,6 +188,8 @@ souffle_cc_binary(
     additional_deps = ["logfunctors"],
 )
 
+# TODO(#728): This datalog_policy_verifier is very entangled and is doing too many things. We should
+# untangle it and delete it.
 raksha_policy_verifier_library(
     name = "datalog_policy_verifier",
     additional_dl_files = [
@@ -200,6 +202,15 @@ raksha_policy_verifier_library(
     policy_verifier_interfaces = [":policy_verifier_interface.dl"],
 )
 
+# This is a policy verifier focused on the exfiltration of secret columns in the SQL verification
+# engine specifically.
+raksha_policy_verifier_library(
+    name = "sql_policy_verifier",
+    policies = ["//src/backends/policy_engine/souffle/testdata:empty_policy.auth"],
+    policy_verifier_interfaces = [":sql_policy_verifier_interface.dl"],
+)
+
+# This is a policy verifier focused on the propagation of differential privacy parameter info.
 raksha_policy_verifier_library(
     name = "dp_policy_verifier",
     additional_dl_files = [

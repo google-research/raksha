@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef SRC_BACKENDS_POLICY_ENGINE_SQL_POLICY_RULE_POLICY_H_
-#define SRC_BACKENDS_POLICY_ENGINE_SQL_POLICY_RULE_POLICY_H_
+#ifndef SRC_BACKENDS_POLICY_ENGINE_CATCHALL_POLICY_RULE_POLICY_H_
+#define SRC_BACKENDS_POLICY_ENGINE_CATCHALL_POLICY_RULE_POLICY_H_
 
 #include <filesystem>
 #include <optional>
@@ -24,15 +24,17 @@
 
 namespace raksha::backends::policy_engine {
 
-// A form of policy for the SQL verifier, which communicates tag transforms on
-// SQL expressions in its special rule format.
-class SqlPolicyRulePolicy : public Policy {
+// TODO(#728): We ended up in a dependency mess around the SqlPolicyRulePolicy,
+// where a number of test frontends started using it that had nothing to do with
+// SQL. This is a shim to slim down the SQL infrastructure and allow us to
+// eventually eliminate the tests using this as a catchall policy.
+class CatchallPolicyRulePolicy : public Policy {
  public:
-  explicit SqlPolicyRulePolicy(std::string is_sql_policy_rule_facts)
+  explicit CatchallPolicyRulePolicy(std::string is_sql_policy_rule_facts)
       : is_sql_policy_rule_facts_(std::move(is_sql_policy_rule_facts)) {}
 
   std::string GetPolicyAnalysisCheckerName() const override {
-    return "sql_policy_verifier_cxx";
+    return "datalog_policy_verifier_cxx";
   }
 
   std::optional<std::string> GetPolicyFactName() const override {

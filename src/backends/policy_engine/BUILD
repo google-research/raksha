@@ -50,6 +50,20 @@ cc_library(
 )
 
 cc_library(
+    name = "catchall_policy_rule_policy",
+    hdrs = ["catchall_policy_rule_policy.h"],
+    visibility = [
+        "//:__pkg__",
+        "//src:__subpackages__",
+    ] + frontend_packages,
+    deps = [
+        ":policy",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "auth_logic_policy",
     hdrs = ["auth_logic_policy.h"],
     visibility = [

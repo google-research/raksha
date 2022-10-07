@@ -29,7 +29,7 @@
 #include "src/backends/policy_engine/dp_parameter_policy.h"
 #include "src/backends/policy_engine/policy.h"
 #include "src/backends/policy_engine/souffle/souffle_policy_checker.h"
-#include "src/backends/policy_engine/sql_policy_rule_policy.h"
+#include "src/backends/policy_engine/catchall_policy_rule_policy.h"
 #include "src/common/logging/logging.h"
 #include "src/ir/proto_to_ir.h"
 #include "src/parser/ir/ir_parser.h"
@@ -120,7 +120,7 @@ absl::StatusOr<IrGraphComponents> GetIrGraphComponentsFromProtoPath(
 using raksha::backends::policy_engine::AuthLogicPolicy;
 using raksha::backends::policy_engine::DpParameterPolicy;
 using raksha::backends::policy_engine::SoufflePolicyChecker;
-using raksha::backends::policy_engine::SqlPolicyRulePolicy;
+using raksha::backends::policy_engine::CatchallPolicyRulePolicy;
 using raksha::ir::IrProgramParser;
 
 int main(int argc, char* argv[]) {
@@ -167,7 +167,7 @@ int main(int argc, char* argv[]) {
                  << sql_policy_rules.status();
       return UnwrapExitCode(ReturnCode::ERROR);
     }
-    SqlPolicyRulePolicy policy(*sql_policy_rules);
+    CatchallPolicyRulePolicy policy(*sql_policy_rules);
     policyCheckSucceeded = SoufflePolicyChecker().IsModulePolicyCompliant(
         *components.value().ir_module, policy);
   } else if (absl::GetFlag(FLAGS_epsilon_dp_parameter).has_value() &&

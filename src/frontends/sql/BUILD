@@ -99,7 +99,7 @@ cc_library(
         ":decode",
         ":sql_ir_cc_proto",
         "//src/backends/policy_engine:policy",
-        "//src/backends/policy_engine/souffle:souffle_policy_checker",
+        "//src/backends/policy_engine/souffle:souffle_policy_checker_sql",
     ],
 )
 
