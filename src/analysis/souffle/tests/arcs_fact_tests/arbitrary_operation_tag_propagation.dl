@@ -25,7 +25,7 @@ isAccessPath("in3").
 isAccessPath("in4").
 
 // Create some arbitrary operation that the analysis has never seen before.
-isOperation(["owner", "???", "result", ["in1", ["in2", ["in3", ["in4", nil]]]], nil]).
+isOperation(["owner", "???", ["result", nil], ["in1", ["in2", ["in3", ["in4", nil]]]], nil]).
 
 // Because we have a general rule that causes inputs to operations to influence
 // the output, show that we can put a tag on any input and have it show up on

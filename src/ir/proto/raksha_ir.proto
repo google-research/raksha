@@ -78,6 +78,7 @@ message Operation {
 // other helpful information.
 message Operator {
   string name = 1;
+  uint64 number_of_return_values = 2;
 }
 
 message AnyValue {}

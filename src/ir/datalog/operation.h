@@ -28,8 +28,12 @@ class OperandList : public Record<Symbol /*operand*/, OperandList /*next*/> {
   using Record::Record;
 };
 
+class ResultList : public Record<Symbol /*result*/, ResultList /*next*/> {
+  using Record::Record;
+};
+
 using Operation =
-    Record<Symbol /*owner*/, Symbol /*operator*/, Symbol /*result*/,
+    Record<Symbol /*owner*/, Symbol /*operator*/, ResultList /*result*/,
            OperandList /*operands*/, AttributeList /*attributes*/>;
 
 class IsOperationFact : public InputRelationFact<Operation> {

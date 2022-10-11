@@ -32,7 +32,7 @@
   TEST_N_RESULT_FOR_OPERATION(n_handles, test_name, (operation), arcsJsConnectInputOperationHasHandleName, handle)
 
 #define INPUT_CREATE_AND_TEST_OPERATION(n_particles, n_stores, n_handles, test_name, owner, operator, result, operandList, attrList, particle, store, handle) \
-  INPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, ([owner, operator, result, (operandList), (attrList)]), particle, store, handle, result)
+  INPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, ([owner, operator, [result, nil], (operandList), (attrList)]), particle, store, handle, result)
 
 #define OUTPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, operation, particle, store, handle, result) \
   isOperation(operation). \
@@ -41,7 +41,7 @@
   TEST_N_RESULT_FOR_OPERATION(n_handles, test_name, (operation), arcsJsConnectOutputOperationHasHandleName, handle)
 
 #define OUTPUT_CREATE_AND_TEST_OPERATION(n_particles, n_stores, n_handles, test_name, owner, operator, result, operandList, attrList, particle, store, handle) \
-  OUTPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, ([owner, operator, result, (operandList), (attrList)]), particle, store, handle, result)
+  OUTPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, ([owner, operator, [result, nil], (operandList), (attrList)]), particle, store, handle, result)
 
 #define ATTR_LIST1 [["name", $StringAttributePayload("foo")], nil]
 #define OPERAND_LIST1 ["operand1", ["operand2", nil]]

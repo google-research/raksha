@@ -1,1 +1,1 @@
-["sql", "arbitrary", "%0", nil, nil]
+["sql", "arbitrary", ["%0", nil], nil, nil]

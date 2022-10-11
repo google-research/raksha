@@ -36,7 +36,7 @@
   TEST_N_RESULT_FOR_OPERATION(n_tags, test_name, (operation), arcsJsClaimOperationHasTag, tag)
 
 #define CLAIM_CREATE_AND_TEST_OPERATION(n_args, n_tags, test_name, owner, operator, result, operandList, attrList, argument, tag) \
-  CLAIM_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, result, (operandList), (attrList)]), argument, tag, result)
+  CLAIM_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]), argument, tag, result)
 
 #define CHECK_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, operation, argument, tag, result) \
   isOperation(operation). \
@@ -44,7 +44,7 @@
   TEST_N_RESULT_FOR_OPERATION(n_tags, test_name, (operation), arcsJsCheckOperationHasTag, tag)
 
 #define CHECK_CREATE_AND_TEST_OPERATION(n_args, n_tags, test_name, owner, operator, result, operandList, attrList, argument, tag) \
-  CHECK_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, result, (operandList), (attrList)]), argument, tag, result)
+  CHECK_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]), argument, tag, result)
 
 #define ATTR_LIST1 [["tag", $StringAttributePayload("private")], nil]
 #define OPERAND_LIST1 ["operand1", nil]
@@ -75,5 +75,6 @@ CHECK_CREATE_AND_TEST_OPERATION(0, 0, "test10_check_requires_arg", "prin", "arcs
 #define OPERAND_LIST6 ["input1", nil]
 
 CLAIM_CREATE_AND_TEST_OPERATION(1, 2, "test11_claim_maps_over_tags", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST6), (ATTR_LIST6), "input1", _).
-CHECK_CREATE_AND_TEST_OPERATION(1, 2, "test12_check_maps_over_tags", "prin", "arcsjs.check", "ap2", (OPERAND_LIST6), (ATTR_LIST6), "input1", _).
+CHECK_CREATE_AND_TEST_OPERATION(1, 2, "test12_check_maps_over_tags", "prin", "arcsjs.check", "ap2"
+, (OPERAND_LIST6), (ATTR_LIST6), "input1", _).
 

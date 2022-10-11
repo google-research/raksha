@@ -36,8 +36,11 @@ value
 argumentList
     : value (',' value)*
     ;
+result
+    : VALUE_ID (',' VALUE_ID)*
+    ;
 operation
-    : VALUE_ID '=' ID '['attributeList?']''('argumentList?')'
+    : result '=' ID '['attributeList?']''('argumentList?')'
     ;
 block
     : BLOCK ID '{' (operation)+ '}'

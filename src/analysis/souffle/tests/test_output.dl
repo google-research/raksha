@@ -22,7 +22,9 @@
 #define DEFAULT_TEST_OWNER "sql"
 #define TEST_OUTPUT_OPERATOR "test.test_output"
 
-violatesPolicy(path) :- isOperation([DEFAULT_TEST_OWNER, TEST_OUTPUT_OPERATOR, path, _, _]),
-  isTag(tag), mayHaveTag(path, DEFAULT_TEST_OWNER, tag).
+violatesPolicy("violates") :- isOperation(op),
+  isTag(tag), operationHasResult(op, result),
+  mayHaveTag(result, DEFAULT_TEST_OWNER, tag),
+  op = [DEFAULT_TEST_OWNER, TEST_OUTPUT_OPERATOR, results, _, _].
 
 #endif // SRC_ANALYSIS_SOUFFLE_TESTS_TEST_OUTPUT_DL_

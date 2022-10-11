@@ -98,8 +98,8 @@ isIntegrityTag(tag) :- sqlPolicyRuleNameHasResult(_, $AddIntegrityTag(tag)).
 .decl isTagTransformOperation(tagTransform: Operation)
 
 isTagTransformOperation(
-  [DEFAULT_SQL_ACTOR, TAG_TRANSFORM_OPERATOR, result, operandList, attributes]) :-
-  isOperation([DEFAULT_SQL_ACTOR, TAG_TRANSFORM_OPERATOR, result, operandList, attributes]).
+  [DEFAULT_SQL_ACTOR, TAG_TRANSFORM_OPERATOR, resultList, operandList, attributes]) :-
+  isOperation([DEFAULT_SQL_ACTOR, TAG_TRANSFORM_OPERATOR, resultList, operandList, attributes]).
 
 // A TagTransform operator propagates confidentiality tags and integrity tags
 // only from its direct input (its 0th input) to its output. It faithfully

@@ -32,6 +32,7 @@ using ir::datalog::AttributeList;
 using ir::datalog::IsOperationFact;
 using ir::datalog::OperandList;
 using ir::datalog::Operation;
+using ir::datalog::ResultList;
 using ir::datalog::Symbol;
 
 class DumpFactsToDirectoryTest : public testing::Test {
@@ -40,13 +41,14 @@ class DumpFactsToDirectoryTest : public testing::Test {
     // Initialize some IsOperationFacts for tests.
     IsOperationFact is_operation_facts[] = {
         IsOperationFact(Operation(
-            Symbol("UserA"), Symbol("sql.Literal"), Symbol("out"),
-            OperandList(),
+            Symbol("UserA"), Symbol("sql.Literal"),
+            ResultList(Symbol("out"), ResultList()), OperandList(),
             AttributeList(
                 Attribute("literal_value", Attribute::String("number_5")),
                 AttributeList()))),
         IsOperationFact(
-            Operation(Symbol("UserB"), Symbol("sql.MergeOp"), Symbol("out"),
+            Operation(Symbol("UserB"), Symbol("sql.MergeOp"),
+                      ResultList(Symbol("out"), ResultList()),
                       OperandList(Symbol("input1"),
                                   OperandList(Symbol("input2"), OperandList())),
                       AttributeList()))};

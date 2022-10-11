@@ -1,2 +1,2 @@
-["sql", "arbitrary", "path1", nil, nil]
-["sql", "sql.tag_transform", "path2", ["path1", nil], [["rule_name", $StringAttributePayload("add_itag_rule")], nil]]
+["sql", "arbitrary", ["path1", nil], nil, nil]
+["sql", "sql.tag_transform", ["path2", nil], ["path1", nil], [["rule_name", $StringAttributePayload("add_itag_rule")], nil]]

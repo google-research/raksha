@@ -16,9 +16,10 @@
 
 #include "src/ir/proto_to_ir.h"
 
+#include <cstdint>
 #include <memory>
-#include <variant>
 #include <optional>
+#include <variant>
 
 #include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
@@ -44,9 +45,13 @@ void ProtoToIR::PreVisit(const proto::Block& block_proto) {
 
     // Register operation result values with 'SsaNames'.
     auto operation = std::make_unique<Operation>(*op);
-    value::OperationResult operation_result(*operation, "out");
-    auto operation_result_value = Value(operation_result);
-    ssa_names_.GetOrCreateID(operation_result_value);
+    // TODO b/253252963 Ir to proto conversion does not have a way to hold onto
+    // the mapping between operator name and number of return values.
+    for (uint64_t i = 0; i < operation->op().number_of_return_values(); i++) {
+      const Value& operation_result_value =
+          Value::MakeOperationResultValue(*operation, absl::StrCat(".", i));
+      ssa_names_.GetOrCreateID(operation_result_value);
+    }
     operations_.insert({operation_it.id(), std::move(operation)});
     PreVisit(operation_proto);
   }

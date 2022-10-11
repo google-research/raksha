@@ -85,6 +85,10 @@ class OperationResult : public NamedValue<Operation> {
       const Operation& operation) {
     return OperationResult(operation, "out");
   }
+  static OperationResult MakeOperationResult(const Operation& operation,
+                                             const std::string& name) {
+    return OperationResult(operation, absl::StrCat("out", name));
+  }
 
   using NamedValue<Operation>::NamedValue;
   const Operation& operation() const { return element(); }
@@ -148,6 +152,10 @@ class Value {
       const Operation& op) {
     return Value(
         value::OperationResult::MakeDefaultOperationResult(op));
+  }
+  static Value MakeOperationResultValue(const Operation& op,
+                                        const std::string& name) {
+    return Value(value::OperationResult::MakeOperationResult(op, name));
   }
 
   explicit Value(Variants value) : value_(std::move(value)) {}
