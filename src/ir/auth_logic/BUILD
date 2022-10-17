@@ -79,13 +79,20 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "is_name_constant",
+    srcs = ["is_name_constant.cc"],
+    hdrs = ["is_name_constant.h"],
+    deps = ["@com_google_absl//absl/strings"],
+)
+
 cc_test(
     name = "is_name_constant_test",
     srcs = [
-        "is_name_constant.h",
         "is_name_constant_test.cc",
     ],
     deps = [
+        ":is_name_constant",
         "//src/common/testing:gtest",
         "@com_google_absl//absl/strings",
     ],
@@ -95,13 +102,13 @@ cc_library(
     name = "type_environment",
     srcs = ["type_environment.cc"],
     hdrs = [
-        "is_name_constant.h",
         "type_environment.h",
     ],
     deps = [
         ":ast",
         ":auth_logic_ast_traversing_visitor",
         ":declaration_environment",
+        ":is_name_constant",
         "//src/ir/datalog:program",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
@@ -124,14 +131,17 @@ cc_library(
     name = "universe_relation_insertion",
     srcs = ["universe_relation_insertion.cc"],
     hdrs = [
-        "is_name_constant.h",
         "universe_relation_insertion.h",
     ],
-    visibility = ["//visibility:private"],
+    visibility = [
+        "//src/backends/policy_engine/souffle:__subpackages__",
+        "//src/ir/auth_logic:__subpackages__",
+    ],
     deps = [
         ":ast",
         ":auth_logic_ast_traversing_visitor",
         ":declaration_environment",
+        ":is_name_constant",
         ":type_environment",
         "//src/common/logging",
         "@com_google_absl//absl/container:flat_hash_map",
