@@ -38,7 +38,9 @@ arcsjs_dl_files_local = [
     "arcsjs_user_consent_to_downgrade.dl",
 ]
 
-policy_verifier_include_dl_files_local = core_dl_files_plus_fact_test_helper_local + arcsjs_dl_files_local + [
+arcsjs_policy_verifier_include_dl_files_local = core_dl_files_plus_fact_test_helper_local + arcsjs_dl_files_local
+
+policy_verifier_include_dl_files_local = core_dl_files_plus_fact_test_helper_local + [
     "may_will.dl",
     "sql_output.dl",
     "tag_transforms.dl",
@@ -73,6 +75,11 @@ core_dl_files = [
 core_dl_files_plus_fact_test_helper = [
     absolute_target_path + target
     for target in core_dl_files_plus_fact_test_helper_local
+]
+
+arcsjs_policy_verifier_include_dl_files = [
+    absolute_target_path + target
+    for target in arcsjs_policy_verifier_include_dl_files_local
 ]
 
 policy_verifier_include_dl_files = [
