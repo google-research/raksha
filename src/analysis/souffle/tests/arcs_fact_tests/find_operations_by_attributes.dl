@@ -36,21 +36,21 @@ isAttributePayload(PAYLOAD3).
 isAttributePayload(PAYLOAD4).
 
 // Create some operations with some attributes.
-isOperation(["owner", "op1", "result1", nil, nil]).
-isOperation(["owner", "op1", "result2", nil, [["attr1", PAYLOAD1], nil]]).
-isOperation(["owner", "op1", "result3", nil, [["attr2", PAYLOAD2], nil]]).
+isOperation(["owner", "op1", ["result1", nil], nil, nil]).
+isOperation(["owner", "op1", ["result2", nil], nil, [["attr1", PAYLOAD1], nil]]).
+isOperation(["owner", "op1", ["result3", nil], nil, [["attr2", PAYLOAD2], nil]]).
 
-isOperation(["owner", "op1", "result4", nil, [["attr1", PAYLOAD1], [["attr2", PAYLOAD2], nil]]]).
+isOperation(["owner", "op1", ["result4", nil], nil, [["attr1", PAYLOAD1], [["attr2", PAYLOAD2], nil]]]).
 
-isOperation(["owner", "op1", "result5", nil, [["attr1", PAYLOAD3], nil]]).
-isOperation(["owner", "op1", "result6", nil, [["attr2", PAYLOAD4], nil]]).
-isOperation(["owner", "op1", "result7", nil, [["attr3", PAYLOAD2], nil]]).
+isOperation(["owner", "op1", ["result5", nil], nil, [["attr1", PAYLOAD3], nil]]).
+isOperation(["owner", "op1", ["result6", nil], nil, [["attr2", PAYLOAD4], nil]]).
+isOperation(["owner", "op1", ["result7", nil], nil, [["attr3", PAYLOAD2], nil]]).
 
 .decl resultToAttrNameAndPayload(
   result: AccessPath, attrName: AttributeName, payload: AttributePayload)
 
 resultToAttrNameAndPayload(result, attrName, payload) :-
-  operationHasAttribute([_, _, result, _, _], [attrName, payload]).
+  operationHasAttribute(op, [attrName, payload]), operationHasResult(op, result).
 
 .decl expectedResultToAttrNameAndPayload(
   result: AccessPath, attrName: AttributeName, payload: AttributePayload)

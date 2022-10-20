@@ -1,4 +1,4 @@
-[sql, sql.sql_output, no_tag_result, [path1, nil], nil];PASS
-[sql, sql.sql_output, expect_tag_result, [path2, nil], nil];FAIL
-[sql, sql.sql_output, expect_tag2_result, [path3, nil], nil];FAIL
-[sql, sql.sql_output, expect_only_itag_result, [path4, nil], nil];PASS
+[sql, sql.sql_output, [no_tag_result, nil], [path1, nil], nil];PASS
+[sql, sql.sql_output, [expect_tag_result, nil], [path2, nil], nil];FAIL
+[sql, sql.sql_output, [expect_tag2_result, nil], [path3, nil], nil];FAIL
+[sql, sql.sql_output, [expect_only_itag_result, nil], [path4, nil], nil];PASS

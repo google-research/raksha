@@ -25,7 +25,8 @@ isAccessPath("in3").
 isAccessPath("in4").
 
 // Create some arbitrary operation that the analysis has never seen before.
-isOperation(["owner", "???", "result", ["in1", ["in2", ["in3", ["in4", nil]]]], nil]).
+isOperation(["owner", "???", ["result", nil], ["in1", ["in2", ["in3", ["in4", nil]]]], nil]).
+isOperation(["owner", "multi_operator", ["result1", ["result2",nil]], ["in1", ["in2", ["in3", ["in4", nil]]]], nil]).
 
 // Because we have a general rule that causes inputs to operations to influence
 // the output, show that we can put a tag on any input and have it show up on
@@ -37,12 +38,20 @@ says_hasTag("owner", "in4", "owner", "tag4").
 
 expectMayHaveTag("in1", "owner", "tag1").
 expectMayHaveTag("result", "owner", "tag1").
+expectMayHaveTag("result1", "owner", "tag1").
+expectMayHaveTag("result2", "owner", "tag1").
 expectMayHaveTag("in2", "owner", "tag2").
 expectMayHaveTag("result", "owner", "tag2").
+expectMayHaveTag("result1", "owner", "tag2").
+expectMayHaveTag("result2", "owner", "tag2").
 expectMayHaveTag("in3", "owner", "tag3").
 expectMayHaveTag("result", "owner", "tag3").
+expectMayHaveTag("result1", "owner", "tag3").
+expectMayHaveTag("result2", "owner", "tag3").
 expectMayHaveTag("in4", "owner", "tag4").
 expectMayHaveTag("result", "owner", "tag4").
+expectMayHaveTag("result1", "owner", "tag4").
+expectMayHaveTag("result2", "owner", "tag4").
 
 // operations other than = do not have a default propagation rule for integrity
 // tags. Show that we can annotate an integrity tag onto every input and it

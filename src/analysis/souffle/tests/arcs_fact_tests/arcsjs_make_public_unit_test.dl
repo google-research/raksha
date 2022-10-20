@@ -26,20 +26,20 @@
   isOperation(operation). \
   TEST_N_RESULT_FOR_OPERATION(n_args, test_name, (operation), arcsJsMakePublicOperationHasArgument, argument)
 
-#define CREATE_AND_TEST_OPERATION(n_args, test_name, owner, operator, result, operandList, attrList, argument) \
-  CREATE_AND_TEST_OPERATOR_INNER(n_args, test_name, ([owner, operator, result, (operandList), (attrList)]), argument, result)
+#define CREATE_AND_TEST_OPERATION(n_args, test_name, owner, operator, resultList, operandList, attrList, argument) \
+  CREATE_AND_TEST_OPERATOR_INNER(n_args, test_name, ([owner, operator, resultList, (operandList), (attrList)]), argument, result)
 
 #define OPERAND_LIST1 ["operand1", nil]
 
-CREATE_AND_TEST_OPERATION(1, "test1_make_public", "somePrincipal", "arcsjs.make_public", "ap1", (OPERAND_LIST1), nil, "operand1").
+CREATE_AND_TEST_OPERATION(1, "test1_make_public", "somePrincipal", "arcsjs.make_public", (["ap1", nil]), (OPERAND_LIST1), nil, "operand1").
 
 #define ATTR_LIST2 [["wrong_tag", $NumberAttributePayload(2)], nil]
 #define OPERAND_LIST2 ["input1", nil]
 
-CREATE_AND_TEST_OPERATION(1, "test2_make_public_ignores_extra_attrs", "prin", "arcsjs.make_public", "ap2", (OPERAND_LIST2), (ATTR_LIST2), "input1").
+CREATE_AND_TEST_OPERATION(1, "test2_make_public_ignores_extra_attrs", "prin", "arcsjs.make_public", (["ap2", nil]), (OPERAND_LIST2), (ATTR_LIST2), "input1").
 
 #define OPERAND_LIST3 ["input1", ["input2", nil]]
-CREATE_AND_TEST_OPERATION(1, "test3_make_public_ignores_extra_args", "prin", "arcsjs.make_public", "ap2", (OPERAND_LIST3), nil, "input1").
+CREATE_AND_TEST_OPERATION(1, "test3_make_public_ignores_extra_args", "prin", "arcsjs.make_public", (["ap2", nil]), (OPERAND_LIST3), nil, "input1").
 
 #define ATTR_LIST4 [["wrong_tag", $NumberAttributePayload(2)], nil]
-CREATE_AND_TEST_OPERATION(0, "test4_make_public_requires_arg", "prin", "arcsjs.make_public", "ap2", nil, (ATTR_LIST4), _).
+CREATE_AND_TEST_OPERATION(0, "test4_make_public_requires_arg", "prin", "arcsjs.make_public", (["ap2", nil]), nil, (ATTR_LIST4), _).

@@ -25,13 +25,15 @@
 
 .decl isSqlOutput(sqlOutputOperation: Operation)
 
-isSqlOutput([DEFAULT_SQL_OWNER, SQL_OUTPUT_OPERATOR, result, operandList, attributes]) :-
-  isOperation([DEFAULT_SQL_OWNER, SQL_OUTPUT_OPERATOR, result, operandList, attributes]).
+isSqlOutput(op) :- isOperation(op),
+                  operationHasActor(op, DEFAULT_SQL_OWNER),
+                  operationHasOperator(op, SQL_OUTPUT_OPERATOR).
 
 .decl sqlOutputHasConfidentialTag(sqlOutputOperation: Operation)
 
-sqlOutputHasConfidentialTag([owner, operator, result, operandList, attrs]) :-
-  isSqlOutput([owner, operator, result, operandList, attrs]),
+sqlOutputHasConfidentialTag(op) :-
+  isSqlOutput(op),
+  operationHasResult(op, result),
   isTag(tag), mayHaveTag(result, DEFAULT_SQL_OWNER, tag).
 
 .decl sqlOutputResult(sqlOutputOperation: Operation, passOrFail: symbol)
@@ -39,6 +41,6 @@ sqlOutputHasConfidentialTag([owner, operator, result, operandList, attrs]) :-
 sqlOutputResult(op, "FAIL") :- sqlOutputHasConfidentialTag(op).
 sqlOutputResult(op, "PASS") :- isSqlOutput(op), !sqlOutputHasConfidentialTag(op).
 
-violatesPolicy(path) :- sqlOutputHasConfidentialTag([_, _, path, _, _]).
+violatesPolicy("violates") :- sqlOutputHasConfidentialTag(op).
 
 #endif // SRC_ANALYSIS_SOUFFLE_SQL_OUTPUT_DL_

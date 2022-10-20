@@ -29,35 +29,35 @@
   TEST_N_RESULT_FOR_OPERATION(n_data, test_name, (operation), arcsJsUserConsentToDowngradeOperationHasData, data). \
   TEST_N_RESULT_FOR_OPERATION(n_intent, test_name, (operation), arcsJsUserConsentToDowngradeOperationHasIntent, intent)
 
-#define CREATE_AND_TEST_OPERATION(n_from_tags, n_to_tags, n_data, n_intent, test_name, owner, operator, result, operandList, attrList, from, to, data, intent) \
-  CREATE_AND_TEST_OPERATOR_INNER(n_from_tags, n_to_tags, n_data, n_intent, test_name, ([owner, operator, result, (operandList), (attrList)]), from, to, data, intent)
+#define CREATE_AND_TEST_OPERATION(n_from_tags, n_to_tags, n_data, n_intent, test_name, owner, operator, resultList, operandList, attrList, from, to, data, intent) \
+  CREATE_AND_TEST_OPERATOR_INNER(n_from_tags, n_to_tags, n_data, n_intent, test_name, ([owner, operator, resultList, (operandList), (attrList)]), from, to, data, intent)
 
 #define ATTR_LIST1 [["downgrade_to", $StringAttributePayload("public")], [["downgrade_from", $StringAttributePayload("private")], nil]]
 #define OPERAND_LIST1 ["operand1", ["operand2", nil]]
 
-CREATE_AND_TEST_OPERATION(1, 1, 1, 1, "test1_user_downgrade", "somePrincipal", "arcsjs.user_consent_to_downgrade", "ap1", (OPERAND_LIST1), (ATTR_LIST1), "private", "public", "operand1", "operand2").
+CREATE_AND_TEST_OPERATION(1, 1, 1, 1, "test1_user_downgrade", "somePrincipal", "arcsjs.user_consent_to_downgrade", (["ap1", nil]), (OPERAND_LIST1), (ATTR_LIST1), "private", "public", "operand1", "operand2").
 
 #define ATTR_LIST2 [["downgrade_to", $StringAttributePayload("public")], [["downgrade_from", $StringAttributePayload("private")], [["other_tag", $NumberAttributePayload(2)], nil]]]
 #define OPERAND_LIST2 ["operand1", ["operand2", nil]]
 
-CREATE_AND_TEST_OPERATION(1, 1, 1, 1, "test2_user_downgrade_ignores_extra_tags", "somePrincipal", "arcsjs.user_consent_to_downgrade", "ap1", (OPERAND_LIST2), (ATTR_LIST2), "private", "public", "operand1", "operand2").
+CREATE_AND_TEST_OPERATION(1, 1, 1, 1, "test2_user_downgrade_ignores_extra_tags", "somePrincipal", "arcsjs.user_consent_to_downgrade", (["ap1", nil]), (OPERAND_LIST2), (ATTR_LIST2), "private", "public", "operand1", "operand2").
 
 #define ATTR_LIST3 [["downgrade_to", $StringAttributePayload("public")], [["downgrade_from", $StringAttributePayload("private")], [["other_tag", $NumberAttributePayload(2)], nil]]]
 #define OPERAND_LIST3 ["operand1", ["operand2", ["operand3", nil]]]
 
-CREATE_AND_TEST_OPERATION(1, 1, 1, 1, "test3_user_downgrade_ignores_extra_args", "somePrincipal", "arcsjs.user_consent_to_downgrade", "ap1", (OPERAND_LIST3), (ATTR_LIST3), "private", "public", "operand1", "operand2").
+CREATE_AND_TEST_OPERATION(1, 1, 1, 1, "test3_user_downgrade_ignores_extra_args", "somePrincipal", "arcsjs.user_consent_to_downgrade", (["ap1", nil]), (OPERAND_LIST3), (ATTR_LIST3), "private", "public", "operand1", "operand2").
 
 #define ATTR_LIST4 [["downgrade_to", $StringAttributePayload("public")], [["other_tag", $NumberAttributePayload(2)], nil]]
 #define OPERAND_LIST4 ["operand1", ["operand2", ["operand3", nil]]]
 
-CREATE_AND_TEST_OPERATION(0, 0, 0, 0, "test4_user_downgrade_requires_from_tag", "somePrincipal", "arcsjs.user_consent_to_downgrade", "ap1", (OPERAND_LIST4), (ATTR_LIST4), _, _, _, _).
+CREATE_AND_TEST_OPERATION(0, 0, 0, 0, "test4_user_downgrade_requires_from_tag", "somePrincipal", "arcsjs.user_consent_to_downgrade", (["ap1", nil]), (OPERAND_LIST4), (ATTR_LIST4), _, _, _, _).
 
 #define ATTR_LIST5 [["downgrade_from", $StringAttributePayload("private")], [["other_tag", $NumberAttributePayload(2)], nil]]
 #define OPERAND_LIST5 ["operand1", ["operand2", ["operand3", nil]]]
 
-CREATE_AND_TEST_OPERATION(0, 0, 0, 0, "test5_user_downgrade_requires_to_tag", "somePrincipal", "arcsjs.user_consent_to_downgrade", "ap1", (OPERAND_LIST5), (ATTR_LIST5), _, _, _, _).
+CREATE_AND_TEST_OPERATION(0, 0, 0, 0, "test5_user_downgrade_requires_to_tag", "somePrincipal", "arcsjs.user_consent_to_downgrade", (["ap1", nil]), (OPERAND_LIST5), (ATTR_LIST5), _, _, _, _).
 
 #define ATTR_LIST6 [["downgrade_to", $StringAttributePayload("public")], [["downgrade_from", $StringAttributePayload("private")], [["other_tag", $NumberAttributePayload(2)], nil]]]
 #define OPERAND_LIST6 ["operand1", nil]
 
-CREATE_AND_TEST_OPERATION(0, 0, 0, 0, "test6_user_downgrade_requires_data_and_intent_args", "somePrincipal", "arcsjs.user_consent_to_downgrade", "ap1", (OPERAND_LIST6), (ATTR_LIST6), _, _, _, _).
+CREATE_AND_TEST_OPERATION(0, 0, 0, 0, "test6_user_downgrade_requires_data_and_intent_args", "somePrincipal", "arcsjs.user_consent_to_downgrade", (["ap1", nil]), (OPERAND_LIST6), (ATTR_LIST6), _, _, _, _).

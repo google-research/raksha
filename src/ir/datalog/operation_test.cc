@@ -41,22 +41,33 @@ TEST_P(IsOperationFactTest, IsOperationFactTest) {
 }
 
 static const IsOperationFact kSampleFact1 = IsOperationFact(Operation(
-    Symbol("UserA"), Symbol("sql.Literal"), Symbol("out"), OperandList(),
+    Symbol("UserA"), Symbol("sql.Literal"),
+    ResultList(Symbol("out"), ResultList()), OperandList(),
     AttributeList(Attribute("literal_value", Attribute::String("number_5")),
                   AttributeList())));
 
 static const IsOperationFact kSampleFact2 = IsOperationFact(Operation(
-    Symbol("UserB"), Symbol("sql.MergeOp"), Symbol("out"),
+    Symbol("UserB"), Symbol("sql.MergeOp"),
+    ResultList(Symbol("out"), ResultList()),
+    OperandList(Symbol("input1"), OperandList(Symbol("input2"), OperandList())),
+    AttributeList()));
+
+static const IsOperationFact kSampleFact3 = IsOperationFact(Operation(
+    Symbol("UserB"), Symbol("sql.MergeOp"),
+    ResultList(Symbol("out.0"), ResultList(Symbol("out.1"), ResultList())),
     OperandList(Symbol("input1"), OperandList(Symbol("input2"), OperandList())),
     AttributeList()));
 
 static IsOperationFactAndExpectedDatalog kSampleIsOperationFactsAndDatalog[] = {
     {.is_operation_fact = &kSampleFact1,
      .expected_datalog =
-         R"(isOperation(["UserA", "sql.Literal", "out", nil, [["literal_value", $StringAttributePayload("number_5")], nil]]).)"},
+         R"(isOperation(["UserA", "sql.Literal", ["out", nil], nil, [["literal_value", $StringAttributePayload("number_5")], nil]]).)"},
     {.is_operation_fact = &kSampleFact2,
      .expected_datalog =
-         R"(isOperation(["UserB", "sql.MergeOp", "out", ["input1", ["input2", nil]], nil]).)"}};
+         R"(isOperation(["UserB", "sql.MergeOp", ["out", nil], ["input1", ["input2", nil]], nil]).)"},
+    {.is_operation_fact = &kSampleFact3,
+     .expected_datalog =
+         R"(isOperation(["UserB", "sql.MergeOp", ["out.0", ["out.1", nil]], ["input1", ["input2", nil]], nil]).)"}};
 
 INSTANTIATE_TEST_SUITE_P(IsOperationFactTest, IsOperationFactTest,
                          ValuesIn(kSampleIsOperationFactsAndDatalog));

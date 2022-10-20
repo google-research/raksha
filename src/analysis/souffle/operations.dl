@@ -28,12 +28,16 @@
 // regardless of arity. Useful for rules that apply to any operation.
 .type OperandList = [ operand: AccessPath, next: OperandList ]
 
+.type ResultList = [ result: AccessPath, next: ResultList ]
+
 // An Operation.
-.type Operation = [actor: Principal, operator: Operator, result: AccessPath,
+.type Operation = [actor: Principal, operator: Operator, resultList: ResultList,
                    operandList: OperandList, attributes: AttributeList]
 
 // Operation universe.
 .decl isOperation(operation: Operation)
+
+.decl isResultList(resultList: ResultList)
 
 // OperandList universe.
 .decl isOperandList(operandList: OperandList)
@@ -45,28 +49,39 @@
 .decl isAttributeList(attributeList: AttributeList)
 
 // Fill the appropriate universes with the pieces of the operation.
-isPrincipal(actor), isOperator(operator), isAccessPath(result),
+isPrincipal(actor), isOperator(operator), isResultList(resultList),
 isOperandList(operandList), isAttributeList(attributeList) :-
-isOperation([actor, operator, result, operandList, attributeList]).
+isOperation([actor, operator, resultList, operandList, attributeList]).
 
 // Declare mappings from an operation to its fields.
-.decl operationHasResult(operation: Operation, result: AccessPath)
+.decl operationHasResultList(operation: Operation, resultList: ResultList)
 .decl operationHasActor(operation: Operation, actor: Principal)
 .decl operationHasOperator(operation: Operation, operator: Operator)
 .decl operationHasOperandList(operation: Operation, operandList: OperandList)
 .decl operationHasAttributeList(operation: Operation, attributeList: AttributeList)
 
 // Populate field association relations.
-operationHasResult(operation, result), operationHasActor(operation, actor),
+operationHasResultList(operation, results), operationHasActor(operation, actor),
 operationHasOperator(operation, operator), operationHasOperandList(operation, operands),
 operationHasAttributeList(operation, attributes) :-
-  isPrincipal(actor), isOperator(operator), isAccessPath(result), isOperandList(operands),
+  isPrincipal(actor), isOperator(operator), isResultList(results), isOperandList(operands),
   isAttributeList(attributes), isOperation(operation),
-  operation = [actor, operator, result, operands, attributes].
+  operation = [actor, operator, results, operands, attributes].
 
 // BINARY_OPERATION is a convenience macro for the very-common-case of binary operations.
 #define BINARY_OPERATION(actor, operator, result, attrs, input1, input2) \
-isOperation([actor, operator, result, [input1, [input2, nil]], attrs])
+isOperation([actor, operator, [result, nil], [input1, [input2, nil]], attrs])
+
+.decl operationHasResultListSuffix(operation: Operation, partialList: ResultList)
+
+operationHasResultListSuffix(operation, results) :-
+  isOperation(operation), operationHasResultList(operation, results).
+operationHasResultListSuffix(op, tail) :- operationHasResultListSuffix(op, [_, tail]).
+
+// A mapping from an `Operation` to each individual `result` on that
+// `Operation`.
+.decl operationHasResult(op: Operation, result: AccessPath)
+operationHasResult(op, result), isAccessPath(result) :- operationHasResultListSuffix(op, [result, _]).
 
 // Explode the operand lists so that we can extract the heads of each sublist
 // to get a mapping from operations to their operands.

@@ -17,8 +17,8 @@
 #include "src/ir/proto_to_ir.h"
 
 #include <memory>
-#include <variant>
 #include <optional>
+#include <variant>
 
 #include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
