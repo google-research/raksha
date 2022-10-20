@@ -40,20 +40,6 @@ class SouffleEmitter {
                         std::move(outputs));
   }
 
-  static const absl::flat_hash_set<std::string>& GetRelationsToNotDeclare() {
-    static const auto* const kRelationsToNotDeclare =
-        new absl::flat_hash_set<std::string>{
-            "Principal",    "Tag",
-            "AccessPath",   "says_isAccessPath",
-            "says_isTag",   "says_isPrincipal",
-            "says_ownsTag", "says_ownsAccessPath",
-            "says_hasTag",  "says_removeTag",
-            "says_may",     "says_will",
-            "isAccessPath", "isTag",
-            "isPrincipal",  "Operation"};
-    return *kRelationsToNotDeclare;
-  }
-
  private:
   SouffleEmitter() = default;
 
@@ -144,10 +130,6 @@ class SouffleEmitter {
   std::string EmitRelationDeclarations(const datalog::Program& program) {
     std::vector<std::string> declaration_strings;
     for (const auto& declaration : program.relation_declarations()) {
-      CHECK(!GetRelationsToNotDeclare().empty());
-      if (GetRelationsToNotDeclare().find(declaration.relation_name()) !=
-          GetRelationsToNotDeclare().end())
-        continue;
       declaration_strings.push_back(
           absl::StrCat(".decl ", declaration.relation_name(), "(",
                        EmitArguments(declaration.arguments()), ")"));
@@ -162,9 +144,6 @@ class SouffleEmitter {
       for (const auto& argument : declaration.arguments()) {
         if (argument.argument_type().kind() !=
             datalog::ArgumentType::Kind::kCustom)
-          continue;
-        if (GetRelationsToNotDeclare().find(argument.argument_type().name()) !=
-            GetRelationsToNotDeclare().end())
           continue;
         type_names.insert(absl::StrCat(
             ".type ", argument.argument_type().name(), " <: symbol"));
