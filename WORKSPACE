@@ -303,12 +303,20 @@ http_archive(
     urls = ["https://github.com/google/re2/archive/refs/tags/2022-06-01.tar.gz"],
 )
 
-fuzztest_commit_hash = "4a8253b7299cf1764550054fae55f1b58a65bbaa"
+#fuzztest_commit_hash = "d219696902fa05478f084a74996cdb02591d3785"
 
 # Fuzztest
+# http_archive(
+#     name = "fuzztest",
+#     # sha256 = "72ae2d28323748d2c466396fa47038351ae81bedc50b8a3c6f1de6a9f02cde33",
+#     strip_prefix = "fuzztest-" + fuzztest_commit_hash,
+#     urls = ["https://github.com/google/fuzztest/archive/" + fuzztest_commit_hash + ".zip"],
+# )
+
+fuzztest_commit_hash = "1f1598c54c24cfbf2a28acd4092a0c16aaf4a13b"
 http_archive(
     name = "fuzztest",
-    sha256 = "72ae2d28323748d2c466396fa47038351ae81bedc50b8a3c6f1de6a9f02cde33",
+    # sha256 = "72ae2d28323748d2c466396fa47038351ae81bedc50b8a3c6f1de6a9f02cde33",
     strip_prefix = "fuzztest-" + fuzztest_commit_hash,
-    urls = ["https://github.com/google/fuzztest/archive/" + fuzztest_commit_hash + ".zip"],
+    urls = ["https://github.com/aferr/fuzztest/archive/" + fuzztest_commit_hash + ".zip"],
 )
