@@ -35,6 +35,8 @@ std::string TypeToUniverseName(const datalog::ArgumentType& arg_type) {
       return "isPrincipal";
     case datalog::ArgumentType::Kind::kCustom:
       return absl::StrCat("is", arg_type.name());
+    default:
+      CHECK(false) << "Unexpected variant of datalog argument type";
   }
 }
 
