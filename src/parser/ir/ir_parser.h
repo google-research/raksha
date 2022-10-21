@@ -44,7 +44,7 @@ class IrProgramParser {
   };
 
   struct ConstructOperationResult {
-    std::string op_name;
+    std::vector<std::string> op_return_value_names;
     std::unique_ptr<Operation> operation;
     std::vector<std::string> input_names;
   };

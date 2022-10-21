@@ -17,6 +17,7 @@
 
 #include "src/parser/ir/ir_parser.h"
 
+#include <cstdint>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -54,7 +55,14 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
   // Operator
   std::string operator_text = operation_context.ID()->getText();
   if (!context_->IsRegisteredOperator(operator_text)) {
-    context_->RegisterOperator(std::make_unique<Operator>(operator_text));
+    context_->RegisterOperator(std::make_unique<Operator>(
+        operator_text, operation_context.result()->VALUE_ID().size()));
+  } else {
+    CHECK(context_->GetOperator(operator_text)->number_of_return_values() ==
+          operation_context.result()->VALUE_ID().size())
+        << "Operator has different number of return values in different "
+           "instances "
+        << operator_text;
   }
   // Grammar rule for attributes is either
   //   -> ID ':' FLOATLITERAL (a double-precision floating point number type) or
@@ -129,12 +137,15 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
       *CHECK_NOTNULL(
           context_->GetOperator(operation_context.ID()->getText())),
       std::move(attributes), ValueList(), nullptr);
+
+  auto op_names =
+      utils::MapIter<std::string>(operation_context.result()->VALUE_ID(),
+                                  [](auto arg) { return arg->getText(); });
   return IrProgramParser::ConstructOperationResult{
-      .op_name = operation_context.VALUE_ID()->getText(),
+      .op_return_value_names = std::move(op_names),
       .operation = std::move(op),
       .input_names = std::move(value_names)};
 }
-
 void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
   BlockBuilder builder;
   absl::flat_hash_map<std::string, Value> value_map;
@@ -144,15 +155,22 @@ void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
        block_context.operation()) {
     auto construct_operation_result = IrProgramParser::ConstructOperation(
         *CHECK_NOTNULL(operation_context), builder);
-    const Value& v = Value::MakeDefaultOperationResultValue(
-        *construct_operation_result.operation);
-    value_map.insert({construct_operation_result.op_name, v});
-    ssa_names_->AddID(v, construct_operation_result.op_name);
+    // operationResult value name is expected to be "out.<index number in the
+    // result list>""
+    uint64_t index = 0;
+    for (const auto& op_name :
+         construct_operation_result.op_return_value_names) {
+      const Value& v = Value::MakeOperationResultValue(
+          *construct_operation_result.operation, index);
+      index++;
+      value_map.insert({op_name, v});
+      ssa_names_->AddID(v, op_name);
+    }
     construct_operation_results.push_back(
         std::move(construct_operation_result));
   }
 
-  for (auto& [op_name, op, input_names] : construct_operation_results) {
+  for (auto& [op_names, op, input_names] : construct_operation_results) {
     for (const auto& op_value : input_names) {
       if (op_value == "<<ANY>>") {
         op->AddInput(Value(value::Any()));

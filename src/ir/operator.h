@@ -16,6 +16,7 @@
 #ifndef SRC_IR_OPERATOR_H_
 #define SRC_IR_OPERATOR_H_
 
+#include <cstdint>
 #include <string>
 
 #include "absl/strings/string_view.h"
@@ -27,12 +28,15 @@ namespace raksha::ir {
 // operations.
 class Operator {
  public:
-  Operator(absl::string_view name) : name_(name) {}
-
+  Operator(absl::string_view name) : name_(name), number_of_return_values_(1) {}
+  Operator(absl::string_view name, uint64_t number_of_return_values)
+      : name_(name), number_of_return_values_(number_of_return_values) {}
   absl::string_view name() const { return name_; }
+  uint64_t number_of_return_values() const { return number_of_return_values_; }
 
  private:
   std::string name_;
+  uint64_t number_of_return_values_;
 };
 
 }  // namespace raksha::ir

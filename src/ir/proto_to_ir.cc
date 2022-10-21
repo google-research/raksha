@@ -44,7 +44,10 @@ void ProtoToIR::PreVisit(const proto::Block& block_proto) {
 
     // Register operation result values with 'SsaNames'.
     auto operation = std::make_unique<Operation>(*op);
-    value::OperationResult operation_result(*operation, "out");
+    // TODO(b/253252963) IR to proto conversion does no hold onto the mapping
+    // between operator name and multi returns. "out.0" is a work around to pass
+    // tests with single return operations.
+    value::OperationResult operation_result(*operation, "out.0");
     auto operation_result_value = Value(operation_result);
     ssa_names_.GetOrCreateID(operation_result_value);
     operations_.insert({operation_it.id(), std::move(operation)});

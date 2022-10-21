@@ -79,6 +79,7 @@ TEST_P(IrOperationLoweringTest, IrOperationLoweringTest) {
 
 static const ir::Operator kLiteralOperator("sql.ReadLiteral");
 static const ir::Operator kMergeOpOperator("sql.MergeOp");
+static const ir::Operator kMultiReturnOperator("sql.MultiReturnOp", 2);
 
 static TestObjectFactory test_factory;
 static const IrAndDatalogOperationPairs kIrAndDatalogOperations[] = {
@@ -176,6 +177,28 @@ static const ModuleAndExpectedRakshaDatalogFactBuilders
                        ir::datalog::AttributeList())));
                return facts;
              }},
+        // Test for lowering multi return operations
+        {.module_fn =
+             ModuleWithAddedOperationsFn([](ir::BlockBuilder &builder) {
+               builder.AddOperation(kMultiReturnOperator, {},
+                                    {ir::Value(ir::value::Any())});
+             }),
+         .facts_fn =
+             []() {
+               RakshaDatalogFacts facts;
+               facts.AddIsOperationFact(
+                   ir::datalog::IsOperationFact(ir::datalog::Operation(
+                       ir::datalog::Symbol("sql"),
+                       ir::datalog::Symbol("sql.MultiReturnOp"),
+                       ir::datalog::ResultList(
+                           ir::datalog::Symbol("%0"),
+                           ir::datalog::ResultList(ir::datalog::Symbol("%1"),
+                                                   ir::datalog::ResultList())),
+                       ir::datalog::OperandList(ir::datalog::Symbol("<<ANY>>"),
+                                                ir::datalog::OperandList()),
+                       ir::datalog::AttributeList())));
+               return facts;
+             }},
         // Show two passthroughs chained together.
         {.module_fn =
              ModuleWithAddedOperationsFn([](ir::BlockBuilder &builder) {
@@ -183,7 +206,7 @@ static const ModuleAndExpectedRakshaDatalogFactBuilders
                    kMergeOpOperator, {}, {ir::Value(ir::value::Any())});
                builder.AddOperation(
                    kMergeOpOperator, {},
-                   {ir::Value(ir::value::OperationResult(operation, "out"))});
+                   {ir::Value(ir::value::OperationResult(operation, "out.0"))});
              }),
          .facts_fn =
              []() {
@@ -213,16 +236,19 @@ static const ModuleAndExpectedRakshaDatalogFactBuilders
                                                          &builder) {
            const ir::Operation &start_operation = builder.AddOperation(
                kMergeOpOperator, {}, {ir::Value(ir::value::Any())});
-           const ir::Operation &left_operation = builder.AddOperation(
-               kMergeOpOperator, {},
-               {ir::Value(ir::value::OperationResult(start_operation, "out"))});
-           const ir::Operation &right_operation = builder.AddOperation(
-               kMergeOpOperator, {},
-               {ir::Value(ir::value::OperationResult(start_operation, "out"))});
+           const ir::Operation &left_operation =
+               builder.AddOperation(kMergeOpOperator, {},
+                                    {ir::Value(ir::value::OperationResult(
+                                        start_operation, "out.0"))});
+           const ir::Operation &right_operation =
+               builder.AddOperation(kMergeOpOperator, {},
+                                    {ir::Value(ir::value::OperationResult(
+                                        start_operation, "out.0"))});
            builder.AddOperation(
                kMergeOpOperator, {},
-               {ir::Value(ir::value::OperationResult(left_operation, "out")),
-                ir::Value(ir::value::OperationResult(right_operation, "out"))});
+               {ir::Value(ir::value::OperationResult(left_operation, "out.0")),
+                ir::Value(
+                    ir::value::OperationResult(right_operation, "out.0"))});
          }),
          .facts_fn = []() {
            RakshaDatalogFacts facts;

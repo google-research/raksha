@@ -43,6 +43,14 @@ INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
 )",
                              R"(module m0 {
   block b0 {
+    %0, %1 = core.plus []()
+  }  // block b0
+  block b1 {
+  }  // block b1
+}  // module m0
+)",
+                             R"(module m0 {
+  block b0 {
     %0 = core.plus []()
   }  // block b0
   block b1 {
@@ -88,6 +96,18 @@ INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
 )",
                              R"(module m0 {
   block b0 {
+    %0 = core.select []()
+    %2, %1 = core.merge [](<<ANY>>, <<ANY>>)
+  }  // block b0
+  block b1 {
+    %custom = core.plus [access: "private", transform: "no"](%3, <<ANY>>)
+    %3 = core.mult [lhs: 10, rhs: "59"](<<ANY>>, %custom)
+    %4, %7 = core.mult_floating [lhs: 3l, rhs: -0.5l]()
+  }  // block b1
+}  // module m0
+)",
+                             R"(module m0 {
+  block b0 {
     %0 = core.plus [access: "private", transform: "no"](%1, <<ANY>>)
     %1 = core.plus []()
   }  // block b0
@@ -114,22 +134,22 @@ TEST_P(IrParserNormalizingTest, FloatsAreNormalizedInTestOperations) {
 }
 
 static const ParserInputAndExpectedOutput kNormalizedIR[] = {
-                             {
-                                 .input = R"(module m0 {
+    {
+        .input = R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
 }  // module m0
 )",
-                                 .output = R"(module m0 {
+        .output = R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
 }  // module m0
 )",
-                             },
-                             {
-                                 .input = R"(module m0 {
+    },
+    {
+        .input = R"(module m0 {
   block b0 {
     %0 = core.select []()
     %1 = core.merge [](<<ANY>>, <<ANY>>)
@@ -141,7 +161,7 @@ static const ParserInputAndExpectedOutput kNormalizedIR[] = {
   }  // block b1
 }  // module m0
 )",
-                                 .output = R"(module m0 {
+        .output = R"(module m0 {
   block b0 {
     %0 = core.select []()
     %1 = core.merge [](<<ANY>>, <<ANY>>)
@@ -153,8 +173,7 @@ static const ParserInputAndExpectedOutput kNormalizedIR[] = {
   }  // block b1
 }  // module m0
 )",
-}
-};
+    }};
 
 INSTANTIATE_TEST_SUITE_P(IrParserNormalizingTest, IrParserNormalizingTest,
     ::testing::ValuesIn(kNormalizedIR));
@@ -202,5 +221,22 @@ TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {
   EXPECT_DEATH(ir_parser.ParseProgram(input_program_text),
 
                "no viable alternative at input");
+}
+
+TEST(IrParseTest, OperatorWithDifferentNumberOfReturnFailure) {
+  auto input_program_text = R"(module m0 {
+  block b0 {
+    %0 = core.make_pair []()
+    %1, %2 = core.make_pair [](<<ANY>>, <<ANY>>)
+  }  // block b0
+  block b1 {
+  }  // block b1
+}  // module m0
+)";
+
+  IrProgramParser ir_parser;
+  EXPECT_DEATH(
+      ir_parser.ParseProgram(input_program_text),
+      "Operator has different number of return values in different instances ");
 }
 }  // namespace raksha::ir

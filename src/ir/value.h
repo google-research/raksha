@@ -16,6 +16,7 @@
 #ifndef SRC_IR_VALUE_H_
 #define SRC_IR_VALUE_H_
 
+#include <cstdint>
 #include <variant>
 #include <vector>
 
@@ -27,6 +28,8 @@
 #include "src/ir/types/type.h"
 
 namespace raksha::ir {
+
+static constexpr char kDefaultValueName[] = "out";
 
 class Block;
 class Operation;
@@ -83,7 +86,12 @@ class OperationResult : public NamedValue<Operation> {
   // name "out" for you.
   static OperationResult MakeDefaultOperationResult(
       const Operation& operation) {
-    return OperationResult(operation, "out");
+    return OperationResult(operation, kDefaultValueName);
+  }
+  static OperationResult MakeOperationResult(const Operation& operation,
+                                             const uint64_t index) {
+    return OperationResult(operation,
+                           absl::StrCat(kDefaultValueName, ".", index));
   }
 
   using NamedValue<Operation>::NamedValue;
@@ -148,6 +156,10 @@ class Value {
       const Operation& op) {
     return Value(
         value::OperationResult::MakeDefaultOperationResult(op));
+  }
+  static Value MakeOperationResultValue(const Operation& op,
+                                        const uint64_t index) {
+    return Value(value::OperationResult::MakeOperationResult(op, index));
   }
 
   explicit Value(Variants value) : value_(std::move(value)) {}

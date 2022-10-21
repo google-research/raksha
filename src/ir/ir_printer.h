@@ -16,8 +16,10 @@
 #ifndef SRC_IR_IR_PRINTER_H_
 #define SRC_IR_IR_PRINTER_H_
 
+#include <cstdint>
 #include <memory>
 
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
 #include "src/ir/ir_traversing_visitor.h"
@@ -105,14 +107,21 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
           absl::StrAppend(out, value.ToString(ssa_names_));
         });
 
+    const ir::Operator& op = operation.op();
+    uint64_t number_of_op_return_values = op.number_of_return_values();
     // Produce the result value's SSA name after the inputs. It is technically
     // correct both ways, and in real programs shouldn't matter, but for unit
     // tests, producing the result first can produce the surprising result of
     // the result being numbered before the inputs.
-    SsaNames::ID this_ssa_name = ssa_names_.GetOrCreateID(
-        ir::Value::MakeDefaultOperationResultValue(operation));
+    std::vector<std::string> op_return_values;
+    for (uint64_t i = 0; i < number_of_op_return_values; ++i) {
+      op_return_values.push_back(ssa_names_.GetOrCreateID(
+          ir::Value::MakeOperationResultValue(operation, i)));
+    }
+    SsaNames::ID result_name = absl::StrJoin(op_return_values, ", ");
+
     out_ << Indent()
-         << absl::StreamFormat(kOperationFormat, this_ssa_name,
+         << absl::StreamFormat(kOperationFormat, result_name,
                                operation.op().name(), attributes_string,
                                inputs_string);
     if (operation.impl_module()) {

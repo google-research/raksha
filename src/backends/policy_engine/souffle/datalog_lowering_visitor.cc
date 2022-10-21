@@ -16,6 +16,7 @@
 
 #include "src/backends/policy_engine/souffle/datalog_lowering_visitor.h"
 
+#include "absl/strings/str_cat.h"
 #include "src/common/logging/logging.h"
 #include "src/common/utils/fold.h"
 #include "src/frontends/sql/decoder_context.h"
@@ -94,14 +95,11 @@ Unit DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
             std::move(list_so_far));
       });
 
-  // TODO Did not introduce number of _return values, a proprty of operator in
-  // this cl. Hence hardcoded to 1. Expected to be, uint64_t
-  // number_of_op_return_values = op.number_of_return_values();
-  uint64_t number_of_op_return_values = 1;
+  uint64_t number_of_op_return_values = op.number_of_return_values();
   std::vector<std::string> op_return_values;
   for (uint64_t i = 0; i < number_of_op_return_values; ++i) {
     op_return_values.push_back(ssa_names_.GetOrCreateID(
-        ir::Value::MakeDefaultOperationResultValue(operation)));
+        ir::Value::MakeOperationResultValue(operation, i)));
   }
   DatalogResultList result_list = common::utils::rfold(
       op_return_values, DatalogResultList(),

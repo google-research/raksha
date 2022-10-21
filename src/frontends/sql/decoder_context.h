@@ -33,7 +33,7 @@ namespace raksha::frontends::sql {
 // inappropriate to put in IRContext.
 class DecoderContext {
  public:
-  static constexpr absl::string_view kDefaultOutputName = "out";
+  static constexpr absl::string_view kDefaultOutputName = "out.0";
 
   DecoderContext(ir::IRContext &ir_context)
       : ir_context_(ir_context),
