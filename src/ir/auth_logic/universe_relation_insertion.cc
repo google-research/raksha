@@ -36,7 +36,7 @@ std::string TypeToUniverseName(const datalog::ArgumentType& arg_type) {
     case datalog::ArgumentType::Kind::kCustom:
       return absl::StrCat("is", arg_type.name());
     default:
-      return "";
+      CHECK(false) << "Unexpected variant of Value from IR";
   }
 }
 
