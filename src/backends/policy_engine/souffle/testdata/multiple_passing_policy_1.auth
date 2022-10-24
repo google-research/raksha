@@ -1,3 +1,5 @@
+.decl hasTag(path: AccessPath, owner: Principal, tag: Tag)
+
 "sql" says {
   hasTag("%0", "sql", "RawAudio").
 }

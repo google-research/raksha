@@ -1,3 +1,5 @@
+.decl isGlobalEpsilon(e: Number)
+
 "sql" says {
   isGlobalEpsilon(4).
 }

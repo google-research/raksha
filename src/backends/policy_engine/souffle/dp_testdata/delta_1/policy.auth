@@ -1,3 +1,6 @@
+.decl isGlobalEpsilon(e: Number)
+.decl isGlobalDelta(d: Number)
+
 "sql" says {
   isGlobalEpsilon(4).
   isGlobalDelta(1).
