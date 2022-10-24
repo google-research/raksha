@@ -17,6 +17,8 @@
 
 #include "ast_string.h"
 
+#include "src/common/logging/logging.h"
+
 namespace raksha::ir::auth_logic {
 
 namespace {
@@ -52,6 +54,8 @@ std::string ToString(AstNodeVariantType Node) {
                 return std::string("Number");
               case datalog::ArgumentType::Kind::kPrincipal:
                 return std::string("Principal");
+              default:
+                CHECK(false) << "Unexpected datalog argument type in ToString";
             }
           },
           [](datalog::Argument argument) {
@@ -122,9 +126,11 @@ std::string ToString(AstNodeVariantType Node) {
           },
           [](Program program) {
             return absl::StrJoin(
-                {absl::StrJoin(ToStrings(program.relation_declarations()), "\n"),
-                absl::StrJoin(ToStrings(program.says_assertions()), "\n"),
-                absl::StrJoin(ToStrings(program.queries()), "\n")}, "\n");
+                {absl::StrJoin(ToStrings(program.relation_declarations()),
+                               "\n"),
+                 absl::StrJoin(ToStrings(program.says_assertions()), "\n"),
+                 absl::StrJoin(ToStrings(program.queries()), "\n")},
+                "\n");
           }},
       Node);
 }
