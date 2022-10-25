@@ -59,7 +59,6 @@
 // of raksha populate these without speakers
 .decl says_isAccessPath(prin: Principal, path: AccessPath)
 .decl says_isTag(prin: Principal, tag: Tag)
-.decl says_isPrincipal(prin1: Principal, prin2: Principal)
 
 // Indicates that an integrity tag is directly applied to an AccessPath. This
 // rule should only be populated with base facts with no derivation to prevent
@@ -164,8 +163,6 @@ isTag(tag) :- says_hasTag(_, _, _, tag).
 // of raksha populate these without speakers
 says_isAccessPath(principal, path) :- isPrincipal(principal), isAccessPath(path).
 says_isTag(principal, tag) :- isPrincipal(principal), isTag(tag).
-says_isPrincipal(principal1, principal2) :- isPrincipal(principal1),
-                                              isPrincipal(principal2).
 
 // A pair of (base, member) is in this set if the base access path is a non-trivial subpath of the
 // member access path.

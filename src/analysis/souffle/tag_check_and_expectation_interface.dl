@@ -30,4 +30,8 @@
 .output checkAndResult(delimiter=";")
 .output expectedCheckAndResult(delimiter=";")
 
+// Used for compatibility while rust implementation of auth logic
+// is yet to be deprecated
+.decl says_isPrincipal(prin1: Principal, prin2: Principal)
+
 #endif
