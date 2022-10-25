@@ -256,6 +256,7 @@ cc_library(
     hdrs = ["ast_string.h"],
     deps = [
         ":ast",
+        "//src/common/logging",
         "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
