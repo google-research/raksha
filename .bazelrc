@@ -10,11 +10,6 @@ build --cxxopt='-Werror' --cxxopt='-Wall'
 build --features=external_include_paths
 build --cxxopt='-Wno-deprecated-declarations'
 
-# These are needed on systems with GLIBC > 2.34-8 to build google-fuzztest
-# which has these errors.
-build --cxxopt='-Wno-error=sign-compare'
-build --cxxopt='-Wno-error=attributes'
-
 # Why are we doing this when Souffle-generated C++ clearly uses exceptions?
 # Well, Google famously does not like C++ exceptions in its internal codebase,
 # so we will need to explicitly override that in Raksha files everywhere we
@@ -31,6 +26,12 @@ build --host_cxxopt='-std=c++17'
 # build --host_cxxopt='-Werror' --host_cxxopt='-Wall'
 build --host_cxxopt='-Wno-deprecated-declarations'
 
+# These are needed on systems with GLIBC > 2.34-8 to build google-fuzztest
+# which has these errors.
+build --cxxopt='-Wno-error=sign-compare'
+build --cxxopt='-Wno-error=attributes'
+build --host_cxxopt='-Wno-error=sign-compare'
+build --host_cxxopt='-Wno-error=attributes'
 # Annoyingly, in the fuzztest library, their attempt to turn off the `-Wpsabi`
 # warning in Clang causes Clang to complain about an unknown warning flag. This
 # is our attempt to work around that.
