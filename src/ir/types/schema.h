@@ -19,7 +19,7 @@
 #include <optional>
 
 #include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
+#include "src/common/absl_shim/container/flat_hash_set.h"
 #include "src/ir/access_path_selectors_set.h"
 #include "src/ir/types/type.h"
 

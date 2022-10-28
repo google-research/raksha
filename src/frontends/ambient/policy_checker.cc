@@ -21,10 +21,10 @@
 #include <iostream>
 #include <memory>
 
+#include "souffle/SouffleInterface.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
-#include "souffle/SouffleInterface.h"
 #include "src/common/logging/logging.h"
 #include "src/common/utils/ranges.h"
 
@@ -177,18 +177,18 @@ bool PolicyChecker::CanUserChangeSetting(absl::string_view user,
   return false;
 }
 
-absl::flat_hash_set<PolicyChecker::Settings> PolicyChecker::AvailableSettings(
-    PolicyChecker::User user) const {
-  absl::flat_hash_set<PolicyChecker::Settings> result;
+absl_shim::flat_hash_set<PolicyChecker::Settings>
+PolicyChecker::AvailableSettings(PolicyChecker::User user) const {
+  absl_shim::flat_hash_set<PolicyChecker::Settings> result;
   for (auto name : AvailableSettings(GetUserName(user))) {
     result.insert(GetSettings(name));
   }
   return result;
 }
 
-absl::flat_hash_set<std::string> PolicyChecker::AvailableSettings(
+absl_shim::flat_hash_set<std::string> PolicyChecker::AvailableSettings(
     absl::string_view user) const {
-  absl::flat_hash_set<std::string> result;
+  absl_shim::flat_hash_set<std::string> result;
   std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
       souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
   program->run();

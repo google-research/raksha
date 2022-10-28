@@ -32,7 +32,7 @@ void ParticleSpec::GenerateEdges() {
   // First, iterate over the DerivesFrom claims to see which AccessPaths
   // explicitly derive from some group of inputs. Draw the edges implied by
   // those claims.
-  absl::flat_hash_set<AccessPath> derives_from_targets;
+  absl_shim::flat_hash_set<AccessPath> derives_from_targets;
   for (const DerivesFromClaim &derives_from_claim : derives_from_claims_) {
     derives_from_targets.insert(derives_from_claim.target());
     edges_.push_back(derives_from_claim.GetAsEdge());
@@ -90,4 +90,4 @@ void ParticleSpec::GenerateEdges() {
   }
 }
 
-}  // namespace raksha::ir
+}  // namespace raksha::frontends::arcs

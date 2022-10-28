@@ -17,9 +17,9 @@
 #ifndef SRC_IR_AUTH_LOGIC_SOUFFLE_EMITTER_H_
 #define SRC_IR_AUTH_LOGIC_SOUFFLE_EMITTER_H_
 
-#include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
+#include "src/common/absl_shim/container/flat_hash_set.h"
 #include "src/common/logging/logging.h"
 #include "src/common/utils/map_iter.h"
 #include "src/ir/datalog/program.h"
@@ -65,7 +65,7 @@ class SouffleEmitter {
   }
 
   std::string EmitPredicate(const datalog::Predicate& predicate) {
-    static const absl::flat_hash_set<std::string> comparison_operators = {
+    static const absl_shim::flat_hash_set<std::string> comparison_operators = {
         {"<"}, {">"}, {"="}, {"!="}, {"<="}, {">="}};
     // Rvalue rules which are represented as datalog::Predicates in AST, we use
     // infix notation while translating to datalog.
@@ -139,7 +139,7 @@ class SouffleEmitter {
   }
 
   std::string EmitTypeDeclarations(const datalog::Program& program) {
-    absl::flat_hash_set<std::string> type_names;
+    absl_shim::flat_hash_set<std::string> type_names;
     for (const auto& declaration : program.relation_declarations()) {
       for (const auto& argument : declaration.arguments()) {
         if (argument.argument_type().kind() !=
@@ -157,7 +157,7 @@ class SouffleEmitter {
     return absl::StrJoin(sorted_type_names, "\n");
   }
 
-  absl::flat_hash_set<datalog::Predicate> declarations_;
+  absl_shim::flat_hash_set<datalog::Predicate> declarations_;
 };
 
 }  // namespace raksha::ir::auth_logic

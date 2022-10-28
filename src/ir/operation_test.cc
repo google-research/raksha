@@ -15,7 +15,7 @@
 //----------------------------------------------------------------------------
 #include <memory>
 
-#include "absl/container/flat_hash_set.h"
+#include "src/common/absl_shim/container/flat_hash_set.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"

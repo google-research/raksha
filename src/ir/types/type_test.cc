@@ -19,9 +19,9 @@
 #include <memory>
 #include <optional>
 
+#include "google/protobuf/text_format.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_split.h"
-#include "google/protobuf/text_format.h"
 #include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/access_path_selectors.h"
@@ -171,8 +171,8 @@ static std::vector<std::string> sample_access_path_str_vecs[] = {
 
 static std::vector<std::string> GetAccessPathStrVecFromAccessPathSelectorsSet(
     raksha::ir::AccessPathSelectorsSet access_path_set) {
-  absl::flat_hash_set<raksha::ir::AccessPathSelectors> absl_access_path_set =
-      raksha::ir::AccessPathSelectorsSet::CreateAbslSet(
+  absl_shim::flat_hash_set<raksha::ir::AccessPathSelectors>
+      absl_access_path_set = raksha::ir::AccessPathSelectorsSet::CreateAbslSet(
           std::move(access_path_set));
   std::vector<std::string> result_strs;
   for (raksha::ir::AccessPathSelectors path : absl_access_path_set) {
@@ -256,8 +256,8 @@ TEST_P(GetAccessPathSelectorsWithProtoTest,
        GetAccessPathSelectorsWithProtoTest) {
   const auto &[type_as_textproto, expected_access_path_strs] = GetParam();
   arcs::TypeProto orig_type_proto;
-  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(type_as_textproto,
-                                                            &orig_type_proto))
+  ASSERT_TRUE(
+      google::protobuf::TextFormat::ParseFromString(type_as_textproto, &orig_type_proto))
       << "Failed to parse text proto!";
   Type type = proto::Decode(type_factory_, orig_type_proto);
   std::vector<std::string> access_path_str_vec =

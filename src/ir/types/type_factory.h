@@ -17,7 +17,7 @@
 #define SRC_IR_TYPES_TYPE_FACTORY_H_
 
 #include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
+#include "src/common/absl_shim/container/flat_hash_set.h"
 #include "src/ir/types/primitive_type.h"
 #include "src/ir/types/schema.h"
 #include "src/ir/types/type.h"
@@ -28,7 +28,6 @@ class Schema;
 
 class TypeFactory {
  public:
-
   // Create a primitive type and wrap it in `types::Type`.
   Type MakePrimitiveType();
 

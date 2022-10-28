@@ -16,7 +16,7 @@
 #ifndef SRC_FRONTENDS_ARCS_ACCESS_PATH_SELECTORS_SET_H_
 #define SRC_FRONTENDS_ARCS_ACCESS_PATH_SELECTORS_SET_H_
 
-#include "absl/container/flat_hash_set.h"
+#include "src/common/absl_shim/container/flat_hash_set.h"
 #include "src/ir/access_path_selectors.h"
 
 namespace raksha::ir {
@@ -51,7 +51,7 @@ class AccessPathSelectorsSet {
     AccessPathSelectorsSet result;
 
     // Make the first set into a hash set for efficient lookup.
-    absl::flat_hash_set<AccessPathSelectors> hash_set1 =
+    absl_shim::flat_hash_set<AccessPathSelectors> hash_set1 =
         AccessPathSelectorsSet::CreateAbslSet(std::move(set1));
 
     // Place items from the second set into the result only if they were in
@@ -80,11 +80,11 @@ class AccessPathSelectorsSet {
   }
 
   // Move the contents of the given AccessPathSelectorsSet into a new
-  // absl::flat_hash_set. This uniques and provides access to the contents of
-  // this "set".
-  static absl::flat_hash_set<AccessPathSelectors> CreateAbslSet(
+  // absl_shim::flat_hash_set. This uniques and provides access to the contents
+  // of this "set".
+  static absl_shim::flat_hash_set<AccessPathSelectors> CreateAbslSet(
       AccessPathSelectorsSet original_set) {
-    return absl::flat_hash_set<AccessPathSelectors>(
+    return absl_shim::flat_hash_set<AccessPathSelectors>(
         std::make_move_iterator(original_set.inner_vec_.begin()),
         std::make_move_iterator(original_set.inner_vec_.end()));
   }

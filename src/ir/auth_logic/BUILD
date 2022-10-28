@@ -133,9 +133,9 @@ cc_library(
         ":auth_logic_ast_traversing_visitor",
         ":declaration_environment",
         ":type_environment",
+        "//src/common/absl_shim/container:flat_hash_set",
         "//src/common/logging",
         "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -170,12 +170,12 @@ cc_library(
         "souffle_emitter.h",
     ],
     deps = [
+        "//src/common/absl_shim/container:flat_hash_set",
         "//src/common/logging",
         "//src/common/utils:map_iter",
         "//src/ir/auth_logic:ast",
         "//src/ir/auth_logic:lowering_ast_datalog",
         "//src/ir/datalog:program",
-        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
     ],
 )

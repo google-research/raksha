@@ -16,7 +16,7 @@
 #ifndef SRC_IR_TYPES_PRIMITIVE_TYPE_H_
 #define SRC_IR_TYPES_PRIMITIVE_TYPE_H_
 
-#include "absl/container/flat_hash_set.h"
+#include "src/common/absl_shim/container/flat_hash_set.h"
 #include "src/ir/access_path_selectors_set.h"
 #include "src/ir/types/type.h"
 
@@ -36,8 +36,8 @@ class PrimitiveType : public TypeBase {
 
   // A primitive type marks the end of a single access path to be built.
   // Return a set containing an empty AccessPathSelectors object.
-  raksha::ir::AccessPathSelectorsSet
-    GetAccessPathSelectorsSet() const override {
+  raksha::ir::AccessPathSelectorsSet GetAccessPathSelectorsSet()
+      const override {
     return raksha::ir::AccessPathSelectorsSet(
         {raksha::ir::AccessPathSelectors()});
   }

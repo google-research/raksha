@@ -16,8 +16,8 @@
 #include "src/ir/access_path_selectors_set.h"
 
 #include "absl/container/btree_set.h"
-#include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_cat.h"
+#include "src/common/absl_shim/container/flat_hash_set.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/field_selector.h"
 #include "src/ir/selector.h"
@@ -61,7 +61,8 @@ TEST_P(CreateAbslSetTest, CreateAbslSetTest) {
   std::vector<AccessPathSelectors> param = GetParam();
   ASSERT_EQ(
       AccessPathSelectorsSet::CreateAbslSet(AccessPathSelectorsSet(param)),
-      absl::flat_hash_set<AccessPathSelectors>(param.begin(), param.end()));
+      absl_shim::flat_hash_set<AccessPathSelectors>(param.begin(),
+                                                    param.end()));
 }
 
 INSTANTIATE_TEST_SUITE_P(CreateAbslSetTest, CreateAbslSetTest,
@@ -79,12 +80,12 @@ TEST_P(AddParentTest, AddParentTest) {
   Selector new_parent_selector = std::get<0>(info);
   AccessPathSelectorsSet original_set =
       AccessPathSelectorsSet(std::get<1>(info));
-  absl::flat_hash_set<AccessPathSelectors> absl_original_set =
+  absl_shim::flat_hash_set<AccessPathSelectors> absl_original_set =
       AccessPathSelectorsSet::CreateAbslSet(original_set);
 
   AccessPathSelectorsSet set_with_parent =
       AccessPathSelectorsSet::AddParentToAll(new_parent_selector, original_set);
-  absl::flat_hash_set<AccessPathSelectors> absl_set_with_parent =
+  absl_shim::flat_hash_set<AccessPathSelectors> absl_set_with_parent =
       AccessPathSelectorsSet::CreateAbslSet(set_with_parent);
 
   // Adding a parent should not affect the size.
@@ -92,7 +93,7 @@ TEST_P(AddParentTest, AddParentTest) {
 
   // For each string generated from AccessPathSelectors in the original set,
   // prepending the selector string should produce a string in the new set.
-  absl::flat_hash_set<std::string> set_with_parent_strings;
+  absl_shim::flat_hash_set<std::string> set_with_parent_strings;
   for (const AccessPathSelectors &path : absl_set_with_parent) {
     set_with_parent_strings.insert(path.ToString());
   }
@@ -115,7 +116,7 @@ class UnionTest
 
 absl::btree_set<std::string> MakeOrderedStrSet(
     AccessPathSelectorsSet orig_set) {
-  absl::flat_hash_set<AccessPathSelectors> absl_hash_set =
+  absl_shim::flat_hash_set<AccessPathSelectors> absl_hash_set =
       AccessPathSelectorsSet::CreateAbslSet(std::move(orig_set));
   absl::btree_set<std::string> absl_ordered_str_set;
   for (const AccessPathSelectors &path : absl_hash_set) {

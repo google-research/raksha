@@ -23,10 +23,10 @@
 #include <variant>
 #include <vector>
 
-#include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
+#include "src/common/absl_shim/container/flat_hash_set.h"
 
 namespace raksha::ir::datalog {
 
@@ -76,9 +76,9 @@ class Predicate {
   // with a name that matches the operator:
   // (https://github.com/google-research/raksha/blob/be6ef8e1e1a20735a06637c12db9ed0b87e3d2a2/src/ir/auth_logic/ast_construction.cc#L92)
   bool IsNumericOperator() const {
-    static const auto* const numeric_operators = 
-      new absl::flat_hash_set<std::string>({
-        "<", ">", "=", "!=", "<=", ">="});
+    static const auto* const numeric_operators =
+        new absl_shim::flat_hash_set<std::string>(
+            {"<", ">", "=", "!=", "<=", ">="});
     return numeric_operators->contains(name_);
   }
 
@@ -120,7 +120,7 @@ class ArgumentType {
   bool operator==(const ArgumentType& otherType) const {
     return this->kind_ == otherType.kind_ && this->name_ == otherType.name_;
   }
-  
+
   bool operator!=(const ArgumentType& otherType) const {
     return !(*this == otherType);
   }

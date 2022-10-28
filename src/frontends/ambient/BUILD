@@ -73,10 +73,10 @@ cc_library(
     local_defines = ["RAM_DOMAIN_SIZE=64"],
     deps = [
         ":ambient_policy_checker",
+        "//src/common/absl_shim/container:flat_hash_set",
         "//src/common/logging",
         "//src/common/utils:ranges",
         "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
         "@souffle//:souffle_include_lib",
