@@ -49,7 +49,6 @@ cc_test(
     deps = [
         ":types",
         "//src/common/testing:gtest",
-        "//src/frontends/arcs:access_path",
         "//src/ir:access_path_selectors",
     ],
 )
