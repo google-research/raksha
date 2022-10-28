@@ -120,7 +120,7 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/ir/attributes:string_attribute",
         "//src/parser/ir:ir_parser",
-        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
         "@com_googlesource_code_re2//:re2",
     ],
