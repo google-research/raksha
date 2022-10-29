@@ -16,8 +16,9 @@
 
 #include "src/frontends/sql/driver.h"
 
+#include "src/backends/policy_engine/chaotic/chaotic_policy_checker.h"
+#include "src/backends/policy_engine/chaotic/sql_policy_rules.h"
 #include "src/backends/policy_engine/policy.h"
-#include "src/backends/policy_engine/souffle/souffle_policy_checker.h"
 #include "src/frontends/sql/decode.h"
 #include "src/frontends/sql/sql_ir.pb.h"
 
@@ -30,8 +31,12 @@ bool verify(const ExpressionArena &arena,
   DecodeExpressionArena(arena, decoder_context);
   decoder_context.BuildTopLevelBlock();
   const ir::Module &module = decoder_context.global_module();
-  return backends::policy_engine::SoufflePolicyChecker()
-      .IsModulePolicyCompliant(module, policy);
+  // LOG(ERROR) << arena.DebugString();
+  backends::policy_engine::SqlPolicyRules policy_rules(arena);
+  backends::policy_engine::ChaoticPolicyChecker policy_checker(policy_rules);
+  return policy_checker.IsModulePolicyCompliant(module, policy);
+  //   return backends::policy_engine::SoufflePolicyChecker()
+  //       .IsModulePolicyCompliant(module, policy);
 }
 
 }  // namespace raksha::frontends::sql

@@ -99,7 +99,9 @@ cc_library(
         ":decode",
         ":sql_ir_cc_proto",
         "//src/backends/policy_engine:policy",
-        "//src/backends/policy_engine/souffle:souffle_policy_checker_sql",
+        "//src/backends/policy_engine/chaotic:chaotic_policy_checker",
+        "//src/backends/policy_engine/chaotic:sql_policy_rules",
+        #"//third_party/raksha/src/backends/policy_engine/souffle:souffle_policy_checker_sql",
     ],
 )
 

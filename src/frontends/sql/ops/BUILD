@@ -20,6 +20,7 @@ package(
         # the SQL frontend because that's where tainting via operations is most
         # developed. We should refactor to remove this test in the future.
         "//src/backends/policy_engine/souffle:__pkg__",
+        "//src/backends/policy_engine/chaotic:__pkg__",
         "//src/frontends/sql:__subpackages__",
     ],
     features = ["layering_check"],

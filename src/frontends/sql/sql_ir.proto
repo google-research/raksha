@@ -108,6 +108,28 @@ message IdExpressionPair {
   Expression expression = 2;
 }
 
+message SqlPolicyRule {
+  message Result {
+    enum Action {
+      ANY = 0;
+      ADD_CONFIDENTIALITY = 1;
+      REMOVE_CONFIDENTIALITY = 2;
+      ADD_INTEGRITY = 3;
+    }
+    Action action = 1;
+    string tag = 2;
+  }
+
+  message Precondition {
+    string argument = 1;
+    string required_tag = 2;
+  }
+
+  string name = 1;
+  Result result = 2;
+  repeated Precondition preconditions = 3;
+}
+
 // An Arena used as the canonical owner of all `Expression`s. `Expression`s will
 // "point" to their children via IDs. It's tempting to point to the expressions
 // via their positions in the list, but imposing a density requirement on the
@@ -120,4 +142,5 @@ message IdExpressionPair {
 // already been deserialized.
 message ExpressionArena {
   repeated IdExpressionPair id_expression_pairs = 1;
+  repeated SqlPolicyRule sql_policy_rules = 2;
 }
