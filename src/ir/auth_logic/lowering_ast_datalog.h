@@ -23,9 +23,9 @@
 #include <memory>
 #include <utility>  //included for std::pair
 
-#include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
+#include "src/common/containers/hash_map.h"
 #include "src/common/logging/logging.h"
 #include "src/common/utils/overloaded.h"
 #include "src/ir/auth_logic/ast.h"
@@ -211,8 +211,8 @@ class LoweringToDatalogPass {
       const std::vector<datalog::RelationDeclaration>& relation_declarations);
 
   std::vector<datalog::RelationDeclaration> GetCanSayDeclarations(
-      const absl::flat_hash_map<std::string_view, datalog::RelationDeclaration>&
-          type_environment);
+      const common::containers::HashMap<
+          std::string_view, datalog::RelationDeclaration>& type_environment);
 
   std::vector<datalog::RelationDeclaration> GetSaysExtendRelationDeclarations(
       const std::vector<datalog::RelationDeclaration>& relation_declarations);
@@ -243,7 +243,7 @@ class LoweringToDatalogPass {
   // for (1..n). `can_say_depth` is only updated by `UpdateCansayDepth` which
   // tracks this maximum.
   // key: predicate name, value: Number of can says.
-  absl::flat_hash_map<std::string, uint64_t> can_say_depth_;
+  common::containers::HashMap<std::string, uint64_t> can_say_depth_;
 };
 
 }  // namespace raksha::ir::auth_logic

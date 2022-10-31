@@ -44,7 +44,7 @@ class SystemSpec {
 
  private:
   // The particles in the system spec.
-  absl::flat_hash_map<std::string, std::unique_ptr<ParticleSpec>>
+  common::containers::HashMap<std::string, std::unique_ptr<ParticleSpec>>
       particle_specs_;
 };
 

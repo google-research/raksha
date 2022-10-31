@@ -16,9 +16,9 @@
 #ifndef SRC_IR_ATTRIBUTES_ATTRIBUTE_H_
 #define SRC_IR_ATTRIBUTES_ATTRIBUTE_H_
 
-#include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
+#include "src/common/containers/hash_map.h"
 #include "src/common/utils/intrusive_ptr.h"
 
 namespace raksha::ir {
@@ -92,7 +92,7 @@ inline bool operator==(const Attribute& lhs, const Attribute& rhs) {
   return lhs.value_->IsEqual(*rhs.value_);
 }
 
-using NamedAttributeMap = absl::flat_hash_map<std::string, Attribute>;
+using NamedAttributeMap = common::containers::HashMap<std::string, Attribute>;
 
 }  // namespace raksha::ir
 

@@ -14,10 +14,10 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "absl/container/flat_hash_map.h"
+#include "google/protobuf/text_format.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
-#include "google/protobuf/text_format.h"
+#include "src/common/containers/hash_map.h"
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/map_iter.h"
 #include "src/frontends/sql/decode.h"
@@ -59,7 +59,8 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
   const auto &[transformed_node_id, rule_name, precondition_name_sequence,
                value_ids] = GetParam();
 
-  absl::flat_hash_map<absl::string_view, uint64_t> precondition_name_to_id;
+  common::containers::HashMap<absl::string_view, uint64_t>
+      precondition_name_to_id;
   std::vector<uint64_t> ids_to_be_filled;
   for (uint64_t i = 0; i < value_ids.size(); ++i) {
     uint64_t current_precondition_id = value_ids.at(i);
@@ -84,8 +85,8 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
           ids_to_be_filled);
 
   ExpressionArena exprArena;
-  EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(exprArenaTextproto,
-                                                            &exprArena));
+  EXPECT_TRUE(
+      google::protobuf::TextFormat::ParseFromString(exprArenaTextproto, &exprArena));
   Value decoded_value = testing::UnwrapTopLevelSqlOutputOp(
       DecodeExpressionArena(exprArena, decoder_context));
 
@@ -104,8 +105,9 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
                 std::string(current_pair.first),
                 decoder_context.GetValue(current_pair.second));
           });
-  auto expected_name_to_value_map = absl::flat_hash_map<std::string, Value>(
-      expected_name_to_value_vec.begin(), expected_name_to_value_vec.end());
+  auto expected_name_to_value_map =
+      common::containers::HashMap<std::string, Value>(
+          expected_name_to_value_vec.begin(), expected_name_to_value_vec.end());
   EXPECT_THAT(tag_transform_op->GetPreconditions(),
               UnorderedElementsAreArray(expected_name_to_value_map));
 }

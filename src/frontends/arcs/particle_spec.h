@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include "absl/container/flat_hash_map.h"
+#include "src/common/containers/hash_map.h"
 #include "src/common/logging/logging.h"
 #include "src/frontends/arcs/derives_from_claim.h"
 #include "src/frontends/arcs/edge.h"
@@ -96,10 +96,10 @@ class ParticleSpec {
   // AccessPaths.
   std::vector<Edge> edges_;
   // A map of HandleConnectionSpec names to HandleConnectionSpecs.
-  absl::flat_hash_map<std::string, HandleConnectionSpec>
+  common::containers::HashMap<std::string, HandleConnectionSpec>
       handle_connection_specs_;
 };
 
-}  // namespace raksha::ir
+}  // namespace raksha::frontends::arcs
 
 #endif  // SRC_FRONTENDS_ARCS_PARTICLE_SPEC_H_

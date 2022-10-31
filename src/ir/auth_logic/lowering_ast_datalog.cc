@@ -304,8 +304,8 @@ LoweringToDatalogPass::TransformAttributeDeclarations(
 
 std::vector<datalog::RelationDeclaration>
 LoweringToDatalogPass::GetCanSayDeclarations(
-    const absl::flat_hash_map<std::string_view, datalog::RelationDeclaration>&
-        type_environment) {
+    const common::containers::HashMap<
+        std::string_view, datalog::RelationDeclaration>& type_environment) {
   // Example: A relation declaration and canSay fact shown below.
   // ".decl grantAccess(x0 : symbol, x1 : symbol)
   // PrincipalA cansay PrincipalB grantAccess(secretFile)."
@@ -399,7 +399,7 @@ LoweringToDatalogPass::RelationDeclarationToDLIR(
           relation_declarations);
   // Produce a mapping from predicate names to predicate typings
   // (where a predicate typing is the same as a predicate relation declaration)
-  absl::flat_hash_map<std::string_view, datalog::RelationDeclaration>
+  common::containers::HashMap<std::string_view, datalog::RelationDeclaration>
       type_environment;
   for (const datalog::RelationDeclaration& declaration :
        transformed_declarations) {

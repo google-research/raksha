@@ -23,9 +23,9 @@
 #include <memory>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/string_view.h"
+#include "src/common/containers/hash_map.h"
 
 namespace raksha::ambient {
 
@@ -48,7 +48,7 @@ class PolicyChecker {
   enum class Settings { kUnknown, kStreaming, kASR, kRecording };
 
   using DataFlowEdge = std::pair<std::string, std::string>;
-  using SettingsMap = absl::flat_hash_map<Settings, bool>;
+  using SettingsMap = common::containers::HashMap<Settings, bool>;
 
   PolicyChecker() {
     user_settings_[User::kOwner] = SettingsMap({{Settings::kASR, true},
@@ -110,7 +110,7 @@ class PolicyChecker {
   }
 
   absl::flat_hash_set<DataFlowEdge> edges_;
-  absl::flat_hash_map<User, SettingsMap> user_settings_;
+  common::containers::HashMap<User, SettingsMap> user_settings_;
 
   static constexpr char kPolicyCheckerProgramName[] =
       "ambient_policy_checker_cxx";

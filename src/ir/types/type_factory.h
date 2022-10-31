@@ -16,8 +16,8 @@
 #ifndef SRC_IR_TYPES_TYPE_FACTORY_H_
 #define SRC_IR_TYPES_TYPE_FACTORY_H_
 
-#include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
+#include "src/common/containers/hash_map.h"
 #include "src/ir/types/primitive_type.h"
 #include "src/ir/types/schema.h"
 #include "src/ir/types/type.h"
@@ -28,7 +28,6 @@ class Schema;
 
 class TypeFactory {
  public:
-
   // Create a primitive type and wrap it in `types::Type`.
   Type MakePrimitiveType();
 
@@ -36,8 +35,9 @@ class TypeFactory {
   Type MakeEntityType(const Schema& schema);
 
   // Create and register the given schema.
-  const Schema& RegisterSchema(std::optional<std::string> name,
-                               absl::flat_hash_map<std::string, Type> fields);
+  const Schema& RegisterSchema(
+      std::optional<std::string> name,
+      common::containers::HashMap<std::string, Type> fields);
 
  private:
   // Known schemas.

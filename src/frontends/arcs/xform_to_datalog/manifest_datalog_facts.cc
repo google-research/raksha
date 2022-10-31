@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
 #include "src/frontends/arcs/xform_to_datalog/manifest_datalog_facts.h"
 
-#include "absl/container/flat_hash_map.h"
+#include "src/common/containers/hash_map.h"
 #include "src/frontends/arcs/handle_connection_spec.h"
 #include "src/frontends/arcs/particle_spec.h"
 #include "src/frontends/arcs/proto/system_spec.h"
@@ -54,8 +54,8 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
   const std::string generated_recipe_name_prefix = "GENERATED_RECIPE_NAME";
   uint64_t recipe_num = 0;
   for (const ::arcs::RecipeProto &recipe_proto : manifest_proto.recipes()) {
-    absl::flat_hash_map<std::string, uint64_t> particle_numbers;
-    absl::flat_hash_map<std::string, std::string> handle_ids;
+    common::containers::HashMap<std::string, uint64_t> particle_numbers;
+    common::containers::HashMap<std::string, std::string> handle_ids;
     for (const ::arcs::HandleProto &handle_proto : recipe_proto.handles()) {
       auto insert_result = handle_ids.insert(
           {handle_proto.name(), handle_proto.id().empty() ? handle_proto.name()

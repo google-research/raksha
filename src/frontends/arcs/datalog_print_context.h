@@ -17,8 +17,8 @@
 #ifndef SRC_FRONTENDS_ARCS_DATALOG_PRINT_CONTEXT_H_
 #define SRC_FRONTENDS_ARCS_DATALOG_PRINT_CONTEXT_H_
 
-#include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_cat.h"
+#include "src/common/containers/hash_map.h"
 #include "src/frontends/arcs/access_path_root.h"
 
 namespace raksha::frontends::arcs {
@@ -29,7 +29,7 @@ namespace raksha::frontends::arcs {
 class DatalogPrintContext {
  public:
   using AccessPathInstantiationMap =
-      absl::flat_hash_map<AccessPathRoot, AccessPathRoot>;
+      common::containers::HashMap<AccessPathRoot, AccessPathRoot>;
 
   DatalogPrintContext() : check_counter_(0), instantiation_map_(nullptr) {}
 

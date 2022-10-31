@@ -16,7 +16,6 @@
 
 #include "src/ir/auth_logic/universe_relation_insertion.h"
 
-#include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "src/ir/auth_logic/auth_logic_ast_traversing_visitor.h"
 #include "src/ir/auth_logic/declaration_environment.h"

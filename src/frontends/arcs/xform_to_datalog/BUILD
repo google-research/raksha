@@ -96,12 +96,12 @@ cc_library(
     srcs = ["manifest_datalog_facts.cc"],
     hdrs = ["manifest_datalog_facts.h"],
     deps = [
+        "//src/common/containers:hash_map",
         "//src/frontends/arcs",
         "//src/frontends/arcs/proto:system_spec",
         "//src/ir/types",
         "//src/ir/types/proto",
         "//third_party/arcs/proto:manifest_cc_proto",
-        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings:str_format",
     ],
 )

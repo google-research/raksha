@@ -56,13 +56,14 @@ ir::Value TagTransformOp::GetTransformedValue() const {
   return inputs().front();
 }
 
-absl::flat_hash_map<std::string, ir::Value> TagTransformOp::GetPreconditions()
-    const {
-  absl::flat_hash_map<std::string, ir::Value> result;
+common::containers::HashMap<std::string, ir::Value>
+TagTransformOp::GetPreconditions() const {
+  common::containers::HashMap<std::string, ir::Value> result;
   const ir::ValueList& input_values = inputs();
   for (const auto& [name, attribute] : attributes()) {
     if (name == kRuleNameAttribute) continue;
-    auto int_attribute = CHECK_NOTNULL(attribute.GetIf<ir::Int64Attribute>());
+    auto int_attribute =
+        CHECK_NOTNULL(attribute.GetIf<ir::Int64Attribute>());
     auto input_index = int_attribute->value();
     // If input_values.size() > std::numeric_limits<int64_t>::max(), the
     // static_cast will return a negative value and this condition will fail,

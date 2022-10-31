@@ -28,7 +28,7 @@
 #include <variant>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
+#include "src/common/containers/hash_map.h"
 #include "src/common/logging/logging.h"
 #include "src/common/utils/map_iter.h"
 #include "src/ir/attributes/attribute.h"
@@ -148,7 +148,7 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
 }
 void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
   BlockBuilder builder;
-  absl::flat_hash_map<std::string, Value> value_map;
+  common::containers::HashMap<std::string, Value> value_map;
   std::vector<ConstructOperationResult> construct_operation_results;
 
   for (IrParser::OperationContext* operation_context :

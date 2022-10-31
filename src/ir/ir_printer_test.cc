@@ -15,8 +15,8 @@
 //----------------------------------------------------------------------------
 #include "src/ir/ir_printer.h"
 
-#include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"
+#include "src/common/containers/hash_map.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/block_builder.h"
@@ -129,7 +129,7 @@ TEST_P(IRPrinterTest, PrettyPrintAttributesInSortedOrder) {
 }
 
 TEST(IRPrinterPrintNamedMapOrderTest, PrintsInSortedOrder) {
-  absl::flat_hash_map<std::string, int> values = {
+  common::containers::HashMap<std::string, int> values = {
       {"zip", -1},
       {"hello", 1},
       {"world", 2},

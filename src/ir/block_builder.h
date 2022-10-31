@@ -19,7 +19,6 @@
 #include <type_traits>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
 #include "src/ir/module.h"
 #include "src/ir/types/type.h"
 #include "src/ir/value.h"

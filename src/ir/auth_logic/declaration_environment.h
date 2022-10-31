@@ -17,7 +17,7 @@
 #ifndef SRC_IR_AUTH_LOGIC_DECLARATION_ENVIRONMENT_H_
 #define SRC_IR_AUTH_LOGIC_DECLARATION_ENVIRONMENT_H_
 
-#include "absl/container/flat_hash_map.h"
+#include "src/common/containers/hash_map.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/auth_logic/auth_logic_ast_traversing_visitor.h"
 #include "src/ir/datalog/program.h"
@@ -33,7 +33,8 @@ class DeclarationEnvironment {
       absl::string_view relation_name) const;
 
  private:
-  absl::flat_hash_map<std::string, datalog::RelationDeclaration> inner_map_;
+  common::containers::HashMap<std::string, datalog::RelationDeclaration>
+      inner_map_;
 };
 
 };  // namespace raksha::ir::auth_logic

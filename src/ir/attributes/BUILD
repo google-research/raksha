@@ -27,8 +27,8 @@ cc_library(
     hdrs = ["attribute.h"],
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
+        "//src/common/containers:hash_map",
         "//src/common/utils:intrusive_ptr",
-        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],

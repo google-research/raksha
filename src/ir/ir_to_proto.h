@@ -47,8 +47,7 @@ class IRToProto {
   }
 
  private:
-  IRToProto(ID& id)
-      : last_used_id_{id} {}
+  IRToProto(ID& id) : last_used_id_{id} {}
 
   // Disable copy (and move) semantics.
   IRToProto(const IRToProto&) = delete;
@@ -71,11 +70,13 @@ class IRToProto {
     // Ensure that each ptr has a single unique ID.
     const void* ptr = &thing_to_get_value_for;
     auto insert_result = used_ids_.insert({ptr, last_used_id_ + 1});
-    if (!insert_result.second) { return insert_result.first->second; }
+    if (!insert_result.second) {
+      return insert_result.first->second;
+    }
     return ++last_used_id_;
   }
 
-  absl::flat_hash_map<const void*, ID> used_ids_;
+  common::containers::HashMap<const void*, ID> used_ids_;
   // This is a reference so that a two translations can more easily avoid having
   // overlapping IDs.
   ID& last_used_id_;

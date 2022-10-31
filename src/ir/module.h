@@ -18,7 +18,6 @@
 
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/data_decl.h"
 #include "src/ir/ir_visitor.h"

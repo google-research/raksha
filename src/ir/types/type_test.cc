@@ -19,9 +19,9 @@
 #include <memory>
 #include <optional>
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/strings/str_split.h"
 #include "google/protobuf/text_format.h"
+#include "absl/strings/str_split.h"
+#include "src/common/containers/hash_map.h"
 #include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/access_path_selectors.h"
@@ -35,13 +35,13 @@ namespace raksha::ir::types {
 // Helper function for making an unnamed schema from a field map.
 static const Schema &MakeAnonymousSchema(
     TypeFactory &type_factory,
-    absl::flat_hash_map<std::string, Type> field_map) {
+    common::containers::HashMap<std::string, Type> field_map) {
   return type_factory.RegisterSchema(std::nullopt, std::move(field_map));
 }
 
 static Type MakeEntityTypeWithAnonymousSchema(
     TypeFactory &type_factory,
-    absl::flat_hash_map<std::string, Type> field_map) {
+    common::containers::HashMap<std::string, Type> field_map) {
   return type_factory.MakeEntityType(
       MakeAnonymousSchema(type_factory, std::move(field_map)));
 }
@@ -93,7 +93,7 @@ static Type MakeMinimalTypeFromAccessPathFieldVec(TypeFactory &type_factory,
     return vec1.at(depth) < vec2.at(depth);
   };
 
-  absl::flat_hash_map<std::string, Type> field_map;
+  common::containers::HashMap<std::string, Type> field_map;
   while (begin_iter != end_iter) {
     const std::vector<std::string> &range_start_vec = *begin_iter;
     std::string field_name = range_start_vec.at(depth);
@@ -231,7 +231,7 @@ static Type kPrimitive =
     TypeProducesAccessPathStrsTest::type_factory.MakePrimitiveType();
 static Type kEmptyEntity = MakeEntityTypeWithAnonymousSchema(
     TypeProducesAccessPathStrsTest::type_factory,
-    absl::flat_hash_map<std::string, Type>());
+    common::containers::HashMap<std::string, Type>());
 
 // Show that we can have aliasing in subpaths between paths that end in a
 // PrimitiveType and paths that end in an empty EntityType. This should be
@@ -256,8 +256,8 @@ TEST_P(GetAccessPathSelectorsWithProtoTest,
        GetAccessPathSelectorsWithProtoTest) {
   const auto &[type_as_textproto, expected_access_path_strs] = GetParam();
   arcs::TypeProto orig_type_proto;
-  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(type_as_textproto,
-                                                            &orig_type_proto))
+  ASSERT_TRUE(
+      google::protobuf::TextFormat::ParseFromString(type_as_textproto, &orig_type_proto))
       << "Failed to parse text proto!";
   Type type = proto::Decode(type_factory_, orig_type_proto);
   std::vector<std::string> access_path_str_vec =

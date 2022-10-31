@@ -31,12 +31,11 @@ namespace {
 // This is a nested class because it needs to access the private
 // fields of the TypeEnvironment in the constructor implementation.
 
-
 class TypeEnvironmentGenerationVisitor
     : public AuthLogicAstTraversingVisitor<TypeEnvironmentGenerationVisitor> {
  public:
-using LiteralTypeMapType =
-    absl::flat_hash_map<std::string, datalog::ArgumentType>;
+  using LiteralTypeMapType =
+      common::containers::HashMap<std::string, datalog::ArgumentType>;
   TypeEnvironmentGenerationVisitor(DeclarationEnvironment decl_env)
       : decl_env_(decl_env), literal_type_map_({}) {}
 
@@ -67,7 +66,6 @@ void TypeEnvironmentGenerationVisitor::AddTyping(
     CHECK(find_result->second == arg_type)
         << "Type error for constant: " << arg_name;
   }
-
 }
 
 // Insert a typing for constant value (e.g. "SomeArgument" in quotes

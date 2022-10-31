@@ -21,7 +21,7 @@
 #define SRC_PARSER_IR_IR_PARSER_H_
 #include <string>
 
-#include "absl/container/flat_hash_map.h"
+#include "src/common/containers/hash_map.h"
 #include "src/ir/block_builder.h"
 #include "src/ir/ir_context.h"
 #include "src/ir/module.h"
@@ -33,7 +33,7 @@ namespace raksha::ir {
 using ir_parser_generator::IrLexer;
 using ir_parser_generator::IrParser;
 using UnresolvedValueMap =
-    absl::flat_hash_map<std::string, std::vector<std::string>>;
+    common::containers::HashMap<std::string, std::vector<std::string>>;
 
 class IrProgramParser {
  public:
@@ -61,7 +61,7 @@ class IrProgramParser {
       BlockBuilder& block_builder);
   void ConstructBlock(IrParser::BlockContext& block_context);
   void ConstructModule(IrParser::ModuleContext& module_context);
-  absl::flat_hash_map<std::string, const Block*> block_map_;
+  common::containers::HashMap<std::string, const Block*> block_map_;
   std::unique_ptr<IRContext> context_;
   std::unique_ptr<SsaNames> ssa_names_;
   std::unique_ptr<Module> module_;

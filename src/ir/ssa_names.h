@@ -16,7 +16,7 @@
 #ifndef SRC_IR_SSA_NAMES_H_
 #define SRC_IR_SSA_NAMES_H_
 
-#include "absl/container/flat_hash_map.h"
+#include "src/common/containers/hash_map.h"
 #include "src/ir/value.h"
 
 namespace raksha::ir {
@@ -91,7 +91,7 @@ class SsaNames {
 
    private:
     std::string prefix_;
-    absl::flat_hash_map<T, ID> item_ids_;
+    common::containers::HashMap<T, ID> item_ids_;
   };
 
   IDManager<const Block *> block_ids_;

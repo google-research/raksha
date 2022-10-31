@@ -16,7 +16,6 @@
 #ifndef SRC_FRONTENDS_ARCS_ACCESS_PATH_H_
 #define SRC_FRONTENDS_ARCS_ACCESS_PATH_H_
 
-#include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_cat.h"
 #include "src/frontends/arcs/access_path_root.h"
 #include "src/ir/access_path_selectors.h"

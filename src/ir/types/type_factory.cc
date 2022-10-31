@@ -33,7 +33,7 @@ Type TypeFactory::MakeEntityType(const Schema& schema) {
 
 const Schema& TypeFactory::RegisterSchema(
     std::optional<std::string> name,
-    absl::flat_hash_map<std::string, Type> fields) {
+    common::containers::HashMap<std::string, Type> fields) {
   std::unique_ptr<Schema> new_schema(
       new Schema(std::move(name), std::move(fields)));
   const Schema* result = new_schema.get();

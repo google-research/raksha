@@ -19,7 +19,7 @@
 
 #include <memory>
 
-#include "absl/container/flat_hash_map.h"
+#include "src/common/containers/hash_map.h"
 #include "src/frontends/sql/ops/literal_op.h"
 #include "src/frontends/sql/ops/sql_output_op.h"
 #include "src/ir/attributes/string_attribute.h"
@@ -104,7 +104,8 @@ class DecoderContext {
 
   const ir::Operation &MakeTagTransformOperation(
       uint64_t transformed_value_id, absl::string_view rule_name,
-      const absl::flat_hash_map<std::string, uint64_t> &tag_preconditions);
+      const common::containers::HashMap<std::string, uint64_t>
+          &tag_preconditions);
 
   const ir::Operation &MakeSqlOutputOperation(ir::Value value) {
     return top_level_block_builder_.AddOperation<SqlOutputOp>(ir_context_,
@@ -125,7 +126,7 @@ class DecoderContext {
   // A mapping from an `id` to the value associated with that `id`. We store
   // `id`s as values because we will be returning copies of them, not
   // pointers to them.
-  absl::flat_hash_map<uint64_t, ir::Value> id_to_value;
+  common::containers::HashMap<uint64_t, ir::Value> id_to_value;
   // An `Operator` that provides the value of a literal.
   const ir::Operator &literal_operator_;
   // An `Operator` that just merges values together. This will cause the

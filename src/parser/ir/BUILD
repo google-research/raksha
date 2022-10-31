@@ -43,6 +43,7 @@ cc_library(
     features = ["-use_header_modules"],
     deps = [
         ":ir_parser_generator",
+        "//src/common/containers:hash_map",
         "//src/common/logging",
         "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
@@ -57,7 +58,6 @@ cc_library(
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "//src/ir/types",
-        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 

@@ -38,7 +38,7 @@ class TagTransformOp : public SqlOp {
   ir::Value GetTransformedValue() const;
 
   // Returns the preconditions.
-  absl::flat_hash_map<std::string, ir::Value> GetPreconditions() const;
+  common::containers::HashMap<std::string, ir::Value> GetPreconditions() const;
 
   absl::string_view GetRuleName() const;
 

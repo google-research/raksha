@@ -20,8 +20,8 @@
 #include <variant>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"
+#include "src/common/containers/hash_map.h"
 #include "src/common/utils/overloaded.h"
 #include "src/common/utils/ranges.h"
 #include "src/ir/storage.h"
@@ -152,10 +152,8 @@ class Value {
   // If you have an `Operation` that should produce a single result value, this
   // helper will produce an `OperationResult`-variant `Value` with the default
   // output name "out" for you.
-  static Value MakeDefaultOperationResultValue(
-      const Operation& op) {
-    return Value(
-        value::OperationResult::MakeDefaultOperationResult(op));
+  static Value MakeDefaultOperationResultValue(const Operation& op) {
+    return Value(value::OperationResult::MakeDefaultOperationResult(op));
   }
   static Value MakeOperationResultValue(const Operation& op,
                                         const uint64_t index) {
@@ -196,8 +194,8 @@ class Value {
 
 using ValueList = std::vector<Value>;
 using ValueRange = utils::iterator_range<ValueList::const_iterator>;
-using NamedValueMap = absl::flat_hash_map<std::string, Value>;
-using NamedValueListMap = absl::flat_hash_map<std::string, ValueList>;
+using NamedValueMap = common::containers::HashMap<std::string, Value>;
+using NamedValueListMap = common::containers::HashMap<std::string, ValueList>;
 
 }  // namespace raksha::ir
 

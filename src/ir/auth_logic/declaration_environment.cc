@@ -21,15 +21,15 @@ namespace raksha::ir::auth_logic {
 namespace {
 // Generates a new mapping from relation names to relation declarations
 // implemented as a flat_hash_map. It is used in the implementation of
-// the constructor for DeclarationEnvironment. 
-using DeclarationMapType = absl::flat_hash_map<std::string, 
-  datalog::RelationDeclaration>;
+// the constructor for DeclarationEnvironment.
+using DeclarationMapType =
+    common::containers::HashMap<std::string, datalog::RelationDeclaration>;
 class RelationDeclarationEnvironmentVisitor
     : public AuthLogicAstTraversingVisitor<
           RelationDeclarationEnvironmentVisitor> {
  public:
-  RelationDeclarationEnvironmentVisitor() : decl_map_({}) {};
-  DeclarationMapType decl_map() { return decl_map_;}
+  RelationDeclarationEnvironmentVisitor() : decl_map_({}){};
+  DeclarationMapType decl_map() { return decl_map_; }
 
  private:
   void AddDeclaration(const datalog::RelationDeclaration& rel_decl) {
