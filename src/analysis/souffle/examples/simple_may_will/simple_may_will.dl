@@ -1,0 +1,76 @@
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/may_will.dl"
+#include "src/analysis/souffle/authorization_logic.dl"
+#include "src/analysis/souffle/tag_transforms.dl"
+
+// An interface used for running and getting results from the policy verifier.
+// Returns as output the violatesPolicy relation, which indicates whether 
+// there were failures in a way that is easy to read across the Souffle C++ interface.
+
+.output violatesPolicy(delimiter=";")
+
+// Following arcs code converetd to datalog code below
+/* Run binary //src/frontends/arcs/xform_to_datalog:generate_datalog_program) 
+            --auth_logic_file=\"$(location %s)\" " % auth_logic +
+            --manifest_proto=\"$(location %s)\" " % proto_target +
+            --datalog_file=<datalog filepath>" "
+   to generate datalog file for both arcs and auth_logic file
+*/
+
+// particle P1
+//  foo: writes Foo {}
+//  claim foo is rawVideo 
+// particle P2
+//  bar: reads Foo {}
+//  foo: writes Foo {}
+//  check bar is rawVideo 
+// particle P3
+//  bar: reads Foo {}
+// recipe R
+//  P1
+//    foo: writes h1
+//  P2
+//    bar: reads h1
+//    foo: writes h2
+//  P3
+//    bar: reads h2
+
+// Rules for detecting policy failures.
+.decl testFails(check_index: symbol)
+.output testFails(IO=stdout)
+.decl allTests(check_index: symbol)
+.output allTests(IO=stdout)
+.decl duplicateTestCaseNames(testAspectName: symbol)
+.output duplicateTestCaseNames(IO=stdout)
+.output disallowedUsage(IO=stdout)
+
+.decl isCheck(check_index: symbol, path: AccessPath)
+.decl check(check_index: symbol, owner: Principal, path: AccessPath)
+
+allTests(check_index) :- isCheck(check_index, _).
+testFails(cat(check_index, "-", owner, "-", path)) :-
+  isCheck(check_index, path), ownsAccessPath(owner, path),
+  !check(check_index, owner, path).
+
+testFails("may_will") :- disallowedUsage(_, _, _, _).
+
+.decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
+.decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
+saysMay(w, x, y, z) :- says_may(w, x, y, z).
+saysWill(w, x, y) :- says_will(w, x, y).
+
+// Manifest
+// Claims:
+says_hasTag("P1", "R.P1.foo", owner, "rawVideo") :- ownsAccessPath(owner, "R.P1.foo").
+
+// Checks:
+isCheck("check_num_0", "R.P2.bar"), check("check_num_0", owner, "R.P2.bar") :-
+  ownsAccessPath(owner, "R.P2.bar"), mayHaveTag("R.P2.bar", owner, "rawVideo").
+violatesPolicy("any") :- isCheck(_, _).
+
+// Edges:
+edge("R.P1.foo", "R.handle0").
+edge("R.handle0", "R.P2.bar").
+edge("R.P2.foo", "R.handle1").
+edge("R.P2.bar", "R.P2.foo").
+edge("R.handle1", "R.P3.bar").

@@ -15,19 +15,48 @@
 #
 #-------------------------------------------------------------------------------
 
-licenses(["notice"])
+load("//build_defs:raksha_policy_verifier.bzl", "raksha_policy_verifier_library")
 
-load("//build_defs:raksha.bzl", "policy_check")
+package(
+    default_visibility = ["//src:__subpackages__"],
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
-policy_check(
+raksha_policy_verifier_library(
     name = "check_multimic_userc_tag_fail",
-    auth_logic = "multimic.auth",
-    dataflow_graph = "multimic.arcs",
-    expect_failure = True,
+    policies = [
+        "multimic.auth",
+    ],
+    policy_verifier_interfaces = [":multimic.dl"],
 )
 
-policy_check(
+raksha_policy_verifier_library(
     name = "check_multimic_pass",
-    auth_logic = "multimic_no_userc_tag.auth",
-    dataflow_graph = "multimic.arcs",
+    policies = [
+        "multimic_no_userc_tag.auth",
+    ],
+    policy_verifier_interfaces = [":multimic.dl"],
 )
+
+[sh_test(
+    name = "check_policy_compliance_%s_test" % verifier_name,
+    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
+    args = [
+        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
+        "%s" % test_result,
+        "sql_policy_analysis",
+        "ir",
+        "$(location //src/analysis/souffle/examples:empty.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "%s" % verifier_name,
+    ],
+    data = [
+        "//src/analysis/souffle/examples:empty.ir",
+        "//src/backends/policy_engine/souffle:check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+) for verifier_name, test_result in [
+    ("check_multimic_pass_cxx", "pass"),
+    ("check_multimic_userc_tag_fail_cxx", "pass"),
+]]

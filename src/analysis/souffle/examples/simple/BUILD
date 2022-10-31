@@ -13,12 +13,37 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-load("//build_defs:raksha.bzl", "raksha_policy_check")
+load("//build_defs:raksha_policy_verifier.bzl", "raksha_policy_verifier_library")
 
-licenses(["notice"])
+package(
+    default_visibility = ["//src:__subpackages__"],
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
-# To invoke policy engine, `bazel test :ok_claim_propagates_check`.
-raksha_policy_check(
+raksha_policy_verifier_library(
     name = "ok_claim_propagates_check",
-    src = "ok_claim_propagates.raksha",
+    policies = [
+        "ok_claim_propagates.auth",
+    ],
+    policy_verifier_interfaces = [":ok_claim_propagates_check.dl"],
+)
+
+sh_test(
+    name = "check_policy_compliance_ok_claim_propagates_test",
+    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
+    args = [
+        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
+        "fail",
+        "sql_policy_analysis",
+        "ir",
+        "$(location //src/analysis/souffle/examples:empty.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "ok_claim_propagates_check_cxx",
+    ],
+    data = [
+        "//src/analysis/souffle/examples:empty.ir",
+        "//src/backends/policy_engine/souffle:check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
 )

@@ -6,5 +6,5 @@
 //TODO(#220): This should be at the level of handles which correspond to stores,
 // where ownership makes more sense.
 "EndUser" says ownsAccessPath("EndUser", "R.P1.foo").
-"EndUser" says "P1" canSay hasTag(accessPathX, "EndUser", "userSelection").
-"EndUser" says "P2" canSay removeTag(accessPathX, "EndUser", "userSelection").
+"EndUser" says "P1" canSay hasTag("R.P1.foo", "EndUser", "userSelection").
+"EndUser" says "P2" canSay removeTag("R.P2.foo", "EndUser", "userSelection").

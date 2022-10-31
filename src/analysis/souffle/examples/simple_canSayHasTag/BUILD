@@ -13,19 +13,48 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-load("//build_defs:raksha.bzl", "policy_check")
+load("//build_defs:raksha_policy_verifier.bzl", "raksha_policy_verifier_library")
 
-licenses(["notice"])
+package(
+    default_visibility = ["//src:__subpackages__"],
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
-policy_check(
+raksha_policy_verifier_library(
     name = "delegation_granted",
-    auth_logic = "ok_claim_propagates_delegation_granted.auth",
-    dataflow_graph = "ok_claim_propagates.arcs",
+    policies = [
+        "ok_claim_propagates_delegation_granted.auth",
+    ],
+    policy_verifier_interfaces = [":ok_claim_propagates.dl"],
 )
 
-policy_check(
+raksha_policy_verifier_library(
     name = "delegation_not_granted",
-    auth_logic = "ok_claim_propagates_delegation_not_granted.auth",
-    dataflow_graph = "ok_claim_propagates.arcs",
-    expect_failure = True,
+    policies = [
+        "ok_claim_propagates_delegation_not_granted.auth",
+    ],
+    policy_verifier_interfaces = [":ok_claim_propagates.dl"],
 )
+
+[sh_test(
+    name = "check_policy_compliance_%s_test" % verifier_name,
+    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
+    args = [
+        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
+        "%s" % test_result,
+        "sql_policy_analysis",
+        "ir",
+        "$(location //src/analysis/souffle/examples:empty.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "%s" % verifier_name,
+    ],
+    data = [
+        "//src/analysis/souffle/examples:empty.ir",
+        "//src/backends/policy_engine/souffle:check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+) for verifier_name, test_result in [
+    ("delegation_granted_cxx", "fail"),
+    ("delegation_not_granted_cxx", "pass"),
+]]

@@ -13,19 +13,48 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-load("//build_defs:raksha.bzl", "policy_check")
+load("//build_defs:raksha_policy_verifier.bzl", "raksha_policy_verifier_library")
 
-licenses(["notice"])
+package(
+    default_visibility = ["//src:__subpackages__"],
+    features = ["layering_check"],
+    licenses = ["notice"],
+)
 
-policy_check(
+raksha_policy_verifier_library(
     name = "may_will_pass",
-    auth_logic = "simple_may_will_pass.auth",
-    dataflow_graph = "simple_may_will.arcs",
+    policies = [
+        "simple_may_will_pass.auth",
+    ],
+    policy_verifier_interfaces = [":simple_may_will.dl"],
 )
 
-policy_check(
+raksha_policy_verifier_library(
     name = "may_will_fail",
-    auth_logic = "simple_may_will_fail.auth",
-    dataflow_graph = "simple_may_will.arcs",
-    expect_failure = True,
+    policies = [
+        "simple_may_will_fail.auth",
+    ],
+    policy_verifier_interfaces = [":simple_may_will.dl"],
 )
+
+[sh_test(
+    name = "check_policy_compliance_%s_test" % verifier_name,
+    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
+    args = [
+        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
+        "%s" % test_result,
+        "sql_policy_analysis",
+        "ir",
+        "$(location //src/analysis/souffle/examples:empty.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "%s" % verifier_name,
+    ],
+    data = [
+        "//src/analysis/souffle/examples:empty.ir",
+        "//src/backends/policy_engine/souffle:check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+) for verifier_name, test_result in [
+    ("may_will_pass_cxx", "pass"),
+    ("may_will_fail_cxx", "fail"),
+]]

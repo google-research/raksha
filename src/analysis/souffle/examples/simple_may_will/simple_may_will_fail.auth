@@ -18,12 +18,11 @@
 .decl ownsTag(prin : Principal, tag : Tag)
 .decl ownsAccessPath(prin : Principal, path : AccessPath)
 .decl hasTag(path : AccessPath, prin : Principal, tag : Tag)
-.decl will(action : Action, path : AccessPath)
 
 "EndUser" says {
     ownsTag("EndUser", "rawVideo").
     ownsAccessPath("EndUser", "R.P1.foo").
-    "P1" canSay hasTag(PathX, "EndUser", "rawVideo").
+    "P1" canSay hasTag("R.P1.foo", "EndUser", "rawVideo").
 }
 
 // It would be better if we could change the manifest frontend and write it 
