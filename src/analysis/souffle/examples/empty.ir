@@ -1,0 +1,4 @@
+module m0 {
+  block b0 {
+  }  // block b0
+}  // module m0

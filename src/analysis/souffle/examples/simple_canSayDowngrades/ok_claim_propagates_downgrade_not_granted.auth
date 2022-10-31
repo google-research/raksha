@@ -1,0 +1,6 @@
+.decl ownsTag(principal : Principal, tag : Tag)
+.decl ownsAccessPath(principal : Principal, path : AccessPath)
+.decl hasTag(path : AccessPath, principal : Principal, tag : Tag)
+"EndUser" says ownsTag("EndUser", "userSelection").
+"EndUser" says ownsAccessPath("EndUser", "R.P1.foo").
+"EndUser" says "P1" canSay hasTag("R.P1.foo", "EndUser", "userSelection").
