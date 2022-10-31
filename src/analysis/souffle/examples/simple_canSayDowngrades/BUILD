@@ -21,32 +21,12 @@ package(
     licenses = ["notice"],
 )
 
-# policy_check(
-#     name = "delegation_granted",
-#     auth_logic = "ok_claim_propagates_downgrade_granted.auth",
-#     dataflow_graph = "ok_claim_propagates.arcs",
-# )
-
-# policy_check(
-#     name = "delegation_not_granted",
-#     auth_logic = "ok_claim_propagates_downgrade_not_granted.auth",
-#     dataflow_graph = "ok_claim_propagates.arcs",
-#     expect_failure = True,
-# )
-
-# policy_check(
-#     name = "delegation_granted_by_non_owner",
-#     auth_logic = "ok_claim_propagates_downgrade_granted_by_non_owner.auth",
-#     dataflow_graph = "ok_claim_propagates.arcs",
-#     expect_failure = True,
-# )
-
 raksha_policy_verifier_library(
     name = "delegation_granted_downgrades",
     policies = [
         "ok_claim_propagates_downgrade_granted.auth",
     ],
-    policy_verifier_interfaces = [":delegation_granted.dl"],
+    policy_verifier_interfaces = [":ok_claim_propagates.dl"],
 )
 
 raksha_policy_verifier_library(
@@ -54,7 +34,7 @@ raksha_policy_verifier_library(
     policies = [
         "ok_claim_propagates_downgrade_not_granted.auth",
     ],
-    policy_verifier_interfaces = [":delegation_not_granted.dl"],
+    policy_verifier_interfaces = [":ok_claim_propagates.dl"],
 )
 
 raksha_policy_verifier_library(
@@ -62,62 +42,28 @@ raksha_policy_verifier_library(
     policies = [
         "ok_claim_propagates_downgrade_granted_by_non_owner.auth",
     ],
-    policy_verifier_interfaces = [":delegation_granted_by_non_owner.dl"],
+    policy_verifier_interfaces = [":ok_claim_propagates.dl"],
 )
 
-sh_test(
-    name = "check_policy_compliance_delegation_granted_test",
+[sh_test(
+    name = "check_policy_compliance_%s_test" % verifier_name,
     srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
     args = [
         "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
-        "fail",
+        "%s" % test_result,
         "sql_policy_analysis",
         "ir",
         "$(location //src/analysis/souffle/examples:empty.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "delegation_granted_downgrades_cxx",
+        "%s" % verifier_name,
     ],
     data = [
         "//src/analysis/souffle/examples:empty.ir",
         "//src/backends/policy_engine/souffle:check_policy_compliance",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
     ],
-)
-
-sh_test(
-    name = "check_policy_compliance_delegation_not_granted_test",
-    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
-    args = [
-        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
-        "fail",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/analysis/souffle/examples:empty.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "delegation_not_granted_downgrades_cxx",
-    ],
-    data = [
-        "//src/analysis/souffle/examples:empty.ir",
-        "//src/backends/policy_engine/souffle:check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
-    ],
-)
-
-sh_test(
-    name = "check_policy_compliance_delegation_granted_by_non_owner_test",
-    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
-    args = [
-        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
-        "fail",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/analysis/souffle/examples:empty.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "delegation_not_granted_by_non_owner_cxx",
-    ],
-    data = [
-        "//src/analysis/souffle/examples:empty.ir",
-        "//src/backends/policy_engine/souffle:check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
-    ],
-)
+) for verifier_name, test_result in [
+    ("delegation_granted_downgrades_cxx", "fail"),
+    ("delegation_not_granted_downgrades_cxx", "fail"),
+    ("delegation_not_granted_by_non_owner_cxx", "fail"),
+]]

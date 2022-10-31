@@ -3,14 +3,109 @@
 #include "src/analysis/souffle/authorization_logic.dl"
 #include "src/analysis/souffle/tag_transforms.dl"
 
-// An interface used for running and getting results from the policy verifier for
-// the specific purpose of the SQL verifier.
-// Does not concern itself with authorization logic facts, considers only
-// `Operation`s and `SqlPolicyRule`s. Returns as output the violatesPolicy
-// relation, which indicates whether there were failures in a way that is easy
-// to read across the Souffle C++ interface.
+// An interface used for running and getting results from the policy verifier.
+// Returns as output the violatesPolicy relation, which indicates whether 
+// there were failures in a way that is easy to read across the Souffle C++ interface.
 
 .output violatesPolicy(delimiter=";")
+
+// Following arcs coe is converted to datalog code in this file
+// // Represents an actual microphone within a smart mic listening to audio.
+// particle MicIn
+//   audio: writes AudioData { }
+//   claim audio is userSpeech
+
+// // The permissions stubs below are not real devices. To allow guests to
+// // influence the policy decisions of the smart mic, the smart mic is
+// // representing the data gathered by the micrpohone as if it flowed through the
+// // smartphones of users to allow their policies to attach tags to that data.
+// //
+// // Note: the permissions stubs add tags of the form userSpeechOfUserX. In
+// // reality, this would likely be written more like the syntax that @aferr
+// // proposed in PR #187, where tags can be refined by the user that introduced
+// // them. The point here is that these stubs are adding a variant on the
+// // userSpeech family of tags that imposes the policy preferences of the user
+// // that they serve.
+// particle UserATainter
+//   audio: reads writes AudioData { }
+
+// particle UserBTainter
+//   audio: reads writes AudioData { }
+
+// particle UserCTainter
+//   audio: reads writes AudioData { }
+//   claim audio is asrDisallowed
+
+// // Represents the CPU within the mic.
+// particle MicCompute
+//   audioIn: reads AudioData { }
+//   asrNeuralNet: reads ASRNeuralNet { }
+//   asrStorageConn: writes ASRData { }
+//   // Claim that MicCompute removes the label from userSpeech to
+//   // textTranscript.
+//   // Note: this is intended to remove not just the userSpeech from the MicIn
+//   // particle, but also the userSpeechOf tags that flow from the user
+//   // permission stubs. This assumes that in our new policy language, we allow
+//   // downgrading from a tag with a particular user refinement to a different
+//   // tag with that same user refinement.
+//   check audioIn is not asrDisallowed
+
+// particle SpeechToTextStorageSink
+//   speechToTextIn: reads ASRData { }
+
+// // This recipe represents the mic operating in a room with no guest storage
+// // permissions.
+// recipe DoASRNoGuests
+//   m1AsrNetStorage: create
+//   m1AsrStorage: create
+//   MicIn
+//     audio: writes micAudio
+//   MicCompute
+//     audioIn: reads micAudio
+//     asrNeuralNet: reads m1AsrNetStorage
+//     asrStorageConn: writes m1AsrStorage
+//   SpeechToTextStorageSink
+//     speechToTextIn: reads m1AsrStorage
+
+// // This recipe represents the mic operating in a room where UserA and UserB are
+// // having a conversation.
+// recipe DoASRUserAAndUserB
+//    m1AsrNetStorage: create
+//    m1AsrStorage: create
+//    MicIn
+//      audio: writes micAudio
+//    UserATainter
+//      audio: reads writes micAudio
+//    UserBTainter
+//      audio: reads writes micAudio
+//    MicCompute
+//      audioIn: reads micAudio
+//      asrNeuralNet: reads m1AsrNetStorage
+//      asrStorageConn: writes m1AsrStorage
+//    SpeechToTextStorageSink
+//      speechToTextIn: reads m1AsrStorage
+
+// // This recipe represents UserC entering the room. The policy of UserC does not
+// // allow storing information derived from their voice; this means that this
+// // recipe must reject the connection from UserC, as the check in
+// // SpeechToTextStorageSink will fail otherwise.
+// recipe DoASRUserAAndUserBAndUserC
+//   m1AsrNetStorage: create
+//   m1AsrStorage: create
+//   MicIn
+//     audio: writes micAudio
+//   UserATainter
+//     audio: reads writes micAudio
+//   UserBTainter
+//     audio: reads writes micAudio
+//   UserCTainter
+//     audio: reads writes micAudio
+//   MicCompute
+//     audioIn: reads micAudio
+//     asrNeuralNet: reads m1AsrNetStorage
+//     asrStorageConn: writes m1AsrStorage
+//   SpeechToTextStorageSink
+//     speechToTextIn: reads m1AsrStorage
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
@@ -44,11 +139,11 @@ says_hasTag("MicIn", "DoASRUserAAndUserBAndUserC.MicIn.audio", owner, "userSpeec
 says_hasTag("UserCTainter", "DoASRUserAAndUserBAndUserC.UserCTainter.audio", owner, "asrDisallowed") :- ownsAccessPath(owner, "DoASRUserAAndUserBAndUserC.UserCTainter.audio").
 
 // Checks:
-isCheck("check_num_0", "DoASRNoGuests.MicCompute.audioIn"). check("check_num_0", owner, "DoASRNoGuests.MicCompute.audioIn") :-
+isCheck("check_num_0", "DoASRNoGuests.MicCompute.audioIn"), check("check_num_0", owner, "DoASRNoGuests.MicCompute.audioIn") :-
   ownsAccessPath(owner, "DoASRNoGuests.MicCompute.audioIn"), isPrincipal(owner), !(mayHaveTag("DoASRNoGuests.MicCompute.audioIn", owner, "asrDisallowed")).
-isCheck("check_num_1", "DoASRUserAAndUserB.MicCompute.audioIn"). check("check_num_1", owner, "DoASRUserAAndUserB.MicCompute.audioIn") :-
+isCheck("check_num_1", "DoASRUserAAndUserB.MicCompute.audioIn"), check("check_num_1", owner, "DoASRUserAAndUserB.MicCompute.audioIn") :-
   ownsAccessPath(owner, "DoASRUserAAndUserB.MicCompute.audioIn"), isPrincipal(owner), !(mayHaveTag("DoASRUserAAndUserB.MicCompute.audioIn", owner, "asrDisallowed")).
-isCheck("check_num_2", "DoASRUserAAndUserBAndUserC.MicCompute.audioIn"). check("check_num_2", owner, "DoASRUserAAndUserBAndUserC.MicCompute.audioIn") :-
+isCheck("check_num_2", "DoASRUserAAndUserBAndUserC.MicCompute.audioIn"), check("check_num_2", owner, "DoASRUserAAndUserBAndUserC.MicCompute.audioIn") :-
   ownsAccessPath(owner, "DoASRUserAAndUserBAndUserC.MicCompute.audioIn"), isPrincipal(owner), !(mayHaveTag("DoASRUserAAndUserBAndUserC.MicCompute.audioIn", owner, "asrDisallowed")).
 
 violatesPolicy("any") :- isCheck(_, _).

@@ -3,14 +3,37 @@
 #include "src/analysis/souffle/authorization_logic.dl"
 #include "src/analysis/souffle/tag_transforms.dl"
 
-// An interface used for running and getting results from the policy verifier for
-// the specific purpose of the SQL verifier.
-// Does not concern itself with authorization logic facts, considers only
-// `Operation`s and `SqlPolicyRule`s. Returns as output the violatesPolicy
-// relation, which indicates whether there were failures in a way that is easy
-// to read across the Souffle C++ interface.
+// An interface used for running and getting results from the policy verifier.
+// Returns as output the violatesPolicy relation, which indicates whether 
+// there were failures in a way that is easy to read across the Souffle C++ interface.
 
 .output violatesPolicy(delimiter=";")
+
+// Following arcs code converetd to datalog code below
+/* Run binary //src/frontends/arcs/xform_to_datalog:generate_datalog_program) 
+            --auth_logic_file=\"$(location %s)\" " % auth_logic +
+            --manifest_proto=\"$(location %s)\" " % proto_target +
+            --datalog_file=<datalog filepath>" "
+   to generate datalog file for both arcs and auth_logic file
+*/
+
+// particle P1
+//  foo: writes Foo {}
+//  claim foo is rawVideo 
+// particle P2
+//  bar: reads Foo {}
+//  foo: writes Foo {}
+//  check bar is rawVideo 
+// particle P3
+//  bar: reads Foo {}
+// recipe R
+//  P1
+//    foo: writes h1
+//  P2
+//    bar: reads h1
+//    foo: writes h2
+//  P3
+//    bar: reads h2
 
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
@@ -38,12 +61,12 @@ saysWill(w, x, y) :- says_will(w, x, y).
 
 // Manifest
 // Claims:
-says_hasTag("P1", "R.P1.foo", owner, "userSelection") :- ownsAccessPath(owner, "R.P1.foo").
+says_hasTag("P1", "R.P1.foo", owner, "rawVideo") :- ownsAccessPath(owner, "R.P1.foo").
 
 // Checks:
-isCheck("check_num_0", "R.P3.bar"), check("check_num_0", owner, "R.P3.bar") :-
-  ownsAccessPath(owner, "R.P3.bar"), mayHaveTag("R.P3.bar", owner, "userSelection").
-violatesPolicy("any") :- isCheck("check_num_0", "R.P3.bar").
+isCheck("check_num_0", "R.P2.bar"), check("check_num_0", owner, "R.P2.bar") :-
+  ownsAccessPath(owner, "R.P2.bar"), mayHaveTag("R.P2.bar", owner, "rawVideo").
+violatesPolicy("any") :- isCheck(_, _).
 
 // Edges:
 edge("R.P1.foo", "R.handle0").

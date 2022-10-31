@@ -23,25 +23,12 @@ package(
     licenses = ["notice"],
 )
 
-# policy_check(
-#     name = "check_multimic_userc_tag_fail",
-#     auth_logic = "multimic.auth",
-#     dataflow_graph = "multimic.arcs",
-#     expect_failure = True,
-# )
-
-# policy_check(
-#     name = "check_multimic_pass",
-#     auth_logic = "multimic_no_userc_tag.auth",
-#     dataflow_graph = "multimic.arcs",
-# )
-
 raksha_policy_verifier_library(
     name = "check_multimic_userc_tag_fail",
     policies = [
         "multimic.auth",
     ],
-    policy_verifier_interfaces = [":check_multimic_userc_tag_fail.dl"],
+    policy_verifier_interfaces = [":multimic.dl"],
 )
 
 raksha_policy_verifier_library(
@@ -49,43 +36,27 @@ raksha_policy_verifier_library(
     policies = [
         "multimic_no_userc_tag.auth",
     ],
-    policy_verifier_interfaces = [":check_multimic_pass.dl"],
+    policy_verifier_interfaces = [":multimic.dl"],
 )
 
-sh_test(
-    name = "check_policy_compliance_multimic_pass_test",
+[sh_test(
+    name = "check_policy_compliance_%s_test" % verifier_name,
     srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
     args = [
         "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
-        "fail",
+        "%s" % test_result,
         "sql_policy_analysis",
         "ir",
         "$(location //src/analysis/souffle/examples:empty.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "check_multimic_pass_cxx",
+        "%s" % verifier_name,
     ],
     data = [
         "//src/analysis/souffle/examples:empty.ir",
         "//src/backends/policy_engine/souffle:check_policy_compliance",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
     ],
-)
-
-sh_test(
-    name = "check_policy_compliance_multimic_fail_test",
-    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
-    args = [
-        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
-        "pass",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/analysis/souffle/examples:empty.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "check_multimic_userc_tag_fail_cxx",
-    ],
-    data = [
-        "//src/analysis/souffle/examples:empty.ir",
-        "//src/backends/policy_engine/souffle:check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
-    ],
-)
+) for verifier_name, test_result in [
+    ("check_multimic_pass_cxx", "pass"),
+    ("check_multimic_userc_tag_fail_cxx", "pass"),
+]]
