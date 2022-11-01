@@ -16,7 +16,7 @@
 #include "src/ir/dot/dot_generator.h"
 
 #include "absl/container/btree_set.h"
-#include "absl/container/flat_hash_set.h"
+#include "src/common/containers/hash_set.h"
 #include "absl/strings/str_format.h"
 #include "src/common/containers/hash_map.h"
 #include "src/ir/dot/dot_generator_config.h"
@@ -97,7 +97,7 @@ class DotGeneratorHelper : public IRTraversingVisitor<DotGeneratorHelper> {
   // operation result is encountered during dot generation.
   common::containers::HashMap<std::string, absl::btree_set<std::string>>
       operation_results_;
-  absl::flat_hash_set<Edge> edges_;
+  common::containers::HashSet<Edge> edges_;
   SsaNames ssa_names_;
   DotGeneratorConfig config_;
 };

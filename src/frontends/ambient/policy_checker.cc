@@ -177,18 +177,18 @@ bool PolicyChecker::CanUserChangeSetting(std::string_view user,
   return false;
 }
 
-absl::flat_hash_set<PolicyChecker::Settings> PolicyChecker::AvailableSettings(
+common::containers::HashSet<PolicyChecker::Settings> PolicyChecker::AvailableSettings(
     PolicyChecker::User user) const {
-  absl::flat_hash_set<PolicyChecker::Settings> result;
+  common::containers::HashSet<PolicyChecker::Settings> result;
   for (auto name : AvailableSettings(GetUserName(user))) {
     result.insert(GetSettings(name));
   }
   return result;
 }
 
-absl::flat_hash_set<std::string> PolicyChecker::AvailableSettings(
+common::containers::HashSet<std::string> PolicyChecker::AvailableSettings(
     std::string_view user) const {
-  absl::flat_hash_set<std::string> result;
+  common::containers::HashSet<std::string> result;
   std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
       souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
   program->run();

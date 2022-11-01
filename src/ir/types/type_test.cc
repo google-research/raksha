@@ -171,7 +171,7 @@ static std::vector<std::string> sample_access_path_str_vecs[] = {
 
 static std::vector<std::string> GetAccessPathStrVecFromAccessPathSelectorsSet(
     raksha::ir::AccessPathSelectorsSet access_path_set) {
-  absl::flat_hash_set<raksha::ir::AccessPathSelectors> absl_access_path_set =
+  common::containers::HashSet<raksha::ir::AccessPathSelectors> absl_access_path_set =
       raksha::ir::AccessPathSelectorsSet::CreateAbslSet(
           std::move(access_path_set));
   std::vector<std::string> result_strs;

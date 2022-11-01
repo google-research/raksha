@@ -24,7 +24,7 @@
 #include <string_view>
 #include <vector>
 
-#include "absl/container/flat_hash_set.h"
+#include "src/common/containers/hash_set.h"
 #include "src/common/containers/hash_map.h"
 
 namespace raksha::ambient {
@@ -75,7 +75,7 @@ class PolicyChecker {
   bool CanUserChangeSetting(User user, Settings setting_name);
 
   // Returns the set of available settings for the given user.
-  absl::flat_hash_set<PolicyChecker::Settings> AvailableSettings(
+  common::containers::HashSet<PolicyChecker::Settings> AvailableSettings(
       User user) const;
 
  private:
@@ -91,7 +91,7 @@ class PolicyChecker {
                             std::string_view setting_name);
 
   // Returns the set of available settings for the given user.
-  absl::flat_hash_set<std::string> AvailableSettings(
+  common::containers::HashSet<std::string> AvailableSettings(
       std::string_view user) const;
 
   // Adds the given edge into the policy context.
@@ -109,7 +109,7 @@ class PolicyChecker {
     edges_.erase(DataFlowEdge(std::string(src), std::string(tgt)));
   }
 
-  absl::flat_hash_set<DataFlowEdge> edges_;
+  common::containers::HashSet<DataFlowEdge> edges_;
   common::containers::HashMap<User, SettingsMap> user_settings_;
 
   static constexpr char kPolicyCheckerProgramName[] =

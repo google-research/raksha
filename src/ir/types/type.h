@@ -16,7 +16,7 @@
 #ifndef SRC_IR_TYPES_TYPE_H_
 #define SRC_IR_TYPES_TYPE_H_
 
-#include "absl/container/flat_hash_set.h"
+#include "src/common/containers/hash_set.h"
 #include "src/ir/access_path_selectors_set.h"
 #include "src/common/utils/intrusive_ptr.h"
 

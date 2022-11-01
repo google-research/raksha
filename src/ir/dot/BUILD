@@ -31,11 +31,11 @@ cc_library(
     ],
     deps = [
         "//src/common/containers:hash_map",
+        "//src/common/containers:hash_set",
         "//src/ir:ir_printer",
         "//src/ir:ir_traversing_visitor",
         "//src/ir:module",
         "@com_google_absl//absl/container:btree",
-        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings:str_format",
     ],
 )

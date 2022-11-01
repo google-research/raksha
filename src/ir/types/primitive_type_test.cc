@@ -30,7 +30,7 @@ TEST(PrimitiveTypeTest, KindReturnsCorrectKind) {
 
 TEST(TestGetAccessPaths, TestGetAccessPaths) {
   PrimitiveType primitive_type;
-  absl::flat_hash_set<ir::AccessPathSelectors>
+  common::containers::HashSet<ir::AccessPathSelectors>
       access_path_selectors_set =
         ir::AccessPathSelectorsSet::CreateAbslSet(
             primitive_type.GetAccessPathSelectorsSet());

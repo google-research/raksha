@@ -16,7 +16,7 @@
 #ifndef SRC_IR_TYPES_TYPE_FACTORY_H_
 #define SRC_IR_TYPES_TYPE_FACTORY_H_
 
-#include "absl/container/flat_hash_set.h"
+#include "src/common/containers/hash_set.h"
 #include "src/common/containers/hash_map.h"
 #include "src/ir/types/primitive_type.h"
 #include "src/ir/types/schema.h"

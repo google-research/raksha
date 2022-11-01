@@ -132,7 +132,7 @@ cc_library(
         ":auth_logic_ast_traversing_visitor",
         ":declaration_environment",
         ":type_environment",
-        "@com_google_absl//absl/container:flat_hash_set",
+        "//src/common/containers:hash_set",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -167,10 +167,10 @@ cc_library(
         "souffle_emitter.h",
     ],
     deps = [
+        "//src/common/containers:hash_set",
         "//src/common/logging",
         "//src/common/utils:map_iter",
         "//src/ir/datalog:program",
-        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
     ],
 )

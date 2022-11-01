@@ -16,7 +16,7 @@
 
 #include "src/ir/auth_logic/universe_relation_insertion.h"
 
-#include "absl/container/flat_hash_set.h"
+#include "src/common/containers/hash_set.h"
 #include "src/ir/auth_logic/auth_logic_ast_traversing_visitor.h"
 #include "src/ir/auth_logic/declaration_environment.h"
 #include "src/ir/auth_logic/is_name_constant.h"
@@ -83,9 +83,9 @@ std::vector<SaysAssertion> GetUniverseDefiningFacts(
 class UniverseDeclarationGenerationVisitor
     : public AuthLogicAstTraversingVisitor<
           UniverseDeclarationGenerationVisitor,
-          absl::flat_hash_set<datalog::RelationDeclaration>> {
+          common::containers::HashSet<datalog::RelationDeclaration>> {
  private:
-  using DeclSet = absl::flat_hash_set<datalog::RelationDeclaration>;
+  using DeclSet = common::containers::HashSet<datalog::RelationDeclaration>;
   DeclSet GetDefaultValue() override { return {}; }
 
   DeclSet CombineResult(DeclSet left, DeclSet right) override {
@@ -104,14 +104,14 @@ class UniverseDeclarationGenerationVisitor
   }
 };
 
-static absl::flat_hash_set<datalog::RelationDeclaration>
+static common::containers::HashSet<datalog::RelationDeclaration>
 GetUniverseDeclarations(const Program& prog) {
   UniverseDeclarationGenerationVisitor gen;
-  absl::flat_hash_set<datalog::RelationDeclaration> ret = prog.Accept(gen);
+  common::containers::HashSet<datalog::RelationDeclaration> ret = prog.Accept(gen);
   // It is possible that universes need to be created
   // for numbers and principals even if they are not
   // referenced in relation declarations in the front-end
-  absl::flat_hash_set<datalog::RelationDeclaration> builtin_universes = {
+  common::containers::HashSet<datalog::RelationDeclaration> builtin_universes = {
       TypeToUniverseDeclaration(datalog::ArgumentType::MakeNumberType()),
       TypeToUniverseDeclaration(datalog::ArgumentType::MakePrincipalType())};
   ret.merge(builtin_universes);
@@ -261,7 +261,7 @@ Program InsertUniverseRelations(const Program& prog) {
 
   // Add declarations for universe relations.
 
-  absl::flat_hash_set<datalog::RelationDeclaration> universe_declarations =
+  common::containers::HashSet<datalog::RelationDeclaration> universe_declarations =
       GetUniverseDeclarations(prog);
   std::vector<datalog::RelationDeclaration> new_declarations =
       prog.relation_declarations();

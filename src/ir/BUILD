@@ -168,11 +168,11 @@ cc_test(
         ":module",
         ":ssa_names",
         ":value",
+        "//src/common/containers:hash_set",
         "//src/common/testing:gtest",
         "//src/ir/attributes:float_attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
-        "@com_google_absl//absl/container:flat_hash_set",
     ],
 )
 
@@ -279,8 +279,8 @@ cc_library(
         "selector.h",
     ],
     deps = [
+        "//src/common/containers:hash_set",
         "//src/common/logging",
-        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/hash",
         "@com_google_absl//absl/strings",
     ],
@@ -303,9 +303,9 @@ cc_test(
     srcs = ["access_path_selectors_set_test.cc"],
     deps = [
         ":access_path_selectors",
+        "//src/common/containers:hash_set",
         "//src/common/testing:gtest",
         "@com_google_absl//absl/container:btree",
-        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
     ],
 )

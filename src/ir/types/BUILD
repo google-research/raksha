@@ -35,10 +35,10 @@ cc_library(
     ],
     deps = [
         "//src/common/containers:hash_map",
+        "//src/common/containers:hash_set",
         "//src/common/logging",
         "//src/common/utils:intrusive_ptr",
         "//src/ir:access_path_selectors",
-        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/hash",
     ],
 )

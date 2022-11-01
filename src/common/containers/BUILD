@@ -9,3 +9,10 @@ cc_library(
     visibility = ["//src:__subpackages__"],
     deps = ["@com_google_absl//absl/container:flat_hash_map"],
 )
+
+cc_library(
+    name = "hash_set",
+    hdrs = ["hash_set.h"],
+    visibility = ["//src:__subpackages__"],
+    deps = ["@com_google_absl//absl/container:flat_hash_set"],
+)

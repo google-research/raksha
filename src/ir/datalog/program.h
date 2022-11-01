@@ -23,7 +23,7 @@
 #include <variant>
 #include <vector>
 
-#include "absl/container/flat_hash_set.h"
+#include "src/common/containers/hash_set.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
 
@@ -76,7 +76,7 @@ class Predicate {
   // (https://github.com/google-research/raksha/blob/be6ef8e1e1a20735a06637c12db9ed0b87e3d2a2/src/ir/auth_logic/ast_construction.cc#L92)
   bool IsNumericOperator() const {
     static const auto* const numeric_operators = 
-      new absl::flat_hash_set<std::string>({
+      new common::containers::HashSet<std::string>({
         "<", ">", "=", "!=", "<=", ">="});
     return numeric_operators->contains(name_);
   }
