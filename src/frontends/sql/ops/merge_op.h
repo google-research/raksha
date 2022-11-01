@@ -33,7 +33,7 @@ namespace raksha::frontends::sql {
 
 class MergeOp : public SqlOp {
  public:
-  static constexpr absl::string_view kControlInputStartIndex =
+  static constexpr std::string_view kControlInputStartIndex =
       "control_input_start_index";
 
   // Constructs a MergeOp.

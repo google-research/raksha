@@ -14,9 +14,10 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
+#include <string_view>
+
 #include "google/protobuf/text_format.h"
 #include "absl/strings/str_format.h"
-#include "absl/strings/string_view.h"
 #include "src/common/containers/hash_map.h"
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/map_iter.h"
@@ -40,15 +41,15 @@ using ::testing::ValuesIn;
 
 class DecodeTagTransformTest
     : public ::testing::TestWithParam<
-          std::tuple<uint64_t, absl::string_view,
-                     std::vector<absl::string_view>, std::vector<uint64_t>>> {};
+          std::tuple<uint64_t, std::string_view,
+                     std::vector<std::string_view>, std::vector<uint64_t>>> {};
 
 TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
   IRContext ir_context;
   DecoderContext decoder_context(ir_context);
 
   // Construct the test textproto and parse it.
-  constexpr absl::string_view kTagTransformTextprotoFormat = R"(
+  constexpr std::string_view kTagTransformTextprotoFormat = R"(
     {
       id: 100
       expression: {
@@ -59,7 +60,7 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
   const auto &[transformed_node_id, rule_name, precondition_name_sequence,
                value_ids] = GetParam();
 
-  common::containers::HashMap<absl::string_view, uint64_t>
+  common::containers::HashMap<std::string_view, uint64_t>
       precondition_name_to_id;
   std::vector<uint64_t> ids_to_be_filled;
   for (uint64_t i = 0; i < value_ids.size(); ++i) {
@@ -120,10 +121,10 @@ static const std::vector<uint64_t> kPreconditionIdVecs[] = {
 };
 
 static const uint64_t kExampleIds[] = {7, 21, 19};
-static const absl::string_view kExampleRuleNames[] = {"rule1", "clearLowBits",
+static const std::string_view kExampleRuleNames[] = {"rule1", "clearLowBits",
                                                       "SQL.Identity"};
 
-static const std::vector<absl::string_view>
+static const std::vector<std::string_view>
     kExamplePreconditionNameSequences[] = {
         {"a", "b", "c"},
         {"1", "2", "3"},

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-#include "absl/strings/numbers.h"
-#include "absl/strings/string_view.h"
+#include <string_view>
+
 #include "absl/strings/match.h"
+#include "absl/strings/numbers.h"
 
 #ifndef SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_
 #define SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_
@@ -29,8 +30,8 @@ namespace raksha::ir::auth_logic {
 // identifiers are a separate AST node with constant and non-constant
 // children determined at parse time rather than here since
 // this information is available at parse time.
-bool IsNameConstant(absl::string_view id) {
-  if(absl::StartsWith(id, "\"") && absl::EndsWith(id, "\"")) {
+inline bool IsNameConstant(std::string_view id) {
+  if (absl::StartsWith(id, "\"") && absl::EndsWith(id, "\"")) {
     return true;
   } else {
     int unused_output;
@@ -40,6 +41,6 @@ bool IsNameConstant(absl::string_view id) {
   }
 }
 
-}; // namespace raksha::ir::auth_logic
+};  // namespace raksha::ir::auth_logic
 
 #endif  // SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_

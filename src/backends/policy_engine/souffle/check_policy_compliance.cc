@@ -80,7 +80,7 @@ struct IrGraphComponents {
 };
 
 absl::StatusOr<IrGraphComponents> GetIrGraphComponentsFromIrPath(
-    absl::string_view ir_path) {
+    std::string_view ir_path) {
   raksha::ir::IrProgramParser ir_parser;
   absl::StatusOr<std::string> ir_string = ReadFileContents(ir_path);
   if (ir_string.ok()) {
@@ -94,7 +94,7 @@ absl::StatusOr<IrGraphComponents> GetIrGraphComponentsFromIrPath(
 }
 
 absl::StatusOr<IrGraphComponents> GetIrGraphComponentsFromProtoPath(
-    absl::string_view proto_path) {
+    std::string_view proto_path) {
   absl::StatusOr<std::string> proto_string = ReadFileContents(proto_path);
   if (proto_string.ok()) {
     std::unique_ptr<raksha::ir::IRContext> context =

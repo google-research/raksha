@@ -41,7 +41,7 @@ class TagCheck {
   // elements of isCheck and check are equal. If that is the case, all checks
   // passed. If it is not, at least one check failed.
   std::string ToDatalog(DatalogPrintContext &ctxt) const {
-    constexpr absl::string_view kCheckHasTagFormat =
+    constexpr std::string_view kCheckHasTagFormat =
         R"(isCheck("$0", "$1"). check("$0", owner, "$1") :-
   ownsAccessPath(owner, "$1"), $2.)";
     std::string check_label = ctxt.GetUniqueCheckLabel();

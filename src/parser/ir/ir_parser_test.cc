@@ -21,7 +21,7 @@
 
 namespace raksha::ir {
 
-class IrParserRoundtripTest : public testing::TestWithParam<absl::string_view> {};
+class IrParserRoundtripTest : public testing::TestWithParam<std::string_view> {};
 
 TEST_P(IrParserRoundtripTest, SimpleTestOperation) {
   auto input_program_text = GetParam();
@@ -119,8 +119,8 @@ INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
 )"));
 
 struct ParserInputAndExpectedOutput {
-  absl::string_view input;
-  absl::string_view output;
+  std::string_view input;
+  std::string_view output;
 };
 
 class IrParserNormalizingTest : public testing::TestWithParam<ParserInputAndExpectedOutput> {};

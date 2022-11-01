@@ -16,7 +16,8 @@
 
 #include "src/ir/datalog/operation.h"
 
-#include "absl/strings/string_view.h"
+#include <string_view>
+
 #include "src/common/testing/gtest.h"
 #include "src/ir/datalog/input_relation_fact.h"
 #include "src/ir/datalog/value.h"
@@ -29,7 +30,7 @@ using testing::ValuesIn;
 
 struct IsOperationFactAndExpectedDatalog {
   const IsOperationFact *is_operation_fact;
-  absl::string_view expected_datalog;
+  std::string_view expected_datalog;
 };
 
 class IsOperationFactTest

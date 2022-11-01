@@ -33,7 +33,7 @@ class Edge {
 
   // Print the edge as a string containing a Datalog fact.
   std::string ToDatalog(DatalogPrintContext &ctxt) const {
-    constexpr absl::string_view kEdgeFormat = R"(edge("%s", "%s").)";
+    constexpr std::string_view kEdgeFormat = R"(edge("%s", "%s").)";
     return absl::StrFormat(kEdgeFormat, from_.ToDatalog(ctxt),
                            to_.ToDatalog(ctxt));
   }

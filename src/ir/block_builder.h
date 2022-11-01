@@ -29,21 +29,21 @@ class BlockBuilder {
  public:
   BlockBuilder() : block_(std::make_unique<Block>()) {}
 
-  BlockBuilder& AddInput(absl::string_view name, types::Type type) {
+  BlockBuilder& AddInput(std::string_view name, types::Type type) {
     CHECK(!IsBuilt())
         << "Attempt to use a `BlockBuilder` that has already been built.";
     block_->inputs_.AddDecl(name, std::move(type));
     return *this;
   }
 
-  BlockBuilder& AddOutput(absl::string_view name, types::Type type) {
+  BlockBuilder& AddOutput(std::string_view name, types::Type type) {
     CHECK(!IsBuilt())
         << "Attempt to use a `BlockBuilder` that has already been built.";
     block_->outputs_.AddDecl(name, std::move(type));
     return *this;
   }
 
-  BlockBuilder& AddResult(absl::string_view name, Value output) {
+  BlockBuilder& AddResult(std::string_view name, Value output) {
     CHECK(!IsBuilt())
         << "Attempt to use a `BlockBuilder` that has already been built.";
     CHECK(block_->outputs_.FindDecl(name) != nullptr)

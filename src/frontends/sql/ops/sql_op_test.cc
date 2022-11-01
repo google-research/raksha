@@ -29,7 +29,7 @@ namespace {
 
 TEST(SqlOpTest, RegisterOperatorRegistersInContext) {
   ir::IRContext context;
-  absl::string_view literal_op_name = OpTraits<LiteralOp>::kName;
+  std::string_view literal_op_name = OpTraits<LiteralOp>::kName;
   EXPECT_FALSE(context.IsRegisteredOperator(literal_op_name));
 
   SqlOp::RegisterOperator<LiteralOp>(context);
@@ -42,7 +42,7 @@ TEST(SqlOpTest, RegisterOperatorRegistersInContext) {
 
 TEST(SqlOpTest, GetOperatorReturnsRegisteredOperatorInContext) {
   ir::IRContext context;
-  absl::string_view literal_op_name = OpTraits<LiteralOp>::kName;
+  std::string_view literal_op_name = OpTraits<LiteralOp>::kName;
 
   EXPECT_FALSE(context.IsRegisteredOperator(literal_op_name));
   context.RegisterOperator(std::make_unique<ir::Operator>(literal_op_name));
@@ -64,20 +64,20 @@ TEST(SqlOpTest, GettingUnregisteredReturnsNullptr) {
 
 class TestOp : public SqlOp {
  public:
-  absl::string_view value() const { return "TestOp"; }
+  std::string_view value() const { return "TestOp"; }
 };
 template <>
 struct OpTraits<TestOp> {
-  static constexpr absl::string_view kName = "sql.this_is_a_test_op";
+  static constexpr std::string_view kName = "sql.this_is_a_test_op";
 };
 
 class AnotherTestOp : public SqlOp {
  public:
-  absl::string_view value() const { return "AnotherTestOp"; }
+  std::string_view value() const { return "AnotherTestOp"; }
 };
 template <>
 struct OpTraits<AnotherTestOp> {
-  static constexpr absl::string_view kName = "sql.this_is_another_test_op";
+  static constexpr std::string_view kName = "sql.this_is_another_test_op";
 };
 
 namespace {

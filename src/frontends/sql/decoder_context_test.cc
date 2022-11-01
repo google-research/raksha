@@ -70,13 +70,13 @@ TEST(DecoderContextTest, GetOrCreateStorageIdempotence) {
   EXPECT_EQ(store2.type().type_base().kind(), TypeBase::Kind::kPrimitive);
 }
 
-class LiteralOpTest : public TestWithParam<absl::string_view> {};
+class LiteralOpTest : public TestWithParam<std::string_view> {};
 
 TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
   IRContext context;
   DecoderContext decoder_context(context);
 
-  absl::string_view literal_str = GetParam();
+  std::string_view literal_str = GetParam();
   const Operation &op = decoder_context.MakeLiteralOperation(literal_str);
 
   const Block &top_level_block = decoder_context.BuildTopLevelBlock();
@@ -184,8 +184,8 @@ INSTANTIATE_TEST_SUITE_P(EmptyControlInputs, DecodeMergeOpTest,
                                  Values(ir::ValueList({}))));
 class DecodeTagTransformTest
     : public TestWithParam<
-          std::tuple<ir::Value, absl::string_view, std::vector<ir::Value>,
-                     std::vector<uint64_t>, std::vector<absl::string_view>>> {};
+          std::tuple<ir::Value, std::string_view, std::vector<ir::Value>,
+                     std::vector<uint64_t>, std::vector<std::string_view>>> {};
 
 TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
   const auto &[xformed_value, policy_rule_name, precondition_values,
@@ -243,7 +243,7 @@ static const Value kSampleValues[] = {
     Value(BlockArgument(kExampleBlock, "arg1")),
 };
 
-static const absl::string_view kSampleRuleNames[] = {
+static const std::string_view kSampleRuleNames[] = {
     "clear_milliseconds",
     "SSN",
     "ApprovedWindow",
@@ -252,7 +252,7 @@ static const absl::string_view kSampleRuleNames[] = {
 static const std::vector<uint64_t> kSampleIdSequences[] = {
     {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {3, 90, 25, 7, 33, 49, 51, 2, 17, 400}};
 
-static const std::vector<absl::string_view> kSamplePreconditionNames[] = {
+static const std::vector<std::string_view> kSamplePreconditionNames[] = {
     {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"},
     // These are the first 10 words of Frakenstein by Mary
     // Wollstonecraft Shelley, and are public domain. Retrieved via Project

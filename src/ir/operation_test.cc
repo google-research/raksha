@@ -34,7 +34,7 @@ struct OperationTestData {
   NamedAttributeMap attributes{};
   ValueList values{};
   // The expected string representation.
-  absl::string_view string_rep;
+  std::string_view string_rep;
 };
 
 class OperationTest : public testing::TestWithParam<OperationTestData> {

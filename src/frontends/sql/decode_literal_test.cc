@@ -14,7 +14,6 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/name_and_string_test.h"
@@ -32,10 +31,10 @@ using ::testing::Combine;
 using ::testing::IsNull;
 using ::testing::ValuesIn;
 
-constexpr std::optional<absl::string_view> kSampleExprNames[] = {
+constexpr std::optional<std::string_view> kSampleExprNames[] = {
     {}, {"name1"}, {"another_name"}};
 
-absl::string_view kStrings[] = {"MyTable.col",
+std::string_view kStrings[] = {"MyTable.col",
                                 "UserAlias",
                                 "MySchema.MyTable.col2",
                                 "MySchema.JoinTable.Table1.col",

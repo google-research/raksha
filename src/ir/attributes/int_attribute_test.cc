@@ -25,7 +25,7 @@ TEST(IntAttributeKindTest, ConstantkAttributeKindIsInt64) {
 }
 
 class IntAttributeTest
-    : public testing::TestWithParam<std::pair<int64_t, absl::string_view>> {};
+    : public testing::TestWithParam<std::pair<int64_t, std::string_view>> {};
 
 TEST_P(IntAttributeTest, KindAndToStringWorks) {
   const auto& [value, string_rep] = GetParam();

@@ -26,7 +26,6 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
-#include "absl/strings/string_view.h"
 
 namespace raksha::ir::datalog {
 
@@ -96,14 +95,14 @@ class ArgumentType {
  public:
   enum class Kind { kNumber, kPrincipal, kCustom };
   Kind kind() const { return kind_; }
-  absl::string_view name() const { return name_; }
+  std::string_view name() const { return name_; }
   static ArgumentType MakePrincipalType() {
     return ArgumentType(Kind::kPrincipal, "Principal");
   }
   static ArgumentType MakeNumberType() {
     return ArgumentType(Kind::kNumber, "Number");
   }
-  static ArgumentType MakeCustomType(absl::string_view name) {
+  static ArgumentType MakeCustomType(std::string_view name) {
     return ArgumentType(Kind::kCustom, name);
   }
 
@@ -126,7 +125,7 @@ class ArgumentType {
   }
 
  private:
-  explicit ArgumentType(Kind kind, absl::string_view name)
+  explicit ArgumentType(Kind kind, std::string_view name)
       : kind_(kind), name_(name) {}
   Kind kind_;
   std::string name_;
@@ -137,7 +136,7 @@ class Argument {
   explicit Argument(std::string_view argument_name, ArgumentType argument_type)
       : argument_name_(argument_name),
         argument_type_(std::move(argument_type)) {}
-  absl::string_view argument_name() const { return argument_name_; }
+  std::string_view argument_name() const { return argument_name_; }
   ArgumentType argument_type() const { return argument_type_; }
 
   bool operator==(const Argument& otherArgument) const {
@@ -161,13 +160,13 @@ class Argument {
 
 class RelationDeclaration {
  public:
-  explicit RelationDeclaration(absl::string_view relation_name,
+  explicit RelationDeclaration(std::string_view relation_name,
                                bool is_attribute,
                                std::vector<Argument> arguments)
       : relation_name_(relation_name),
         is_attribute_(is_attribute),
         arguments_(std::move(arguments)) {}
-  absl::string_view relation_name() const { return relation_name_; }
+  std::string_view relation_name() const { return relation_name_; }
   bool is_attribute() const { return is_attribute_; }
   const std::vector<Argument>& arguments() const { return arguments_; }
 

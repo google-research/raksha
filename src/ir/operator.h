@@ -18,8 +18,8 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 
-#include "absl/strings/string_view.h"
 
 namespace raksha::ir {
 
@@ -28,10 +28,10 @@ namespace raksha::ir {
 // operations.
 class Operator {
  public:
-  Operator(absl::string_view name) : name_(name), number_of_return_values_(1) {}
-  Operator(absl::string_view name, uint64_t number_of_return_values)
+  Operator(std::string_view name) : name_(name), number_of_return_values_(1) {}
+  Operator(std::string_view name, uint64_t number_of_return_values)
       : name_(name), number_of_return_values_(number_of_return_values) {}
-  absl::string_view name() const { return name_; }
+  std::string_view name() const { return name_; }
   uint64_t number_of_return_values() const { return number_of_return_values_; }
 
  private:

@@ -49,7 +49,7 @@ class IrProgramParser {
     std::vector<std::string> input_names;
   };
 
-  IrProgramParser::Result ParseProgram(absl::string_view prog_text);
+  IrProgramParser::Result ParseProgram(std::string_view prog_text);
   IrProgramParser()
       : context_(std::make_unique<IRContext>()),
         ssa_names_(std::make_unique<SsaNames>()),

@@ -28,7 +28,7 @@ class DataDeclTestBase : public testing::Test {
   types::TypeFactory type_factory_;
 
   static types::Type MakeTestEntityType(types::TypeFactory& factory,
-                                        absl::string_view name) {
+                                        std::string_view name) {
     const types::Schema& schema = factory.RegisterSchema(std::string(name), {});
     return factory.MakeEntityType(schema);
   }

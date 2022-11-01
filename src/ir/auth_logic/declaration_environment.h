@@ -30,7 +30,7 @@ class DeclarationEnvironment {
   DeclarationEnvironment(const Program& prog);
 
   datalog::RelationDeclaration GetDeclarationOrFatal(
-      absl::string_view relation_name) const;
+      std::string_view relation_name) const;
 
  private:
   common::containers::HashMap<std::string, datalog::RelationDeclaration>

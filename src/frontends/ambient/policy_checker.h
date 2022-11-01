@@ -21,10 +21,10 @@
 
 #include <iostream>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 #include "absl/container/flat_hash_set.h"
-#include "absl/strings/string_view.h"
 #include "src/common/containers/hash_map.h"
 
 namespace raksha::ambient {
@@ -80,32 +80,32 @@ class PolicyChecker {
 
  private:
   // Check and add if the given edge can be added safely to the policy context.
-  std::pair<bool, std::string> AddIfValidEdge(absl::string_view src,
-                                              absl::string_view tgt);
+  std::pair<bool, std::string> AddIfValidEdge(std::string_view src,
+                                              std::string_view tgt);
   // Simply check if the given edge can be added safely to the policy context.
-  std::pair<bool, std::string> IsValidEdge(absl::string_view src,
-                                           absl::string_view tgt);
+  std::pair<bool, std::string> IsValidEdge(std::string_view src,
+                                           std::string_view tgt);
 
   // Returns true if the user can change the given setting.
-  bool CanUserChangeSetting(absl::string_view user,
-                            absl::string_view setting_name);
+  bool CanUserChangeSetting(std::string_view user,
+                            std::string_view setting_name);
 
   // Returns the set of available settings for the given user.
   absl::flat_hash_set<std::string> AvailableSettings(
-      absl::string_view user) const;
+      std::string_view user) const;
 
   // Adds the given edge into the policy context.
-  void AddEdge(absl::string_view src, absl::string_view tgt) {
+  void AddEdge(std::string_view src, std::string_view tgt) {
     edges_.insert(DataFlowEdge(std::string(src), std::string(tgt)));
   }
 
   // Returns true if the given edge is present in the policy context.
-  bool IsEdgePresent(absl::string_view src, absl::string_view tgt) {
+  bool IsEdgePresent(std::string_view src, std::string_view tgt) {
     return edges_.count(DataFlowEdge(std::string(src), std::string(tgt))) > 0;
   }
 
   // Removes the given edge from the policy context.
-  void RemoveEdge(absl::string_view src, absl::string_view tgt) {
+  void RemoveEdge(std::string_view src, std::string_view tgt) {
     edges_.erase(DataFlowEdge(std::string(src), std::string(tgt)));
   }
 

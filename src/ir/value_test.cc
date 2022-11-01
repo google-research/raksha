@@ -152,7 +152,7 @@ INSTANTIATE_TEST_SUITE_P(OperationResultTest, OperationResultTest,
                                 &test_data.minus_operation));
 
 class ValueToStringTest
-    : public TestWithParam<std::pair<Value, absl::string_view>> {};
+    : public TestWithParam<std::pair<Value, std::string_view>> {};
 
 TEST_P(ValueToStringTest, ToStringReturnsExpectedFormat) {
   const auto &[value, value_string] = GetParam();

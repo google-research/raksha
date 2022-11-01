@@ -26,7 +26,7 @@ namespace raksha::frontends::arcs {
 // specifiers at static time through a template. Instead, we use Substitute,
 // which is better suited for the purpose that we want. Therefore, access
 // path substitution points are indicated with $0 instead of %s.
-static constexpr std::tuple<absl::string_view, absl::string_view>
+static constexpr std::tuple<std::string_view, std::string_view>
     predicate_textproto_to_rule_body_format[] = {
         // Each of the tests is preceded by a snippet of what the predicate
         // might look like in an Arcs manifest file, with the AccessPath
@@ -115,6 +115,6 @@ implies: {
     }
   } })",
          R"(!(!(mayHaveTag("$0", $1, "tag1")); ((mayHaveTag("$0", $1, "tag1")), (mayHaveTag("$0", $1, "tag2")))); ((!(mayHaveTag("$0", $1, "tag1")); ((mayHaveTag("$0", $1, "tag1")), (mayHaveTag("$0", $1, "tag2")))), (!(mayHaveTag("$0", $1, "tag3")); ((mayHaveTag("$0", $1, "tag3")), (mayHaveTag("$0", $1, "tag4"))))))"}};
-}  // namespace raksha::ir
+}  // namespace raksha::frontends::arcs
 
 #endif  // SRC_FRONTENDS_ARCS_PREDICATE_TEXTPROTO_TO_RULE_BODY_TESTDATA_H_H_

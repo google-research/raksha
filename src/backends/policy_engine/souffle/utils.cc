@@ -24,7 +24,7 @@ namespace raksha::backends::policy_engine::souffle {
 
 absl::Status WriteFactsStringToFactsFile(
     const std::filesystem::path &facts_directory_path,
-    absl::string_view relation_name, absl::string_view facts_string) {
+    std::string_view relation_name, std::string_view facts_string) {
   std::filesystem::path fact_files_path(
       facts_directory_path /
       std::string(absl::StrFormat("%s.facts", relation_name)));

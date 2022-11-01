@@ -19,8 +19,6 @@
 #include <filesystem>
 #include <optional>
 
-#include "absl/strings/string_view.h"
-
 namespace raksha::backends::policy_engine {
 
 // Placeholder for the Policy interface. Right now, the policy is represented

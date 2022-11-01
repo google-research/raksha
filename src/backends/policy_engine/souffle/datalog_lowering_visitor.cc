@@ -59,7 +59,7 @@ static DatalogAttributePayload GetPayloadForAttribute(ir::Attribute attr,
 
 Unit DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
   const ir::Operator &op = operation.op();
-  absl::string_view op_name = op.name();
+  std::string_view op_name = op.name();
 
   // Introduce a local to make capturing this field in lambdas easier.
   ir::SsaNames &ssa_names = ssa_names_;

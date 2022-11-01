@@ -49,7 +49,7 @@ class ParticleSpec {
   const std::vector<Edge> &edges() const { return edges_; }
 
   const HandleConnectionSpec &getHandleConnectionSpec(
-      const absl::string_view hcs_name) const {
+      const std::string_view hcs_name) const {
     auto find_res = handle_connection_specs_.find(hcs_name);
     CHECK(find_res != handle_connection_specs_.end())
         << "Could not find a HandleConnectionSpec with name " << hcs_name

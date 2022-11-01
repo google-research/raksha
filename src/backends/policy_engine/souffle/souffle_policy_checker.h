@@ -16,7 +16,6 @@
 #ifndef SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_SOUFFLE_POLICY_CHECKER_H_
 #define SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_SOUFFLE_POLICY_CHECKER_H_
 
-#include "absl/strings/string_view.h"
 #include "src/backends/policy_engine/policy.h"
 #include "src/backends/policy_engine/policy_checker.h"
 #include "src/ir/module.h"

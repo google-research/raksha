@@ -14,7 +14,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
-#include "absl/strings/string_view.h"
+#include <string_view>
+
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/name_and_string_test.h"
@@ -38,16 +39,16 @@ class DecodeSourceTableColumnExprTest : public NameAndStringTest {
   }
 };
 
-constexpr std::optional<absl::string_view> kSampleExprNames[] = {
+constexpr std::optional<std::string_view> kSampleExprNames[] = {
     {}, {"name1"}, {"another_name"}};
 
-absl::string_view kStrings[] = {"MyTable.col",
-                                "UserAlias",
-                                "MySchema.MyTable.col2",
-                                "MySchema.JoinTable.Table1.col",
-                                "9",
-                                "hello world!",
-                                "3.1415"};
+std::string_view kStrings[] = {"MyTable.col",
+                               "UserAlias",
+                               "MySchema.MyTable.col2",
+                               "MySchema.JoinTable.Table1.col",
+                               "9",
+                               "hello world!",
+                               "3.1415"};
 
 TEST_P(DecodeSourceTableColumnExprTest, DecodeSourceTableColumnExprTest) {
   auto &[name, str] = GetParam();

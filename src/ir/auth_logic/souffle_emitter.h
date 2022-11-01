@@ -151,7 +151,7 @@ class SouffleEmitter {
     }
     // TODO (#633) work around till we add number types in C++ version.
     type_names.insert(absl::StrCat(".type Number", " <: symbol"));
-    std::vector<absl::string_view> sorted_type_names(type_names.begin(),
+    std::vector<std::string_view> sorted_type_names(type_names.begin(),
                                                      type_names.end());
     std::sort(sorted_type_names.begin(), sorted_type_names.end());
     return absl::StrJoin(sorted_type_names, "\n");

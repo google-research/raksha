@@ -16,7 +16,8 @@
 #ifndef SRC_IR_ATTRIBUTES_STRING_ATTRIBUTE_H_
 #define SRC_IR_ATTRIBUTES_STRING_ATTRIBUTE_H_
 
-#include "absl/strings/string_view.h"
+#include <string_view>
+
 #include "src/common/utils/intrusive_ptr.h"
 #include "src/ir/attributes/attribute.h"
 
@@ -29,21 +30,23 @@ class StringAttribute : public AttributeBase {
  public:
   static constexpr Kind kAttributeKind = Kind::kString;
 
-  static intrusive_ptr<const StringAttribute> Create(absl::string_view value) {
+  static intrusive_ptr<const StringAttribute> Create(std::string_view value) {
     return intrusive_ptr<const StringAttribute>(new StringAttribute(value));
   }
 
-  absl::string_view value() const { return value_; }
+  std::string_view value() const { return value_; }
 
   bool IsEqual(const AttributeBase& other) const override {
     if (this->kind() != other.kind()) return false;
     return *this == static_cast<const StringAttribute&>(other);
   }
 
-  std::string ToString() const override { return absl::StrCat("\"", value_, "\""); }
+  std::string ToString() const override {
+    return absl::StrCat("\"", value_, "\"");
+  }
 
  private:
-  StringAttribute(absl::string_view value)
+  StringAttribute(std::string_view value)
       : AttributeBase(kAttributeKind), value_(value) {}
 
   std::string value_;

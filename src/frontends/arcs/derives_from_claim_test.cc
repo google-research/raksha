@@ -16,9 +16,10 @@
 
 #include "src/frontends/arcs/derives_from_claim.h"
 
-#include "absl/strings/str_format.h"
-#include "absl/strings/string_view.h"
+#include <string_view>
+
 #include "google/protobuf/text_format.h"
+#include "absl/strings/str_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/arcs/proto/access_path.h"
 #include "src/frontends/arcs/proto/derives_from_claim.h"
@@ -30,7 +31,7 @@ namespace raksha::frontends::arcs {
 // DerivesFrom textproto from pairs of AccessPath textprotos. We then use the
 // pair to generate our observed output and the original AccessPath  textprotos
 // to generate our expected output(s).
-constexpr absl::string_view kDerivesFromTextprotoFormat =
+constexpr std::string_view kDerivesFromTextprotoFormat =
     R"(target: {%s} source: {%s})";
 
 static const std::string kSampleAccessPathTextprotos[] = {
@@ -57,8 +58,7 @@ class DerivesFromAsAccessPathPairTest
     const std::string &textproto =
         absl::StrFormat(kDerivesFromTextprotoFormat, std::get<0>(GetParam()),
                         std::get<1>(GetParam()));
-    google::protobuf::TextFormat::ParseFromString(textproto,
-                                                  &derives_from_proto);
+    google::protobuf::TextFormat::ParseFromString(textproto, &derives_from_proto);
     return proto::Decode(derives_from_proto);
   }
 
@@ -66,8 +66,7 @@ class DerivesFromAsAccessPathPairTest
   AccessPath CreateAccessPathFromParam() const {
     ::arcs::AccessPathProto access_path_proto;
     const std::string &textproto = std::get<ParamNum>(GetParam());
-    google::protobuf::TextFormat::ParseFromString(textproto,
-                                                  &access_path_proto);
+    google::protobuf::TextFormat::ParseFromString(textproto, &access_path_proto);
     return proto::Decode(access_path_proto);
   }
 

@@ -19,8 +19,7 @@
 #include <filesystem>
 #include <optional>
 #include <string>
-
-#include "absl/strings/string_view.h"
+#include <string_view>
 
 namespace raksha::frontends::arcs::xform_to_datalog {
 
@@ -31,7 +30,7 @@ class AuthorizationLogicDatalogFacts {
   //
   static std::optional<AuthorizationLogicDatalogFacts> create(
       const std::filesystem::path &path,
-      absl::string_view authorization_logic_filename);
+      std::string_view authorization_logic_filename);
 
   AuthorizationLogicDatalogFacts(std::string datalog_facts):
       datalog_facts_(std::move(datalog_facts)) {}

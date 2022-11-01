@@ -41,7 +41,7 @@ const Operation &DecoderContext::MakeMergeOperation(
 }
 
 const ir::Operation &DecoderContext::MakeTagTransformOperation(
-    uint64_t transformed_value_id, absl::string_view rule_name,
+    uint64_t transformed_value_id, std::string_view rule_name,
     const common::containers::HashMap<std::string, uint64_t>
         &tag_preconditions) {
   auto precondition_value_pairs = MapIter<std::pair<std::string, Value>>(

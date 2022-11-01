@@ -36,7 +36,7 @@ TEST(Dummy, Dummy) { ASSERT_EQ(1, 1); }
 #else
 
 TEST(AuthorizationLogicTest, InvokesRustToolAndGeneratesOutput) {
-  const std::vector<absl::string_view> kRelationsToNotDeclare{
+  const std::vector<std::string_view> kRelationsToNotDeclare{
       "Principal",
       "Tag",
       "Action",

@@ -63,7 +63,6 @@ cc_library(
         ":ast",
         ":auth_logic_ast_traversing_visitor",
         "//src/common/containers:hash_map",
-        "//src/common/logging",
         "//src/ir/datalog:program",
     ],
 )
@@ -133,8 +132,6 @@ cc_library(
         ":auth_logic_ast_traversing_visitor",
         ":declaration_environment",
         ":type_environment",
-        "//src/common/containers:hash_map",
-        "//src/common/logging",
         "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
     ],
@@ -172,8 +169,6 @@ cc_library(
     deps = [
         "//src/common/logging",
         "//src/common/utils:map_iter",
-        "//src/ir/auth_logic:ast",
-        "//src/ir/auth_logic:lowering_ast_datalog",
         "//src/ir/datalog:program",
         "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
@@ -242,7 +237,6 @@ cc_library(
     deps = [
         "//src/common/logging",
         "//src/common/utils:map_iter",
-        "//src/common/utils:overloaded",
         "//src/ir/auth_logic:ast",
         "//src/ir/datalog:program",
         "//src/policy/auth_logic:auth_logic_cc_generator",

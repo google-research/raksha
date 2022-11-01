@@ -39,7 +39,7 @@ std::string TypeToUniverseName(const datalog::ArgumentType& arg_type) {
   }
 }
 
-BaseFact MakeUniverseMembershipFact(absl::string_view element_name,
+BaseFact MakeUniverseMembershipFact(std::string_view element_name,
                                     const datalog::ArgumentType& arg_type) {
   return BaseFact(datalog::Predicate(
       TypeToUniverseName(arg_type),  // universe relation
@@ -229,7 +229,7 @@ class GroundingConditionTransformer
     std::vector<BaseFact> conditions;
     std::vector<std::string> args = pred.args();
     for (size_t i = 0; i < args.size(); i++) {
-      absl::string_view arg = args[i];
+      std::string_view arg = args[i];
       if (!IsNameConstant(arg)) {
         conditions.push_back(MakeUniverseMembershipFact(
             arg, decl.arguments()[i].argument_type()));

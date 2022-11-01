@@ -20,11 +20,11 @@
 
 #include <iostream>
 #include <memory>
+#include <string_view>
 
+#include "souffle/SouffleInterface.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_format.h"
-#include "absl/strings/string_view.h"
-#include "souffle/SouffleInterface.h"
 #include "src/common/logging/logging.h"
 #include "src/common/utils/ranges.h"
 
@@ -44,7 +44,7 @@ static constexpr char kDemoASRIn[] = "R.asr_audio_stream_in";
 static constexpr char kDemoStoreIn[] = "R.store_audio_stream_in";
 static constexpr char kSystemSettingsManager[] = "SystemSettingsManager";
 
-absl::string_view GetSettingsName(PolicyChecker::Settings settings) {
+std::string_view GetSettingsName(PolicyChecker::Settings settings) {
   switch (settings) {
     case PolicyChecker::Settings::kASR: {
       return kASRSetting;
@@ -63,7 +63,7 @@ absl::string_view GetSettingsName(PolicyChecker::Settings settings) {
   }
 }
 
-PolicyChecker::Settings GetSettings(absl::string_view name) {
+PolicyChecker::Settings GetSettings(std::string_view name) {
   if (name == kASRSetting) {
     return PolicyChecker::Settings::kASR;
   } else if (name == kStreamingSetting) {
@@ -77,7 +77,7 @@ PolicyChecker::Settings GetSettings(absl::string_view name) {
   }
 }
 
-absl::string_view GetUserName(PolicyChecker::User user) {
+std::string_view GetUserName(PolicyChecker::User user) {
   switch (user) {
     case PolicyChecker::User::kOwner: {
       return kOwnerUser;
@@ -93,8 +93,8 @@ absl::string_view GetUserName(PolicyChecker::User user) {
   }
 }
 
-absl::string_view GetDataConnectionName(PolicyChecker::Node node,
-                                        bool in_bound) {
+std::string_view GetDataConnectionName(PolicyChecker::Node node,
+                                       bool in_bound) {
   switch (node) {
     case PolicyChecker::Node::kSmartMicrophone: {
       CHECK(!in_bound) << "No inbound connections for SmartMicrophone";
@@ -155,8 +155,8 @@ bool PolicyChecker::CanUserChangeSetting(PolicyChecker::User user,
   return CanUserChangeSetting(GetUserName(user), GetSettingsName(setting));
 }
 
-bool PolicyChecker::CanUserChangeSetting(absl::string_view user,
-                                         absl::string_view setting_name) {
+bool PolicyChecker::CanUserChangeSetting(std::string_view user,
+                                         std::string_view setting_name) {
   std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
       souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
   program->run();
@@ -187,7 +187,7 @@ absl::flat_hash_set<PolicyChecker::Settings> PolicyChecker::AvailableSettings(
 }
 
 absl::flat_hash_set<std::string> PolicyChecker::AvailableSettings(
-    absl::string_view user) const {
+    std::string_view user) const {
   absl::flat_hash_set<std::string> result;
   std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
       souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
@@ -210,8 +210,8 @@ absl::flat_hash_set<std::string> PolicyChecker::AvailableSettings(
 
 bool PolicyChecker::ChangeSetting(PolicyChecker::User user,
                                   PolicyChecker::Settings setting, bool value) {
-  absl::string_view user_name = GetUserName(user);
-  absl::string_view settings_name = GetSettingsName(setting);
+  std::string_view user_name = GetUserName(user);
+  std::string_view settings_name = GetSettingsName(setting);
   if (!CanUserChangeSetting(user_name, settings_name)) {
     return false;
   }
@@ -227,7 +227,7 @@ std::pair<bool, std::string> PolicyChecker::AddIfValidEdge(Node source,
 }
 
 std::pair<bool, std::string> PolicyChecker::AddIfValidEdge(
-    absl::string_view src, absl::string_view tgt) {
+    std::string_view src, std::string_view tgt) {
   bool edge_already_in_context = IsEdgePresent(src, tgt);
   if (!edge_already_in_context) AddEdge(src, tgt);
   auto result = ValidatePolicyCompliance();
@@ -243,8 +243,8 @@ std::pair<bool, std::string> PolicyChecker::IsValidEdge(Node source,
                      GetDataConnectionName(target, /*inbound=*/true));
 }
 
-std::pair<bool, std::string> PolicyChecker::IsValidEdge(absl::string_view src,
-                                                        absl::string_view tgt) {
+std::pair<bool, std::string> PolicyChecker::IsValidEdge(std::string_view src,
+                                                        std::string_view tgt) {
   AddEdge(src, tgt);
   auto result = ValidatePolicyCompliance();
   RemoveEdge(src, tgt);

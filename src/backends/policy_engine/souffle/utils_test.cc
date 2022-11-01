@@ -56,7 +56,7 @@ class CreateTempdirTest : public testing::Test {
 };
 
 TEST_F(CreateTempdirTest, SuccessfullyCreateFactFile) {
-  absl::string_view kFileContents = "hello";
+  std::string_view kFileContents = "hello";
   absl::Status result =
       WriteFactsStringToFactsFile(tempdir_, "SomeRelation", kFileContents);
   EXPECT_TRUE(result.ok());

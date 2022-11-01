@@ -25,7 +25,7 @@
 namespace raksha::ir::auth_logic {
 
 // Parses an input string
-Program ParseProgram(absl::string_view prog_text);
+Program ParseProgram(std::string_view prog_text);
 
 }  // namespace raksha::ir::auth_logic
 

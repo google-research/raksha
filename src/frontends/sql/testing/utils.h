@@ -47,7 +47,7 @@ ir::Value UnwrapTopLevelSqlOutputOp(ir::Value sql_output_value) {
 // expressions, but you don't care what they are really are.
 std::string CreateExprArenaTextprotoWithLiteralsPrefix(
     std::string top_level_proto, std::vector<uint64_t> ids_to_be_filled) {
-  const absl::string_view kExprArenaFormat = "id_expression_pairs: [ %s ]";
+  const std::string_view kExprArenaFormat = "id_expression_pairs: [ %s ]";
   // Generate a bunch of literals to act as potential child expressions.
   std::vector<std::string> expr_protos;
   expr_protos.reserve(ids_to_be_filled.size() + 1);

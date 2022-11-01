@@ -16,7 +16,7 @@
 #ifndef SRC_FRONTENDS_SQL_OPS_OP_TRAITS_H_
 #define SRC_FRONTENDS_SQL_OPS_OP_TRAITS_H_
 
-#include "absl/strings/string_view.h"
+#include <string_view>
 
 namespace raksha::frontends::sql {
 
@@ -27,7 +27,7 @@ struct OpTraits {};
   class CLASS;                                          \
   template <>                                           \
   struct OpTraits<CLASS> {                              \
-    static constexpr absl::string_view kName = OP_NAME; \
+    static constexpr std::string_view kName = OP_NAME; \
   }
 
 DEFINE_OP_TRAITS(LiteralOp, "sql.literal");

@@ -15,7 +15,8 @@
 //----------------------------------------------------------------------------
 #include "src/ir/ir_printer.h"
 
-#include "absl/strings/string_view.h"
+#include <string_view>
+
 #include "src/common/containers/hash_map.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/string_attribute.h"
@@ -146,7 +147,7 @@ TEST(IRPrinterPrintNamedMapOrderTest, PrintsInSortedOrder) {
 // work, values must be assigned to SSA values ordered in the number the appear.
 // It would be nice to not have this constraint, but it would require some deep
 // work on comparing IR structures that we have not yet done.
-class IRParserPrinterRoundTripTest : public TestWithParam<absl::string_view> {};
+class IRParserPrinterRoundTripTest : public TestWithParam<std::string_view> {};
 
 // Normalize the printed output so we don't have to worry about whitespace
 // differences.
@@ -165,7 +166,7 @@ TEST_P(IRParserPrinterRoundTripTest, IrPrinterRoundTripTest) {
             EliminateWhitespaceAndComments(reprinted));
 }
 
-absl::string_view kExampleIrPrograms[] = {
+std::string_view kExampleIrPrograms[] = {
     R"(
 module m0 {
   block b0 {

@@ -69,21 +69,21 @@ class DotGeneratorHelper : public IRTraversingVisitor<DotGeneratorHelper> {
   }
 
   // Returns the dot node name for the given `storage`.
-  absl::string_view GetNodeName(const Storage& storage) const {
+  std::string_view GetNodeName(const Storage& storage) const {
     return storage.name();
   }
 
   // Associates a name with the given op and returns that name.
-  void AddOperationNode(absl::string_view node_name, const Operation& op);
+  void AddOperationNode(std::string_view node_name, const Operation& op);
 
   // Associates a name with the given block and returns that name.
-  void AddBlockNode(absl::string_view node_name, const Block& op);
+  void AddBlockNode(std::string_view node_name, const Block& op);
 
   // Adds a result for the given node;
-  void AddResult(const Operation& op, absl::string_view name);
+  void AddResult(const Operation& op, std::string_view name);
 
   // Adds an edge from `src` -> `tgt`.
-  void AddEdge(absl::string_view src, absl::string_view tgt) {
+  void AddEdge(std::string_view src, std::string_view tgt) {
     edges_.insert(Edge(Node(src), Node(tgt)));
   }
 
@@ -102,20 +102,20 @@ class DotGeneratorHelper : public IRTraversingVisitor<DotGeneratorHelper> {
   DotGeneratorConfig config_;
 };
 
-void DotGeneratorHelper::AddOperationNode(absl::string_view node_name,
+void DotGeneratorHelper::AddOperationNode(std::string_view node_name,
                                           const Operation& op) {
   auto insert_result = operations_.insert({std::string(node_name), &op});
   CHECK(insert_result.second) << "Adding a duplicate node for an op";
 }
 
-void DotGeneratorHelper::AddBlockNode(absl::string_view node_name,
+void DotGeneratorHelper::AddBlockNode(std::string_view node_name,
                                       const Block& op) {
   auto insert_result = blocks_.insert({std::string(node_name), &op});
   CHECK(insert_result.second) << "Adding a duplicate node for a block";
 }
 
 void DotGeneratorHelper::AddResult(const Operation& op,
-                                   absl::string_view name) {
+                                   std::string_view name) {
   std::string node_name = GetNodeName(op);
   auto find_result = operation_results_.find(node_name);
   if (find_result == operation_results_.end()) {
@@ -211,7 +211,7 @@ std::string DotGeneratorHelper::GetDotNode(const Operation& op) {
 }
 
 std::string DotGeneratorHelper::GetDotGraph() {
-  constexpr absl::string_view kDigraphFormat = R"(digraph G {
+  constexpr std::string_view kDigraphFormat = R"(digraph G {
   node[shape=none];
   // Nodes:
   %s

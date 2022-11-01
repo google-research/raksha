@@ -36,7 +36,7 @@ class SystemSpec {
   // Returns a ParticleSpec with a particular name. If there is no
   // particle spec with that name, returns nullptr.
   const ParticleSpec *GetParticleSpec(
-      absl::string_view particle_spec_name) const {
+      std::string_view particle_spec_name) const {
     auto find_res = particle_specs_.find(particle_spec_name);
     return (find_res != particle_specs_.end()) ? find_res->second.get()
                                                : nullptr;

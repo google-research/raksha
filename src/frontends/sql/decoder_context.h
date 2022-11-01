@@ -33,7 +33,7 @@ namespace raksha::frontends::sql {
 // inappropriate to put in IRContext.
 class DecoderContext {
  public:
-  static constexpr absl::string_view kDefaultOutputName = "out.0";
+  static constexpr std::string_view kDefaultOutputName = "out.0";
 
   DecoderContext(ir::IRContext &ir_context)
       : ir_context_(ir_context),
@@ -81,7 +81,7 @@ class DecoderContext {
   // puts it right at the beginning). This allows us to create `Storage`s for
   // columns as we see them. We will probably want to do something less lazy,
   // like registering storages in advance, for the mature implementation.
-  const ir::Storage &GetOrCreateStorage(absl::string_view storage_name) {
+  const ir::Storage &GetOrCreateStorage(std::string_view storage_name) {
     return (ir_context_.IsRegisteredStorage(storage_name))
                ? *CHECK_NOTNULL(ir_context_.GetStorage(storage_name))
                : ir_context_.RegisterStorage(std::make_unique<ir::Storage>(
@@ -93,7 +93,7 @@ class DecoderContext {
   // `literal_str`. This shall create an `Operation` of `Operator`
   // "sql.literal" and with the literal value indicated in a `literal_str`
   // attribute.
-  const ir::Operation &MakeLiteralOperation(absl::string_view literal_str) {
+  const ir::Operation &MakeLiteralOperation(std::string_view literal_str) {
     return top_level_block_builder_.AddOperation<LiteralOp>(ir_context_,
                                                             literal_str);
   }
@@ -103,7 +103,7 @@ class DecoderContext {
       std::vector<uint64_t> control_input_ids);
 
   const ir::Operation &MakeTagTransformOperation(
-      uint64_t transformed_value_id, absl::string_view rule_name,
+      uint64_t transformed_value_id, std::string_view rule_name,
       const common::containers::HashMap<std::string, uint64_t>
           &tag_preconditions);
 

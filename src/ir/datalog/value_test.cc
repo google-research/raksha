@@ -20,7 +20,6 @@
 
 #include "fuzztest/fuzztest.h"
 #include "absl/strings/numbers.h"
-#include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
 
 namespace raksha::ir::datalog {
@@ -73,17 +72,17 @@ FUZZ_TEST(NumberTest, RoundTripNumberThroughDatalogString)
     .WithDomains(Arbitrary<int64_t>())
     .WithSeeds(kSampleIntegerValues);
 
-constexpr std::tuple<absl::string_view> kSampleSymbols[] = {
+constexpr std::tuple<std::string_view> kSampleSymbols[] = {
     {""}, {"x"}, {"foo"}, {"hello_world"}};
 
-void RoundTripStringThroughDatalogString(absl::string_view symbol) {
+void RoundTripStringThroughDatalogString(std::string_view symbol) {
   Symbol symbol_value = Symbol(symbol);
   std::string symbol_str = symbol_value.ToDatalogString();
   ASSERT_EQ(symbol_str, "\"" + std::string(symbol) + "\"");
 }
 
 FUZZ_TEST(SymbolTest, RoundTripStringThroughDatalogString)
-    .WithDomains(Arbitrary<absl::string_view>())
+    .WithDomains(Arbitrary<std::string_view>())
     .WithSeeds(kSampleSymbols);
 
 using SimpleRecord = Record<Symbol, Number>;
@@ -94,9 +93,9 @@ TEST(SimpleRecordNilTest, SimpleRecordNilTest) {
 
 class SimpleRecordTest
     : public TestWithParam<
-          std::tuple<std::tuple<absl::string_view>, std::tuple<int64_t>>> {};
+          std::tuple<std::tuple<std::string_view>, std::tuple<int64_t>>> {};
 
-void PerformSimpleRecordTest(absl::string_view symbol, int64_t number) {
+void PerformSimpleRecordTest(std::string_view symbol, int64_t number) {
   SimpleRecord record_value = SimpleRecord(Symbol(symbol), Number(number));
   ASSERT_EQ(record_value.ToDatalogString(),
             absl::StrFormat(R"(["%s", %d])", symbol, number));
@@ -112,7 +111,7 @@ INSTANTIATE_TEST_SUITE_P(SimpleRecordTest, SimpleRecordTest,
                                  ValuesIn(kSampleIntegerValues)));
 
 FUZZ_TEST(SimpleRecordTest, PerformSimpleRecordTest)
-    .WithDomains(Arbitrary<absl::string_view>(), Arbitrary<int64_t>());
+    .WithDomains(Arbitrary<std::string_view>(), Arbitrary<int64_t>());
 
 class NumList : public Record<Number, NumList> {
  public:
@@ -121,7 +120,7 @@ class NumList : public Record<Number, NumList> {
 
 struct NumListAndExpectedDatalog {
   const NumList *num_list_ptr;
-  absl::string_view expected_datalog;
+  std::string_view expected_datalog;
 };
 
 class NumListTest : public TestWithParam<NumListAndExpectedDatalog> {};
@@ -150,11 +149,11 @@ using NumberSymbolPairPair = Record<NumberSymbolPair, NumberSymbolPair>;
 
 class NumberSymbolPairPairTest
     : public TestWithParam<
-          std::tuple<std::tuple<int64_t>, std::tuple<absl::string_view>,
-                     std::tuple<int64_t>, std::tuple<absl::string_view>>> {};
+          std::tuple<std::tuple<int64_t>, std::tuple<std::string_view>,
+                     std::tuple<int64_t>, std::tuple<std::string_view>>> {};
 
-void CheckNumberSymbolPairPair(int64_t number1, absl::string_view symbol1,
-                               int64_t number2, absl::string_view symbol2) {
+void CheckNumberSymbolPairPair(int64_t number1, std::string_view symbol1,
+                               int64_t number2, std::string_view symbol2) {
   NumberSymbolPair number_symbol_pair1 =
       NumberSymbolPair(Number(number1), Symbol(symbol1));
   NumberSymbolPair number_symbol_pair2 =
@@ -179,8 +178,8 @@ INSTANTIATE_TEST_SUITE_P(NumberSymbolPairPairTest, NumberSymbolPairPairTest,
                                  ValuesIn(kSampleSymbols)));
 
 FUZZ_TEST(NumberSymbolPairPairTest, CheckNumberSymbolPairPair)
-    .WithDomains(Arbitrary<int64_t>(), Arbitrary<absl::string_view>(),
-                 Arbitrary<int64_t>(), Arbitrary<absl::string_view>());
+    .WithDomains(Arbitrary<int64_t>(), Arbitrary<std::string_view>(),
+                 Arbitrary<int64_t>(), Arbitrary<std::string_view>());
 
 static constexpr char kNullBranchName[] = "Null";
 static constexpr char kNumberBranchName[] = "Number";
@@ -213,7 +212,7 @@ class AddBranch : public ArithmeticAdt {
 
 struct AdtAndExpectedDatalog {
   const ArithmeticAdt *adt;
-  absl::string_view expected_datalog;
+  std::string_view expected_datalog;
 };
 
 class AdtTest : public TestWithParam<AdtAndExpectedDatalog> {};
