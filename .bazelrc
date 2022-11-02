@@ -42,10 +42,15 @@ build --host_cxxopt='-Wno-unknown-warning-option'
 # should re-enable this warning.
 build --cxxopt='-Wno-macro-redefined'
 build --host_cxxopt='-Wno-macro-redefined'
+build --cxxopt='-Wno-error'
 
 # Similarly, we should not set this flag that we're using as a debugging
 # assistant when compiling third party libraries.
 # build --host_cxxopt='-fno-exceptions'
+
+build --cxxopt='-Wno-unused-const-variable'
+build --cxxopt='-Wno-thread-safety-reference'
+build --cxxopt='-Wno-implicit-int-float-conversion'
 
 # ASAN config for exposing memory errors.
 build:asan --strip=never
