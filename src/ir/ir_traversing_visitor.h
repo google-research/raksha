@@ -26,17 +26,21 @@ namespace raksha::ir {
 // A visitor that also traverses the children of a node and allows performing
 // different actions before (PreVisit) and after (PostVisit) the children are
 // visited. Override any of the `PreVisit` and `PostVisit` methods as needed.
-template <typename Derived, typename Result=Unit, bool IsConst=true>
+template <typename Derived, typename Result = Unit, bool IsConst = true>
 class IRTraversingVisitor : public IRVisitor<Derived, Result, IsConst> {
  private:
-  template<class ValueType, class Enable = void>
+  template <class ValueType, class Enable = void>
   struct DefaultValueGetter {
-    // TODO(cypher1, jopra): See https://github.com/google-research/raksha/issues/618
-    static ValueType Get() { LOG(FATAL) << "Override required for non-default-constructible type."; }
+    // TODO(cypher1, jopra): See
+    // https://github.com/google-research/raksha/issues/618
+    static ValueType Get() {
+      LOG(FATAL) << "Override required for non-default-constructible type.";
+    }
   };
 
-  template<class ValueType>
-  struct DefaultValueGetter<ValueType, std::enable_if_t<std::is_default_constructible_v<ValueType>>> {
+  template <class ValueType>
+  struct DefaultValueGetter<
+      ValueType, std::enable_if_t<std::is_default_constructible_v<ValueType>>> {
     static ValueType Get() { return ValueType(); }
   };
 
@@ -49,8 +53,7 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result, IsConst> {
 
   // Used to accumulate child results from the node's children.
   // Should discard or merge `child_result` into the `accumulator`.
-  virtual Result FoldResult(Result accumulator,
-                            Result child_result) {
+  virtual Result FoldResult(Result accumulator, Result child_result) {
     return accumulator;
   }
 
@@ -59,7 +62,8 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result, IsConst> {
     return GetDefaultValue();
   }
   // Invoked after all the children of `module` are visited.
-  virtual Result PostVisit(CopyConst<IsConst, Module>& module, Result in_order_result) {
+  virtual Result PostVisit(CopyConst<IsConst, Module>& module,
+                           Result in_order_result) {
     return in_order_result;
   }
   // Invoked before all the children of `block` are visited.
@@ -67,7 +71,8 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result, IsConst> {
     return GetDefaultValue();
   }
   // Invoked after all the children of `block` are visited.
-  virtual Result PostVisit(CopyConst<IsConst, Block>& block, Result in_order_result) {
+  virtual Result PostVisit(CopyConst<IsConst, Block>& block,
+                           Result in_order_result) {
     return in_order_result;
   }
   // Invoked before all the children of `operation` are visited.
@@ -104,7 +109,9 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result, IsConst> {
   Result Visit(CopyConst<IsConst, Operation>& operation) final override {
     Result pre_visit_result = PreVisit(operation);
     auto* module = operation.impl_module();
-    Result result = module == nullptr ? std::move(pre_visit_result) : FoldResult(std::move(pre_visit_result), module->Accept(*this));
+    Result result = module == nullptr ? std::move(pre_visit_result)
+                                      : FoldResult(std::move(pre_visit_result),
+                                                   module->Accept(*this));
     return PostVisit(operation, std::move(result));
   }
 };
