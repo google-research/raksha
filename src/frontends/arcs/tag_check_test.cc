@@ -34,7 +34,7 @@ TEST_P(TagCheckToDatalogWithRootTest, TagCheckToDatalogWithRootTest) {
       std::get<0>(GetParam());
   const std::string &check_textproto =
       std::get<0>(textproto_format_string_pair);
-  const std::string_view expected_todatalog_format_string =
+  const absl::string_view expected_todatalog_format_string =
       std::get<1>(textproto_format_string_pair);
   const AccessPathRoot &root = std::get<1>(GetParam());
   std::string root_string = root.ToString();

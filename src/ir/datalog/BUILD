@@ -74,6 +74,7 @@ cc_library(
         "value.h",
     ],
     deps = [
+        "//src/common/logging",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],
@@ -84,6 +85,7 @@ cc_library(
     hdrs = ["input_relation_fact.h"],
     deps = [
         ":value",
+        "//src/common/logging",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],
@@ -92,7 +94,10 @@ cc_library(
 cc_library(
     name = "attribute",
     hdrs = ["attribute.h"],
-    deps = [":value"],
+    deps = [
+        ":value",
+        "@com_google_absl//absl/strings",
+    ],
 )
 
 cc_test(
@@ -115,6 +120,9 @@ cc_library(
         ":attribute",
         ":input_relation_fact",
         ":value",
+        "//src/common/logging",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -136,6 +144,7 @@ cc_test(
         ":input_relation_fact",
         ":value",
         "//src/common/testing:gtest",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -147,5 +156,6 @@ cc_test(
         ":raksha_relation_interface",
         ":value",
         "//src/common/testing:gtest",
+        "@com_google_absl//absl/strings",
     ],
 )

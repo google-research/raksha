@@ -32,6 +32,7 @@ cc_library(
         "//:__pkg__",
         "//src:__subpackages__",
     ] + frontend_packages,
+    deps = ["@com_google_absl//absl/strings"],
 )
 
 cc_library(
@@ -41,7 +42,11 @@ cc_library(
         "//:__pkg__",
         "//src:__subpackages__",
     ] + frontend_packages,
-    deps = [":policy"],
+    deps = [
+        ":policy",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+    ],
 )
 
 cc_library(
@@ -51,7 +56,11 @@ cc_library(
         "//:__pkg__",
         "//src:__subpackages__",
     ] + frontend_packages,
-    deps = [":policy"],
+    deps = [
+        ":policy",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+    ],
 )
 
 cc_library(
@@ -61,7 +70,11 @@ cc_library(
         "//:__pkg__",
         "//src:__subpackages__",
     ] + frontend_packages,
-    deps = [":policy"],
+    deps = [
+        ":policy",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+    ],
 )
 
 cc_library(

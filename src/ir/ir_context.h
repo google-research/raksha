@@ -65,12 +65,12 @@ class IRContext {
 
   // Returns the Operator with a particular name. If there is no
   // operator with that name, fail.
-  const Operator *GetOperator(std::string_view operators_name) const {
+  const Operator *GetOperator(absl::string_view operators_name) const {
     return operators_.GetNode(operators_name);
   }
 
   // Returns true if the operator is registered with this context.
-  bool IsRegisteredOperator(std::string_view operators_name) const {
+  bool IsRegisteredOperator(absl::string_view operators_name) const {
     return operators_.IsRegisteredNode(operators_name);
   }
 
@@ -81,12 +81,12 @@ class IRContext {
 
   // Returns the Storage with a particular name. If there is no
   // operator with that name, fail.
-  const Storage *GetStorage(std::string_view operators_name) const {
+  const Storage *GetStorage(absl::string_view operators_name) const {
     return storages_.GetNode(operators_name);
   }
 
   // Returns true if the operator is registered with this context.
-  bool IsRegisteredStorage(std::string_view operators_name) const {
+  bool IsRegisteredStorage(absl::string_view operators_name) const {
     return storages_.IsRegisteredNode(operators_name);
   }
 
@@ -114,13 +114,13 @@ class IRContext {
 
     // Returns the node with a particular name. If there is no
     // node with that name returns nullptr
-    const Node *GetNode(std::string_view node_name) const {
+    const Node *GetNode(absl::string_view node_name) const {
       auto find_res = nodes_.find(node_name);
       return find_res == nodes_.end() ? nullptr : find_res->second.get();
     }
 
     // Returns true if the node is registered with this context.
-    bool IsRegisteredNode(std::string_view node_name) const {
+    bool IsRegisteredNode(absl::string_view node_name) const {
       return nodes_.find(node_name) != nodes_.end();
     }
 

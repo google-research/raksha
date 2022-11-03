@@ -34,7 +34,7 @@ using ::testing::ValuesIn;
 
 class TagTransformOpTest
     : public ::testing::TestWithParam<
-          std::tuple<const ir::Block*, std::string_view, ir::Value,
+          std::tuple<const ir::Block*, absl::string_view, ir::Value,
                      std::vector<std::pair<std::string, ir::Value>>>> {
  public:
   TagTransformOpTest() { SqlOp::RegisterOperator<TagTransformOp>(context); }
@@ -100,7 +100,7 @@ TEST(TagTransformOpDeathTest, DuplicatePreconditionNamesAreDetected) {
 
 static testing::ExampleValueTestHelper example_helper;
 
-static const std::string_view kSampleRuleNames[] = {
+static const absl::string_view kSampleRuleNames[] = {
     "clear_milliseconds",
     "SSN",
     "ApprovedWindow",

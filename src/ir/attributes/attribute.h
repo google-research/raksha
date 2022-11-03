@@ -17,6 +17,7 @@
 #define SRC_IR_ATTRIBUTES_ATTRIBUTE_H_
 
 #include "absl/strings/str_format.h"
+#include "absl/strings/string_view.h"
 #include "src/common/containers/hash_map.h"
 #include "src/common/utils/intrusive_ptr.h"
 

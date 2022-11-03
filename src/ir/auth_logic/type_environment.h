@@ -31,7 +31,7 @@ class TypeEnvironment {
  public:
   TypeEnvironment(DeclarationEnvironment decl_env, const Program& prog);
 
-  datalog::ArgumentType GetTypingOrFatal(std::string_view argument_name);
+  datalog::ArgumentType GetTypingOrFatal(absl::string_view argument_name);
 
   const common::containers::HashMap<std::string, datalog::ArgumentType>&
   literal_type_map() const {

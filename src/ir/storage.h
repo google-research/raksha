@@ -24,7 +24,7 @@ namespace raksha::ir {
 // A class that represents a storage node.
 class Storage {
  public:
-  Storage(std::string_view name, types::Type type)
+  Storage(absl::string_view name, types::Type type)
       : name_(name), type_(std::move(type)) {}
 
   // Disable copy semantics.
@@ -34,7 +34,7 @@ class Storage {
   Storage(Storage&&) = default;
   Storage& operator=(Storage&&) = default;
 
-  std::string_view name() const { return name_; }
+  absl::string_view name() const { return name_; }
   const types::Type& type() const { return type_; }
 
   std::string ToString() const {

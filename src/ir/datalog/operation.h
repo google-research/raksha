@@ -17,8 +17,7 @@
 #ifndef SRC_IR_DATALOG_OPERATION_H_
 #define SRC_IR_DATALOG_OPERATION_H_
 
-#include <string_view>
-
+#include "absl/strings/string_view.h"
 #include "src/ir/datalog/attribute.h"
 #include "src/ir/datalog/input_relation_fact.h"
 #include "src/ir/datalog/value.h"
@@ -43,8 +42,8 @@ class IsOperationFact : public InputRelationFact<Operation> {
   IsOperationFact(IsOperationFact &&) = default;
   IsOperationFact &operator=(IsOperationFact &&) = default;
   virtual ~IsOperationFact() {}
-  static constexpr std::string_view relation_name() { return "isOperation"; }
-  std::string_view GetRelationName() const { return relation_name(); }
+  static constexpr absl::string_view relation_name() { return "isOperation"; }
+  absl::string_view GetRelationName() const { return relation_name(); }
 };
 
 }  // namespace raksha::ir::datalog

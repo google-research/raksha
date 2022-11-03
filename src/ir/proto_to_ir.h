@@ -37,7 +37,7 @@ class ProtoToIR {
   };
 
   static absl::StatusOr<Result> Convert(
-      IRContext& context, std::string_view irTranslationUnitJsonProto) {
+      IRContext& context, absl::string_view irTranslationUnitJsonProto) {
     proto::IrTranslationUnit irTranslationUnit;
     auto status = google::protobuf::util::JsonStringToMessage(irTranslationUnitJsonProto,
                                                     &irTranslationUnit);

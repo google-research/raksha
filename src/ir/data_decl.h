@@ -24,10 +24,10 @@ namespace raksha::ir {
 // A data declaration, which corresponds to an input or output of a block.
 class DataDecl {
  public:
-  DataDecl(std::string_view name, types::Type type)
+  DataDecl(absl::string_view name, types::Type type)
       : name_(name), type_(std::move(type)) {}
 
-  std::string_view name() const { return name_; }
+  absl::string_view name() const { return name_; }
   const types::Type& type() const { return type_; }
 
  private:
@@ -39,7 +39,7 @@ class DataDeclCollection {
  public:
   // Adds a declaration to the collection. Fails if there is already a
   // declaration with the given name.
-  const DataDecl& AddDecl(std::string_view name, types::Type type) {
+  const DataDecl& AddDecl(absl::string_view name, types::Type type) {
     auto insertion_result = decls_.insert(
         {std::string(name), std::make_unique<DataDecl>(name, std::move(type))});
     CHECK(insertion_result.second)
@@ -47,7 +47,7 @@ class DataDeclCollection {
     return *(insertion_result.first)->second.get();
   }
 
-  const DataDecl* FindDecl(std::string_view name) const {
+  const DataDecl* FindDecl(absl::string_view name) const {
     auto find_result = decls_.find(name);
     return (find_result == decls_.end()) ? nullptr : find_result->second.get();
   }

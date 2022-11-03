@@ -20,10 +20,10 @@
 namespace raksha::ir {
 namespace {
 
-class OperatorTest : public testing::TestWithParam<std::string_view> {};
+class OperatorTest : public testing::TestWithParam<absl::string_view> {};
 
 TEST_P(OperatorTest, NameIsCorrectlySet) {
-  std::string_view name = GetParam();
+  absl::string_view name = GetParam();
   Operator op(name);
   EXPECT_EQ(op.name(), name);
 }

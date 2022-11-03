@@ -32,6 +32,7 @@ cc_library(
     deps = [
         ":module",
         ":value",
+        "//src/common/containers:hash_map",
         "//src/ir/types",
     ],
 )
@@ -120,6 +121,7 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/ir/attributes:string_attribute",
         "//src/parser/ir:ir_parser",
+        "@com_google_absl//absl/strings",
         "@com_googlesource_code_re2//:re2",
     ],
 )
@@ -149,6 +151,7 @@ cc_library(
     name = "operator",
     hdrs = ["operator.h"],
     visibility = ["//src:__subpackages__"] + frontend_packages,
+    deps = ["@com_google_absl//absl/strings"],
 )
 
 cc_test(
@@ -186,10 +189,13 @@ cc_library(
     deps = [
         ":data_decl",
         ":operator",
+        ":ssa_names",
         ":value",
+        "//src/common/containers:hash_map",
         "//src/common/utils:types",
         "//src/ir/attributes:attribute",
         "//src/ir/types",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -207,6 +213,7 @@ cc_library(
     hdrs = ["ssa_names.h"],
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
+        ":operator",
         ":value",
         "//src/common/containers:hash_map",
     ],
@@ -228,6 +235,7 @@ cc_library(
     hdrs = ["storage.h"],
     deps = [
         "//src/ir/types",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],
 )
@@ -252,6 +260,7 @@ cc_library(
         "//src/common/utils:overloaded",
         "//src/common/utils:ranges",
         "//src/ir/types",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings:str_format",
     ],
 )
@@ -279,10 +288,12 @@ cc_library(
         "selector.h",
     ],
     deps = [
+        "//src/common/containers:hash_map",
         "//src/common/logging",
         "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/hash",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:variant",
     ],
 )
 
@@ -340,7 +351,9 @@ cc_library(
         ":module",
         ":ssa_names",
         ":value",
+        "//src/common/containers:hash_map",
         "//src/common/proto:json_util",
+        "//src/common/proto:protobuf",
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:float_attribute",
         "//src/ir/attributes:int_attribute",
@@ -359,6 +372,7 @@ cc_library(
         ":module",
         ":ssa_names",
         ":value",
+        "//src/common/containers:hash_map",
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:float_attribute",
         "//src/ir/attributes:int_attribute",

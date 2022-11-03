@@ -32,7 +32,7 @@ namespace {
 //
 // This is used in a few places in the translation, for example, to translate
 // "X says blah(args)" into "says_blah(X, args)".
-datalog::Predicate PushOntoPredicate(std::string_view modifier,
+datalog::Predicate PushOntoPredicate(absl::string_view modifier,
                                      std::vector<std::string> new_args,
                                      const datalog::Predicate& predicate) {
   std::string new_name = absl::StrCat(std::move(modifier), predicate.name());
@@ -47,7 +47,7 @@ datalog::Predicate PushOntoPredicate(std::string_view modifier,
 // This is a common case in this translation because it is used for
 // `x says blah(args)` and `x canActAs y` and other constructions involving a
 // principal name.
-datalog::Predicate PushPrincipal(std::string_view modifier,
+datalog::Predicate PushPrincipal(absl::string_view modifier,
                                  const Principal& principal,
                                  const datalog::Predicate& predicate) {
   return PushOntoPredicate(modifier, {principal.name()}, predicate);

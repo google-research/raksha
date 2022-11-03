@@ -14,8 +14,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 #include <string>
-#include <string_view>
 
+#include "absl/strings/string_view.h"
 #include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decode.h"
@@ -36,7 +36,7 @@ using ::testing::Combine;
 using ::testing::TestWithParam;
 using ::testing::ValuesIn;
 
-constexpr std::optional<std::string_view> kSampleExprNames[] = {
+constexpr std::optional<absl::string_view> kSampleExprNames[] = {
     {}, {"name1"}, {"another_name"}};
 
 // We test the decoding of the child `Operation`s in other tests. We also
@@ -47,7 +47,7 @@ constexpr std::optional<std::string_view> kSampleExprNames[] = {
 // generate the given number of `Literal` values on the input proto.
 class DecodeMergeOpTest
     : public TestWithParam<
-          std::tuple<std::optional<std::string_view>, uint64_t, uint64_t>> {
+          std::tuple<std::optional<absl::string_view>, uint64_t, uint64_t>> {
  protected:
   DecodeMergeOpTest() : ir_context_(), decoder_context_(ir_context_) {}
 

@@ -28,7 +28,7 @@ namespace raksha::frontends::sql {
 
 std::unique_ptr<LiteralOp> LiteralOp::Create(const ir::Block* parent_block,
                                              const ir::IRContext& context,
-                                             std::string_view literal) {
+                                             absl::string_view literal) {
   return std::make_unique<LiteralOp>(
       parent_block, *CHECK_NOTNULL(SqlOp::GetOperator<LiteralOp>(context)),
       ir::NamedAttributeMap(
@@ -38,7 +38,7 @@ std::unique_ptr<LiteralOp> LiteralOp::Create(const ir::Block* parent_block,
       /*impl_module=*/nullptr);
 }
 
-std::string_view LiteralOp::GetLiteralString() const {
+absl::string_view LiteralOp::GetLiteralString() const {
   auto find_result = attributes().find(kLiteralStringAttrName);
   CHECK(find_result != attributes().end());
   auto literal = find_result->second;

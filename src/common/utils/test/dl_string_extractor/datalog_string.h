@@ -17,8 +17,7 @@
 #ifndef SRC_COMMON_UTILS_TEST_DL_STRING_EXTRACTOR_DATALOG_STRING_H_
 #define SRC_COMMON_UTILS_TEST_DL_STRING_EXTRACTOR_DATALOG_STRING_H_
 
-#include <string>
-#include <string_view>
+#include "absl/strings/string_view.h"
 
 namespace raksha::utils::test::dl_string_extractor {
 
@@ -31,12 +30,11 @@ enum DatalogStringKind {
 class DatalogString {
  public:
   DatalogString(DatalogStringKind kind, std::string dl_string)
-      : kind_(kind), dl_string_(std::move(dl_string)) {}
+    : kind_(kind), dl_string_(std::move(dl_string)) { }
 
   DatalogStringKind kind() const { return kind_; }
 
-  std::string_view dl_string() const { return dl_string_; }
-
+  absl::string_view dl_string() const { return dl_string_; }
  private:
   DatalogStringKind kind_;
   std::string dl_string_;

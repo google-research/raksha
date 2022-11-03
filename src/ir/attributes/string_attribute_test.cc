@@ -23,13 +23,13 @@ namespace {
 TEST(StringAttributeKindTest, ConstantkAttributeKindIsString) {
   EXPECT_EQ(StringAttribute::kAttributeKind, AttributeBase::Kind::kString);
 }
-constexpr std::string_view kExampleStrings[] = {"good", "bad", "ugly",
-                                                "3242e323"};
+constexpr absl::string_view kExampleStrings[] = {"good", "bad", "ugly",
+                                                 "3242e323"};
 
-class StringAttributeTest : public testing::TestWithParam<std::string_view> {};
+class StringAttributeTest : public testing::TestWithParam<absl::string_view> {};
 
 TEST_P(StringAttributeTest, KindAndToStringWorks) {
-  std::string_view value = GetParam();
+  absl::string_view value = GetParam();
   auto string_attribute = StringAttribute::Create(value);
   EXPECT_EQ(string_attribute->kind(), StringAttribute::kAttributeKind);
   EXPECT_EQ(string_attribute->ToString(), absl::StrCat("\"", value, "\""));
@@ -40,7 +40,7 @@ INSTANTIATE_TEST_SUITE_P(StringAttributeTest, StringAttributeTest,
 
 class StringAttributeComparatorTest
     : public testing::TestWithParam<
-          std::tuple<std::string_view, std::string_view>> {};
+          std::tuple<absl::string_view, absl::string_view>> {};
 
 TEST_P(StringAttributeComparatorTest, EqualityWorksAsExpected) {
   const auto& [lhs, rhs] = GetParam();

@@ -42,7 +42,7 @@ class BlockBuilderTest : public testing::Test {
             },
             {}) {}
 
-  types::Type MakeTestEntityType(std::string_view schema_name) {
+  types::Type MakeTestEntityType(absl::string_view schema_name) {
     const types::Schema& schema =
         type_factory_.RegisterSchema(std::string(schema_name), {});
     return type_factory_.MakeEntityType(schema);
@@ -63,9 +63,9 @@ TEST_F(BlockBuilderTest, DefaultConstructorInitilizesModuleToNullptr) {
 }
 
 void CheckExpectedDecls(const DataDeclCollection& decls,
-                        std::string_view entity_key,
-                        std::string_view primitive_key,
-                        std::string_view schema_name) {
+                        absl::string_view entity_key,
+                        absl::string_view primitive_key,
+                        absl::string_view schema_name) {
   // TODO(#279): This will be simplified when types are canonicalized
   // and we have a nicer comparator.
   const DataDecl* lhs_decl = decls.FindDecl(entity_key);
@@ -292,7 +292,7 @@ class TestOperation : public Operation {
  public:
   static std::unique_ptr<Operation> Create(const Block* parent_block,
                                            IRContext& context,
-                                           std::string_view op_name) {
+                                           absl::string_view op_name) {
     if (!context.IsRegisteredOperator(op_name)) return nullptr;
     // `parent_block` is  nullptr if op_name is `core.merge` for death tests.
     return std::make_unique<Operation>(

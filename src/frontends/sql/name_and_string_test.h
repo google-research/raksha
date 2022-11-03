@@ -17,9 +17,8 @@
 #ifndef SRC_FRONTENDS_SQL_ID_NAME_AND_STRING_TEST_H_
 #define SRC_FRONTENDS_SQL_ID_NAME_AND_STRING_TEST_H_
 
-#include <string_view>
-
 #include "absl/strings/str_format.h"
+#include "absl/strings/string_view.h"
 #include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decode.h"
@@ -39,7 +38,7 @@ namespace raksha::frontends::sql {
 // each structure.
 class NameAndStringTest
     : public ::testing::TestWithParam<
-          std::tuple<std::optional<std::string_view>, std::string_view>> {
+          std::tuple<std::optional<absl::string_view>, absl::string_view>> {
  protected:
   NameAndStringTest() : ir_context_(), decoder_context_(ir_context_) {}
 

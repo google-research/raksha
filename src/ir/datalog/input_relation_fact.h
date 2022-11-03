@@ -36,7 +36,7 @@ class InputRelationFact {
   InputRelationFact(RelationParameterTypes &&...args)
       : relation_arguments_(std::forward<RelationParameterTypes>(args)...) {}
 
-  virtual std::string_view GetRelationName() const = 0;
+  virtual absl::string_view GetRelationName() const = 0;
 
   std::string ToDatalogString() const {
     return absl::StrFormat(R"(%s(%s).)", GetRelationName(),

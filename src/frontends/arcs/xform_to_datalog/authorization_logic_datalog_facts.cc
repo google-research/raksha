@@ -30,7 +30,7 @@ namespace raksha::frontends::arcs::xform_to_datalog {
 
 std::optional<AuthorizationLogicDatalogFacts>
 AuthorizationLogicDatalogFacts::create(const std::filesystem::path &program_dir,
-                                       std::string_view program) {
+                                       absl::string_view program) {
   const std::filesystem::path result_dir =
       std::filesystem::temp_directory_path();
 
@@ -39,7 +39,7 @@ AuthorizationLogicDatalogFacts::create(const std::filesystem::path &program_dir,
   // this purpose. We use an vector here and create the composite string to pass
   // into the Rust code with StrJoin to make the code a bit more readable and to
   // prevent typos changing the interpretation of the list.
-  const std::vector<std::string_view> kRelationsToNotDeclare{
+  const std::vector<absl::string_view> kRelationsToNotDeclare{
       "Principal",    "Tag",
       "AccessPath",   "says_isAccessPath",
       "says_isTag",   "says_isPrincipal",

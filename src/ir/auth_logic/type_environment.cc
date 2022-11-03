@@ -42,7 +42,7 @@ class TypeEnvironmentGenerationVisitor
   LiteralTypeMapType literal_type_map() { return literal_type_map_; }
 
  private:
-  void AddTyping(std::string_view arg_name, datalog::ArgumentType arg_type);
+  void AddTyping(absl::string_view arg_name, datalog::ArgumentType arg_type);
   Unit PreVisit(const Principal& principal);
   Unit Visit(const datalog::Predicate& pred);
   DeclarationEnvironment decl_env_;
@@ -50,7 +50,7 @@ class TypeEnvironmentGenerationVisitor
 };
 
 void TypeEnvironmentGenerationVisitor::AddTyping(
-    std::string_view arg_name, datalog::ArgumentType arg_type) {
+    absl::string_view arg_name, datalog::ArgumentType arg_type) {
   if (!IsNameConstant(arg_name)) {
     // This pass is only meant to find typings for constants,
     // so do nothing if this argument is not a constant.
@@ -117,7 +117,7 @@ TypeEnvironment::TypeEnvironment(DeclarationEnvironment decl_env,
 }
 
 datalog::ArgumentType TypeEnvironment::GetTypingOrFatal(
-    std::string_view argument_name) {
+    absl::string_view argument_name) {
   auto find_result = literal_type_map_.find(argument_name);
   CHECK(find_result != literal_type_map_.end())
       << "Could not find typing for argument " << argument_name;

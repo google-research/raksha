@@ -24,6 +24,7 @@
 #include "absl/flags/parse.h"
 #include "absl/flags/usage.h"
 #include "absl/strings/str_join.h"
+#include "absl/strings/string_view.h"
 #include "src/backends/policy_engine/souffle/datalog_lowering_visitor.h"
 #include "src/common/logging/logging.h"
 #include "src/parser/ir/ir_parser.h"

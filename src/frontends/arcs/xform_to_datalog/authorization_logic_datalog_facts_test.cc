@@ -18,11 +18,11 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <string_view>
 #include <vector>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
+#include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/test/utils.h"
 
@@ -38,18 +38,18 @@ TEST(Dummy, Dummy) { ASSERT_EQ(1, 1); }
 
 #else
 
-static const std::vector<std::string_view> programs = {
+static const std::vector<absl::string_view> programs = {
     "simple_auth_logic", "empty_auth_logic", "says_owns_tag"};
 
 class AuthorizationLogicDatalogFactsTest
-    : public ::testing::TestWithParam<std::string_view> {};
+    : public ::testing::TestWithParam<absl::string_view> {};
 
 TEST_P(AuthorizationLogicDatalogFactsTest, InvokesRustToolAndGeneratesOutput) {
-  std::string_view param = GetParam();
+  absl::string_view param = GetParam();
   fs::path test_data_dir = utils::test::GetTestDataDir(
       "src/frontends/arcs/xform_to_datalog/testdata");
-  auto auth_facts = AuthorizationLogicDatalogFacts::create(
-      test_data_dir.c_str(), absl::StrCat(param, ".auth"));
+  auto auth_facts =
+      AuthorizationLogicDatalogFacts::create(test_data_dir.c_str(), absl::StrCat(param, ".auth"));
   ASSERT_TRUE(auth_facts.has_value());
 
   std::vector<std::string> actual_datalog =

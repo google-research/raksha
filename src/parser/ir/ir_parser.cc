@@ -197,7 +197,7 @@ void IrProgramParser::ConstructModule(IrParser::ModuleContext& module_context) {
 /// This function produces an abstract syntax tree (AST) rooted with a
 /// program node when given the textual representation of a program.
 IrProgramParser::Result IrProgramParser::ParseProgram(
-    std::string_view prog_text) {
+    absl::string_view prog_text) {
   // Provide the input text in a stream
   antlr4::ANTLRInputStream input(prog_text);
   // Creates a lexer from input

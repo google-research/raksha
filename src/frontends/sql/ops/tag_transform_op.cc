@@ -28,7 +28,7 @@ namespace raksha::frontends::sql {
 
 std::unique_ptr<TagTransformOp> TagTransformOp::Create(
     const ir::Block* parent_block, const ir::IRContext& context,
-    std::string_view rule_name, ir::Value transformed_value,
+    absl::string_view rule_name, ir::Value transformed_value,
     const std::vector<std::pair<std::string, ir::Value>>& preconditions) {
   ir::ValueList inputs;
   ir::NamedAttributeMap attributes;
@@ -76,7 +76,7 @@ TagTransformOp::GetPreconditions() const {
   return result;
 }
 
-std::string_view TagTransformOp::GetRuleName() const {
+absl::string_view TagTransformOp::GetRuleName() const {
   const ir::NamedAttributeMap& attribute_map = attributes();
   auto find_result = attribute_map.find(kRuleNameAttribute);
   CHECK(find_result != attribute_map.end());

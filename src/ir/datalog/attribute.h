@@ -18,8 +18,8 @@
 #define SRC_IR_DATALOG_ATTRIBUTE_H_
 
 #include <memory>
-#include <string_view>
 
+#include "absl/strings/string_view.h"
 #include "src/ir/datalog/value.h"
 
 namespace raksha::ir::datalog {
@@ -29,7 +29,7 @@ using AttributePayload = Adt;
 class Attribute
     : public Record<Symbol /*attr_name*/, AttributePayload /*attr_payload*/> {
  public:
-  explicit Attribute(std::string_view name, AttributePayload payload)
+  explicit Attribute(absl::string_view name, AttributePayload payload)
       : Record(Symbol(name), std::move(payload)) {}
 
   class String : public AttributePayload {
@@ -39,7 +39,7 @@ class Attribute
       arguments_.push_back(std::make_unique<Symbol>(std::move(symbol)));
     }
 
-    explicit String(std::string_view symbol) : String(Symbol(symbol)) {}
+    explicit String(absl::string_view symbol) : String(Symbol(symbol)) {}
   };
 
   class Float : public AttributePayload {
@@ -47,7 +47,8 @@ class Attribute
     explicit Float(datalog::Float number)
         : AttributePayload(kFloatAttributePayloadName) {
       // NOTE: unique_ptr<datalog::Float> and **not** unique_ptr<Float>!
-      arguments_.push_back(std::make_unique<datalog::Float>(std::move(number)));
+      arguments_.push_back(
+          std::make_unique<datalog::Float>(std::move(number)));
     }
 
     explicit Float(double number) : Float(datalog::Float(number)) {}
@@ -55,14 +56,14 @@ class Attribute
 
   class Number : public AttributePayload {
    public:
-    template <typename T>
+    template<typename T>
     Number(T value) = delete;
 
     Number(double value) = delete;
     Number(float value) = delete;
     Number(datalog::Float value) = delete;
 
-    explicit Number(int number) : Number(datalog::Number(number)) {}
+    explicit Number(int number): Number(datalog::Number(number)) {}
     explicit Number(datalog::Number number)
         : AttributePayload(kNumberAttributePayloadName) {
       // NOTE: unique_ptr<datalog::Number> and **not** unique_ptr<Number>!
@@ -74,11 +75,11 @@ class Attribute
   };
 
  private:
-  static constexpr std::string_view kStringAttributePayloadName =
+  static constexpr absl::string_view kStringAttributePayloadName =
       "StringAttributePayload";
-  static constexpr std::string_view kFloatAttributePayloadName =
+  static constexpr absl::string_view kFloatAttributePayloadName =
       "FloatAttributePayload";
-  static constexpr std::string_view kNumberAttributePayloadName =
+  static constexpr absl::string_view kNumberAttributePayloadName =
       "NumberAttributePayload";
 };
 

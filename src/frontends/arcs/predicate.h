@@ -18,9 +18,9 @@
 #define SRC_FRONTENDS_ARCS_PREDICATES_PREDICATE_H_
 
 #include <memory>
-#include <string_view>
 
 #include "absl/strings/str_format.h"
+#include "absl/strings/string_view.h"
 #include "src/frontends/arcs/access_path.h"
 
 // This file includes Predicate and its subclasses. These classes are boolean
@@ -74,7 +74,7 @@ class And : public Predicate {
 
   std::string ToDatalogRuleBody(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const override {
-    constexpr std::string_view kFormatString = R"(((%s), (%s)))";
+    constexpr absl::string_view kFormatString = R"(((%s), (%s)))";
     return absl::StrFormat(kFormatString, lhs_->ToDatalogRuleBody(ap, ctxt),
                            rhs_->ToDatalogRuleBody(ap, ctxt));
   }
@@ -114,7 +114,7 @@ class Implies : public Predicate {
   std::string ToDatalogRuleBody(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const override {
     std::string antecedent_str = antecedent_->ToDatalogRuleBody(ap, ctxt);
-    constexpr std::string_view kFormatString = R"(!(%s); ((%s), (%s)))";
+    constexpr absl::string_view kFormatString = R"(!(%s); ((%s), (%s)))";
     return absl::StrFormat(kFormatString, antecedent_str, antecedent_str,
                            consequent_->ToDatalogRuleBody(ap, ctxt));
   }
@@ -147,7 +147,7 @@ class Not : public Predicate {
 
   std::string ToDatalogRuleBody(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const override {
-    constexpr std::string_view kFormatString = R"(isPrincipal(owner), !(%s))";
+    constexpr absl::string_view kFormatString = R"(isPrincipal(owner), !(%s))";
     return absl::StrFormat(kFormatString,
                            negated_predicate_->ToDatalogRuleBody(ap, ctxt));
   }
@@ -178,7 +178,7 @@ class Or : public Predicate {
 
   std::string ToDatalogRuleBody(
       const AccessPath &ap, const DatalogPrintContext &ctxt) const override {
-    constexpr std::string_view kFormatString = R"(((%s); (%s)))";
+    constexpr absl::string_view kFormatString = R"(((%s); (%s)))";
     return absl::StrFormat(kFormatString, lhs_->ToDatalogRuleBody(ap, ctxt),
                            rhs_->ToDatalogRuleBody(ap, ctxt));
   }
@@ -211,7 +211,7 @@ class TagPresence : public Predicate {
   std::string ToDatalogRuleBody(
       const AccessPath &access_path,
       const DatalogPrintContext &ctxt) const override {
-    constexpr std::string_view kFormatStr = R"(mayHaveTag("%s", owner, "%s"))";
+    constexpr absl::string_view kFormatStr = R"(mayHaveTag("%s", owner, "%s"))";
     return absl::StrFormat(kFormatStr, access_path.ToDatalog(ctxt), tag_);
   }
 
@@ -232,6 +232,6 @@ class TagPresence : public Predicate {
   std::string tag_;
 };
 
-}  // namespace raksha::frontends::arcs
+}  // namespace raksha::ir
 
 #endif  // SRC_FRONTENDS_ARCS_PREDICATES_PREDICATE_H_

@@ -141,6 +141,7 @@ cc_library(
         "//src/frontends/sql:sql_ir_cc_proto",
         "//src/frontends/sql/testing:utils",
         "//src/ir:ir_context",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],
 )
@@ -155,6 +156,7 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/frontends/sql:sql_ir_cc_proto",
         "//src/frontends/sql/testing:utils",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -167,6 +169,7 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/frontends/sql/ops:literal_op",
         "//src/frontends/sql/testing:utils",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -177,6 +180,7 @@ cc_test(
         ":decoder_context",
         ":name_and_string_test",
         "//src/common/testing:gtest",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -191,6 +195,7 @@ cc_test(
         "//src/frontends/sql:sql_ir_cc_proto",
         "//src/frontends/sql/ops:merge_op",
         "//src/frontends/sql/testing:utils",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -207,6 +212,7 @@ cc_test(
         "//src/frontends/sql:sql_ir_cc_proto",
         "//src/frontends/sql/ops:tag_transform_op",
         "//src/frontends/sql/testing:utils",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],
 )

@@ -21,6 +21,7 @@
 
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/string_view.h"
 #include "src/common/logging/logging.h"
 
 namespace raksha::common::utils {

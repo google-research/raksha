@@ -16,8 +16,8 @@
 
 #include "src/frontends/arcs/xform_to_datalog/manifest_datalog_facts.h"
 
-#include "google/protobuf/text_format.h"
 #include "absl/strings/substitute.h"
+#include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/ranges.h"
 #include "src/frontends/arcs/datalog_print_context.h"
@@ -306,7 +306,8 @@ class ParseBigManifestTest : public testing::Test {
  public:
   ParseBigManifestTest() {
     ::arcs::ManifestProto manifest_proto;
-    google::protobuf::TextFormat::ParseFromString(kManifestTextproto, &manifest_proto);
+    google::protobuf::TextFormat::ParseFromString(kManifestTextproto,
+                                                  &manifest_proto);
     system_spec_ = arcs::proto::Decode(type_factory, manifest_proto);
     CHECK(system_spec_ != nullptr);
     datalog_facts_ = ManifestDatalogFacts::CreateFromManifestProto(
@@ -342,7 +343,7 @@ TEST_F(ParseBigManifestTest, ManifestProtoClaimsTest) {
       testing::UnorderedElementsAreArray(kExpectedClaimStrings));
 }
 
-static constexpr std::string_view kPattern =
+static constexpr absl::string_view kPattern =
     R"(isCheck("$0", "$1"). check("$0", owner, "$1") :-
   ownsAccessPath(owner, "$1"), mayHaveTag("$1", owner, "$2").)";
 

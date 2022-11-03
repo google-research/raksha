@@ -26,15 +26,15 @@ namespace raksha::frontends::sql {
 
 class LiteralOp : public SqlOp {
  public:
-  static constexpr std::string_view kLiteralStringAttrName = "literal_string";
+  static constexpr absl::string_view kLiteralStringAttrName = "literal_string";
 
   // Constructs a LiteralOp.
   static std::unique_ptr<LiteralOp> Create(const ir::Block* parent_block,
                                            const ir::IRContext& context,
-                                           std::string_view literal);
+                                           absl::string_view literal);
 
   // Returns the literal string associated with the operation.
-  std::string_view GetLiteralString() const;
+  absl::string_view GetLiteralString() const;
 
  private:
   // Inherit constructors.

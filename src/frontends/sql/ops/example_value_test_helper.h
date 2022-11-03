@@ -16,8 +16,7 @@
 #ifndef SRC_FRONTENDS_SQL_OPS_EXAMPLE_VALUE_TEST_HELPER_H_
 #define SRC_FRONTENDS_SQL_OPS_EXAMPLE_VALUE_TEST_HELPER_H_
 
-#include <string_view>
-
+#include "absl/strings/string_view.h"
 #include "src/ir/ir_context.h"
 #include "src/ir/module.h"
 #include "src/ir/value.h"
@@ -30,11 +29,11 @@ class ExampleValueTestHelper {
   ExampleValueTestHelper()
       : operator_("example"), operation_(nullptr, operator_, {}, {}) {}
 
-  ir::Value GetOperationResult(std::string_view name) const {
+  ir::Value GetOperationResult(absl::string_view name) const {
     return ir::Value(ir::value::OperationResult(operation_, name));
   }
 
-  ir::Value GetBlockArgument(std::string_view name) const {
+  ir::Value GetBlockArgument(absl::string_view name) const {
     return ir::Value(ir::value::BlockArgument(block_, name));
   }
 

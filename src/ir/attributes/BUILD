@@ -29,6 +29,7 @@ cc_library(
     deps = [
         "//src/common/containers:hash_map",
         "//src/common/utils:intrusive_ptr",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],
 )
@@ -93,6 +94,8 @@ cc_library(
     deps = [
         ":attribute",
         "//src/common/utils:intrusive_ptr",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 

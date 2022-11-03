@@ -16,15 +16,13 @@
 
 #include "src/ir/auth_logic/is_name_constant.h"
 
-#include <string_view>
-
 #include "absl/strings/match.h"
 #include "absl/strings/numbers.h"
 
 namespace raksha::ir::auth_logic {
 
 
-bool IsNameConstant(std::string_view id) {
+bool IsNameConstant(absl::string_view id) {
   if (absl::StartsWith(id, "\"") && absl::EndsWith(id, "\"")) {
     return true;
   } else {

@@ -67,7 +67,7 @@ class SsaNames {
   template <typename T>
   class IDManager {
    public:
-    IDManager(std::string_view prefix) : prefix_(prefix) {}
+    IDManager(absl::string_view prefix) : prefix_(prefix) {}
 
     ID GetOrCreateID(T entity) {
       // Note that if `entity` is already in the map, the `insert` call below

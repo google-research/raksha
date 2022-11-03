@@ -17,16 +17,19 @@
 #define SRC_FRONTENDS_ARCS_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
 
 #include <filesystem>
-#include <string_view>
 #include <vector>
+
+#include "absl/strings/string_view.h"
 
 namespace raksha::frontends::arcs::xform_to_datalog {
 
 int GenerateDatalogFactsFromAuthorizationLogic(
-    std::string_view program, const std::filesystem::path &program_dir,
+    absl::string_view program,
+    const std::filesystem::path &program_dir,
     const std::filesystem::path &result_dir,
-    const std::vector<std::string_view> &relations_to_not_declare);
+    const std::vector<absl::string_view> &relations_to_not_declare);
 
 }
 
 #endif  // SRC_FRONTENDS_ARCS_XFORM_TO_DATALOG_AUTHORIZATION_LOGIC_H_
+

@@ -30,7 +30,7 @@ namespace {
 
 template <typename F>
 absl::Status WriteFactsToFile(const std::filesystem::path &facts_path,
-                              std::string_view relation_name, const F &facts) {
+                              absl::string_view relation_name, const F &facts) {
   return WriteFactsStringToFactsFile(
       facts_path, relation_name,
       absl::StrJoin(facts, "\n", [](std::string *out, const auto &arg) {
@@ -53,7 +53,7 @@ absl::Status RakshaDatalogFacts::DumpFactsToDirectory(
   auto status =
       WriteFactsToFile(facts_path, "isOperation", is_operation_facts_);
   if (!status.ok()) return status;
-  for (std::string_view name : empty_relations) {
+  for (absl::string_view name : empty_relations) {
     status = WriteFactsStringToFactsFile(facts_path, name, "");
     if (!status.ok()) return status;
   }

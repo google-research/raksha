@@ -33,7 +33,7 @@ class RelationDeclarationEnvironmentVisitor
 
  private:
   void AddDeclaration(const datalog::RelationDeclaration& rel_decl) {
-    std::string_view rel_name = rel_decl.relation_name();
+    absl::string_view rel_name = rel_decl.relation_name();
     if (decl_map_.find(rel_name) == decl_map_.end()) {
       decl_map_.insert({std::string{rel_decl.relation_name()}, rel_decl});
     } else {
@@ -61,7 +61,7 @@ DeclarationEnvironment::DeclarationEnvironment(const Program& prog) {
 }
 
 datalog::RelationDeclaration DeclarationEnvironment::GetDeclarationOrFatal(
-    std::string_view relation_name) const {
+    absl::string_view relation_name) const {
   auto find_result = inner_map_.find(relation_name);
   CHECK(find_result != inner_map_.end())
       << "could not find declaration for relation " << relation_name;

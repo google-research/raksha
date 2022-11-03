@@ -24,9 +24,9 @@
 #include "authorization_logic.h"
 
 #include <filesystem>
-#include <string_view>
 
 #include "absl/strings/str_join.h"
+#include "absl/strings/string_view.h"
 #include "src/common/logging/logging.h"
 
 // For now, we need to be able to disable authorization logic to smooth the
@@ -43,9 +43,9 @@ extern "C" int generate_datalog_facts_from_authorization_logic(
 namespace raksha::frontends::arcs::xform_to_datalog {
 
 int GenerateDatalogFactsFromAuthorizationLogic(
-    std::string_view program, const std::filesystem::path& program_dir,
+    absl::string_view program, const std::filesystem::path& program_dir,
     const std::filesystem::path& result_dir,
-    const std::vector<std::string_view>& relations_to_not_declare) {
+    const std::vector<absl::string_view>& relations_to_not_declare) {
   const std::string relations_to_not_declare_str =
       absl::StrJoin(relations_to_not_declare, ",");
 

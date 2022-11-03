@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-#include <string_view>
-
-#include "absl/strings/match.h"
 #include "absl/strings/numbers.h"
+#include "absl/strings/string_view.h"
+#include "absl/strings/match.h"
 
 #ifndef SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_
 #define SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_
 
 namespace raksha::ir::auth_logic {
 
-// Determines if an identifier (which may be an argument of a predicate
+// Determine if an identifier (which may be an argument of a predicate
 // or a principal name) is a constant or variable.
 // TODO(#673 aferr) it would be better to refactor the AST so that
 // identifiers are a separate AST node with constant and non-constant
 // children determined at parse time rather than here since
 // this information is available at parse time.
-bool IsNameConstant(std::string_view id);
+bool IsNameConstant(absl::string_view id);
 
-};  // namespace raksha::ir::auth_logic
+}; // namespace raksha::ir::auth_logic
 
 #endif  // SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_

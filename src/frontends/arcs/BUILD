@@ -58,8 +58,11 @@ cc_library(
         "access_path_root.h",
     ],
     deps = [
+        "//src/common/containers:hash_map",
         "//src/common/logging",
         "//src/ir:access_path_selectors",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/hash",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:variant",
     ],
@@ -113,6 +116,7 @@ cc_test(
     name = "tag_check_test",
     srcs = ["tag_check_test.cc"],
     deps = [
+        ":access_path",
         ":arcs",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
@@ -143,6 +147,7 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/frontends/arcs/proto:access_path",
         "//src/frontends/arcs/proto:derives_from_claim",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],
 )

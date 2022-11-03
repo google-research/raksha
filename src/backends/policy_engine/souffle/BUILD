@@ -333,11 +333,13 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/ir:block_builder",
         "//src/ir:module",
+        "//src/ir/attributes:attribute",
         "//src/ir/attributes:float_attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "//src/ir/datalog:raksha_relation_interface",
         "//src/ir/datalog:value",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -404,6 +406,8 @@ cc_library(
         "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:dp_policy_verifier_epsilon_4_with_auth_logic_lib",
         "//src/common/utils:filesystem",
         "//src/ir:module",
+        "@com_google_absl//absl/container:inlined_vector",
+        "@com_google_absl//absl/strings",
         "@souffle//:souffle_include_lib",
     ],
 )
@@ -432,6 +436,7 @@ cc_library(
         "//src/backends/policy_engine:policy_checker",
         "//src/common/utils:filesystem",
         "//src/ir:module",
+        "@com_google_absl//absl/strings",
         "@souffle//:souffle_include_lib",
     ],
 )
@@ -466,6 +471,7 @@ cc_library(
     hdrs = ["utils.h"],
     deps = [
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],
 )

@@ -19,6 +19,7 @@
 #include <filesystem>
 #include <optional>
 
+#include "absl/strings/string_view.h"
 #include "src/backends/policy_engine/policy.h"
 
 namespace raksha::backends::policy_engine {

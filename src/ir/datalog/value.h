@@ -18,12 +18,12 @@
 #define SRC_IR_DATALOG_VALUE_H_
 
 #include <string>
-#include <string_view>
 #include <tuple>
 #include <variant>
 
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
+#include "absl/strings/string_view.h"
 
 namespace raksha::ir::datalog {
 
@@ -66,7 +66,7 @@ class Number : public Value {
 // Corresponds to Souffle's `symbol` type.
 class Symbol : public Value {
  public:
-  explicit Symbol(std::string_view value) : symbol_value_(value) {}
+  explicit Symbol(absl::string_view value) : symbol_value_(value) {}
 
   std::string ToDatalogString() const override {
     return absl::StrFormat(R"("%s")", symbol_value_);
@@ -105,7 +105,7 @@ class Record : public Value {
 
 class Adt : public Value {
  public:
-  explicit Adt(std::string_view branch_name) : branch_name_(branch_name) {}
+  explicit Adt(absl::string_view branch_name) : branch_name_(branch_name) {}
 
   std::string ToDatalogString() const {
     return absl::StrFormat(
@@ -119,7 +119,7 @@ class Adt : public Value {
   std::vector<std::unique_ptr<Value>> arguments_;
 
  private:
-  std::string_view branch_name_;
+  absl::string_view branch_name_;
 };
 
 }  // namespace raksha::ir::datalog

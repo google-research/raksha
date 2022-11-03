@@ -29,7 +29,7 @@ namespace raksha::frontends::arcs {
 
 class ToDatalogRuleBodyTest
     : public testing::TestWithParam<std::tuple<
-          std::tuple<std::string_view, std::string_view>, AccessPath>> {
+          std::tuple<absl::string_view, absl::string_view>, AccessPath>> {
  public:
   explicit ToDatalogRuleBodyTest() : access_path_(std::get<1>(GetParam())) {
     const auto &[textproto, expected_rule_body_format] =

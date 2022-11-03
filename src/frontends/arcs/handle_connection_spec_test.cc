@@ -18,10 +18,10 @@
 
 #include "google/protobuf/text_format.h"
 #include "google/protobuf/util/message_differencer.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/arcs/proto/handle_connection_spec.h"
 #include "src/ir/types/type_factory.h"
+#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::frontends::arcs {
 
@@ -43,7 +43,8 @@ TEST_P(RoundTripHandleConnectionSpecProtoTest,
   ProtoStringAndExpectations info = GetParam();
 
   ::arcs::HandleConnectionSpecProto original_proto;
-  google::protobuf::TextFormat::ParseFromString(info.proto_str, &original_proto);
+  google::protobuf::TextFormat::ParseFromString(info.proto_str,
+                                                &original_proto);
   HandleConnectionSpec handle_connection_spec =
       proto::Decode(type_factory_, original_proto);
 
@@ -53,8 +54,8 @@ TEST_P(RoundTripHandleConnectionSpecProtoTest,
 
   ::arcs::HandleConnectionSpecProto result_proto =
       proto::Encode(handle_connection_spec);
-  ASSERT_TRUE(
-      google::protobuf::util::MessageDifferencer::Equals(original_proto, result_proto));
+  ASSERT_TRUE(google::protobuf::util::MessageDifferencer::Equals(original_proto,
+                                                                 result_proto));
 }
 
 // Note: each of these protos has a type field that is just a TEXT primitive.
@@ -89,7 +90,7 @@ struct ProtoStringAndExpectedAccessPathPieces {
 
 class GetAccessPathTest
     : public testing::TestWithParam<std::tuple<
-          ProtoStringAndExpectedAccessPathPieces, std::string_view>> {
+          ProtoStringAndExpectedAccessPathPieces, absl::string_view>> {
  protected:
   ir::types::TypeFactory type_factory_;
 };
@@ -117,8 +118,8 @@ TEST_P(GetAccessPathTest, GetAccessPathTest) {
 }
 
 // Just some different strings that could be used as particle specs.
-static std::string_view sample_particle_spec_names[] = {"ParticleSpec", "PS",
-                                                        "P1", "P2"};
+static absl::string_view sample_particle_spec_names[] = {"ParticleSpec", "PS",
+                                                         "P1", "P2"};
 
 static ProtoStringAndExpectedAccessPathPieces protos_and_access_path_info[] = {
     {.textproto =

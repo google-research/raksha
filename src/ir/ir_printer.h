@@ -92,7 +92,7 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
   }
 
   Unit PreVisit(const Operation& operation) override {
-    constexpr std::string_view kOperationFormat = "%s = %s [%s](%s)";
+    constexpr absl::string_view kOperationFormat = "%s = %s [%s](%s)";
 
     // We want the attribute names to print in a stable order. This means that
     // we cannot just print from the attribute map directly. Gather the names
@@ -146,14 +146,14 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
   static std::string PrintNamedMapInNameOrder(
       const common::containers::HashMap<std::string, T>& map_to_print,
       F value_pretty_printer) {
-    std::vector<std::string_view> names;
+    std::vector<absl::string_view> names;
     names.reserve(map_to_print.size());
     for (auto& key_value_pair : map_to_print) {
       names.push_back(key_value_pair.first);
     }
     std::sort(names.begin(), names.end());
     return absl::StrJoin(
-        names, ", ", [&](std::string* out, const std::string_view name) {
+        names, ", ", [&](std::string* out, const absl::string_view name) {
           absl::StrAppend(out, name, ": ",
                           value_pretty_printer(map_to_print.at(name)));
         });

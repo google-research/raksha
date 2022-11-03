@@ -18,15 +18,15 @@
 #define SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_UTILS_H_
 
 #include <filesystem>
-#include <string_view>
 
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 
 namespace raksha::backends::policy_engine::souffle {
 
 absl::Status WriteFactsStringToFactsFile(
     const std::filesystem::path &facts_directory_path,
-    std::string_view relation_name, std::string_view facts_string);
+    absl::string_view relation_name, absl::string_view facts_string);
 
 }  // namespace raksha::backends::policy_engine::souffle
 

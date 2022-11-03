@@ -37,7 +37,7 @@ class DatalogLoweringVisitor
       : ssa_names_(std::move(ssa_names)) {}
   // We currently don't have any owner information when outputting IR. We don't
   // need it yet, really, but we do need to output something.
-  static constexpr std::string_view kDefaultPrincipal = "sql";
+  static constexpr absl::string_view kDefaultPrincipal = "sql";
 
   Unit PreVisit(const ir::Operation &operation) override;
 

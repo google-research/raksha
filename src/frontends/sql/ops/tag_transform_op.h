@@ -26,12 +26,12 @@ namespace raksha::frontends::sql {
 
 class TagTransformOp : public SqlOp {
  public:
-  static constexpr std::string_view kRuleNameAttribute = "rule_name";
+  static constexpr absl::string_view kRuleNameAttribute = "rule_name";
 
   // Constructs a TagTransformOp.
   static std::unique_ptr<TagTransformOp> Create(
       const ir::Block* parent_block, const ir::IRContext& context,
-      std::string_view rule_name, ir::Value transformed_value,
+      absl::string_view rule_name, ir::Value transformed_value,
       const std::vector<std::pair<std::string, ir::Value>>& preconditions);
 
   // Returns the value that is being transformed by this op.
@@ -40,7 +40,7 @@ class TagTransformOp : public SqlOp {
   // Returns the preconditions.
   common::containers::HashMap<std::string, ir::Value> GetPreconditions() const;
 
-  std::string_view GetRuleName() const;
+  absl::string_view GetRuleName() const;
 
  private:
   // Inherit constructors.

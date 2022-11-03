@@ -16,8 +16,7 @@
 
 #include "src/ir/datalog/input_relation_fact.h"
 
-#include <string_view>
-
+#include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/datalog/value.h"
 
@@ -31,25 +30,25 @@ class IsAccessPathFact : public InputRelationFact<Symbol> {
  public:
   using InputRelationFact::InputRelationFact;
   virtual ~IsAccessPathFact() {}
-  static constexpr std::string_view relation_name() { return "isAccessPath"; }
-  std::string_view GetRelationName() const override { return relation_name(); }
+  static constexpr absl::string_view relation_name() { return "isAccessPath"; }
+  absl::string_view GetRelationName() const override { return relation_name(); }
 };
 
-class IsAccessPathFactTest : public TestWithParam<std::string_view> {};
+class IsAccessPathFactTest : public TestWithParam<absl::string_view> {};
 
 TEST_P(IsAccessPathFactTest, IsAccessPathFactTest) {
-  std::string_view symbol_string = GetParam();
+  absl::string_view symbol_string = GetParam();
   EXPECT_EQ(IsAccessPathFact(Symbol(symbol_string)).ToDatalogString(),
             absl::StrFormat(R"(isAccessPath("%s").)", symbol_string));
 }
 
 TEST_P(IsAccessPathFactTest, ToDatalogFactsFileStringTest) {
-  std::string_view symbol_string = GetParam();
+  absl::string_view symbol_string = GetParam();
   EXPECT_EQ(IsAccessPathFact(Symbol(symbol_string)).ToDatalogFactsFileString(),
             absl::StrFormat(R"("%s")", symbol_string));
 }
 
-static const std::string_view kSampleAccessPathStrings[] = {"", "P1.foo",
+static const absl::string_view kSampleAccessPathStrings[] = {"", "P1.foo",
                                                              "P2.handle1.x"};
 
 INSTANTIATE_TEST_SUITE_P(IsAccessPathFactTest, IsAccessPathFactTest,
@@ -72,8 +71,8 @@ class OneOfEachFact
  public:
   using InputRelationFact::InputRelationFact;
   virtual ~OneOfEachFact() {}
-  static constexpr std::string_view relation_name() { return "oneOfEach"; }
-  std::string_view GetRelationName() const override { return relation_name(); }
+  static constexpr absl::string_view relation_name() { return "oneOfEach"; }
+  absl::string_view GetRelationName() const override { return relation_name(); }
 };
 
 TEST(OneOfEachFactTest, OneOfEachFactTest) {

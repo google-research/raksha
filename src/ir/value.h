@@ -44,7 +44,7 @@ namespace value {
 template <typename T>
 class NamedValue {
  public:
-  NamedValue(const T& element, std::string_view name)
+  NamedValue(const T& element, absl::string_view name)
       : element_(&element), name_(name) {}
 
   NamedValue(const NamedValue&) = default;
@@ -58,7 +58,7 @@ class NamedValue {
   }
 
   const T& element() const { return *element_; }
-  std::string_view name() const { return name_; }
+  absl::string_view name() const { return name_; }
 
  protected:
   bool operator==(const NamedValue<T>& other) const {

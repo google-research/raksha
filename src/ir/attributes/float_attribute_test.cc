@@ -25,7 +25,7 @@ TEST(FloatAttributeKindTest, ConstantkAttributeKindIsFloat) {
 }
 
 class FloatAttributeTest
-    : public testing::TestWithParam<std::pair<double, std::string_view>> {};
+    : public testing::TestWithParam<std::pair<double, absl::string_view>> {};
 
 TEST_P(FloatAttributeTest, KindAndToStringWorks) {
   const auto& [value, string_rep] = GetParam();
