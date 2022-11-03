@@ -64,7 +64,6 @@ TEST(EmitterTestSuite, EmptyAuthLogicTest) {
 .type Number <: symbol
 .decl grounded_dummy(dummy_param : DummyType)
 .decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
-.decl says_isNumber(speaker : Principal, x : Number)
 grounded_dummy("dummy_var").
 )";
   std::string actual = SouffleEmitter::EmitProgram(
@@ -78,7 +77,6 @@ TEST(EmitterTestSuite, SimpleTest) {
 .type Number <: symbol
 .decl grounded_dummy(dummy_param : DummyType)
 .decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
-.decl says_isNumber(speaker : Principal, x : Number)
 says_foo(TestPrincipal, bar, baz).
 grounded_dummy("dummy_var").
 )";
@@ -106,7 +104,6 @@ TEST(EmitterTestSuite, CanSayTest) {
 .decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
 .decl says_canSay_grantAccess(speaker : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
 .decl says_grantAccess(speaker : Principal, x0 : Principal, x1 : FileName)
-.decl says_isNumber(speaker : Principal, x : Number)
 says_grantAccess(TestSpeaker, secretFile) :- says_grantAccess(x__1, secretFile), says_canSay_grantAccess(TestSpeaker, x__1, secretFile).
 says_canSay_grantAccess(TestSpeaker, PrincipalA, secretFile).
 grounded_dummy("dummy_var").
@@ -137,7 +134,6 @@ TEST(EmitterTestSuite, FloatCanSayTest) {
 .decl says_canSay_canSay_grantAccess(speaker : Principal, delegatee2 : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
 .decl says_canSay_grantAccess(speaker : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
 .decl says_grantAccess(speaker : Principal, x0 : Principal, x1 : FileName)
-.decl says_isNumber(speaker : Principal, x : Number)
 says_grantAccess(TestSpeaker, secretFile) :- says_grantAccess(x__1, secretFile), says_canSay_grantAccess(TestSpeaker, x__1, secretFile).
 says_canSay_grantAccess(TestSpeaker, PrincipalA, secretFile) :- says_canSay_grantAccess(x__2, PrincipalA, secretFile), says_canSay_canSay_grantAccess(TestSpeaker, x__2, PrincipalA, secretFile).
 says_canSay_canSay_grantAccess(TestSpeaker, PrincipalB, PrincipalA, secretFile).

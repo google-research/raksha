@@ -414,13 +414,6 @@ LoweringToDatalogPass::RelationDeclarationToDLIR(
       "canActAs", false,
       {datalog::Argument("p1", datalog::ArgumentType::MakePrincipalType()),
        datalog::Argument("p2", datalog::ArgumentType::MakePrincipalType())}));
-  // Another declaration "isNumber" added aa a work around for
-  // universe_translations. To be removed after adding parser for
-  // universe_translations. Declaration being added is
-  //.decl isNumber(x : Number)
-  transformed_declarations.push_back(datalog::RelationDeclaration(
-      "isNumber", false,
-      {datalog::Argument("x", datalog::ArgumentType::MakeNumberType())}));
   // The translated declarations are all extended with "says_" and a speaker
   // argument
   std::vector<datalog::RelationDeclaration>

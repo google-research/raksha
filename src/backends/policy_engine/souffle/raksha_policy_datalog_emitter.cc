@@ -28,6 +28,7 @@
 #include "src/ir/auth_logic/ast_construction.h"
 #include "src/ir/auth_logic/lowering_ast_datalog.h"
 #include "src/ir/auth_logic/souffle_emitter.h"
+#include "src/ir/auth_logic/universe_relation_insertion.h"
 
 ABSL_FLAG(std::string, policy_rules, "", "file containing policy rules");
 ABSL_FLAG(std::string, datalog_file, "", "path to policy directory");
@@ -85,6 +86,7 @@ int main(int argc, char* argv[]) {
   // Invoke the parser for auth_logic and return datalog
   AuthLogicProgram program =
       raksha::ir::auth_logic::ParseProgram(policy_rules.value());
+  program = raksha::ir::auth_logic::InsertUniverseRelations(program);
   DatalogProgram datalog_program =
       raksha::ir::auth_logic::LoweringToDatalogPass::Lower(program);
   std::string datalog_policy =

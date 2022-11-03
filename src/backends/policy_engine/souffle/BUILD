@@ -35,6 +35,7 @@ cc_binary(
         "//src/ir/auth_logic:ast_construction",
         "//src/ir/auth_logic:lowering_ast_datalog",
         "//src/ir/auth_logic:souffle_emitter",
+        "//src/ir/auth_logic:universe_relation_insertion",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@com_google_absl//absl/flags:usage",

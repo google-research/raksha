@@ -43,14 +43,26 @@ class SouffleEmitter {
   }
   static const absl::flat_hash_set<std::string>& GetRelationsToNotDeclare() {
     static const auto* const kRelationsToNotDeclare =
-        new absl::flat_hash_set<std::string>{
-            "Principal",    "Tag",
-            "AccessPath",   "says_isAccessPath",
-            "says_isTag",   "says_isPrincipal",
-            "says_ownsTag", "says_ownsAccessPath",
-            "says_hasTag",  "says_removeTag",
-            "isAccessPath", "isTag",
-            "isPrincipal",  "Operation"};
+        new absl::flat_hash_set<std::string>{"Principal",
+                                             "Tag",
+                                             "AccessPath",
+                                             "Epsilon",
+                                             "Delta",
+                                             "says_isAccessPath",
+                                             "says_isTag",
+                                             "says_isPrincipal",
+                                             "says_ownsTag",
+                                             "says_ownsAccessPath",
+                                             "says_hasTag",
+                                             "says_removeTag",
+                                             "says_may",
+                                             "says_will",
+                                             "says_isGlobalEpsilon",
+                                             "says_isGlobalDelta",
+                                             "isAccessPath",
+                                             "isTag",
+                                             "isPrincipal",
+                                             "Operation"};
     return *kRelationsToNotDeclare;
   }
 
@@ -176,8 +188,13 @@ class SouffleEmitter {
     }
     // TODO (#633) work around till we add number types in C++ version.
     type_names.insert(absl::StrCat(".type Number", " <: symbol"));
+<<<<<<< HEAD
     std::vector<absl::string_view> sorted_type_names(type_names.begin(),
                                                      type_names.end());
+=======
+    std::vector<std::string_view> sorted_type_names(type_names.begin(),
+                                                    type_names.end());
+>>>>>>> e0031ce (Call universe relation pass.)
     std::sort(sorted_type_names.begin(), sorted_type_names.end());
     return absl::StrJoin(sorted_type_names, "\n");
   }
