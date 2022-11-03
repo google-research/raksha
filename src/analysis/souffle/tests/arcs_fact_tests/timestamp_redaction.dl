@@ -32,51 +32,51 @@ BINARY_OPERATION("owner", "/", "div_result", nil, "a", "b").
 BINARY_OPERATION("owner", "*", "final_result", nil, "div_result", "c").
 
 // "a" contains a millsecond-granularity timestamp.
-hasAppliedIntegrityTag("a", "owner", "TimestampMilliseconds").
+hasAppliedIntegrityTag("a", "owner", ["TimestampMilliseconds", nil]).
 // Millisecond granularity timestamps are considered sensitive.
-says_hasTag("owner", "a", "owner", "SensitiveTimestamp").
+says_hasTag("owner", "a", "owner", ["SensitiveTimestamp", nil]).
 // A different confidentiality tag.
-says_hasTag("owner", "a", "owner", "OtherConfTag").
+says_hasTag("owner", "a", "owner", ["OtherConfTag", nil]).
 // Say that "a" has some unrelated confidentiality property.
 // Access path "b" and "c" are both the constant expression 1000.
-hasAppliedIntegrityTag("b", "owner", "Constant_1000").
-hasAppliedIntegrityTag("c", "owner", "Constant_1000").
+hasAppliedIntegrityTag("b", "owner", ["Constant_1000", nil]).
+hasAppliedIntegrityTag("c", "owner", ["Constant_1000", nil]).
 
 // An AST-matching policy that says that "TimestampMilliseconds" divided by
 // 1000 are "TimestampSeconds". Also, that this is sufficient for removing the
 // "TimestampMilliseconds" confidentiality tag.
-mustHaveIntegrityTag(result, owner, "TimestampSeconds"),
-removeTag(result, owner, "SensitiveTimestamp") :-
+mustHaveIntegrityTag(result, owner, ["TimestampSeconds", nil]),
+removeTag(result, owner, ["SensitiveTimestamp", nil]) :-
   BINARY_OPERATION(owner, "/", result, nil, op1, op2),
-  mustHaveIntegrityTag(op1, owner, "TimestampMilliseconds"),
-  mustHaveIntegrityTag(op2, owner, "Constant_1000").
+  mustHaveIntegrityTag(op1, owner, ["TimestampMilliseconds", nil]),
+  mustHaveIntegrityTag(op2, owner, ["Constant_1000", nil]).
 
 // An AST matching policy that says that "TimestampSeconds", multiplied by
 // 1000, is now a "TimestampMillisecondsRedacted".
-mustHaveIntegrityTag(result, owner, "TimestampMillisecondsRedacted") :-
+mustHaveIntegrityTag(result, owner, ["TimestampMillisecondsRedacted", nil]) :-
   BINARY_OPERATION(owner, "*", result, nil, op1, op2),
-  mustHaveIntegrityTag(op1, owner, "TimestampSeconds"),
-  mustHaveIntegrityTag(op2, owner, "Constant_1000").
+  mustHaveIntegrityTag(op1, owner, ["TimestampSeconds", nil]),
+  mustHaveIntegrityTag(op2, owner, ["Constant_1000", nil]).
 
 // Only "a" should have "SensitiveTimestamp", as the first policy rule should
 // remove it.
-expectMayHaveTag("a", "owner", "SensitiveTimestamp").
+expectMayHaveTag("a", "owner", ["SensitiveTimestamp", nil]).
 
 // "OtherConfTag", on the other hand, is not removed and should propagate to
 // all operation results.
-expectMayHaveTag("a", "owner", "OtherConfTag").
-expectMayHaveTag("div_result", "owner", "OtherConfTag").
-expectMayHaveTag("final_result", "owner", "OtherConfTag").
+expectMayHaveTag("a", "owner", ["OtherConfTag", nil]).
+expectMayHaveTag("div_result", "owner", ["OtherConfTag", nil]).
+expectMayHaveTag("final_result", "owner", ["OtherConfTag", nil]).
 
 // "a" has "TimestampMilliseconds" because it was directly added there.
-expectHasIntegrityTag("a", "owner", "TimestampMilliseconds").
+expectHasIntegrityTag("a", "owner", ["TimestampMilliseconds", nil]).
 
 // Similar to "b" and "c" with "Constant_1000".
-expectHasIntegrityTag("b", "owner", "Constant_1000").
-expectHasIntegrityTag("c", "owner", "Constant_1000").
+expectHasIntegrityTag("b", "owner", ["Constant_1000", nill]).
+expectHasIntegrityTag("c", "owner", ["Constant_1000", nill]).
 
 // The first policy rule should apply "TimestampSeconds" to "div_result".
-expectHasIntegrityTag("div_result", "owner", "TimestampSeconds").
+expectHasIntegrityTag("div_result", "owner", ["TimestampSeconds", nill]).
 // The second policy rule should apply "TimestampMillisecondsRedacted" to
 // "final_result".
-expectHasIntegrityTag("final_result", "owner", "TimestampMillisecondsRedacted").
+expectHasIntegrityTag("final_result", "owner", ["TimestampMillisecondsRedacted", nill]).

@@ -22,17 +22,32 @@
 // An information flow Label which in this model is a set of taint Tags. One
 // label L1 flows to another L2 if L1 is a subset or equal to L2.
 
-// A symbol representing a taint (or information flow) tag. These would be
+// A list of tag parameters, useful for handling parameterized tags regardless
+// of arity.
+.type TagArguments = [ argument: Tag, next: TagArguments ]
+
+.decl tagName(tag: Tag, name: symbol)
+tagName([name, arguments], name) :- isTag(tag), tag = [name, arguments].
+
+.decl tagArguments(tag: Tag, arguments: TagArguments)
+tagArguments([name, arguments], arguments) :- isTag(tag), tag=[name, arguments].
+
+// A symbol and a set of (optional) arguments.
+// The symbol represents a taint (or information flow) tag. These would be
 // strings of the form "secret", "public", "timestampInMs", etc. Just like
 // `AccessPath`, it would make sense to define an ADT in the long term.
-.type Tag <: symbol
+// The arguments represent additional information that is used to parameterize
+// some specific kinds of tags (e.g. making confidentiality conditional)
+.type Tag = [name: symbol, arguments:  TagArguments]
 .decl isTag(tag: Tag)
 
-// An access path marked with an integrity tag (shortened here to IntegTag)
-// indicates that some property must be true of the data at the given
-// AccessPath. The conservative over-approximation for propagating an integrity
-// tag is that a node has an integrity tag only if all of its predecessors have
-// that integrity tag.
-.type IntegrityTag <: symbol
+.decl isTagNamed(tag_named: symbol)
+isTagNamed(tag_name) :- isTag(tag), tagName(tag, tag_name).
+
+// An access path marked with an integrity tag indicates that some property
+// must be true of the data at the given AccessPath. The conservative
+// over-approximation for propagating an integrity tag is that a node has an
+// integrity tag only if all of its predecessors have that integrity tag.
+.type IntegrityTag = [name: symbol, arguments:  TagArguments]
 
 #endif // SRC_ANALYSIS_SOUFFLE_TAGS_DL_

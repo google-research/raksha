@@ -26,7 +26,7 @@ edge("a", "b").
 edge("b", "c").
 edge("c", "a").
 
-hasAppliedIntegrityTag("a", "defaultOwner", "integ1").
-expectHasIntegrityTag("a", "defaultOwner", "integ1").
-expectHasIntegrityTag("b", "defaultOwner", "integ1").
-expectHasIntegrityTag("c", "defaultOwner", "integ1").
+hasAppliedIntegrityTag("a", "defaultOwner", ["integ1", nil]).
+expectHasIntegrityTag("a", "defaultOwner", ["integ1", nil]).
+expectHasIntegrityTag("b", "defaultOwner", ["integ1", nil]).
+expectHasIntegrityTag("c", "defaultOwner", ["integ1", nil]).

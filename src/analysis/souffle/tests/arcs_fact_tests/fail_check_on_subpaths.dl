@@ -37,8 +37,8 @@
 #include "src/analysis/souffle/taint.dl"
 #include "src/analysis/souffle/fact_test_helper.dl"
 
-says_hasTag("P1", "R.P1.foo.a", "P1", "userSelection").
-says_hasTag("P1", "R.P1.foo.b", "P1", "screenContent").
+says_hasTag("P1", "R.P1.foo.a", "P1", ["userSelection", nil]).
+says_hasTag("P1", "R.P1.foo.b", "P1", ["screenContent", nil]).
 
 edge("R.P1.foo.a", "R.h.Foo.a").
 edge("R.P1.foo.b", "R.h.Foo.b").
@@ -46,8 +46,8 @@ edge("R.P1.foo.b", "R.h.Foo.b").
 edge("R.h.Foo.a", "R.P2.foo.a").
 edge("R.h.Foo.b", "R.P2.foo.b").
 
-CHECK_TAG_PRESENT("R.P2.foo.a", "P1", "userSelection").
-CHECK_TAG_PRESENT("R.P2.foo.b", "P1", "screenContent").
+CHECK_TAG_PRESENT("R.P2.foo.a", "P1", ["userSelection", nil]).
+CHECK_TAG_PRESENT("R.P2.foo.b", "P1", ["screenContent", nil]).
 
-CHECK_TAG_PRESENT("R.P2.foo", "P1", "userSelection").
-CHECK_TAG_PRESENT("R.P2.foo", "P1", "screenContent").
+CHECK_TAG_PRESENT("R.P2.foo", "P1", ["userSelection", nil]).
+CHECK_TAG_PRESENT("R.P2.foo", "P1", ["screenContent", nil]).

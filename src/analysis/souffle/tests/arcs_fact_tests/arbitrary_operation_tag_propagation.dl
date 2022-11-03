@@ -31,37 +31,37 @@ isOperation(["owner", "multi_operator", ["result1", ["result2",nil]], ["in1", ["
 // Because we have a general rule that causes inputs to operations to influence
 // the output, show that we can put a tag on any input and have it show up on
 // the output.
-says_hasTag("owner", "in1", "owner", "tag1").
-says_hasTag("owner", "in2", "owner", "tag2").
-says_hasTag("owner", "in3", "owner", "tag3").
-says_hasTag("owner", "in4", "owner", "tag4").
+says_hasTag("owner", "in1", "owner", ["tag1", nil]).
+says_hasTag("owner", "in2", "owner", ["tag2", nil]).
+says_hasTag("owner", "in3", "owner", ["tag3", nil]).
+says_hasTag("owner", "in4", "owner", ["tag4", nil]).
 
-expectMayHaveTag("in1", "owner", "tag1").
-expectMayHaveTag("result", "owner", "tag1").
-expectMayHaveTag("result1", "owner", "tag1").
-expectMayHaveTag("result2", "owner", "tag1").
-expectMayHaveTag("in2", "owner", "tag2").
-expectMayHaveTag("result", "owner", "tag2").
-expectMayHaveTag("result1", "owner", "tag2").
-expectMayHaveTag("result2", "owner", "tag2").
-expectMayHaveTag("in3", "owner", "tag3").
-expectMayHaveTag("result", "owner", "tag3").
-expectMayHaveTag("result1", "owner", "tag3").
-expectMayHaveTag("result2", "owner", "tag3").
-expectMayHaveTag("in4", "owner", "tag4").
-expectMayHaveTag("result", "owner", "tag4").
-expectMayHaveTag("result1", "owner", "tag4").
-expectMayHaveTag("result2", "owner", "tag4").
+expectMayHaveTag("in1", "owner", ["tag1", nil]).
+expectMayHaveTag("result", "owner", ["tag1", nil]).
+expectMayHaveTag("result1", "owner", ["tag1", nil]).
+expectMayHaveTag("result2", "owner", ["tag1", nil]).
+expectMayHaveTag("in2", "owner", ["tag2", nil]).
+expectMayHaveTag("result", "owner", ["tag2", nil]).
+expectMayHaveTag("result1", "owner", ["tag2", nil]).
+expectMayHaveTag("result2", "owner", ["tag2", nil]).
+expectMayHaveTag("in3", "owner", ["tag3", nil]).
+expectMayHaveTag("result", "owner", ["tag3", nil]).
+expectMayHaveTag("result1", "owner", ["tag3", nil]).
+expectMayHaveTag("result2", "owner", ["tag3", nil]).
+expectMayHaveTag("in4", "owner", ["tag4", nil]).
+expectMayHaveTag("result", "owner", ["tag4", nil]).
+expectMayHaveTag("result1", "owner", ["tag4", nil]).
+expectMayHaveTag("result2", "owner", ["tag4", nil]).
 
 // operations other than = do not have a default propagation rule for integrity
 // tags. Show that we can annotate an integrity tag onto every input and it
 // will not show up in the result.
-hasAppliedIntegrityTag("in1", "owner", "integ").
-hasAppliedIntegrityTag("in2", "owner", "integ").
-hasAppliedIntegrityTag("in3", "owner", "integ").
-hasAppliedIntegrityTag("in4", "owner", "integ").
+hasAppliedIntegrityTag("in1", "owner", ["integ", nil]).
+hasAppliedIntegrityTag("in2", "owner", ["integ", nil]).
+hasAppliedIntegrityTag("in3", "owner", ["integ", nil]).
+hasAppliedIntegrityTag("in4", "owner", ["integ", nil]).
 
-expectHasIntegrityTag("in1", "owner", "integ").
-expectHasIntegrityTag("in2", "owner", "integ").
-expectHasIntegrityTag("in3", "owner", "integ").
-expectHasIntegrityTag("in4", "owner", "integ").
+expectHasIntegrityTag("in1", "owner", ["integ", nil]).
+expectHasIntegrityTag("in2", "owner", ["integ", nil]).
+expectHasIntegrityTag("in3", "owner", ["integ", nil]).
+expectHasIntegrityTag("in4", "owner", ["integ", nil]).

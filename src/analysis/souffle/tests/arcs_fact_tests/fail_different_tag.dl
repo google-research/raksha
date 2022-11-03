@@ -36,9 +36,9 @@
 #include "src/analysis/souffle/taint.dl"
 #include "src/analysis/souffle/fact_test_helper.dl"
 
-says_hasTag("P1", "R.P1.foo", "P1", "userSelection").
+says_hasTag("P1", "R.P1.foo", "P1", ["userSelection", nil]).
 edge("R.P1.foo", "R.h.Foo").
 edge("R.h.Foo", "R.P2.bar").
 
-CHECK_TAG_NOT_PRESENT("R.P2.bar", "P1", "screenContent").
-CHECK_TAG_PRESENT("R.P2.bar", "P1", "userSelection").
+CHECK_TAG_NOT_PRESENT("R.P2.bar", "P1", ["screenContent", nil]).
+CHECK_TAG_PRESENT("R.P2.bar", "P1", ["userSelection", nil]).

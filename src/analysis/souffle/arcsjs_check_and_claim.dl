@@ -37,7 +37,7 @@ isArcsJsCheckOperation(op) :-
 
 .decl arcsJsClaimOperationHasTag(op: Operation, tag: Tag)
 .decl arcsJsClaimOperationHasArgument(op: Operation, argument: AccessPath)
-arcsJsClaimOperationHasTag(op, as(tag, Tag)),
+arcsJsClaimOperationHasTag(op, as([tag, nil], Tag)),
 arcsJsClaimOperationHasArgument(op, argument) :-
   isArcsJsClaimOperation(op),
   operationHasOperandAtIndex(
@@ -52,7 +52,7 @@ arcsJsClaimOperationHasArgument(op, argument) :-
 
 .decl arcsJsCheckOperationHasTag(op: Operation, tag: Tag)
 .decl arcsJsCheckOperationHasArgument(op: Operation, argument: AccessPath)
-arcsJsCheckOperationHasTag(op, as(tag, Tag)),
+arcsJsCheckOperationHasTag(op, as([tag, nil], Tag)),
 arcsJsCheckOperationHasArgument(op, argument) :-
   isArcsJsCheckOperation(op),
   operationHasOperandAtIndex(
@@ -67,11 +67,13 @@ arcsJsCheckOperationHasArgument(op, argument) :-
 
 isTag(tag) :-
   arcsJsClaimOperationHasTag(_, tag),
-  tag != ARCSJS_PUBLIC_TAG.
+  tagName(tag, tag_name),
+  tag_name != ARCSJS_PUBLIC_TAG.
 
 isTag(tag) :-
   arcsJsCheckOperationHasTag(_, tag),
-  tag != ARCSJS_PUBLIC_TAG.
+  tagName(tag, tag_name),
+  tag_name != ARCSJS_PUBLIC_TAG.
 
 // Adds `claim`ed tags to the argument of a `claim` operation.
 hasTag(argument, DEFAULT_ARCSJS_OWNER, claimed_tag) :-

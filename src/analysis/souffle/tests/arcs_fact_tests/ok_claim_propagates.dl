@@ -40,7 +40,7 @@
 #include "src/analysis/souffle/taint.dl"
 #include "src/analysis/souffle/fact_test_helper.dl"
 
-says_hasTag("P1", "R.P1.foo", "P1", "userSelection").
+says_hasTag("P1", "R.P1.foo", "P1", ["userSelection", nil]).
 edge("R.P1.foo", "R.h1.Foo").
 edge("R.h1.Foo", "R.P2.bar").
 edge("R.P2.bar", "R.P2.foo").
@@ -48,4 +48,4 @@ edge("R.P2.foo", "R.h2.Foo").
 edge("R.h2.Foo", "R.P3.bar").
 
 // This test passes if R.P3.bar has the trusted tag.
-CHECK_TAG_PRESENT("R.P3.bar", "P1", "userSelection").
+CHECK_TAG_PRESENT("R.P3.bar", "P1", ["userSelection", nil]).

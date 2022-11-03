@@ -22,9 +22,9 @@ isAccessPath("b").
 
 edge("a", "b").
 
-hasAppliedIntegrityTag("a", "defaultOwner", "integ1").
-expectHasIntegrityTag("a", "defaultOwner", "integ1").
-expectHasIntegrityTag("b", "defaultOwner", "integ1").
+hasAppliedIntegrityTag("a", "defaultOwner", ["integ1", nil]).
+expectHasIntegrityTag("a", "defaultOwner", ["integ1", nil]).
+expectHasIntegrityTag("b", "defaultOwner", ["integ1", nil]).
 
-hasAppliedIntegrityTag("b", "defaultOwner", "integ2").
-expectHasIntegrityTag("b", "defaultOwner", "integ2").
+hasAppliedIntegrityTag("b", "defaultOwner", ["integ2", nil]).
+expectHasIntegrityTag("b", "defaultOwner", ["integ2", nil]).

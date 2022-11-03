@@ -21,7 +21,7 @@
 edge("a", "b").
 edge("b", "c").
 
-hasAppliedIntegrityTag("a", "defaultOwner", "integ").
-removeIntegrityTag("b", "defaultOwner", "integ").
+hasAppliedIntegrityTag("a", "defaultOwner", ["integ", nil]).
+removeIntegrityTag("b", "defaultOwner", ["integ", nil]).
 
-expectHasIntegrityTag("a", "defaultOwner", "integ").
+expectHasIntegrityTag("a", "defaultOwner", ["integ", nil]).

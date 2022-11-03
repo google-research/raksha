@@ -33,39 +33,39 @@ edge("d", "e").
 
 // If we apply "integ1" and "integ2" to "a" and "b", they should also appear on
 // "c".
-hasAppliedIntegrityTag("a", "defaultOwner", "integ1").
-hasAppliedIntegrityTag("b", "defaultOwner", "integ1").
+hasAppliedIntegrityTag("a", "defaultOwner", ["integ1", nil]).
+hasAppliedIntegrityTag("b", "defaultOwner", ["integ1", nil]).
 
-hasAppliedIntegrityTag("a", "defaultOwner", "integ2").
-hasAppliedIntegrityTag("b", "defaultOwner", "integ2").
+hasAppliedIntegrityTag("a", "defaultOwner", ["integ2", nil]).
+hasAppliedIntegrityTag("b", "defaultOwner", ["integ2", nil]).
 
-expectHasIntegrityTag("a", "defaultOwner", "integ1").
-expectHasIntegrityTag("b", "defaultOwner", "integ1").
-expectHasIntegrityTag("c", "defaultOwner", "integ1").
+expectHasIntegrityTag("a", "defaultOwner", ["integ1", nil]).
+expectHasIntegrityTag("b", "defaultOwner", ["integ1", nil]).
+expectHasIntegrityTag("c", "defaultOwner", ["integ1", nil]).
 
-expectHasIntegrityTag("a", "defaultOwner", "integ2").
-expectHasIntegrityTag("b", "defaultOwner", "integ2").
-expectHasIntegrityTag("c", "defaultOwner", "integ2").
+expectHasIntegrityTag("a", "defaultOwner", ["integ2", nil]).
+expectHasIntegrityTag("b", "defaultOwner", ["integ2", nil]).
+expectHasIntegrityTag("c", "defaultOwner", ["integ2", nil]).
 
 // If we apply "integ1" to d, it should also appear on e.
-hasAppliedIntegrityTag("d", "defaultOwner", "integ1").
+hasAppliedIntegrityTag("d", "defaultOwner", ["integ1", nil]).
 
-expectHasIntegrityTag("d", "defaultOwner", "integ1").
-expectHasIntegrityTag("e", "defaultOwner", "integ1").
+expectHasIntegrityTag("d", "defaultOwner", ["integ1", nil]).
+expectHasIntegrityTag("e", "defaultOwner", ["integ1", nil]).
 
 // If we apply "integ3" to "a" and not "b", however, it should not appear on
 // "c".
-hasAppliedIntegrityTag("a", "defaultOwner", "integ3").
-expectHasIntegrityTag("a", "defaultOwner", "integ3").
+hasAppliedIntegrityTag("a", "defaultOwner", ["integ3", nil]).
+expectHasIntegrityTag("a", "defaultOwner", ["integ3", nil]).
 
 // Similarly if we apply "integ4" only to "b".
-hasAppliedIntegrityTag("b", "defaultOwner", "integ4").
-expectHasIntegrityTag("b", "defaultOwner", "integ4").
+hasAppliedIntegrityTag("b", "defaultOwner", ["integ4", nil]).
+expectHasIntegrityTag("b", "defaultOwner", ["integ4", nil]).
 
 // If we apply "integ5" to "c" and "d" directly, it should appear on "e".
-hasAppliedIntegrityTag("c", "defaultOwner", "integ5").
-hasAppliedIntegrityTag("d", "defaultOwner", "integ5").
+hasAppliedIntegrityTag("c", "defaultOwner", ["integ5", nil]).
+hasAppliedIntegrityTag("d", "defaultOwner", ["integ5", nil]).
 
-expectHasIntegrityTag("c", "defaultOwner", "integ5").
-expectHasIntegrityTag("d", "defaultOwner", "integ5").
-expectHasIntegrityTag("e", "defaultOwner", "integ5").
+expectHasIntegrityTag("c", "defaultOwner", ["integ5", nil]).
+expectHasIntegrityTag("d", "defaultOwner", ["integ5", nil]).
+expectHasIntegrityTag("e", "defaultOwner", ["integ5", nil]).

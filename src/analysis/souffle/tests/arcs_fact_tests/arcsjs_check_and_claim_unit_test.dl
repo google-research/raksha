@@ -30,21 +30,21 @@
     count : { relation(operation, expected) } = n, \
     count : { relation(operation, _) } = n
 
-#define CLAIM_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, operation, argument, tag, result) \
+#define CLAIM_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, operation, argument, tag_name, result) \
   isOperation(operation). \
   TEST_N_RESULT_FOR_OPERATION(n_args, test_name, (operation), arcsJsClaimOperationHasArgument, argument). \
-  TEST_N_RESULT_FOR_OPERATION(n_tags, test_name, (operation), arcsJsClaimOperationHasTag, tag)
+  TEST_N_RESULT_FOR_OPERATION(n_tags, test_name, (operation), arcsJsClaimOperationHasTag, [tag_name, _])
 
-#define CLAIM_CREATE_AND_TEST_OPERATION(n_args, n_tags, test_name, owner, operator, result, operandList, attrList, argument, tag) \
-  CLAIM_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]), argument, tag, result)
+#define CLAIM_CREATE_AND_TEST_OPERATION(n_args, n_tags, test_name, owner, operator, result, operandList, attrList, argument, tag_name) \
+  CLAIM_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]), argument, tag_name, result)
 
-#define CHECK_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, operation, argument, tag, result) \
+#define CHECK_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, operation, argument, tag_name, result) \
   isOperation(operation). \
   TEST_N_RESULT_FOR_OPERATION(n_args, test_name, (operation), arcsJsCheckOperationHasArgument, argument). \
-  TEST_N_RESULT_FOR_OPERATION(n_tags, test_name, (operation), arcsJsCheckOperationHasTag, tag)
+  TEST_N_RESULT_FOR_OPERATION(n_tags, test_name, (operation), arcsJsCheckOperationHasTag, [tag_name, _])
 
-#define CHECK_CREATE_AND_TEST_OPERATION(n_args, n_tags, test_name, owner, operator, result, operandList, attrList, argument, tag) \
-  CHECK_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]), argument, tag, result)
+#define CHECK_CREATE_AND_TEST_OPERATION(n_args, n_tags, test_name, owner, operator, result, operandList, attrList, argument, tag_name) \
+  CHECK_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]), argument, tag_name, result)
 
 #define ATTR_LIST1 [["tag", $StringAttributePayload("private")], nil]
 #define OPERAND_LIST1 ["operand1", nil]

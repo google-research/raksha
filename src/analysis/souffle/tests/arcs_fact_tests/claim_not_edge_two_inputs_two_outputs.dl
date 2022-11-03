@@ -34,11 +34,11 @@ edge("R.foo.hc2", "R.foo.hco2").
 isPrincipal("Claimer").
 isPrincipal("ParticleX").
 
-ownsTag("Claimer", "tag1").
-ownsTag("Claimer", "tag2").
+ownsTag("Claimer", ["tag1", nil]).
+ownsTag("Claimer", ["tag2", nil]).
 
-says_hasTag("Claimer", "R.foo.hc1", "Claimer", "tag1").
-says_hasTag("Claimer", "R.foo.hc2", "Claimer", "tag2").
+says_hasTag("Claimer", "R.foo.hc1", "Claimer", ["tag1", nil]).
+says_hasTag("Claimer", "R.foo.hc2", "Claimer", ["tag2", nil]).
 
 
 #ifdef ALL_PRINCIPALS_OWN_ALL_TAGS
@@ -56,15 +56,15 @@ claimNotEdge("Claimer", "R.foo.hc2", "R.foo.hco1").
 
 // If we believe it, we should find only tag1 on hco1, but we should still find
 // both tag1 and tag2 on hco2.
-TEST_CASE("hco1_tag1_as_expected") :- mayHaveTag("R.foo.hco1", "Claimer", "tag1").
+TEST_CASE("hco1_tag1_as_expected") :- mayHaveTag("R.foo.hco1", "Claimer", ["tag1", nil]).
 TEST_CASE("hco1_tag2_as_expected") :-
-  isTag("tag2"), isAccessPath("R.foo.hco1"), !mayHaveTag("R.foo.hco1", "Claimer", "tag2").
-TEST_CASE("hco2_tag1_as_expected") :- mayHaveTag("R.foo.hco2", "Claimer", "tag1").
-TEST_CASE("hco2_tag2_as_expected") :- mayHaveTag("R.foo.hco2", "Claimer", "tag2").
+  isTag(["tag2", args]), isAccessPath("R.foo.hco1"), !mayHaveTag("R.foo.hco1", "Claimer", ["tag2", args]).
+TEST_CASE("hco2_tag1_as_expected") :- mayHaveTag("R.foo.hco2", "Claimer", ["tag1", nil]).
+TEST_CASE("hco2_tag2_as_expected") :- mayHaveTag("R.foo.hco2", "Claimer", ["tag2", nil]).
 #else
 // If we don't believe it, all tags should flow to all outputs
-TEST_CASE("hco1_tag1_as_expected") :- mayHaveTag("R.foo.hco1", "Claimer", "tag1").
-TEST_CASE("hco1_tag2_as_expected") :- mayHaveTag("R.foo.hco1", "Claimer", "tag2").
-TEST_CASE("hco2_tag1_as_expected") :- mayHaveTag("R.foo.hco2", "Claimer", "tag1").
-TEST_CASE("hco2_tag2_as_expected") :- mayHaveTag("R.foo.hco2", "Claimer", "tag2").
+TEST_CASE("hco1_tag1_as_expected") :- mayHaveTag("R.foo.hco1", "Claimer", ["tag1", nil]).
+TEST_CASE("hco1_tag2_as_expected") :- mayHaveTag("R.foo.hco1", "Claimer", ["tag2", nil]).
+TEST_CASE("hco2_tag1_as_expected") :- mayHaveTag("R.foo.hco2", "Claimer", ["tag1", nil]).
+TEST_CASE("hco2_tag2_as_expected") :- mayHaveTag("R.foo.hco2", "Claimer", ["tag2", nil]).
 #endif
