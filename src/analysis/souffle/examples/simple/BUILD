@@ -13,12 +13,13 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-load("//build_defs:raksha.bzl", "raksha_policy_check")
+# load("//build_defs:raksha.bzl", "raksha_policy_check")
 
 licenses(["notice"])
 
+# TODO PR#772 uncomments and replaces rust dependent policy checks
 # To invoke policy engine, `bazel test :ok_claim_propagates_check`.
-raksha_policy_check(
-    name = "ok_claim_propagates_check",
-    src = "ok_claim_propagates.raksha",
-)
+# raksha_policy_check(
+#     name = "ok_claim_propagates_check",
+#     src = "ok_claim_propagates.raksha",
+# )

@@ -13,26 +13,28 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
-load("//build_defs:raksha.bzl", "policy_check")
+# load("//build_defs:raksha.bzl", "policy_check")
 
 licenses(["notice"])
 
-policy_check(
-    name = "delegation_granted",
-    auth_logic = "ok_claim_propagates_downgrade_granted.auth",
-    dataflow_graph = "ok_claim_propagates.arcs",
-)
+# TODO PR#772 uncomments and replaces rust dependent policy checks
 
-policy_check(
-    name = "delegation_not_granted",
-    auth_logic = "ok_claim_propagates_downgrade_not_granted.auth",
-    dataflow_graph = "ok_claim_propagates.arcs",
-    expect_failure = True,
-)
+# policy_check(
+#     name = "delegation_granted",
+#     auth_logic = "ok_claim_propagates_downgrade_granted.auth",
+#     dataflow_graph = "ok_claim_propagates.arcs",
+# )
 
-policy_check(
-    name = "delegation_granted_by_non_owner",
-    auth_logic = "ok_claim_propagates_downgrade_granted_by_non_owner.auth",
-    dataflow_graph = "ok_claim_propagates.arcs",
-    expect_failure = True,
-)
+# policy_check(
+#     name = "delegation_not_granted",
+#     auth_logic = "ok_claim_propagates_downgrade_not_granted.auth",
+#     dataflow_graph = "ok_claim_propagates.arcs",
+#     expect_failure = True,
+# )
+
+# policy_check(
+#     name = "delegation_granted_by_non_owner",
+#     auth_logic = "ok_claim_propagates_downgrade_granted_by_non_owner.auth",
+#     dataflow_graph = "ok_claim_propagates.arcs",
+#     expect_failure = True,
+# )
