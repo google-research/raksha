@@ -43,6 +43,17 @@ build --host_cxxopt='-Wno-unknown-warning-option'
 build --cxxopt='-Wno-macro-redefined'
 build --host_cxxopt='-Wno-macro-redefined'
 
+# This is needed to build ZetaSQL for now. Fixes for these warnings are coming,
+# however.
+build --cxxopt='-Wno-final-dtor-non-final-class'
+build --host_cxxopt='-Wno-final-dtor-non-final-class'
+build --cxxopt='-Wno-unused-const-variable'
+build --host_cxxopt='-Wno-unused-const-variable'
+
+# Need this for ZetaSQL's icu dependency as long as it remains at version 65.
+# Should remove when it gets upgraded.
+build --host_cxxopt='-Wno-implicit-int-float-conversion'
+
 # Similarly, we should not set this flag that we're using as a debugging
 # assistant when compiling third party libraries.
 # build --host_cxxopt='-fno-exceptions'
