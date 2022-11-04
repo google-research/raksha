@@ -17,17 +17,18 @@
 
 licenses(["notice"])
 
-load("//build_defs:raksha.bzl", "policy_check")
+# load("//build_defs:raksha.bzl", "policy_check")
 
-policy_check(
-    name = "check_multimic_userc_tag_fail",
-    auth_logic = "multimic.auth",
-    dataflow_graph = "multimic.arcs",
-    expect_failure = True,
-)
+# TODO PR#772 uncomments and replaces rust dependent policy checks
+# policy_check(
+#     name = "check_multimic_userc_tag_fail",
+#     auth_logic = "multimic.auth",
+#     dataflow_graph = "multimic.arcs",
+#     expect_failure = True,
+# )
 
-policy_check(
-    name = "check_multimic_pass",
-    auth_logic = "multimic_no_userc_tag.auth",
-    dataflow_graph = "multimic.arcs",
-)
+# policy_check(
+#     name = "check_multimic_pass",
+#     auth_logic = "multimic_no_userc_tag.auth",
+#     dataflow_graph = "multimic.arcs",
+# )
