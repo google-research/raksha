@@ -143,18 +143,13 @@ http_archive(
     urls = ["https://github.com/bazelbuild/rules_cc/archive/fb624ff008196216a86e958e98fbd1a2615d7bbe.zip"],
 )
 
-http_archive(
-    name = "absl",
-    sha256 = "4208129b49006089ba1d6710845a45e31c59b0ab6bff9e5788a87f55c5abd602",
-    strip_prefix = "abseil-cpp-20220623.0",
-    urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20220623.0.tar.gz"],
-)
+absl_commit_sha = "4a98f786820f72ff7483c46d14fe85f3310f1272"
 
 http_archive(
     name = "com_google_absl",
-    sha256 = "4208129b49006089ba1d6710845a45e31c59b0ab6bff9e5788a87f55c5abd602",
-    strip_prefix = "abseil-cpp-20220623.0",
-    urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20220623.0.tar.gz"],
+    sha256 = "b029ed744500bcbdfd4ba6529613db46b3d050d5d45865d94780268f1b6e3b49",
+    strip_prefix = "abseil-cpp-" + absl_commit_sha,
+    urls = ["https://github.com/abseil/abseil-cpp/archive/" + absl_commit_sha + ".zip"],
 )
 
 # Bazel platform rules.
