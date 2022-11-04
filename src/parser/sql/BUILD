@@ -38,3 +38,14 @@ cc_library(
         "@com_google_zetasql//zetasql/public:parse_helpers",
     ],
 )
+
+cc_test(
+    name = "sql_parser_test",
+    srcs = ["sql_parser_test.cc"],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    deps = [
+        ":sql_parser",
+        "//src/common/testing:gtest",
+    ],
+)

@@ -290,17 +290,12 @@ http_archive(
 
 # RE2
 http_archive(
-    name = "re2",
-    sha256 = "f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f",
-    strip_prefix = "re2-2022-06-01",
-    urls = ["https://github.com/google/re2/archive/refs/tags/2022-06-01.tar.gz"],
-)
-
-http_archive(
     name = "com_googlesource_code_re2",
-    sha256 = "f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f",
-    strip_prefix = "re2-2022-06-01",
-    urls = ["https://github.com/google/re2/archive/refs/tags/2022-06-01.tar.gz"],
+    sha256 = "c5f46950cdf33175f0668f454d9b6b4fe1b5a71ffd9283213e77fb04461af099",
+    strip_prefix = "re2-e8cb5ecb8ee1066611aa937a42fa10514edf30fb",
+    urls = [
+        "https://github.com/google/re2/archive/e8cb5ecb8ee1066611aa937a42fa10514edf30fb.tar.gz",
+    ],
 )
 
 fuzztest_commit_hash = "4a8253b7299cf1764550054fae55f1b58a65bbaa"
@@ -314,12 +309,14 @@ http_archive(
 )
 
 #zetasql
+zetasql_commit_hash = "177d495a064e38684c462cf883e22428273bd996"
+
 http_archive(
     name = "com_google_zetasql",
-    sha256 = "4c9611fa2fc2bde0e7877ff36fa3ebc0400477a2fe86589025d49a06897e5296",
-    strip_prefix = "zetasql-2022.08.1",
+    sha256 = "5dc8f45b5d2b6d7ed39546d1c43c1a7cc341e6c1ae36aa93d8663f9c3a475aee",
+    strip_prefix = "zetasql-" + zetasql_commit_hash,
     urls = [
-        "https://github.com/google/zetasql/archive/2022.08.1.tar.gz",
+        "https://github.com/google/zetasql/archive/" + zetasql_commit_hash + ".zip",
     ],
 )
 

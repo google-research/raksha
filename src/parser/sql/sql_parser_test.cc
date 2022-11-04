@@ -14,31 +14,29 @@
 // limitations under the License.
 //
 //-------------------------------------------------------------------------------
-
 #include "src/parser/sql/sql_parser.h"
 
-#include <cstdint>
-#include <iostream>
-#include <memory>
-#include <optional>
-#include <stdexcept>
-#include <string>
-#include <tuple>
-#include <utility>
-#include <variant>
-#include <vector>
-
-#include "src/common/containers/hash_map.h"
-#include "src/common/logging/logging.h"
-#include "src/common/utils/map_iter.h"
-#include "zetasql/public/analyzer.h"
-#include "zetasql/public/parse_helpers.h"
+#include "src/common/testing/gtest.h"
 
 namespace raksha::parser::sql {
+namespace {
 
-absl::Status ParseStatement(std::string_view sql) {
-  return zetasql::IsValidStatementSyntax(sql,
-                                         zetasql::ERROR_MESSAGE_WITH_PAYLOAD);
+using testing::TestWithParam;
+using testing::ValuesIn;
+
+class SqlParserTest
+    : public TestWithParam<std::tuple<absl::string_view, bool>> {};
+
+TEST_P(SqlParserTest, SimpleTest) {
+  auto [input_program_text, is_sql] = GetParam();
+  auto result = ParseStatement(input_program_text);
+  EXPECT_EQ(result.ok(), is_sql);
 }
 
+constexpr std::tuple<absl::string_view, bool> kTestStatements[] = {
+    {"SELECT 5;", true}, {"int foo(int i);", false}};
+
+INSTANTIATE_TEST_SUITE_P(SqlParserTest, SqlParserTest,
+                         ValuesIn(kTestStatements));
+}  // namespace
 }  // namespace raksha::parser::sql

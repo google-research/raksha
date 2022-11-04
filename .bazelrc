@@ -42,7 +42,36 @@ build --host_cxxopt='-Wno-unknown-warning-option'
 # should re-enable this warning.
 build --cxxopt='-Wno-macro-redefined'
 build --host_cxxopt='-Wno-macro-redefined'
-build --cxxopt='-Wno-error'
+# This is needed to build ZetaSQL for now. Fixes for these warnings are coming,
+# however.
+build --cxxopt='-Wno-final-dtor-non-final-class'
+build --host_cxxopt='-Wno-final-dtor-non-final-class'
+build --cxxopt='-Wno-unused-const-variable'
+build --host_cxxopt='-Wno-unused-const-variable'
+build --cxxopt='-Wno-inconsistent-missing-override'
+build --host_cxxopt='-Wno-inconsistent-missing-override'
+build --cxxopt='-Wno-defaulted-function-deleted'
+build --host_cxxopt='-Wno-defaulted-function-deleted'
+build --cxxopt='-Wno-enum-compare-switch'
+build --host_cxxopt='-Wno-enum-compare-switch'
+build --cxxopt='-Wno-char-subscripts'
+build --host_cxxopt='-Wno-char-subscripts'
+build --cxxopt='-Wno-unused-variable'
+build --host_cxxopt='-Wno-unused-variable'
+build --cxxopt='-Wno-unused-function'
+build --host_cxxopt='-Wno-unused-function'
+# This warning is just a bad one, common return optimizations make its advice
+# the wrong thing to do.
+build --cxxopt='-Wno-return-std-move'
+build --host_cxxopt='-Wno-return-std-move'
+# This warning has a false positive on ZetaSQL.
+build --cxxopt='-Wno-thread-safety-precise'
+build --host_cxxopt='-Wno-thread-safety-precise'
+
+# Need this for ZetaSQL's icu dependency as long as it remains at version 65.
+# Should remove when it gets upgraded.
+build --cxxopt='-Wno-implicit-int-float-conversion'
+build --host_cxxopt='-Wno-implicit-int-float-conversion'
 
 # Similarly, we should not set this flag that we're using as a debugging
 # assistant when compiling third party libraries.
