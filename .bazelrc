@@ -51,6 +51,7 @@ build --cxxopt='-Wno-error'
 build --cxxopt='-Wno-unused-const-variable'
 build --cxxopt='-Wno-thread-safety-reference'
 build --cxxopt='-Wno-implicit-int-float-conversion'
+# build --host_force_python=PY2
 
 # ASAN config for exposing memory errors.
 build:asan --strip=never

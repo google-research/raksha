@@ -1,0 +1,12 @@
+--- zetasql/parser/gen_parse_tree.py
++++ zetasql/parser/gen_parse_tree.py
+@@ -23,7 +23,7 @@
+
+ """
+
+-import collections
++import collections.abc
+ import enum
+ import operator
+ import re
+

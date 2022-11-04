@@ -314,12 +314,27 @@ http_archive(
 )
 
 #zetasql
+# http_archive(
+#     name = "com_google_zetasql",
+#     sha256 = "4c9611fa2fc2bde0e7877ff36fa3ebc0400477a2fe86589025d49a06897e5296",
+#     strip_prefix = "zetasql-2022.08.1",
+#     urls = [
+#         "https://github.com/google/zetasql/archive/2022.08.1.tar.gz",
+#     ],
+# )
+#zetasql
 http_archive(
     name = "com_google_zetasql",
-    sha256 = "4c9611fa2fc2bde0e7877ff36fa3ebc0400477a2fe86589025d49a06897e5296",
-    strip_prefix = "zetasql-2022.08.1",
+    patches = [
+        "@//third_party/zetasql:py_collections.patch",
+        "@//third_party/zetasql:jinja.patch",
+        "@//third_party/zetasql:markupsafe.patch",
+        #"@//third_party/zetasql:bazelversion.patch",
+    ],
+    sha256 = "60f28d891bf6b3cd92f9395bd273d58e34ba4d07c25515d22740afae5959f996",
+    strip_prefix = "zetasql-formatter-1.6.5",
     urls = [
-        "https://github.com/google/zetasql/archive/2022.08.1.tar.gz",
+        "https://github.com/Matts966/zetasql-formatter/archive/refs/tags/v1.6.5.tar.gz",
     ],
 )
 
