@@ -160,22 +160,6 @@ http_archive(
     urls = ["https://github.com/bazelbuild/platforms/archive/98939346da932eef0b54cf808622f5bb0928f00b.zip"],
 )
 
-# gflags, required for glog.
-http_archive(
-    name = "com_github_gflags_gflags",
-    sha256 = "34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf",
-    strip_prefix = "gflags-2.2.2",
-    urls = ["https://github.com/gflags/gflags/archive/v2.2.2.tar.gz"],
-)
-
-# Google logger (glog).
-http_archive(
-    name = "glog",
-    sha256 = "21bc744fb7f2fa701ee8db339ded7dce4f975d0d55837a97be7d46e8382dea5a",
-    strip_prefix = "glog-0.5.0",
-    urls = ["https://github.com/google/glog/archive/v0.5.0.zip"],
-)
-
 #-------------------
 # Rust
 #-------------------
