@@ -1,14 +1,11 @@
 try-import %workspace%/gcb/rbe/remote.bazelrc
 
-# TODO(#167): Remove `-Wno-deprecated-declarations` when glog is updated.
-
 build --cxxopt='-std=c++17'
 build --cxxopt='-Werror' --cxxopt='-Wall'
 # This feature disables warnings in include paths from external repos. This is
 # useful because it allows us to ignore non-serious flaws in code for which we
 # are not directly responsible.
 build --features=external_include_paths
-build --cxxopt='-Wno-deprecated-declarations'
 
 # Why are we doing this when Souffle-generated C++ clearly uses exceptions?
 # Well, Google famously does not like C++ exceptions in its internal codebase,
@@ -24,7 +21,6 @@ build --host_cxxopt='-std=c++17'
 # warning-clean. We also comment out -Wall so that we do not receive extra
 # warnings from our third party packages.
 # build --host_cxxopt='-Werror' --host_cxxopt='-Wall'
-build --host_cxxopt='-Wno-deprecated-declarations'
 
 # These are needed on systems with GLIBC > 2.34-8 to build google-fuzztest
 # which has these errors.
