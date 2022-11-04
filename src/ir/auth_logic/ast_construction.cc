@@ -59,7 +59,7 @@ static datalog::Predicate ConstructPredicate(
       predicate_context.pred_arg(), [](auto* pred_arg_context) {
         if (auto* multi_line_predicate_argument_context =
                 dynamic_cast<AuthLogicParser::MultilineConstantContext*>(
-                    CHECK_NOTNULL(pred_arg_context)))
+                    ABSL_DIE_IF_NULL(pred_arg_context)))
           return SanitizeMultilineStringForPredicateArgument(
               multi_line_predicate_argument_context->getText());
         return pred_arg_context->getText();
@@ -79,14 +79,14 @@ static BaseFact ConstructVerbphrase(
               &verbphrase_context)) {  // PredicateContext
     return BaseFact(Attribute(
         left_principal,
-        ConstructPredicate(*CHECK_NOTNULL(predphrase_context->predicate()))));
+        ConstructPredicate(*ABSL_DIE_IF_NULL(predphrase_context->predicate()))));
   }
   auto& act_as_phrase_context =
-      *CHECK_NOTNULL(dynamic_cast<AuthLogicParser::ActsAsPhraseContext*>(
+      *ABSL_DIE_IF_NULL(dynamic_cast<AuthLogicParser::ActsAsPhraseContext*>(
           &verbphrase_context));  // ActsAsPhraseContext
   return BaseFact(CanActAs(
       left_principal,
-      ConstructPrincipal(*CHECK_NOTNULL(act_as_phrase_context.principal()))));
+      ConstructPrincipal(*ABSL_DIE_IF_NULL(act_as_phrase_context.principal()))));
 }
 
 static BaseFact ConstructFlatFact(
@@ -94,14 +94,14 @@ static BaseFact ConstructFlatFact(
   if (auto* prin_fact_context =
           dynamic_cast<AuthLogicParser::PrinFactContext*>(&flat_fact_context)) {
     return ConstructVerbphrase(
-        ConstructPrincipal(*CHECK_NOTNULL(prin_fact_context->principal())),
-        *CHECK_NOTNULL(prin_fact_context->verbphrase()));
+        ConstructPrincipal(*ABSL_DIE_IF_NULL(prin_fact_context->principal())),
+        *ABSL_DIE_IF_NULL(prin_fact_context->verbphrase()));
   }
   auto& pred_fact_context =
-      *CHECK_NOTNULL(dynamic_cast<AuthLogicParser::PredFactContext*>(
+      *ABSL_DIE_IF_NULL(dynamic_cast<AuthLogicParser::PredFactContext*>(
           &flat_fact_context));  // predFactContext
   return BaseFact(
-      ConstructPredicate(*CHECK_NOTNULL(pred_fact_context.predicate())));
+      ConstructPredicate(*ABSL_DIE_IF_NULL(pred_fact_context.predicate())));
 }
 
 static BaseFact ConstructRvalue(
@@ -110,15 +110,15 @@ static BaseFact ConstructRvalue(
           dynamic_cast<AuthLogicParser::FlatFactRvalueContext*>(
               &rvalue_context)) {
     return ConstructFlatFact(
-        *CHECK_NOTNULL(flat_fact_rvalue_context->flatFact()));
+        *ABSL_DIE_IF_NULL(flat_fact_rvalue_context->flatFact()));
   }
-  auto& binop_rvalue_context = *CHECK_NOTNULL(
+  auto& binop_rvalue_context = *ABSL_DIE_IF_NULL(
       dynamic_cast<AuthLogicParser::BinopRvalueContext*>(&rvalue_context));
   std::vector<std::string> args = utils::MapIter<std::string>(
       binop_rvalue_context.pred_arg(), [](auto* pred_arg_context) {
         if (auto* multi_line_predicate_argument_context =
                 dynamic_cast<AuthLogicParser::MultilineConstantContext*>(
-                    CHECK_NOTNULL(pred_arg_context)))
+                    ABSL_DIE_IF_NULL(pred_arg_context)))
           return SanitizeMultilineStringForPredicateArgument(
               multi_line_predicate_argument_context->getText());
         return pred_arg_context->getText();
@@ -139,14 +139,14 @@ static Fact ConstructFact(std::forward_list<Principal> delegation_chain,
               &fact_context)) {  // FlatFactFactContext
     return Fact(
         std::move(delegation_chain),
-        ConstructFlatFact(*CHECK_NOTNULL(flat_fact_fact_context->flatFact())));
+        ConstructFlatFact(*ABSL_DIE_IF_NULL(flat_fact_fact_context->flatFact())));
   }
-  auto& can_say_fact_context = *CHECK_NOTNULL(
+  auto& can_say_fact_context = *ABSL_DIE_IF_NULL(
       dynamic_cast<AuthLogicParser::CanSayFactContext*>(&fact_context));
   delegation_chain.push_front(
-      ConstructPrincipal(*CHECK_NOTNULL(can_say_fact_context.principal())));
+      ConstructPrincipal(*ABSL_DIE_IF_NULL(can_say_fact_context.principal())));
   return ConstructFact(std::move(delegation_chain),
-                       *CHECK_NOTNULL(can_say_fact_context.fact()));
+                       *ABSL_DIE_IF_NULL(can_say_fact_context.fact()));
 }
 
 static datalog::ArgumentType ConstructArgumentType(
@@ -159,7 +159,7 @@ static datalog::ArgumentType ConstructArgumentType(
     return datalog::ArgumentType::MakePrincipalType();
   }
   auto& custom_type_context =
-      *CHECK_NOTNULL(dynamic_cast<AuthLogicParser::CustomTypeContext*>(
+      *ABSL_DIE_IF_NULL(dynamic_cast<AuthLogicParser::CustomTypeContext*>(
           &auth_logic_type_context));
   return datalog::ArgumentType::MakeCustomType(
       custom_type_context.VARIABLE()->getText());
@@ -181,7 +181,7 @@ static datalog::RelationDeclaration ConstructRelationDeclaration(
     arguments.push_back(datalog::Argument(
         relation_declaration_context.VARIABLE(i + 1)->getText(),
         ConstructArgumentType(
-            *CHECK_NOTNULL(relation_declaration_context.authLogicType(i)))));
+            *ABSL_DIE_IF_NULL(relation_declaration_context.authLogicType(i)))));
   }
   return datalog::RelationDeclaration(
       relation_declaration_context.VARIABLE(0)->getText(),
@@ -191,8 +191,8 @@ static datalog::RelationDeclaration ConstructRelationDeclaration(
 
 static Query ConstructQuery(AuthLogicParser::QueryContext& query_context) {
   return Query(query_context.VARIABLE()->getText(),
-               ConstructPrincipal(*CHECK_NOTNULL(query_context.principal())),
-               ConstructFact({}, *CHECK_NOTNULL(query_context.fact())));
+               ConstructPrincipal(*ABSL_DIE_IF_NULL(query_context.principal())),
+               ConstructFact({}, *ABSL_DIE_IF_NULL(query_context.fact())));
 }
 
 static Assertion ConstructAssertion(
@@ -201,18 +201,18 @@ static Assertion ConstructAssertion(
           dynamic_cast<AuthLogicParser::FactAssertionContext*>(
               &assertion_context)) {
     return Assertion(
-        ConstructFact({}, *CHECK_NOTNULL(fact_assertion_context->fact())));
+        ConstructFact({}, *ABSL_DIE_IF_NULL(fact_assertion_context->fact())));
   }
   auto& horn_clause_assertion_context =
-      *CHECK_NOTNULL(dynamic_cast<AuthLogicParser::HornClauseAssertionContext*>(
+      *ABSL_DIE_IF_NULL(dynamic_cast<AuthLogicParser::HornClauseAssertionContext*>(
           &assertion_context));
   std::vector<BaseFact> base_facts = utils::MapIter<BaseFact>(
       horn_clause_assertion_context.rvalue(),
       [](AuthLogicParser::RvalueContext* rvalue_context) {
-        return ConstructRvalue(*CHECK_NOTNULL(rvalue_context));
+        return ConstructRvalue(*ABSL_DIE_IF_NULL(rvalue_context));
       });
   return Assertion(ConditionalAssertion(
-      ConstructFact({}, *CHECK_NOTNULL(horn_clause_assertion_context.fact())),
+      ConstructFact({}, *ABSL_DIE_IF_NULL(horn_clause_assertion_context.fact())),
       std::move(base_facts)));
 }
 
@@ -223,21 +223,21 @@ static SaysAssertion ConstructSaysAssertion(
               &says_assertion_context)) {
     std::vector<Assertion> assertions;
     assertions.push_back(
-        ConstructAssertion(*CHECK_NOTNULL(says_single_context->assertion())));
+        ConstructAssertion(*ABSL_DIE_IF_NULL(says_single_context->assertion())));
     return SaysAssertion(
-        ConstructPrincipal(*CHECK_NOTNULL(says_single_context->principal())),
+        ConstructPrincipal(*ABSL_DIE_IF_NULL(says_single_context->principal())),
         std::move(assertions));
   }
   auto& says_multi_context =
-      *CHECK_NOTNULL(dynamic_cast<AuthLogicParser::SaysMultiContext*>(
+      *ABSL_DIE_IF_NULL(dynamic_cast<AuthLogicParser::SaysMultiContext*>(
           &says_assertion_context));
   std::vector<Assertion> assertions = utils::MapIter<Assertion>(
       says_multi_context.assertion(),
       [](AuthLogicParser::AssertionContext* assertion_context) {
-        return ConstructAssertion(*CHECK_NOTNULL(assertion_context));
+        return ConstructAssertion(*ABSL_DIE_IF_NULL(assertion_context));
       });
   return SaysAssertion(
-      ConstructPrincipal(*CHECK_NOTNULL(says_multi_context.principal())),
+      ConstructPrincipal(*ABSL_DIE_IF_NULL(says_multi_context.principal())),
       std::move(assertions));
 }
 
@@ -248,17 +248,17 @@ static Program ConstructProgram(
       [](AuthLogicParser::RelationDeclarationContext*
              relation_declaration_context) {
         return ConstructRelationDeclaration(
-            *CHECK_NOTNULL(relation_declaration_context));
+            *ABSL_DIE_IF_NULL(relation_declaration_context));
       });
   std::vector<SaysAssertion> says_assertions = utils::MapIter<SaysAssertion>(
       program_context.saysAssertion(),
       [](AuthLogicParser::SaysAssertionContext* says_assertion_context) {
-        return ConstructSaysAssertion(*CHECK_NOTNULL(says_assertion_context));
+        return ConstructSaysAssertion(*ABSL_DIE_IF_NULL(says_assertion_context));
       });
   std::vector<Query> queries = utils::MapIter<Query>(
       program_context.query(),
       [](AuthLogicParser::QueryContext* query_context) {
-        return ConstructQuery(*CHECK_NOTNULL(query_context));
+        return ConstructQuery(*ABSL_DIE_IF_NULL(query_context));
       });
   return Program(std::move(relation_declarations), std::move(says_assertions),
                  std::move(queries));
@@ -279,7 +279,7 @@ Program ParseProgram(absl::string_view prog_text) {
   AuthLogicParser parser(&tokens);
   // program_context points to the root of the parse tree
   AuthLogicParser::ProgramContext& program_context =
-      *CHECK_NOTNULL(parser.program());
+      *ABSL_DIE_IF_NULL(parser.program());
   return ConstructProgram(program_context);
 }
 

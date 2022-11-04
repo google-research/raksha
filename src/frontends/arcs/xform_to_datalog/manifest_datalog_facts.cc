@@ -86,7 +86,7 @@ ManifestDatalogFacts ManifestDatalogFacts::CreateFromManifestProto(
       // contained in the spec will be needed for all facts produced within a
       // Particle.
       const arcs::ParticleSpec &particle_spec =
-          *CHECK_NOTNULL(system_spec.GetParticleSpec(particle_spec_name));
+          *ABSL_DIE_IF_NULL(system_spec.GetParticleSpec(particle_spec_name));
 
       // Each ParticleSpec already contains lists of TagClaims, TagChecks,
       // and Edges that shall be generated for each Particle implementing that

@@ -50,7 +50,7 @@ std::unique_ptr<MergeOp> MergeOp::Create(const ir::Block* parent_block,
 
   // Construct and return the operation
   return std::make_unique<MergeOp>(
-      parent_block, *CHECK_NOTNULL(SqlOp::GetOperator<MergeOp>(context)),
+      parent_block, *ABSL_DIE_IF_NULL(SqlOp::GetOperator<MergeOp>(context)),
       ir::NamedAttributeMap(
           {{std::string(kControlInputStartIndex),
             ir::Attribute::Create<ir::Int64Attribute>(control_start_index)}}),
@@ -72,7 +72,7 @@ size_t MergeOp::GetControlInputStartIndex() const {
   auto find_result = attributes_map.find(kControlInputStartIndex);
   CHECK(find_result != attributes_map.end());
   auto int_attribute =
-      CHECK_NOTNULL(find_result->second.GetIf<ir::Int64Attribute>());
+      ABSL_DIE_IF_NULL(find_result->second.GetIf<ir::Int64Attribute>());
 
   CHECK(int_attribute->value() >= 0);
   return static_cast<size_t>(int_attribute->value());

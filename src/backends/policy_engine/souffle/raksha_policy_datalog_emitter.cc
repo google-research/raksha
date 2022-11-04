@@ -62,7 +62,7 @@ using AuthLogicProgram = raksha::ir::auth_logic::Program;
 using DatalogProgram = raksha::ir::datalog::Program;
 
 int main(int argc, char* argv[]) {
-  google::InitGoogleLogging("check_policy_compliance");
+  /*google::InitGoogleLogging("check_policy_compliance");*/
   absl::SetProgramUsageMessage(kUsageMessage);
   absl::ParseCommandLine(argc, argv);
 

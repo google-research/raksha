@@ -38,7 +38,7 @@ ir::Value UnwrapTopLevelSqlOutputOp(ir::Value sql_output_value) {
   const ir::Operation &operation =
       UnwrapDefaultOperationResult(sql_output_value);
   const SqlOutputOp &sql_output_op =
-      *CHECK_NOTNULL(SqlOp::GetIf<SqlOutputOp>(operation));
+      *ABSL_DIE_IF_NULL(SqlOp::GetIf<SqlOutputOp>(operation));
   return sql_output_op.GetValueMarkedAsOutput();
 }
 

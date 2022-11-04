@@ -63,7 +63,7 @@ static bool IsModulePolicyCompliantHelper(
       << "Unexpected error while outputting module: " << output_module_status;
 
   std::unique_ptr<SouffleProgram> program(
-      CHECK_NOTNULL(ProgramFactory::newInstance(
+      ABSL_DIE_IF_NULL(ProgramFactory::newInstance(
           std::string(policy.GetPolicyAnalysisCheckerName()))));
 
   // If we allow Souffle to set up its signal handler, it can cause issues when
@@ -73,7 +73,7 @@ static bool IsModulePolicyCompliantHelper(
   program->loadAll(facts_directory.string());
   program->run();
   Relation* hasPolicyViolation =
-      CHECK_NOTNULL(program->getRelation(kViolatesPolicyRelation));
+      ABSL_DIE_IF_NULL(program->getRelation(kViolatesPolicyRelation));
 
   return hasPolicyViolation->size() == 0;
 }

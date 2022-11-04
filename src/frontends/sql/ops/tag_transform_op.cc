@@ -47,7 +47,7 @@ std::unique_ptr<TagTransformOp> TagTransformOp::Create(
 
   return std::make_unique<TagTransformOp>(
       parent_block,
-      *CHECK_NOTNULL(context.GetOperator(OpTraits<TagTransformOp>::kName)),
+      *ABSL_DIE_IF_NULL(context.GetOperator(OpTraits<TagTransformOp>::kName)),
       attributes, inputs);
 }
 
@@ -63,7 +63,7 @@ TagTransformOp::GetPreconditions() const {
   for (const auto& [name, attribute] : attributes()) {
     if (name == kRuleNameAttribute) continue;
     auto int_attribute =
-        CHECK_NOTNULL(attribute.GetIf<ir::Int64Attribute>());
+        ABSL_DIE_IF_NULL(attribute.GetIf<ir::Int64Attribute>());
     auto input_index = int_attribute->value();
     // If input_values.size() > std::numeric_limits<int64_t>::max(), the
     // static_cast will return a negative value and this condition will fail,
@@ -81,7 +81,7 @@ absl::string_view TagTransformOp::GetRuleName() const {
   auto find_result = attribute_map.find(kRuleNameAttribute);
   CHECK(find_result != attribute_map.end());
   auto rule_name_attribute =
-      CHECK_NOTNULL(find_result->second.GetIf<ir::StringAttribute>());
+      ABSL_DIE_IF_NULL(find_result->second.GetIf<ir::StringAttribute>());
   return rule_name_attribute->value();
 }
 

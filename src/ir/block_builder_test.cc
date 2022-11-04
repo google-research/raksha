@@ -130,11 +130,11 @@ TEST_F(BlockBuilderDeathTest, AddResultsVerifiesOutputIsDeclared) {
 TEST_F(BlockBuilderTest, AddOperationUpdatesOperationList) {
   BlockBuilder builder;
   const Operator& core_plus =
-      *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+      *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
   const Operator& core_minus =
-      *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+      *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
   const Operator& core_merge =
-      *CHECK_NOTNULL(context_.GetOperator("core.merge"));
+      *ABSL_DIE_IF_NULL(context_.GetOperator("core.merge"));
   // std::vector<const Operator*> operations;
   const Operation* plus_op =
       std::addressof(builder.AddOperation(core_plus, {}, {}));
@@ -157,11 +157,11 @@ TEST_F(BlockBuilderTest, AddOperationUpdatesOperationList) {
 TEST_F(BlockBuilderTest, AddOperationOfUniquePtrUpdatesOperationList) {
   BlockBuilder builder;
   const Operator& core_plus =
-      *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+      *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
   const Operator& core_minus =
-      *CHECK_NOTNULL(context_.GetOperator("core.minus"));
+      *ABSL_DIE_IF_NULL(context_.GetOperator("core.minus"));
   const Operator& core_merge =
-      *CHECK_NOTNULL(context_.GetOperator("core.merge"));
+      *ABSL_DIE_IF_NULL(context_.GetOperator("core.merge"));
 
   const Operation* plus_op =
       std::addressof(builder.AddOperation(std::make_unique<Operation>(
@@ -189,7 +189,7 @@ TEST_F(BlockBuilderTest, SetParentPtrErrorsWithPredefinedParent) {
   BlockBuilder builder;
   auto block = builder.GetBlockPtr();
   const Operator& core_merge =
-      *CHECK_NOTNULL(context_.GetOperator("core.merge"));
+      *ABSL_DIE_IF_NULL(context_.GetOperator("core.merge"));
   EXPECT_DEATH(builder.AddOperation(std::make_unique<Operation>(
                    block, core_merge, NamedAttributeMap(), ValueList(),
                    std::make_unique<Module>())),
@@ -238,7 +238,7 @@ TEST_F(BlockBuilderTest, AddImplementationDoesNotChangeBlockAddress) {
 TEST_F(BlockBuilderTest, AddOperationDoesNotChangeBlockAddress) {
   BlockBuilder builder;
   Block* block_ptr = builder.GetBlockPtr();
-  const Operator& core_plus = *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+  const Operator& core_plus = *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
   const Operation& op = builder.AddOperation(core_plus, {}, {});
   auto block = builder.build();
   EXPECT_THAT(block->operations(),
@@ -256,7 +256,7 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
         builder.AddOutput("primitive_output", MakePrimitiveType());
         builder.AddOutput("entity_output", MakeTestEntityType("OutputTensor"));
         const Operator& core_plus =
-            *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+            *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
         const Operation& op = builder.AddOperation(core_plus, {}, {});
         builder.AddResult("primitive_output",
                           Value(value::OperationResult(op, "primitive_value")));
@@ -297,21 +297,21 @@ class TestOperation : public Operation {
     // `parent_block` is  nullptr if op_name is `core.merge` for death tests.
     return std::make_unique<Operation>(
         op_name == "core.merge" ? nullptr : parent_block,
-        *CHECK_NOTNULL(context.GetOperator(op_name)), NamedAttributeMap({}),
+        *ABSL_DIE_IF_NULL(context.GetOperator(op_name)), NamedAttributeMap({}),
         ValueList({}));
   }
 };
 
 TEST_F(BlockBuilderTest, AllowsAdditionOfPreConstructedOperation) {
   BlockBuilder builder;
-  const Operator& core_plus = *CHECK_NOTNULL(context_.GetOperator("core.plus"));
+  const Operator& core_plus = *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
   std::unique_ptr<Operation> plus_op_ptr =
       std::make_unique<Operation>(core_plus);
   const Operation* plus_op =
       std::addressof(builder.AddOperation(std::move(plus_op_ptr)));
 
   const Operator& core_minus =
-      *CHECK_NOTNULL(context_.GetOperator("core.minus"));
+      *ABSL_DIE_IF_NULL(context_.GetOperator("core.minus"));
   std::unique_ptr<Operation> minus_op_ptr =
       std::make_unique<Operation>(core_minus);
   const Operation* minus_op =

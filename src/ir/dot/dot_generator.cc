@@ -237,7 +237,7 @@ std::string DotGeneratorHelper::GetDotGraph() {
           std::string* out,
           common::containers::HashMap<std::string, const Operation*>::value_type
               node_entry) {
-        absl::StrAppend(out, GetDotNode(*CHECK_NOTNULL(node_entry.second)));
+        absl::StrAppend(out, GetDotNode(*ABSL_DIE_IF_NULL(node_entry.second)));
       });
   // Generate edges.
   std::string edges =

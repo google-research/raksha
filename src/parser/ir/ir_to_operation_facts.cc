@@ -44,7 +44,7 @@ constexpr char kUsageMessage[] =
     "file for Souffle.";
 
 int MainInner(int argc, char** argv) {
-  google::InitGoogleLogging("generate_datalog_program");
+  /*google::InitGoogleLogging("generate_datalog_program");*/
   absl::SetProgramUsageMessage(kUsageMessage);
   absl::ParseCommandLine(argc, argv);
 

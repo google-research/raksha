@@ -76,9 +76,9 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
               dynamic_cast<IrParser::StringAttributeContext*>(
                   attribute_context)) {
         attributes.insert(
-            {CHECK_NOTNULL(string_attribute_context)->ID()->getText(),
+            {ABSL_DIE_IF_NULL(string_attribute_context)->ID()->getText(),
              Attribute::Create<StringAttribute>(
-                 CHECK_NOTNULL(string_attribute_context)
+                 ABSL_DIE_IF_NULL(string_attribute_context)
                      ->stringLiteral()
                      ->getText())});
         continue;
@@ -87,7 +87,7 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
               dynamic_cast<IrParser::FloatAttributeContext*>(
                   attribute_context)) {
         double parsed_float = 0;
-        auto text = CHECK_NOTNULL(float_attribute_context)
+        auto text = ABSL_DIE_IF_NULL(float_attribute_context)
                         ->FLOATLITERAL()
                         ->getText();
         // Discard the suffix (l or f).
@@ -98,7 +98,7 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
         bool conversion_succeeds = absl::SimpleAtod(text, &parsed_float);
         CHECK(conversion_succeeds == true);
         attributes.insert(
-            {CHECK_NOTNULL(float_attribute_context)->ID()->getText(),
+            {ABSL_DIE_IF_NULL(float_attribute_context)->ID()->getText(),
              Attribute::Create<FloatAttribute>(parsed_float)});
         continue;
       }
@@ -106,11 +106,11 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
           dynamic_cast<IrParser::NumAttributeContext*>(attribute_context);
       int64_t parsed_int = 0;
       bool conversion_succeeds = absl::SimpleAtoi(
-          CHECK_NOTNULL(num_attribute_context)->NUMLITERAL()->getText(),
+          ABSL_DIE_IF_NULL(num_attribute_context)->NUMLITERAL()->getText(),
           &parsed_int);
       CHECK(conversion_succeeds == true);
       attributes.insert(
-          {CHECK_NOTNULL(num_attribute_context)->ID()->getText(),
+          {ABSL_DIE_IF_NULL(num_attribute_context)->ID()->getText(),
            Attribute::Create<Int64Attribute>(parsed_int)});
     }
   }
@@ -128,13 +128,13 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
           dynamic_cast<IrParser::NamedValueContext*>(value_context);
       // Operation Result Value
       value_names.push_back(
-          CHECK_NOTNULL(named_value_context)->VALUE_ID()->getText());
+          ABSL_DIE_IF_NULL(named_value_context)->VALUE_ID()->getText());
     }
   }
 
   auto op = std::make_unique<Operation>(
       nullptr,
-      *CHECK_NOTNULL(
+      *ABSL_DIE_IF_NULL(
           context_->GetOperator(operation_context.ID()->getText())),
       std::move(attributes), ValueList(), nullptr);
 
@@ -154,7 +154,7 @@ void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
   for (IrParser::OperationContext* operation_context :
        block_context.operation()) {
     auto construct_operation_result = IrProgramParser::ConstructOperation(
-        *CHECK_NOTNULL(operation_context), builder);
+        *ABSL_DIE_IF_NULL(operation_context), builder);
     // operationResult value name is expected to be "out.<index number in the
     // result list>""
     uint64_t index = 0;
@@ -189,7 +189,7 @@ void IrProgramParser::ConstructBlock(IrParser::BlockContext& block_context) {
 
 void IrProgramParser::ConstructModule(IrParser::ModuleContext& module_context) {
   for (IrParser::BlockContext* block_context : module_context.block()) {
-    IrProgramParser::ConstructBlock(*CHECK_NOTNULL(block_context));
+    IrProgramParser::ConstructBlock(*ABSL_DIE_IF_NULL(block_context));
   }
   ssa_names_->AddID(*module_, module_context.ID()->getText());
 }
@@ -208,9 +208,9 @@ IrProgramParser::Result IrProgramParser::ParseProgram(
   IrParser parser(&tokens);
   // program_context points to the root of the parse tree
   IrParser::IrProgramContext& program_context =
-      *CHECK_NOTNULL(parser.irProgram());
+      *ABSL_DIE_IF_NULL(parser.irProgram());
 
-  IrProgramParser::ConstructModule(*CHECK_NOTNULL(program_context.module()));
+  IrProgramParser::ConstructModule(*ABSL_DIE_IF_NULL(program_context.module()));
 
   return IrProgramParser::Result{.context = std::move(context_),
                                  .module = std::move(module_),

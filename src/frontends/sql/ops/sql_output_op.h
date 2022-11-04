@@ -31,7 +31,7 @@ class SqlOutputOp : public SqlOp {
                                              const ir::IRContext& context,
                                              ir::Value value) {
     return std::make_unique<SqlOutputOp>(
-        parent_block, *CHECK_NOTNULL(SqlOp::GetOperator<SqlOutputOp>(context)),
+        parent_block, *ABSL_DIE_IF_NULL(SqlOp::GetOperator<SqlOutputOp>(context)),
         ir::NamedAttributeMap(), ir::ValueList({value}),
         /*impl_module=*/nullptr);
   }

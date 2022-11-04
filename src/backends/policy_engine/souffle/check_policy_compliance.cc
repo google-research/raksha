@@ -124,7 +124,7 @@ using raksha::backends::policy_engine::CatchallPolicyRulePolicy;
 using raksha::ir::IrProgramParser;
 
 int main(int argc, char* argv[]) {
-  google::InitGoogleLogging("check_policy_compliance");
+  /*google::InitGoogleLogging("check_policy_compliance");*/
   absl::SetProgramUsageMessage(kUsageMessage);
   absl::ParseCommandLine(argc, argv);
 

@@ -30,7 +30,7 @@ std::unique_ptr<LiteralOp> LiteralOp::Create(const ir::Block* parent_block,
                                              const ir::IRContext& context,
                                              absl::string_view literal) {
   return std::make_unique<LiteralOp>(
-      parent_block, *CHECK_NOTNULL(SqlOp::GetOperator<LiteralOp>(context)),
+      parent_block, *ABSL_DIE_IF_NULL(SqlOp::GetOperator<LiteralOp>(context)),
       ir::NamedAttributeMap(
           {{std::string(kLiteralStringAttrName),
             ir::Attribute::Create<ir::StringAttribute>(literal)}}),
@@ -42,7 +42,7 @@ absl::string_view LiteralOp::GetLiteralString() const {
   auto find_result = attributes().find(kLiteralStringAttrName);
   CHECK(find_result != attributes().end());
   auto literal = find_result->second;
-  auto string_literal = CHECK_NOTNULL(literal.GetIf<ir::StringAttribute>());
+  auto string_literal = ABSL_DIE_IF_NULL(literal.GetIf<ir::StringAttribute>());
   return string_literal->value();
 }
 

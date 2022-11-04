@@ -122,7 +122,7 @@ absl::string_view GetDataConnectionName(PolicyChecker::Node node,
 
 template <typename Range>
 void UpdateEdges(const souffle::SouffleProgram *program, Range edges) {
-  souffle::Relation *rel = CHECK_NOTNULL(program->getRelation("edge"));
+  souffle::Relation *rel = ABSL_DIE_IF_NULL(program->getRelation("edge"));
   for (const auto &[src, tgt] : edges) {
     souffle::tuple edge(rel);  // Create an empty tuple
     edge << std::string(src) << std::string(tgt);
@@ -134,7 +134,7 @@ template <typename Range>
 void UpdateSettings(const souffle::SouffleProgram *program,
                     Range user_settings) {
   souffle::Relation *rel =
-      CHECK_NOTNULL(program->getRelation("says_isEnabled"));
+      ABSL_DIE_IF_NULL(program->getRelation("says_isEnabled"));
   // .decl hasTag(accessPath: AccessPath, owner: Principal, tag: Tag)
   for (const auto &[user, settings] : user_settings) {
     for (const auto &[usage, allowed] : settings) {
@@ -157,14 +157,14 @@ bool PolicyChecker::CanUserChangeSetting(PolicyChecker::User user,
 
 bool PolicyChecker::CanUserChangeSetting(absl::string_view user,
                                          absl::string_view setting_name) {
-  std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
+  std::unique_ptr<souffle::SouffleProgram> program(ABSL_DIE_IF_NULL(
       souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
   program->run();
 
   // .decl says_canSay_isEnabled(speaker: Principal, delegatee1: Principal,
   // usage: symbol)
   souffle::Relation *saysCanSayIsEnabled =
-      CHECK_NOTNULL(program->getRelation("says_canSay_isEnabled"));
+      ABSL_DIE_IF_NULL(program->getRelation("says_canSay_isEnabled"));
   // std::string setting_tag = absl::StrFormat("Allow%s", setting_name);
   for (auto &output : *saysCanSayIsEnabled) {
     std::string speaker, delegatee1, usage;
@@ -189,14 +189,14 @@ absl::flat_hash_set<PolicyChecker::Settings> PolicyChecker::AvailableSettings(
 absl::flat_hash_set<std::string> PolicyChecker::AvailableSettings(
     absl::string_view user) const {
   absl::flat_hash_set<std::string> result;
-  std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
+  std::unique_ptr<souffle::SouffleProgram> program(ABSL_DIE_IF_NULL(
       souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
   program->run();
 
   // .decl says_canSay_isEnabled(speaker: Principal, delegatee1: Principal,
   // usage: symbol)
   souffle::Relation *saysCanSayIsEnabled =
-      CHECK_NOTNULL(program->getRelation("says_canSay_isEnabled"));
+      ABSL_DIE_IF_NULL(program->getRelation("says_canSay_isEnabled"));
   // std::string setting_tag = absl::StrFormat("Allow%s", setting_name);
   for (auto &output : *saysCanSayIsEnabled) {
     std::string speaker, delegatee1, usage;
@@ -252,7 +252,7 @@ std::pair<bool, std::string> PolicyChecker::IsValidEdge(absl::string_view src,
 }
 
 std::pair<bool, std::string> PolicyChecker::ValidatePolicyCompliance() const {
-  std::unique_ptr<souffle::SouffleProgram> program(CHECK_NOTNULL(
+  std::unique_ptr<souffle::SouffleProgram> program(ABSL_DIE_IF_NULL(
       souffle::ProgramFactory::newInstance(kPolicyCheckerProgramName)));
 
   UpdateEdges(program.get(), utils::make_range(edges_.begin(), edges_.end()));
@@ -262,7 +262,7 @@ std::pair<bool, std::string> PolicyChecker::ValidatePolicyCompliance() const {
   program->run();
 
   souffle::Relation *disallowed_usage =
-      CHECK_NOTNULL(program->getRelation("disallowedUsage"));
+      ABSL_DIE_IF_NULL(program->getRelation("disallowedUsage"));
   // .decl disallowedUsage(dataConsumer: Principal, usage: Usage, owner:
   // Principal, tag: Tag)
 

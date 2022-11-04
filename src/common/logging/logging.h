@@ -16,6 +16,6 @@
 #ifndef SRC_COMMON_LOGGING_LOGGING_H_
 #define SRC_COMMON_LOGGING_LOGGING_H_
 
-#include <glog/logging.h>
+#include "base/logging.h"
 
 #endif  // SRC_COMMON_LOGGING_LOGGING_H_
