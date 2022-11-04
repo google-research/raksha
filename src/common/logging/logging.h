@@ -16,6 +16,8 @@
 #ifndef SRC_COMMON_LOGGING_LOGGING_H_
 #define SRC_COMMON_LOGGING_LOGGING_H_
 
-#include "base/logging.h"
+#include "absl/log/check.h"
+#include "absl/log/die_if_null.h"
+#include "absl/log/log.h"
 
 #endif  // SRC_COMMON_LOGGING_LOGGING_H_
