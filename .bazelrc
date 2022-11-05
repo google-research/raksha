@@ -45,6 +45,9 @@ build --host_cxxopt='-Wno-final-dtor-non-final-class'
 build --cxxopt='-Wno-unused-const-variable'
 build --host_cxxopt='-Wno-unused-const-variable'
 
+# Need this for ZetaSQL's icu dependency as long as it remains at version 65.
+# Should remove when it gets upgraded.
+build --host_cxxopt='-Wno-implicit-int-float-conversion'
 
 # Similarly, we should not set this flag that we're using as a debugging
 # assistant when compiling third party libraries.
