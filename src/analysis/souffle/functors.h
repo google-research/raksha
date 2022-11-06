@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef THIRD_PARTY_RAKSHA_SRC_ANALYSIS_SOUFFLE_FUNCTORS_H_
-#define THIRD_PARTY_RAKSHA_SRC_ANALYSIS_SOUFFLE_FUNCTORS_H_
+#ifndef SRC_ANALYSIS_SOUFFLE_FUNCTORS_H_
+#define SRC_ANALYSIS_SOUFFLE_FUNCTORS_H_
 
 #include "souffle/RecordTable.h"
 #include "souffle/SymbolTable.h"
@@ -22,4 +22,4 @@ souffle::RamDomain log_wrapper_cxx(souffle::SymbolTable *symbolTable,
                                    souffle::RecordTable *recordTable,
                                    souffle::RamDomain n);
 
-#endif  // THIRD_PARTY_RAKSHA_SRC_ANALYSIS_SOUFFLE_FUNCTORS_H_
+#endif  // SRC_ANALYSIS_SOUFFLE_FUNCTORS_H_

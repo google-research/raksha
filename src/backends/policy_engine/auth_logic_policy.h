@@ -50,4 +50,4 @@ class AuthLogicPolicy : public Policy {
 
 }  // namespace raksha::backends::policy_engine
 
-#endif
+#endif  // SRC_BACKENDS_POLICY_ENGINE_AUTH_LOGIC_POLICY_H_

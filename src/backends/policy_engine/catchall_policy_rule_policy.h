@@ -51,4 +51,4 @@ class CatchallPolicyRulePolicy : public Policy {
 
 }  // namespace raksha::backends::policy_engine
 
-#endif
+#endif  // SRC_BACKENDS_POLICY_ENGINE_CATCHALL_POLICY_RULE_POLICY_H_

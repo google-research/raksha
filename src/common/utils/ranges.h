@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_IR_UTILS_RANGES_H_
-#define SRC_IR_UTILS_RANGES_H_
+#ifndef SRC_COMMON_UTILS_RANGES_H_
+#define SRC_COMMON_UTILS_RANGES_H_
 
 #include <iterator>
 
@@ -47,4 +47,4 @@ inline iterator_range<I> make_range(I begin, I end) {
 
 }  // namespace raksha::utils
 
-#endif  // SRC_IR_UTILS_RANGES_H_
+#endif  // SRC_COMMON_UTILS_RANGES_H_

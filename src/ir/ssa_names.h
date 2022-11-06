@@ -101,4 +101,4 @@ class SsaNames {
 
 }  // namespace raksha::ir
 
-#endif  // SRC_IR_CONTEXT_H_
+#endif  // SRC_IR_SSA_NAMES_H_

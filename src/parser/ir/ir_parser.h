@@ -69,4 +69,4 @@ class IrProgramParser {
 
 }  // namespace raksha::ir
 
-#endif
+#endif  // SRC_PARSER_IR_IR_PARSER_H_

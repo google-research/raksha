@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_IR_UTILS_OVERLOADED_H_
-#define SRC_IR_UTILS_OVERLOADED_H_
+#ifndef SRC_COMMON_UTILS_OVERLOADED_H_
+#define SRC_COMMON_UTILS_OVERLOADED_H_
 
 namespace raksha::utils {
 
@@ -40,4 +40,4 @@ template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 }  // namespace raksha::utils
 
-#endif  // SRC_IR_UTILS_OVERLOADED_H_
+#endif  // SRC_COMMON_UTILS_OVERLOADED_H_
