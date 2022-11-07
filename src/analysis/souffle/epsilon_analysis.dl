@@ -170,4 +170,4 @@ violatesPolicy(value) :- isInitialInput(value),
     isSqlOutput(sql_output_operation),
     operationHasResult(sql_output_operation, sql_output).
 
-#endif //SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_
+#endif // SRC_ANALYSIS_SOUFFLE_EPSILON_ANALYSIS_DL_

@@ -21,4 +21,4 @@
 .input isLogInput(delimiter=";")
 .output logResult(delimiter=";")
 
-#endif
+#endif // SRC_ANALYSIS_SOUFFLE_MATH_UNIT_TEST_INTERFACE_DL_

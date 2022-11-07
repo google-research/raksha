@@ -27,4 +27,4 @@
 
 logResult(argument, to_float(result)) :- isLogInput(argument), result = @log_wrapper(argument).
 
-#endif
+#endif // SRC_ANALYSIS_SOUFFLE_MATH_DL_
