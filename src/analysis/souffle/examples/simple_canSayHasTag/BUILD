@@ -21,32 +21,12 @@ package(
     licenses = ["notice"],
 )
 
-<<<<<<< HEAD
-=======
-# policy_check(
-#     name = "delegation_granted",
-#     auth_logic = "ok_claim_propagates_delegation_granted.auth",
-#     dataflow_graph = "ok_claim_propagates.arcs",
-# )
-
-# policy_check(
-#     name = "delegation_not_granted",
-#     auth_logic = "ok_claim_propagates_delegation_not_granted.auth",
-#     dataflow_graph = "ok_claim_propagates.arcs",
-#     expect_failure = True,
-# )
-
->>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)
 raksha_policy_verifier_library(
     name = "delegation_granted",
     policies = [
         "ok_claim_propagates_delegation_granted.auth",
     ],
-<<<<<<< HEAD
     policy_verifier_interfaces = [":ok_claim_propagates.dl"],
-=======
-    policy_verifier_interfaces = [":delegation_granted.dl"],
->>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)
 )
 
 raksha_policy_verifier_library(
@@ -54,7 +34,6 @@ raksha_policy_verifier_library(
     policies = [
         "ok_claim_propagates_delegation_not_granted.auth",
     ],
-<<<<<<< HEAD
     policy_verifier_interfaces = [":ok_claim_propagates.dl"],
 )
 
@@ -64,56 +43,18 @@ raksha_policy_verifier_library(
     args = [
         "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
         "%s" % test_result,
-=======
-    policy_verifier_interfaces = [":delegation_not_granted.dl"],
-)
-
-sh_test(
-    name = "check_policy_compliance_delegation_granted_test",
-    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
-    args = [
-        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
-        "fail",
->>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)
         "sql_policy_analysis",
         "ir",
         "$(location //src/analysis/souffle/examples:empty.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-<<<<<<< HEAD
         "%s" % verifier_name,
-=======
-        "delegation_granted_cxx",
->>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)
     ],
     data = [
         "//src/analysis/souffle/examples:empty.ir",
         "//src/backends/policy_engine/souffle:check_policy_compliance",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
     ],
-<<<<<<< HEAD
 ) for verifier_name, test_result in [
     ("delegation_granted_cxx", "fail"),
     ("delegation_not_granted_cxx", "pass"),
 ]]
-=======
-)
-
-sh_test(
-    name = "check_policy_compliance_delegation_not_granted_test",
-    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
-    args = [
-        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
-        "pass",
-        "sql_policy_analysis",
-        "ir",
-        "$(location //src/analysis/souffle/examples:empty.ir)",
-        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
-        "delegation_not_granted_cxx",
-    ],
-    data = [
-        "//src/analysis/souffle/examples:empty.ir",
-        "//src/backends/policy_engine/souffle:check_policy_compliance",
-        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
-    ],
-)
->>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)

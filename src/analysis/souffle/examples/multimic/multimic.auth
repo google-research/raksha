@@ -1,0 +1,21 @@
+
+"UserA" says {
+  ownsAccessPath("UserA", "DoASRUserAAndUserB.UserATainter#3.audioIn").
+  ownsAccessPath("UserA", "DoASRUserAAndUserBAndUserC.UserATainter#3.audioIn").
+}
+
+"UserB" says {
+  ownsAccessPath("UserB", "DoASRUserAAndUserB.UserBTainter#4.audioIn").
+  ownsAccessPath("UserB", "DoASRUserAAndUserBAndUserC.UserBTainter#4.audioIn").
+}
+
+// UserC is a very privacy sensitive user. They do not trust anyone to perform
+// ASR on their voice data.
+"UserC" says {
+  // TODO(#220): we should claim ownership at the level of handles rather recipe access paths.
+  ownsAccessPath("UserC", "DoASRUserAAndUserBAndUserC.UserCTainter5.audio").
+  // We want to use canSay hasTag but cannot due to issue #195.
+  // "UserCTainter" canSay hasTag("DoASRUserAAndUserBAndUserC.UserCTainter5.audio", "UserC", "asrDisallowed").
+  // TODO(#195) remove this ownership claim.
+  ownsTag("UserCTainter", "asrDisallowed").
+}

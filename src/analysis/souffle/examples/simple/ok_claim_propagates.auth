@@ -4,8 +4,4 @@
 "EndUser" says "P1" canSay ownsTag("P1", "userSelection").
 "P1" says ownsTag("P1", "userSelection").
 "EndUser" says ownsAccessPath("EndUser", "R.P1.foo").
-<<<<<<< HEAD
 "EndUser" says "P1" canSay hasTag("R.P1.foo", "EndUser", "userSelection").
-=======
-"EndUser" says "P1" canSay hasTag("R.P1.foo", "EndUser", "userSelection").
->>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)
