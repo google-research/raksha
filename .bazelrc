@@ -62,6 +62,8 @@ build --cxxopt='-Wno-enum-compare-switch'
 build --host_cxxopt='-Wno-enum-compare-switch'
 build --cxxopt='-Wno-char-subscripts'
 build --host_cxxopt='-Wno-char-subscripts'
+build --cxxopt='-Wno-deprecated-declarations'
+build --host_cxxopt='-Wno-deprecated-declarations'
 # This warning has a false positive on ZetaSQL.
 build --cxxopt='-Wno-thread-safety-precise'
 build --host_cxxopt='-Wno-thread-safety-precise'
