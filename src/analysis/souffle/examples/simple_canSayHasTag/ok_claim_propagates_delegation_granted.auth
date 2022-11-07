@@ -1,0 +1,10 @@
+.decl ownsTag(principal : Principal, tag : Tag)
+.decl ownsAccessPath(principal : Principal, path : AccessPath)
+.decl hasTag(path : AccessPath, principal : Principal, tag : Tag)
+
+
+//TODO(#220): We should claim ownership at the level of handles that correspond
+// to stores where ownership makes more sense.
+"EndUser" says { ownsTag("EndUser", "userSelection"). 
+                 ownsAccessPath("EndUser", "R.P1.foo"). 
+                "P1" canSay hasTag("R.P1.foo", "EndUser", "userSelection"). }

@@ -31,6 +31,9 @@
 
 ABSL_FLAG(std::string, policy_rules, "", "file containing policy rules");
 ABSL_FLAG(std::string, datalog_file, "", "path to policy directory");
+ABSL_FLAG(std::optional<bool>, skip_declarations, std::nullopt,
+          "true: Need to declare all the relations; false: No need to declare "
+          "pre defined relations");
 
 constexpr char kUsageMessage[] =
     "This tool takes a file containing policy, converts it to datalog and "
@@ -72,6 +75,10 @@ int main(int argc, char* argv[]) {
     LOG(ERROR) << "Error reading policy rules file: " << policy_rules.status();
     return 2;
   }
+  const std::optional<bool> skip_declarations_flag =
+      absl::GetFlag(FLAGS_skip_declarations);
+  const bool skip_declarations =
+      skip_declarations_flag.has_value() && skip_declarations_flag.value();
 
   std::filesystem::path datalog_file_path(absl::GetFlag(FLAGS_datalog_file));
 
@@ -81,7 +88,8 @@ int main(int argc, char* argv[]) {
   DatalogProgram datalog_program =
       raksha::ir::auth_logic::LoweringToDatalogPass::Lower(program);
   std::string datalog_policy =
-      raksha::ir::auth_logic::SouffleEmitter::EmitProgram(datalog_program);
+      raksha::ir::auth_logic::SouffleEmitter::EmitProgram(datalog_program,
+                                                          skip_declarations);
 
   std::ofstream datalog_file(
       datalog_file_path, std::ios::out | std::ios::trunc | std::ios::binary);
