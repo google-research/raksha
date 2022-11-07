@@ -3,39 +3,6 @@
 #include "src/analysis/souffle/authorization_logic.dl"
 #include "src/analysis/souffle/tag_transforms.dl"
 
-<<<<<<< HEAD
-// An interface used for running and getting results from the policy verifier.
-// Returns as output the violatesPolicy relation, which indicates whether 
-// there were failures in a way that is easy to read across the Souffle C++ interface.
-
-.output violatesPolicy(delimiter=";")
-
-// Following arcs code converetd to datalog code below
-/* Run binary //src/frontends/arcs/xform_to_datalog:generate_datalog_program) 
-            --auth_logic_file=\"$(location %s)\" " % auth_logic +
-            --manifest_proto=\"$(location %s)\" " % proto_target +
-            --datalog_file=<datalog filepath>" "
-   to generate datalog file for both arcs and auth_logic file
-*/
-// particle P1
-//  foo: writes Foo {}
-//  claim foo is userSelection
-// particle P2
-//  bar: reads Foo {}
-//  foo: writes Foo {}
-// particle P3
-//  bar: reads Foo {}
-//  check bar is userSelection
-// recipe R
-//  P1
-//    foo: writes h1
-//  P2
-//    bar: reads h1
-//    foo: writes h2
-//  P3
-//    bar: reads h2
-
-=======
 // An interface used for running and getting results from the policy verifier for
 // the specific purpose of the SQL verifier.
 // Does not concern itself with authorization logic facts, considers only
@@ -45,7 +12,6 @@
 
 .output violatesPolicy(delimiter=";")
 
->>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)
 // Rules for detecting policy failures.
 .decl testFails(check_index: symbol)
 .output testFails(IO=stdout)
@@ -73,19 +39,17 @@ saysWill(w, x, y) :- says_will(w, x, y).
 // Manifest
 // Claims:
 says_hasTag("P1", "R.P1.foo", owner, "userSelection") :- ownsAccessPath(owner, "R.P1.foo").
+says_removeTag("P2", "R.P2.foo", owner, "userSelection") :- ownsAccessPath(owner, "R.P2.foo").
 
 // Checks:
-isCheck("check_num_0", "R.P3.bar"), check("check_num_0", owner, "R.P3.bar") :-
-  ownsAccessPath(owner, "R.P3.bar"), mayHaveTag("R.P3.bar", owner, "userSelection").
-
+isCheck("check_num_0", "R.P2.bar"), check("check_num_0", owner, "R.P2.bar") :-
+  ownsAccessPath(owner, "R.P2.bar"), mayHaveTag("R.P2.bar", owner, "userSelection").
+isCheck("check_num_1", "R.P3.bar"), check("check_num_1", owner, "R.P3.bar") :-
+  ownsAccessPath(owner, "R.P3.bar"), isPrincipal(owner), !(mayHaveTag("R.P3.bar", owner, "userSelection")).
 violatesPolicy("any") :- isCheck(_, _).
 // Edges:
 edge("R.P1.foo", "R.handle0").
 edge("R.handle0", "R.P2.bar").
 edge("R.P2.foo", "R.handle1").
 edge("R.P2.bar", "R.P2.foo").
-<<<<<<< HEAD
 edge("R.handle1", "R.P3.bar").
-=======
-edge("R.handle1", "R.P3.bar").
->>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)

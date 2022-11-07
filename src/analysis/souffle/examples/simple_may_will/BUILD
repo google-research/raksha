@@ -13,6 +13,10 @@
 # limitations under the License.
 #
 #-------------------------------------------------------------------------------
+<<<<<<< HEAD
+=======
+load("//build_defs:raksha.bzl", "policy_check")
+>>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)
 load("//build_defs:raksha_policy_verifier.bzl", "raksha_policy_verifier_library")
 
 package(
@@ -26,7 +30,11 @@ raksha_policy_verifier_library(
     policies = [
         "simple_may_will_pass.auth",
     ],
+<<<<<<< HEAD
     policy_verifier_interfaces = [":simple_may_will.dl"],
+=======
+    policy_verifier_interfaces = [":may_will_pass.dl"],
+>>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)
 )
 
 raksha_policy_verifier_library(
@@ -34,6 +42,7 @@ raksha_policy_verifier_library(
     policies = [
         "simple_may_will_fail.auth",
     ],
+<<<<<<< HEAD
     policy_verifier_interfaces = [":simple_may_will.dl"],
 )
 
@@ -43,18 +52,56 @@ raksha_policy_verifier_library(
     args = [
         "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
         "%s" % test_result,
+=======
+    policy_verifier_interfaces = [":may_will_fail.dl"],
+)
+
+sh_test(
+    name = "check_policy_compliance_simple_may_will_pass_test",
+    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
+    args = [
+        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
+        "pass",
+>>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)
         "sql_policy_analysis",
         "ir",
         "$(location //src/analysis/souffle/examples:empty.ir)",
         "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+<<<<<<< HEAD
         "%s" % verifier_name,
+=======
+        "may_will_pass_cxx",
+>>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)
     ],
     data = [
         "//src/analysis/souffle/examples:empty.ir",
         "//src/backends/policy_engine/souffle:check_policy_compliance",
         "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
     ],
+<<<<<<< HEAD
 ) for verifier_name, test_result in [
     ("may_will_pass_cxx", "pass"),
     ("may_will_fail_cxx", "fail"),
 ]]
+=======
+)
+
+sh_test(
+    name = "check_policy_compliance_simple_may_will_fail_test",
+    srcs = ["//src/backends/policy_engine/souffle:check_policy_compliance_test.sh"],
+    args = [
+        "$(location //src/backends/policy_engine/souffle:check_policy_compliance)",
+        "fail",
+        "sql_policy_analysis",
+        "ir",
+        "$(location //src/analysis/souffle/examples:empty.ir)",
+        "$(location //src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt)",
+        "may_will_fail_cxx",
+    ],
+    data = [
+        "//src/analysis/souffle/examples:empty.ir",
+        "//src/backends/policy_engine/souffle:check_policy_compliance",
+        "//src/backends/policy_engine/souffle/testdata:sql_policy_rules.txt",
+    ],
+)
+>>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)

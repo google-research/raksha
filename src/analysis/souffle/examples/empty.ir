@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 // We use empty IR for policy compliance check. The IR is captured in the datalog files for now.
 // Skip converting the old arcs to IR as of now.
 module m0 {
   block b0 {
   }  // block b0
 }  // module m0
+=======
+module m0 {
+  block b0 {
+  }  // block b0
+}  // module m0
+>>>>>>> 64068c8 (remove rust dependency for auth_logic in src/analysis/souffle/example/)

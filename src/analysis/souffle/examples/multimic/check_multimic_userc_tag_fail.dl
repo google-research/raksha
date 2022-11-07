@@ -1,0 +1,95 @@
+
+#include "src/analysis/souffle/taint.dl"
+#include "src/analysis/souffle/may_will.dl"
+#include "src/analysis/souffle/authorization_logic.dl"
+#include "src/analysis/souffle/tag_transforms.dl"
+
+// An interface used for running and getting results from the policy verifier for
+// the specific purpose of the SQL verifier.
+// Does not concern itself with authorization logic facts, considers only
+// `Operation`s and `SqlPolicyRule`s. Returns as output the violatesPolicy
+// relation, which indicates whether there were failures in a way that is easy
+// to read across the Souffle C++ interface.
+
+.output violatesPolicy(delimiter=";")
+
+// Rules for detecting policy failures.
+.decl testFails(check_index: symbol)
+.output testFails(IO=stdout)
+.decl allTests(check_index: symbol)
+.output allTests(IO=stdout)
+.decl duplicateTestCaseNames(testAspectName: symbol)
+.output duplicateTestCaseNames(IO=stdout)
+.output disallowedUsage(IO=stdout)
+
+.decl isCheck(check_index: symbol, path: AccessPath)
+.decl check(check_index: symbol, owner: Principal, path: AccessPath)
+
+allTests(check_index) :- isCheck(check_index, _).
+testFails(cat(check_index, "-", owner, "-", path)) :-
+  isCheck(check_index, path), ownsAccessPath(owner, path),
+  !check(check_index, owner, path).
+
+testFails("may_will") :- disallowedUsage(_, _, _, _).
+
+.decl says_may(speaker: Principal, actor: Principal, usage: Usage, tag: Tag)
+.decl says_will(speaker: Principal, usage: Usage, path: AccessPath)
+saysMay(w, x, y, z) :- says_may(w, x, y, z).
+saysWill(w, x, y) :- says_will(w, x, y).
+
+// Manifest
+// Claims:
+says_hasTag("MicIn", "DoASRNoGuests.MicIn.audio", owner, "userSpeech") :- ownsAccessPath(owner, "DoASRNoGuests.MicIn.audio").
+says_hasTag("MicIn", "DoASRUserAAndUserB.MicIn.audio", owner, "userSpeech") :- ownsAccessPath(owner, "DoASRUserAAndUserB.MicIn.audio").
+says_hasTag("MicIn", "DoASRUserAAndUserBAndUserC.MicIn.audio", owner, "userSpeech") :- ownsAccessPath(owner, "DoASRUserAAndUserBAndUserC.MicIn.audio").
+says_hasTag("UserCTainter", "DoASRUserAAndUserBAndUserC.UserCTainter.audio", owner, "asrDisallowed") :- ownsAccessPath(owner, "DoASRUserAAndUserBAndUserC.UserCTainter.audio").
+
+// Checks:
+isCheck("check_num_0", "DoASRNoGuests.MicCompute.audioIn"), check("check_num_0", owner, "DoASRNoGuests.MicCompute.audioIn") :-
+  ownsAccessPath(owner, "DoASRNoGuests.MicCompute.audioIn"), isPrincipal(owner), !(mayHaveTag("DoASRNoGuests.MicCompute.audioIn", owner, "asrDisallowed")).
+isCheck("check_num_1", "DoASRUserAAndUserB.MicCompute.audioIn"), check("check_num_1", owner, "DoASRUserAAndUserB.MicCompute.audioIn") :-
+  ownsAccessPath(owner, "DoASRUserAAndUserB.MicCompute.audioIn"), isPrincipal(owner), !(mayHaveTag("DoASRUserAAndUserB.MicCompute.audioIn", owner, "asrDisallowed")).
+isCheck("check_num_2", "DoASRUserAAndUserBAndUserC.MicCompute.audioIn"), check("check_num_2", owner, "DoASRUserAAndUserBAndUserC.MicCompute.audioIn") :-
+  ownsAccessPath(owner, "DoASRUserAAndUserBAndUserC.MicCompute.audioIn"), isPrincipal(owner), !(mayHaveTag("DoASRUserAAndUserBAndUserC.MicCompute.audioIn", owner, "asrDisallowed")).
+
+violatesPolicy("any") :- isCheck(_, _).
+// Edges:
+edge("DoASRNoGuests.handle0", "DoASRNoGuests.MicCompute.asrNeuralNet").
+edge("DoASRNoGuests.MicCompute.asrStorageConn", "DoASRNoGuests.handle1").
+edge("DoASRNoGuests.handle2", "DoASRNoGuests.MicCompute.audioIn").
+edge("DoASRNoGuests.MicCompute.asrNeuralNet", "DoASRNoGuests.MicCompute.asrStorageConn").
+edge("DoASRNoGuests.MicCompute.audioIn", "DoASRNoGuests.MicCompute.asrStorageConn").
+edge("DoASRNoGuests.MicIn.audio", "DoASRNoGuests.handle2").
+edge("DoASRNoGuests.handle1", "DoASRNoGuests.SpeechToTextStorageSink.speechToTextIn").
+edge("DoASRUserAAndUserB.handle0", "DoASRUserAAndUserB.MicCompute.asrNeuralNet").
+edge("DoASRUserAAndUserB.MicCompute.asrStorageConn", "DoASRUserAAndUserB.handle1").
+edge("DoASRUserAAndUserB.handle2", "DoASRUserAAndUserB.MicCompute.audioIn").
+edge("DoASRUserAAndUserB.MicCompute.asrNeuralNet", "DoASRUserAAndUserB.MicCompute.asrStorageConn").
+edge("DoASRUserAAndUserB.MicCompute.audioIn", "DoASRUserAAndUserB.MicCompute.asrStorageConn").
+edge("DoASRUserAAndUserB.MicIn.audio", "DoASRUserAAndUserB.handle2").
+edge("DoASRUserAAndUserB.handle1", "DoASRUserAAndUserB.SpeechToTextStorageSink.speechToTextIn").
+edge("DoASRUserAAndUserB.handle2", "DoASRUserAAndUserB.UserATainter.audio").
+edge("DoASRUserAAndUserB.UserATainter.audio", "DoASRUserAAndUserB.handle2").
+edge("DoASRUserAAndUserB.UserATainter.audio", "DoASRUserAAndUserB.UserATainter.audio").
+edge("DoASRUserAAndUserB.handle2", "DoASRUserAAndUserB.UserBTainter.audio").
+edge("DoASRUserAAndUserB.UserBTainter.audio", "DoASRUserAAndUserB.handle2").
+edge("DoASRUserAAndUserB.UserBTainter.audio", "DoASRUserAAndUserB.UserBTainter.audio").
+edge("DoASRUserAAndUserBAndUserC.handle0", "DoASRUserAAndUserBAndUserC.MicCompute.asrNeuralNet").
+edge("DoASRUserAAndUserBAndUserC.MicCompute.asrStorageConn", "DoASRUserAAndUserBAndUserC.handle1").
+edge("DoASRUserAAndUserBAndUserC.handle2", "DoASRUserAAndUserBAndUserC.MicCompute.audioIn").
+edge("DoASRUserAAndUserBAndUserC.MicCompute.asrNeuralNet", "DoASRUserAAndUserBAndUserC.MicCompute.asrStorageConn").
+edge("DoASRUserAAndUserBAndUserC.MicCompute.audioIn", "DoASRUserAAndUserBAndUserC.MicCompute.asrStorageConn").
+edge("DoASRUserAAndUserBAndUserC.MicIn.audio", "DoASRUserAAndUserBAndUserC.handle2").
+edge("DoASRUserAAndUserBAndUserC.handle1", "DoASRUserAAndUserBAndUserC.SpeechToTextStorageSink.speechToTextIn").
+edge("DoASRUserAAndUserBAndUserC.handle2", "DoASRUserAAndUserBAndUserC.UserATainter.audio").
+edge("DoASRUserAAndUserBAndUserC.UserATainter.audio", "DoASRUserAAndUserBAndUserC.handle2").
+edge("DoASRUserAAndUserBAndUserC.UserATainter.audio", "DoASRUserAAndUserBAndUserC.UserATainter.audio").
+edge("DoASRUserAAndUserBAndUserC.handle2", "DoASRUserAAndUserBAndUserC.UserBTainter.audio").
+edge("DoASRUserAAndUserBAndUserC.UserBTainter.audio", "DoASRUserAAndUserBAndUserC.handle2").
+edge("DoASRUserAAndUserBAndUserC.UserBTainter.audio", "DoASRUserAAndUserBAndUserC.UserBTainter.audio").
+edge("DoASRUserAAndUserBAndUserC.handle2", "DoASRUserAAndUserBAndUserC.UserCTainter.audio").
+edge("DoASRUserAAndUserBAndUserC.UserCTainter.audio", "DoASRUserAAndUserBAndUserC.handle2").
+edge("DoASRUserAAndUserBAndUserC.UserCTainter.audio", "DoASRUserAAndUserBAndUserC.UserCTainter.audio").
+
+
+
