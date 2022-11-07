@@ -21,6 +21,11 @@ build --host_cxxopt='-std=c++17'
 # warning-clean. We also comment out -Wall so that we do not receive extra
 # warnings from our third party packages.
 # build --host_cxxopt='-Werror' --host_cxxopt='-Wall'
+#
+# This warning is just a bad one, common return optimizations make its advice
+# the wrong thing to do.
+build --cxxopt='-Wno-return-std-move'
+build --host_cxxopt='-Wno-return-std-move'
 
 # These are needed on systems with GLIBC > 2.34-8 to build google-fuzztest
 # which has these errors.
@@ -44,7 +49,27 @@ build --cxxopt='-Wno-final-dtor-non-final-class'
 build --host_cxxopt='-Wno-final-dtor-non-final-class'
 build --cxxopt='-Wno-unused-const-variable'
 build --host_cxxopt='-Wno-unused-const-variable'
+build --cxxopt='-Wno-unused-variable'
+build --host_cxxopt='-Wno-unused-variable'
+build --cxxopt='-Wno-unused-function'
+build --host_cxxopt='-Wno-unused-function'
+# We need to turn off these warnings to build ZetaSQL too.
+build --cxxopt='-Wno-inconsistent-missing-override'
+build --host_cxxopt='-Wno-inconsistent-missing-override'
+build --cxxopt='-Wno-defaulted-function-deleted'
+build --host_cxxopt='-Wno-defaulted-function-deleted'
+build --cxxopt='-Wno-enum-compare-switch'
+build --host_cxxopt='-Wno-enum-compare-switch'
+build --cxxopt='-Wno-char-subscripts'
+build --host_cxxopt='-Wno-char-subscripts'
+# This warning has a false positive on ZetaSQL.
+build --cxxopt='-Wno-thread-safety-precise'
+build --host_cxxopt='-Wno-thread-safety-precise'
 
+# Need this for ZetaSQL's icu dependency as long as it remains at version 65.
+# Should remove when it gets upgraded.
+build --cxxopt='-Wno-implicit-int-float-conversion'
+build --host_cxxopt='-Wno-implicit-int-float-conversion'
 
 # Similarly, we should not set this flag that we're using as a debugging
 # assistant when compiling third party libraries.
