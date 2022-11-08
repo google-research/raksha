@@ -1,2 +1,0 @@
-.decl ownsTag(principal : Principal, tag : Tag)
-"prin1" says ownsTag("particle", "foo").

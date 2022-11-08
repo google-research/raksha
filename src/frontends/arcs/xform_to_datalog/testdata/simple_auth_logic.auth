@@ -1,4 +1,0 @@
-.decl fact1(someType : SomeType)
-.decl cond1(someType : SomeType)
-"prin1" says fact1(thing_x) :- cond1(thing_x).
-"prin1" says cond1("foo").

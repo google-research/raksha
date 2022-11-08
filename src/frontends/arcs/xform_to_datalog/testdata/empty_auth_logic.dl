@@ -1,5 +1,0 @@
-.type DummyType <: symbol
-.decl grounded_dummy(dummy_param: DummyType)
-.decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
-.decl says_isNumber(speaker: Principal, x: number)
-grounded_dummy("dummy_var").

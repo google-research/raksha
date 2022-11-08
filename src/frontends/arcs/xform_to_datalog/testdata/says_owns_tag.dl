@@ -1,9 +1,0 @@
-.type DummyType <: symbol
-.decl grounded_dummy(dummy_param: DummyType)
-.decl says_canActAs(speaker: Principal, p1: Principal, p2: Principal)
-.decl says_isNumber(speaker: Principal, x: number)
-says_ownsTag("prin1", "particle", "foo").
-says_isPrincipal("prin1", "prin1").
-says_isTag("prin1", "foo").
-says_isPrincipal("prin1", "particle").
-grounded_dummy("dummy_var").
