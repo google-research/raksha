@@ -60,8 +60,6 @@ class Operation {
   const NamedAttributeMap& attributes() const { return attributes_; }
   const Module* impl_module() const { return impl_module_.get(); }
 
-  std::string ToString(SsaNames& ssa_names) const;
-
   template <typename Derived, typename Result>
   Result Accept(IRVisitor<Derived, Result, false>& visitor) {
     return visitor.Visit(*this);
