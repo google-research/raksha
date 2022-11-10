@@ -16,6 +16,7 @@
 #ifndef SRC_IR_MODULE_H_
 #define SRC_IR_MODULE_H_
 
+#include <cstdint>
 #include <vector>
 
 #include "src/ir/attributes/attribute.h"
@@ -59,6 +60,19 @@ class Operation {
   const ValueList& inputs() const { return inputs_; }
   const NamedAttributeMap& attributes() const { return attributes_; }
   const Module* impl_module() const { return impl_module_.get(); }
+
+  const Value& GetInputValue(uint64_t index) const {
+    CHECK(index < inputs_.size())
+        << "Operation:GetInputValue fails because index is out of bounds";
+    return inputs_[index];
+  }
+  uint64_t NumberOfOutputs() const { return op_->number_of_return_values(); }
+
+  Value GetOutputValue(uint64_t index) const {
+    CHECK(index < op_->number_of_return_values())
+        << "Operation:GetOutputValue fails because index is out of bounds";
+    return Value::MakeOperationResultValue(*this, index);
+  }
 
   template <typename Derived, typename Result>
   Result Accept(IRVisitor<Derived, Result, false>& visitor) {

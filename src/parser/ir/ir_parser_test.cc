@@ -239,4 +239,63 @@ TEST(IrParseTest, OperatorWithDifferentNumberOfReturnFailure) {
       ir_parser.ParseProgram(input_program_text),
       "Operator has different number of return values in different instances ");
 }
+
+TEST(IrParserOperationTest, SimpleTestOperationAPIs) {
+  auto input_program_text = R"(module m0 {
+  block b0 {
+    %1, %2 = core.make_pair [](<<ANY>>, <<ANY>>)
+  }  // block b0
+  block b1 {
+  }  // block b1
+}  // module m0
+)";
+  IrProgramParser ir_parser;
+  auto result = ir_parser.ParseProgram(input_program_text);
+  EXPECT_EQ(IRPrinter::ToString(*result.module, *result.ssa_names),
+            input_program_text);
+  auto& op = result.module->blocks()[0]->operations()[0];
+  EXPECT_EQ(result.ssa_names->GetOrCreateID(op->GetOutputValue(1)), "%2");
+  EXPECT_EQ(result.ssa_names->GetOrCreateID(op->GetOutputValue(0)), "%1");
+  EXPECT_EQ(result.ssa_names->GetOrCreateID(op->GetInputValue(0)), "%2");
+  EXPECT_EQ(op->NumberOfOutputs(), 2);
+  EXPECT_DEATH(result.ssa_names->GetOrCreateID(op->GetOutputValue(2)),
+               "Operation:GetOutputValue fails because index is out of bounds");
+  EXPECT_DEATH(result.ssa_names->GetOrCreateID(op->GetInputValue(2)),
+               "Operation:GetInputValue fails because index is out of bounds");
+}
+TEST(IrParserOperationDeathTest, DiesIfRequestingOutOfBoundOutputs) {
+  auto input_program_text = R"(module m0 {
+  block b0 {
+    %1, %2 = core.make_pair [](%2, <<ANY>>)
+  }  // block b0
+  block b1 {
+  }  // block b1
+}  // module m0
+)";
+  IrProgramParser ir_parser;
+  auto result = ir_parser.ParseProgram(input_program_text);
+  EXPECT_EQ(IRPrinter::ToString(*result.module, *result.ssa_names),
+            input_program_text);
+  auto& op = result.module->blocks()[0]->operations()[0];
+  EXPECT_DEATH(result.ssa_names->GetOrCreateID(op->GetOutputValue(2)),
+               "Operation:GetOutputValue fails because index is out of bounds");
+}
+
+TEST(IrParserOperationDeathTest, DiesIfRequestingOutOfBoundInputs) {
+  auto input_program_text = R"(module m0 {
+  block b0 {
+    %1, %2 = core.make_pair [](%2, <<ANY>>)
+  }  // block b0
+  block b1 {
+  }  // block b1
+}  // module m0
+)";
+  IrProgramParser ir_parser;
+  auto result = ir_parser.ParseProgram(input_program_text);
+  EXPECT_EQ(IRPrinter::ToString(*result.module, *result.ssa_names),
+            input_program_text);
+  auto& op = result.module->blocks()[0]->operations()[0];
+  EXPECT_DEATH(result.ssa_names->GetOrCreateID(op->GetInputValue(2)),
+               "Operation:GetInputValue fails because index is out of bounds");
+}
 }  // namespace raksha::ir
