@@ -1,3 +1,5 @@
+.decl ownsAccessPath(owner : Principal, path : AccessPath)
+
 // TODO(#220): we should claim ownership at the level of handles rather recipe access paths.
 "UserA" says {
   ownsAccessPath("UserA", "DoASRUserAAndUserB.UserATainter#3.audioIn").

@@ -1,3 +1,5 @@
+.decl ownsAccessPath(owner : Principal, path : AccessPath)
+.decl ownsTag(owner : Principal, tag : Tag)
 
 "UserA" says {
   ownsAccessPath("UserA", "DoASRUserAAndUserB.UserATainter#3.audioIn").

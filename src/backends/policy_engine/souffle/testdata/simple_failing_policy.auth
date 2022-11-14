@@ -1,7 +1,8 @@
+.decl hasTag(path : AccessPath, owner : Principal, tag : Tag)
+.decl removeTag(path : AccessPath, owner : Principal, tag : Tag)
+
 "sql" says {
   hasTag("%0", "sql", "RawAudio").
   //Not removing confidentiality tag by commenting out below line would ensure that test fails
   //removeTag("%2", "sql", "RawAudio").
 }
-
-

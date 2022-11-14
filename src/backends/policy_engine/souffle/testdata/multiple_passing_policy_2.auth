@@ -1,3 +1,5 @@
+.decl removeTag(path: AccessPath, owner: Principal, tag: Tag)
+
 "sql" says {
   removeTag("%2", "sql", "RawAudio").
 }
