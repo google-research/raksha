@@ -21,6 +21,26 @@ package(
 )
 
 cc_library(
+    name = "iterator_adapter",
+    hdrs = ["iterator_adapter.h"],
+    deps = [
+        ":iterator_range",
+        ":types",
+    ],
+)
+
+cc_test(
+    name = "iterator_adapter_test",
+    srcs = ["iterator_adapter_test.cc"],
+    deps = [
+        ":iterator_adapter",
+        ":iterator_range",
+        "//src/common/testing:gtest",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "types",
     hdrs = ["types.h"],
     deps = [],
