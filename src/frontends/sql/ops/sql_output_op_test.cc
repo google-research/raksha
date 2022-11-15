@@ -16,7 +16,7 @@
 #include "src/frontends/sql/ops/sql_output_op.h"
 
 #include "src/common/testing/gtest.h"
-#include "src/common/utils/ranges.h"
+#include "src/common/utils/iterator_range.h"
 #include "src/frontends/sql/ops/example_value_test_helper.h"
 #include "src/frontends/sql/ops/sql_op.h"
 #include "src/ir/attributes/attribute.h"
@@ -47,9 +47,8 @@ TEST_P(SqlOutputOpTest, FactoryMethodCreatesCorrectOperation) {
   EXPECT_TRUE(op->attributes().empty());
 }
 
-
 TEST_P(SqlOutputOpTest, GetWrappedValueTest) {
-   const ir::Value wrapped_value = GetParam();
+  const ir::Value wrapped_value = GetParam();
 
   std::unique_ptr<SqlOutputOp> op =
       SqlOutputOp::Create(nullptr, context_, wrapped_value);
@@ -63,5 +62,5 @@ INSTANTIATE_TEST_SUITE_P(
     SqlOutputOpTest, SqlOutputOpTest,
     Values(ir::Value(ir::value::Any()),
            ir::Value(ir::value::OperationResult(kExampleOperation, 0))));
-}
-}  // namespace raksha::frontends::sql::ops
+}  // namespace
+}  // namespace raksha::frontends::sql

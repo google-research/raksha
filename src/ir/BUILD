@@ -257,10 +257,9 @@ cc_library(
     deps = [
         ":storage",
         "//src/common/containers:hash_map",
+        "//src/common/utils:iterator_range",
         "//src/common/utils:overloaded",
-        "//src/common/utils:ranges",
         "//src/ir/types",
-        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings:str_format",
     ],
 )

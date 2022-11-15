@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_COMMON_UTILS_RANGES_H_
-#define SRC_COMMON_UTILS_RANGES_H_
+#ifndef SRC_COMMON_UTILS_ITERATOR_RANGE_H_
+#define SRC_COMMON_UTILS_ITERATOR_RANGE_H_
 
 #include <iterator>
 
@@ -29,7 +29,8 @@ class iterator_range {
   using value_type = typename std::iterator_traits<I>::value_type;
 
   iterator_range() = default;
-  iterator_range(I begin, I end) : begin_(begin), end_(end) {}
+  iterator_range(I begin, I end)
+      : begin_(std::move(begin)), end_(std::move(end)) {}
 
   I begin() const { return begin_; }
   I end() const { return end_; }
@@ -42,9 +43,9 @@ class iterator_range {
 
 template <typename I>
 inline iterator_range<I> make_range(I begin, I end) {
-  return iterator_range<I>(begin, end);
+  return iterator_range<I>(std::move(begin), std::move(end));
 }
 
 }  // namespace raksha::utils
 
-#endif  // SRC_COMMON_UTILS_RANGES_H_
+#endif  // SRC_COMMON_UTILS_ITERATOR_RANGE_H_

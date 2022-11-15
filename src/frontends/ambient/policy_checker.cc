@@ -21,12 +21,12 @@
 #include <iostream>
 #include <memory>
 
+#include "souffle/SouffleInterface.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
-#include "souffle/SouffleInterface.h"
 #include "src/common/logging/logging.h"
-#include "src/common/utils/ranges.h"
+#include "src/common/utils/iterator_range.h"
 
 namespace raksha::ambient {
 

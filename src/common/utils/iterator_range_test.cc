@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#include "src/common/utils/ranges.h"
+#include "src/common/utils/iterator_range.h"
 
 #include <vector>
 
@@ -21,7 +21,7 @@
 
 namespace raksha::utils {
 
-TEST(MakeRangeTest, FieldsAreInitializedCorrectly){
+TEST(MakeRangeTest, FieldsAreInitializedCorrectly) {
   std::vector<int> values = {0, 1, 2, 3, 4, 5};
   auto all = make_range(values.begin(), values.end());
   EXPECT_EQ(all.begin(), values.begin());

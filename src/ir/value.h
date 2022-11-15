@@ -22,8 +22,8 @@
 
 #include "absl/strings/str_format.h"
 #include "src/common/containers/hash_map.h"
+#include "src/common/utils/iterator_range.h"
 #include "src/common/utils/overloaded.h"
-#include "src/common/utils/ranges.h"
 #include "src/ir/storage.h"
 #include "src/ir/types/type.h"
 

@@ -110,16 +110,16 @@ cc_test(
 )
 
 cc_library(
-    name = "ranges",
-    hdrs = ["ranges.h"],
+    name = "iterator_range",
+    hdrs = ["iterator_range.h"],
     deps = [],
 )
 
 cc_test(
-    name = "ranges_test",
-    srcs = ["ranges_test.cc"],
+    name = "iterator_range_test",
+    srcs = ["iterator_range_test.cc"],
     deps = [
-        ":ranges",
+        ":iterator_range",
         "//src/common/testing:gtest",
     ],
 )

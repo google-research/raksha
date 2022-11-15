@@ -75,7 +75,7 @@ cc_library(
         ":ambient_policy_checker",
         "//src/common/containers:hash_map",
         "//src/common/logging",
-        "//src/common/utils:ranges",
+        "//src/common/utils:iterator_range",
         "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
