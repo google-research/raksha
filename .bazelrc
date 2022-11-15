@@ -68,6 +68,22 @@ build --host_cxxopt='-Wno-deprecated-declarations'
 build --cxxopt='-Wno-thread-safety-precise'
 build --host_cxxopt='-Wno-thread-safety-precise'
 
+# These warnings must be disabled to run ZetaSQL on either linux or Mac off of google3.
+build --cxxopt='-Wno-address'
+build --host_cxxopt='-Wno-address'
+build --cxxopt='-Wno-deprecated-copy'
+build --host_cxxopt='-Wno-deprecated-copy'
+build --cxxopt='-Wno-array-compare'
+build --host_cxxopt='-Wno-array-compare'
+build --cxxopt='-Wno-cpp'
+build --host_cxxopt='-Wno-cpp'
+build --cxxopt='-Wno-format-overflow'
+build --host_cxxopt='-Wno-format-overflow'
+build --cxxopt='-Wno-return-type'
+build --host_cxxopt='-Wno-return-type'
+build --cxxopt='-Wno-class-memaccess'
+build --host_cxxopt='-Wno-class-memaccess'
+
 # Need this for ZetaSQL's icu dependency as long as it remains at version 65.
 # Should remove when it gets upgraded.
 build --cxxopt='-Wno-implicit-int-float-conversion'
