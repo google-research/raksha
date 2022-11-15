@@ -39,7 +39,7 @@ using ir::Operator;
 using ir::ValueList;
 
 ir::Value MakeOperationResultValue(const Operation &op) {
-  return ir::Value(ir::value::OperationResult(op, "out.0"));
+  return ir::Value(ir::value::OperationResult(op, 0));
 }
 
 TEST(SoufflePolicyCheckerTest, SqlPolicyRuleReturnsTrue) {

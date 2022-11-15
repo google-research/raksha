@@ -84,12 +84,12 @@ message AnyValue {}
 
 message OperationResultValue {
   uint64 operation_id = 1;
-  string output_name = 2;
+  uint64 output_index = 2;
 }
 
 message BlockArgumentValue {
   uint64 block_id = 1;
-  string block_argument_name = 2;
+  uint64 block_argument_index = 2;
 }
 
 message Value {

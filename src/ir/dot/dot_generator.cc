@@ -257,15 +257,15 @@ Unit DotGeneratorHelper::PreVisit(const Operation& operation) {
       // BlockArgument rendered as "block:arg_name"
       const Block& block = block_arg->block();
       std::string block_arg_name =
-          absl::StrFormat("%s:%s", GetNodeName(block), block_arg->name());
+          absl::StrFormat("%s:%u", GetNodeName(block), block_arg->index());
       AddEdge(block_arg_name, input_name);
     } else if (const auto* op_result = value.If<value::OperationResult>()) {
       // OperationResult rendered as "op:result_name"
       const Operation& other_op = op_result->operation();
       std::string op_result_name =
-          absl::StrFormat("%s:%s", GetNodeName(other_op), op_result->name());
+          absl::StrFormat("%s:%u", GetNodeName(other_op), op_result->index());
       AddEdge(op_result_name, input_name);
-      AddResult(other_op, op_result->name());
+      AddResult(other_op, absl::StrCat(op_result->index()));
     } else if (const auto* stored_value = value.If<value::StoredValue>()) {
       // StoredValue rendered as "storage-name"
       AddEdge(GetNodeName(stored_value->storage()), input_name);

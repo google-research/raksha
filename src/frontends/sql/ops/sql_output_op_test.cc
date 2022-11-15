@@ -62,6 +62,6 @@ const ir::Operation kExampleOperation = ir::Operation(nullptr, kSomeOp, {}, {});
 INSTANTIATE_TEST_SUITE_P(
     SqlOutputOpTest, SqlOutputOpTest,
     Values(ir::Value(ir::value::Any()),
-             ir::Value(ir::value::OperationResult(kExampleOperation, "out"))));
+           ir::Value(ir::value::OperationResult(kExampleOperation, 0))));
 }
 }  // namespace raksha::frontends::sql::ops

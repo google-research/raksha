@@ -119,7 +119,7 @@ class Block {
   const OperationList& operations() const { return operations_; }
   const DataDeclCollection& inputs() const { return inputs_; }
   const DataDeclCollection& outputs() const { return outputs_; }
-  const NamedValueMap& results() const { return results_; }
+  const IndexedValueMap& results() const { return results_; }
   const Module* parent_module() const { return parent_module_; }
 
   template <typename Derived, typename Result>
@@ -151,7 +151,7 @@ class Block {
   // Maps the outputs of the operations in the list of operations in this
   // block to the corresponding name. Note that a result can have more than
   // one value which is used to represent non-determinism.
-  NamedValueMap results_;
+  IndexedValueMap results_;
 };
 
 // A class that contains a collection of blocks.

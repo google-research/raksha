@@ -112,8 +112,8 @@ testing::ExampleValueTestHelper example_helper;
 
 static const ir::ValueList kValueListExamples[] = {
     {example_helper.GetAny()},
-    {example_helper.GetOperationResult("out"),
-     example_helper.GetBlockArgument("arg"), example_helper.GetAny()}};
+    {example_helper.GetOperationResult(0), example_helper.GetBlockArgument(0),
+     example_helper.GetAny()}};
 
 INSTANTIATE_TEST_SUITE_P(MultipleValueCombinations, MergeOpTest,
                          Combine(ValuesIn(kValueListExamples),

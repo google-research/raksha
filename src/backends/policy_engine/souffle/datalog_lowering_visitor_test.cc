@@ -206,7 +206,7 @@ static const ModuleAndExpectedRakshaDatalogFactBuilders
                    kMergeOpOperator, {}, {ir::Value(ir::value::Any())});
                builder.AddOperation(
                    kMergeOpOperator, {},
-                   {ir::Value(ir::value::OperationResult(operation, "out.0"))});
+                   {ir::Value(ir::value::OperationResult(operation, 0))});
              }),
          .facts_fn =
              []() {
@@ -239,16 +239,16 @@ static const ModuleAndExpectedRakshaDatalogFactBuilders
            const ir::Operation &left_operation =
                builder.AddOperation(kMergeOpOperator, {},
                                     {ir::Value(ir::value::OperationResult(
-                                        start_operation, "out.0"))});
+                                        start_operation, 0))});
            const ir::Operation &right_operation =
                builder.AddOperation(kMergeOpOperator, {},
                                     {ir::Value(ir::value::OperationResult(
-                                        start_operation, "out.0"))});
+                                        start_operation, 0))});
            builder.AddOperation(
                kMergeOpOperator, {},
-               {ir::Value(ir::value::OperationResult(left_operation, "out.0")),
+               {ir::Value(ir::value::OperationResult(left_operation, 0)),
                 ir::Value(
-                    ir::value::OperationResult(right_operation, "out.0"))});
+                    ir::value::OperationResult(right_operation, 0))});
          }),
          .facts_fn = []() {
            RakshaDatalogFacts facts;

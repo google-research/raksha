@@ -106,8 +106,8 @@ INSTANTIATE_TEST_SUITE_P(
             {&OperationTest::first_block_,
              &OperationTest::minus_op,
              {{"const", Attribute::Create<Int64Attribute>(10)}},
-             {Value(value::BlockArgument(OperationTest::first_block_, "arg0")),
-              Value(value::BlockArgument(OperationTest::first_block_, "arg1"))},
+             {Value(value::BlockArgument(OperationTest::first_block_, 0)),
+              Value(value::BlockArgument(OperationTest::first_block_, 1))},
              "%2 = core.minus [const: 10](%0, %1)\n"})));
 
 }  // namespace

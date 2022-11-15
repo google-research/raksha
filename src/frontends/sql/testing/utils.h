@@ -29,7 +29,7 @@ const ir::Operation &UnwrapDefaultOperationResult(
   const ir::value::OperationResult *result =
       expected_operation_result.If<ir::value::OperationResult>();
   CHECK(result != nullptr) << "Expected value to be an `OperationResult`.";
-  CHECK(result->name() == DecoderContext::kDefaultOutputName)
+  CHECK(result->index() == DecoderContext::kDefaultOutputIndex)
       << "Expected the result to have the default output name.";
   return result->operation();
 }

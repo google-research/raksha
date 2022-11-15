@@ -33,8 +33,8 @@ using ::testing::Values;
 using ::testing::ValuesIn;
 
 using ir::Block;
+using ir::IndexedValueMap;
 using ir::IRContext;
-using ir::NamedValueMap;
 using ir::Operation;
 using ir::Operator;
 using ir::Storage;
@@ -170,8 +170,8 @@ static const Block kExampleBlock;
 
 static const std::vector<Value> kSampleInputVectors[] = {
     {Value(Any())},
-    {Value(OperationResult(kExampleOperation, "out")),
-     Value(BlockArgument(kExampleBlock, "arg0")), Value(Any())}};
+    {Value(OperationResult(kExampleOperation, 0)),
+     Value(BlockArgument(kExampleBlock, 0)), Value(Any())}};
 
 INSTANTIATE_TEST_SUITE_P(NonEmptyValues, DecodeMergeOpTest,
                          Combine(ValuesIn(kSampleInputVectors),
@@ -237,10 +237,10 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
 
 static const Value kSampleValues[] = {
     Value(Any()),
-    Value(OperationResult(kExampleOperation, "out")),
-    Value(OperationResult(kExampleOperation, "out2")),
-    Value(BlockArgument(kExampleBlock, "arg0")),
-    Value(BlockArgument(kExampleBlock, "arg1")),
+    Value(OperationResult(kExampleOperation, 0)),
+    Value(OperationResult(kExampleOperation, 1)),
+    Value(BlockArgument(kExampleBlock, 0)),
+    Value(BlockArgument(kExampleBlock, 1)),
 };
 
 static const absl::string_view kSampleRuleNames[] = {

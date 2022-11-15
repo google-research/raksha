@@ -109,22 +109,22 @@ static const absl::string_view kSampleRuleNames[] = {
 static const ir::Block* kSampleBlocks[] = {nullptr, &example_helper.GetBlock()};
 static const ir::Value kSampleValues[] = {
     example_helper.GetAny(),
-    example_helper.GetOperationResult("out0"),
-    example_helper.GetOperationResult("out1"),
-    example_helper.GetBlockArgument("arg0"),
-    example_helper.GetBlockArgument("arg1"),
+    example_helper.GetOperationResult(0),
+    example_helper.GetOperationResult(1),
+    example_helper.GetBlockArgument(0),
+    example_helper.GetBlockArgument(1),
 };
 
 static const std::vector<std::pair<std::string, ir::Value>>
     kSamplePreconditions[] = {
         {},
         {{"a", example_helper.GetAny()},
-         {"b", example_helper.GetBlockArgument("b")},
-         {"c", example_helper.GetOperationResult("c")},
-         {"d", example_helper.GetBlockArgument("d")}},
+         {"b", example_helper.GetBlockArgument(0)},
+         {"c", example_helper.GetOperationResult(0)},
+         {"d", example_helper.GetBlockArgument(1)}},
         {{"one", example_helper.GetAny()},
-         {"two", example_helper.GetBlockArgument("two")},
-         {"three", example_helper.GetOperationResult("three")}}};
+         {"two", example_helper.GetBlockArgument(2)},
+         {"three", example_helper.GetOperationResult(1)}}};
 
 INSTANTIATE_TEST_SUITE_P(TagTransformOpTest, TagTransformOpTest,
                          Combine(ValuesIn(kSampleBlocks),

@@ -182,8 +182,8 @@ TEST_F(DotGeneratorTest, CreatesOutputPortsInNodesForOperation) {
   const Operation& pair =
       builder.AddOperation(pair_op(), {}, {any_value, any_value});
   builder.AddOperation(plus_op(), {},
-                       {Value(value::OperationResult(pair, "first")),
-                        Value(value::OperationResult(pair, "second"))});
+                       {Value(value::OperationResult(pair, 0)),
+                        Value(value::OperationResult(pair, 1))});
   global_module().AddBlock(builder.build());
   const auto& dot_graph_lines =
       GetDotGraphAsWhitespaceTrimmedLines(global_module());
@@ -191,7 +191,7 @@ TEST_F(DotGeneratorTest, CreatesOutputPortsInNodesForOperation) {
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
           R"(b0 [shape=Mrecord])",
-          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.pair</TD></TR><TR><TD COLSPAN="1" PORT="first">first</TD><TD COLSPAN="1" PORT="second">second</TD></TR></TABLE>>])",
+          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.pair</TD></TR><TR><TD COLSPAN="1" PORT="0">0</TD><TD COLSPAN="1" PORT="1">1</TD></TR></TABLE>>])",
           R"("b0_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])"));
 }
 
@@ -207,10 +207,10 @@ TEST_F(DotGeneratorTest, AddsEdgeFromOperationResultToInputs) {
   // }  // module m0
   const Operation& minus = builder.AddOperation(minus_op(), {}, {any_value});
   const Operation& plus = builder.AddOperation(
-      plus_op(), {}, {Value(value::OperationResult(minus, "out")), any_value});
+      plus_op(), {}, {Value(value::OperationResult(minus, 0)), any_value});
   builder.AddOperation(plus_op(), {},
-                       {Value(value::OperationResult(plus, "out")),
-                        Value(value::OperationResult(minus, "out"))});
+                       {Value(value::OperationResult(plus, 0)),
+                        Value(value::OperationResult(minus, 0))});
   global_module().AddBlock(builder.build());
   LOG(WARNING) << IRPrinter::ToString(global_module());
   const auto& dot_graph_lines =
@@ -221,12 +221,12 @@ TEST_F(DotGeneratorTest, AddsEdgeFromOperationResultToInputs) {
       testing::UnorderedElementsAre(
           R"(b0 [shape=Mrecord])",
           R"("b0_%2" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])",
-          R"("b0_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])",
-          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD></TR><TR><TD COLSPAN="1">core.minus</TD></TR><TR><TD COLSPAN="1" PORT="out">out</TD></TR></TABLE>>])"));
+          R"("b0_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2" PORT="0">0</TD></TR></TABLE>>])",
+          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD></TR><TR><TD COLSPAN="1">core.minus</TD></TR><TR><TD COLSPAN="1" PORT="0">0</TD></TR></TABLE>>])"));
   EXPECT_THAT(GetEdges(dot_graph_lines),
-              testing::UnorderedElementsAre(R"("b0_%0":out -> "b0_%1":I0)",
-                                            R"("b0_%0":out -> "b0_%2":I1)",
-                                            R"("b0_%1":out -> "b0_%2":I0)"));
+              testing::UnorderedElementsAre(R"("b0_%0":0 -> "b0_%1":I0)",
+                                            R"("b0_%0":0 -> "b0_%2":I1)",
+                                            R"("b0_%1":0 -> "b0_%2":I0)"));
 }
 
 TEST_F(DotGeneratorTest, AddsAdditionalLabelToOperationNodes) {
@@ -247,8 +247,8 @@ TEST_F(DotGeneratorTest, AddsAdditionalLabelToOperationNodes) {
   BlockBuilder builder;
   const Operation& pair = builder.AddOperation(pair_op(), {}, {});
   builder.AddOperation(plus_op(), {},
-                       {Value(value::OperationResult(pair, "first")),
-                        Value(value::OperationResult(pair, "second"))});
+                       {Value(value::OperationResult(pair, 0)),
+                        Value(value::OperationResult(pair, 1))});
   global_module().AddBlock(builder.build());
   const auto& dot_graph_lines =
       GetDotGraphAsWhitespaceTrimmedLines(global_module(), config);
@@ -257,7 +257,7 @@ TEST_F(DotGeneratorTest, AddsAdditionalLabelToOperationNodes) {
       GetNodes(dot_graph_lines),
       testing::UnorderedElementsAre(
           R"(b0 [shape=Mrecord])",
-          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="2">&nbsp;</TD></TR><TR><TD COLSPAN="2">core.pair</TD></TR><TR><TD COLSPAN="2">numResults(core.pair): 2 </TD></TR><TR><TD COLSPAN="1" PORT="first">first</TD><TD COLSPAN="1" PORT="second">second</TD></TR></TABLE>>])",
+          R"("b0_%0" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="2">&nbsp;</TD></TR><TR><TD COLSPAN="2">core.pair</TD></TR><TR><TD COLSPAN="2">numResults(core.pair): 2 </TD></TR><TR><TD COLSPAN="1" PORT="0">0</TD><TD COLSPAN="1" PORT="1">1</TD></TR></TABLE>>])",
           R"("b0_%1" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="1" PORT="I0">I0</TD><TD COLSPAN="1" PORT="I1">I1</TD></TR><TR><TD COLSPAN="2">core.plus</TD></TR><TR><TD COLSPAN="2">numResults(core.plus): 0 </TD></TR><TR><TD COLSPAN="2" PORT="out">out</TD></TR></TABLE>>])"));
 }
 

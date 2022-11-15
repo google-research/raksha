@@ -33,7 +33,7 @@ namespace raksha::frontends::sql {
 // inappropriate to put in IRContext.
 class DecoderContext {
  public:
-  static constexpr absl::string_view kDefaultOutputName = "out.0";
+  static constexpr ir::ValueIndexType kDefaultOutputIndex = 0;
 
   DecoderContext(ir::IRContext &ir_context)
       : ir_context_(ir_context),
@@ -51,7 +51,8 @@ class DecoderContext {
   // Takes an `Operation` that should only return a single result and creates
   // the default `OperationResult` value for that `Operation`.
   static ir::Value WrapOperationResultValue(const ir::Operation &operation) {
-    return ir::Value(ir::value::OperationResult(operation, kDefaultOutputName));
+    return ir::Value(
+        ir::value::OperationResult(operation, kDefaultOutputIndex));
   }
 
   // Register a value as associated with a particular id.

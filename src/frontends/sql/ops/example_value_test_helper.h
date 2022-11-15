@@ -27,14 +27,16 @@ namespace raksha::frontends::sql::testing {
 class ExampleValueTestHelper {
  public:
   ExampleValueTestHelper()
-      : operator_("example"), operation_(nullptr, operator_, {}, {}) {}
+      : operator_("example", 2), operation_(nullptr, operator_, {}, {}) {}
 
-  ir::Value GetOperationResult(absl::string_view name) const {
-    return ir::Value(ir::value::OperationResult(operation_, name));
+  ir::Value GetOperationResult(uint64_t index) const {
+    CHECK(index < operation_.op().number_of_return_values())
+        << "GetOperationResult:index is out of bounds";
+    return ir::Value(ir::value::OperationResult(operation_, index));
   }
 
-  ir::Value GetBlockArgument(absl::string_view name) const {
-    return ir::Value(ir::value::BlockArgument(block_, name));
+  ir::Value GetBlockArgument(uint64_t index) const {
+    return ir::Value(ir::value::BlockArgument(block_, index));
   }
 
   ir::Value GetAny() const { return ir::Value(ir::value::Any()); }

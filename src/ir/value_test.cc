@@ -40,14 +40,14 @@ struct TestData {
         minus_operation(nullptr, minus_operator, {}, {}),
         input_storage("input", type_factory.MakePrimitiveType()),
         output_storage("output", type_factory.MakePrimitiveType()),
-        first_block_first_arg(first_block, "one"),
-        first_block_second_arg(first_block, "two"),
-        second_block_first_arg(second_block, "one"),
-        second_block_second_arg(second_block, "two"),
-        plus_operation_result1(plus_operation, "res1"),
-        plus_operation_result2(plus_operation, "res2"),
-        minus_operation_result1(minus_operation, "res1"),
-        minus_operation_result2(minus_operation, "res2"),
+        first_block_first_arg(first_block, 1),
+        first_block_second_arg(first_block, 2),
+        second_block_first_arg(second_block, 1),
+        second_block_second_arg(second_block, 2),
+        plus_operation_result1(plus_operation, 0),
+        plus_operation_result2(plus_operation, 1),
+        minus_operation_result1(minus_operation, 0),
+        minus_operation_result2(minus_operation, 1),
         input_stored_value(input_storage),
         output_stored_value(output_storage) {
     // Create SSA names to keep tests reproducible.
@@ -93,32 +93,32 @@ TestData test_data;
 TEST(ValueTest, AccessorsReturnCorrectValue) {
   EXPECT_EQ(&test_data.plus_operation_result1.operation(),
             &test_data.plus_operation);
-  EXPECT_EQ(test_data.plus_operation_result1.name(), "res1");
+  EXPECT_EQ(test_data.plus_operation_result1.index(), 0);
 
   EXPECT_EQ(&test_data.plus_operation_result2.operation(),
             &test_data.plus_operation);
-  EXPECT_EQ(test_data.plus_operation_result2.name(), "res2");
+  EXPECT_EQ(test_data.plus_operation_result2.index(), 1);
 
   EXPECT_EQ(&test_data.minus_operation_result1.operation(),
             &test_data.minus_operation);
-  EXPECT_EQ(test_data.minus_operation_result1.name(), "res1");
+  EXPECT_EQ(test_data.minus_operation_result1.index(), 0);
 
   EXPECT_EQ(&test_data.minus_operation_result2.operation(),
             &test_data.minus_operation);
-  EXPECT_EQ(test_data.minus_operation_result2.name(), "res2");
+  EXPECT_EQ(test_data.minus_operation_result2.index(), 1);
 
   EXPECT_EQ(&test_data.first_block_first_arg.block(), &test_data.first_block);
-  EXPECT_EQ(test_data.first_block_first_arg.name(), "one");
+  EXPECT_EQ(test_data.first_block_first_arg.index(), 1);
 
   EXPECT_EQ(&test_data.first_block_second_arg.block(), &test_data.first_block);
-  EXPECT_EQ(test_data.first_block_second_arg.name(), "two");
+  EXPECT_EQ(test_data.first_block_second_arg.index(), 2);
 
   EXPECT_EQ(&test_data.second_block_first_arg.block(), &test_data.second_block);
-  EXPECT_EQ(test_data.second_block_first_arg.name(), "one");
+  EXPECT_EQ(test_data.second_block_first_arg.index(), 1);
 
   EXPECT_EQ(&test_data.second_block_second_arg.block(),
             &test_data.second_block);
-  EXPECT_EQ(test_data.second_block_second_arg.name(), "two");
+  EXPECT_EQ(test_data.second_block_second_arg.index(), 2);
 
   EXPECT_EQ(&test_data.input_stored_value.storage(), &test_data.input_storage);
   EXPECT_EQ(&test_data.output_stored_value.storage(),
@@ -132,7 +132,7 @@ TEST_P(OperationResultTest, DefaultOperationResultTest) {
   value::OperationResult default_operation_result =
       value::OperationResult::MakeDefaultOperationResult(operation);
   EXPECT_EQ(&default_operation_result.operation(), &operation);
-  EXPECT_EQ(default_operation_result.name(), "out");
+  EXPECT_EQ(default_operation_result.index(), 0);
 }
 
 
@@ -144,7 +144,7 @@ TEST_P(OperationResultTest, DefaultOperationResultValueTest) {
       default_result_value.If<value::OperationResult>();
   EXPECT_THAT(downcast, NotNull());
   EXPECT_EQ(&downcast->operation(), &operation);
-  EXPECT_EQ(downcast->name(), "out");
+  EXPECT_EQ(downcast->index(), 0);
 }
 
 INSTANTIATE_TEST_SUITE_P(OperationResultTest, OperationResultTest,

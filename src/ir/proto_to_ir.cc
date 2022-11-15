@@ -47,7 +47,7 @@ void ProtoToIR::PreVisit(const proto::Block& block_proto) {
     // TODO(b/253252963) IR to proto conversion does no hold onto the mapping
     // between operator name and multi returns. "out.0" is a work around to pass
     // tests with single return operations.
-    value::OperationResult operation_result(*operation, "out.0");
+    value::OperationResult operation_result(*operation, 0);
     auto operation_result_value = Value(operation_result);
     ssa_names_.GetOrCreateID(operation_result_value);
     operations_.insert({operation_it.id(), std::move(operation)});
@@ -238,7 +238,7 @@ value::BlockArgument ProtoToIR::ToIR(
   CHECK(block_it != blocks_.end()) << "Could not find block with id " << id;
   Block* block = block_it->second.GetBlockPtr();
   return value::BlockArgument(*block,
-                              block_argument_proto.block_argument_name());
+                              block_argument_proto.block_argument_index());
 }
 
 value::OperationResult ProtoToIR::ToIR(
@@ -248,7 +248,7 @@ value::OperationResult ProtoToIR::ToIR(
   CHECK(operation_it != operations_.end()) << "Could not find operation with id " << id;
   Operation* operation = operation_it->second.get();
   return value::OperationResult(*operation,
-                                operation_argument_proto.output_name());
+                                operation_argument_proto.output_index());
 }
 
 Attribute ProtoToIR::ToIR(const proto::AttributePayload& attribute_payload) {

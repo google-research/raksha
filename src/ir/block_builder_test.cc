@@ -110,7 +110,7 @@ TEST_F(BlockBuilderTest, AddResultsUpdatesResults) {
   builder.AddResult("entity", Value(value::Any()));
   builder.AddResult("primitive", Value(value::StoredValue(*some_storage)));
   auto block = builder.build();
-  const NamedValueMap& results = block->results();
+  const IndexedValueMap& results = block->results();
   // TODO(#337): A comparator for values will avoid the need to use
   // `ToString()`.
   SsaNames ssa_names;
@@ -259,13 +259,12 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
             *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
         const Operation& op = builder.AddOperation(core_plus, {}, {});
         builder.AddResult("primitive_output",
-                          Value(value::OperationResult(op, "primitive_value")));
-        ssa_names.AddID(Value(value::OperationResult(op, "primitive_value")),
+                          Value(value::OperationResult(op, 0)));
+        ssa_names.AddID(Value(value::OperationResult(op, 0)),
                         "primitive_value");
         builder.AddResult("entity_output",
-                          Value(value::OperationResult(op, "entity_value")));
-        ssa_names.AddID(Value(value::OperationResult(op, "entity_value")),
-                        "entity_value");
+                          Value(value::OperationResult(op, 1)));
+        ssa_names.AddID(Value(value::OperationResult(op, 1)), "entity_value");
       });
 
   auto block = builder.build();
@@ -275,7 +274,7 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
   CheckExpectedDecls(block->outputs(), /*entity_key=*/"entity_output",
                      /*primitive_key=*/"primitive_output",
                      /*schema_name=*/"OutputTensor");
-  const NamedValueMap& results = block->results();
+  const IndexedValueMap& results = block->results();
   ASSERT_EQ(results.count("entity_output"), 1);
   //%0 is the entity_value OperationResult Value :
   // Value(value::OperationResult(op, "entity_value"))

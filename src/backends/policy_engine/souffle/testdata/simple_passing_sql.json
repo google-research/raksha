@@ -26,7 +26,7 @@
                   {
                     "operationResultValue": {
                       "operationId": "1",
-                      "outputName": "out"
+                      "outputIndex": "0"
                     }
                   }
                 ],
@@ -47,7 +47,7 @@
                   {
                     "operationResultValue": {
                       "operationId": "2",
-                      "outputName": "out"
+                      "outputIndex": "0"
                     }
                   }
                 ],
@@ -68,7 +68,7 @@
                   {
                     "operationResultValue": {
                       "operationId": "3",
-                      "outputName": "out"
+                      "outputIndex": "0"
                     }
                   }
                 ],
@@ -89,7 +89,7 @@
                   {
                     "operationResultValue": {
                       "operationId": "4",
-                      "outputName": "out"
+                      "outputIndex": "0"
                     }
                   }
                 ]

@@ -93,8 +93,7 @@ proto::BlockArgumentValue IRToProto::BlockArgumentToProto(
     const value::BlockArgument& block_argument) {
   proto::BlockArgumentValue block_argument_proto;
   block_argument_proto.set_block_id(GetID(block_argument.element()));
-  block_argument_proto.set_block_argument_name(
-      std::string(block_argument.name()));
+  block_argument_proto.set_block_argument_index(block_argument.index());
   return block_argument_proto;
 }
 
@@ -104,8 +103,7 @@ proto::OperationResultValue IRToProto::OperationResultToProto(
   const auto id = GetID(operation_result.element());
   proto::OperationResultValue operation_result_value_proto;
   operation_result_value_proto.set_operation_id(id);
-  operation_result_value_proto.set_output_name(
-      std::string(operation_result.name()));
+  operation_result_value_proto.set_output_index(operation_result.index());
   return operation_result_value_proto;
 }
 

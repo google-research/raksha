@@ -29,7 +29,8 @@
 
 namespace raksha::ir {
 
-static constexpr char kDefaultValueName[] = "out";
+using ValueIndexType = uint64_t;
+static constexpr ValueIndexType kDefaultValueIndex = 0;
 
 class Block;
 class Operation;
@@ -42,61 +43,60 @@ namespace value {
 // TODO: validate fields.
 
 template <typename T>
-class NamedValue {
+class IndexedValue {
  public:
-  NamedValue(const T& element, absl::string_view name)
-      : element_(&element), name_(name) {}
+  IndexedValue(const T& element, uint64_t index)
+      : element_(&element), index_(index) {}
 
-  NamedValue(const NamedValue&) = default;
-  NamedValue& operator=(const NamedValue&) = default;
-  NamedValue(NamedValue&&) = default;
-  NamedValue& operator=(NamedValue&&) = default;
+  IndexedValue(const IndexedValue&) = default;
+  IndexedValue& operator=(const IndexedValue&) = default;
+  IndexedValue(IndexedValue&&) = default;
+  IndexedValue& operator=(IndexedValue&&) = default;
 
   template <typename H>
-  friend H AbslHashValue(H h, const NamedValue<T>& v) {
-    return H::combine(std::move(h), v.element_, v.name_);
+  friend H AbslHashValue(H h, const IndexedValue<T>& v) {
+    return H::combine(std::move(h), v.element_, v.index_);
   }
 
   const T& element() const { return *element_; }
-  absl::string_view name() const { return name_; }
+  uint64_t index() const { return index_; }
 
  protected:
-  bool operator==(const NamedValue<T>& other) const {
-    return (element_ == other.element_) && (name_ == other.name_);
+  bool operator==(const IndexedValue<T>& other) const {
+    return (element_ == other.element_) && (index_ == other.index_);
   }
 
  private:
   const T* element_;
-  std::string name_;
+  uint64_t index_;
 };
 
 // Indicates the argument to a block.
-class BlockArgument : public NamedValue<Block> {
+class BlockArgument : public IndexedValue<Block> {
  public:
-  using NamedValue<Block>::NamedValue;
+  using IndexedValue<Block>::IndexedValue;
   const Block& block() const { return element(); }
-  using NamedValue<Block>::operator==;
+  using IndexedValue<Block>::operator==;
 };
 
 // Indicates the result of an operation.
-class OperationResult : public NamedValue<Operation> {
+class OperationResult : public IndexedValue<Operation> {
  public:
   // If you have an `Operation` that should produce a single result value, this
   // factory helper will produce an `OperationResult` with the default output
-  // name "out" for you.
+  // index 0 for you.
   static OperationResult MakeDefaultOperationResult(
       const Operation& operation) {
-    return OperationResult(operation, kDefaultValueName);
+    return OperationResult(operation, kDefaultValueIndex);
   }
   static OperationResult MakeOperationResult(const Operation& operation,
                                              const uint64_t index) {
-    return OperationResult(operation,
-                           absl::StrCat(kDefaultValueName, ".", index));
+    return OperationResult(operation, index);
   }
 
-  using NamedValue<Operation>::NamedValue;
+  using IndexedValue<Operation>::IndexedValue;
   const Operation& operation() const { return element(); }
-  using NamedValue<Operation>::operator==;
+  using IndexedValue<Operation>::operator==;
 };
 
 // Indicates the value in a storage.
@@ -151,7 +151,7 @@ class Value {
 
   // If you have an `Operation` that should produce a single result value, this
   // helper will produce an `OperationResult`-variant `Value` with the default
-  // output name "out" for you.
+  // index 0 for you.
   static Value MakeDefaultOperationResultValue(const Operation& op) {
     return Value(value::OperationResult::MakeDefaultOperationResult(op));
   }
@@ -194,8 +194,8 @@ class Value {
 
 using ValueList = std::vector<Value>;
 using ValueRange = utils::iterator_range<ValueList::const_iterator>;
-using NamedValueMap = common::containers::HashMap<std::string, Value>;
-using NamedValueListMap = common::containers::HashMap<std::string, ValueList>;
+using IndexedValueMap = common::containers::HashMap<std::string, Value>;
+using IndexedValueListMap = common::containers::HashMap<std::string, ValueList>;
 
 }  // namespace raksha::ir
 

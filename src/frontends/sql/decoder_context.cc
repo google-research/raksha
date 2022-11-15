@@ -25,8 +25,8 @@
 
 namespace raksha::frontends::sql {
 
+using ir::IndexedValueMap;
 using ir::NamedAttributeMap;
-using ir::NamedValueMap;
 using ir::Operation;
 using ir::Value;
 using utils::MapIter;
