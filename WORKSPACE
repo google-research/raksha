@@ -307,7 +307,15 @@ zetasql_deps_step_1()
 
 load("@com_google_zetasql//bazel:zetasql_deps_step_2.bzl", "zetasql_deps_step_2")
 
-zetasql_deps_step_2()
+# To use ZetaSQL as a frontend, we only need the analyzer. Don't grab other
+# dependencies unnecessarily.
+zetasql_deps_step_2(
+    analyzer_deps = True,
+    evaluator_deps = False,
+    java_deps = False,
+    testing_deps = False,
+    tools_deps = False,
+)
 
 load("@com_google_zetasql//bazel:zetasql_deps_step_3.bzl", "zetasql_deps_step_3")
 
