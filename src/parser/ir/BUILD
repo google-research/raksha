@@ -15,6 +15,7 @@
 #
 #-------------------------------------------------------------------------------
 load("//build_defs:antlr.bzl", "antlr4_cc_combined")
+load("//third_party/googlefuzztest/build_defs:cc_fuzztest_grammar_library.bzl", "cc_fuzztest_grammar_library")
 
 package(
     default_visibility = [
@@ -35,6 +36,11 @@ antlr4_cc_combined(
     src = "Ir.g4",
     listener = False,
     visitor = True,
+)
+
+cc_fuzztest_grammar_library(
+    name = "ir_grammar",
+    srcs = ["Ir.g4"],
 )
 
 cc_library(
@@ -69,9 +75,11 @@ cc_test(
     copts = ["-fexceptions"],
     features = ["-use_header_modules"],
     deps = [
+        ":ir_grammar",
         ":ir_parser",
         "//src/common/testing:gtest",
         "//src/ir:ir_printer",
+        "@fuzztest//fuzztest",
     ],
 )
 
