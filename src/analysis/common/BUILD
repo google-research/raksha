@@ -21,6 +21,44 @@ package(
 )
 
 cc_library(
+    name = "module_graph",
+    srcs = ["module_graph.cc"],
+    hdrs = ["module_graph.h"],
+    deps = [
+        "//src/common/utils:iterator_adapter",
+        "//src/common/utils:ranges",
+        "//src/ir:ir_traversing_visitor",
+        "//src/ir:module",
+        "//src/ir:value",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/log:check",
+        "@com_google_absl//absl/log:die_if_null",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "module_graph_test",
+    srcs = ["module_graph_test.cc"],
+    deps = [
+        ":module_graph",
+        "//src/common/testing:gtest",
+        "//src/common/utils:iterator_adapter",
+        "//src/ir:ir_printer",
+        "//src/ir:ssa_names",
+        "//src/ir:value",
+        "//src/parser/ir:ir_parser",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/log:die_if_null",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+        "@com_googlesource_code_re2//:re2",
+    ],
+)
+
+cc_library(
     name = "worklist_fixpoint_iterator",
     hdrs = ["worklist_fixpoint_iterator.h"],
     deps = [
