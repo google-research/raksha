@@ -119,15 +119,6 @@ souffle_cc_binary(
     src = ":tag_check_and_expectation_for_test",
 )
 
-arcsjs_dl_files = [
-    "arcsjs_core.dl",
-    "arcsjs_check_and_claim.dl",
-    "arcsjs_input_and_output.dl",
-    "arcsjs_make_public.dl",
-    "arcsjs_user_consent_to_downgrade.dl",
-    "tag_transforms.dl",
-]
-
 sql_dl_files = [
     "sql_output.dl",
     "tag_transforms.dl",

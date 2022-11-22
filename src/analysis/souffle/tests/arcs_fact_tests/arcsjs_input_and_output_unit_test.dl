@@ -14,16 +14,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
+#include "src/analysis/souffle/arcsjs_test_helper.dl"
 #include "src/analysis/souffle/arcsjs_input_and_output.dl"
-#include "src/analysis/souffle/fact_test_helper.dl"
 
 #define CONNECT_INPUT "arcsjs.connect_input"
 #define CONNECT_OUTPUT "arcsjs.connect_output"
-
-#define TEST_N_RESULT_FOR_OPERATION(n, test_name, operation, relation, expected) \
-  TEST_CASE(cat(test_name, cat("_", #relation))) :- \
-    count : { relation(operation, expected) } = n, \
-    count : { relation(operation, _) } = n
 
 #define INPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, operation, particle, store, handle, result) \
   isOperation(operation). \
@@ -43,34 +38,45 @@
 #define OUTPUT_CREATE_AND_TEST_OPERATION(n_particles, n_stores, n_handles, test_name, owner, operator, result, operandList, attrList, particle, store, handle) \
   OUTPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, ([owner, operator, [result, nil], (operandList), (attrList)]), particle, store, handle, result)
 
+#define CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(n_violations, test_name, operation) \
+  isOperation(operation). \
+  TEST_N_PREDICATE_FOR_OPERATION(n_violations, test_name, (operation), violatesPolicy)
+
+#define CREATE_AND_TEST_OPERATION_VIOLATES(n_violations, test_name, owner, operator, result, operandList, attrList, particle, store, handle) \
+  CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(n_violations, test_name, ([owner, operator, [result, nil], (operandList), (attrList)]))
+
 #define ATTR_LIST1 [["name", $StringAttributePayload("foo")], nil]
 #define OPERAND_LIST1 ["operand1", ["operand2", nil]]
 
 INPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test1_input", "somePrincipal", CONNECT_INPUT, "ap1", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "operand2", "foo").
-OUTPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test2_output", "somePrincipal", CONNECT_OUTPUT, "ap1", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "operand2", "foo").
+CREATE_AND_TEST_OPERATION_VIOLATES(0, "test1_input_passes_if_correctly_defined", "somePrincipal", CONNECT_INPUT, "ap2", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "operand2", "foo").
+OUTPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test2_output", "somePrincipal", CONNECT_OUTPUT, "ap3", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "operand2", "foo").
+CREATE_AND_TEST_OPERATION_VIOLATES(0, "test2_output_passes_if_correctly_defined", "somePrincipal", CONNECT_OUTPUT, "ap4", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "operand2", "foo").
 
 #define ATTR_LIST2 [["name", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
 #define OPERAND_LIST2 ["particle", ["store", nil]]
 
-INPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test3_input_ignores_extra_attrs", "prin", CONNECT_INPUT, "ap2", (OPERAND_LIST2), (ATTR_LIST2), "particle", "store", "hello").
-OUTPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test4_output_ignores_extra_attrs", "prin", CONNECT_OUTPUT, "ap2", (OPERAND_LIST2), (ATTR_LIST2), "particle", "store", "hello").
+INPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test3_input_ignores_extra_attrs", "prin", CONNECT_INPUT, "ap5", (OPERAND_LIST2), (ATTR_LIST2), "particle", "store", "hello").
+OUTPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test4_output_ignores_extra_attrs", "prin", CONNECT_OUTPUT, "ap6", (OPERAND_LIST2), (ATTR_LIST2), "particle", "store", "hello").
 
 #define ATTR_LIST3 [["name", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
 #define OPERAND_LIST3 ["input1", ["input2", ["input3", nil]]]
-INPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test5_input_ignores_extra_args", "prin", CONNECT_INPUT, "ap2", (OPERAND_LIST3), (ATTR_LIST3), "input1", "input2", "hello").
-OUTPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test6_output_ignores_extra_args", "prin", CONNECT_OUTPUT, "ap2", (OPERAND_LIST3), (ATTR_LIST3), "input1", "input2", "hello").
+INPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test5_input_ignores_extra_args", "prin", CONNECT_INPUT, "ap7", (OPERAND_LIST3), (ATTR_LIST3), "input1", "input2", "hello").
+CREATE_AND_TEST_OPERATION_VIOLATES(1, "test5_input_violates_policy_with_extra_args", "prin", CONNECT_INPUT, "ap8", (OPERAND_LIST3), (ATTR_LIST3), "input1", "input2", "hello").
+OUTPUT_CREATE_AND_TEST_OPERATION(1, 1, 1, "test6_output_ignores_extra_args", "prin", CONNECT_OUTPUT, "ap9", (OPERAND_LIST3), (ATTR_LIST3), "input1", "input2", "hello").
+CREATE_AND_TEST_OPERATION_VIOLATES(1, "test6_output_violates_policy_with_extra_args", "prin", CONNECT_OUTPUT, "ap10", (OPERAND_LIST3), (ATTR_LIST3), "input1", "input2", "hello").
 
 #define OPERAND_LIST4 ["input1", ["input2", nil]]
-INPUT_CREATE_AND_TEST_OPERATION(0, 0, 0, "test7_input_requires_tag", "prin", CONNECT_INPUT, "ap2", (OPERAND_LIST4), nil, _, _, _).
-OUTPUT_CREATE_AND_TEST_OPERATION(0, 0, 0, "test8_output_requires_tag", "prin", CONNECT_OUTPUT, "ap2", (OPERAND_LIST4), nil, _, _, _).
+INPUT_CREATE_AND_TEST_OPERATION(0, 0, 0, "test7_input_requires_tag", "prin", CONNECT_INPUT, "ap11", (OPERAND_LIST4), nil, _, _, _).
+OUTPUT_CREATE_AND_TEST_OPERATION(0, 0, 0, "test8_output_requires_tag", "prin", CONNECT_OUTPUT, "ap12", (OPERAND_LIST4), nil, _, _, _).
 
 #define ATTR_LIST5 [["name", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
-INPUT_CREATE_AND_TEST_OPERATION(0, 0, 0, "test9_input_requires_arg", "prin", CONNECT_INPUT, "ap2", nil, (ATTR_LIST5), _, _, _).
-OUTPUT_CREATE_AND_TEST_OPERATION(0, 0, 0, "test10_output_requires_arg", "prin", CONNECT_OUTPUT, "ap2", nil, (ATTR_LIST5), _, _, _).
+INPUT_CREATE_AND_TEST_OPERATION(0, 0, 0, "test9_input_requires_arg", "prin", CONNECT_INPUT, "ap13", nil, (ATTR_LIST5), _, _, _).
+OUTPUT_CREATE_AND_TEST_OPERATION(0, 0, 0, "test10_output_requires_arg", "prin", CONNECT_OUTPUT, "ap14", nil, (ATTR_LIST5), _, _, _).
 
 #define ATTR_LIST6 [["name", $StringAttributePayload("hello")], [["name", $StringAttributePayload("world")], nil]]
 #define OPERAND_LIST6 ["input1", ["input2", nil]]
 
-INPUT_CREATE_AND_TEST_OPERATION(1, 1, 2, "test11_input_maps_over_handles", "prin", CONNECT_INPUT, "ap2", (OPERAND_LIST6), (ATTR_LIST6), "input1", "input2", _).
-OUTPUT_CREATE_AND_TEST_OPERATION(1, 1, 2, "test12_output_maps_over_handles", "prin", CONNECT_OUTPUT, "ap2", (OPERAND_LIST6), (ATTR_LIST6), "input1", "input2", _).
+INPUT_CREATE_AND_TEST_OPERATION(1, 1, 2, "test11_input_maps_over_handles", "prin", CONNECT_INPUT, "ap15", (OPERAND_LIST6), (ATTR_LIST6), "input1", "input2", _).
+OUTPUT_CREATE_AND_TEST_OPERATION(1, 1, 2, "test12_output_maps_over_handles", "prin", CONNECT_OUTPUT, "ap16", (OPERAND_LIST6), (ATTR_LIST6), "input1", "input2", _).
 

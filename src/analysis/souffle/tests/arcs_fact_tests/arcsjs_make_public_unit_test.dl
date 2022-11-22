@@ -14,32 +14,36 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
+#include "src/analysis/souffle/arcsjs_test_helper.dl"
 #include "src/analysis/souffle/arcsjs_make_public.dl"
-#include "src/analysis/souffle/fact_test_helper.dl"
 
-#define TEST_N_RESULT_FOR_OPERATION(n, test_name, operation, relation, expected) \
-  TEST_CASE(cat(test_name, cat("_", #relation))) :- \
-    count : { relation(operation, expected) } = n, \
-    count : { relation(operation, _) } = n
-
-#define CREATE_AND_TEST_OPERATOR_INNER(n_args, test_name, operation, argument, result) \
+#define CREATE_AND_TEST_OPERATOR_INNER(n_args, test_name, operation, argument) \
   isOperation(operation). \
   TEST_N_RESULT_FOR_OPERATION(n_args, test_name, (operation), arcsJsMakePublicOperationHasArgument, argument)
 
 #define CREATE_AND_TEST_OPERATION(n_args, test_name, owner, operator, resultList, operandList, attrList, argument) \
-  CREATE_AND_TEST_OPERATOR_INNER(n_args, test_name, ([owner, operator, resultList, (operandList), (attrList)]), argument, result)
+  CREATE_AND_TEST_OPERATOR_INNER(n_args, test_name, ([owner, operator, resultList, (operandList), (attrList)]), argument)
+
+#define CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(n_args, test_name, operation) \
+  isOperation(operation). \
+  TEST_N_PREDICATE_FOR_OPERATION(n_args, test_name, (operation), violatesPolicy)
+
+#define CREATE_AND_TEST_OPERATION_VIOLATES(n_args, test_name, owner, operator, resultList, operandList, attrList, argument) \
+  CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(n_args, test_name, ([owner, operator, resultList, (operandList), (attrList)]))
 
 #define OPERAND_LIST1 ["operand1", nil]
 
 CREATE_AND_TEST_OPERATION(1, "test1_make_public", "somePrincipal", "arcsjs.make_public", (["ap1", nil]), (OPERAND_LIST1), nil, "operand1").
+CREATE_AND_TEST_OPERATION_VIOLATES(0, "test1_make_public_passes_if_correctly_defined", "prin", "arcsjs.make_public", (["ap2", nil]), (OPERAND_LIST1), nil, "input1").
 
 #define ATTR_LIST2 [["wrong_tag", $NumberAttributePayload(2)], nil]
 #define OPERAND_LIST2 ["input1", nil]
 
-CREATE_AND_TEST_OPERATION(1, "test2_make_public_ignores_extra_attrs", "prin", "arcsjs.make_public", (["ap2", nil]), (OPERAND_LIST2), (ATTR_LIST2), "input1").
+CREATE_AND_TEST_OPERATION(1, "test2_make_public_ignores_extra_attrs", "prin", "arcsjs.make_public", (["ap3", nil]), (OPERAND_LIST2), (ATTR_LIST2), "input1").
 
 #define OPERAND_LIST3 ["input1", ["input2", nil]]
-CREATE_AND_TEST_OPERATION(1, "test3_make_public_ignores_extra_args", "prin", "arcsjs.make_public", (["ap2", nil]), (OPERAND_LIST3), nil, "input1").
+CREATE_AND_TEST_OPERATION(1, "test3_make_public_ignores_extra_args", "prin", "arcsjs.make_public", (["ap4", nil]), (OPERAND_LIST3), nil, "input1").
+CREATE_AND_TEST_OPERATION_VIOLATES(1, "test3_make_public_violates_policy_with_extra_args", "prin", "arcsjs.make_public", (["ap5", nil]), (OPERAND_LIST3), nil, "input1").
 
 #define ATTR_LIST4 [["wrong_tag", $NumberAttributePayload(2)], nil]
-CREATE_AND_TEST_OPERATION(0, "test4_make_public_requires_arg", "prin", "arcsjs.make_public", (["ap2", nil]), nil, (ATTR_LIST4), _).
+CREATE_AND_TEST_OPERATION(0, "test4_make_public_requires_arg", "prin", "arcsjs.make_public", (["ap6", nil]), nil, (ATTR_LIST4), _).

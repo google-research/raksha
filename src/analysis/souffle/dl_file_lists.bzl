@@ -28,7 +28,10 @@ core_dl_files_local = core_dl_files_except_taint_local + ["taint.dl"]
 
 core_dl_files_plus_sql_output_local = core_dl_files_local + ["sql_output.dl"]
 
-core_dl_files_plus_fact_test_helper_local = core_dl_files_local + ["fact_test_helper.dl"]
+core_dl_files_plus_fact_test_helper_local = core_dl_files_local + [
+    "fact_test_helper.dl",
+    "arcsjs_test_helper.dl",
+]
 
 arcsjs_dl_files_local = [
     "arcsjs_core.dl",

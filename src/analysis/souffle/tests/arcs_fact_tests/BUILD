@@ -60,6 +60,7 @@ exports_files([
         "//src/analysis/souffle:operations.dl",
         "//src/analysis/souffle:taint.dl",
         "//src/analysis/souffle:tags.dl",
+        "//src/analysis/souffle:arcsjs_test_helper.dl",
         "//src/analysis/souffle:fact_test_helper.dl",
     ],
 ) for dl_script in ALL_DL_TEST_FILES]

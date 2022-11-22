@@ -95,7 +95,8 @@ violatesPolicy(path) :-
 policyConformingClaim(op) :-
   isArcsJsClaimOperation(op),
   arcsJsClaimOperationHasArgument(op, _),
-  arcsJsClaimOperationHasTag(op, _).
+  arcsJsClaimOperationHasTag(op, _),
+  count : { operationHasOperandAtIndex(op, _, _) } = 1.
 
 // Violates policy if claim operations not correctly defined.
 violatesPolicy(result) :-
@@ -103,13 +104,18 @@ violatesPolicy(result) :-
   !policyConformingClaim(op),
   operationHasResult(op, result).
 
+.decl policyConformingCheck(op: Operation)
+
+policyConformingCheck(op) :-
+  isArcsJsCheckOperation(op),
+  arcsJsCheckOperationHasArgument(op, _),
+  arcsJsCheckOperationHasTag(op, _),
+  count : { operationHasOperandAtIndex(op, _, _) } = 1.
+
 // Violates policy if check operations not correctly defined.
 violatesPolicy(result) :-
   isArcsJsCheckOperation(op),
-  (
-    !arcsJsCheckOperationHasArgument(op, _);
-    !arcsJsCheckOperationHasTag(op, _)
-  ),
+  !policyConformingCheck(op),
   operationHasResult(op, result).
 
 #undef ARCSJS_CLAIM_OPERATOR

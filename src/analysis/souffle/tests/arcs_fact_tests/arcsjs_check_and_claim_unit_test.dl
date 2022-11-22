@@ -14,21 +14,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 
+#include "src/analysis/souffle/arcsjs_test_helper.dl"
 #include "src/analysis/souffle/arcsjs_check_and_claim.dl"
-#include "src/analysis/souffle/fact_test_helper.dl"
-
-/*
-  This macro makes it easy to ensure that:
-  1. the `relation` exists exactly `n` times for the given `operation`,
-  2. and that all of those `n` match the `expected` pattern.
-
-  This checks that there are no unexpected solutions, for the `relation` for the
-  given operation.
-*/ 
-#define TEST_N_RESULT_FOR_OPERATION(n, test_name, operation, relation, expected) \
-  TEST_CASE(cat(test_name, cat("_", #relation))) :- \
-    count : { relation(operation, expected) } = n, \
-    count : { relation(operation, _) } = n
 
 #define CLAIM_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, operation, argument, tag, result) \
   isOperation(operation). \
@@ -46,11 +33,20 @@
 #define CHECK_CREATE_AND_TEST_OPERATION(n_args, n_tags, test_name, owner, operator, result, operandList, attrList, argument, tag) \
   CHECK_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]), argument, tag, result)
 
+#define CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(n_violations, test_name, operation) \
+  isOperation(operation). \
+  TEST_N_PREDICATE_FOR_OPERATION(n_violations, test_name, (operation), violatesPolicy)
+
+#define CREATE_AND_TEST_OPERATION_VIOLATES(n_violations, test_name, owner, operator, result, operandList, attrList) \
+  CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(n_violations, test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]))
+
 #define ATTR_LIST1 [["tag", $StringAttributePayload("private")], nil]
 #define OPERAND_LIST1 ["operand1", nil]
 
 CLAIM_CREATE_AND_TEST_OPERATION(1, 1, "test1_claim", "somePrincipal", "arcsjs.claim", "ap1", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "private").
+CREATE_AND_TEST_OPERATION_VIOLATES(0, "test1_claim_passes", "somePrincipal", "arcsjs.claim", "ap1", (OPERAND_LIST1), (ATTR_LIST1)).
 CHECK_CREATE_AND_TEST_OPERATION(1, 1, "test2_check", "somePrincipal", "arcsjs.check", "ap1", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "private").
+CREATE_AND_TEST_OPERATION_VIOLATES(0, "test2_check_passes", "somePrincipal", "arcsjs.check", "ap1", (OPERAND_LIST1), (ATTR_LIST1)).
 
 #define ATTR_LIST2 [["tag", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
 #define OPERAND_LIST2 ["input1", nil]
@@ -61,7 +57,9 @@ CHECK_CREATE_AND_TEST_OPERATION(1, 1, "test4_check_ignores_extra_attrs", "prin",
 #define ATTR_LIST3 [["tag", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
 #define OPERAND_LIST3 ["input1", ["input2", nil]]
 CLAIM_CREATE_AND_TEST_OPERATION(1, 1, "test5_claim_ignores_extra_args", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST3), (ATTR_LIST3), "input1", "hello").
+CREATE_AND_TEST_OPERATION_VIOLATES(1, "test5_claim_violates_policy", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST3), (ATTR_LIST3)).
 CHECK_CREATE_AND_TEST_OPERATION(1, 1, "test6_check_ignores_extra_args", "prin", "arcsjs.check", "ap2", (OPERAND_LIST3), (ATTR_LIST3), "input1", "hello").
+CREATE_AND_TEST_OPERATION_VIOLATES(1, "test6_check_violates_policy", "prin", "arcsjs.check", "ap2", (OPERAND_LIST3), (ATTR_LIST3)).
 
 #define OPERAND_LIST4 ["input1", ["input2", nil]]
 CLAIM_CREATE_AND_TEST_OPERATION(0, 0, "test7_claim_requires_tag", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST4), nil, _, _).
@@ -75,6 +73,5 @@ CHECK_CREATE_AND_TEST_OPERATION(0, 0, "test10_check_requires_arg", "prin", "arcs
 #define OPERAND_LIST6 ["input1", nil]
 
 CLAIM_CREATE_AND_TEST_OPERATION(1, 2, "test11_claim_maps_over_tags", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST6), (ATTR_LIST6), "input1", _).
-CHECK_CREATE_AND_TEST_OPERATION(1, 2, "test12_check_maps_over_tags", "prin", "arcsjs.check", "ap2"
-, (OPERAND_LIST6), (ATTR_LIST6), "input1", _).
+CHECK_CREATE_AND_TEST_OPERATION(1, 2, "test12_check_maps_over_tags", "prin", "arcsjs.check", "ap2", (OPERAND_LIST6), (ATTR_LIST6), "input1", _).
 

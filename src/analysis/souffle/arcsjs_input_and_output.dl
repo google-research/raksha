@@ -112,7 +112,8 @@ policyConformingInput(op) :-
   isArcsJsConnectInputOperation(op),
   arcsJsConnectInputOperationHasParticle(op, _),
   arcsJsConnectInputOperationHasStore(op, _),
-  arcsJsConnectInputOperationHasHandleName(op, _).
+  arcsJsConnectInputOperationHasHandleName(op, _),
+  count : { operationHasOperandAtIndex(op, _, _) } = 2.
 
 violatesPolicy(result) :-
   isArcsJsConnectInputOperation(op),
@@ -124,7 +125,8 @@ policyConformingOutput(op) :-
   isArcsJsConnectOutputOperation(op),
   arcsJsConnectOutputOperationHasParticle(op, _),
   arcsJsConnectOutputOperationHasStore(op, _),
-  arcsJsConnectOutputOperationHasHandleName(op, _).
+  arcsJsConnectOutputOperationHasHandleName(op, _),
+  count : { operationHasOperandAtIndex(op, _, _) } = 2.
 
 violatesPolicy(result) :-
   isArcsJsConnectOutputOperation(op),

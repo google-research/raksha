@@ -36,10 +36,17 @@ arcsJsMakePublicOperationHasArgument(op, argument) :-
     ARCSJS_MAKE_PUBLIC_ARGUMENT_INDEX
   ).
 
+.decl policyConformingMakePublic(op: Operation)
+
+policyConformingMakePublic(op) :-
+  isArcsJsMakePublicOperation(op),
+  arcsJsMakePublicOperationHasArgument(op, _),
+  count : { operationHasOperandAtIndex(op, _, _) } = 1.
+
 // Violates policy if `make_public` operation is malformed.
 violatesPolicy(path) :-
   isArcsJsMakePublicOperation(op),
-  !arcsJsMakePublicOperationHasArgument(op, _),
+  !policyConformingMakePublic(op),
   operationHasResult(op, path).
 
 .decl arcsJsMakePublicHasConfidentialTag(
