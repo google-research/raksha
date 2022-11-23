@@ -20,36 +20,47 @@ grammar Ir;
 // Parser
 //-----------------------------------------------------------------------------
 
-stringLiteral : NUMLITERAL | ID;
-attribute
-    : ID ':' FLOATLITERAL #floatAttribute
-    | ID ':' NUMLITERAL #numAttribute
-    | ID ':' '"'stringLiteral'"' #stringAttribute
+stringLiteral : stringLiteralContents=STRING_LITERAL;
+
+attributePayload
+    : floatLiteral=FLOATLITERAL #floatAttribute
+    | numLiteral=NUMLITERAL #numAttribute
+    | stringLiteral #stringAttribute
     ;
+
+attribute
+    : name=ID ':' attributePayload
+    ;
+
 attributeList
     : attribute (',' attribute)*
     ;
+
+namedTempValue
+    : valueName=TEMPORARY_ID
+    ;
+
 value
     : ANY #anyValue
-    | VALUE_ID  #namedValue
+    | namedTempValue #namedTempValueLabel
     ;
 argumentList
     : value (',' value)*
     ;
 result
-    : VALUE_ID (',' VALUE_ID)*
+    : namedTempValue (',' namedTempValue)*
     ;
 operation
-    : result '=' ID '['attributeList?']''('argumentList?')'
+    : result '=' operatorName=ID '['attributeList?']''('argumentList?')'
     ;
 block
-    : BLOCK ID '{' (operation)+ '}'
+    : BLOCK blockId=ID '{' operation* '}'
     ;
 module
-    : MODULE ID '{' (block)+ '}'
+    : MODULE moduleId=ID '{' block* '}'
     ;
 irProgram
-    : module
+    : module EOF
     ;
 
 //-----------------------------------------------------------------------------
@@ -74,16 +85,16 @@ FLOAT_TAIL
 // Either require a decimal point or an exponent or a trailing suffix (but allow both).
 FLOATLITERAL : SIGN? NUMLITERAL FLOAT_TAIL;
 
-ID : [0-9_a-zA-Z/.]+;
-VALUE_ID : '%'? ID;
-
+ID : [_a-zA-Z/.][0-9_a-zA-Z/.]*;
+STRING_LITERAL : '"'.*?'"';
+TEMPORARY_ID : '%'(ID|NUMLITERAL);
 
 WHITESPACE_IGNORE
     : [ \r\t\n]+ -> skip
     ;
 
 COMMENT_SINGLE
-    : '//' ~[\r\n]* '\r'? '\n' -> skip
+    : '//' ~[\r\n]*? '\r'? '\n' -> skip
     ;
 
 COMMENT_MULTI

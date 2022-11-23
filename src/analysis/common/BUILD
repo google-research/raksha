@@ -52,7 +52,6 @@ cc_test(
         "//src/parser/ir:ir_parser",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/container:flat_hash_set",
-        "@com_google_absl//absl/log:die_if_null",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
         "@com_googlesource_code_re2//:re2",

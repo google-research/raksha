@@ -33,10 +33,12 @@
 namespace raksha::backends::policy_engine {
 namespace {
 
-using ir::NamedAttributeMap;
-using ir::Operation;
-using ir::Operator;
-using ir::ValueList;
+using raksha::ir::NamedAttributeMap;
+using raksha::ir::Operation;
+using raksha::ir::Operator;
+using raksha::ir::ValueList;
+using raksha::parser::ir::ParseProgram;
+using raksha::parser::ir::IrProgramParserResult;
 
 ir::Value MakeOperationResultValue(const Operation &op) {
   return ir::Value(ir::value::OperationResult(op, 0));
@@ -97,8 +99,7 @@ TEST(SoufflePolicyCheckerTest, DpPolicyRuleReturnsTrue) {
 // sensitivity of the epsilon-5 privacy mechanism).
 TEST(SoufflePolicyCheckerTest, DpPolicyRuleReturnsFalse) {
   SoufflePolicyChecker checker;
-  ir::IrProgramParser ir_parser;
-  ir::IrProgramParser::Result parse_result = ir_parser.ParseProgram(R"(
+  IrProgramParserResult parse_result = ParseProgram(R"(
 module m0 {
 block b0 {
 %0 = core.input[name: "MyTable"]()
