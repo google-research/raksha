@@ -259,12 +259,14 @@ load("@rules_antlr//antlr:lang.bzl", "CPP")
 
 rules_antlr_dependencies("4.8")
 
+ANTLR_VERSION = "4.11.1"
+
 http_archive(
     name = "antlr4_runtimes",
     build_file = "@//third_party/antlr:antlr.BUILD",
-    sha256 = "efe4057d75ab48145d4683100fec7f77d7f87fa258707330cadd1f8e6f7eecae",
-    strip_prefix = "antlr4-4.9.3",
-    urls = ["https://github.com/antlr/antlr4/archive/4.9.3.tar.gz"],
+    sha256 = "81f87f03bb83b48da62e4fc8bfdaf447efb9fb3b7f19eb5cbc37f64e171218cf",
+    strip_prefix = "antlr4-" + ANTLR_VERSION,
+    urls = ["https://github.com/antlr/antlr4/archive/" + ANTLR_VERSION + ".tar.gz"],
 )
 
 re2_commit_hash = "e8cb5ecb8ee1066611aa937a42fa10514edf30fb"
