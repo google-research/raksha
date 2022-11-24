@@ -247,25 +247,29 @@ hedron_compile_commands_setup()
 
 #Antlr
 
+ANTLR_VERSION = "4.11.1"
+
+http_archive(
+    name = "antlr4_runtimes",
+    build_file = "@//third_party/antlr:antlr.BUILD",
+    sha256 = "81f87f03bb83b48da62e4fc8bfdaf447efb9fb3b7f19eb5cbc37f64e171218cf",
+    strip_prefix = "antlr4-" + ANTLR_VERSION,
+    urls = ["https://github.com/antlr/antlr4/archive/" + ANTLR_VERSION + ".tar.gz"],
+)
+
+RULES_ANTLR_COMMIT_HASH = "2e6a30d8ad24582a5cb89d2e42a93cfbfdca7002"
+
 http_archive(
     name = "rules_antlr",
-    sha256 = "26e6a83c665cf6c1093b628b3a749071322f0f70305d12ede30909695ed85591",
-    strip_prefix = "rules_antlr-0.5.0",
-    urls = ["https://github.com/marcohu/rules_antlr/archive/0.5.0.tar.gz"],
+    sha256 = "971b338ee8508e44076002e433292df3e13ee8e775277f5740971d7a72cec409",
+    strip_prefix = "rules_antlr-" + RULES_ANTLR_COMMIT_HASH,
+    urls = ["https://github.com/markww/rules_antlr/archive/" + RULES_ANTLR_COMMIT_HASH + ".zip"],
 )
 
 load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
 load("@rules_antlr//antlr:lang.bzl", "CPP")
 
-rules_antlr_dependencies("4.8")
-
-http_archive(
-    name = "antlr4_runtimes",
-    build_file = "@//third_party/antlr:antlr.BUILD",
-    sha256 = "efe4057d75ab48145d4683100fec7f77d7f87fa258707330cadd1f8e6f7eecae",
-    strip_prefix = "antlr4-4.9.3",
-    urls = ["https://github.com/antlr/antlr4/archive/4.9.3.tar.gz"],
-)
+rules_antlr_dependencies(ANTLR_VERSION)
 
 re2_commit_hash = "e8cb5ecb8ee1066611aa937a42fa10514edf30fb"
 
