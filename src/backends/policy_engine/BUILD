@@ -38,10 +38,7 @@ cc_library(
 cc_library(
     name = "sql_policy_rule_policy",
     hdrs = ["sql_policy_rule_policy.h"],
-    visibility = [
-        "//:__pkg__",
-        "//src:__subpackages__",
-    ] + frontend_packages,
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":policy",
         "@com_google_absl//absl/status",
@@ -66,10 +63,7 @@ cc_library(
 cc_library(
     name = "auth_logic_policy",
     hdrs = ["auth_logic_policy.h"],
-    visibility = [
-        "//:__pkg__",
-        "//src:__subpackages__",
-    ] + frontend_packages,
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":policy",
         "@com_google_absl//absl/status",
