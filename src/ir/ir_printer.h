@@ -22,7 +22,6 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
-#include "src/common/utils/overloaded.h"
 #include "src/ir/ir_traversing_visitor.h"
 #include "src/ir/module.h"
 #include "src/ir/ssa_names.h"
@@ -106,8 +105,7 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
 
     std::string inputs_string = absl::StrJoin(
         operation.inputs(), ", ", [this](std::string* out, const Value& value) {
-          absl::StrAppend(out,
-                          ValueStringConverter(&ssa_names_).ToString(value));
+          absl::StrAppend(out, ValueToString(value, ssa_names_));
         });
 
     const ir::Operator& op = operation.op();

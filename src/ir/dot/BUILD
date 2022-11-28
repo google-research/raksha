@@ -34,6 +34,7 @@ cc_library(
         "//src/ir:ir_printer",
         "//src/ir:ir_traversing_visitor",
         "//src/ir:module",
+        "//src/ir:storage",
         "@com_google_absl//absl/container:btree",
         "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings:str_format",

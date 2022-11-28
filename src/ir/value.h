@@ -23,7 +23,6 @@
 #include "absl/strings/str_format.h"
 #include "src/common/containers/hash_map.h"
 #include "src/common/utils/iterator_range.h"
-#include "src/ir/storage.h"
 
 namespace raksha::ir {
 
@@ -113,10 +112,6 @@ class StoredValue {
 
   const Storage& storage() const { return *storage_; }
 
-  std::string ToString() const {
-    return storage_->ToString();
-  }
-
   bool operator==(const StoredValue& other) const {
     return storage_ == other.storage_;
   }
@@ -186,7 +181,7 @@ class Value {
   bool operator==(const Value& other) const { return value_ == other.value_; }
 
  private:
-  friend class ValueStringConverter;
+  friend std::string ValueToString(Value, SsaNames&);
   Variants value_;
 };
 

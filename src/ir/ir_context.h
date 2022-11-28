@@ -20,8 +20,8 @@
 #include <vector>
 
 #include "src/common/containers/hash_map.h"
-#include "src/ir/module.h"
 #include "src/ir/operator.h"
+#include "src/ir/storage.h"
 #include "src/ir/types/type_factory.h"
 
 namespace raksha::ir {

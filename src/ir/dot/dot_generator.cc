@@ -23,6 +23,7 @@
 #include "src/ir/ir_printer.h"
 #include "src/ir/ir_traversing_visitor.h"
 #include "src/ir/module.h"
+#include "src/ir/storage.h"
 
 namespace raksha::ir::dot {
 

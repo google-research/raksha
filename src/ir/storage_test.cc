@@ -16,12 +16,20 @@
 #include "src/ir/storage.h"
 
 #include "src/common/testing/gtest.h"
+#include "src/ir/module.h"
 #include "src/ir/types/entity_type.h"
 #include "src/ir/types/type.h"
 #include "src/ir/types/type_factory.h"
+#include "src/ir/value.h"
 
 namespace raksha::ir {
 namespace {
+
+using raksha::ir::Value;
+using raksha::ir::value::Any;
+using raksha::ir::value::OperationResult;
+using testing::IsEmpty;
+using testing::UnorderedElementsAre;
 
 class StorageTest : public testing::Test {
  protected:
@@ -46,6 +54,23 @@ TEST_F(StorageTest, PropertyAccessorsReturnCorrectValues) {
 TEST_F(StorageTest, ToStringPrintsNameAndType) {
   Storage input_storage("input", type_factory_.MakePrimitiveType());
   EXPECT_EQ(input_storage.ToString(), "store:input:type");
+}
+
+TEST_F(StorageTest, AddInputValues) {
+  Operator test_operator("test");
+  Operation test_operation(nullptr, test_operator, {}, {});
+  Value any_value = Value(Any());
+  Value operation_result_0 = Value(OperationResult(test_operation, 0));
+  Value operation_result_5 = Value(OperationResult(test_operation, 5));
+  Storage storage("store1", type_factory_.MakePrimitiveType());
+
+  EXPECT_THAT(storage.input_values(), IsEmpty());
+  storage.AddInputValue(any_value);
+  storage.AddInputValue(operation_result_0);
+  storage.AddInputValue(operation_result_5);
+  EXPECT_THAT(
+      storage.input_values(),
+      UnorderedElementsAre(any_value, operation_result_0, operation_result_5));
 }
 
 }  // namespace

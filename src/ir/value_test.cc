@@ -20,6 +20,7 @@
 #include "src/ir/ir_printer.h"
 #include "src/ir/module.h"
 #include "src/ir/ssa_names.h"
+#include "src/ir/storage.h"
 #include "src/ir/types/type_factory.h"
 
 namespace raksha::ir {
@@ -155,8 +156,7 @@ class ValueToStringTest
 
 TEST_P(ValueToStringTest, ToStringReturnsExpectedFormat) {
   const auto &[value, value_string] = GetParam();
-  EXPECT_EQ(ValueStringConverter(&test_data.ssa_names).ToString(value),
-            value_string);
+  EXPECT_EQ(ValueToString(value, test_data.ssa_names), value_string);
 }
 
 INSTANTIATE_TEST_SUITE_P(

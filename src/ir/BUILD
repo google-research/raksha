@@ -32,7 +32,6 @@ cc_library(
     deps = [
         ":module",
         ":value",
-        "//src/common/containers:hash_map",
         "//src/ir/types",
     ],
 )
@@ -78,8 +77,8 @@ cc_library(
     hdrs = ["ir_context.h"],
     visibility = ["//:__subpackages__"] + frontend_packages,
     deps = [
-        ":module",
         ":operator",
+        ":storage",
         "//src/common/containers:hash_map",
         "//src/ir/types",
     ],
@@ -192,13 +191,10 @@ cc_library(
     deps = [
         ":data_decl",
         ":operator",
-        ":ssa_names",
         ":value",
-        "//src/common/containers:hash_map",
         "//src/common/utils:types",
         "//src/ir/attributes:attribute",
         "//src/ir/types",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -216,9 +212,9 @@ cc_library(
     hdrs = ["ssa_names.h"],
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
-        ":operator",
         ":value",
         "//src/common/containers:hash_map",
+        "@com_google_absl//absl/log:check",
     ],
 )
 
@@ -237,8 +233,9 @@ cc_library(
     name = "storage",
     hdrs = ["storage.h"],
     deps = [
+        ":value",
         "//src/ir/types",
-        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings:str_format",
     ],
 )
@@ -247,9 +244,12 @@ cc_test(
     name = "storage_test",
     srcs = ["storage_test.cc"],
     deps = [
+        ":module",
         ":storage",
+        ":value",
         "//src/common/testing:gtest",
         "//src/ir/types",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -258,7 +258,6 @@ cc_library(
     hdrs = ["value.h"],
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
-        ":storage",
         "//src/common/containers:hash_map",
         "//src/common/utils:iterator_range",
         "@com_google_absl//absl/strings:str_format",
@@ -272,6 +271,7 @@ cc_test(
         ":ir_printer",
         ":module",
         ":ssa_names",
+        ":storage",
         ":value",
         "//src/common/testing:gtest",
         "//src/ir/types",
@@ -285,9 +285,9 @@ cc_library(
     hdrs = ["value_string_converter.h"],
     deps = [
         ":ssa_names",
+        ":storage",
         ":value",
         "//src/common/utils:overloaded",
-        "@com_google_absl//absl/log:die_if_null",
     ],
 )
 

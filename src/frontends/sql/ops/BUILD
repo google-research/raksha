@@ -49,7 +49,6 @@ cc_library(
         "//src/ir:value",
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:string_attribute",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -161,8 +160,6 @@ cc_library(
         ":sql_op",
         "//src/ir:ir_context",
         "//src/ir:module",
-        "//src/ir:value",
-        "@com_google_absl//absl/strings",
     ],
 )
 

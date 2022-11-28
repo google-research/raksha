@@ -5,7 +5,6 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
-#include "absl/log/die_if_null.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/substitute.h"
 #include "src/common/testing/gtest.h"
@@ -21,7 +20,6 @@ namespace raksha::analysis::common {
 namespace {
 
 using NodeId = size_t;
-using ir::ValueStringConverter;
 
 struct ModuleGraphTestCase {
   using Edge = std::tuple<NodeId, NodeId, NodeId>;
@@ -274,7 +272,7 @@ std::string GetPrettyPrintedNode(const ModuleGraph::Node& node,
   if (auto operation = std::get_if<const ir::Operation*>(&node)) {
     return ir::IRPrinter::ToString(**operation, ssa_names);
   } else if (auto value = std::get_if<ir::Value>(&node)) {
-    return ValueStringConverter(&ssa_names).ToString(*value);
+    return ValueToString(*value, ssa_names);
   } else {
     return "<<UNKNOWN>>";
   }
@@ -297,7 +295,7 @@ module m0 {
                       // Filter values (like $0) and only include
                       // operations.
                       absl::StrAppend(
-                          out, RE2::FullMatch(value, "\%[0-9]+") ? "" : value);
+                          out, RE2::FullMatch(value, "%[0-9]+") ? "" : value);
                     }));
   // Parse the generated IR.
   return ir::IrProgramParser().ParseProgram(ir);

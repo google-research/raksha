@@ -39,7 +39,6 @@ using DatalogOperandList = ir::datalog::OperandList;
 using DatalogIsOperationFact = ir::datalog::IsOperationFact;
 using DatalogAttribute = ir::datalog::Attribute;
 using DatalogAttributePayload = ir::datalog::AttributePayload;
-using ValueStringConverter = ir::ValueStringConverter;
 
 static DatalogAttributePayload GetPayloadForAttribute(ir::Attribute attr,
                                                       ir::SsaNames &ssa_names) {
@@ -69,7 +68,7 @@ Unit DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
       ir_operand_list, DatalogOperandList(),
       [&ssa_names](DatalogOperandList list_so_far, const ir::Value &value) {
         return DatalogOperandList(
-            DatalogSymbol(ValueStringConverter(&ssa_names).ToString(value)),
+            DatalogSymbol(ValueToString(value, ssa_names)),
             std::move(list_so_far));
       });
 

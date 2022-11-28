@@ -16,6 +16,7 @@
 #ifndef SRC_IR_SSA_NAMES_H_
 #define SRC_IR_SSA_NAMES_H_
 
+#include "absl/log/check.h"
 #include "src/common/containers/hash_map.h"
 #include "src/ir/value.h"
 

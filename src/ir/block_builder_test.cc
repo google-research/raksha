@@ -20,7 +20,6 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/ir_context.h"
-#include "src/ir/ir_printer.h"
 #include "src/ir/ssa_names.h"
 #include "src/ir/types/entity_type.h"
 #include "src/ir/types/type.h"
@@ -115,11 +114,10 @@ TEST_F(BlockBuilderTest, AddResultsUpdatesResults) {
   // TODO(#337): A comparator for values will avoid the need to use
   // `ToString()`.
   SsaNames ssa_names;
-  ValueStringConverter string_converter(&ssa_names);
   ASSERT_EQ(results.count("entity"), 1);
-  EXPECT_EQ(string_converter.ToString(results.at("entity")), "<<ANY>>");
+  EXPECT_EQ(ValueToString(results.at("entity"), ssa_names), "<<ANY>>");
   ASSERT_EQ(results.count("primitive"), 1);
-  EXPECT_EQ(string_converter.ToString(results.at("primitive")),
+  EXPECT_EQ(ValueToString(results.at("primitive"), ssa_names),
             "store:secret_store:type");
 }
 
@@ -276,14 +274,14 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
                      /*schema_name=*/"OutputTensor");
   const IndexedValueMap& results = block->results();
   ASSERT_EQ(results.count("entity_output"), 1);
-  //%0 is the entity_value OperationResult Value :
+  // %0 is the entity_value OperationResult Value :
   // Value(value::OperationResult(op, "entity_value"))
-  ValueStringConverter converter(&ssa_names);
-  EXPECT_EQ(converter.ToString(results.at("entity_output")), "entity_value");
+  EXPECT_EQ(ValueToString(results.at("entity_output"), ssa_names),
+            "entity_value");
   ASSERT_EQ(results.count("primitive_output"), 1);
-  //%0 is the primitive_value OperationResult Value :
+  // %0 is the primitive_value OperationResult Value :
   // Value(value::OperationResult(op, "primitive_value"))
-  EXPECT_EQ(converter.ToString(results.at("primitive_output")),
+  EXPECT_EQ(ValueToString(results.at("primitive_output"), ssa_names),
             "primitive_value");
 }
 

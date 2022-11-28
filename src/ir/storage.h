@@ -16,8 +16,10 @@
 #ifndef SRC_IR_STORAGE_H_
 #define SRC_IR_STORAGE_H_
 
+#include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_format.h"
 #include "src/ir/types/type.h"
+#include "src/ir/value.h"
 
 namespace raksha::ir {
 
@@ -34,8 +36,13 @@ class Storage {
   Storage(Storage&&) = default;
   Storage& operator=(Storage&&) = default;
 
+  void AddInputValue(Value value) { input_values_.insert(value); }
+
   absl::string_view name() const { return name_; }
   const types::Type& type() const { return type_; }
+  const absl::flat_hash_set<Value>& input_values() const {
+    return input_values_;
+  }
 
   std::string ToString() const {
     // TODO(#335): When types have a ToString use that to print types.
@@ -45,7 +52,7 @@ class Storage {
  private:
   std::string name_;
   types::Type type_;
-  // TODO: We will add additional attributes like ttl, medium, etc.
+  absl::flat_hash_set<Value> input_values_;
 };
 
 }  // namespace raksha::ir
