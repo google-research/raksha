@@ -16,10 +16,7 @@
 
 #include "src/backends/policy_engine/souffle/datalog_lowering_visitor.h"
 
-#include "absl/strings/str_cat.h"
-#include "src/common/logging/logging.h"
 #include "src/common/utils/fold.h"
-#include "src/frontends/sql/decoder_context.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
