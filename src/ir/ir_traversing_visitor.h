@@ -108,11 +108,7 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result, IsConst> {
 
   Result Visit(CopyConst<IsConst, Operation>& operation) final override {
     Result pre_visit_result = PreVisit(operation);
-    auto* module = operation.impl_module();
-    Result result = module == nullptr ? std::move(pre_visit_result)
-                                      : FoldResult(std::move(pre_visit_result),
-                                                   module->Accept(*this));
-    return PostVisit(operation, std::move(result));
+    return PostVisit(operation, std::move(pre_visit_result));
   }
 };
 

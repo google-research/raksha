@@ -48,20 +48,11 @@ Block OperationTest::first_block_;
 Operator OperationTest::plus_op("core.plus");
 Operator OperationTest::minus_op("core.minus");
 
-TEST(OperationTest, ConstructorSetsModuleCorrectly) {
-  auto module = std::unique_ptr<Module>();
-  auto passed_in_module = module.get();
-  Operation operation(nullptr, OperationTest::plus_op, {}, {},
-                      std::move(module));
-  EXPECT_EQ(operation.impl_module(), passed_in_module);
-}
-
 TEST_P(OperationTest, AccessorsAndToStringReturnCorrectValue) {
   // Keeping it local so that the operation and first_block always get %0.
   SsaNames ssa_names;
   const auto& [block, op, attributes, inputs, string_reps] = GetParam();
   Operation operation(block, *op, attributes, inputs);
-  EXPECT_EQ(operation.impl_module(), nullptr);
   EXPECT_EQ(operation.parent(), block);
   EXPECT_EQ(&operation.op(), op);
   EXPECT_EQ(operation.attributes(), attributes);

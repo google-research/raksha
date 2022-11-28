@@ -38,7 +38,8 @@ class WrappedInt {
   uint64_t val_;
 };
 
-// A small test visitor that checks behavior when using non default constructable return values.
+// A small test visitor that checks behavior when using non default
+// constructable return values.
 class NonDefaultConstructorVisitor
     : public IRTraversingVisitor<NonDefaultConstructorVisitor, WrappedInt> {
  public:
@@ -173,28 +174,23 @@ TEST(IRTraversingVisitorTest, TraversesOperationAsExpected) {
   auto minus_op = std::make_unique<Operator>("core.minus");
   BlockBuilder builder;
 
-  Operation plus_op_instance(nullptr, *plus_op, {}, {},
-                             std::make_unique<Module>());
-  auto plus_op_module = plus_op_instance.impl_module();
+  Operation plus_op_instance(nullptr, *plus_op, {}, {});
 
   CollectingVisitor preorder_visitor(TraversalType::kPre);
   plus_op_instance.Accept(preorder_visitor);
-  EXPECT_THAT(
-      preorder_visitor.nodes(),
-      testing::ElementsAre(std::addressof(plus_op_instance), plus_op_module));
+  EXPECT_THAT(preorder_visitor.nodes(),
+              testing::ElementsAre(std::addressof(plus_op_instance)));
 
   CollectingVisitor postorder_visitor(TraversalType::kPost);
   plus_op_instance.Accept(postorder_visitor);
-  EXPECT_THAT(
-      postorder_visitor.nodes(),
-      testing::ElementsAre(plus_op_module, std::addressof(plus_op_instance)));
+  EXPECT_THAT(postorder_visitor.nodes(),
+              testing::ElementsAre(std::addressof(plus_op_instance)));
 
   CollectingVisitor all_order_visitor(TraversalType::kBoth);
   plus_op_instance.Accept(all_order_visitor);
-  EXPECT_THAT(
-      all_order_visitor.nodes(),
-      testing::ElementsAre(std::addressof(plus_op_instance), plus_op_module,
-                           plus_op_module, std::addressof(plus_op_instance)));
+  EXPECT_THAT(all_order_visitor.nodes(),
+              testing::ElementsAre(std::addressof(plus_op_instance),
+                                   std::addressof(plus_op_instance)));
 }
 
 using ResultType = std::vector<void*>;
@@ -310,24 +306,19 @@ TEST(IRTraversingVisitorTest, TraversesOperationAsExpectedUsingReturns) {
   auto minus_op = std::make_unique<Operator>("core.minus");
   BlockBuilder builder;
 
-  Operation plus_op_instance(nullptr, *plus_op, {}, {},
-                             std::make_unique<Module>());
-  auto plus_op_module = plus_op_instance.impl_module();
+  Operation plus_op_instance(nullptr, *plus_op, {}, {});
 
   ReturningVisitor preorder_visitor(TraversalType::kPre);
   ResultType nodes1 = plus_op_instance.Accept(preorder_visitor);
-  EXPECT_THAT(nodes1, testing::ElementsAre(std::addressof(plus_op_instance),
-                                           plus_op_module));
+  EXPECT_THAT(nodes1, testing::ElementsAre(std::addressof(plus_op_instance)));
 
   ReturningVisitor postorder_visitor(TraversalType::kPost);
   ResultType nodes2 = plus_op_instance.Accept(postorder_visitor);
-  EXPECT_THAT(nodes2, testing::ElementsAre(plus_op_module,
-                                           std::addressof(plus_op_instance)));
+  EXPECT_THAT(nodes2, testing::ElementsAre(std::addressof(plus_op_instance)));
 
   ReturningVisitor all_order_visitor(TraversalType::kBoth);
   ResultType nodes3 = plus_op_instance.Accept(all_order_visitor);
   EXPECT_THAT(nodes3, testing::ElementsAre(std::addressof(plus_op_instance),
-                                           plus_op_module, plus_op_module,
                                            std::addressof(plus_op_instance)));
 }
 

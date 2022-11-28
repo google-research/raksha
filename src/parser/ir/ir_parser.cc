@@ -132,11 +132,10 @@ IrProgramParser::ConstructOperationResult IrProgramParser::ConstructOperation(
     }
   }
 
-  auto op = std::make_unique<Operation>(
-      nullptr,
-      *ABSL_DIE_IF_NULL(
-          context_->GetOperator(operation_context.ID()->getText())),
-      std::move(attributes), ValueList(), nullptr);
+  auto op = std::make_unique<Operation>(nullptr,
+                                        *ABSL_DIE_IF_NULL(context_->GetOperator(
+                                            operation_context.ID()->getText())),
+                                        std::move(attributes), ValueList());
 
   auto op_names =
       utils::MapIter<std::string>(operation_context.result()->VALUE_ID(),

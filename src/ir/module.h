@@ -35,17 +35,14 @@ class Block;
 class Operation {
  public:
   Operation(const Block* parent, const Operator& op,
-            NamedAttributeMap attributes, ValueList inputs,
-            std::unique_ptr<Module> impl_module = nullptr)
+            NamedAttributeMap attributes, ValueList inputs)
       : parent_(parent),
         op_(std::addressof(op)),
         attributes_(std::move(attributes)),
-        inputs_(std::move(inputs)),
-        impl_module_(std::move(impl_module)) {}
+        inputs_(std::move(inputs)) {}
 
-  Operation(const Operator& op, NamedAttributeMap attributes, ValueList inputs,
-            std::unique_ptr<Module> impl_module = nullptr)
-      : Operation(nullptr, op, attributes, inputs, std::move(impl_module)) {}
+  Operation(const Operator& op, NamedAttributeMap attributes, ValueList inputs)
+      : Operation(nullptr, op, attributes, inputs) {}
 
   Operation(const Operator& op) : Operation(nullptr, op, {}, {}) {}
 
@@ -59,7 +56,6 @@ class Operation {
   const Block* parent() const { return parent_; }
   const ValueList& inputs() const { return inputs_; }
   const NamedAttributeMap& attributes() const { return attributes_; }
-  const Module* impl_module() const { return impl_module_.get(); }
 
   const Value& GetInputValue(uint64_t index) const {
     CHECK(index < inputs_.size())
@@ -98,10 +94,6 @@ class Operation {
   NamedAttributeMap attributes_;
   // The inputs of the operation.
   ValueList inputs_;
-  // If the operation can be broken down into other operations, it is
-  // specified in the optional module. If `module_` is nullptr, then this is a
-  // basic operator like `+`, `-`, etc., which cannot be broken down further.
-  std::unique_ptr<Module> impl_module_;
 };
 
 // A collection of operations.

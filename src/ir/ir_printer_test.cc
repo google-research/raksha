@@ -108,11 +108,8 @@ TEST_P(IRPrinterTest, PrettyPrintsBlockWithProperIndentation) {
 }
 
 TEST_P(IRPrinterTest, PrettyPrintsOperationWithProperIndentation) {
-  Operation operation(nullptr, plus_op(), {}, {}, std::make_unique<Module>());
-  EXPECT_EQ(ToString(operation), R"(%0 = core.plus []() {
-  module m0 {
-  }  // module m0
-}
+  Operation operation(nullptr, plus_op(), {}, {});
+  EXPECT_EQ(ToString(operation), R"(%0 = core.plus []()
 )");
 }
 

@@ -142,16 +142,12 @@ TEST_F(BlockBuilderTest, AddOperationUpdatesOperationList) {
       std::addressof(builder.AddOperation(core_minus, {}, {}));
   const Operation* merge_op =
       std::addressof(builder.AddOperation(core_merge, {}, {}));
-  const Operation* merge_op_with_module = std::addressof(
-      builder.AddOperation(core_merge, {}, {}, std::make_unique<Module>()));
 
   auto block = builder.build();
   EXPECT_THAT(block->operations(),
-              testing::ElementsAre(
-                  testing::Pointer(testing::Eq(plus_op)),
-                  testing::Pointer(testing::Eq(minus_op)),
-                  testing::Pointer(testing::Eq(merge_op)),
-                  testing::Pointer(testing::Eq(merge_op_with_module))));
+              testing::ElementsAre(testing::Pointer(testing::Eq(plus_op)),
+                                   testing::Pointer(testing::Eq(minus_op)),
+                                   testing::Pointer(testing::Eq(merge_op))));
 }
 
 TEST_F(BlockBuilderTest, AddOperationOfUniquePtrUpdatesOperationList) {
@@ -165,24 +161,19 @@ TEST_F(BlockBuilderTest, AddOperationOfUniquePtrUpdatesOperationList) {
 
   const Operation* plus_op =
       std::addressof(builder.AddOperation(std::make_unique<Operation>(
-          nullptr, core_plus, NamedAttributeMap(), ValueList(), nullptr)));
+          nullptr, core_plus, NamedAttributeMap(), ValueList())));
   const Operation* minus_op =
       std::addressof(builder.AddOperation(std::make_unique<Operation>(
-          nullptr, core_minus, NamedAttributeMap(), ValueList(), nullptr)));
+          nullptr, core_minus, NamedAttributeMap(), ValueList())));
   const Operation* merge_op =
       std::addressof(builder.AddOperation(std::make_unique<Operation>(
-          nullptr, core_merge, NamedAttributeMap(), ValueList(), nullptr)));
-  const Operation* merge_op_with_module = std::addressof(builder.AddOperation(
-      std::make_unique<Operation>(nullptr, core_merge, NamedAttributeMap(),
-                                  ValueList(), std::make_unique<Module>())));
+          nullptr, core_merge, NamedAttributeMap(), ValueList())));
 
   auto block = builder.build();
   EXPECT_THAT(block->operations(),
-              testing::ElementsAre(
-                  testing::Pointer(testing::Eq(plus_op)),
-                  testing::Pointer(testing::Eq(minus_op)),
-                  testing::Pointer(testing::Eq(merge_op)),
-                  testing::Pointer(testing::Eq(merge_op_with_module))));
+              testing::ElementsAre(testing::Pointer(testing::Eq(plus_op)),
+                                   testing::Pointer(testing::Eq(minus_op)),
+                                   testing::Pointer(testing::Eq(merge_op))));
 }
 
 TEST_F(BlockBuilderTest, SetParentPtrErrorsWithPredefinedParent) {
@@ -191,8 +182,7 @@ TEST_F(BlockBuilderTest, SetParentPtrErrorsWithPredefinedParent) {
   const Operator& core_merge =
       *ABSL_DIE_IF_NULL(context_.GetOperator("core.merge"));
   EXPECT_DEATH(builder.AddOperation(std::make_unique<Operation>(
-                   block, core_merge, NamedAttributeMap(), ValueList(),
-                   std::make_unique<Module>())),
+                   block, core_merge, NamedAttributeMap(), ValueList())),
                "Parent pointer already defined. Cannot set parent again!");
 }
 

@@ -58,7 +58,6 @@ TEST_P(DecodeLiteralExprTest, DecodeLiteralExprTest) {
   // Set up finished, now check expectations.
   const Operation &operation = testing::UnwrapDefaultOperationResult(result);
   EXPECT_EQ(operation.parent(), &top_block);
-  EXPECT_THAT(operation.impl_module(), IsNull());
 
   const LiteralOp *literal_op = SqlOp::GetIf<LiteralOp>(operation);
   ASSERT_NE(literal_op, nullptr);

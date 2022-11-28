@@ -82,7 +82,6 @@ TEST_P(LiteralOpTest, MakeLiteralOperationTest) {
   const Block &top_level_block = decoder_context.BuildTopLevelBlock();
 
   EXPECT_THAT(op.parent(), &top_level_block);
-  EXPECT_THAT(op.impl_module(), IsNull());
 
   const LiteralOp *literal_op = SqlOp::GetIf<LiteralOp>(op);
   ASSERT_NE(literal_op, nullptr);

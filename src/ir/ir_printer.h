@@ -124,21 +124,12 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
     out_ << Indent()
          << absl::StreamFormat(kOperationFormat, result_name,
                                operation.op().name(), attributes_string,
-                               inputs_string);
-    if (operation.impl_module()) {
-      out_ << " {\n";
-      IncreaseIndent();
-    } else {
-      out_ << "\n";
-    }
+                               inputs_string)
+         << "\n";
     return Unit();
   }
 
   Unit PostVisit(const Operation& operation, Unit result) override {
-    if (operation.impl_module()) {
-      DecreaseIndent();
-      out_ << Indent() << "}\n";
-    }
     return result;
   }
 
