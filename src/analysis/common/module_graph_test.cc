@@ -13,6 +13,7 @@
 #include "src/ir/ir_printer.h"
 #include "src/ir/ssa_names.h"
 #include "src/ir/value.h"
+#include "src/ir/value_string_converter.h"
 #include "src/parser/ir/ir_parser.h"
 #include "re2/re2.h"
 
@@ -20,6 +21,7 @@ namespace raksha::analysis::common {
 namespace {
 
 using NodeId = size_t;
+using ir::ValueStringConverter;
 
 struct ModuleGraphTestCase {
   using Edge = std::tuple<NodeId, NodeId, NodeId>;
@@ -272,7 +274,7 @@ std::string GetPrettyPrintedNode(const ModuleGraph::Node& node,
   if (auto operation = std::get_if<const ir::Operation*>(&node)) {
     return ir::IRPrinter::ToString(**operation, ssa_names);
   } else if (auto value = std::get_if<ir::Value>(&node)) {
-    return value->ToString(ssa_names);
+    return ValueStringConverter(&ssa_names).ToString(*value);
   } else {
     return "<<UNKNOWN>>";
   }

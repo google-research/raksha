@@ -22,10 +22,12 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
+#include "src/common/utils/overloaded.h"
 #include "src/ir/ir_traversing_visitor.h"
 #include "src/ir/module.h"
 #include "src/ir/ssa_names.h"
 #include "src/ir/value.h"
+#include "src/ir/value_string_converter.h"
 
 namespace raksha::ir {
 
@@ -104,7 +106,8 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
 
     std::string inputs_string = absl::StrJoin(
         operation.inputs(), ", ", [this](std::string* out, const Value& value) {
-          absl::StrAppend(out, value.ToString(ssa_names_));
+          absl::StrAppend(out,
+                          ValueStringConverter(&ssa_names_).ToString(value));
         });
 
     const ir::Operator& op = operation.op();
@@ -172,24 +175,6 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
   // TODO(#615): Make ssa_names_ const.
   SsaNames& ssa_names_;
 };
-
-inline std::string Value::ToString(SsaNames& ssa_names) const {
-  return std::visit(
-      raksha::utils::overloaded{
-          [&ssa_names](const value::Any& any) {
-            return any.ToString(ssa_names);
-          },
-          [&ssa_names](const value::StoredValue& stored_value) {
-            return stored_value.ToString(ssa_names);
-          },
-          [this, &ssa_names](const value::BlockArgument& block_argument) {
-            return absl::StrFormat("%s", ssa_names.GetOrCreateID(*this));
-          },
-          [this, &ssa_names](const value::OperationResult& operation_result) {
-            return absl::StrFormat("%s", ssa_names.GetOrCreateID(*this));
-          }},
-      Value::value_);
-}
 
 inline std::ostream& operator<<(std::ostream& out, const Operation& operation) {
   IRPrinter::ToString(out, operation);

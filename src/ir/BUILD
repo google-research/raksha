@@ -47,6 +47,7 @@ cc_test(
         ":ir_context",
         ":ir_printer",
         ":ssa_names",
+        ":value_string_converter",
         "//src/common/testing:gtest",
         "//src/ir/attributes:attribute",
         "//src/ir/types",
@@ -102,6 +103,8 @@ cc_library(
         ":module",
         ":ssa_names",
         ":value",
+        ":value_string_converter",
+        "//src/common/utils:overloaded",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],
@@ -258,8 +261,6 @@ cc_library(
         ":storage",
         "//src/common/containers:hash_map",
         "//src/common/utils:iterator_range",
-        "//src/common/utils:overloaded",
-        "//src/ir/types",
         "@com_google_absl//absl/strings:str_format",
     ],
 )
@@ -275,6 +276,18 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/ir/types",
         "@com_google_absl//absl/hash:hash_testing",
+    ],
+)
+
+cc_library(
+    name = "value_string_converter",
+    srcs = ["value_string_converter.cc"],
+    hdrs = ["value_string_converter.h"],
+    deps = [
+        ":ssa_names",
+        ":value",
+        "//src/common/utils:overloaded",
+        "@com_google_absl//absl/log:die_if_null",
     ],
 )
 

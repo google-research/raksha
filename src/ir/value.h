@@ -23,9 +23,7 @@
 #include "absl/strings/str_format.h"
 #include "src/common/containers/hash_map.h"
 #include "src/common/utils/iterator_range.h"
-#include "src/common/utils/overloaded.h"
 #include "src/ir/storage.h"
-#include "src/ir/types/type.h"
 
 namespace raksha::ir {
 
@@ -37,6 +35,7 @@ class Operation;
 class Operator;
 class Value;
 class SsaNames;
+class Storage;
 
 namespace value {
 
@@ -114,7 +113,7 @@ class StoredValue {
 
   const Storage& storage() const { return *storage_; }
 
-  std::string ToString(const SsaNames& ssa_names) const {
+  std::string ToString() const {
     return storage_->ToString();
   }
 
@@ -129,7 +128,7 @@ class StoredValue {
 // A special value to indicate that it can be anything.
 class Any {
  public:
-  std::string ToString(const SsaNames& ssa_names) const { return "<<ANY>>"; }
+  std::string ToString() const { return "<<ANY>>"; }
 
   template <typename H>
   friend H AbslHashValue(H h, const Any& v) {
@@ -168,8 +167,6 @@ class Value {
     return H::combine(std::move(h), v.value_);
   }
 
-  std::string ToString(SsaNames& ssa_names) const;
-
   // A downcast operation. Just delegates directly to std::get on variants.
   template <class T>
   const T& As() const {
@@ -189,6 +186,7 @@ class Value {
   bool operator==(const Value& other) const { return value_ == other.value_; }
 
  private:
+  friend class ValueStringConverter;
   Variants value_;
 };
 

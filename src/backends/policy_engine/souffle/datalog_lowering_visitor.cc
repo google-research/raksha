@@ -22,11 +22,11 @@
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/datalog/operation.h"
-#include "src/ir/ir_printer.h"
 #include "src/ir/module.h"
 #include "src/ir/operator.h"
 #include "src/ir/ssa_names.h"
 #include "src/ir/value.h"
+#include "src/ir/value_string_converter.h"
 
 namespace raksha::backends::policy_engine::souffle {
 
@@ -39,6 +39,7 @@ using DatalogOperandList = ir::datalog::OperandList;
 using DatalogIsOperationFact = ir::datalog::IsOperationFact;
 using DatalogAttribute = ir::datalog::Attribute;
 using DatalogAttributePayload = ir::datalog::AttributePayload;
+using ValueStringConverter = ir::ValueStringConverter;
 
 static DatalogAttributePayload GetPayloadForAttribute(ir::Attribute attr,
                                                       ir::SsaNames &ssa_names) {
@@ -67,8 +68,9 @@ Unit DatalogLoweringVisitor::PreVisit(const ir::Operation &operation) {
   DatalogOperandList operand_list = common::utils::rfold(
       ir_operand_list, DatalogOperandList(),
       [&ssa_names](DatalogOperandList list_so_far, const ir::Value &value) {
-        return DatalogOperandList(DatalogSymbol(value.ToString(ssa_names)),
-                                  std::move(list_so_far));
+        return DatalogOperandList(
+            DatalogSymbol(ValueStringConverter(&ssa_names).ToString(value)),
+            std::move(list_so_far));
       });
 
   // Convert each `Attribute` to the analogous record in datalog and put into an

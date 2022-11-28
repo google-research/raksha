@@ -135,7 +135,6 @@ TEST_P(OperationResultTest, DefaultOperationResultTest) {
   EXPECT_EQ(default_operation_result.index(), 0);
 }
 
-
 TEST_P(OperationResultTest, DefaultOperationResultValueTest) {
   const Operation &operation = *GetParam();
   Value default_result_value =
@@ -156,7 +155,8 @@ class ValueToStringTest
 
 TEST_P(ValueToStringTest, ToStringReturnsExpectedFormat) {
   const auto &[value, value_string] = GetParam();
-  EXPECT_EQ(value.ToString(test_data.ssa_names), value_string);
+  EXPECT_EQ(ValueStringConverter(&test_data.ssa_names).ToString(value),
+            value_string);
 }
 
 INSTANTIATE_TEST_SUITE_P(

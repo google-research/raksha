@@ -25,6 +25,7 @@
 #include "src/ir/types/entity_type.h"
 #include "src/ir/types/type.h"
 #include "src/ir/types/type_factory.h"
+#include "src/ir/value_string_converter.h"
 
 namespace raksha::ir {
 namespace {
@@ -114,10 +115,11 @@ TEST_F(BlockBuilderTest, AddResultsUpdatesResults) {
   // TODO(#337): A comparator for values will avoid the need to use
   // `ToString()`.
   SsaNames ssa_names;
+  ValueStringConverter string_converter(&ssa_names);
   ASSERT_EQ(results.count("entity"), 1);
-  EXPECT_EQ(results.at("entity").ToString(ssa_names), "<<ANY>>");
+  EXPECT_EQ(string_converter.ToString(results.at("entity")), "<<ANY>>");
   ASSERT_EQ(results.count("primitive"), 1);
-  EXPECT_EQ(results.at("primitive").ToString(ssa_names),
+  EXPECT_EQ(string_converter.ToString(results.at("primitive")),
             "store:secret_store:type");
 }
 
@@ -238,7 +240,8 @@ TEST_F(BlockBuilderTest, AddImplementationDoesNotChangeBlockAddress) {
 TEST_F(BlockBuilderTest, AddOperationDoesNotChangeBlockAddress) {
   BlockBuilder builder;
   Block* block_ptr = builder.GetBlockPtr();
-  const Operator& core_plus = *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
+  const Operator& core_plus =
+      *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
   const Operation& op = builder.AddOperation(core_plus, {}, {});
   auto block = builder.build();
   EXPECT_THAT(block->operations(),
@@ -249,23 +252,20 @@ TEST_F(BlockBuilderTest, AddOperationDoesNotChangeBlockAddress) {
 TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
   BlockBuilder builder;
   SsaNames ssa_names;
-  builder.AddImplementation(
-      [this, &ssa_names](BlockBuilder& builder, Block& block) {
-        builder.AddInput("primitive_input", MakePrimitiveType());
-        builder.AddInput("entity_input", MakeTestEntityType("InputTensor"));
-        builder.AddOutput("primitive_output", MakePrimitiveType());
-        builder.AddOutput("entity_output", MakeTestEntityType("OutputTensor"));
-        const Operator& core_plus =
-            *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
-        const Operation& op = builder.AddOperation(core_plus, {}, {});
-        builder.AddResult("primitive_output",
-                          Value(value::OperationResult(op, 0)));
-        ssa_names.AddID(Value(value::OperationResult(op, 0)),
-                        "primitive_value");
-        builder.AddResult("entity_output",
-                          Value(value::OperationResult(op, 1)));
-        ssa_names.AddID(Value(value::OperationResult(op, 1)), "entity_value");
-      });
+  builder.AddImplementation([this, &ssa_names](BlockBuilder& builder,
+                                               Block& block) {
+    builder.AddInput("primitive_input", MakePrimitiveType());
+    builder.AddInput("entity_input", MakeTestEntityType("InputTensor"));
+    builder.AddOutput("primitive_output", MakePrimitiveType());
+    builder.AddOutput("entity_output", MakeTestEntityType("OutputTensor"));
+    const Operator& core_plus =
+        *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
+    const Operation& op = builder.AddOperation(core_plus, {}, {});
+    builder.AddResult("primitive_output", Value(value::OperationResult(op, 0)));
+    ssa_names.AddID(Value(value::OperationResult(op, 0)), "primitive_value");
+    builder.AddResult("entity_output", Value(value::OperationResult(op, 1)));
+    ssa_names.AddID(Value(value::OperationResult(op, 1)), "entity_value");
+  });
 
   auto block = builder.build();
   CheckExpectedDecls(block->inputs(), /*entity_key=*/"entity_input",
@@ -278,11 +278,12 @@ TEST_F(BlockBuilderTest, AddImplementationMakingMultipleUpdates) {
   ASSERT_EQ(results.count("entity_output"), 1);
   //%0 is the entity_value OperationResult Value :
   // Value(value::OperationResult(op, "entity_value"))
-  EXPECT_EQ(results.at("entity_output").ToString(ssa_names), "entity_value");
+  ValueStringConverter converter(&ssa_names);
+  EXPECT_EQ(converter.ToString(results.at("entity_output")), "entity_value");
   ASSERT_EQ(results.count("primitive_output"), 1);
   //%0 is the primitive_value OperationResult Value :
   // Value(value::OperationResult(op, "primitive_value"))
-  EXPECT_EQ(results.at("primitive_output").ToString(ssa_names),
+  EXPECT_EQ(converter.ToString(results.at("primitive_output")),
             "primitive_value");
 }
 
@@ -303,7 +304,8 @@ class TestOperation : public Operation {
 
 TEST_F(BlockBuilderTest, AllowsAdditionOfPreConstructedOperation) {
   BlockBuilder builder;
-  const Operator& core_plus = *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
+  const Operator& core_plus =
+      *ABSL_DIE_IF_NULL(context_.GetOperator("core.plus"));
   std::unique_ptr<Operation> plus_op_ptr =
       std::make_unique<Operation>(core_plus);
   const Operation* plus_op =

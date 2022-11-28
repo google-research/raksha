@@ -317,6 +317,7 @@ cc_library(
         "//src/ir:operator",
         "//src/ir:ssa_names",
         "//src/ir:value",
+        "//src/ir:value_string_converter",
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:float_attribute",
         "//src/ir/attributes:int_attribute",

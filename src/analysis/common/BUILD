@@ -48,6 +48,7 @@ cc_test(
         "//src/ir:ir_printer",
         "//src/ir:ssa_names",
         "//src/ir:value",
+        "//src/ir:value_string_converter",
         "//src/parser/ir:ir_parser",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/container:flat_hash_set",
