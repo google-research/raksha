@@ -39,10 +39,10 @@ namespace raksha::common::utils {
 // custom `BinaryOperator`.
 template <class I, class A, class F>
 A fold(I begin_iter, I end_iter, A accumulated, F fold_fn) {
-  if (begin_iter == end_iter) return accumulated;
-  const auto &current_element = *begin_iter;
-  return fold(++begin_iter, end_iter,
-              fold_fn(std::move(accumulated), current_element), fold_fn);
+  for (; begin_iter != end_iter; ++begin_iter) {
+    accumulated = fold_fn(std::move(accumulated), *begin_iter);
+  }
+  return accumulated;
 }
 
 // A left fold over the provided container using `fold_fn` with an initial value
