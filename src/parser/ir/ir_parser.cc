@@ -117,7 +117,8 @@ class IrVisitor : public IrBaseVisitor {
                 .module = std::make_unique<Module>(),
                 .ssa_names = std::make_unique<SsaNames>()} {}
 
-  Any visitStringLiteral(IrParser::StringLiteralContext* string_context) {
+  Any visitStringLiteral(
+      IrParser::StringLiteralContext* string_context) override {
     std::string string_literal_contents_with_quotes =
         string_context->stringLiteralContents->getText();
     // Strip the quotes off of the end. This would be better to do in the lexer
@@ -317,9 +318,7 @@ class IrVisitor : public IrBaseVisitor {
     return Unit();
   }
 
-  IrProgramParserResult TakeResult() {
-    return std::move(result_);
-  }
+  IrProgramParserResult TakeResult() { return std::move(result_); }
 
  private:
   // A helper function that idempotently registers an operator and returns a
