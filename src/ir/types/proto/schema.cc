@@ -22,8 +22,11 @@
 
 namespace raksha::ir::types::proto {
 
+using type::proto::SchemaProto;
+using type::proto::TypeProto;
+
 const ir::types::Schema &decode(ir::types::TypeFactory &type_factory,
-                                const arcs::SchemaProto &schema_proto) {
+                                const SchemaProto &schema_proto) {
   auto schema_names = schema_proto.names();
   CHECK(schema_names.size() <= 1)
       << "Multiple names for a Schema not yet supported.";
@@ -35,7 +38,7 @@ const ir::types::Schema &decode(ir::types::TypeFactory &type_factory,
   common::containers::HashMap<std::string, ir::types::Type> field_map;
   for (const auto &field_name_type_pair : schema_proto.fields()) {
     const std::string &field_name = field_name_type_pair.first;
-    const arcs::TypeProto &type_proto = field_name_type_pair.second;
+    const TypeProto &type_proto = field_name_type_pair.second;
 
     field_map.insert({field_name, Decode(type_factory, type_proto)});
   }
@@ -43,9 +46,9 @@ const ir::types::Schema &decode(ir::types::TypeFactory &type_factory,
   return type_factory.RegisterSchema(std::move(name), std::move(field_map));
 }
 
-// Create an arcs::SchemaProto message from the contents of this Schema object.
-arcs::SchemaProto encode(const ir::types::Schema &schema) {
-  arcs::SchemaProto schema_proto;
+// Create an proto::SchemaProto message from the contents of this Schema object.
+SchemaProto encode(const ir::types::Schema &schema) {
+  SchemaProto schema_proto;
   if (const auto &name = schema.name()) {
     schema_proto.add_names(*name);
   }

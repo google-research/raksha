@@ -20,9 +20,9 @@
 #include "google/protobuf/text_format.h"
 #include "google/protobuf/util/message_differencer.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/proto/raksha_type.pb.h"
 #include "src/ir/types/proto/type.h"
 #include "src/ir/types/type_factory.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types::proto {
 
@@ -32,11 +32,11 @@ class EntityTypeTest : public testing::TestWithParam<std::string> {
 };
 
 TEST_P(EntityTypeTest, RoundTripPreservesAllInformation) {
-  arcs::TypeProto orig_type_proto;
+  proto::TypeProto orig_type_proto;
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(GetParam(),
                                                             &orig_type_proto))
       << "Failed to parse type proto.";
-  arcs::TypeProto result_type_proto =
+  proto::TypeProto result_type_proto =
       Encode(Decode(type_factory_, orig_type_proto));
   ASSERT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
       orig_type_proto, result_type_proto));

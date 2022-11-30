@@ -119,22 +119,6 @@ http_archive(
     urls = ["https://github.com/souffle-lang/souffle/archive/refs/tags/2.3.zip"],
 )
 
-#-------------------
-# nodejs
-#-------------------
-http_archive(
-    name = "build_bazel_rules_nodejs",
-    sha256 = "0fa2d443571c9e02fcb7363a74ae591bdcce2dd76af8677a95965edf329d778a",
-    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/3.6.0/rules_nodejs-3.6.0.tar.gz"],
-)
-
-load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories")
-
-# NOTE: this rule installs nodejs, npm, and yarn, but does NOT install
-# your npm dependencies into your node_modules folder.
-# You must still run the package manager to do this.
-node_repositories(package_json = ["//third_party/arcs/tools/manifest2proto:package.json"])
-
 # Note: Required for abseil.
 http_archive(
     name = "rules_cc",

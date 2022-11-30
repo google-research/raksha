@@ -23,6 +23,8 @@
 
 namespace raksha::ir::types {
 
+using type::proto::SchemaProto;
+
 class ToStringTest
     : public testing::TestWithParam<std::tuple<std::string, std::string>> {
  protected:
@@ -34,7 +36,7 @@ class ToStringTest
 // and the expected output of the ToString()
 TEST_P(ToStringTest, ToStringTest) {
   const auto &[schema_as_textproto, expected_to_string_output] = GetParam();
-  arcs::SchemaProto orig_schema_proto;
+  SchemaProto orig_schema_proto;
   ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(schema_as_textproto,
                                                             &orig_schema_proto))
       << "Failed to convert text to schema proto.";

@@ -94,13 +94,8 @@ check_build_files_for_licenses_rule
 check_copyright
 
 # Verifies that the following targets build fine:
-#  - Arcs parser and proto works.
-#  - Arcs manifest tests that we do not yet handle parse correctly.
 #  - Arcs manifest examples.
 bazel_run build \
-  //third_party/arcs/examples:consume \
-  //third_party/arcs/proto:manifest_cc_proto \
-  //src/analysis/souffle/tests/arcs_manifest_tests_todo/... \
   //src/analysis/souffle/examples/...
 
 # Run all the bazel tests.

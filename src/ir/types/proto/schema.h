@@ -16,18 +16,21 @@
 #ifndef SRC_IR_TYPES_PROTO_SCHEMA_H_
 #define SRC_IR_TYPES_PROTO_SCHEMA_H_
 
+#include "src/ir/proto/raksha_type.pb.h"
 #include "src/ir/types/schema.h"
 #include "src/ir/types/type_factory.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types::proto {
 
+using type::proto::SchemaProto;
+using type::proto::TypeProto;
+
 // Decodes the given `schema_proto` and returns the resulting Schema.
 const Schema& decode(TypeFactory& type_factory,
-                     const arcs::SchemaProto& schema_proto);
+                     const SchemaProto& schema_proto);
 
-// Encodes the given `schema` as an arcs::SchemaProto.
-arcs::SchemaProto encode(const Schema& schema);
+// Encodes the given `schema` as an proto::SchemaProto.
+SchemaProto encode(const Schema& schema);
 
 }  // namespace raksha::ir::types::proto
 

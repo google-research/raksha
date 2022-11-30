@@ -16,21 +16,24 @@
 #ifndef SRC_IR_TYPES_PROTO_PRIMITIVE_TYPE_H_
 #define SRC_IR_TYPES_PROTO_PRIMITIVE_TYPE_H_
 
+#include "src/ir/proto/raksha_type.pb.h"
 #include "src/ir/types/primitive_type.h"
 #include "src/ir/types/type_factory.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types::proto {
 
+using type::proto::PrimitiveTypeProto;
+using type::proto::TypeProto;
+
 // Decodes the given `primitive_type_proto` as a PrimitiveType.
 Type decode(TypeFactory& type_factory,
-            const arcs::PrimitiveTypeProto& primitive_type_proto);
+            const PrimitiveTypeProto& primitive_type_proto);
 
 // Encodes the given `primitive_type` as an PrimitiveTypeProto.
-arcs::PrimitiveTypeProto encode(const PrimitiveType& primitive_type);
+PrimitiveTypeProto encode(const PrimitiveType& primitive_type);
 
 // Returns a TypeProto with the given `primitive_type`.
-arcs::TypeProto encodeAsTypeProto(const PrimitiveType& primitive_type);
+TypeProto encodeAsTypeProto(const PrimitiveType& primitive_type);
 
 }  // namespace raksha::ir::types::proto
 
