@@ -292,31 +292,3 @@ http_archive(
     strip_prefix = "fuzztest-" + fuzztest_commit_hash,
     urls = ["https://github.com/google/fuzztest/archive/" + fuzztest_commit_hash + ".zip"],
 )
-
-#zetasql
-zetasql_commit_hash = "177d495a064e38684c462cf883e22428273bd996"
-
-http_archive(
-    name = "com_google_zetasql",
-    sha256 = "5dc8f45b5d2b6d7ed39546d1c43c1a7cc341e6c1ae36aa93d8663f9c3a475aee",
-    strip_prefix = "zetasql-" + zetasql_commit_hash,
-    urls = [
-        "https://github.com/google/zetasql/archive/" + zetasql_commit_hash + ".zip",
-    ],
-)
-
-load("@com_google_zetasql//bazel:zetasql_deps_step_1.bzl", "zetasql_deps_step_1")
-
-zetasql_deps_step_1()
-
-load("@com_google_zetasql//bazel:zetasql_deps_step_2.bzl", "zetasql_deps_step_2")
-
-zetasql_deps_step_2()
-
-load("@com_google_zetasql//bazel:zetasql_deps_step_3.bzl", "zetasql_deps_step_3")
-
-zetasql_deps_step_3()
-
-load("@com_google_zetasql//bazel:zetasql_deps_step_4.bzl", "zetasql_deps_step_4")
-
-zetasql_deps_step_4()
