@@ -19,10 +19,12 @@
 #include <cstdint>
 #include <vector>
 
+#include "absl/strings/string_view.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/data_decl.h"
 #include "src/ir/ir_visitor.h"
 #include "src/ir/operator.h"
+#include "src/ir/storage.h"
 #include "src/ir/types/type.h"
 #include "src/ir/value.h"
 
@@ -150,6 +152,8 @@ class Block {
 class Module {
  public:
   using BlockListType = std::vector<std::unique_ptr<Block>>;
+  using NamedStorageMap =
+      absl::flat_hash_map<std::string, std::unique_ptr<Storage>>;
   Module() {}
 
   Module(const Module&) = delete;
@@ -169,7 +173,38 @@ class Module {
     return *blocks_.back();
   }
 
+  // Creates a `Storage` in the `Module` with the given name and type. We expect
+  // `Storage`s to be declared in a `Module` before they are actually used, so
+  // we expect that the `Storage`'s `input_value`s will be filled in later,
+  // which is why we return a mutable reference.
+  const Storage& CreateStorage(absl::string_view name, ir::types::Type type) {
+    auto insert_result = named_storage_map_.insert(
+        {std::string(name), std::make_unique<Storage>(name, type)});
+    CHECK(insert_result.second)
+        << "Multiple stores with name " << insert_result.first->first;
+    return *insert_result.first->second;
+  }
+
+  // Get the `Storage` associated with `name` in this `Module`.
+  //
+  // This method fails if the name is not present in this module.
+  const Storage& GetStorage(absl::string_view name) const {
+    auto find_result = named_storage_map_.find(name);
+    CHECK(find_result != named_storage_map_.end())
+        << "Could not find Storage with name " << name;
+    return *find_result->second;
+  }
+
+  void AddInputValueToStorage(absl::string_view storage_name, Value value) {
+    auto find_result = named_storage_map_.find(storage_name);
+    CHECK(find_result != named_storage_map_.end());
+    find_result->second->AddInputValue(value);
+  }
+
   const BlockListType& blocks() const { return blocks_; }
+  const NamedStorageMap& named_storage_map() const {
+    return named_storage_map_;
+  }
 
   template <typename Derived, typename Result>
   Result Accept(IRVisitor<Derived, Result, false>& visitor) {
@@ -183,6 +218,7 @@ class Module {
 
  private:
   BlockListType blocks_;
+  NamedStorageMap named_storage_map_;
 };
 
 }  // namespace raksha::ir

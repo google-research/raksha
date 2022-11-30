@@ -309,8 +309,6 @@ cc_library(
         "//src/common/logging",
         "//src/common/utils:fold",
         "//src/common/utils:types",
-        "//src/frontends/sql:decoder_context",
-        "//src/ir:ir_printer",
         "//src/ir:ir_traversing_visitor",
         "//src/ir:module",
         "//src/ir:operator",
@@ -322,7 +320,6 @@ cc_library(
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "//src/ir/datalog:raksha_relation_interface",
-        "@com_google_absl//absl/strings",
     ],
 )
 

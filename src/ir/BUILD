@@ -44,7 +44,6 @@ cc_test(
     deps = [
         ":block_builder",
         ":ir_context",
-        ":ir_printer",
         ":ssa_names",
         ":value_string_converter",
         "//src/common/testing:gtest",
@@ -103,7 +102,6 @@ cc_library(
         ":ssa_names",
         ":value",
         ":value_string_converter",
-        "//src/common/utils:overloaded",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],
@@ -191,10 +189,12 @@ cc_library(
     deps = [
         ":data_decl",
         ":operator",
+        ":storage",
         ":value",
         "//src/common/utils:types",
         "//src/ir/attributes:attribute",
         "//src/ir/types",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -203,7 +203,12 @@ cc_test(
     srcs = ["module_test.cc"],
     deps = [
         ":module",
+        ":storage",
+        ":value",
         "//src/common/testing:gtest",
+        "//src/common/utils:map_iter",
+        "//src/ir/types",
+        "@fuzztest//fuzztest",
     ],
 )
 
