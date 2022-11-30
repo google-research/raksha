@@ -1,7 +1,0 @@
-# this is an endorsement file for the Oak Functions Loader
-[[endorsement]]
-binary_hash = "cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1"
-provenance_file = "https://github.com/project-oak/oak/blob/provenances/cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1.toml"
-provenance_file_hash = "58c705880605d2f0eda58f9403811277ea2a31128223532ad93e778cb330af0f"
-release_timestamp = "2021-10-21T19:14:57"
-expiry_timestamp = "2021-11-21T19:14:57"

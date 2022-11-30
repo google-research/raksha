@@ -106,4 +106,3 @@ bazel_run build \
 # Run all the bazel tests.
 bazel_run test \
   //src/... \
-  //rust/tools/authorization-logic/...
