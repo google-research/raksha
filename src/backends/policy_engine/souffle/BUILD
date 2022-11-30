@@ -88,7 +88,6 @@ cc_binary(
         "//src/backends/policy_engine:catchall_policy_rule_policy",
         "//src/backends/policy_engine:dp_parameter_policy",
         "//src/backends/policy_engine:policy",
-        "//src/common/logging",
         "//src/ir:proto_to_ir",
         "//src/parser/ir:ir_parser",
         "@com_google_absl//absl/flags:flag",
@@ -471,8 +470,6 @@ cc_test(
         "//src/ir:module",
         "//src/ir:value",
         "//src/ir/attributes:attribute",
-        "//src/ir/attributes:int_attribute",
-        "//src/ir/attributes:string_attribute",
         "//src/parser/ir:ir_parser",
     ],
 )

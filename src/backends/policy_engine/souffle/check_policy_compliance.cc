@@ -26,11 +26,10 @@
 #include "absl/flags/usage.h"
 #include "absl/status/statusor.h"
 #include "src/backends/policy_engine/auth_logic_policy.h"
+#include "src/backends/policy_engine/catchall_policy_rule_policy.h"
 #include "src/backends/policy_engine/dp_parameter_policy.h"
 #include "src/backends/policy_engine/policy.h"
 #include "src/backends/policy_engine/souffle/souffle_policy_checker.h"
-#include "src/backends/policy_engine/catchall_policy_rule_policy.h"
-#include "src/common/logging/logging.h"
 #include "src/ir/proto_to_ir.h"
 #include "src/parser/ir/ir_parser.h"
 
@@ -51,6 +50,8 @@ constexpr char kUsageMessage[] =
 
 namespace {
 
+using raksha::parser::ir::ParseProgram;
+
 absl::StatusOr<std::string> ReadFileContents(std::filesystem::path file_path) {
   if (!std::filesystem::exists(file_path)) {
     return absl::NotFoundError(
@@ -69,7 +70,7 @@ absl::StatusOr<std::string> ReadFileContents(std::filesystem::path file_path) {
   return string_stream.str();
 }
 
-enum class ReturnCode : uint8_t { PASS = 0, FAIL = 1 , ERROR = 2};
+enum class ReturnCode : uint8_t { PASS = 0, FAIL = 1, ERROR = 2 };
 
 int UnwrapExitCode(ReturnCode code) { return static_cast<int>(code); }
 
@@ -81,10 +82,9 @@ struct IrGraphComponents {
 
 absl::StatusOr<IrGraphComponents> GetIrGraphComponentsFromIrPath(
     absl::string_view ir_path) {
-  raksha::ir::IrProgramParser ir_parser;
   absl::StatusOr<std::string> ir_string = ReadFileContents(ir_path);
   if (ir_string.ok()) {
-    auto [context, module, ssa_names] = ir_parser.ParseProgram(*ir_string);
+    auto [context, module, ssa_names] = ParseProgram(*ir_string);
     return IrGraphComponents{.ir_module = std::move(module),
                              .ir_ssa_names = std::move(ssa_names),
                              .ir_context = std::move(context)};
@@ -118,10 +118,9 @@ absl::StatusOr<IrGraphComponents> GetIrGraphComponentsFromProtoPath(
 }  // namespace
 
 using raksha::backends::policy_engine::AuthLogicPolicy;
+using raksha::backends::policy_engine::CatchallPolicyRulePolicy;
 using raksha::backends::policy_engine::DpParameterPolicy;
 using raksha::backends::policy_engine::SoufflePolicyChecker;
-using raksha::backends::policy_engine::CatchallPolicyRulePolicy;
-using raksha::ir::IrProgramParser;
 
 int main(int argc, char* argv[]) {
   absl::SetProgramUsageMessage(kUsageMessage);

@@ -20,6 +20,8 @@ namespace raksha::analysis::common {
 namespace {
 
 using NodeId = size_t;
+using raksha::parser::ir::IrProgramParserResult;
+using raksha::parser::ir::ParseProgram;
 
 struct ModuleGraphTestCase {
   using Edge = std::tuple<NodeId, NodeId, NodeId>;
@@ -103,7 +105,7 @@ class ModuleGraphTest : public ::testing::TestWithParam<ModuleGraphTestCase> {
     }
   };
 
-  ir::IrProgramParser::Result parse_result_;
+  IrProgramParserResult parse_result_;
   ModuleGraph graph_;
   absl::flat_hash_map<ModuleGraph::Node, NodeId> node_to_id_;
   absl::flat_hash_map<NodeId, ModuleGraph::Node> id_to_node_;
@@ -279,7 +281,7 @@ std::string GetPrettyPrintedNode(const ModuleGraph::Node& node,
 }
 
 // Builds an IR with the given nodes, parses it and returns the result.
-ir::IrProgramParser::Result BuildIRAndParse(
+IrProgramParserResult BuildIRAndParse(
     const absl::flat_hash_map<std::string, NodeId>& nodes) {
   // Concatenate all operations in the given nodes map and build the IR.
   auto ir = absl::Substitute(
@@ -298,7 +300,7 @@ module m0 {
                           out, RE2::FullMatch(value, "%[0-9]+") ? "" : value);
                     }));
   // Parse the generated IR.
-  return ir::IrProgramParser().ParseProgram(ir);
+  return ParseProgram(ir);
 }
 
 // Given a map from string representation of a node to an id, builds and

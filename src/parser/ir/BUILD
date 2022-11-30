@@ -33,6 +33,8 @@ exports_files(
 antlr4_cc_combined(
     name = "ir_parser_generator",
     src = "Ir.g4",
+    listener = False,
+    visitor = True,
 )
 
 cc_library(
@@ -43,9 +45,10 @@ cc_library(
     features = ["-use_header_modules"],
     deps = [
         ":ir_parser_generator",
-        "//src/common/containers:hash_map",
-        "//src/common/logging",
+        "//src/common/utils:fold",
         "//src/common/utils:map_iter",
+        "//src/common/utils:overloaded",
+        "//src/common/utils:types",
         "//src/ir:block_builder",
         "//src/ir:ir_context",
         "//src/ir:module",
@@ -56,7 +59,7 @@ cc_library(
         "//src/ir/attributes:float_attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
-        "//src/ir/types",
+        "@com_google_absl//absl/log:check",
     ],
 )
 
@@ -80,7 +83,6 @@ cc_binary(
     deps = [
         ":ir_parser",
         "//src/backends/policy_engine/souffle:datalog_lowering_visitor",
-        "//src/common/logging",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@com_google_absl//absl/flags:usage",

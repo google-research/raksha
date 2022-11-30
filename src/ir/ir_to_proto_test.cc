@@ -27,17 +27,19 @@
 #include "src/parser/ir/ir_parser.h"
 
 namespace raksha::ir {
+namespace {
+
+using raksha::parser::ir::ParseProgram;
 
 class IrToProtoTest : public testing::TestWithParam<std::string_view> {};
 
 TEST_P(IrToProtoTest, RoundTripPreservesAllInformation) {
   const auto input_program_text = GetParam();
-  IrProgramParser ir_parser;
   // TODO(#615): IRPrinter cannot take a const SsaNames.
-  /*const*/ auto parse_result = ir_parser.ParseProgram(input_program_text);
+  auto parse_result = ParseProgram(input_program_text);
   const Module& program = *parse_result.module;
   const IRContext& context1 = *parse_result.context;
-  /*const*/ auto& ssa_names = *parse_result.ssa_names;
+  auto& ssa_names = *parse_result.ssa_names;
 
   // Check round trip toString (sanity check to ensure later checks are sound).
   EXPECT_EQ(IRPrinter::ToString(program, ssa_names), input_program_text);
@@ -46,8 +48,10 @@ TEST_P(IrToProtoTest, RoundTripPreservesAllInformation) {
       IRToProto::Convert(context1, program);
 
   IRContext context2;
-  ProtoToIR::Result recovered = ProtoToIR::Convert(context2, orig_translation_unit_proto);
-  const std::string result = IRPrinter::ToString(*recovered.module, *recovered.ssa_names);
+  ProtoToIR::Result recovered =
+      ProtoToIR::Convert(context2, orig_translation_unit_proto);
+  const std::string result =
+      IRPrinter::ToString(*recovered.module, *recovered.ssa_names);
   EXPECT_EQ(result, input_program_text);
 
   proto::IrTranslationUnit recovered_translation_unit_proto =
@@ -62,10 +66,9 @@ TEST_P(IrToProtoTest, RoundTripPreservesAllInformation) {
       << difference;
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    IrToProtoTest, IrToProtoTest,
-    ::testing::Values(
-        R"(module m0 {
+INSTANTIATE_TEST_SUITE_P(IrToProtoTest, IrToProtoTest,
+                         ::testing::Values(
+                             R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -74,7 +77,7 @@ INSTANTIATE_TEST_SUITE_P(
   }  // block b1
 }  // module m0
 )",
-        R"(module m0 {
+                             R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -85,4 +88,5 @@ INSTANTIATE_TEST_SUITE_P(
 )"));
 // TODO(#596): Add tests for IR with block arguments and returns.
 // TODO(#605): Add tests for IR with out of order declarations.
+}  // namespace
 }  // namespace raksha::ir

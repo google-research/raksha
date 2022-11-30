@@ -19,14 +19,16 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/ir_printer.h"
 
-namespace raksha::ir {
+namespace raksha::parser::ir {
 
-class IrParserRoundtripTest : public testing::TestWithParam<absl::string_view> {};
+using ::raksha::ir::IRPrinter;
+
+class IrParserRoundtripTest : public testing::TestWithParam<absl::string_view> {
+};
 
 TEST_P(IrParserRoundtripTest, SimpleTestOperation) {
   auto input_program_text = GetParam();
-  IrProgramParser ir_parser;
-  auto result = ir_parser.ParseProgram(input_program_text);
+  auto result = ParseProgram(input_program_text);
   EXPECT_EQ(IRPrinter::ToString(*result.module, *result.ssa_names),
             input_program_text);
 }
@@ -78,7 +80,7 @@ INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
     %4 = core.floating_value [value: 8]()
     %5 = core.floating_value [value: 1]()
     %6 = core.mult_floating [access: "private", transform: "no"](%4, %5)
-    %4 = core.floating_value [value: 8]()
+    %7 = core.floating_value [value: 8]()
   }  // block b1
 }  // module m0
 )",
@@ -116,6 +118,12 @@ INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
     %2 = core.plus [access: "private", transform: "no"](%0, <<ANY>>)
   }  // block b1
 }  // module m0
+)",
+                             R"(module m0 {
+  block b0 {
+    %0 = core.some_op [attr1: "!@#$%^*()_-+", attr2: "✓ಠ_ಠ|{[}]\(╯°□°)╯︵ ┻━┻"]()
+  }  // block b0
+}  // module m0
 )"));
 
 struct ParserInputAndExpectedOutput {
@@ -123,12 +131,12 @@ struct ParserInputAndExpectedOutput {
   absl::string_view output;
 };
 
-class IrParserNormalizingTest : public testing::TestWithParam<ParserInputAndExpectedOutput> {};
+class IrParserNormalizingTest
+    : public testing::TestWithParam<ParserInputAndExpectedOutput> {};
 
 TEST_P(IrParserNormalizingTest, FloatsAreNormalizedInTestOperations) {
   auto program_text = GetParam();
-  IrProgramParser ir_parser;
-  auto result = ir_parser.ParseProgram(program_text.input);
+  auto result = ParseProgram(program_text.input);
   EXPECT_EQ(IRPrinter::ToString(*result.module, *result.ssa_names),
             program_text.output);
 }
@@ -156,7 +164,7 @@ static const ParserInputAndExpectedOutput kNormalizedIR[] = {
   }  // block b0
   block b1 {
     %2 = core.plus [access: "private", transform: "no"](%3, <<ANY>>)
-    %3 = core.mult [lhs: 10e0, rhs: "59"](<<ANY>>, %2)
+    %3 = core.mult [lhs: 10e0, rhs: 59](<<ANY>>, %2)
     %4 = core.mult_floating [lhs: 3e-2l, rhs: -0.5, other: 1E+100, no_sign_exponent: 0.1e10]()
   }  // block b1
 }  // module m0
@@ -168,7 +176,7 @@ static const ParserInputAndExpectedOutput kNormalizedIR[] = {
   }  // block b0
   block b1 {
     %2 = core.plus [access: "private", transform: "no"](%3, <<ANY>>)
-    %3 = core.mult [lhs: 10l, rhs: "59"](<<ANY>>, %2)
+    %3 = core.mult [lhs: 10l, rhs: 59](<<ANY>>, %2)
     %4 = core.mult_floating [lhs: 0.03l, no_sign_exponent: 1e+09l, other: 1e+100l, rhs: -0.5l]()
   }  // block b1
 }  // module m0
@@ -176,7 +184,7 @@ static const ParserInputAndExpectedOutput kNormalizedIR[] = {
     }};
 
 INSTANTIATE_TEST_SUITE_P(IrParserNormalizingTest, IrParserNormalizingTest,
-    ::testing::ValuesIn(kNormalizedIR));
+                         ::testing::ValuesIn(kNormalizedIR));
 
 TEST(IrParseTest, ValueNotFoundCausesFailure) {
   auto input_program_text = R"(module m0 {
@@ -188,8 +196,7 @@ TEST(IrParseTest, ValueNotFoundCausesFailure) {
   }  // block b1
 }  // module m0
 )";
-  IrProgramParser ir_parser;
-  EXPECT_DEATH(ir_parser.ParseProgram(input_program_text), "Value not found");
+  EXPECT_DEATH(ParseProgram(input_program_text), "Value not found");
 }
 
 TEST(IrParseTest, ValueAccessedBetweenBlockCausesFailure) {
@@ -202,8 +209,7 @@ TEST(IrParseTest, ValueAccessedBetweenBlockCausesFailure) {
   }  // block b1
 }  // module m0
 )";
-  IrProgramParser ir_parser;
-  EXPECT_DEATH(ir_parser.ParseProgram(input_program_text), "Value not found");
+  EXPECT_DEATH(ParseProgram(input_program_text), "Value not found");
 }
 
 TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {
@@ -217,10 +223,8 @@ TEST(IrParseTest, NoStringAttributeQuoteCausesFailure) {
 }  // module m0
 )";
 
-  IrProgramParser ir_parser;
-  EXPECT_DEATH(ir_parser.ParseProgram(input_program_text),
-
-               "no viable alternative at input");
+  EXPECT_DEATH(ParseProgram(input_program_text),
+               ".*mismatched input 'private' expecting.*");
 }
 
 TEST(IrParseTest, OperatorWithDifferentNumberOfReturnFailure) {
@@ -234,9 +238,8 @@ TEST(IrParseTest, OperatorWithDifferentNumberOfReturnFailure) {
 }  // module m0
 )";
 
-  IrProgramParser ir_parser;
   EXPECT_DEATH(
-      ir_parser.ParseProgram(input_program_text),
+      ParseProgram(input_program_text),
       "Operator has different number of return values in different instances ");
 }
 
@@ -249,8 +252,7 @@ TEST(IrParserOperationTest, SimpleTestOperationAPIs) {
   }  // block b1
 }  // module m0
 )";
-  IrProgramParser ir_parser;
-  auto result = ir_parser.ParseProgram(input_program_text);
+  auto result = ParseProgram(input_program_text);
   EXPECT_EQ(IRPrinter::ToString(*result.module, *result.ssa_names),
             input_program_text);
   auto& op = result.module->blocks()[0]->operations()[0];
@@ -272,8 +274,7 @@ TEST(IrParserOperationDeathTest, DiesIfRequestingOutOfBoundOutputs) {
   }  // block b1
 }  // module m0
 )";
-  IrProgramParser ir_parser;
-  auto result = ir_parser.ParseProgram(input_program_text);
+  auto result = ParseProgram(input_program_text);
   EXPECT_EQ(IRPrinter::ToString(*result.module, *result.ssa_names),
             input_program_text);
   auto& op = result.module->blocks()[0]->operations()[0];
@@ -290,12 +291,16 @@ TEST(IrParserOperationDeathTest, DiesIfRequestingOutOfBoundInputs) {
   }  // block b1
 }  // module m0
 )";
-  IrProgramParser ir_parser;
-  auto result = ir_parser.ParseProgram(input_program_text);
+  auto result = ParseProgram(input_program_text);
   EXPECT_EQ(IRPrinter::ToString(*result.module, *result.ssa_names),
             input_program_text);
   auto& op = result.module->blocks()[0]->operations()[0];
   EXPECT_DEATH(result.ssa_names->GetOrCreateID(op->GetInputValue(2)),
                "Operation:GetInputValue fails because index is out of bounds");
 }
-}  // namespace raksha::ir
+
+TEST(IrParserSyntaxErrorDeathTest, IrParserSyntaxErrorDeathTest) {
+  EXPECT_DEATH(ParseProgram("This is not a valid IR program."),
+               ".*Encountered syntax errors in IR parser, stopping!.*");
+}
+}  // namespace raksha::parser::ir

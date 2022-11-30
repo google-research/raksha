@@ -28,6 +28,8 @@
 namespace raksha::ir {
 namespace {
 
+using raksha::parser::ir::IrProgramParserResult;
+using raksha::parser::ir::ParseProgram;
 using testing::TestWithParam;
 using testing::ValuesIn;
 
@@ -155,8 +157,7 @@ std::string EliminateWhitespaceAndComments(std::string s) {
 
 TEST_P(IRParserPrinterRoundTripTest, IrPrinterRoundTripTest) {
   std::string original_program(GetParam());
-  IrProgramParser parser;
-  IrProgramParser::Result result = parser.ParseProgram(original_program);
+  IrProgramParserResult result = ParseProgram(original_program);
   std::string reprinted = IRPrinter::ToString(*result.module);
   EXPECT_EQ(EliminateWhitespaceAndComments(original_program),
             EliminateWhitespaceAndComments(reprinted));

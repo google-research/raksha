@@ -26,7 +26,6 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "src/backends/policy_engine/souffle/datalog_lowering_visitor.h"
-#include "src/common/logging/logging.h"
 #include "src/parser/ir/ir_parser.h"
 
 ABSL_FLAG(std::string, ir_file, "", "The file containing the IR program.");
@@ -37,7 +36,6 @@ namespace raksha::parser::ir {
 namespace {
 
 using ::raksha::backends::policy_engine::souffle::DatalogLoweringVisitor;
-using ::raksha::ir::IrProgramParser;
 
 constexpr char kUsageMessage[] =
     "This tool takes a Raksha IR file and generates an `isOperation.facts` "
@@ -62,9 +60,8 @@ int MainInner(int argc, char** argv) {
 
   std::ostringstream string_stream;
   string_stream << ir_stream.rdbuf();
-  IrProgramParser parser;
 
-  IrProgramParser::Result result = parser.ParseProgram(string_stream.str());
+  IrProgramParserResult result = ParseProgram(string_stream.str());
   DatalogLoweringVisitor datalog_lowering_visitor(std::move(*result.ssa_names));
   result.module->Accept(datalog_lowering_visitor);
 
