@@ -43,51 +43,6 @@ build --host_cxxopt='-Wno-unknown-warning-option'
 # should re-enable this warning.
 build --cxxopt='-Wno-macro-redefined'
 build --host_cxxopt='-Wno-macro-redefined'
-# This is needed to build ZetaSQL for now. Fixes for these warnings are coming,
-# however.
-build --cxxopt='-Wno-final-dtor-non-final-class'
-build --host_cxxopt='-Wno-final-dtor-non-final-class'
-build --cxxopt='-Wno-unused-const-variable'
-build --host_cxxopt='-Wno-unused-const-variable'
-build --cxxopt='-Wno-unused-variable'
-build --host_cxxopt='-Wno-unused-variable'
-build --cxxopt='-Wno-unused-function'
-build --host_cxxopt='-Wno-unused-function'
-# We need to turn off these warnings to build ZetaSQL too.
-build --cxxopt='-Wno-inconsistent-missing-override'
-build --host_cxxopt='-Wno-inconsistent-missing-override'
-build --cxxopt='-Wno-defaulted-function-deleted'
-build --host_cxxopt='-Wno-defaulted-function-deleted'
-build --cxxopt='-Wno-enum-compare-switch'
-build --host_cxxopt='-Wno-enum-compare-switch'
-build --cxxopt='-Wno-char-subscripts'
-build --host_cxxopt='-Wno-char-subscripts'
-build --cxxopt='-Wno-deprecated-declarations'
-build --host_cxxopt='-Wno-deprecated-declarations'
-# This warning has a false positive on ZetaSQL.
-build --cxxopt='-Wno-thread-safety-precise'
-build --host_cxxopt='-Wno-thread-safety-precise'
-
-# These warnings must be disabled to run ZetaSQL on either linux or Mac off of google3.
-build --cxxopt='-Wno-address'
-build --host_cxxopt='-Wno-address'
-build --cxxopt='-Wno-deprecated-copy'
-build --host_cxxopt='-Wno-deprecated-copy'
-build --cxxopt='-Wno-array-compare'
-build --host_cxxopt='-Wno-array-compare'
-build --cxxopt='-Wno-cpp'
-build --host_cxxopt='-Wno-cpp'
-build --cxxopt='-Wno-format-overflow'
-build --host_cxxopt='-Wno-format-overflow'
-build --cxxopt='-Wno-return-type'
-build --host_cxxopt='-Wno-return-type'
-build --cxxopt='-Wno-class-memaccess'
-build --host_cxxopt='-Wno-class-memaccess'
-
-# Need this for ZetaSQL's icu dependency as long as it remains at version 65.
-# Should remove when it gets upgraded.
-build --cxxopt='-Wno-implicit-int-float-conversion'
-build --host_cxxopt='-Wno-implicit-int-float-conversion'
 
 # Similarly, we should not set this flag that we're using as a debugging
 # assistant when compiling third party libraries.
