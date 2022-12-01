@@ -123,6 +123,7 @@ cc_binary(
 
 [sh_test(
     name = "check_policy_compliance_%s_test" % ir_name,
+    size = "enormous",
     srcs = ["check_policy_compliance_test.sh"],
     args = [
         "$(location :check_policy_compliance)",
@@ -139,6 +140,7 @@ cc_binary(
     ],
 ) for ir_name, test_result in [
     ("simple_passing_arcsjs", "pass"),
+    ("large_sample_passing_arcsjs", "pass"),
     ("simple_failing_arcsjs", "fail"),
     ("user_action_passing_arcsjs", "pass"),
     ("user_action_failing_arcsjs_modified_after_consent", "fail"),
