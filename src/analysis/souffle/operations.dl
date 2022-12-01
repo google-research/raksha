@@ -64,9 +64,7 @@ isOperation([actor, operator, resultList, operandList, attributeList]).
 operationHasResultList(operation, results), operationHasActor(operation, actor),
 operationHasOperator(operation, operator), operationHasOperandList(operation, operands),
 operationHasAttributeList(operation, attributes) :-
-  isPrincipal(actor), isOperator(operator), isResultList(results), isOperandList(operands),
-  isAttributeList(attributes), isOperation(operation),
-  operation = [actor, operator, results, operands, attributes].
+  isOperation(operation), operation = [actor, operator, results, operands, attributes].
 
 // BINARY_OPERATION is a convenience macro for the very-common-case of binary operations.
 #define BINARY_OPERATION(actor, operator, result, attrs, input1, input2) \
