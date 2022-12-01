@@ -97,12 +97,8 @@ isIntegrityTag(tag) :- sqlPolicyRuleNameHasResult(_, $AddIntegrityTag(tag)).
 
 .decl isTagTransformOperation(tagTransform: Operation)
 
-isTagTransformOperation(operation) :- isOperation(operation),
-                                      operationHasActor(operation, DEFAULT_SQL_ACTOR),
-                                      operationHasOperator(operation, TAG_TRANSFORM_OPERATOR),
-                                      operationHasResultList(operation, resultList),
-                                      operationHasOperandList(operation, operandList),
-                                      operationHasAttributeList(operation, attributes).
+isTagTransformOperation(operation) :- operationHasActor(operation, DEFAULT_SQL_ACTOR),
+                                      operationHasOperator(operation, TAG_TRANSFORM_OPERATOR).
 
 // A TagTransform operator propagates confidentiality tags and integrity tags
 // only from its direct input (its 0th input) to its output. It faithfully
@@ -190,7 +186,7 @@ isSpecialITagPropagationRule(RAKSHA_INTERNAL_INTERSECT_ITAG_RULE_NAME).
 isSpecialITagPropagationRule(RAKSHA_INTERNAL_UNION_ITAG_RULE_NAME).
 
 .decl isMergeOp(mergeOp: Operation)
-isMergeOp(mergeOp) :- isOperation(mergeOp), operationHasOperator(mergeOp, MERGE_OPERATOR).
+isMergeOp(mergeOp) :- operationHasOperator(mergeOp, MERGE_OPERATOR).
 
 .decl isModifiedPropagationMergeOp(mergeOp: Operation, ruleName: symbol)
 isModifiedPropagationMergeOp(mergeOp, ruleName) :-
@@ -209,7 +205,7 @@ mergeOperationHasControlInputStartIndex(mergeOp, controlStartIdx) :-
 
 .decl isMergeOperationDirectInput(mergeOp: Operation, ap: AccessPath)
 isMergeOperationDirectInput(mergeOp, inputPath) :-
-  isMergeOp(mergeOp), isAccessPath(inputPath), operationHasOperandAtIndex(mergeOp, inputPath, idx),
+  isMergeOp(mergeOp), operationHasOperandAtIndex(mergeOp, inputPath, idx),
   mergeOperationHasControlInputStartIndex(mergeOp, controlStartIdx),
   idx < controlStartIdx.
 
@@ -229,7 +225,7 @@ mustHaveIntegrityTag(result, DEFAULT_SQL_ACTOR, iTag) :-
 
 // Base case, the 0th operand.
 mergeOperationHasIntegrityTagOnDirectOperandsUpToIndex(mergeOp, integrityTag, 0) :-
-  isMergeOp(mergeOp), isIntegrityTag(integrityTag),
+  isMergeOp(mergeOp),
   operationHasOperandAtIndex(mergeOp, operand, 0),
   isMergeOperationDirectInput(mergeOp, operand),
   operationHasActor(mergeOp, actor),
@@ -237,7 +233,7 @@ mergeOperationHasIntegrityTagOnDirectOperandsUpToIndex(mergeOp, integrityTag, 0)
 
 // Inductive case.
 mergeOperationHasIntegrityTagOnDirectOperandsUpToIndex(mergeOp, integrityTag, idx + 1) :-
-  isMergeOp(mergeOp), isIntegrityTag(integrityTag),
+  isMergeOp(mergeOp),
   mergeOperationHasIntegrityTagOnDirectOperandsUpToIndex(mergeOp, integrityTag, idx),
   operationHasOperandAtIndex(mergeOp, operand, idx + 1),
   isMergeOperationDirectInput(mergeOp, operand),
@@ -248,7 +244,7 @@ mergeOperationHasIntegrityTagOnDirectOperandsUpToIndex(mergeOp, integrityTag, id
 // just under the control start index.
 mustHaveIntegrityTag(result, actor, integTag) :-
   isModifiedPropagationMergeOp(mergeOp, RAKSHA_INTERNAL_INTERSECT_ITAG_RULE_NAME),
-  isPrincipal(actor), isIntegrityTag(integTag), operationHasResult(mergeOp, result),
+  isPrincipal(actor), operationHasResult(mergeOp, result),
   mergeOperationHasIntegrityTagOnDirectOperandsUpToIndex(mergeOp, integTag, idx),
   mergeOperationHasControlInputStartIndex(mergeOp, idx + 1).
 
