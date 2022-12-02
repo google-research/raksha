@@ -36,8 +36,8 @@ cc_library(
     ],
     deps = [
         "//src/common/logging",
+        "//src/ir/proto:type_cc_proto",
         "//src/ir/types",
-        "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
 
@@ -49,8 +49,8 @@ cc_test(
         "//src/common/proto:proto_message_differencer",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
+        "//src/ir/proto:type_cc_proto",
         "//src/ir/types",
-        "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )
 
@@ -60,7 +60,7 @@ cc_test(
     deps = [
         ":proto",
         "//src/common/testing:gtest",
+        "//src/ir/proto:type_cc_proto",
         "//src/ir/types",
-        "//third_party/arcs/proto:manifest_cc_proto",
     ],
 )

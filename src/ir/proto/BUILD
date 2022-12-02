@@ -31,7 +31,21 @@ proto_library(
     srcs = ["raksha_ir.proto"],
 )
 
+proto_library(
+    name = "type_proto",
+    srcs = ["raksha_type.proto"],
+)
+
 raksha_cc_proto_library(
     name = "ir_cc_proto",
-    protos = [":ir_proto"],
+    protos = [
+        ":ir_proto",
+    ],
+)
+
+raksha_cc_proto_library(
+    name = "type_cc_proto",
+    protos = [
+        ":type_proto",
+    ],
 )

@@ -16,18 +16,19 @@
 #ifndef SRC_IR_TYPES_PROTO_TYPE_H_
 #define SRC_IR_TYPES_PROTO_TYPE_H_
 
+#include "src/ir/proto/raksha_type.pb.h"
 #include "src/ir/types/type.h"
 #include "src/ir/types/type_factory.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types::proto {
 
-// Decodes the given `type_proto` and returns Type.
-ir::types::Type Decode(TypeFactory& type_factory,
-                       const arcs::TypeProto& type_proto);
+using type::proto::TypeProto;
 
-// Encodes the given `type` in an arcs::TypeProto.
-arcs::TypeProto Encode(const Type& type);
+// Decodes the given `type_proto` and returns Type.
+ir::types::Type Decode(TypeFactory& type_factory, const TypeProto& type_proto);
+
+// Encodes the given `type` in an proto::TypeProto.
+TypeProto Encode(const Type& type);
 
 }  // namespace raksha::ir::types::proto
 

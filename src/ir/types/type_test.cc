@@ -19,8 +19,8 @@
 #include <memory>
 #include <optional>
 
-#include "google/protobuf/text_format.h"
 #include "absl/strings/str_split.h"
+#include "google/protobuf/text_format.h"
 #include "src/common/containers/hash_map.h"
 #include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"
@@ -31,6 +31,8 @@
 #include "src/ir/types/schema.h"
 
 namespace raksha::ir::types {
+
+using type::proto::TypeProto;
 
 // Helper function for making an unnamed schema from a field map.
 static const Schema &MakeAnonymousSchema(
@@ -255,9 +257,9 @@ class GetAccessPathSelectorsWithProtoTest
 TEST_P(GetAccessPathSelectorsWithProtoTest,
        GetAccessPathSelectorsWithProtoTest) {
   const auto &[type_as_textproto, expected_access_path_strs] = GetParam();
-  arcs::TypeProto orig_type_proto;
-  ASSERT_TRUE(
-      google::protobuf::TextFormat::ParseFromString(type_as_textproto, &orig_type_proto))
+  TypeProto orig_type_proto;
+  ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(type_as_textproto,
+                                                            &orig_type_proto))
       << "Failed to parse text proto!";
   Type type = proto::Decode(type_factory_, orig_type_proto);
   std::vector<std::string> access_path_str_vec =

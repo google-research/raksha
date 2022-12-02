@@ -20,9 +20,10 @@
 #include "src/common/testing/gtest.h"
 #include "src/ir/types/proto/type.h"
 #include "src/ir/types/type_factory.h"
-#include "third_party/arcs/proto/manifest.pb.h"
 
 namespace raksha::ir::types::proto {
+
+using type::proto::PrimitiveTypeProto;
 
 class PrimitiveTypeTest : public testing::TestWithParam<std::string> {
  protected:
@@ -31,8 +32,8 @@ class PrimitiveTypeTest : public testing::TestWithParam<std::string> {
 
 TEST_P(PrimitiveTypeTest, RoundTripPreservesAllInformation) {
   const std::string &type_as_textproto = GetParam();
-  arcs::PrimitiveTypeProto expected_proto;
-  arcs::PrimitiveTypeProto_Parse(type_as_textproto, &expected_proto);
+  PrimitiveTypeProto expected_proto;
+  type::proto::PrimitiveTypeProto_Parse(type_as_textproto, &expected_proto);
   Type type = decode(type_factory_, expected_proto);
   ASSERT_EQ(type.type_base().kind(), TypeBase::Kind::kPrimitive);
   const PrimitiveType &primitive_type =
@@ -42,10 +43,10 @@ TEST_P(PrimitiveTypeTest, RoundTripPreservesAllInformation) {
 
 TEST_P(PrimitiveTypeTest, RoundTripToTypeProtoAndBackWorks) {
   const std::string &type_as_textproto = GetParam();
-  arcs::PrimitiveTypeProto expected_proto;
-  arcs::PrimitiveTypeProto_Parse(type_as_textproto, &expected_proto);
-  arcs::TypeProto type_proto = Encode(decode(type_factory_, expected_proto));
-  ASSERT_EQ(type_proto.data_case(), arcs::TypeProto::DataCase::kPrimitive);
+  PrimitiveTypeProto expected_proto;
+  type::proto::PrimitiveTypeProto_Parse(type_as_textproto, &expected_proto);
+  TypeProto type_proto = Encode(decode(type_factory_, expected_proto));
+  ASSERT_EQ(type_proto.data_case(), proto::TypeProto::DataCase::kPrimitive);
   EXPECT_EQ(expected_proto, type_proto.primitive());
 }
 

@@ -20,21 +20,21 @@
 namespace raksha::ir::types::proto {
 
 Type decode(TypeFactory& type_factory,
-            const arcs::EntityTypeProto& entity_type_proto) {
+            const EntityTypeProto& entity_type_proto) {
   CHECK(entity_type_proto.has_schema())
       << "Schema is required for Entity types.";
   return type_factory.MakeEntityType(
       decode(type_factory, entity_type_proto.schema()));
 }
 
-arcs::EntityTypeProto encode(const EntityType& entity_type) {
-  arcs::EntityTypeProto entity_type_proto;
+EntityTypeProto encode(const EntityType& entity_type) {
+  EntityTypeProto entity_type_proto;
   *entity_type_proto.mutable_schema() = encode(entity_type.schema());
   return entity_type_proto;
 }
 
-arcs::TypeProto encodeAsTypeProto(const EntityType& entity_type) {
-  arcs::TypeProto type_proto;
+TypeProto encodeAsTypeProto(const EntityType& entity_type) {
+  TypeProto type_proto;
   *type_proto.mutable_entity() = encode(entity_type);
   return type_proto;
 }

@@ -21,17 +21,17 @@
 namespace raksha::ir::types::proto {
 
 Type decode(TypeFactory& type_factory,
-            const arcs::PrimitiveTypeProto& primitive_type_proto) {
+            const PrimitiveTypeProto& primitive_type_proto) {
   return type_factory.MakePrimitiveType();
 }
 
-arcs::PrimitiveTypeProto encode(const PrimitiveType& primitive_type) {
+PrimitiveTypeProto encode(const PrimitiveType& primitive_type) {
   // For now, just set all primitives to TEXT when serializing.
-  return arcs::PrimitiveTypeProto::TEXT;
+  return PrimitiveTypeProto::TEXT;
 }
 
-arcs::TypeProto encodeAsTypeProto(const PrimitiveType& primitive_type) {
-  arcs::TypeProto type_proto;
+TypeProto encodeAsTypeProto(const PrimitiveType& primitive_type) {
+  TypeProto type_proto;
   type_proto.set_primitive(encode(primitive_type));
   return type_proto;
 }

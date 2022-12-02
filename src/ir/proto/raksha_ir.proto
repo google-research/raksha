@@ -126,3 +126,4 @@ enum AnalysisResultStatus {
 message AnalysisResult {
   AnalysisResultStatus result = 1;
 }
+
