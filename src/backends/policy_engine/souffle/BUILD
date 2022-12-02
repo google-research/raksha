@@ -141,6 +141,7 @@ cc_binary(
     ("simple_passing_arcsjs", "pass"),
     ("simple_failing_arcsjs", "fail"),
     ("user_action_passing_arcsjs", "pass"),
+    ("large_sample_passing_arcsjs", "pass"),
     ("user_action_failing_arcsjs_modified_after_consent", "fail"),
     ("user_action_failing_arcsjs_no_consent", "fail"),
     ("user_action_failing_arcsjs_no_intent", "fail"),
