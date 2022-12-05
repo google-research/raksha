@@ -16,9 +16,9 @@
 #ifndef SRC_BACKENDS_POLICY_ENGINE_AUTH_LOGIC_POLICY_H_
 #define SRC_BACKENDS_POLICY_ENGINE_AUTH_LOGIC_POLICY_H_
 
-#include <filesystem>
 #include <optional>
 
+#include "souffle/SouffleInterface.h"
 #include "absl/strings/string_view.h"
 #include "src/backends/policy_engine/policy.h"
 
@@ -27,12 +27,15 @@ namespace raksha::backends::policy_engine {
 // Policy interface for authorization logic based policies.
 class AuthLogicPolicy : public Policy {
  public:
-  explicit AuthLogicPolicy(std::string auth_logic_policy_engine)
-      : auth_logic_policy_engine_(std::move(auth_logic_policy_engine)) {}
+  explicit AuthLogicPolicy(std::string auth_logic_policy_engine_name)
+      : auth_logic_policy_engine_name_(
+            std::move(auth_logic_policy_engine_name)) {}
 
   // policy checker for authorization logic based policies.
-  std::string GetPolicyAnalysisCheckerName() const override {
-    return auth_logic_policy_engine_;
+  std::unique_ptr<souffle::SouffleProgram> GetPolicyAnalysisChecker()
+      const override {
+    return std::unique_ptr<souffle::SouffleProgram>(
+        souffle::ProgramFactory::newInstance(auth_logic_policy_engine_name_));
   }
 
   // Policies from authorization logic are converetd to datalog and eventually
@@ -45,7 +48,7 @@ class AuthLogicPolicy : public Policy {
   std::optional<std::string> GetPolicyString() const override { return {}; }
 
  private:
-  std::string auth_logic_policy_engine_;
+  std::string auth_logic_policy_engine_name_;
 };
 
 }  // namespace raksha::backends::policy_engine

@@ -16,11 +16,18 @@
 #ifndef SRC_BACKENDS_POLICY_ENGINE_CATCHALL_POLICY_RULE_POLICY_H_
 #define SRC_BACKENDS_POLICY_ENGINE_CATCHALL_POLICY_RULE_POLICY_H_
 
-#include <filesystem>
+#include <memory>
 #include <optional>
 
+#include "souffle/SouffleInterface.h"
+#include "absl/log/die_if_null.h"
 #include "absl/strings/string_view.h"
 #include "src/backends/policy_engine/policy.h"
+
+// A forward declaration of a function created by Souffle
+namespace souffle {
+SouffleProgram *newInstance_datalog_policy_verifier_cxx();
+}
 
 namespace raksha::backends::policy_engine {
 
@@ -33,8 +40,10 @@ class CatchallPolicyRulePolicy : public Policy {
   explicit CatchallPolicyRulePolicy(std::string is_sql_policy_rule_facts)
       : is_sql_policy_rule_facts_(std::move(is_sql_policy_rule_facts)) {}
 
-  std::string GetPolicyAnalysisCheckerName() const override {
-    return "datalog_policy_verifier_cxx";
+  std::unique_ptr<souffle::SouffleProgram> GetPolicyAnalysisChecker()
+      const override {
+    return std::unique_ptr<souffle::SouffleProgram>(
+        ABSL_DIE_IF_NULL(souffle::newInstance_datalog_policy_verifier_cxx()));
   }
 
   std::optional<std::string> GetPolicyFactName() const override {

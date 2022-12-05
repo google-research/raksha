@@ -32,7 +32,10 @@ cc_library(
         "//:__pkg__",
         "//src:__subpackages__",
     ] + frontend_packages,
-    deps = ["@com_google_absl//absl/strings"],
+    deps = [
+        "@com_google_absl//absl/strings",
+        "@souffle//:souffle_include_lib",
+    ],
 )
 
 cc_library(
@@ -41,8 +44,10 @@ cc_library(
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":policy",
-        "@com_google_absl//absl/status",
+        "//src/analysis/souffle:sql_policy_verifier",
+        "@com_google_absl//absl/log:die_if_null",
         "@com_google_absl//absl/strings",
+        "@souffle//:souffle_include_lib",
     ],
 )
 
@@ -55,8 +60,10 @@ cc_library(
     ] + frontend_packages,
     deps = [
         ":policy",
-        "@com_google_absl//absl/status",
+        "//src/analysis/souffle:datalog_policy_verifier",
+        "@com_google_absl//absl/log:die_if_null",
         "@com_google_absl//absl/strings",
+        "@souffle//:souffle_include_lib",
     ],
 )
 
@@ -66,8 +73,8 @@ cc_library(
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":policy",
-        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
+        "@souffle//:souffle_include_lib",
     ],
 )
 
@@ -86,7 +93,10 @@ cc_library(
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":policy",
+        "//src/analysis/souffle:dp_policy_verifier",
+        "@com_google_absl//absl/log:die_if_null",
         "@com_google_absl//absl/strings:str_format",
+        "@souffle//:souffle_include_lib",
     ],
 )
 

@@ -83,11 +83,29 @@ cc_binary(
     copts = ["-fexceptions"],
     features = ["-use_header_modules"],
     deps = [
+        ":datalog_multiple_policy_verifier_fail",
+        ":datalog_multiple_policy_verifier_pass",
+        ":datalog_simple_policy_verifier_fail",
+        ":datalog_simple_policy_verifier_pass",
         ":souffle_policy_checker",
+        "//src/analysis/souffle/examples/multimic:check_multimic_pass",
+        "//src/analysis/souffle/examples/multimic:check_multimic_userc_tag_fail",
+        "//src/analysis/souffle/examples/simple:ok_claim_propagates_check",
+        "//src/analysis/souffle/examples/simple_canSayDowngrades:delegation_granted_downgrades",
+        "//src/analysis/souffle/examples/simple_canSayDowngrades:delegation_not_granted_by_non_owner",
+        "//src/analysis/souffle/examples/simple_canSayDowngrades:delegation_not_granted_downgrades",
+        "//src/analysis/souffle/examples/simple_canSayHasTag:delegation_granted",
+        "//src/analysis/souffle/examples/simple_canSayHasTag:delegation_not_granted",
+        "//src/analysis/souffle/examples/simple_may_will:may_will_fail",
+        "//src/analysis/souffle/examples/simple_may_will:may_will_pass",
         "//src/backends/policy_engine:auth_logic_policy",
         "//src/backends/policy_engine:catchall_policy_rule_policy",
         "//src/backends/policy_engine:dp_parameter_policy",
         "//src/backends/policy_engine:policy",
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_1:dp_policy_verifier_delta_1_with_auth_logic_lib",
+        "//src/backends/policy_engine/souffle/dp_testdata/delta_2:dp_policy_verifier_delta_2_with_auth_logic_lib",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:dp_policy_verifier_epsilon_2_with_auth_logic_lib",
+        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:dp_policy_verifier_epsilon_4_with_auth_logic_lib",
         "//src/ir:proto_to_ir",
         "//src/parser/ir:ir_parser",
         "@com_google_absl//absl/flags:flag",
@@ -371,8 +389,6 @@ cc_test(
     ],
 )
 
-# Use this version of the `souffle_policy_checker` when binary size does not matter. Linked with
-# every library that may use it.
 cc_library(
     name = "souffle_policy_checker",
     srcs = ["souffle_policy_checker.cc"],
@@ -389,58 +405,7 @@ cc_library(
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":datalog_lowering_visitor",
-        ":datalog_multiple_policy_verifier_fail",
-        ":datalog_multiple_policy_verifier_pass",
-        ":datalog_simple_policy_verifier_fail",
-        ":datalog_simple_policy_verifier_pass",
         ":utils",
-        "//src/analysis/souffle:datalog_policy_verifier",
-        "//src/analysis/souffle:dp_policy_verifier",
-        "//src/analysis/souffle:sql_policy_verifier",
-        "//src/analysis/souffle/examples/multimic:check_multimic_pass",
-        "//src/analysis/souffle/examples/multimic:check_multimic_userc_tag_fail",
-        "//src/analysis/souffle/examples/simple:ok_claim_propagates_check",
-        "//src/analysis/souffle/examples/simple_canSayDowngrades:delegation_granted_downgrades",
-        "//src/analysis/souffle/examples/simple_canSayDowngrades:delegation_not_granted_by_non_owner",
-        "//src/analysis/souffle/examples/simple_canSayDowngrades:delegation_not_granted_downgrades",
-        "//src/analysis/souffle/examples/simple_canSayHasTag:delegation_granted",
-        "//src/analysis/souffle/examples/simple_canSayHasTag:delegation_not_granted",
-        "//src/analysis/souffle/examples/simple_may_will:may_will_fail",
-        "//src/analysis/souffle/examples/simple_may_will:may_will_pass",
-        "//src/backends/policy_engine:policy",
-        "//src/backends/policy_engine:policy_checker",
-        "//src/backends/policy_engine/souffle/dp_testdata/delta_1:dp_policy_verifier_delta_1_with_auth_logic_lib",
-        "//src/backends/policy_engine/souffle/dp_testdata/delta_2:dp_policy_verifier_delta_2_with_auth_logic_lib",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_2:dp_policy_verifier_epsilon_2_with_auth_logic_lib",
-        "//src/backends/policy_engine/souffle/dp_testdata/epsilon_4:dp_policy_verifier_epsilon_4_with_auth_logic_lib",
-        "//src/common/utils:filesystem",
-        "//src/ir:module",
-        "@com_google_absl//absl/container:inlined_vector",
-        "@com_google_absl//absl/strings",
-        "@souffle//:souffle_include_lib",
-    ],
-)
-
-# This is a version of the `souffle_policy_checker` for use with the SQL verifier only. Links only
-# with the SQL verifier library.
-cc_library(
-    name = "souffle_policy_checker_sql",
-    srcs = ["souffle_policy_checker.cc"],
-    hdrs = ["souffle_policy_checker.h"],
-    copts = [
-        "-fexceptions",
-        "-Iexternal/souffle/src/include/souffle",
-    ],
-    # Turn off header modules, as Google precompiled headers use
-    # -fno-exceptions, and combining a precompiled header with -fno-exceptions
-    # with a binary that uses -fexceptions makes Clang upset.
-    features = ["-use_header_modules"],
-    linkopts = ["-pthread"],
-    visibility = ["//src:__subpackages__"] + frontend_packages,
-    deps = [
-        ":datalog_lowering_visitor",
-        ":utils",
-        "//src/analysis/souffle:sql_policy_verifier",
         "//src/backends/policy_engine:policy",
         "//src/backends/policy_engine:policy_checker",
         "//src/common/utils:filesystem",

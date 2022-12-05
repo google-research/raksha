@@ -16,11 +16,17 @@
 #ifndef SRC_BACKENDS_POLICY_ENGINE_SQL_POLICY_RULE_POLICY_H_
 #define SRC_BACKENDS_POLICY_ENGINE_SQL_POLICY_RULE_POLICY_H_
 
-#include <filesystem>
 #include <optional>
 
+#include "souffle/SouffleInterface.h"
+#include "absl/log/die_if_null.h"
 #include "absl/strings/string_view.h"
 #include "src/backends/policy_engine/policy.h"
+
+// A forward declaration of a function created by Souffle
+namespace souffle {
+SouffleProgram *newInstance_sql_policy_verifier_cxx();
+}
 
 namespace raksha::backends::policy_engine {
 
@@ -31,8 +37,10 @@ class SqlPolicyRulePolicy : public Policy {
   explicit SqlPolicyRulePolicy(std::string is_sql_policy_rule_facts)
       : is_sql_policy_rule_facts_(std::move(is_sql_policy_rule_facts)) {}
 
-  std::string GetPolicyAnalysisCheckerName() const override {
-    return "sql_policy_verifier_cxx";
+  std::unique_ptr<souffle::SouffleProgram> GetPolicyAnalysisChecker()
+      const override {
+    return std::unique_ptr<souffle::SouffleProgram>(
+        ABSL_DIE_IF_NULL(souffle::newInstance_sql_policy_verifier_cxx()));
   }
 
   std::optional<std::string> GetPolicyFactName() const override {

@@ -16,9 +16,10 @@
 #ifndef SRC_BACKENDS_POLICY_ENGINE_POLICY_H_
 #define SRC_BACKENDS_POLICY_ENGINE_POLICY_H_
 
-#include <filesystem>
+#include <memory>
 #include <optional>
 
+#include "souffle/SouffleInterface.h"
 #include "absl/strings/string_view.h"
 
 namespace raksha::backends::policy_engine {
@@ -37,7 +38,8 @@ class Policy {
   // into the analysis itself. Thus, it is only appropriate to place the checker
   // to be called into the `Policy` as if the data compiled in were opaque
   // members of this object.
-  virtual std::string GetPolicyAnalysisCheckerName() const = 0;
+  virtual std::unique_ptr<souffle::SouffleProgram> GetPolicyAnalysisChecker()
+      const = 0;
 
   // Gets the name of the Datalog fact populated by this policy. If this policy
   // does not populate any facts, (it is all compiled into the analysis) this

@@ -26,10 +26,6 @@ class DpParamaterPolicyRulePolicyTest
   DpParameterPolicy policy_;
 };
 
-TEST_P(DpParamaterPolicyRulePolicyTest, TestCheckerName) {
-  EXPECT_EQ(policy_.GetPolicyAnalysisCheckerName(), "dp_policy_verifier_cxx");
-}
-
 TEST_P(DpParamaterPolicyRulePolicyTest, TestPolicyFactName) {
   std::optional<std::string> policy_fact_name = policy_.GetPolicyFactName();
   ASSERT_TRUE(policy_fact_name.has_value());

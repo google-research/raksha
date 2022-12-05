@@ -32,7 +32,6 @@ namespace raksha::backends::policy_engine {
 // "::souffle".
 using Relation = ::souffle::Relation;
 using SouffleProgram = ::souffle::SouffleProgram;
-using ProgramFactory = ::souffle::ProgramFactory;
 
 // These are from Raksha's "souffle" subpackage.
 using DatalogLoweringVisitor = souffle::DatalogLoweringVisitor;
@@ -62,9 +61,7 @@ static bool IsModulePolicyCompliantHelper(
   CHECK(output_module_status.ok())
       << "Unexpected error while outputting module: " << output_module_status;
 
-  std::unique_ptr<SouffleProgram> program(
-      ABSL_DIE_IF_NULL(ProgramFactory::newInstance(
-          std::string(policy.GetPolicyAnalysisCheckerName()))));
+  std::unique_ptr<SouffleProgram> program = policy.GetPolicyAnalysisChecker();
 
   // If we allow Souffle to set up its signal handler, it can cause issues when
   // we call via JNI. See b/245620786 for a circumstance where this occurred.
