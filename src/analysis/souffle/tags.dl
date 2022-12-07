@@ -35,4 +35,7 @@
 // that integrity tag.
 .type IntegrityTag <: symbol
 
+// A policy name used for error reporting.
+.type PolicyName <: symbol
+
 #endif // SRC_ANALYSIS_SOUFFLE_TAGS_DL_

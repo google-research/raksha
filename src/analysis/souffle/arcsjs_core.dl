@@ -16,6 +16,8 @@
 #ifndef SRC_ANALYSIS_SOUFFLE_ARCSJS_CORE_DL_
 #define SRC_ANALYSIS_SOUFFLE_ARCSJS_CORE_DL_
 
+#include "src/analysis/souffle/tags.dl"
+
 // Note: this will need to change when we integrate auth logic into the ARCSJS
 // verifier.
 // TODO(#663): Rename or remove DEFAULT_ARCSJS_OWNER.
@@ -23,5 +25,10 @@
 // TODO(#664): Rename/move code shared with SQL into Raksha or Core namespace.
 // TODO(#664): Rename/move code not shared with SQL into ArcsJs namespace.
 #define ARCSJS_PUBLIC_TAG as("public", Tag)
+
+#define ARCSJS_CONSTRUCTION_POLICY as("arcsjs.construction", PolicyName)
+#define ARCSJS_DATA_LEAK_POLICY as("arcsjs.data_leak", PolicyName)
+#define ARCSJS_CHECK_TAG_POLICY as("arcsjs.check_tag", PolicyName)
+#define ARCSJS_USER_DOWNGRADE_POLICY as("arcsjs.user_consent_to_downgrade", PolicyName)
 
 #endif // SRC_ANALYSIS_SOUFFLE_ARCSJS_CORE_DL_

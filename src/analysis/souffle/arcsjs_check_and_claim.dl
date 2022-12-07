@@ -79,16 +79,16 @@ hasTag(argument, DEFAULT_ARCSJS_OWNER, claimed_tag) :-
   claimed_tag != ARCSJS_PUBLIC_TAG,
   arcsJsClaimOperationHasArgument(op, argument).
 
-.decl arcsJsCheckedResultMissingExpectedTag(op: Operation, result: AccessPath)
+.decl arcsJsCheckedResultMissingExpectedTag(op: Operation, result: AccessPath, tag: Tag)
 
 // Checks `check`ed tags are present on the argument of a `check` operation.
-arcsJsCheckedResultMissingExpectedTag(op, argument) :-
+arcsJsCheckedResultMissingExpectedTag(op, argument, tag) :-
   arcsJsCheckOperationHasTag(op, tag),
   arcsJsCheckOperationHasArgument(op, argument),
   hasTag(argument, _, tag).
 
-violatesPolicy(path) :-
-  arcsJsCheckedResultMissingExpectedTag(_, path).
+violatesPolicy(path, ARCSJS_CHECK_TAG_POLICY, cat(cat("Expected tag '", tag), cat("' missing at ", path))) :-
+  arcsJsCheckedResultMissingExpectedTag(_, path, tag).
 
 .decl policyConformingClaim(op: Operation)
 
@@ -99,7 +99,7 @@ policyConformingClaim(op) :-
   count : { operationHasOperandAtIndex(op, _, _) } = 1.
 
 // Violates policy if claim operations not correctly defined.
-violatesPolicy(result) :-
+violatesPolicy(result, ARCSJS_CONSTRUCTION_POLICY, cat("Malformed claim at ", result)) :-
   isArcsJsClaimOperation(op),
   !policyConformingClaim(op),
   operationHasResult(op, result).
@@ -113,7 +113,7 @@ policyConformingCheck(op) :-
   count : { operationHasOperandAtIndex(op, _, _) } = 1.
 
 // Violates policy if check operations not correctly defined.
-violatesPolicy(result) :-
+violatesPolicy(result, ARCSJS_CONSTRUCTION_POLICY, cat("Malformed check at ", result)) :-
   isArcsJsCheckOperation(op),
   !policyConformingCheck(op),
   operationHasResult(op, result).

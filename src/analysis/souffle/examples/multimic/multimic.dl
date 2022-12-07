@@ -146,7 +146,11 @@ isCheck("check_num_1", "DoASRUserAAndUserB.MicCompute.audioIn"), check("check_nu
 isCheck("check_num_2", "DoASRUserAAndUserBAndUserC.MicCompute.audioIn"), check("check_num_2", owner, "DoASRUserAAndUserBAndUserC.MicCompute.audioIn") :-
   ownsAccessPath(owner, "DoASRUserAAndUserBAndUserC.MicCompute.audioIn"), isPrincipal(owner), !(mayHaveTag("DoASRUserAAndUserBAndUserC.MicCompute.audioIn", owner, "asrDisallowed")).
 
-violatesPolicy("any") :- isCheck(_, _).
+violatesPolicy(
+  "any",
+  "examplePolicy",
+  cat("Check ", cat(check_num, " fails."))) :-
+  isCheck(check_num, _).
 // Edges:
 edge("DoASRNoGuests.handle0", "DoASRNoGuests.MicCompute.asrNeuralNet").
 edge("DoASRNoGuests.MicCompute.asrStorageConn", "DoASRNoGuests.handle1").

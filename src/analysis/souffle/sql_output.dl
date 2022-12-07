@@ -21,6 +21,7 @@
 // Note: this will need to change when we integrate auth logic into the SQL
 // verifier.
 #define DEFAULT_SQL_OWNER "sql"
+#define DEFAULT_SQL_POLICY_NAME as("sql", PolicyName)
 #define SQL_OUTPUT_OPERATOR "sql.sql_output"
 
 .decl isSqlOutput(sqlOutputOperation: Operation)
@@ -29,18 +30,18 @@ isSqlOutput(op) :- isOperation(op),
                   operationHasActor(op, DEFAULT_SQL_OWNER),
                   operationHasOperator(op, SQL_OUTPUT_OPERATOR).
 
-.decl sqlOutputHasConfidentialTag(sqlOutputOperation: Operation)
+.decl sqlOutputHasConfidentialTag(sqlOutputOperation: Operation, tag: Tag)
 
-sqlOutputHasConfidentialTag(op) :-
+sqlOutputHasConfidentialTag(op, tag) :-
   isSqlOutput(op),
   operationHasResult(op, result),
   isTag(tag), mayHaveTag(result, DEFAULT_SQL_OWNER, tag).
 
 .decl sqlOutputResult(sqlOutputOperation: Operation, passOrFail: symbol)
 
-sqlOutputResult(op, "FAIL") :- sqlOutputHasConfidentialTag(op).
-sqlOutputResult(op, "PASS") :- isSqlOutput(op), !sqlOutputHasConfidentialTag(op).
+sqlOutputResult(op, "FAIL") :- sqlOutputHasConfidentialTag(op, _).
+sqlOutputResult(op, "PASS") :- isSqlOutput(op), !sqlOutputHasConfidentialTag(op, _).
 
-violatesPolicy("violates") :- sqlOutputHasConfidentialTag(op).
+violatesPolicy("violates", DEFAULT_SQL_POLICY_NAME, cat("Output has confidential tag: ", tag)) :- sqlOutputHasConfidentialTag(op, tag).
 
 #endif // SRC_ANALYSIS_SOUFFLE_SQL_OUTPUT_DL_

@@ -22,25 +22,25 @@
 
 #define INPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, operation, particle, store, handle, result) \
   isOperation(operation). \
-  TEST_N_RESULT_FOR_OPERATION(n_particles, test_name, (operation), arcsJsConnectInputOperationHasParticle, particle). \
-  TEST_N_RESULT_FOR_OPERATION(n_stores, test_name, (operation), arcsJsConnectInputOperationHasStore, store). \
-  TEST_N_RESULT_FOR_OPERATION(n_handles, test_name, (operation), arcsJsConnectInputOperationHasHandleName, handle)
+  TEST_N_RESULT(n_particles, test_name, (operation), arcsJsConnectInputOperationHasParticle, particle). \
+  TEST_N_RESULT(n_stores, test_name, (operation), arcsJsConnectInputOperationHasStore, store). \
+  TEST_N_RESULT(n_handles, test_name, (operation), arcsJsConnectInputOperationHasHandleName, handle)
 
 #define INPUT_CREATE_AND_TEST_OPERATION(n_particles, n_stores, n_handles, test_name, owner, operator, result, operandList, attrList, particle, store, handle) \
   INPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, ([owner, operator, [result, nil], (operandList), (attrList)]), particle, store, handle, result)
 
 #define OUTPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, operation, particle, store, handle, result) \
   isOperation(operation). \
-  TEST_N_RESULT_FOR_OPERATION(n_particles, test_name, (operation), arcsJsConnectOutputOperationHasParticle, particle). \
-  TEST_N_RESULT_FOR_OPERATION(n_stores, test_name, (operation), arcsJsConnectOutputOperationHasStore, store). \
-  TEST_N_RESULT_FOR_OPERATION(n_handles, test_name, (operation), arcsJsConnectOutputOperationHasHandleName, handle)
+  TEST_N_RESULT(n_particles, test_name, (operation), arcsJsConnectOutputOperationHasParticle, particle). \
+  TEST_N_RESULT(n_stores, test_name, (operation), arcsJsConnectOutputOperationHasStore, store). \
+  TEST_N_RESULT(n_handles, test_name, (operation), arcsJsConnectOutputOperationHasHandleName, handle)
 
 #define OUTPUT_CREATE_AND_TEST_OPERATION(n_particles, n_stores, n_handles, test_name, owner, operator, result, operandList, attrList, particle, store, handle) \
   OUTPUT_CREATE_AND_TEST_OPERATOR_INNER(n_particles, n_stores, n_handles, test_name, ([owner, operator, [result, nil], (operandList), (attrList)]), particle, store, handle, result)
 
 #define CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(n_violations, test_name, operation) \
   isOperation(operation). \
-  TEST_N_PREDICATE_FOR_OPERATION(n_violations, test_name, (operation), violatesPolicy)
+  TEST_N_RESULT2_FOR_OPERATION(n_violations, test_name, (operation), violatesPolicy, _, _)
 
 #define CREATE_AND_TEST_OPERATION_VIOLATES(n_violations, test_name, owner, operator, result, operandList, attrList, particle, store, handle) \
   CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(n_violations, test_name, ([owner, operator, [result, nil], (operandList), (attrList)]))

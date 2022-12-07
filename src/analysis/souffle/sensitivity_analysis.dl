@@ -45,6 +45,8 @@
 
 #define PRIVACY_MECHANISM_OPERATOR as("privacy_mechanism", Operator)
 
+#define SENSITIVITY_ANALYSIS_POLICY as("sql.sensitivity_analysis", PolicyName)
+
 #define ANY as("<<ANY>>", symbol)
 
 .type SensitivityScore <: number

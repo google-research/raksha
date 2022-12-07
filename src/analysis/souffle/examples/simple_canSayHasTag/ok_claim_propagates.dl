@@ -67,7 +67,7 @@ says_hasTag("P1", "R.P1.foo", owner, "userSelection") :- ownsAccessPath(owner, "
 isCheck("check_num_0", "R.P3.bar"), check("check_num_0", owner, "R.P3.bar") :-
   ownsAccessPath(owner, "R.P3.bar"), mayHaveTag("R.P3.bar", owner, "userSelection").
 
-violatesPolicy("any") :- isCheck("check_num_0", "R.P3.bar").
+violatesPolicy("any", "test_policy", "has isCheck for check_num_0 and R.P3.bar") :- isCheck("check_num_0", "R.P3.bar").
 
 // Edges:
 edge("R.P1.foo", "R.handle0").

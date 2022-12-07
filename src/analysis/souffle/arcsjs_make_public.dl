@@ -44,7 +44,7 @@ policyConformingMakePublic(op) :-
   count : { operationHasOperandAtIndex(op, _, _) } = 1.
 
 // Violates policy if `make_public` operation is malformed.
-violatesPolicy(path) :-
+violatesPolicy(path, ARCSJS_CONSTRUCTION_POLICY, cat("Malformed make_public operation at ", path)) :-
   isArcsJsMakePublicOperation(op),
   !policyConformingMakePublic(op),
   operationHasResult(op, path).
@@ -67,7 +67,8 @@ arcsJsMakePublicResult(op, "PASS") :-
   isArcsJsMakePublicOperation(op),
   !arcsJsMakePublicHasConfidentialTag(op, _, _).
 
-violatesPolicy(path) :- arcsJsMakePublicHasConfidentialTag(_, path, _).
+violatesPolicy(path, ARCSJS_DATA_LEAK_POLICY, cat(cat("May leak data labelled '", tag), cat("' at ", path))) :-
+  arcsJsMakePublicHasConfidentialTag(_, path, tag).
 
 #undef ARCSJS_MAKE_PUBLIC_OPERATOR
 #undef ARCSJS_MAKE_PUBLIC_ARGUMENT_INDEX

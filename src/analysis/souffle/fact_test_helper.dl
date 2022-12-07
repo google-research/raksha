@@ -52,6 +52,9 @@ duplicateTestCaseNames(testAspectName) :-
 
 testFails(testAspectName) :- allTests(testAspectName), !testPasses(testAspectName).
 
+// All tests should list which cases contained violations of policy.
+.output violatesPolicy(IO=stdout, delimiter=",")
+
 #ifdef ALL_PRINCIPALS_OWN_ALL_TAGS
 // For the fact tests, consider all principals as owning all tags. This allows us to avoid writing
 // ownership relations, which are not the point of those tests.

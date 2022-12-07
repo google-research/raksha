@@ -72,7 +72,11 @@ isCheck("check_num_0", "R.P2.bar"), check("check_num_0", owner, "R.P2.bar") :-
 isCheck("check_num_1", "R.P3.bar"), check("check_num_1", owner, "R.P3.bar") :-
   ownsAccessPath(owner, "R.P3.bar"), isPrincipal(owner), !(mayHaveTag("R.P3.bar", owner, "userSelection")).
 
-violatesPolicy("any") :- isCheck(_, _).
+violatesPolicy(
+  "any",
+  "examplePolicy",
+  cat("Check ", cat(check_num, " fails."))) :-
+  isCheck(check_num, _).
 
 // Edges:
 edge("R.P1.foo", "R.handle0").

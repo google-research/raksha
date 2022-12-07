@@ -115,7 +115,7 @@ policyConformingInput(op) :-
   arcsJsConnectInputOperationHasHandleName(op, _),
   count : { operationHasOperandAtIndex(op, _, _) } = 2.
 
-violatesPolicy(result) :-
+violatesPolicy(result, ARCSJS_CONSTRUCTION_POLICY, cat("Malformed input operation at ", result)) :-
   isArcsJsConnectInputOperation(op),
   !policyConformingInput(op),
   operationHasResult(op, result).
@@ -128,7 +128,7 @@ policyConformingOutput(op) :-
   arcsJsConnectOutputOperationHasHandleName(op, _),
   count : { operationHasOperandAtIndex(op, _, _) } = 2.
 
-violatesPolicy(result) :-
+violatesPolicy(result, ARCSJS_CONSTRUCTION_POLICY, cat("Malformed output operation at ", result)) :-
   isArcsJsConnectOutputOperation(op),
   !policyConformingOutput(op),
   operationHasResult(op, result).

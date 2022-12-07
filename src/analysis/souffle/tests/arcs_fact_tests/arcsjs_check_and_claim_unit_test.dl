@@ -19,34 +19,34 @@
 
 #define CLAIM_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, operation, argument, tag, result) \
   isOperation(operation). \
-  TEST_N_RESULT_FOR_OPERATION(n_args, test_name, (operation), arcsJsClaimOperationHasArgument, argument). \
-  TEST_N_RESULT_FOR_OPERATION(n_tags, test_name, (operation), arcsJsClaimOperationHasTag, tag)
+  TEST_N_RESULT(n_args, test_name, (operation), arcsJsClaimOperationHasArgument, argument). \
+  TEST_N_RESULT(n_tags, test_name, (operation), arcsJsClaimOperationHasTag, tag)
 
 #define CLAIM_CREATE_AND_TEST_OPERATION(n_args, n_tags, test_name, owner, operator, result, operandList, attrList, argument, tag) \
   CLAIM_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]), argument, tag, result)
 
 #define CHECK_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, operation, argument, tag, result) \
   isOperation(operation). \
-  TEST_N_RESULT_FOR_OPERATION(n_args, test_name, (operation), arcsJsCheckOperationHasArgument, argument). \
-  TEST_N_RESULT_FOR_OPERATION(n_tags, test_name, (operation), arcsJsCheckOperationHasTag, tag)
+  TEST_N_RESULT(n_args, test_name, (operation), arcsJsCheckOperationHasArgument, argument). \
+  TEST_N_RESULT(n_tags, test_name, (operation), arcsJsCheckOperationHasTag, tag)
 
 #define CHECK_CREATE_AND_TEST_OPERATION(n_args, n_tags, test_name, owner, operator, result, operandList, attrList, argument, tag) \
   CHECK_CREATE_AND_TEST_OPERATOR_INNER(n_args, n_tags, test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]), argument, tag, result)
 
-#define CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(n_violations, test_name, operation) \
+#define CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(n_violations, test_name, operation, policy, message) \
   isOperation(operation). \
-  TEST_N_PREDICATE_FOR_OPERATION(n_violations, test_name, (operation), violatesPolicy)
+  TEST_N_RESULT2_FOR_OPERATION(n_violations, test_name, (operation), violatesPolicy, policy, message)
 
-#define CREATE_AND_TEST_OPERATION_VIOLATES(n_violations, test_name, owner, operator, result, operandList, attrList) \
-  CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(n_violations, test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]))
+#define CREATE_AND_TEST_OPERATION_VIOLATES(n_violations, test_name, owner, operator, result, operandList, attrList, policy, message) \
+  CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(n_violations, test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]), policy, message)
 
 #define ATTR_LIST1 [["tag", $StringAttributePayload("private")], nil]
 #define OPERAND_LIST1 ["operand1", nil]
 
 CLAIM_CREATE_AND_TEST_OPERATION(1, 1, "test1_claim", "somePrincipal", "arcsjs.claim", "ap1", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "private").
-CREATE_AND_TEST_OPERATION_VIOLATES(0, "test1_claim_passes", "somePrincipal", "arcsjs.claim", "ap1", (OPERAND_LIST1), (ATTR_LIST1)).
+CREATE_AND_TEST_OPERATION_VIOLATES(0, "test1_claim_passes", "somePrincipal", "arcsjs.claim", "ap1", (OPERAND_LIST1), (ATTR_LIST1), _, _).
 CHECK_CREATE_AND_TEST_OPERATION(1, 1, "test2_check", "somePrincipal", "arcsjs.check", "ap1", (OPERAND_LIST1), (ATTR_LIST1), "operand1", "private").
-CREATE_AND_TEST_OPERATION_VIOLATES(0, "test2_check_passes", "somePrincipal", "arcsjs.check", "ap1", (OPERAND_LIST1), (ATTR_LIST1)).
+CREATE_AND_TEST_OPERATION_VIOLATES(0, "test2_check_passes", "somePrincipal", "arcsjs.check", "ap1", (OPERAND_LIST1), (ATTR_LIST1), _, _).
 
 #define ATTR_LIST2 [["tag", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
 #define OPERAND_LIST2 ["input1", nil]
@@ -57,21 +57,22 @@ CHECK_CREATE_AND_TEST_OPERATION(1, 1, "test4_check_ignores_extra_attrs", "prin",
 #define ATTR_LIST3 [["tag", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
 #define OPERAND_LIST3 ["input1", ["input2", nil]]
 CLAIM_CREATE_AND_TEST_OPERATION(1, 1, "test5_claim_ignores_extra_args", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST3), (ATTR_LIST3), "input1", "hello").
-CREATE_AND_TEST_OPERATION_VIOLATES(1, "test5_claim_violates_policy", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST3), (ATTR_LIST3)).
-CHECK_CREATE_AND_TEST_OPERATION(1, 1, "test6_check_ignores_extra_args", "prin", "arcsjs.check", "ap2", (OPERAND_LIST3), (ATTR_LIST3), "input1", "hello").
-CREATE_AND_TEST_OPERATION_VIOLATES(1, "test6_check_violates_policy", "prin", "arcsjs.check", "ap2", (OPERAND_LIST3), (ATTR_LIST3)).
+CREATE_AND_TEST_OPERATION_VIOLATES(1, "test5_claim_violates_policy", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST3), (ATTR_LIST3), "arcsjs.construction", "Malformed claim at ap2").
+
+CHECK_CREATE_AND_TEST_OPERATION(1, 1, "test6_check_ignores_extra_args", "prin", "arcsjs.check", "ap3", (OPERAND_LIST3), (ATTR_LIST3), "input1", "hello").
+CREATE_AND_TEST_OPERATION_VIOLATES(1, "test6_check_violates_policy", "prin", "arcsjs.check", "ap3", (OPERAND_LIST3), (ATTR_LIST3), "arcsjs.construction", "Malformed check at ap3").
 
 #define OPERAND_LIST4 ["input1", ["input2", nil]]
-CLAIM_CREATE_AND_TEST_OPERATION(0, 0, "test7_claim_requires_tag", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST4), nil, _, _).
-CHECK_CREATE_AND_TEST_OPERATION(0, 0, "test8_check_requires_tag", "prin", "arcsjs.check", "ap2", (OPERAND_LIST4), nil, _, _).
+CLAIM_CREATE_AND_TEST_OPERATION(0, 0, "test7_claim_requires_tag", "prin", "arcsjs.claim", "ap4", (OPERAND_LIST4), nil, _, _).
+CHECK_CREATE_AND_TEST_OPERATION(0, 0, "test8_check_requires_tag", "prin", "arcsjs.check", "ap5", (OPERAND_LIST4), nil, _, _).
 
 #define ATTR_LIST5 [["tag", $StringAttributePayload("hello")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
-CLAIM_CREATE_AND_TEST_OPERATION(0, 0, "test9_claim_requires_arg", "prin", "arcsjs.claim", "ap2", nil, (ATTR_LIST5), _, _).
-CHECK_CREATE_AND_TEST_OPERATION(0, 0, "test10_check_requires_arg", "prin", "arcsjs.check", "ap2", nil, (ATTR_LIST5), _, _).
+CLAIM_CREATE_AND_TEST_OPERATION(0, 0, "test9_claim_requires_arg", "prin", "arcsjs.claim", "ap6", nil, (ATTR_LIST5), _, _).
+CHECK_CREATE_AND_TEST_OPERATION(0, 0, "test10_check_requires_arg", "prin", "arcsjs.check", "ap7", nil, (ATTR_LIST5), _, _).
 
 #define ATTR_LIST6 [["tag", $StringAttributePayload("hello")], [["tag", $StringAttributePayload("world")], nil]]
 #define OPERAND_LIST6 ["input1", nil]
 
-CLAIM_CREATE_AND_TEST_OPERATION(1, 2, "test11_claim_maps_over_tags", "prin", "arcsjs.claim", "ap2", (OPERAND_LIST6), (ATTR_LIST6), "input1", _).
-CHECK_CREATE_AND_TEST_OPERATION(1, 2, "test12_check_maps_over_tags", "prin", "arcsjs.check", "ap2", (OPERAND_LIST6), (ATTR_LIST6), "input1", _).
+CLAIM_CREATE_AND_TEST_OPERATION(1, 2, "test11_claim_maps_over_tags", "prin", "arcsjs.claim", "ap8", (OPERAND_LIST6), (ATTR_LIST6), "input1", _).
+CHECK_CREATE_AND_TEST_OPERATION(1, 2, "test12_check_maps_over_tags", "prin", "arcsjs.check", "ap9", (OPERAND_LIST6), (ATTR_LIST6), "input1", _).
 

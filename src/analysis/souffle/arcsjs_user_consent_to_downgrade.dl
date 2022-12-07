@@ -153,7 +153,7 @@ arcsJsUserConsentValid(op) :-
 arcsJsUserConsentResult(op, "FAIL") :- arcsJsUserConsentInvalid(op).
 arcsJsUserConsentResult(op, "PASS") :- arcsJsUserConsentValid(op).
 
-violatesPolicy(path) :-
+violatesPolicy(path, ARCSJS_USER_DOWNGRADE_POLICY, cat("User consent considered invalid at ", path)) :-
   arcsJsUserConsentInvalid(op),
   operationHasResult(op, path).
 

@@ -66,7 +66,11 @@ says_hasTag("P1", "R.P1.foo", owner, "rawVideo") :- ownsAccessPath(owner, "R.P1.
 // Checks:
 isCheck("check_num_0", "R.P2.bar"), check("check_num_0", owner, "R.P2.bar") :-
   ownsAccessPath(owner, "R.P2.bar"), mayHaveTag("R.P2.bar", owner, "rawVideo").
-violatesPolicy("any") :- isCheck(_, _).
+violatesPolicy(
+  "any",
+  "examplePolicy",
+  cat("Check ", cat(check_num, " fails."))) :-
+  isCheck(check_num, _).
 
 // Edges:
 edge("R.P1.foo", "R.handle0").

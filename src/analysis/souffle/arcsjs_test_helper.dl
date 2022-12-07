@@ -17,19 +17,42 @@
 #include "src/analysis/souffle/fact_test_helper.dl"
 
 /*
-  This macro makes it easy to ensure that:
-  1. the `relation` exists exactly `n` times for the given `operation`,
-  2. and that all of those `n` match the `expected` pattern.
+  These macros makes it easy to ensure that:
+  1. the `relation` exists exactly `n` times for the given `result`,
+  2. and that all of those `n` have arguments matching the `expected[n]` patterns.
 
   This checks that there are no unexpected solutions, for the `relation` for the
   given operation.
-*/ 
-#define TEST_N_RESULT_FOR_OPERATION(n, test_name, operation, relation, expected) \
+*/
+#define TEST_N_PREDICATE(n, test_name, result, relation) \
   TEST_CASE(cat(test_name, cat("_", #relation))) :- \
-    count : { relation(operation, expected) } = n, \
-    count : { relation(operation, _) } = n
+    count : { relation(result) } = n
 
+#define TEST_N_RESULT(n, test_name, result, relation, expected) \
+  TEST_CASE(cat(test_name, cat("_", #relation))) :- \
+    count : { relation(result, expected) } = n, \
+    count : { relation(result, _) } = n
+
+#define TEST_N_RESULT2(n, test_name, result, relation, expected1, expected2) \
+  TEST_CASE(cat(test_name, cat("_", #relation))) :- \
+    count : { relation(result, expected1, expected2) } = n, \
+    count : { relation(result, _, _) } = n
+
+
+// Similar to the above, but for operations (and mapping to their results).
 #define TEST_N_PREDICATE_FOR_OPERATION(n, test_name, operation, relation) \
   TEST_CASE(cat(test_name, cat("_", #relation))) :- \
     operationHasResult(operation, result), \
     count : { relation(result) } = n
+
+#define TEST_N_RESULT_FOR_OPERATION(n, test_name, operation, relation, expected) \
+  TEST_CASE(cat(test_name, cat("_", #relation))) :- \
+    operationHasResult(operation, result), \
+    count : { relation(result, expected) } = n, \
+    count : { relation(result, _) } = n
+
+#define TEST_N_RESULT2_FOR_OPERATION(n, test_name, operation, relation, expected1, expected2) \
+  TEST_CASE(cat(test_name, cat("_", #relation))) :- \
+    operationHasResult(operation, result), \
+    count : { relation(result, expected1, expected2) } = n, \
+    count : { relation(result, _, _) } = n

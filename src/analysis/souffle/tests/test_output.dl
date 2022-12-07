@@ -22,7 +22,7 @@
 #define DEFAULT_TEST_OWNER "sql"
 #define TEST_OUTPUT_OPERATOR "test.test_output"
 
-violatesPolicy("violates") :- isOperation(op),
+violatesPolicy("violates", "testPolicy", "testViolation") :- isOperation(op),
   isTag(tag),
   mayHaveTag(result, DEFAULT_TEST_OWNER, tag),
   operationHasActor(op, DEFAULT_TEST_OWNER),

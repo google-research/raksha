@@ -28,7 +28,9 @@
 //-----------------------------------------------------------------------------
 
 // This is the universal 'result' relation that all backends should implement.
-.decl violatesPolicy(path: AccessPath)
+// Declares that there has been a violation of policy `policy`, detected at
+// `path` described by `violation`.
+.decl violatesPolicy(path: AccessPath, policy: PolicyName, message: symbol)
 
 //-----------------------------------------------------------------------------
 // Relation Declarations
