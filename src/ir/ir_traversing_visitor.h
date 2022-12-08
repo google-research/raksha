@@ -26,8 +26,14 @@ namespace raksha::ir {
 // A visitor that also traverses the children of a node and allows performing
 // different actions before (PreVisit) and after (PostVisit) the children are
 // visited. Override any of the `PreVisit` and `PostVisit` methods as needed.
-template <typename Derived, typename Result = Unit, bool IsConst = true>
-class IRTraversingVisitor : public IRVisitor<Derived, Result, IsConst> {
+//
+// Note: `IsConst` is necessarily true. This is because the form of traversal
+// that occurs here, in which the visitor descends into `Module`s to find
+// `Block`s, etc, relies upon iterating over collections which are const
+// references. That means that a non-const traversal is not safely possible.
+template <typename Derived, typename Result = Unit>
+class IRTraversingVisitor
+    : public IRVisitor<Derived, Result, /*IsConst=*/true> {
  private:
   template <class ValueType, class Enable = void>
   struct DefaultValueGetter {
@@ -58,55 +64,47 @@ class IRTraversingVisitor : public IRVisitor<Derived, Result, IsConst> {
   }
 
   // Invoked before all the children of `module` are visited.
-  virtual Result PreVisit(CopyConst<IsConst, Module>& module) {
-    return GetDefaultValue();
-  }
+  virtual Result PreVisit(const Module& module) { return GetDefaultValue(); }
   // Invoked after all the children of `module` are visited.
-  virtual Result PostVisit(CopyConst<IsConst, Module>& module,
-                           Result in_order_result) {
+  virtual Result PostVisit(const Module& module, Result in_order_result) {
     return in_order_result;
   }
   // Invoked before all the children of `block` are visited.
-  virtual Result PreVisit(CopyConst<IsConst, Block>& block) {
-    return GetDefaultValue();
-  }
+  virtual Result PreVisit(const Block& block) { return GetDefaultValue(); }
   // Invoked after all the children of `block` are visited.
-  virtual Result PostVisit(CopyConst<IsConst, Block>& block,
-                           Result in_order_result) {
+  virtual Result PostVisit(const Block& block, Result in_order_result) {
     return in_order_result;
   }
   // Invoked before all the children of `operation` are visited.
-  virtual Result PreVisit(CopyConst<IsConst, Operation>& operation) {
+  virtual Result PreVisit(const Operation& operation) {
     return GetDefaultValue();
   }
   // Invoked after all the children of `operation` are visited.
-  virtual Result PostVisit(CopyConst<IsConst, Operation>& operation,
-                           Result in_order_result) {
+  virtual Result PostVisit(const Operation& operation, Result in_order_result) {
     return in_order_result;
   }
 
-  Result Visit(CopyConst<IsConst, Module>& module) final override {
+  Result Visit(const Module& module) final override {
     Result pre_visit_result = PreVisit(module);
     Result fold_result = common::utils::fold(
         module.blocks(), std::move(pre_visit_result),
-        [this](Result acc, CopyConst<IsConst, std::unique_ptr<Block>>& block) {
+        [this](Result acc, const std::unique_ptr<Block>& block) {
           return FoldResult(std::move(acc), block->Accept(*this));
         });
     return PostVisit(module, std::move(fold_result));
   }
 
-  Result Visit(CopyConst<IsConst, Block>& block) final override {
+  Result Visit(const Block& block) final override {
     Result pre_visit_result = PreVisit(block);
     Result fold_result = common::utils::fold(
         block.operations(), std::move(pre_visit_result),
-        [this](Result acc,
-               CopyConst<IsConst, std::unique_ptr<Operation>>& operation) {
+        [this](Result acc, const std::unique_ptr<Operation>& operation) {
           return FoldResult(std::move(acc), operation->Accept(*this));
         });
     return PostVisit(block, std::move(fold_result));
   }
 
-  Result Visit(CopyConst<IsConst, Operation>& operation) final override {
+  Result Visit(const Operation& operation) final override {
     Result pre_visit_result = PreVisit(operation);
     return PostVisit(operation, std::move(pre_visit_result));
   }
