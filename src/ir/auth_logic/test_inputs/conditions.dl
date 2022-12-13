@@ -1,0 +1,35 @@
+.type DummyType <: symbol
+.type Number <: number
+.type Principal <: symbol
+.type Symbol <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl q_prin1_fact1(dummy_param : DummyType)
+.decl q_prin1_fact2(dummy_param : DummyType)
+.decl q_prin2_fact1(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_cond1(speaker : Principal, x : Symbol)
+.decl says_cond2(speaker : Principal, x : Symbol, y : Symbol)
+.decl says_fact1(speaker : Principal, x : Symbol)
+.decl says_fact2(speaker : Principal, x : Symbol)
+.decl says_isNumber(speaker : Principal, x : Number)
+.decl says_isPrincipal(speaker : Principal, x : Principal)
+.decl says_isSymbol(speaker : Principal, x : Symbol)
+says_isPrincipal("prin2", "prin2").
+says_isSymbol("prin2", "foo").
+says_isPrincipal("prin2", "prin1").
+says_isSymbol("prin2", "bar").
+says_isPrincipal("prin1", "prin2").
+says_isSymbol("prin1", "foo").
+says_isPrincipal("prin1", "prin1").
+says_isSymbol("prin1", "bar").
+says_fact1("prin1", thing_x) :- says_isSymbol("prin1", thing_x), says_cond1("prin1", thing_x).
+says_fact2("prin1", thing_x) :- says_isSymbol("prin1", thing_x), says_cond1("prin1", thing_x), says_cond2("prin1", thing_x, "bar").
+says_cond1("prin1", "foo").
+says_cond1("prin2", "foo").
+q_prin1_fact1("dummy_var") :- says_fact1("prin1", "foo"), grounded_dummy("dummy_var").
+q_prin1_fact2("dummy_var") :- says_fact2("prin1", "foo"), grounded_dummy("dummy_var").
+q_prin2_fact1("dummy_var") :- says_fact1("prin2", "foo"), grounded_dummy("dummy_var").
+grounded_dummy("dummy_var").
+.output q_prin1_fact1
+.output q_prin1_fact2
+.output q_prin2_fact1
