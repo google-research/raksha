@@ -32,6 +32,14 @@
 // `path` described by `violation`.
 .decl violatesPolicy(path: AccessPath, policy: PolicyName, message: symbol)
 
+// All errors should be reported via this relation.
+.decl hasError(message: symbol)
+.output hasError(delimiter=";")
+
+// Report violations of policy as errors.
+hasError(cat(cat(cat(cat(path, " violates policy "), policy), ": "), message)):-
+  violatesPolicy(path, policy, message).
+
 //-----------------------------------------------------------------------------
 // Relation Declarations
 //-----------------------------------------------------------------------------

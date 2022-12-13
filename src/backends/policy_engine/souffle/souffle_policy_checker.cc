@@ -37,6 +37,7 @@ using SouffleProgram = ::souffle::SouffleProgram;
 using DatalogLoweringVisitor = souffle::DatalogLoweringVisitor;
 
 static constexpr char kViolatesPolicyRelation[] = "violatesPolicy";
+static constexpr char kHasErrorRelation[] = "hasError";
 
 static bool IsModulePolicyCompliantHelper(
     const ir::Module& module, const Policy& policy,
@@ -69,10 +70,16 @@ static bool IsModulePolicyCompliantHelper(
   CHECK(setenv_result == 0) << "Could not set `SOUFFLE_ALLOW_SIGNALS";
   program->loadAll(facts_directory.string());
   program->run();
+  Relation& errors =
+      *ABSL_DIE_IF_NULL(program->getRelation(kHasErrorRelation));
+  for (::souffle::tuple &errorMessageTuple : errors) {
+    std::string message;
+    errorMessageTuple >> message;
+    LOG(ERROR) << "Error: " << message << "\n";
+  }
   Relation* hasPolicyViolation =
       ABSL_DIE_IF_NULL(program->getRelation(kViolatesPolicyRelation));
-
-  return hasPolicyViolation->size() == 0;
+  return hasPolicyViolation->size() + errors.size() == 0;
 }
 
 bool SoufflePolicyChecker::IsModulePolicyCompliant(const ir::Module& module,
