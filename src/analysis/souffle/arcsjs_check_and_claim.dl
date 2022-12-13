@@ -19,10 +19,12 @@
 #include "src/analysis/souffle/arcsjs_core.dl"
 #include "src/analysis/souffle/taint.dl"
 
-#define ARCSJS_CLAIM_OPERATOR as("arcsjs.claim", Operator)
 #define ARCSJS_CHECK_OPERATOR as("arcsjs.check", Operator)
 #define ARCSJS_CHECK_ARGUMENT_INDEX 0
+#define ARCSJS_CLAIM_OPERATOR as("arcsjs.claim", Operator)
 #define ARCSJS_CLAIM_ARGUMENT_INDEX 0
+#define ARCSJS_CHECK_NOT_OPERATOR as("arcsjs.check_not", Operator)
+#define ARCSJS_CHECK_NOT_ARGUMENT_INDEX 0
 #define ARCSJS_TAG_ATTRIBUTE "tag"
 
 .decl isArcsJsClaimOperation(arcsJsClaimOperation: Operation)
@@ -35,20 +37,10 @@ isArcsJsCheckOperation(op) :-
   isOperation(op),
   operationHasOperator(op, ARCSJS_CHECK_OPERATOR).
 
-.decl arcsJsClaimOperationHasTag(op: Operation, tag: Tag)
-.decl arcsJsClaimOperationHasArgument(op: Operation, argument: AccessPath)
-arcsJsClaimOperationHasTag(op, as(tag, Tag)),
-arcsJsClaimOperationHasArgument(op, argument) :-
-  isArcsJsClaimOperation(op),
-  operationHasOperandAtIndex(
-    op,
-    argument,
-    ARCSJS_CLAIM_ARGUMENT_INDEX
-  ),
-  operationHasAttribute(
-    op,
-    [ARCSJS_TAG_ATTRIBUTE, $StringAttributePayload(tag)]
-  ).
+.decl isArcsJsCheckNotOperation(arcsJsCheckNotOperation: Operation)
+isArcsJsCheckNotOperation(op) :-
+  isOperation(op),
+  operationHasOperator(op, ARCSJS_CHECK_NOT_OPERATOR).
 
 .decl arcsJsCheckOperationHasTag(op: Operation, tag: Tag)
 .decl arcsJsCheckOperationHasArgument(op: Operation, argument: AccessPath)
@@ -65,6 +57,36 @@ arcsJsCheckOperationHasArgument(op, argument) :-
     [ARCSJS_TAG_ATTRIBUTE, $StringAttributePayload(tag)]
   ).
 
+.decl arcsJsClaimOperationHasTag(op: Operation, tag: Tag)
+.decl arcsJsClaimOperationHasArgument(op: Operation, argument: AccessPath)
+arcsJsClaimOperationHasTag(op, as(tag, Tag)),
+arcsJsClaimOperationHasArgument(op, argument) :-
+  isArcsJsClaimOperation(op),
+  operationHasOperandAtIndex(
+    op,
+    argument,
+    ARCSJS_CLAIM_ARGUMENT_INDEX
+  ),
+  operationHasAttribute(
+    op,
+    [ARCSJS_TAG_ATTRIBUTE, $StringAttributePayload(tag)]
+  ).
+
+.decl arcsJsCheckNotOperationHasTag(op: Operation, tag: Tag)
+.decl arcsJsCheckNotOperationHasArgument(op: Operation, argument: AccessPath)
+arcsJsCheckNotOperationHasTag(op, as(tag, Tag)),
+arcsJsCheckNotOperationHasArgument(op, argument) :-
+  isArcsJsCheckNotOperation(op),
+  operationHasOperandAtIndex(
+    op,
+    argument,
+    ARCSJS_CHECK_NOT_ARGUMENT_INDEX
+  ),
+  operationHasAttribute(
+    op,
+    [ARCSJS_TAG_ATTRIBUTE, $StringAttributePayload(tag)]
+  ).
+
 isTag(tag) :-
   arcsJsClaimOperationHasTag(_, tag),
   tag != ARCSJS_PUBLIC_TAG.
@@ -73,30 +95,36 @@ isTag(tag) :-
   arcsJsCheckOperationHasTag(_, tag),
   tag != ARCSJS_PUBLIC_TAG.
 
+isTag(tag) :-
+  arcsJsCheckNotOperationHasTag(_, tag),
+  tag != ARCSJS_PUBLIC_TAG.
+
 // Adds `claim`ed tags to the argument of a `claim` operation.
 hasTag(argument, DEFAULT_ARCSJS_OWNER, claimed_tag) :-
   arcsJsClaimOperationHasTag(op, claimed_tag),
   claimed_tag != ARCSJS_PUBLIC_TAG,
   arcsJsClaimOperationHasArgument(op, argument).
 
-.decl arcsJsCheckedResultMissingExpectedTag(op: Operation, result: AccessPath, tag: Tag)
+.decl arcsJsCheckedResultMissingExpectedTag(op: Operation, node: AccessPath, tag: Tag)
 
 // Checks `check`ed tags are present on the argument of a `check` operation.
 arcsJsCheckedResultMissingExpectedTag(op, argument, tag) :-
   arcsJsCheckOperationHasTag(op, tag),
   arcsJsCheckOperationHasArgument(op, argument),
-  hasTag(argument, _, tag).
+  !hasTag(argument, _, tag).
 
 violatesPolicy(path, ARCSJS_CHECK_TAG_POLICY, cat(cat("Expected tag '", tag), cat("' missing at ", path))) :-
   arcsJsCheckedResultMissingExpectedTag(_, path, tag).
 
-.decl policyConformingClaim(op: Operation)
+.decl arcsJsCheckNotResultHasUnexpectedTag(op: Operation, node: AccessPath, tag: Tag)
+// Checks `check_not`ed tags are not present on the argument of a `check` operation.
+arcsJsCheckNotResultHasUnexpectedTag(op, argument, tag) :-
+  arcsJsCheckNotOperationHasTag(op, tag),
+  arcsJsCheckNotOperationHasArgument(op, argument),
+  hasTag(argument, _, tag).
 
-policyConformingClaim(op) :-
-  isArcsJsClaimOperation(op),
-  arcsJsClaimOperationHasArgument(op, _),
-  arcsJsClaimOperationHasTag(op, _),
-  count : { operationHasOperandAtIndex(op, _, _) } = 1.
+violatesPolicy(path, ARCSJS_CHECK_TAG_POLICY, cat(cat("Unexpected tag '", tag), cat("' found at ", path))) :-
+  arcsJsCheckNotResultHasUnexpectedTag(_, path, tag).
 
 // Violates policy if claim operations not correctly defined.
 violatesPolicy(result, ARCSJS_CONSTRUCTION_POLICY, cat("Malformed claim at ", result)) :-
@@ -118,9 +146,38 @@ violatesPolicy(result, ARCSJS_CONSTRUCTION_POLICY, cat("Malformed check at ", re
   !policyConformingCheck(op),
   operationHasResult(op, result).
 
-#undef ARCSJS_CLAIM_OPERATOR
+.decl policyConformingCheckNot(op: Operation)
+policyConformingCheckNot(op) :-
+  isArcsJsCheckNotOperation(op),
+  arcsJsCheckNotOperationHasArgument(op, _),
+  arcsJsCheckNotOperationHasTag(op, _),
+  count : { operationHasOperandAtIndex(op, _, _) } = 1.
+
+// Violates policy if check_not operations not correctly defined.
+// violatesPolicy(result, as(cat("Malformed check_not at ", result), PolicyName), ARCSJS_CONSTRUCTION_POLICY) :- // TODO(remove)
+violatesPolicy(result, ARCSJS_CONSTRUCTION_POLICY, cat("Malformed check_not at ", result)) :-
+  isArcsJsCheckNotOperation(op),
+  !policyConformingCheckNot(op),
+  operationHasResult(op, result).
+
+.decl policyConformingClaim(op: Operation)
+policyConformingClaim(op) :-
+  isArcsJsClaimOperation(op),
+  arcsJsClaimOperationHasArgument(op, _),
+  arcsJsClaimOperationHasTag(op, _),
+  count : { operationHasOperandAtIndex(op, _, _) } = 1.
+
+// Violates policy if claim operations not correctly defined.
+violatesPolicy(result, ARCSJS_CONSTRUCTION_POLICY, cat("Malformed claim at ", result)) :-
+  isArcsJsClaimOperation(op),
+  !policyConformingClaim(op),
+  operationHasResult(op, result).
+
 #undef ARCSJS_CHECK_OPERATOR
 #undef ARCSJS_CHECK_ARGUMENT_INDEX
+#undef ARCSJS_CHECK_NOT_OPERATOR
+#undef ARCSJS_CHECK_NOT_ARGUMENT_INDEX
+#undef ARCSJS_CLAIM_OPERATOR
 #undef ARCSJS_CLAIM_ARGUMENT_INDEX
 
 #endif // SRC_ANALYSIS_SOUFFLE_ARCSJS_CHECK_AND_CLAIM_DL_

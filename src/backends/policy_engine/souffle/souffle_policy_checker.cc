@@ -75,7 +75,7 @@ static bool IsModulePolicyCompliantHelper(
   for (::souffle::tuple &errorMessageTuple : errors) {
     std::string message;
     errorMessageTuple >> message;
-    LOG(ERROR) << "Error: " << message << "\n";
+    LOG(ERROR) << "[Error] " << message << "\n";
   }
   Relation* hasPolicyViolation =
       ABSL_DIE_IF_NULL(program->getRelation(kViolatesPolicyRelation));

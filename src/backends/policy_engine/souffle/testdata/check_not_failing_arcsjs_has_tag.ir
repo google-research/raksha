@@ -1,0 +1,30 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+module m0 {
+  block b0 {
+    %private_texts = arcsjs.create_store[name: "CheckNotPrivateRecipe.private_texts", type: "List_Text"]()
+    %share = arcsjs.create_store[name: "CheckNotPrivateRecipe.share", type: "List_Text"]()
+
+    %claim1 = arcsjs.claim[tag: "private"](%private_texts)
+
+    %exfil_p = arcsjs.particle[name: "CheckNotPrivateRecipe.exfil_particle"]()
+    %connect1 = arcsjs.connect_input[name: "secrets"](%exfil_p, %private_texts)
+    %connect2 = arcsjs.connect_output[name: "share"](%exfil_p, %share)
+
+    %check1 = arcsjs.check_not[tag: "private"](%private_texts)
+  }  // block b0
+}  // module m0

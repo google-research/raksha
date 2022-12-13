@@ -158,6 +158,8 @@ cc_binary(
 ) for ir_name, test_result in [
     ("simple_passing_arcsjs", "pass"),
     ("simple_failing_arcsjs", "fail"),
+    ("check_not_passing_arcsjs", "pass"),
+    ("check_not_failing_arcsjs_has_tag", "fail"),
     ("user_action_passing_arcsjs", "pass"),
     ("large_sample_passing_arcsjs", "pass"),
     ("user_action_failing_arcsjs_modified_after_consent", "fail"),
