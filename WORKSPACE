@@ -144,35 +144,6 @@ http_archive(
     urls = ["https://github.com/bazelbuild/platforms/archive/98939346da932eef0b54cf808622f5bb0928f00b.zip"],
 )
 
-#-------------------
-# Rust
-#-------------------
-http_archive(
-    name = "rules_rust",
-    sha256 = "531bdd470728b61ce41cf7604dc4f9a115983e455d46ac1d0c1632f613ab9fc3",
-    strip_prefix = "rules_rust-d8238877c0e552639d3e057aadd6bfcf37592408",
-    urls = [
-        # `main` branch as of 2021-08-23
-        "https://github.com/bazelbuild/rules_rust/archive/d8238877c0e552639d3e057aadd6bfcf37592408.tar.gz",
-    ],
-)
-
-load("@rules_rust//rust:repositories.bzl", "rust_repositories")
-
-# TODO(#143): We need this specific repository for authorization logic.
-rust_repositories(
-    edition = "2018",
-    iso_date = "2021-07-01",
-    version = "nightly",
-)
-
-#--------------------
-# Cargo Raze Crates
-#--------------------
-load("//third_party/cargo:crates.bzl", "raze_fetch_remote_crates")
-
-raze_fetch_remote_crates()
-
 # Buildifier
 
 # buildifier is written in Go and hence needs rules_go to be built.

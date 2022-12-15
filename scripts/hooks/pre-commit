@@ -52,7 +52,6 @@ SOURCE_FILES_PATTERNS=(
   ':(exclude,top)third_party'
   ':(exclude,top)images'
   ':(exclude,top)gcb'
-  ':(exclude,top)rust'
 )
 
 error() {

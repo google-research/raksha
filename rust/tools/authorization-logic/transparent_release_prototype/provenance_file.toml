@@ -1,7 +1,0 @@
-[[provenance]]
-repo = "https://github.com/project-oak/oak"
-commit_hash = "073ff28158e8ece7c5048e0eb7a6a91dd44af8cc"
-builder_image = "gcr.io/oak-ci/oak@sha256:6bc0ee3dc098d15ff93677217571a9d5ee3a54476b6a43435bc54343f4d90024"
-command = ["/workspace/scripts/runner", "build_functions_server"]
-output_path = "./oak_functions/loader/bin/oak_functions_loader"
-expected_binary_sha256_hash = "cb255dbbea86b128379995ff7dc805fd026e2d21c997a8df688ba9e5cb98e1c1"
