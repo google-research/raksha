@@ -41,10 +41,14 @@ template <typename T>
 class RefCounted {
  protected:
   RefCounted() : count_(0) {}
-  RefCounted(const RefCounted& other) : RefCounted() {}
-  RefCounted(const RefCounted&& other) : RefCounted() {}
 
+  // Disable copies and moves of RefCounted objects because they should be done
+  // by classes like intrusive_ptr, which update the reference counts
+  // appropriately.
+  RefCounted(const RefCounted& other) = delete;
+  RefCounted(const RefCounted&& other) = delete;
   RefCounted& operator=(const RefCounted&) = delete;
+  RefCounted& operator=(RefCounted&&) = delete;
 
  private:
   void Retain() const { count_.FetchAdd(1); }

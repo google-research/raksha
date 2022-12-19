@@ -28,6 +28,12 @@ class AttributeBase : public RefCounted<AttributeBase> {
  public:
   enum class Kind { kInt64, kString, kFloat };
   AttributeBase(Kind kind) : kind_(kind) {}
+
+  // A polymorphic class should not be copyable/movable to prevent slicing.
+  AttributeBase(const AttributeBase&) = delete;
+  AttributeBase& operator=(const AttributeBase&) = delete;
+  AttributeBase(AttributeBase&&) = delete;
+  AttributeBase& operator=(AttributeBase&&) = delete;
   virtual ~AttributeBase() {}
 
   Kind kind() const { return kind_; }
@@ -50,12 +56,6 @@ class Attribute {
   static Attribute Create(Args&&... a) {
     return T::Create(std::forward<Args>(a)...);
   }
-
-  // Use default copy, move, and assignments.
-  Attribute(const Attribute&) = default;
-  Attribute(Attribute&&) = default;
-  Attribute& operator=(const Attribute&) = default;
-  Attribute& operator=(Attribute&&) = default;
 
   // If this is of type `T` as identified by the `kind`, this method returns a
   // non-null value to the underlying attribute. Otherwise, returns nullptr.

@@ -52,6 +52,8 @@ class IRToProto {
   // Disable copy (and move) semantics.
   IRToProto(const IRToProto&) = delete;
   IRToProto& operator=(const IRToProto&) = delete;
+  IRToProto(IRToProto&&) = delete;
+  IRToProto& operator=(IRToProto&&) = delete;
 
   virtual ~IRToProto() {}
 

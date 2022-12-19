@@ -29,6 +29,11 @@ namespace raksha::backends::policy_engine {
 // probably want something more flexible in the future.
 class Policy {
  public:
+  Policy() = default;
+  Policy(const Policy&) = delete;
+  Policy& operator=(const Policy&) = delete;
+  Policy(Policy&&) = delete;
+  Policy& operator=(Policy&&) = delete;
   virtual ~Policy() = default;
 
   // The name of the checker that should be used to analyze this kind of policy.

@@ -29,10 +29,12 @@ namespace raksha::ir {
 class IRContext {
  public:
   IRContext() = default;
-  // Disable copy (and move) semantics.
+  // Disable copy semantics.
   IRContext(const IRContext &) = delete;
   IRContext &operator=(const IRContext &) = delete;
   IRContext(IRContext &&) = default;
+  IRContext &operator=(IRContext &&) = default;
+  ~IRContext() = default;
 
   // Create a context with some number of operators and storages pre-seeded.
   IRContext(std::vector<ir::Operator> operators,

@@ -28,7 +28,6 @@ class iterator_range {
   using const_iterator = I;
   using value_type = typename std::iterator_traits<I>::value_type;
 
-  iterator_range() = default;
   iterator_range(I begin, I end)
       : begin_(std::move(begin)), end_(std::move(end)) {}
 

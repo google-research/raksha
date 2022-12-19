@@ -33,10 +33,12 @@ class intrusive_ptr {
   intrusive_ptr(intrusive_ptr<T>&& other) : ptr_(other.ptr_) {
     other.ptr_ = nullptr;
   }
-  
-  template <class X, std::enable_if_t<std::is_convertible<X *, T *>::value, bool> = true>
+  intrusive_ptr<T>& operator=(intrusive_ptr<T>&& other) = delete;
+
+  template <class X,
+            std::enable_if_t<std::is_convertible<X*, T*>::value, bool> = true>
   intrusive_ptr(const intrusive_ptr<X>& other) : ptr_(Retain(other.get())) {}
-  
+
   ~intrusive_ptr() { Release(ptr_); }
 
   intrusive_ptr<T>& operator=(intrusive_ptr<T> other) {
@@ -53,9 +55,7 @@ class intrusive_ptr {
 
   T* operator->() const { return ptr_; }
   T* get() const { return ptr_; }
-  explicit operator bool() const {
-    return ptr_ != nullptr;
-  }
+  explicit operator bool() const { return ptr_ != nullptr; }
 
  private:
   void Swap(intrusive_ptr<T>& other) {
@@ -87,52 +87,52 @@ intrusive_ptr<T> make_intrusive_ptr(Args&&... a) {
 }
 
 template <class T, class U>
-bool operator==(const intrusive_ptr<T> &lhs, const intrusive_ptr<U> &rhs) {
+bool operator==(const intrusive_ptr<T>& lhs, const intrusive_ptr<U>& rhs) {
   return lhs.get() == rhs.get();
 }
 
 template <class T, class U>
-bool operator!=(const intrusive_ptr<T> &lhs, const intrusive_ptr<U> &rhs) {
+bool operator!=(const intrusive_ptr<T>& lhs, const intrusive_ptr<U>& rhs) {
   return !(lhs == rhs);
 }
 
 template <class T, class U>
-bool operator==(const intrusive_ptr<T> &lhs, U *rhs) {
+bool operator==(const intrusive_ptr<T>& lhs, U* rhs) {
   return lhs.get() == rhs;
 }
 
 template <class T, class U>
-bool operator!=(const intrusive_ptr<T> &lhs, U *rhs) {
+bool operator!=(const intrusive_ptr<T>& lhs, U* rhs) {
   return !(lhs.get() == rhs);
 }
 
 template <class T, class U>
-bool operator==(T *lhs, const intrusive_ptr<U> &rhs) {
+bool operator==(T* lhs, const intrusive_ptr<U>& rhs) {
   return lhs == rhs.get();
 }
 
 template <class T, class U>
-bool operator!=(T *lhs, const intrusive_ptr<U> &rhs) {
+bool operator!=(T* lhs, const intrusive_ptr<U>& rhs) {
   return !(lhs == rhs.get());
 }
 
 template <class T>
-bool operator==(std::nullptr_t, const intrusive_ptr<T> &rhs) {
+bool operator==(std::nullptr_t, const intrusive_ptr<T>& rhs) {
   return !(rhs.get());
 }
 
 template <class T>
-bool operator==(const intrusive_ptr<T> &lhs, std::nullptr_t rhs) {
+bool operator==(const intrusive_ptr<T>& lhs, std::nullptr_t rhs) {
   return rhs == lhs.get();
 }
 
 template <class T>
-bool operator!=(std::nullptr_t lhs, const intrusive_ptr<T> &rhs) {
+bool operator!=(std::nullptr_t lhs, const intrusive_ptr<T>& rhs) {
   return !(lhs == rhs.get());
 }
 
 template <class T>
-bool operator!=(const intrusive_ptr<T> &lhs, std::nullptr_t rhs) {
+bool operator!=(const intrusive_ptr<T>& lhs, std::nullptr_t rhs) {
   return !(lhs.get() == rhs);
 }
 }  // namespace raksha

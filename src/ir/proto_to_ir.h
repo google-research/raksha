@@ -93,6 +93,8 @@ class ProtoToIR {
   // Disable copy (and move) semantics.
   ProtoToIR(const ProtoToIR&) = delete;
   ProtoToIR& operator=(const ProtoToIR&) = delete;
+  ProtoToIR(ProtoToIR&&) = delete;
+  ProtoToIR& operator=(ProtoToIR&&) = delete;
 
   virtual ~ProtoToIR() {}
 

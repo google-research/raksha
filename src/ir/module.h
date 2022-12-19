@@ -48,9 +48,11 @@ class Operation {
 
   Operation(const Operator& op) : Operation(nullptr, op, {}, {}) {}
 
-  // Disable copy (and move) semantics.
+  // Disable copy semantics.
   Operation(const Operation&) = delete;
   Operation& operator=(const Operation&) = delete;
+  Operation(Operation&&) = default;
+  Operation& operator=(Operation&&) = default;
 
   virtual ~Operation() {}
 
@@ -106,9 +108,12 @@ class Block {
 
   Block() : parent_module_(nullptr) {}
 
-  // Disable copy (and move) semantics.
+  // Disable copy semantics.
   Block(const Block&) = delete;
   Block& operator=(const Block&) = delete;
+  Block(Block&&) = default;
+  Block& operator=(Block&&) = default;
+  ~Block() = default;
 
   const OperationList& operations() const { return operations_; }
   const DataDeclCollection& inputs() const { return inputs_; }
@@ -154,12 +159,14 @@ class Module {
   using BlockListType = std::vector<std::unique_ptr<Block>>;
   using NamedStorageMap =
       absl::flat_hash_map<std::string, std::unique_ptr<Storage>>;
-  Module() {}
 
+  Module() {}
+  // Make the class move-only.
   Module(const Module&) = delete;
   Module& operator=(const Module&) = delete;
   Module(Module&&) = default;
   Module& operator=(Module&&) = default;
+  ~Module() = default;
 
   // Adds a block to the module and returns a pointer to it.
   const Block& AddBlock(std::unique_ptr<Block> block) {

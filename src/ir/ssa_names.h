@@ -36,6 +36,8 @@ class SsaNames {
   SsaNames(const SsaNames &) = delete;
   SsaNames &operator=(const SsaNames &) = delete;
   SsaNames(SsaNames &&) = default;
+  SsaNames &operator=(SsaNames &&) = default;
+  ~SsaNames() = default;
 
   ID GetOrCreateID(const Block &block) {
     return block_ids_.GetOrCreateID(&block);

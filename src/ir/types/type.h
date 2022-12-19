@@ -17,8 +17,8 @@
 #define SRC_IR_TYPES_TYPE_H_
 
 #include "absl/container/flat_hash_set.h"
-#include "src/ir/access_path_selectors_set.h"
 #include "src/common/utils/intrusive_ptr.h"
+#include "src/ir/access_path_selectors_set.h"
 
 namespace raksha::ir::types {
 
@@ -26,6 +26,11 @@ class TypeBase : public RefCounted<TypeBase> {
  public:
   enum class Kind { kPrimitive, kEntity };
 
+  TypeBase() = default;
+  TypeBase(const TypeBase&) = delete;
+  TypeBase& operator=(const TypeBase&) = delete;
+  TypeBase(TypeBase&&) = delete;
+  TypeBase& operator=(TypeBase&&) = delete;
   virtual ~TypeBase() {}
 
   virtual raksha::ir::AccessPathSelectorsSet GetAccessPathSelectorsSet()

@@ -32,9 +32,9 @@ class Storage {
   // Disable copy semantics.
   Storage(const Storage&) = delete;
   Storage& operator=(const Storage&) = delete;
-
   Storage(Storage&&) = default;
   Storage& operator=(Storage&&) = default;
+  ~Storage() = default;
 
   void AddInputValue(Value value) { input_values_.insert(value); }
 

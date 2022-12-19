@@ -46,11 +46,6 @@ class IndexedValue {
   IndexedValue(const T& element, uint64_t index)
       : element_(&element), index_(index) {}
 
-  IndexedValue(const IndexedValue&) = default;
-  IndexedValue& operator=(const IndexedValue&) = default;
-  IndexedValue(IndexedValue&&) = default;
-  IndexedValue& operator=(IndexedValue&&) = default;
-
   template <typename H>
   friend H AbslHashValue(H h, const IndexedValue<T>& v) {
     return H::combine(std::move(h), v.element_, v.index_);

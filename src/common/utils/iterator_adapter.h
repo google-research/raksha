@@ -62,9 +62,6 @@ struct IteratorAdapter {
     }
   }
 
-  IteratorAdapter(const IteratorAdapter& other) = default;
-  IteratorAdapter(IteratorAdapter&& other) = default;
-
  private:
   explicit IteratorAdapter(Iterator underlying_iterator,
                            Context context = Context())

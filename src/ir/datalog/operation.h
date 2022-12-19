@@ -39,6 +39,8 @@ using Operation =
 class IsOperationFact : public InputRelationFact<Operation> {
  public:
   using InputRelationFact::InputRelationFact;
+  IsOperationFact(IsOperationFact &) = delete;
+  IsOperationFact &operator=(const IsOperationFact &) = delete;
   IsOperationFact(IsOperationFact &&) = default;
   IsOperationFact &operator=(IsOperationFact &&) = default;
   virtual ~IsOperationFact() {}
