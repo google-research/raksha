@@ -32,9 +32,12 @@ class WorklistFixpointIterator {
   using AbstractState = typename AbstractSemantics::AbstractState;
   using NodeStateMap = absl::flat_hash_map<Node, AbstractState>;
 
-  // Computes a fixpoint for the given graph and returns the computed fixpoint.
-  NodeStateMap ComputeFixpoint(const Graph& graph) const {
-    AbstractSemantics semantics(graph);
+  // Computes a fixpoint for the given graph by instantiating a new
+  // AbstractSemantics object and returns the computed fixpoint.
+  template <typename SemanticsMaker>
+  NodeStateMap ComputeFixpoint(const Graph& graph,
+                               SemanticsMaker semantics_maker) const {
+    AbstractSemantics semantics = semantics_maker(graph);
     NodeStateMap node_states;
     absl::flat_hash_set<Node> worklist;
     for (const Node& entry : semantics.GetEntryNodes()) {

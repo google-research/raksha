@@ -59,7 +59,6 @@ class ReachingNodesAndEdgesSemantics {
  public:
   using Graph = IntGraph;
   using AbstractState = absl::flat_hash_set<IntGraph::Node>;
-
   ReachingNodesAndEdgesSemantics(const IntGraph& graph) : graph_(&graph) {}
 
   IntGraph::NodeSet GetEntryNodes() const { return {1}; }
@@ -114,7 +113,10 @@ TEST(WorklistFixpointIteratorTest, ComputesFixpoint) {
               {8, {10}},
               {9, {}},
               {10, {}}});
-  auto result = solver.ComputeFixpoint(g);
+  auto result =
+      solver.ComputeFixpoint(g, /*semantics_maker=*/[](const IntGraph& g) {
+        return ReachingNodesAndEdgesSemantics(g);
+      });
 
   IntGraph::NodeSet stateInLoop(
       {1, 2, 3, 4, 5, 6, /*edges*/ 1002, 2003, 3004, 4005, 5006, 6003});
