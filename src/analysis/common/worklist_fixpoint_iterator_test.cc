@@ -55,12 +55,12 @@ class IntGraph {
 };
 
 // Interpreter for computing reaching nodes and edges.
-class ReachingNodesAndEdgesInterpreter {
+class ReachingNodesAndEdgesSemantics {
  public:
   using Graph = IntGraph;
   using AbstractState = absl::flat_hash_set<IntGraph::Node>;
 
-  ReachingNodesAndEdgesInterpreter(const IntGraph& graph) : graph_(&graph) {}
+  ReachingNodesAndEdgesSemantics(const IntGraph& graph) : graph_(&graph) {}
 
   IntGraph::NodeSet GetEntryNodes() const { return {1}; }
 
@@ -100,7 +100,7 @@ class ReachingNodesAndEdgesInterpreter {
 };
 
 using ReachingNodesAndEdgesAnalysis =
-    WorklistFixpointIterator<ReachingNodesAndEdgesInterpreter>;
+    WorklistFixpointIterator<ReachingNodesAndEdgesSemantics>;
 
 TEST(WorklistFixpointIteratorTest, ComputesFixpoint) {
   ReachingNodesAndEdgesAnalysis solver;

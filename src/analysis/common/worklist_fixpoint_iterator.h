@@ -22,24 +22,24 @@
 
 namespace raksha::analysis::common {
 
-template <typename AbstractInterpreter>
+template <typename AbstractSemantics>
 class WorklistFixpointIterator {
  public:
-  // TODO(b/258095882): Add a way to encode requirements for AbstractInterpreter
-  using Graph = typename AbstractInterpreter::Graph;
+  // TODO(b/258095882): Add a way to encode requirements for AbstractSemantics
+  using Graph = typename AbstractSemantics::Graph;
   using Node = typename Graph::Node;
   using Edge = typename Graph::Edge;
-  using AbstractState = typename AbstractInterpreter::AbstractState;
+  using AbstractState = typename AbstractSemantics::AbstractState;
   using NodeStateMap = absl::flat_hash_map<Node, AbstractState>;
 
   // Computes a fixpoint for the given graph and returns the computed fixpoint.
   NodeStateMap ComputeFixpoint(const Graph& graph) const {
-    AbstractInterpreter interpreter(graph);
+    AbstractSemantics semantics(graph);
     NodeStateMap node_states;
     absl::flat_hash_set<Node> worklist;
-    for (const Node& entry : interpreter.GetEntryNodes()) {
+    for (const Node& entry : semantics.GetEntryNodes()) {
       worklist.insert(entry);
-      node_states[entry] = interpreter.GetInitialState(entry);
+      node_states[entry] = semantics.GetInitialState(entry);
     }
 
     while (!worklist.empty()) {
@@ -54,25 +54,25 @@ class WorklistFixpointIterator {
       const AbstractState& node_state_in = node_state_find_result->second;
 
       AbstractState node_state_out =
-          interpreter.ApplyNodeTransformer(node, node_state_in);
+          semantics.ApplyNodeTransformer(node, node_state_in);
 
       // Apply edge transformation and propagate to targets of node.
       for (const Edge& edge : graph.GetOutEdges(node)) {
         AbstractState edge_out =
-            interpreter.ApplyEdgeTransformer(edge, node_state_out);
+            semantics.ApplyEdgeTransformer(edge, node_state_out);
 
         const Node& target = graph.GetEdgeTarget(edge);
         auto find_result = node_states.find(target);
         bool first_visit = find_result == node_states.end();
         const AbstractState& target_old_state_in =
-            (first_visit) ? interpreter.GetInitialState(target)
+            (first_visit) ? semantics.GetInitialState(target)
                           : find_result->second;
 
         const AbstractState& target_new_state_in =
-            interpreter.CombineStates(edge_out, target_old_state_in);
+            semantics.CombineStates(edge_out, target_old_state_in);
 
-        if (first_visit || !interpreter.AreStatesEqual(target_new_state_in,
-                                                       target_old_state_in)) {
+        if (first_visit || !semantics.AreStatesEqual(target_new_state_in,
+                                                     target_old_state_in)) {
           node_states.insert_or_assign(target, target_new_state_in);
           worklist.insert(target);
         }
