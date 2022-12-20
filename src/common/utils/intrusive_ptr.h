@@ -33,7 +33,6 @@ class intrusive_ptr {
   intrusive_ptr(intrusive_ptr<T>&& other) : ptr_(other.ptr_) {
     other.ptr_ = nullptr;
   }
-  intrusive_ptr<T>& operator=(intrusive_ptr<T>&& other) = delete;
 
   template <class X,
             std::enable_if_t<std::is_convertible<X*, T*>::value, bool> = true>
