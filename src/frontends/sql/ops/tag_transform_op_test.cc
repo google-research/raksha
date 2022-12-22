@@ -18,6 +18,8 @@
 #include <algorithm>
 
 #include "src/common/testing/gtest.h"
+#include "src/common/utils/map_iter.h"
+#include "src/common/utils/ranges.h"
 #include "src/frontends/sql/ops/example_value_test_helper.h"
 #include "src/frontends/sql/ops/sql_op.h"
 #include "src/ir/attributes/attribute.h"
@@ -30,6 +32,7 @@ namespace raksha::frontends::sql {
 namespace {
 
 using ::testing::Combine;
+using ::testing::UnorderedElementsAreArray;
 using ::testing::ValuesIn;
 
 class TagTransformOpTest
@@ -81,8 +84,29 @@ TEST_P(TagTransformOpTest, AccessorsReturnTheCorrectValue) {
       parent_block, context, policy_rule_name, xformed_value, preconditions);
   EXPECT_EQ(tag_transform_op->GetRuleName(), policy_rule_name);
   EXPECT_EQ(tag_transform_op->GetTransformedValue(), xformed_value);
-  EXPECT_THAT(tag_transform_op->GetPreconditions(),
+  EXPECT_EQ(tag_transform_op->GetTransformedValueIndex(), 0);
+  const auto& actual_preconditions = tag_transform_op->GetPreconditions();
+  EXPECT_THAT(actual_preconditions,
               ::testing::UnorderedElementsAreArray(preconditions));
+  const auto& actual_precondition_indices =
+      tag_transform_op->GetPreconditionInputIndices();
+
+  // Make sure that the keys of the preconditions and indices are the same.
+  std::vector<std::string> actual_precondition_names =
+      utils::MapIter<std::string>(
+          actual_preconditions,
+          [](const auto& name_value) { return name_value.first; });
+  EXPECT_THAT(utils::ranges::keys(actual_precondition_indices),
+              UnorderedElementsAreArray(actual_precondition_names));
+
+  // Make sure returned values match the attributes in the tag_transform_op.
+  const auto& attributes = tag_transform_op->attributes();
+  for (const auto& [name, index] : actual_precondition_indices) {
+    auto find_result = attributes.find(name);
+    ASSERT_TRUE(find_result != attributes.end());
+    EXPECT_EQ(find_result->second,
+              ir::Attribute::Create<ir::Int64Attribute>(index));
+  }
 }
 
 TEST(TagTransformOpDeathTest, DuplicatePreconditionNamesAreDetected) {

@@ -141,10 +141,11 @@ cc_test(
     srcs = ["tag_transform_op_test.cc"],
     deps = [
         ":example_value_test_helper",
-        ":op_traits",
         ":sql_op",
         ":tag_transform_op",
         "//src/common/testing:gtest",
+        "//src/common/utils:map_iter",
+        "//src/common/utils:ranges",
         "//src/ir:ir_context",
         "//src/ir:value",
         "//src/ir/attributes:attribute",

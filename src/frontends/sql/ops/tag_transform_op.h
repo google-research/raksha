@@ -37,8 +37,15 @@ class TagTransformOp : public SqlOp {
   // Returns the value that is being transformed by this op.
   ir::Value GetTransformedValue() const;
 
+  // Returns the input index of value that is being transformed by this op.
+  uint64_t GetTransformedValueIndex() const;
+
   // Returns the preconditions.
   common::containers::HashMap<std::string, ir::Value> GetPreconditions() const;
+
+  // Returns the input indexes of the values used in the precondition.
+  common::containers::HashMap<std::string, uint64_t>
+  GetPreconditionInputIndices() const;
 
   absl::string_view GetRuleName() const;
 

@@ -51,9 +51,18 @@ std::unique_ptr<TagTransformOp> TagTransformOp::Create(
       attributes, inputs);
 }
 
+uint64_t TagTransformOp::GetTransformedValueIndex() const {
+  // A tag transform operation is of the following form:
+  //   result = sql.tag_transform [] (value, precond1, precond2, ...)
+  //
+  // The first argument of the tag transform operation is the one for which
+  // the tags are being modified. Therefore, we return 0.
+  CHECK(!inputs().empty());
+  return 0;
+}
+
 ir::Value TagTransformOp::GetTransformedValue() const {
-  CHECK(inputs().size() > 0);
-  return inputs().front();
+  return GetInputValue(GetTransformedValueIndex());
 }
 
 common::containers::HashMap<std::string, ir::Value>
@@ -72,6 +81,27 @@ TagTransformOp::GetPreconditions() const {
           input_index < static_cast<int64_t>(input_values.size()))
         << "Invalid index in TagTransformOp";
     result.insert({name, input_values[input_index]});
+  }
+  return result;
+}
+
+common::containers::HashMap<std::string, uint64_t>
+TagTransformOp::GetPreconditionInputIndices() const {
+  common::containers::HashMap<std::string, uint64_t> result;
+  const ir::ValueList& input_values = inputs();
+  for (const auto& [name, attribute] : attributes()) {
+    if (name == kRuleNameAttribute) continue;
+    auto int_attribute =
+        ABSL_DIE_IF_NULL(attribute.GetIf<ir::Int64Attribute>());
+
+    auto input_index = int_attribute->value();
+    // If input_values.size() > std::numeric_limits<int64_t>::max(), the
+    // static_cast will return a negative value and this condition will fail,
+    // which is desired.
+    CHECK(input_index >= 1 &&
+          input_index < static_cast<int64_t>(input_values.size()))
+        << "Invalid index in TagTransformOp";
+    result.insert({name, input_index});
   }
   return result;
 }
