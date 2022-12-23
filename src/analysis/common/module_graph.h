@@ -52,6 +52,16 @@ class ModuleGraph {
     }
   };
 
+  template <typename T>
+  struct TargetMaterializer {
+    std::pair<EdgeIndex, T> operator()(
+        const std::pair<EdgeIndex, Node>& target) {
+      CHECK(std::holds_alternative<T>(target.second))
+          << "ModuleGraph has an unexpected edge.";
+      return std::make_pair(target.first, std::get<T>(target.second));
+    }
+  };
+
   explicit ModuleGraph(const ir::Module* module);
 
   // Returns all the nodes in the graph.
@@ -59,11 +69,20 @@ class ModuleGraph {
 
   // Returns the out edges of the given source.
   auto GetOutEdges(const Node& source) const {
-    auto find_result = adjacency_list_.find(source);
-    CHECK(find_result != adjacency_list_.end())
-        << "GetOutEdges: source not found in graph.";
-    return utils::make_adapted_range<EdgeMaterializer>(find_result->second,
+    return utils::make_adapted_range<EdgeMaterializer>(GetAdjacentNodes(source),
                                                        source);
+  }
+
+  // Returns the uses of the given value as (index, Operation) pairs.
+  auto GetUses(const ir::Value& value) const {
+    return utils::make_adapted_range<TargetMaterializer<const ir::Operation*>>(
+        GetAdjacentNodes(value));
+  }
+
+  // Returns the results of the given operation as (index, Value) pairs.
+  auto GetResults(const ir::Operation* operation) const {
+    return utils::make_adapted_range<TargetMaterializer<ir::Value>>(
+        GetAdjacentNodes(operation));
   }
 
   // Returns the source node of an edge.
@@ -73,6 +92,13 @@ class ModuleGraph {
   const Node& GetEdgeTarget(const Edge& edge) const { return edge.target; }
 
  private:
+  const AdjacencyList::mapped_type& GetAdjacentNodes(const Node& source) const {
+    auto find_result = adjacency_list_.find(source);
+    CHECK(find_result != adjacency_list_.end())
+        << "GetOutEdges: source not found in graph.";
+    return find_result->second;
+  }
+
   const ir::Module& module_;
   AdjacencyList adjacency_list_;
 };

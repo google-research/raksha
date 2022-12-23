@@ -9,7 +9,9 @@
 #include "absl/strings/substitute.h"
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/iterator_adapter.h"
+#include "src/common/utils/overloaded.h"
 #include "src/ir/ir_printer.h"
+#include "src/ir/module.h"
 #include "src/ir/ssa_names.h"
 #include "src/ir/value.h"
 #include "src/ir/value_string_converter.h"
@@ -19,12 +21,13 @@
 namespace raksha::analysis::common {
 namespace {
 
+using ::testing::UnorderedPointwise;
 using NodeId = size_t;
 using raksha::parser::ir::IrProgramParserResult;
 using raksha::parser::ir::ParseProgram;
 
 struct ModuleGraphTestCase {
-  using Edge = std::tuple<NodeId, NodeId, NodeId>;
+  using Edge = std::tuple<NodeId, ModuleGraph::EdgeIndex, NodeId>;
   std::string test_name;
   absl::flat_hash_map<std::string, NodeId> node_string_ids;
   absl::flat_hash_set<NodeId> expected_nodes;
@@ -65,77 +68,93 @@ class ModuleGraphTest : public ::testing::TestWithParam<ModuleGraphTestCase> {
   ModuleGraphTest();
   const ModuleGraph& graph() const { return graph_; }
 
-  // Returns the node ids in the graph.
-  auto GetNodes() const {
-    return utils::make_adapted_range<GraphNodeToIdMapper>(graph_.GetNodes(),
-                                                          node_to_id_);
-  }
-
   const ModuleGraph::Node& GetNode(NodeId id) const {
     return id_to_node_.at(id);
   }
 
-  // Returns the out edges of the node with given `id`.
-  auto GetOutEdges(NodeId id) const {
-    return utils::make_adapted_range<GraphEdgeToIdMapper>(
-        graph_.GetOutEdges(GetNode(id)), node_to_id_);
+  NodeId GetNodeId(ModuleGraph::Node node) const {
+    auto find_result = node_to_id_.find(node);
+    CHECK(find_result != node_to_id_.end()) << "Unable to find a node id";
+    return find_result->second;
   }
 
  private:
-  // Returns the selected node id for the given node.
-  struct GraphNodeToIdMapper {
-    NodeId operator()(
-        const ModuleGraph::Node& node,
-        const absl::flat_hash_map<ModuleGraph::Node, NodeId>& node_ids) const {
-      auto find_result = node_ids.find(node);
-      CHECK(find_result != node_ids.end()) << "Unable to find a node id";
-      return find_result->second;
-    }
-  };
-
-  // Replaces the ModuleGraph::Node entities in an ModuleGraph::Edge with the
-  // corresponding id and returns the corresponding tuple.
-  struct GraphEdgeToIdMapper {
-    std::tuple<NodeId, ModuleGraph::EdgeIndex, NodeId> operator()(
-        const ModuleGraph::Edge& edge,
-        const absl::flat_hash_map<ModuleGraph::Node, NodeId>& node_ids) const {
-      return std::make_tuple(GraphNodeToIdMapper()(edge.source, node_ids),
-                             edge.index,
-                             GraphNodeToIdMapper()(edge.target, node_ids));
-    }
-  };
-
   IrProgramParserResult parse_result_;
   ModuleGraph graph_;
   absl::flat_hash_map<ModuleGraph::Node, NodeId> node_to_id_;
   absl::flat_hash_map<NodeId, ModuleGraph::Node> id_to_node_;
 };
 
+// Matches node against node_id.
+MATCHER_P(NodeEq, module_graph_test, "") {
+  const auto& [actual, expected] = arg;
+  return actual == module_graph_test->GetNode(expected);
+}
+
+// Checks a target, which is represented as a pair (index, target) matches the
+// target portion of an edge, which is represented as (source, index, target).
+MATCHER_P(TargetIndexEq, module_graph_test, "") {
+  const auto& [use, edge] = arg;
+  return use.first == std::get<1>(edge) &&
+         module_graph_test->GetNode(std::get<2>(edge)) ==
+             ModuleGraph::Node(use.second);
+}
+
+// Matches (node, index, node) with (node_id, index, node_id)
+MATCHER_P(EdgeEq, module_graph_test, "") {
+  const auto& [actual, expected] = arg;
+  return ModuleGraph::Node(actual.source) ==
+             module_graph_test->GetNode(std::get<0>(expected)) &&
+         actual.index == std::get<1>(expected) &&
+         ModuleGraph::Node(actual.target) ==
+             module_graph_test->GetNode(std::get<2>(expected));
+}
+
 TEST_P(ModuleGraphTest, GraphIsConstructedProperly) {
   const auto& param = GetParam();
-  EXPECT_THAT(GetNodes(), ::testing::UnorderedPointwise(::testing::Eq(),
-                                                        param.expected_nodes));
-  for (const auto& node : GetNodes()) {
-    auto edge_result = param.expected_edges.find(node);
+  const ModuleGraph& test_graph = graph();
+  EXPECT_THAT(test_graph.GetNodes(),
+              UnorderedPointwise(NodeEq(this), param.expected_nodes));
+  for (const auto& node : test_graph.GetNodes()) {
+    NodeId node_id = GetNodeId(node);
+    auto edge_result = param.expected_edges.find(node_id);
     ASSERT_NE(edge_result, param.expected_edges.end())
-        << "Unable to find expected edges for node: " << node;
-    EXPECT_THAT(GetOutEdges(node), ::testing::UnorderedPointwise(
-                                       ::testing::Eq(), edge_result->second));
+        << "Unable to find expected edges for node: " << node_id;
 
-    for (const auto& edge : graph().GetOutEdges(GetNode(node))) {
+    // Check GetOutEdges API
+    EXPECT_THAT(test_graph.GetOutEdges(node),
+                UnorderedPointwise(EdgeEq(this), edge_result->second));
+
+    // Check GetUses and GetResults API.
+    std::visit(
+        utils::overloaded{
+            [this, &test_graph, &edge_result](const ir::Value& value) {
+              EXPECT_THAT(
+                  test_graph.GetUses(value),
+                  UnorderedPointwise(TargetIndexEq(this), edge_result->second));
+            },
+            [this, &test_graph, &edge_result](const ir::Operation* operation) {
+              EXPECT_THAT(
+                  test_graph.GetResults(operation),
+                  UnorderedPointwise(TargetIndexEq(this), edge_result->second));
+            }},
+        node);
+
+    for (const auto& edge : test_graph.GetOutEdges(node)) {
       const auto& [source, index, target] = edge;
-      EXPECT_THAT(graph().GetEdgeSource(edge), source);
-      EXPECT_THAT(graph().GetEdgeTarget(edge), target);
+      EXPECT_THAT(test_graph.GetEdgeSource(edge), source);
+      EXPECT_THAT(test_graph.GetEdgeTarget(edge), target);
     }
   }
 }
 
 TEST_P(ModuleGraphTest, GetEdgeTargetAndGetEdgeSourceBehavesCorrectly) {
-  for (const auto& node : GetNodes()) {
-    for (const auto& edge : graph().GetOutEdges(GetNode(node))) {
+  const ModuleGraph& test_graph = graph();
+  for (const auto& node : test_graph.GetNodes()) {
+    for (const auto& edge : test_graph.GetOutEdges(node)) {
       const auto& [source, index, target] = edge;
-      EXPECT_THAT(graph().GetEdgeSource(edge), source);
-      EXPECT_THAT(graph().GetEdgeTarget(edge), target);
+      EXPECT_THAT(test_graph.GetEdgeSource(edge), source);
+      EXPECT_THAT(test_graph.GetEdgeTarget(edge), target);
     }
   }
 }
