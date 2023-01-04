@@ -61,6 +61,35 @@ cc_test(
 )
 
 cc_library(
+    name = "module_fixpoint_iterator",
+    hdrs = ["module_fixpoint_iterator.h"],
+    deps = [
+        ":module_graph",
+        "//src/common/utils:map_iter",
+        "//src/common/utils:overloaded",
+        "//src/ir:module",
+        "//src/ir:value",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+    ],
+)
+
+cc_test(
+    name = "module_fixpoint_iterator_test",
+    srcs = ["module_fixpoint_iterator_test.cc"],
+    deps = [
+        ":module_fixpoint_iterator",
+        "//src/common/testing:gtest",
+        "//src/common/utils:fold",
+        "//src/ir:ssa_names",
+        "//src/ir:value_string_converter",
+        "//src/parser/ir:ir_parser",
+        "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/container:btree",
+    ],
+)
+
+cc_library(
     name = "worklist_fixpoint_iterator",
     hdrs = ["worklist_fixpoint_iterator.h"],
     deps = [
