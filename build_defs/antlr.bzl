@@ -19,19 +19,23 @@ Generates C++ parser, visitor, listener, lexer from a grammar file.
 
 load("@rules_antlr//antlr:antlr4.bzl", "antlr")
 
-def antlr4_cc_combined(name, src, listener = False, visitor = True):
+def antlr4_cc_combined(name, src, token_vocab = None, listener = False, visitor = True):
     """Creates a C++ lexer, visitor, listener, parser from a source grammar.
     Args:
       name: Base name for the lexer and the parser rules.
-      src: source ANTLR grammar file
+      src: source ANTLR parser file
+      token_vocab: an ANTLR file providing the lexer.
       package: The namespace for the generated code
       listener: generate ANTLR listener (default: True)
       visitor: generate ANTLR visitor (default: True)
     """
     generated = name + "_grammar"
+    srcs = [src]
+    if not token_vocab == None:
+        srcs += [token_vocab]
     antlr(
         name = generated,
-        srcs = [src],
+        srcs = srcs,
         language = "Cpp",
         listener = listener,
         visitor = visitor,
