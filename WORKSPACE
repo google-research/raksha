@@ -1,4 +1,4 @@
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
 #--------------------
 # googletest
@@ -246,4 +246,25 @@ http_archive(
     sha256 = "72ae2d28323748d2c466396fa47038351ae81bedc50b8a3c6f1de6a9f02cde33",
     strip_prefix = "fuzztest-" + fuzztest_commit_hash,
     urls = ["https://github.com/google/fuzztest/archive/" + fuzztest_commit_hash + ".zip"],
+)
+
+# SQLite Antlr grammar
+
+SQLITE_ANTLR_COMMIT_HASH = "0037201886b6ec66bcb423c274cee593a64f5e25"
+
+# Dealing with the two files that we want out of the ANTLR SQLite parser is
+# surprisingly complicated. `exports_files` seems to not work well with `BUILD`
+# files dropped into http archives, and we can't bring our antlr rules in
+# without a circular dependency on sub repositories. Instead, just grab the two
+# files we want directly.
+http_file(
+    name = "antlr4_sqlite_parser",
+    sha256 = "8d8bdcc1e2376a16be37535fabec73cecdae0bf1ad76fbd8095914d6f9b00f65",
+    urls = ["https://raw.githubusercontent.com/antlr/grammars-v4/" + SQLITE_ANTLR_COMMIT_HASH + "/sql/sqlite/SQLiteParser.g4"],
+)
+
+http_file(
+    name = "antlr4_sqlite_lexer",
+    sha256 = "6c153471bf3576cdaac3efcefbd4fba7946bf685abc62b15e3075dd14b8144e6",
+    urls = ["https://raw.githubusercontent.com/antlr/grammars-v4/" + SQLITE_ANTLR_COMMIT_HASH + "/sql/sqlite/SQLiteLexer.g4"],
 )
