@@ -20,8 +20,8 @@
 #include <variant>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/strings/str_format.h"
-#include "src/common/containers/hash_map.h"
 #include "src/common/utils/iterator_range.h"
 
 namespace raksha::ir {
@@ -182,8 +182,8 @@ class Value {
 
 using ValueList = std::vector<Value>;
 using ValueRange = utils::iterator_range<ValueList::const_iterator>;
-using IndexedValueMap = common::containers::HashMap<std::string, Value>;
-using IndexedValueListMap = common::containers::HashMap<std::string, ValueList>;
+using IndexedValueMap = absl::flat_hash_map<std::string, Value>;
+using IndexedValueListMap = absl::flat_hash_map<std::string, ValueList>;
 
 }  // namespace raksha::ir
 

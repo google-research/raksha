@@ -136,7 +136,7 @@ class IRPrinter : public IRTraversingVisitor<IRPrinter> {
   // Returns a pretty-printed map where entries are sorted by the key.
   template <class T, class F>
   static std::string PrintNamedMapInNameOrder(
-      const common::containers::HashMap<std::string, T>& map_to_print,
+      const absl::flat_hash_map<std::string, T>& map_to_print,
       F value_pretty_printer) {
     std::vector<absl::string_view> names;
     names.reserve(map_to_print.size());

@@ -128,8 +128,8 @@ class ProtoToIR {
   const IRContext& context_;
   SsaNames& ssa_names_;
   // TODO(#620): Consider an 'OperationBuilder'
-  common::containers::HashMap<ID, std::unique_ptr<Operation>> operations_;
-  common::containers::HashMap<ID, BlockBuilder> blocks_;
+  absl::flat_hash_map<ID, std::unique_ptr<Operation>> operations_;
+  absl::flat_hash_map<ID, BlockBuilder> blocks_;
 };
 
 }  // namespace raksha::ir

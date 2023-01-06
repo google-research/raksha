@@ -35,7 +35,7 @@ const ir::types::Schema &decode(ir::types::TypeFactory &type_factory,
     name = schema_names.at(0);
   }
 
-  common::containers::HashMap<std::string, ir::types::Type> field_map;
+  absl::flat_hash_map<std::string, ir::types::Type> field_map;
   for (const auto &field_name_type_pair : schema_proto.fields()) {
     const std::string &field_name = field_name_type_pair.first;
     const TypeProto &type_proto = field_name_type_pair.second;

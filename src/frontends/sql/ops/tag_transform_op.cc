@@ -65,9 +65,9 @@ ir::Value TagTransformOp::GetTransformedValue() const {
   return GetInputValue(GetTransformedValueIndex());
 }
 
-common::containers::HashMap<std::string, ir::Value>
-TagTransformOp::GetPreconditions() const {
-  common::containers::HashMap<std::string, ir::Value> result;
+absl::flat_hash_map<std::string, ir::Value> TagTransformOp::GetPreconditions()
+    const {
+  absl::flat_hash_map<std::string, ir::Value> result;
   const ir::ValueList& input_values = inputs();
   for (const auto& [name, attribute] : attributes()) {
     if (name == kRuleNameAttribute) continue;
@@ -85,9 +85,9 @@ TagTransformOp::GetPreconditions() const {
   return result;
 }
 
-common::containers::HashMap<std::string, uint64_t>
+absl::flat_hash_map<std::string, uint64_t>
 TagTransformOp::GetPreconditionInputIndices() const {
-  common::containers::HashMap<std::string, uint64_t> result;
+  absl::flat_hash_map<std::string, uint64_t> result;
   const ir::ValueList& input_values = inputs();
   for (const auto& [name, attribute] : attributes()) {
     if (name == kRuleNameAttribute) continue;

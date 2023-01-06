@@ -133,6 +133,7 @@ cc_library(
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 

@@ -19,7 +19,7 @@
 #include <memory>
 #include <vector>
 
-#include "src/common/containers/hash_map.h"
+#include "absl/container/flat_hash_map.h"
 #include "src/ir/operator.h"
 #include "src/ir/storage.h"
 #include "src/ir/types/type_factory.h"
@@ -50,8 +50,8 @@ class IRContext {
   types::TypeFactory &type_factory() { return type_factory_; }
 
   // Expose the Operators for inspection.
-  const common::containers::HashMap<std::string, std::unique_ptr<Operator>>
-      &Operators() const {
+  const absl::flat_hash_map<std::string, std::unique_ptr<Operator>> &Operators()
+      const {
     return operators_.nodes();
   }
 
@@ -126,13 +126,13 @@ class IRContext {
       return nodes_.find(node_name) != nodes_.end();
     }
 
-    const common::containers::HashMap<std::string, std::unique_ptr<Node>>
-        &nodes() const {
+    const absl::flat_hash_map<std::string, std::unique_ptr<Node>> &nodes()
+        const {
       return nodes_;
     }
 
    private:
-    common::containers::HashMap<std::string, std::unique_ptr<Node>> nodes_;
+    absl::flat_hash_map<std::string, std::unique_ptr<Node>> nodes_;
   };
 
   // List of registered operators.

@@ -78,7 +78,7 @@ class IRToProto {
     return ++last_used_id_;
   }
 
-  common::containers::HashMap<const void*, ID> used_ids_;
+  absl::flat_hash_map<const void*, ID> used_ids_;
   // This is a reference so that a two translations can more easily avoid having
   // overlapping IDs.
   ID& last_used_id_;

@@ -16,6 +16,7 @@
 #ifndef SRC_FRONTENDS_SQL_OPS_TAG_TRANSFORM_OP_H_
 #define SRC_FRONTENDS_SQL_OPS_TAG_TRANSFORM_OP_H_
 
+#include "absl/container/flat_hash_map.h"
 #include "src/frontends/sql/ops/op_traits.h"
 #include "src/frontends/sql/ops/sql_op.h"
 #include "src/ir/ir_context.h"
@@ -41,11 +42,11 @@ class TagTransformOp : public SqlOp {
   uint64_t GetTransformedValueIndex() const;
 
   // Returns the preconditions.
-  common::containers::HashMap<std::string, ir::Value> GetPreconditions() const;
+  absl::flat_hash_map<std::string, ir::Value> GetPreconditions() const;
 
   // Returns the input indexes of the values used in the precondition.
-  common::containers::HashMap<std::string, uint64_t>
-  GetPreconditionInputIndices() const;
+  absl::flat_hash_map<std::string, uint64_t> GetPreconditionInputIndices()
+      const;
 
   absl::string_view GetRuleName() const;
 

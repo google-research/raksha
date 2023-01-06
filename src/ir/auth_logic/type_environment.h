@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "src/common/containers/hash_map.h"
+#include "absl/container/flat_hash_map.h"
 #include "src/ir/auth_logic/ast.h"
 #include "src/ir/auth_logic/auth_logic_ast_traversing_visitor.h"
 #include "src/ir/auth_logic/declaration_environment.h"
@@ -33,14 +33,13 @@ class TypeEnvironment {
 
   datalog::ArgumentType GetTypingOrFatal(absl::string_view argument_name);
 
-  const common::containers::HashMap<std::string, datalog::ArgumentType>&
+  const absl::flat_hash_map<std::string, datalog::ArgumentType>&
   literal_type_map() const {
     return literal_type_map_;
   }
 
  private:
-  common::containers::HashMap<std::string, datalog::ArgumentType>
-      literal_type_map_;
+  absl::flat_hash_map<std::string, datalog::ArgumentType> literal_type_map_;
 };
 
 };  // namespace raksha::ir::auth_logic

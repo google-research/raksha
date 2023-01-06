@@ -197,8 +197,7 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
   // need for associating each input with a name and ID. We will select the
   // first precondition_values.size() prefix of each to build our name to ID
   // map.
-  common::containers::HashMap<std::string, uint64_t>
-      precondition_name_to_id_map;
+  absl::flat_hash_map<std::string, uint64_t> precondition_name_to_id_map;
   precondition_name_to_id_map.reserve(precondition_values.size());
   uint64_t max_id = 0;
   for (uint64_t idx = 0; idx < precondition_values.size(); ++idx) {
@@ -221,8 +220,7 @@ TEST_P(DecodeTagTransformTest, DecodeTagTransformTest) {
   const TagTransformOp *tag_transform_op =
       SqlOp::GetIf<TagTransformOp>(tag_xform_operation);
   ASSERT_NE(tag_transform_op, nullptr);
-  common::containers::HashMap<std::string, Value>
-      precondition_name_to_value_map;
+  absl::flat_hash_map<std::string, Value> precondition_name_to_value_map;
   precondition_name_to_value_map.reserve(precondition_name_to_id_map.size());
   for (const auto &[name, id] : precondition_name_to_id_map) {
     precondition_name_to_value_map.insert({name, decoder_context.GetValue(id)});

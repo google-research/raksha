@@ -16,7 +16,7 @@
 #ifndef SRC_IR_DATA_DECL_H_
 #define SRC_IR_DATA_DECL_H_
 
-#include "src/common/containers/hash_map.h"
+#include "absl/container/flat_hash_map.h"
 #include "src/ir/types/type.h"
 
 namespace raksha::ir {
@@ -53,7 +53,7 @@ class DataDeclCollection {
   }
 
  private:
-  common::containers::HashMap<std::string, std::unique_ptr<DataDecl>> decls_;
+  absl::flat_hash_map<std::string, std::unique_ptr<DataDecl>> decls_;
 };
 
 }  // namespace raksha::ir

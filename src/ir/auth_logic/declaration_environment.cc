@@ -23,7 +23,7 @@ namespace {
 // implemented as a flat_hash_map. It is used in the implementation of
 // the constructor for DeclarationEnvironment.
 using DeclarationMapType =
-    common::containers::HashMap<std::string, datalog::RelationDeclaration>;
+    absl::flat_hash_map<std::string, datalog::RelationDeclaration>;
 class RelationDeclarationEnvironmentVisitor
     : public AuthLogicAstTraversingVisitor<
           RelationDeclarationEnvironmentVisitor> {

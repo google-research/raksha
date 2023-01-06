@@ -62,9 +62,8 @@ cc_library(
     deps = [
         ":ast",
         ":auth_logic_ast_traversing_visitor",
-        "//src/common/containers:hash_map",
-        "//src/common/logging",
         "//src/ir/datalog:program",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 
@@ -110,8 +109,8 @@ cc_library(
         ":auth_logic_ast_traversing_visitor",
         ":declaration_environment",
         ":is_name_constant",
-        "//src/common/containers:hash_map",
         "//src/ir/datalog:program",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -144,10 +143,8 @@ cc_library(
         ":declaration_environment",
         ":is_name_constant",
         ":type_environment",
-        "//src/common/containers:hash_map",
-        "//src/common/logging",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/container:flat_hash_set",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -160,12 +157,12 @@ cc_library(
     visibility = ["//src/backends/policy_engine/souffle:__subpackages__"],
     deps = [
         ":ast",
-        "//src/common/containers:hash_map",
         "//src/common/logging",
         "//src/common/utils:map_iter",
         "//src/common/utils:overloaded",
         "//src/ir/datalog:program",
         "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],

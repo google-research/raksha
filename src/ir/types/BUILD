@@ -34,10 +34,10 @@ cc_library(
         "type_factory.h",
     ],
     deps = [
-        "//src/common/containers:hash_map",
         "//src/common/logging",
         "//src/common/utils:intrusive_ptr",
         "//src/ir:access_path_selectors",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/hash",
     ],
@@ -58,12 +58,12 @@ cc_test(
     srcs = ["type_test.cc"],
     deps = [
         ":types",
-        "//src/common/containers:hash_map",
         "//src/common/logging",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/ir:access_path_selectors",
         "//src/ir/types/proto",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
     ],
 )

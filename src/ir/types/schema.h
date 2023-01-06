@@ -18,8 +18,8 @@
 
 #include <optional>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
-#include "src/common/containers/hash_map.h"
 #include "src/ir/access_path_selectors_set.h"
 #include "src/ir/types/type.h"
 
@@ -31,7 +31,7 @@ class Schema {
 
   const std::optional<std::string>& name() const { return name_; }
 
-  const common::containers::HashMap<std::string, Type>& fields() const {
+  const absl::flat_hash_map<std::string, Type>& fields() const {
     return fields_;
   }
 
@@ -72,11 +72,11 @@ class Schema {
 
  private:
   explicit Schema(std::optional<std::string> name,
-                  common::containers::HashMap<std::string, Type> fields)
+                  absl::flat_hash_map<std::string, Type> fields)
       : name_(std::move(name)), fields_(std::move(fields)) {}
 
   std::optional<std::string> name_;
-  common::containers::HashMap<std::string, Type> fields_;
+  absl::flat_hash_map<std::string, Type> fields_;
 };
 
 }  // namespace raksha::ir::types

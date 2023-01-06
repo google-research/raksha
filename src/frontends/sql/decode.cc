@@ -77,7 +77,7 @@ static Value DecodeTagTransform(const TagTransform &tag_transform,
   std::string transform_rule_name = tag_transform.transform_rule_name();
   CHECK(!transform_rule_name.empty())
       << "Required TagTransform field transform_rule_name not present.";
-  common::containers::HashMap<std::string, uint64_t> preconditions(
+  absl::flat_hash_map<std::string, uint64_t> preconditions(
       tag_transform.tag_preconditions().begin(),
       tag_transform.tag_preconditions().end());
   return WrapOperationResultValue(decoder_context.MakeTagTransformOperation(

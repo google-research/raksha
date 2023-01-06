@@ -35,7 +35,7 @@ class TypeEnvironmentGenerationVisitor
     : public AuthLogicAstTraversingVisitor<TypeEnvironmentGenerationVisitor> {
  public:
   using LiteralTypeMapType =
-      common::containers::HashMap<std::string, datalog::ArgumentType>;
+      absl::flat_hash_map<std::string, datalog::ArgumentType>;
   TypeEnvironmentGenerationVisitor(DeclarationEnvironment decl_env)
       : decl_env_(decl_env), literal_type_map_({}) {}
 

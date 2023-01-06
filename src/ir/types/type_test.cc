@@ -19,9 +19,9 @@
 #include <memory>
 #include <optional>
 
-#include "absl/strings/str_split.h"
 #include "google/protobuf/text_format.h"
-#include "src/common/containers/hash_map.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/strings/str_split.h"
 #include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/access_path_selectors.h"
@@ -37,13 +37,13 @@ using type::proto::TypeProto;
 // Helper function for making an unnamed schema from a field map.
 static const Schema &MakeAnonymousSchema(
     TypeFactory &type_factory,
-    common::containers::HashMap<std::string, Type> field_map) {
+    absl::flat_hash_map<std::string, Type> field_map) {
   return type_factory.RegisterSchema(std::nullopt, std::move(field_map));
 }
 
 static Type MakeEntityTypeWithAnonymousSchema(
     TypeFactory &type_factory,
-    common::containers::HashMap<std::string, Type> field_map) {
+    absl::flat_hash_map<std::string, Type> field_map) {
   return type_factory.MakeEntityType(
       MakeAnonymousSchema(type_factory, std::move(field_map)));
 }
@@ -95,7 +95,7 @@ static Type MakeMinimalTypeFromAccessPathFieldVec(TypeFactory &type_factory,
     return vec1.at(depth) < vec2.at(depth);
   };
 
-  common::containers::HashMap<std::string, Type> field_map;
+  absl::flat_hash_map<std::string, Type> field_map;
   while (begin_iter != end_iter) {
     const std::vector<std::string> &range_start_vec = *begin_iter;
     std::string field_name = range_start_vec.at(depth);
@@ -233,7 +233,7 @@ static Type kPrimitive =
     TypeProducesAccessPathStrsTest::type_factory.MakePrimitiveType();
 static Type kEmptyEntity = MakeEntityTypeWithAnonymousSchema(
     TypeProducesAccessPathStrsTest::type_factory,
-    common::containers::HashMap<std::string, Type>());
+    absl::flat_hash_map<std::string, Type>());
 
 // Show that we can have aliasing in subpaths between paths that end in a
 // PrimitiveType and paths that end in an empty EntityType. This should be

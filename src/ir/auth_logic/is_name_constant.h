@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-#include "absl/strings/numbers.h"
-#include "absl/strings/string_view.h"
-#include "absl/strings/match.h"
-
 #ifndef SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_
 #define SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_
+
+#include "absl/strings/string_view.h"
 
 namespace raksha::ir::auth_logic {
 
@@ -31,6 +29,6 @@ namespace raksha::ir::auth_logic {
 // this information is available at parse time.
 bool IsNameConstant(absl::string_view id);
 
-}; // namespace raksha::ir::auth_logic
+};  // namespace raksha::ir::auth_logic
 
 #endif  // SRC_IR_AUTH_LOGIC_IS_NAME_CONSTANT_H_

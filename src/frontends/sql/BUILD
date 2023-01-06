@@ -54,7 +54,6 @@ cc_library(
         "//src/backends/policy_engine/souffle:__pkg__",
     ],
     deps = [
-        "//src/common/containers:hash_map",
         "//src/common/utils:map_iter",
         "//src/frontends/sql/ops:literal_op",
         "//src/frontends/sql/ops:merge_op",
@@ -66,6 +65,7 @@ cc_library(
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
 
@@ -205,13 +205,13 @@ cc_test(
     deps = [
         ":decode",
         ":decoder_context",
-        "//src/common/containers:hash_map",
+        ":sql_ir_cc_proto",
         "//src/common/proto:protobuf",
         "//src/common/testing:gtest",
         "//src/common/utils:map_iter",
-        "//src/frontends/sql:sql_ir_cc_proto",
         "//src/frontends/sql/ops:tag_transform_op",
         "//src/frontends/sql/testing:utils",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
     ],

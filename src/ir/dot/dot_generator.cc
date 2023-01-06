@@ -16,9 +16,9 @@
 #include "src/ir/dot/dot_generator.h"
 
 #include "absl/container/btree_set.h"
+#include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_format.h"
-#include "src/common/containers/hash_map.h"
 #include "src/ir/dot/dot_generator_config.h"
 #include "src/ir/ir_printer.h"
 #include "src/ir/ir_traversing_visitor.h"
@@ -89,14 +89,14 @@ class DotGeneratorHelper : public IRTraversingVisitor<DotGeneratorHelper> {
   }
 
   // Mapping from node name to blocks.
-  common::containers::HashMap<std::string, const Block*> blocks_;
+  absl::flat_hash_map<std::string, const Block*> blocks_;
   // Mapping from node name to operation.
-  common::containers::HashMap<std::string, const Operation*> operations_;
+  absl::flat_hash_map<std::string, const Operation*> operations_;
   // Results of an operation that are used somewhere. The signature of an
   // operator does not *yet* provide enough information about the number of
   // results. This map infers this indirectly by adding one whenever an
   // operation result is encountered during dot generation.
-  common::containers::HashMap<std::string, absl::btree_set<std::string>>
+  absl::flat_hash_map<std::string, absl::btree_set<std::string>>
       operation_results_;
   absl::flat_hash_set<Edge> edges_;
   SsaNames ssa_names_;
@@ -226,7 +226,7 @@ std::string DotGeneratorHelper::GetDotGraph() {
   std::string blocks = absl::StrJoin(
       blocks_, "\n  ",
       [](std::string* out,
-         common::containers::HashMap<std::string, const Block*>::value_type
+         absl::flat_hash_map<std::string, const Block*>::value_type
              node_entry) {
         absl::StrAppend(
             out, absl::StrFormat("%s [shape=Mrecord]", node_entry.first));
@@ -234,10 +234,9 @@ std::string DotGeneratorHelper::GetDotGraph() {
   // Generate nodes for operations.
   std::string operations = absl::StrJoin(
       operations_, "\n  ",
-      [this](
-          std::string* out,
-          common::containers::HashMap<std::string, const Operation*>::value_type
-              node_entry) {
+      [this](std::string* out,
+             absl::flat_hash_map<std::string, const Operation*>::value_type
+                 node_entry) {
         absl::StrAppend(out, GetDotNode(*ABSL_DIE_IF_NULL(node_entry.second)));
       });
   // Generate edges.
