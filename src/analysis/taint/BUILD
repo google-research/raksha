@@ -21,6 +21,29 @@ package(
 )
 
 cc_library(
+    name = "abstract_ifc_tags",
+    srcs = ["abstract_ifc_tags.cc"],
+    hdrs = ["abstract_ifc_tags.h"],
+    deps = [
+        ":inference_rules",
+        "//src/common/utils:intrusive_ptr",
+        "//src/common/utils:ref_counted",
+        "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/container:btree",
+    ],
+)
+
+cc_test(
+    name = "abstract_ifc_tags_test",
+    srcs = ["abstract_ifc_tags_test.cc"],
+    deps = [
+        ":abstract_ifc_tags",
+        "//src/common/testing:gtest",
+    ],
+)
+
+cc_library(
     name = "inference_rule",
     hdrs = ["inference_rule.h"],
 )
