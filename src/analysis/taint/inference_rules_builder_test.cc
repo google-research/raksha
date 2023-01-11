@@ -25,6 +25,7 @@ namespace {
 
 using ::testing::Eq;
 using ::testing::IsEmpty;
+using ::testing::Not;
 using ::testing::UnorderedElementsAre;
 
 InferenceRules::OutputRules test_action_rules[] = {
@@ -60,6 +61,22 @@ TEST(InferenceRulesBuilderTest, GetOrCreateTagIdStoresTheNamesAndTheMapping) {
   EXPECT_THAT(rules.tag_names(), UnorderedElementsAre("A", "B"));
   EXPECT_THAT(rules.tags(), UnorderedElementsAre(std::make_pair("A", tag_a),
                                                  std::make_pair("B", tag_b)));
+}
+
+TEST(InferenceRulesBuilderTest, SeedTagsAreCorrectlyInitialized) {
+  constexpr TagId kTagA = 0;
+  constexpr TagId kTagB = 1;
+  InferenceRulesBuilder builder({"A", "B"});
+  TagId tag_c = builder.GetOrCreateTagId("C");
+  EXPECT_THAT(builder.GetOrCreateTagId("A"), Eq(kTagA));
+  EXPECT_THAT(builder.GetOrCreateTagId("B"), Eq(kTagB));
+  EXPECT_THAT(tag_c, Not(Eq(kTagA)));
+  EXPECT_THAT(tag_c, Not(Eq(kTagB)));
+}
+
+TEST(InferenceRulesBuilderTest, DuplicatesInSeedTagsCausesFailure) {
+  EXPECT_DEATH(InferenceRulesBuilder({"A", "B", "A"}),
+               "Duplicate seed tag 'A'");
 }
 
 TEST(InferenceRulesBuilderTest, AddOutputRulesForActionRemembersTheRules) {

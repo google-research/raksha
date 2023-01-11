@@ -26,9 +26,23 @@ namespace raksha::analysis::taint {
 // A class to build InferenceRules.
 class InferenceRulesBuilder {
  public:
+  // Constructs a builder by populating the tags names with given seed tags.
+  //
+  // The ids of the seed tags are in the order in which they appear in the
+  // seed_tag_names. Construction fails if there are duplicates entries among
+  // the seed tags.
+  explicit InferenceRulesBuilder(std::vector<std::string> seed_tag_names = {})
+      : tag_names_(std::move(seed_tag_names)) {
+    // Populates tag ids in the order of tag_names_.
+    for (const std::string& tag_name : tag_names_) {
+      auto [_, success] = tags_.insert({tag_name, tags_.size()});
+      CHECK(success) << "Duplicate seed tag '" << tag_name << "'";
+    }
+  }
+
   // Returns InferenceRules on the current state of the builder object. Note
-  // that the builder instance becomes invalid after the invocation of `Build`
-  // and should not be used futher.
+  // that the builder instance becomes invalid after the invocation of
+  // `Build` and should not be used futher.
   InferenceRules Build() {
     return InferenceRules(std::move(action_rules_), std::move(actions_),
                           std::move(tags_), std::move(tag_names_));
@@ -63,12 +77,12 @@ class InferenceRulesBuilder {
   }
 
  private:
+  // TagIds Table
+  std::vector<std::string> tag_names_;
+  absl::flat_hash_map<std::string, TagId> tags_;
+  // Actions and rules
   InferenceRules::ActionRules action_rules_;
   absl::flat_hash_map<const ir::Operation*, std::string> actions_;
-
-  // TagIds Table
-  absl::flat_hash_map<std::string, TagId> tags_;
-  std::vector<std::string> tag_names_;
 };
 }  // namespace raksha::analysis::taint
 
