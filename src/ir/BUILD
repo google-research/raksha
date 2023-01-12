@@ -131,6 +131,7 @@ cc_library(
     name = "ir_traversing_visitor",
     hdrs = ["ir_traversing_visitor.h"],
     deps = [
+        ":ir_visitor",
         ":module",
         "//src/common/utils:fold",
         "//src/common/utils:types",
@@ -181,14 +182,18 @@ cc_test(
 )
 
 cc_library(
+    name = "ir_visitor",
+    hdrs = ["ir_visitor.h"],
+    deps = ["//src/common/utils:types"],
+)
+
+cc_library(
     name = "module",
-    hdrs = [
-        "ir_visitor.h",
-        "module.h",
-    ],
+    hdrs = ["module.h"],
     visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":data_decl",
+        ":ir_visitor",
         ":operator",
         ":storage",
         ":value",
