@@ -18,6 +18,7 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_format.h"
+#include "src/ir/ir_visitor.h"
 #include "src/ir/types/type.h"
 #include "src/ir/value.h"
 
@@ -42,6 +43,16 @@ class Storage {
   const types::Type& type() const { return type_; }
   const absl::flat_hash_set<Value>& input_values() const {
     return input_values_;
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(IRVisitor<Derived, Result, false>& visitor) {
+    return visitor.Visit(*this);
+  }
+
+  template <typename Derived, typename Result>
+  Result Accept(IRVisitor<Derived, Result, true>& visitor) const {
+    return visitor.Visit(*this);
   }
 
   std::string ToString() const {

@@ -16,13 +16,19 @@
 #include "src/ir/ir_traversing_visitor.h"
 
 #include <memory>
+#include <vector>
 
+#include "absl/types/span.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/block_builder.h"
 #include "src/ir/module.h"
+#include "src/ir/types/type_factory.h"
 
 namespace raksha::ir {
 namespace {
+
+using testing::ElementsAre;
+using testing::UnorderedElementsAre;
 
 class WrappedInt {
  public:
@@ -62,9 +68,13 @@ TEST(IRTraversingVisitorTest,
   global_module.AddBlock(std::make_unique<Block>());
   global_module.AddBlock(std::make_unique<Block>());
 
+  types::TypeFactory type_factory;
+  global_module.CreateStorage("storage1", type_factory.MakePrimitiveType());
+  global_module.CreateStorage("storage2", type_factory.MakePrimitiveType());
+
   NonDefaultConstructorVisitor counting_visitor;
   const WrappedInt result = global_module.Accept(counting_visitor);
-  EXPECT_EQ(*result, 3);
+  EXPECT_EQ(*result, 5);
 }
 
 enum class TraversalType { kPre = 0x1, kPost = 0x2, kBoth = 0x3 };
@@ -107,6 +117,16 @@ class CollectingVisitor : public IRTraversingVisitor<CollectingVisitor> {
     return result;
   }
 
+  Unit PreVisit(const Storage& storage) override {
+    if (pre_visits_) nodes_.push_back(std::addressof(storage));
+    return Unit();
+  }
+
+  Unit PostVisit(const Storage& storage, Unit result) override {
+    if (post_visits_) nodes_.push_back(std::addressof(storage));
+    return result;
+  }
+
   const std::vector<const void*>& nodes() const { return nodes_; }
 
  private:
@@ -117,29 +137,56 @@ class CollectingVisitor : public IRTraversingVisitor<CollectingVisitor> {
 
 TEST(IRTraversingVisitorTest, TraversesModuleAsExpected) {
   Module global_module;
+  types::TypeFactory type_factory;
+  const Storage* storage1 = std::addressof(global_module.CreateStorage(
+      "storage1", type_factory.MakePrimitiveType()));
+  const Storage* storage2 = std::addressof(global_module.CreateStorage(
+      "storage2", type_factory.MakePrimitiveType()));
   const Block* block1 =
       std::addressof(global_module.AddBlock(std::make_unique<Block>()));
   const Block* block2 =
       std::addressof(global_module.AddBlock(std::make_unique<Block>()));
 
-  CollectingVisitor preorder_visitor(TraversalType::kPre);
-  global_module.Accept(preorder_visitor);
-  EXPECT_THAT(
-      preorder_visitor.nodes(),
-      testing::ElementsAre(std::addressof(global_module), block1, block2));
+  {
+    CollectingVisitor preorder_visitor(TraversalType::kPre);
+    global_module.Accept(preorder_visitor);
 
-  CollectingVisitor postorder_visitor(TraversalType::kPost);
-  global_module.Accept(postorder_visitor);
-  EXPECT_THAT(
-      postorder_visitor.nodes(),
-      testing::ElementsAre(block1, block2, std::addressof(global_module)));
+    absl::Span<const void* const> nodes = preorder_visitor.nodes();
+    EXPECT_EQ(nodes.size(), 5);
+    EXPECT_EQ(nodes.at(0), std::addressof(global_module));
+    EXPECT_THAT(nodes.subspan(1, 2), UnorderedElementsAre(storage1, storage2));
+    EXPECT_THAT(nodes.subspan(3, 2), ElementsAre(block1, block2));
+  }
 
-  CollectingVisitor all_order_visitor(TraversalType::kBoth);
-  global_module.Accept(all_order_visitor);
-  EXPECT_THAT(
-      all_order_visitor.nodes(),
-      testing::ElementsAre(std::addressof(global_module), block1, block1,
-                           block2, block2, std::addressof(global_module)));
+  {
+    CollectingVisitor postorder_visitor(TraversalType::kPost);
+    global_module.Accept(postorder_visitor);
+
+    absl::Span<const void* const> nodes = postorder_visitor.nodes();
+    EXPECT_EQ(nodes.size(), 5);
+    EXPECT_THAT(nodes.subspan(0, 2), UnorderedElementsAre(storage1, storage2));
+    EXPECT_THAT(nodes.subspan(2, 2), ElementsAre(block1, block2));
+    EXPECT_EQ(nodes.at(4), std::addressof(global_module));
+  }
+
+  {
+    CollectingVisitor all_order_visitor(TraversalType::kBoth);
+    global_module.Accept(all_order_visitor);
+
+    absl::Span<const void* const> nodes = all_order_visitor.nodes();
+    EXPECT_EQ(nodes.size(), 10);
+    EXPECT_EQ(nodes.at(0), std::addressof(global_module));
+    EXPECT_EQ(nodes.at(9), std::addressof(global_module));
+    std::vector<const void*> deduped_nodes_vec;
+    for (auto iter = nodes.begin() + 1; iter + 1 != nodes.end(); iter += 2) {
+      EXPECT_EQ(*iter, *(iter + 1));
+      deduped_nodes_vec.push_back(*iter);
+    }
+    absl::Span<const void* const> deduped_nodes_span = deduped_nodes_vec;
+    EXPECT_THAT(deduped_nodes_span.subspan(0, 2),
+                UnorderedElementsAre(storage1, storage2));
+    EXPECT_THAT(deduped_nodes_span.subspan(2, 2), ElementsAre(block1, block2));
+  }
 }
 
 TEST(IRTraversingVisitorTest, TraversesBlockAsExpected) {
@@ -154,22 +201,19 @@ TEST(IRTraversingVisitorTest, TraversesBlockAsExpected) {
 
   CollectingVisitor preorder_visitor(TraversalType::kPre);
   block->Accept(preorder_visitor);
-  EXPECT_THAT(
-      preorder_visitor.nodes(),
-      testing::ElementsAre(block.get(), plus_op_instance, minus_op_instance));
+  EXPECT_THAT(preorder_visitor.nodes(),
+              ElementsAre(block.get(), plus_op_instance, minus_op_instance));
 
   CollectingVisitor postorder_visitor(TraversalType::kPost);
   block->Accept(postorder_visitor);
-  EXPECT_THAT(
-      postorder_visitor.nodes(),
-      testing::ElementsAre(plus_op_instance, minus_op_instance, block.get()));
+  EXPECT_THAT(postorder_visitor.nodes(),
+              ElementsAre(plus_op_instance, minus_op_instance, block.get()));
 
   CollectingVisitor all_order_visitor(TraversalType::kBoth);
   block->Accept(all_order_visitor);
-  EXPECT_THAT(
-      all_order_visitor.nodes(),
-      testing::ElementsAre(block.get(), plus_op_instance, plus_op_instance,
-                           minus_op_instance, minus_op_instance, block.get()));
+  EXPECT_THAT(all_order_visitor.nodes(),
+              ElementsAre(block.get(), plus_op_instance, plus_op_instance,
+                          minus_op_instance, minus_op_instance, block.get()));
 }
 
 TEST(IRTraversingVisitorTest, TraversesOperationAsExpected) {
@@ -182,18 +226,18 @@ TEST(IRTraversingVisitorTest, TraversesOperationAsExpected) {
   CollectingVisitor preorder_visitor(TraversalType::kPre);
   plus_op_instance.Accept(preorder_visitor);
   EXPECT_THAT(preorder_visitor.nodes(),
-              testing::ElementsAre(std::addressof(plus_op_instance)));
+              ElementsAre(std::addressof(plus_op_instance)));
 
   CollectingVisitor postorder_visitor(TraversalType::kPost);
   plus_op_instance.Accept(postorder_visitor);
   EXPECT_THAT(postorder_visitor.nodes(),
-              testing::ElementsAre(std::addressof(plus_op_instance)));
+              ElementsAre(std::addressof(plus_op_instance)));
 
   CollectingVisitor all_order_visitor(TraversalType::kBoth);
   plus_op_instance.Accept(all_order_visitor);
   EXPECT_THAT(all_order_visitor.nodes(),
-              testing::ElementsAre(std::addressof(plus_op_instance),
-                                   std::addressof(plus_op_instance)));
+              ElementsAre(std::addressof(plus_op_instance),
+                          std::addressof(plus_op_instance)));
 }
 
 using ResultType = std::vector<void*>;
@@ -246,6 +290,17 @@ class ReturningVisitor
     return result;
   }
 
+  ResultType PreVisit(const Storage& storage) override {
+    ResultType result;
+    if (pre_visits_) result.push_back((void*)std::addressof(storage));
+    return result;
+  }
+
+  ResultType PostVisit(const Storage& storage, ResultType result) override {
+    if (post_visits_) result.push_back((void*)std::addressof(storage));
+    return result;
+  }
+
  private:
   const bool pre_visits_;
   const bool post_visits_;
@@ -258,22 +313,49 @@ TEST(IRTraversingVisitorTest, TraversesModuleAsExpectedUsingReturns) {
   const Block* block2 =
       std::addressof(global_module.AddBlock(std::make_unique<Block>()));
 
-  ReturningVisitor preorder_visitor(TraversalType::kPre);
-  ResultType nodes1 =
-      global_module.Accept<ReturningVisitor, ResultType>(preorder_visitor);
-  EXPECT_THAT(nodes1, testing::ElementsAre(std::addressof(global_module),
-                                           block1, block2));
+  types::TypeFactory type_factory;
+  const Storage* storage1 = std::addressof(global_module.CreateStorage(
+      "storage1", type_factory.MakePrimitiveType()));
+  const Storage* storage2 = std::addressof(global_module.CreateStorage(
+      "storage2", type_factory.MakePrimitiveType()));
 
-  ReturningVisitor postorder_visitor(TraversalType::kPost);
-  ResultType nodes2 = global_module.Accept(postorder_visitor);
-  EXPECT_THAT(nodes2, testing::ElementsAre(block1, block2,
-                                           std::addressof(global_module)));
+  {
+    ReturningVisitor preorder_visitor(TraversalType::kPre);
+    std::vector<void*> nodes_vec = global_module.Accept(preorder_visitor);
+    absl::Span<const void* const> nodes = nodes_vec;
+    EXPECT_EQ(nodes.size(), 5);
+    EXPECT_EQ(nodes.at(0), std::addressof(global_module));
+    EXPECT_THAT(nodes.subspan(1, 2), UnorderedElementsAre(storage1, storage2));
+    EXPECT_THAT(nodes.subspan(3, 2), ElementsAre(block1, block2));
+  }
 
-  ReturningVisitor all_order_visitor(TraversalType::kBoth);
-  ResultType nodes3 = global_module.Accept(all_order_visitor);
-  EXPECT_THAT(nodes3, testing::ElementsAre(std::addressof(global_module),
-                                           block1, block1, block2, block2,
-                                           std::addressof(global_module)));
+  {
+    ReturningVisitor postorder_visitor(TraversalType::kPost);
+    std::vector<void*> nodes_vec = global_module.Accept(postorder_visitor);
+    absl::Span<const void* const> nodes = nodes_vec;
+    EXPECT_EQ(nodes.size(), 5);
+    EXPECT_THAT(nodes.subspan(0, 2), UnorderedElementsAre(storage1, storage2));
+    EXPECT_THAT(nodes.subspan(2, 2), ElementsAre(block1, block2));
+    EXPECT_EQ(nodes.at(4), std::addressof(global_module));
+  }
+
+  {
+    ReturningVisitor all_order_visitor(TraversalType::kBoth);
+    std::vector<void*> nodes_vec = global_module.Accept(all_order_visitor);
+    absl::Span<const void* const> nodes = nodes_vec;
+    EXPECT_EQ(nodes.size(), 10);
+    EXPECT_EQ(nodes.at(0), std::addressof(global_module));
+    EXPECT_EQ(nodes.at(9), std::addressof(global_module));
+    std::vector<const void*> deduped_nodes_vec;
+    for (auto iter = nodes.begin() + 1; iter + 1 != nodes.end(); iter += 2) {
+      EXPECT_EQ(*iter, *(iter + 1));
+      deduped_nodes_vec.push_back(*iter);
+    }
+    absl::Span<const void* const> deduped_nodes_span = deduped_nodes_vec;
+    EXPECT_THAT(deduped_nodes_span.subspan(0, 2),
+                UnorderedElementsAre(storage1, storage2));
+    EXPECT_THAT(deduped_nodes_span.subspan(2, 2), ElementsAre(block1, block2));
+  }
 }
 
 TEST(IRTraversingVisitorTest, TraversesBlockAsExpectedUsingReturns) {
@@ -289,19 +371,19 @@ TEST(IRTraversingVisitorTest, TraversesBlockAsExpectedUsingReturns) {
   ReturningVisitor preorder_visitor(TraversalType::kPre);
   ResultType nodes1 =
       block->Accept<ReturningVisitor, ResultType>(preorder_visitor);
-  EXPECT_THAT(nodes1, testing::ElementsAre(block.get(), plus_op_instance,
-                                           minus_op_instance));
+  EXPECT_THAT(nodes1,
+              ElementsAre(block.get(), plus_op_instance, minus_op_instance));
 
   ReturningVisitor postorder_visitor(TraversalType::kPost);
   ResultType nodes2 = block->Accept(postorder_visitor);
-  EXPECT_THAT(nodes2, testing::ElementsAre(plus_op_instance, minus_op_instance,
-                                           block.get()));
+  EXPECT_THAT(nodes2,
+              ElementsAre(plus_op_instance, minus_op_instance, block.get()));
 
   ReturningVisitor all_order_visitor(TraversalType::kBoth);
   ResultType nodes3 = block->Accept(all_order_visitor);
-  EXPECT_THAT(nodes3, testing::ElementsAre(block.get(), plus_op_instance,
-                                           plus_op_instance, minus_op_instance,
-                                           minus_op_instance, block.get()));
+  EXPECT_THAT(nodes3,
+              ElementsAre(block.get(), plus_op_instance, plus_op_instance,
+                          minus_op_instance, minus_op_instance, block.get()));
 }
 
 TEST(IRTraversingVisitorTest, TraversesOperationAsExpectedUsingReturns) {
@@ -313,16 +395,16 @@ TEST(IRTraversingVisitorTest, TraversesOperationAsExpectedUsingReturns) {
 
   ReturningVisitor preorder_visitor(TraversalType::kPre);
   ResultType nodes1 = plus_op_instance.Accept(preorder_visitor);
-  EXPECT_THAT(nodes1, testing::ElementsAre(std::addressof(plus_op_instance)));
+  EXPECT_THAT(nodes1, ElementsAre(std::addressof(plus_op_instance)));
 
   ReturningVisitor postorder_visitor(TraversalType::kPost);
   ResultType nodes2 = plus_op_instance.Accept(postorder_visitor);
-  EXPECT_THAT(nodes2, testing::ElementsAre(std::addressof(plus_op_instance)));
+  EXPECT_THAT(nodes2, ElementsAre(std::addressof(plus_op_instance)));
 
   ReturningVisitor all_order_visitor(TraversalType::kBoth);
   ResultType nodes3 = plus_op_instance.Accept(all_order_visitor);
-  EXPECT_THAT(nodes3, testing::ElementsAre(std::addressof(plus_op_instance),
-                                           std::addressof(plus_op_instance)));
+  EXPECT_THAT(nodes3, ElementsAre(std::addressof(plus_op_instance),
+                                  std::addressof(plus_op_instance)));
 }
 
 }  // namespace
