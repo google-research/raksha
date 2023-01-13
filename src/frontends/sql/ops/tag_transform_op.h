@@ -28,6 +28,10 @@ namespace raksha::frontends::sql {
 class TagTransformOp : public SqlOp {
  public:
   static constexpr absl::string_view kRuleNameAttribute = "rule_name";
+  static constexpr absl::string_view kIntersectItagRule =
+      "##raksha_internal#intersect_itag_rule";
+  static constexpr absl::string_view kUnionItagRule =
+      "##raksha_internal#union_itag_rule";
 
   // Constructs a TagTransformOp.
   static std::unique_ptr<TagTransformOp> Create(

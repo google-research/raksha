@@ -89,6 +89,47 @@ cc_library(
 )
 
 cc_library(
+    name = "decode_sql_policy_rules",
+    srcs = ["decode_sql_policy_rules.cc"],
+    hdrs = ["decode_sql_policy_rules.h"],
+    visibility = ["//:__pkg__"],
+    deps = [
+        ":decoder_context",
+        ":sql_ir_cc_proto",
+        "//src/analysis/taint:inference_rules",
+        "//src/analysis/taint:inference_rules_builder",
+        "//src/frontends/sql/ops:merge_op",
+        "//src/frontends/sql/ops:sql_op",
+        "//src/frontends/sql/ops:tag_transform_op",
+        "//src/ir:module",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "decode_sql_policy_rules_test",
+    srcs = ["decode_sql_policy_rules_test.cc"],
+    deps = [
+        ":decode_sql_policy_rules",
+        ":decoder_context",
+        ":sql_ir_cc_proto",
+        "//src/analysis/taint:inference_rule",
+        "//src/analysis/taint:inference_rules",
+        "//src/common/proto:protobuf",
+        "//src/common/testing:gtest",
+        "//src/common/utils:ranges",
+        "//src/frontends/sql/ops:merge_op",
+        "//src/frontends/sql/ops:sql_op",
+        "//src/frontends/sql/ops:tag_transform_op",
+        "//src/ir:module",
+        "//src/parser/ir:ir_parser",
+        "@com_google_absl//absl/log:die_if_null",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "driver",
     srcs = ["driver.cc"],
     hdrs = ["driver.h"],
