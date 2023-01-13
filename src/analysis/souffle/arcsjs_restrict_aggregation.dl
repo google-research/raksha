@@ -1,0 +1,75 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+#ifndef SRC_ANALYSIS_SOUFFLE_ARCSJS_RESTRICT_AGGREGATION_DL_
+#define SRC_ANALYSIS_SOUFFLE_ARCSJS_RESTRICT_AGGREGATION_DL_
+
+#include "src/analysis/souffle/arcsjs_core.dl"
+#define ARCSJS_RESTRICT_AGGREGATION "arcsjs.restrict_aggregation"
+#define ARCSJS_RESTRICT_AGGREGATION_HIDDEN_TAG_ATTR "tag"
+
+.decl arcsJsIsRestrictAggregationOperation(op: Operation)
+arcsJsIsRestrictAggregationOperation(op) :-
+      isOperation(op),
+      operationHasOperator(op, ARCSJS_RESTRICT_AGGREGATION).
+
+.decl arcsJsHasRestrictAggregationConfiguration(tag: Tag, new_tag: Tag, source: AccessPath)
+
+isTag(as(tag, Tag)),
+arcsJsHasRestrictAggregationConfiguration(
+  as(tag, Tag),
+  as(cat(cat("restrict_aggregation_", as(tag, symbol)), cat("_", as(source, symbol))), Tag),
+  source
+) :-
+  arcsJsIsRestrictAggregationOperation(op),
+  operationHasOperandAtIndex(op, source, _),
+  operationHasAttribute(
+    op,
+    [ARCSJS_RESTRICT_AGGREGATION_HIDDEN_TAG_ATTR, $StringAttributePayload(tag)]
+  ).
+
+isConditionalTag(new_tag),
+isTag(new_tag) :-
+  arcsJsHasRestrictAggregationConfiguration(_, new_tag, _).
+
+mayHaveTag(result, DEFAULT_ARCSJS_OWNER, new_tag) :-
+  arcsJsIsRestrictAggregationOperation(op),
+  operationHasOperandAtIndex(op, source, _),
+  arcsJsHasRestrictAggregationConfiguration(_, new_tag, source),
+  operationHasResult(op, result).
+
+mayHaveTag(result, DEFAULT_ARCSJS_OWNER, tag) :-
+  arcsJsHasRestrictAggregationConfiguration(tag, new_tag, _),
+  mayHaveTag(source1, _, new_tag),
+  resolvedEdge(_, source1, result),
+  resolvedEdge(_, source2, result),
+  source1 != source2,
+  mayHaveTag(source2, _, new_tag).
+
+.decl policyArcsJsConformingRestrictAggregation(op: Operation)
+policyArcsJsConformingRestrictAggregation(op) :-
+  arcsJsIsRestrictAggregationOperation(op),
+  operationHasAttribute(op, [ARCSJS_RESTRICT_AGGREGATION_HIDDEN_TAG_ATTR, tag]),
+  count : { operationHasOperandAtIndex(op, _, _) } = 1.
+
+violatesPolicy(
+  result,
+  ARCSJS_CONSTRUCTION_POLICY,
+  cat("Malformed restrict_aggregation operation at ", result)) :-
+  arcsJsIsRestrictAggregationOperation(op),
+  !policyArcsJsConformingRestrictAggregation(op),
+  operationHasResult(op, result).
+
+#endif // SRC_ANALYSIS_SOUFFLE_ARCSJS_RESTRICT_AGGREGATION_DL_

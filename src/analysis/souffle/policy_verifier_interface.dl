@@ -23,6 +23,7 @@
 #include "src/analysis/souffle/arcsjs_input_and_output.dl"
 #include "src/analysis/souffle/arcsjs_make_public.dl"
 #include "src/analysis/souffle/arcsjs_opaque.dl"
+#include "src/analysis/souffle/arcsjs_restrict_aggregation.dl"
 #include "src/analysis/souffle/arcsjs_user_consent_to_downgrade.dl"
 #include "src/analysis/souffle/tag_transforms.dl"
 #include "src/analysis/souffle/epsilon_analysis.dl"
