@@ -24,6 +24,7 @@
 namespace raksha::analysis::taint {
 namespace {
 
+using ::testing::AnyOfArray;
 using ::testing::Combine;
 using ::testing::Eq;
 using ::testing::ValuesIn;
@@ -310,6 +311,54 @@ TEST_P(AbstractIfcTagsJoinTest, JoinWorksCorrectly) {
   AbstractIfcTags result(secrecy_param.union_result,
                          integrity_param.intersect_result);
   EXPECT_TRUE(arg0.Join(arg1).IsEquivalentTo(result));
+}
+
+using AbstractIfcTagsToStringTest = ::testing::TestWithParam<
+    std::pair<AbstractIfcTags, std::vector<std::string>>>;
+
+const std::vector<std::string> kTagNames = {"A", "B", "C", "D", "E"};
+constexpr TagId kTagA = 0;
+constexpr TagId kTagB = 1;
+constexpr TagId kTagC = 2;
+constexpr TagId kTagD = 3;
+constexpr TagId kTagE = 4;
+
+// We need a vector because flat_hash_set does not have a predictable order.
+const std::pair<AbstractIfcTags, std::vector<std::string>>
+    kAbstractIfcTagsToStringExamples[] = {
+        std::make_pair(AbstractIfcTags::Bottom(),
+                       std::vector<std::string>({"[Bottom]"})),
+        std::make_pair(AbstractIfcTags({}, {}),
+                       std::vector<std::string>({"s: {}, i: {}"})),
+        std::make_pair(AbstractIfcTags({kTagA}, {kTagE}),
+                       std::vector<std::string>({"s: {A}, i: {E}"})),
+        std::make_pair(AbstractIfcTags({kTagA}, {}),
+                       std::vector<std::string>({"s: {A}, i: {}"})),
+        std::make_pair(AbstractIfcTags({}, {kTagD}),
+                       std::vector<std::string>({"s: {}, i: {D}"})),
+        std::make_pair(AbstractIfcTags({}, {6}),
+                       std::vector<std::string>({"s: {}, i: {<<6>>}"})),
+        std::make_pair(AbstractIfcTags({9}, {}),
+                       std::vector<std::string>({"s: {<<9>>}, i: {}"})),
+        std::make_pair(AbstractIfcTags({9}, {6}),
+                       std::vector<std::string>({"s: {<<9>>}, i: {<<6>>}"})),
+        std::make_pair(AbstractIfcTags({9, kTagA}, {}),
+                       std::vector<std::string>(
+                           {"s: {<<9>>, A}, i: {}", "s: {A, <<9>>}, i: {}"})),
+        std::make_pair(AbstractIfcTags({kTagA, kTagB}, {kTagC, kTagE}),
+                       std::vector<std::string>({
+                           "s: {A, B}, i: {C, E}",
+                           "s: {B, A}, i: {C, E}",
+                           "s: {A, B}, i: {E, C}",
+                           "s: {B, A}, i: {E, C}",
+                       }))};
+
+INSTANTIATE_TEST_SUITE_P(AbstractIfcTagsTest, AbstractIfcTagsToStringTest,
+                         ValuesIn(kAbstractIfcTagsToStringExamples));
+
+TEST_P(AbstractIfcTagsToStringTest, ToStringIsAsExpected) {
+  const auto& [ifc_tags, expected_strings] = GetParam();
+  EXPECT_THAT(ifc_tags.ToString(kTagNames), AnyOfArray(expected_strings));
 }
 
 }  // namespace

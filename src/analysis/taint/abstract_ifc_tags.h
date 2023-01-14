@@ -98,6 +98,9 @@ class AbstractIfcTags {
   // Otherwise, returns bottom.
   ABSL_MUST_USE_RESULT AbstractIfcTags ClearSecrecy(TagId tag) const;
 
+  // Returns a human readable representation.
+  std::string ToString(const std::vector<std::string>& tag_names) const;
+
  private:
   AbstractIfcTags(IfcTagsConstPtr tags) : tags_(std::move(tags)) {}
 

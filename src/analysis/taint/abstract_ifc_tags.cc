@@ -108,4 +108,25 @@ bool AbstractIfcTags::HasNoSecrecy() const {
   return tags_->secrecy_tags().empty();
 }
 
+std::string AbstractIfcTags::ToString(
+    const std::vector<std::string>& tag_names) const {
+  if (IsBottom()) return "[Bottom]";
+
+  auto render_tags = [&tag_names](absl::string_view label, TagIdSet tags_set) {
+    return absl::StrCat(
+        label, ": {",
+        absl::StrJoin(
+            tags_set, ", ",
+            [&tag_names](std::string* out, analysis::taint::TagId tag) {
+              std::string tag_name = (tag < tag_names.size())
+                                         ? tag_names[tag]
+                                         : absl::StrCat("<<", tag, ">>");
+              absl::StrAppend(out, tag_name);
+            }),
+        "}");
+  };
+  return absl::StrCat(render_tags("s", tags_->secrecy_tags()), ", ",
+                      render_tags("i", tags_->integrity_tags()));
+}
+
 }  // namespace raksha::analysis::taint
