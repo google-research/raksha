@@ -46,7 +46,7 @@ class RefCountedType {
   unsigned int count_;
 };
 
-class RefCountedTypeDerived: public RefCountedType {};
+class RefCountedTypeDerived : public RefCountedType {};
 
 using RefCountedTypePtr = intrusive_ptr<RefCountedType>;
 
@@ -147,25 +147,34 @@ TEST(IntrusivePtrTest, ArrowOperatorProvidesAccessToSavedPtr) {
 }
 
 TEST(IntrusivePtrTest, FactoryConstructionWorks) {
-  auto default_obj = make_intrusive_ptr<RefCountedType>();
-  EXPECT_EQ(default_obj->count(), 1);
-  EXPECT_EQ(default_obj->id(), "<unknown>");
-  EXPECT_EQ(default_obj->some_flag(), false);
+  for (bool use_global_method : {false, true}) {
+    auto default_obj = use_global_method
+                           ? make_intrusive_ptr<RefCountedType>()
+                           : intrusive_ptr<RefCountedType>::create();
+    EXPECT_EQ(default_obj->count(), 1);
+    EXPECT_EQ(default_obj->id(), "<unknown>");
+    EXPECT_EQ(default_obj->some_flag(), false);
 
-  auto ptr = make_intrusive_ptr<RefCountedType>("NewValue");
-  EXPECT_EQ(ptr->count(), 1);
-  EXPECT_EQ(ptr->id(), "NewValue");
-  EXPECT_EQ(ptr->some_flag(), false);
+    auto ptr = use_global_method
+                   ? make_intrusive_ptr<RefCountedType>("NewValue")
+                   : intrusive_ptr<RefCountedType>::create("NewValue");
+    EXPECT_EQ(ptr->count(), 1);
+    EXPECT_EQ(ptr->id(), "NewValue");
+    EXPECT_EQ(ptr->some_flag(), false);
 
-  auto another_ptr = make_intrusive_ptr<RefCountedType>("AnotherValue", true);
-  EXPECT_EQ(another_ptr->count(), 1);
-  EXPECT_EQ(another_ptr->id(), "AnotherValue");
-  EXPECT_EQ(another_ptr->some_flag(), true);
-  EXPECT_NE(ptr.get(), another_ptr.get());
+    auto another_ptr =
+        use_global_method
+            ? make_intrusive_ptr<RefCountedType>("AnotherValue", true)
+            : intrusive_ptr<RefCountedType>::create("AnotherValue", true);
+    EXPECT_EQ(another_ptr->count(), 1);
+    EXPECT_EQ(another_ptr->id(), "AnotherValue");
+    EXPECT_EQ(another_ptr->some_flag(), true);
+    EXPECT_NE(ptr.get(), another_ptr.get());
+  }
   // All objects will be destroyed when the intrusive_pointers go out of scope.
 }
 
-TEST(IntrusivePtrTest, CanConvertBetweenConvertiblePtrs){
+TEST(IntrusivePtrTest, CanConvertBetweenConvertiblePtrs) {
   auto derived_ptr = make_intrusive_ptr<RefCountedTypeDerived>();
   EXPECT_EQ(derived_ptr->count(), 1);
   intrusive_ptr<RefCountedType> base_ptr(derived_ptr);
@@ -207,7 +216,8 @@ TEST(IntrusivePtrTest, EqualReturnsTrueForIdenticalPtrs) {
 }
 
 TEST(IntrusivePtrTest, ComparePtrsOfDifferentTypes) {
-  intrusive_ptr<RefCountedTypeDerived> derived_ptr = make_intrusive_ptr<RefCountedTypeDerived>();
+  intrusive_ptr<RefCountedTypeDerived> derived_ptr =
+      make_intrusive_ptr<RefCountedTypeDerived>();
   intrusive_ptr<RefCountedType> base_ptr(derived_ptr.get());
   EXPECT_EQ(base_ptr, derived_ptr);
 }

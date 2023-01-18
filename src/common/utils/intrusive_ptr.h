@@ -26,6 +26,13 @@ namespace raksha {
 template <typename T>
 class intrusive_ptr {
  public:
+  // Factory function for creating instances of intrusive_ptr. It might be
+  // more convenient and succint to use the global make_intrusive_ptr below.
+  template <typename... Args>
+  static intrusive_ptr<T> create(Args&&... a) {
+    return intrusive_ptr<T>(new T(std::forward<Args>(a)...));
+  }
+
   intrusive_ptr() : ptr_(nullptr) {}
   intrusive_ptr(T* ptr) : ptr_(Retain(ptr)) {}
   intrusive_ptr(const intrusive_ptr<T>& other) : ptr_(Retain(other.ptr_)) {}
@@ -79,10 +86,11 @@ class intrusive_ptr {
   T* ptr_;
 };
 
-// Factory function for creating instances of intrusive_ptr.
+// Creates an intrusive_ptr by invoking the constructor of the underlying
+// type.
 template <typename T, typename... Args>
-intrusive_ptr<T> make_intrusive_ptr(Args&&... a) {
-  return intrusive_ptr<T>(new T(std::forward<Args>(a)...));
+inline intrusive_ptr<T> make_intrusive_ptr(Args&&... a) {
+  return intrusive_ptr<T>::create(std::forward<Args>(a)...);
 }
 
 template <class T, class U>
