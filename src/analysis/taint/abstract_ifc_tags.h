@@ -33,8 +33,8 @@ using IfcTagsPtr = intrusive_ptr<IfcTags>;
 class IfcTags : public RefCounted<IfcTags> {
  public:
   static IfcTagsPtr Create(TagIdSet secrecy_tags, TagIdSet integrity_tags) {
-    return IfcTagsPtr(
-        new IfcTags(std::move(secrecy_tags), std::move(integrity_tags)));
+    return make_intrusive_ptr<IfcTags>(std::move(secrecy_tags),
+                                       std::move(integrity_tags));
   }
 
   IfcTags() = delete;
@@ -49,6 +49,8 @@ class IfcTags : public RefCounted<IfcTags> {
 
   TagIdSet secrecy_tags_;
   TagIdSet integrity_tags_;
+
+  friend class intrusive_ptr<IfcTags>;
 };
 
 // Abstract domain for IFC tags.
