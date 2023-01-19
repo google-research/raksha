@@ -13,22 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //-----------------------------------------------------------------------------
-#ifndef SRC_ANALYSIS_SOUFFLE_TESTS_TEST_OUTPUT_DL_
-#define SRC_ANALYSIS_SOUFFLE_TESTS_TEST_OUTPUT_DL_
 
-#include "src/analysis/souffle/taint.dl"
-
-
-#define DEFAULT_TEST_OWNER "sql"
-#define TEST_OUTPUT_OPERATOR "test.test_output"
-
-violatesPolicy("violates", "testPolicy", "testViolation") :- isOperation(op),
-  isTag(tag),
-  mayHaveTag(result, DEFAULT_TEST_OWNER, tag),
-  !isConditionalTag(tag),
-  operationHasActor(op, DEFAULT_TEST_OWNER),
-  operationHasOperator(op, TEST_OUTPUT_OPERATOR),
-  operationHasResult(op, result).
-
-
-#endif // SRC_ANALYSIS_SOUFFLE_TESTS_TEST_OUTPUT_DL_
+module m0 {
+  block b0 {
+    %private_texts = arcsjs.create_store[name: "CheckNotPrivateRecipe.private_texts", type: "List_Text"]()
+    %claim1 = arcsjs.claim[tag: "private"](%private_texts)
+    %opaque_texts = arcsjs.wrap_opaque[]()
+    %make_public = arcsjs.make_public[](%opaque_texts)
+  }  // block b0
+}  // module m0

@@ -1,0 +1,128 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+#ifndef SRC_ANALYSIS_SOUFFLE_ARCSJS_OPAQUE_DL_
+#define SRC_ANALYSIS_SOUFFLE_ARCSJS_OPAQUE_DL_
+
+#include "src/analysis/souffle/arcsjs_core.dl"
+#define ARCSJS_WRAP_OPAQUE as("arcsjs.wrap_opaque", Operator)
+#define ARCSJS_UNWRAP_OPAQUE as("arcsjs.unwrap_opaque", Operator)
+#define ARCSJS_OPAQUE_PREFIX "opaque_"
+
+hasSpecialEdgeRules(ARCSJS_WRAP_OPAQUE).
+hasSpecialEdgeRules(ARCSJS_UNWRAP_OPAQUE).
+
+// Relates generated opaque tags to their wrapped tag.
+// Here `tag` is the original tag that is wrapped,
+// 'conditional_tag' is the generated tag (ignored until it is unwrapped).
+.decl arcsJsHasOpaqueConfiguration(conditional_tag: Tag, tag: Tag)
+arcsJsHasOpaqueConfiguration(
+  as(cat(ARCSJS_OPAQUE_PREFIX, as(tag, symbol)), Tag),
+  tag
+) :-
+  arcsJsIsWrapOpaqueOperation(op),
+  operationHasOperandAtIndex(op, source, _),
+  mayHaveTag(source, _, tag),
+  // Avoid potential infinite loops via re-wrapping here:
+  strlen(tag) < ARCSJS_MAX_TAG_LENGTH.
+
+violatesPolicy(
+  result,
+  ARCSJS_CONSTRUCTION_POLICY,
+  cat("Deeply nesting opaques is not supported. Performed at ", result)) :-
+  arcsJsIsWrapOpaqueOperation(op),
+  operationHasOperandAtIndex(op, source, _),
+  mayHaveTag(source, _, tag),
+  strlen(tag) >= ARCSJS_MAX_TAG_LENGTH,
+  operationHasResult(op, result).
+
+isConditionalTag(tag) :-
+  arcsJsHasOpaqueConfiguration(tag, _).
+
+.decl arcsJsIsWrapOpaqueOperation(op: Operation)
+arcsJsIsWrapOpaqueOperation(op) :-
+      isOperation(op),
+      operationHasOperator(op, ARCSJS_WRAP_OPAQUE).
+
+isTag(new_tag) :-
+  arcsJsHasOpaqueConfiguration(new_tag, _).
+
+// TODO(jopra): Add support for opaque integrity tags.
+// Currently this would cause a stratification error and is not useful for
+// ArcsJs so can be skipped.
+//
+// Sketch of the necessary code:
+// mustHaveIntegrityTag(result, owner, as(new_tag, IntegrityTag)) :-
+//   arcsJsIsWrapOpaqueOperation(op),
+//   operationHasOperandAtIndex(op, source, _),
+//   operationHasResult(op, result),
+//   mustHaveIntegrityTag(source, owner, tag),
+//   arcsJsHasOpaqueConfiguration(new_tag, tag).
+//
+// mustHaveIntegrityTag(result, owner, as(tag, IntegrityTag)) :-
+//   arcsJsIsUnwrapOpaqueOperation(op),
+//   operationHasOperandAtIndex(op, source, _),
+//   mustHaveIntegrityTag(source, owner, new_tag),
+//   arcsJsHasOpaqueConfiguration(as(new_tag, Tag), tag),
+//   operationHasResult(op, result).
+
+mayHaveTag(result, owner, new_tag) :-
+  arcsJsIsWrapOpaqueOperation(op),
+  operationHasOperandAtIndex(op, source, _),
+  operationHasResult(op, result),
+  mayHaveTag(source, owner, tag),
+  arcsJsHasOpaqueConfiguration(new_tag, tag).
+
+// Unwrap opaque tags into tags.
+mayHaveTag(result, owner, tag) :-
+  arcsJsIsUnwrapOpaqueOperation(op),
+  operationHasOperandAtIndex(op, node, _),
+  mayHaveTag(node, owner, new_tag),
+  arcsJsHasOpaqueConfiguration(new_tag, tag),
+  operationHasResult(op, result).
+
+.decl policyArcsJsConformingWrapOpaque(op: Operation)
+policyArcsJsConformingWrapOpaque(op) :-
+  arcsJsIsWrapOpaqueOperation(op),
+  count : { operationHasOperandAtIndex(op, _, _) } = 1.
+
+violatesPolicy(
+  result,
+  ARCSJS_CONSTRUCTION_POLICY,
+  cat("Malformed wrap_opaque operation at ", result)) :-
+  arcsJsIsWrapOpaqueOperation(op),
+  !policyArcsJsConformingWrapOpaque(op),
+  operationHasResult(op, result).
+
+.decl arcsJsIsUnwrapOpaqueOperation(op: Operation)
+arcsJsIsUnwrapOpaqueOperation(op) :-
+      isOperation(op),
+      operationHasOperator(op, ARCSJS_UNWRAP_OPAQUE).
+
+.decl policyArcsJsConformingUnwrapOpaque(op: Operation)
+policyArcsJsConformingUnwrapOpaque(op) :-
+  arcsJsIsUnwrapOpaqueOperation(op),
+  count : { operationHasOperandAtIndex(op, _, _) } = 1.
+
+violatesPolicy(
+  result,
+  ARCSJS_CONSTRUCTION_POLICY,
+  cat("Malformed unwrap_opaque operation at ", result)) :-
+  arcsJsIsUnwrapOpaqueOperation(op),
+  !policyArcsJsConformingUnwrapOpaque(op),
+  operationHasResult(op, result).
+
+
+#endif // SRC_ANALYSIS_SOUFFLE_ARCSJS_OPAQUE_DL_

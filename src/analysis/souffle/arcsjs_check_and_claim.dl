@@ -100,7 +100,7 @@ isTag(tag) :-
   tag != ARCSJS_PUBLIC_TAG.
 
 // Adds `claim`ed tags to the argument of a `claim` operation.
-hasTag(argument, DEFAULT_ARCSJS_OWNER, claimed_tag) :-
+mayHaveTag(argument, DEFAULT_ARCSJS_OWNER, claimed_tag) :-
   arcsJsClaimOperationHasTag(op, claimed_tag),
   claimed_tag != ARCSJS_PUBLIC_TAG,
   arcsJsClaimOperationHasArgument(op, argument).
@@ -111,7 +111,7 @@ hasTag(argument, DEFAULT_ARCSJS_OWNER, claimed_tag) :-
 arcsJsCheckedResultMissingExpectedTag(op, argument, tag) :-
   arcsJsCheckOperationHasTag(op, tag),
   arcsJsCheckOperationHasArgument(op, argument),
-  !hasTag(argument, _, tag).
+  !mayHaveTag(argument, _, tag).
 
 violatesPolicy(path, ARCSJS_CHECK_TAG_POLICY, cat(cat("Expected tag '", tag), cat("' missing at ", path))) :-
   arcsJsCheckedResultMissingExpectedTag(_, path, tag).
@@ -121,7 +121,7 @@ violatesPolicy(path, ARCSJS_CHECK_TAG_POLICY, cat(cat("Expected tag '", tag), ca
 arcsJsCheckNotResultHasUnexpectedTag(op, argument, tag) :-
   arcsJsCheckNotOperationHasTag(op, tag),
   arcsJsCheckNotOperationHasArgument(op, argument),
-  hasTag(argument, _, tag).
+  mayHaveTag(argument, _, tag).
 
 violatesPolicy(path, ARCSJS_CHECK_TAG_POLICY, cat(cat("Unexpected tag '", tag), cat("' found at ", path))) :-
   arcsJsCheckNotResultHasUnexpectedTag(_, path, tag).

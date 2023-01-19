@@ -31,4 +31,8 @@
 #define ARCSJS_CHECK_TAG_POLICY as("arcsjs.check_tag", PolicyName)
 #define ARCSJS_USER_DOWNGRADE_POLICY as("arcsjs.user_consent_to_downgrade", PolicyName)
 
+// Used to control the 'recursion depth' of simulating graph structures
+// that are able to build new tags.
+#define ARCSJS_MAX_TAG_LENGTH 200
+
 #endif // SRC_ANALYSIS_SOUFFLE_ARCSJS_CORE_DL_

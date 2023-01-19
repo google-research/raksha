@@ -58,7 +58,8 @@ arcsJsMakePublicHasConfidentialTag(op, argument, tag) :-
   arcsJsMakePublicOperationHasArgument(op, argument),
   isTag(tag),
   tag != ARCSJS_PUBLIC_TAG,
-  mayHaveTag(argument, _, tag).
+  mayHaveTag(argument, _, tag),
+  !isConditionalTag(tag).
 
 .decl arcsJsMakePublicResult(arcsJsMakePublicOperation: Operation, passOrFail: symbol)
 

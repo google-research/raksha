@@ -35,7 +35,8 @@ isSqlOutput(op) :- isOperation(op),
 sqlOutputHasConfidentialTag(op, tag) :-
   isSqlOutput(op),
   operationHasResult(op, result),
-  isTag(tag), mayHaveTag(result, DEFAULT_SQL_OWNER, tag).
+  isTag(tag), mayHaveTag(result, DEFAULT_SQL_OWNER, tag),
+  !isConditionalTag(tag).
 
 .decl sqlOutputResult(sqlOutputOperation: Operation, passOrFail: symbol)
 

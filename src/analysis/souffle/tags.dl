@@ -38,4 +38,10 @@
 // A policy name used for error reporting.
 .type PolicyName <: symbol
 
+// Indicates that the tag has some runtime specific, conditional handling, and
+// should be propagated, but not considered for validation or invalidation.
+// e.g. Data tagged with 'opaque_secret', is not currently 'secret', but
+// runtime specific rules may convert this tag to 'secret' later.
+.decl isConditionalTag(tag: Tag)
+
 #endif // SRC_ANALYSIS_SOUFFLE_TAGS_DL_

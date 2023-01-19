@@ -1,0 +1,91 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+#include "src/analysis/souffle/arcsjs_test_helper.dl"
+#include "src/analysis/souffle/arcsjs_opaque.dl"
+
+.output arcsJsHasOpaqueConfiguration(IO=stdout, delimiter=";")
+.output hasTag(IO=stdout, delimiter=";")
+.output mayHaveTag(IO=stdout, delimiter=";")
+
+#define WRAP_OPAQUE_CREATE_AND_TEST_OPERATOR_INNER(n_tags, test_name, owner, operation, tag, source, hidden_tag) \
+  isOperation(operation). \
+  TEST_CASE(cat(test_name, "_arcsJsIsWrapOpaqueOperation")) :- \
+    arcsJsIsWrapOpaqueOperation(operation). \
+  TEST_CASE(cat(test_name, "_isConditionalTag")) :- \
+    isConditionalTag(tag). \
+  TEST_CASE(cat(test_name, "_arcsJsHasOpaqueConfiguration")) :- \
+    arcsJsIsWrapOpaqueOperation(operation), \
+    count : { arcsJsHasOpaqueConfiguration(tag, hidden_tag) } = n_tags, \
+    count : { arcsJsHasOpaqueConfiguration(tag, _) } = n_tags
+
+#define WRAP_OPAQUE_CREATE_AND_TEST_OPERATION(n_tags, test_name, owner, operator, result, operandList, attrList, tag, source, hidden_tag) \
+  WRAP_OPAQUE_CREATE_AND_TEST_OPERATOR_INNER(n_tags, test_name, owner, ([owner, operator, ([result, nil]), (operandList), (attrList)]), tag, source, hidden_tag)
+
+#define WRAP_OPAQUE_CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(test_name, owner, operation) \
+  isOperation(operation). \
+  TEST_N_RESULT2_FOR_OPERATION(1, test_name, (operation), violatesPolicy, "arcsjs.construction", _)
+
+#define WRAP_OPAQUE_CREATE_AND_TEST_OPERATION_VIOLATES(test_name, owner, operator, result, operandList, attrList) \
+  WRAP_OPAQUE_CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(test_name, owner, ([owner, operator, ([result, nil]), (operandList), (attrList)]))
+
+#define UNWRAP_OPAQUE_CREATE_AND_TEST_OPERATOR_INNER(test_name, operation, tag, hidden_tag, source) \
+  isOperation(operation). \
+  TEST_CASE(cat(test_name, "_arcsJsIsUnwrapOpaqueOperation")) :- \
+    arcsJsIsUnwrapOpaqueOperation(operation)
+
+#define UNWRAP_OPAQUE_CREATE_AND_TEST_OPERATION(test_name, owner, operator, result, operandList, attrList, tag, hidden_tag, source) \
+  UNWRAP_OPAQUE_CREATE_AND_TEST_OPERATOR_INNER(test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]), tag, hidden_tag, source)
+
+#define UNWRAP_OPAQUE_CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(test_name, operation, tag, hidden_tag, source) \
+  isOperation(operation). \
+  TEST_N_RESULT2_FOR_OPERATION(1, test_name, (operation), violatesPolicy, "arcsjs.construction", _)
+
+#define UNWRAP_OPAQUE_CREATE_AND_TEST_OPERATION_VIOLATES(test_name, owner, operator, result, operandList, attrList, tag, hidden_tag, source) \
+  UNWRAP_OPAQUE_CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(test_name, ([owner, operator, ([result, nil]), (operandList), (attrList)]), tag, hidden_tag, source)
+
+
+#define ATTR_LIST1 nil
+#define OPERAND_LIST1 ["operand1", nil]
+
+hasTag("operand1", "somePrincipal", "private").
+WRAP_OPAQUE_CREATE_AND_TEST_OPERATION(1, "test1_wrap_opaque", "somePrincipal", "arcsjs.wrap_opaque", "ap1", (OPERAND_LIST1), (ATTR_LIST1), "opaque_private", "operand1", "private").
+UNWRAP_OPAQUE_CREATE_AND_TEST_OPERATION("test2_unwrap_opaque", "somePrincipal", "arcsjs.unwrap_opaque", "ap2", (OPERAND_LIST1), (ATTR_LIST1), "opaque_private", "operand1", "private").
+
+#define ATTR_LIST2 [["wrong_tag", $NumberAttributePayload(2)], nil]
+#define OPERAND_LIST2 ["input1", nil]
+
+hasTag("input1", "prin", "hello1").
+WRAP_OPAQUE_CREATE_AND_TEST_OPERATION(1, "test3_wrap_opaque_ignores_extra_attrs", "prin", "arcsjs.wrap_opaque", "ap3", (OPERAND_LIST2), (ATTR_LIST2), "opaque_hello1", "input1", "hello1").
+UNWRAP_OPAQUE_CREATE_AND_TEST_OPERATION("test4_unwrap_opaque_ignores_extra_attrs", "prin", "arcsjs.unwrap_opaque", "ap4", (OPERAND_LIST2), (ATTR_LIST2), "opaque_hello1", "input1", "hello1").
+
+#define ATTR_LIST3 [["wrong_tag", $NumberAttributePayload(2)], nil]
+#define OPERAND_LIST3 ["input2", ["input2", nil]]
+WRAP_OPAQUE_CREATE_AND_TEST_OPERATION_VIOLATES("test5_wrap_opaque_errors_on_extra_args", "prin", "arcsjs.wrap_opaque", "ap5", (OPERAND_LIST3), (ATTR_LIST3)).
+UNWRAP_OPAQUE_CREATE_AND_TEST_OPERATION_VIOLATES("test6_unwrap_opaque_errors_on_extra_args", "prin", "arcsjs.unwrap_opaque", "ap6", (OPERAND_LIST3), (ATTR_LIST3), "opaque_hello", "input2", "hello3").
+
+#define ATTR_LIST4 [["wrong_tag", $NumberAttributePayload(2)], nil]
+WRAP_OPAQUE_CREATE_AND_TEST_OPERATION_VIOLATES("test9_wrap_opaque_requires_arg", "prin", "arcsjs.wrap_opaque", "ap9", nil, (ATTR_LIST4)).
+UNWRAP_OPAQUE_CREATE_AND_TEST_OPERATION_VIOLATES("test10_unwrap_opaque_requires_arg", "prin", "arcsjs.unwrap_opaque", "ap10", nil, (ATTR_LIST4), _, _, _).
+
+#define ATTR_LIST6 nil
+#define OPERAND_LIST6 ["input3", nil]
+
+hasTag("input3", "prin", "hello").
+hasTag("input3", "prin", "world").
+WRAP_OPAQUE_CREATE_AND_TEST_OPERATION(1, "test11_wrap_opaque_maps_over_tags_hello", "prin", "arcsjs.wrap_opaque", "ap11", (OPERAND_LIST6), (ATTR_LIST6), "opaque_hello", "input3", "hello").
+WRAP_OPAQUE_CREATE_AND_TEST_OPERATION(1, "test11_wrap_opaque_maps_over_tags_world", "prin", "arcsjs.wrap_opaque", "ap11", (OPERAND_LIST6), (ATTR_LIST6), "opaque_world", "input3", "world").
+UNWRAP_OPAQUE_CREATE_AND_TEST_OPERATION("test12_unwrap_opaque_maps_over_tags", "prin", "arcsjs.unwrap_opaque", "ap12", (OPERAND_LIST6), (ATTR_LIST6), _, "input3", _).
