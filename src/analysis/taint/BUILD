@@ -44,6 +44,40 @@ cc_test(
 )
 
 cc_library(
+    name = "abstract_semantics",
+    srcs = ["abstract_semantics.cc"],
+    hdrs = ["abstract_semantics.h"],
+    deps = [
+        ":abstract_ifc_tags",
+        ":inference_rules",
+        "//src/analysis/common:module_graph",
+        "//src/common/utils:fold",
+        "//src/common/utils:overloaded",
+        "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/container:flat_hash_set",
+    ],
+)
+
+cc_test(
+    name = "abstract_semantics_test",
+    srcs = ["abstract_semantics_test.cc"],
+    deps = [
+        ":abstract_ifc_tags",
+        ":abstract_semantics",
+        ":inference_rule",
+        ":inference_rules",
+        ":inference_rules_builder",
+        "//src/common/testing:gtest",
+        "//src/common/utils:map_iter",
+        "//src/ir:module",
+        "//src/ir:storage",
+        "//src/ir:value",
+        "//src/ir/types",
+        "//src/parser/ir:ir_parser",
+    ],
+)
+
+cc_library(
     name = "inference_rule",
     hdrs = ["inference_rule.h"],
 )
