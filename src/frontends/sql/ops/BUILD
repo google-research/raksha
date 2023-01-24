@@ -184,6 +184,9 @@ cc_test(
 cc_library(
     name = "op_traits",
     hdrs = ["op_traits.h"],
+    visibility = [
+        "//src/backends/policy_engine/abstract_interpretation:__pkg__",
+    ],
     deps = [
         "@com_google_absl//absl/strings",
     ],
