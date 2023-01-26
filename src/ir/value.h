@@ -54,7 +54,6 @@ class IndexedValue {
   const T& element() const { return *element_; }
   uint64_t index() const { return index_; }
 
- protected:
   bool operator==(const IndexedValue<T>& other) const {
     return (element_ == other.element_) && (index_ == other.index_);
   }
@@ -69,7 +68,6 @@ class BlockArgument : public IndexedValue<Block> {
  public:
   using IndexedValue<Block>::IndexedValue;
   const Block& block() const { return element(); }
-  using IndexedValue<Block>::operator==;
 };
 
 // Indicates the result of an operation.
@@ -89,7 +87,6 @@ class OperationResult : public IndexedValue<Operation> {
 
   using IndexedValue<Operation>::IndexedValue;
   const Operation& operation() const { return element(); }
-  using IndexedValue<Operation>::operator==;
 };
 
 // Indicates the value in a storage.
