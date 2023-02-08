@@ -107,7 +107,7 @@ A simple case might be `f(x: number /label_of_x/, y: number /label_of_y/) /label
 
 We’ll cover what `+` means in detail below, but the key part is that it’s a label that satisfies the label constraints, i.e. it is equal or stricter than any of the input labels. For example, if `x` is more sensitive than `y`, then `z` will be at least as sensitive as `x`. An exception might be trusted components (see below), that might claim that not all inputs taint all outputs, e.g. a `map` implementation that is trusted to handle each input element separately.
 
-![drawing](img/high-and-low-precision.svg)
+![drawing](img/high-and-low-sensitivity.svg)
 
 In practice it’ll be rare to spell these out, and we should assume them as hidden templates, i.e. an implicit `f(x: number /<L1>/) /<L2>/ → y, z: number /<L1 + L2>/`.
 
