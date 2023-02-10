@@ -133,10 +133,7 @@ cc_library(
     hdrs = [
         "universe_relation_insertion.h",
     ],
-    visibility = [
-        "//src/backends/policy_engine/souffle:__subpackages__",
-        "//src/ir/auth_logic:__subpackages__",
-    ],
+    visibility = ["//src/backends/policy_engine/souffle:__subpackages__"],
     deps = [
         ":ast",
         ":auth_logic_ast_traversing_visitor",
