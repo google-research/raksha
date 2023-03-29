@@ -54,10 +54,7 @@ cc_library(
 cc_library(
     name = "catchall_policy_rule_policy",
     hdrs = ["catchall_policy_rule_policy.h"],
-    visibility = [
-        "//:__pkg__",
-        "//src:__subpackages__",
-    ] + frontend_packages,
+    visibility = ["//src:__subpackages__"] + frontend_packages,
     deps = [
         ":policy",
         "//src/analysis/souffle:datalog_policy_verifier",
