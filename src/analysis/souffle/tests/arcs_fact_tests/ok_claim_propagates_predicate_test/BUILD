@@ -21,6 +21,7 @@ load(
 )
 
 package(
+    default_applicable_licenses = ["//third_party/raksha:license"],
     features = ["layering_check"],
     licenses = ["notice"],
 )

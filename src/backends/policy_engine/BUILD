@@ -20,6 +20,7 @@ load(
 )
 
 package(
+    default_applicable_licenses = ["//third_party/raksha:license"],
     default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
     licenses = ["notice"],

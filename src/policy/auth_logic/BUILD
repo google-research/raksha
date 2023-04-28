@@ -17,6 +17,7 @@
 load("//build_defs:antlr.bzl", "antlr4_cc_combined")
 
 package(
+    default_applicable_licenses = ["//third_party/raksha:license"],
     default_visibility = [
         "//src/ir/auth_logic:__pkg__",
     ],

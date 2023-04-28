@@ -19,6 +19,8 @@ load(
     "raksha_policy_verifier_library",
 )
 
+package(default_applicable_licenses = ["//third_party/raksha:license"])
+
 licenses(["notice"])
 
 # This is not yet available internally. So, we have generated the

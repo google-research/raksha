@@ -18,6 +18,7 @@
 load("//build_defs:raksha_policy_verifier.bzl", "raksha_policy_verifier_library")
 
 package(
+    default_applicable_licenses = ["//third_party/raksha:license"],
     default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
     licenses = ["notice"],

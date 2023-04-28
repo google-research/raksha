@@ -17,6 +17,7 @@
 # A Raksha frontend for SQLite
 
 package(
+    default_applicable_licenses = ["//third_party/raksha:license"],
     default_visibility = [
         "//:__subpackages__",
     ],

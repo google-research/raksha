@@ -17,6 +17,8 @@
 
 load("//build_defs:test_helpers.bzl", "convert_ir_to_is_operation_facts")
 
+package(default_applicable_licenses = ["//third_party/raksha:license"])
+
 convert_ir_to_is_operation_facts(
     name = "dp_ir_test_convert",
     ir_file = ":2q_passing.ir",

@@ -15,6 +15,7 @@
 #
 #-------------------------------------------------------------------------------
 package(
+    default_applicable_licenses = ["//third_party/raksha:license"],
     default_visibility = [
         # The policy checker test currently requires specific operations from
         # the SQL frontend because that's where tainting via operations is most
