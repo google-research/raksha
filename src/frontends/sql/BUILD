@@ -93,10 +93,7 @@ cc_library(
     name = "decode_sql_policy_rules",
     srcs = ["decode_sql_policy_rules.cc"],
     hdrs = ["decode_sql_policy_rules.h"],
-    visibility = [
-        "//:__pkg__",
-        "//src/backends/policy_engine/abstract_interpretation:__pkg__",
-    ],
+    visibility = ["//src/backends/policy_engine/abstract_interpretation:__pkg__"],
     deps = [
         ":decoder_context",
         ":sql_ir_cc_proto",
