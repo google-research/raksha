@@ -16,12 +16,7 @@
 
 # A Raksha frontend for SQLite
 
-package(
-    default_visibility = [
-        "//:__subpackages__",
-    ],
-    licenses = ["notice"],
-)
+package(licenses = ["notice"])
 
 cc_library(
     name = "ast",
