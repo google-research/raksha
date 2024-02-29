@@ -58,7 +58,7 @@ static bool IsModulePolicyCompliantHelper(
   module.Accept(datalog_lowering_visitor);
   absl::Status output_module_status =
       datalog_lowering_visitor.datalog_facts().DumpFactsToDirectory(
-          facts_directory, {});
+          facts_directory, {"isDPParameter"});
   CHECK(output_module_status.ok())
       << "Unexpected error while outputting module: " << output_module_status;
 

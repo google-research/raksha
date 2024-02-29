@@ -54,8 +54,9 @@ absl::Status RakshaDatalogFacts::DumpFactsToDirectory(
       WriteFactsToFile(facts_path, "isOperation", is_operation_facts_);
   if (!status.ok()) return status;
   for (absl::string_view name : empty_relations) {
-    status = WriteFactsStringToFactsFile(facts_path, name, "");
-    if (!status.ok()) return status;
+    // Allow this operation to fail (e.g., if someone has already written out
+    // the relation.)
+    (void)WriteFactsStringToFactsFile(facts_path, name, "");
   }
 
   CHECK(status.ok());
