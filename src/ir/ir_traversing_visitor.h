@@ -16,10 +16,13 @@
 #ifndef SRC_IR_IR_TRAVERSING_VISITOR_H_
 #define SRC_IR_IR_TRAVERSING_VISITOR_H_
 
+#include <memory>
+
 #include "src/common/utils/fold.h"
 #include "src/common/utils/types.h"
 #include "src/ir/ir_visitor.h"
 #include "src/ir/module.h"
+#include "src/ir/storage.h"
 
 namespace raksha::ir {
 
@@ -84,10 +87,25 @@ class IRTraversingVisitor
     return in_order_result;
   }
 
+  virtual Result PreVisit(const Storage& storage) { return GetDefaultValue(); }
+
+  virtual Result PostVisit(const Storage& storage, Result in_order_result) {
+    return in_order_result;
+  }
+
   Result Visit(const Module& module) final override {
     Result pre_visit_result = PreVisit(module);
+    // Visit storages before blocks
+    Result storage_fold_result = common::utils::fold(
+        module.named_storage_map(), std::move(pre_visit_result),
+        [this](Result acc,
+               const std::pair<const std::string, std::unique_ptr<Storage>>&
+                   name_and_storage) {
+          return FoldResult(std::move(acc),
+                            name_and_storage.second->Accept(*this));
+        });
     Result fold_result = common::utils::fold(
-        module.blocks(), std::move(pre_visit_result),
+        module.blocks(), std::move(storage_fold_result),
         [this](Result acc, const std::unique_ptr<Block>& block) {
           return FoldResult(std::move(acc), block->Accept(*this));
         });
@@ -107,6 +125,11 @@ class IRTraversingVisitor
   Result Visit(const Operation& operation) final override {
     Result pre_visit_result = PreVisit(operation);
     return PostVisit(operation, std::move(pre_visit_result));
+  }
+
+  Result Visit(const Storage& storage) final override {
+    Result pre_visit_result = PreVisit(storage);
+    return PostVisit(storage, std::move(pre_visit_result));
   }
 };
 

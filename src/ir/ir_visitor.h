@@ -23,6 +23,7 @@ namespace raksha::ir {
 class Module;
 class Block;
 class Operation;
+class Storage;
 
 // An interface for the visitor class. We will also pass in the `Derived` class
 // as template argument if we want to support CRTP at a later point.
@@ -33,6 +34,7 @@ class IRVisitor {
   virtual Result Visit(CopyConst<IsConst, Module>& module) = 0;
   virtual Result Visit(CopyConst<IsConst, Block>& block) = 0;
   virtual Result Visit(CopyConst<IsConst, Operation>& operation) = 0;
+  virtual Result Visit(CopyConst<IsConst, Storage>& storage) = 0;
 };
 
 }  // namespace raksha::ir
