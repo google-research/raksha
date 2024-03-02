@@ -48,6 +48,10 @@ build:remote --define=EXECUTOR=remote
 
 # Enable remote execution so actions are performed on the remote systems.
 build:remote --remote_executor=grpcs://remotebuildexecution.googleapis.com
+build:remote --remote_cache=grpcs://remotebuildexecution.googleapis.com
+build:remote --remote_instance_name=projects/google.com:raksha-ci/instances/raksha_rbe_instance
+build:remote --host_platform_remote_properties_override='properties:{name:"cache-silo-key" value:"gcb-ci-cache"}'
+
 
 # Enforce stricter environment rules, which eliminates some non-hermetic
 # behavior and therefore improves both the remote cache hit rate and the
@@ -61,3 +65,7 @@ build:remote --remote_timeout=3600
 # default. You can use --google_credentials=some_file.json to use a service
 # account credential instead.
 build:remote --google_default_credentials=true
+
+# Do not risk cache corruption. See:
+# https://github.com/bazelbuild/bazel/issues/3360
+build:linux --experimental_guard_against_concurrent_changes
