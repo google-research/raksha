@@ -53,6 +53,7 @@ exports_files([
         "//src/analysis/souffle:arcsjs_input_and_output.dl",
         "//src/analysis/souffle:arcsjs_make_public.dl",
         "//src/analysis/souffle:arcsjs_opaque.dl",
+        "//src/analysis/souffle:arcsjs_restrict_aggregation.dl",
         "//src/analysis/souffle:arcsjs_user_consent_to_downgrade.dl",
         "//src/analysis/souffle:attributes.dl",
         "//src/analysis/souffle:authorization_logic.dl",

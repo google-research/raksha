@@ -39,6 +39,7 @@ arcsjs_dl_files_local = [
     "arcsjs_input_and_output.dl",
     "arcsjs_make_public.dl",
     "arcsjs_opaque.dl",
+    "arcsjs_restrict_aggregation.dl",
     "arcsjs_user_consent_to_downgrade.dl",
 ]
 

@@ -1,0 +1,65 @@
+//-----------------------------------------------------------------------------
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+#include "src/analysis/souffle/arcsjs_test_helper.dl"
+#include "src/analysis/souffle/arcsjs_restrict_aggregation.dl"
+
+.output arcsJsHasRestrictAggregationConfiguration(IO=stdout, delimiter=";")
+.output hasTag(IO=stdout, delimiter=";")
+.output mayHaveTag(IO=stdout, delimiter=";")
+.output arcsJsIsRestrictAggregationOperation(IO=stdout, delimiter=";")
+
+#define RESTRICT_AGGREGATION_CREATE_AND_TEST_OPERATOR_INNER(n_tags, test_name, owner, operation, tag, source, hidden_tag) \
+  isOperation(operation). \
+  TEST_CASE(cat(test_name, "_arcsJsIsRestrictAggregationOperation")) :- \
+    arcsJsIsRestrictAggregationOperation(operation). \
+  TEST_CASE(cat(test_name, "_isConditionalTag")) :- \
+    isConditionalTag(tag). \
+  TEST_CASE(cat(test_name, "_arcsJsHasRestrictAggregationConfiguration")) :- \
+    count : { arcsJsHasRestrictAggregationConfiguration(hidden_tag, tag, source) } = n_tags, \
+    count : { arcsJsHasRestrictAggregationConfiguration(_, tag, source) } = n_tags
+
+#define RESTRICT_AGGREGATION_CREATE_AND_TEST_OPERATION(n_tags, test_name, owner, operator, result, operandList, attrList, tag, source, hidden_tag) \
+  RESTRICT_AGGREGATION_CREATE_AND_TEST_OPERATOR_INNER(n_tags, test_name, owner, ([owner, operator, ([result, nil]), (operandList), (attrList)]), tag, source, hidden_tag)
+
+#define RESTRICT_AGGREGATION_CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(test_name, owner, operation) \
+  isOperation(operation). \
+  TEST_N_RESULT2_FOR_OPERATION(1, test_name, (operation), violatesPolicy, "arcsjs.construction", _)
+
+#define RESTRICT_AGGREGATION_CREATE_AND_TEST_OPERATION_VIOLATES(test_name, owner, operator, result, operandList, attrList) \
+  RESTRICT_AGGREGATION_CREATE_AND_TEST_OPERATOR_INNER_VIOLATES(test_name, owner, ([owner, operator, ([result, nil]), (operandList), (attrList)]))
+
+#define ATTR_LIST1 [["tag", $StringAttributePayload("private")], nil]
+#define OPERAND_LIST1 ["operand1", nil]
+
+RESTRICT_AGGREGATION_CREATE_AND_TEST_OPERATION(1, "test1_restrict_aggregation", "somePrincipal", "arcsjs.restrict_aggregation", "ap1", (OPERAND_LIST1), (ATTR_LIST1), "restrict_aggregation_private_operand1", "operand1", "private").
+
+#define ATTR_LIST2 [["tag", $StringAttributePayload("hello1")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
+#define OPERAND_LIST2 ["input1", nil]
+
+RESTRICT_AGGREGATION_CREATE_AND_TEST_OPERATION(1, "test2_restrict_aggregation_ignores_extra_attrs", "prin", "arcsjs.restrict_aggregation", "ap3", (OPERAND_LIST2), (ATTR_LIST2), "restrict_aggregation_hello1_input1", "input1", "hello1").
+
+#define ATTR_LIST3 [["tag", $StringAttributePayload("private")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
+#define OPERAND_LIST3 ["input2", ["input2", nil]]
+RESTRICT_AGGREGATION_CREATE_AND_TEST_OPERATION_VIOLATES("test3_restrict_aggregation_errors_on_extra_args", "prin", "arcsjs.restrict_aggregation", "ap5", (OPERAND_LIST3), (ATTR_LIST3)).
+
+#define ATTR_LIST4 [["tag", $StringAttributePayload("private")], [["wrong_tag", $NumberAttributePayload(2)], nil]]
+RESTRICT_AGGREGATION_CREATE_AND_TEST_OPERATION_VIOLATES("test4_restrict_aggregation_requires_arg", "prin", "arcsjs.restrict_aggregation", "ap9", nil, (ATTR_LIST4)).
+
+#define ATTR_LIST6 [["tag", $StringAttributePayload("private1")], [["tag", $StringAttributePayload("private2")], nil]]
+#define OPERAND_LIST6 ["input3", nil]
+
+RESTRICT_AGGREGATION_CREATE_AND_TEST_OPERATION(2, "test5_restrict_aggregation_maps_over_tags", "prin", "arcsjs.restrict_aggregation", "ap11", (OPERAND_LIST6), (ATTR_LIST6), _, "input3", _).
