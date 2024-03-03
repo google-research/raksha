@@ -1,0 +1,3 @@
+.decl mayA(prin : Principal)
+"UserA" says mayA("NotifierA").
+may_notifierA = query "UserA" says mayA(NotifierA)?
