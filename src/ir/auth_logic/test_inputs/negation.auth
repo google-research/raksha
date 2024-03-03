@@ -1,0 +1,15 @@
+.decl foo(x : Symbol)
+.decl bar(x : Symbol)
+.decl baz(x : Symbol)
+
+"TestPrin" says foo("x") :- !bar("x").
+"TestPrin" says foo("y") :- !bar("y").
+"TestPrin" says baz("x") :- bar("x").
+"TestPrin" says bar("y").
+
+// yes
+q1 = query "TestPrin" says foo("x")?
+// no
+q2 = query "TestPrin" says baz("x")?
+// no
+q3 = query "TestPrin" says foo("y")?

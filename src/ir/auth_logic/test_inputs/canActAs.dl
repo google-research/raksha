@@ -1,0 +1,129 @@
+.type DummyType <: symbol
+.type Number <: number
+.type Principal <: symbol
+.type Symbol <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl q_chicken(dummy_param : DummyType)
+.decl q_ketchup(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_canSay_canActAs(speaker : Principal, delegatee1 : Principal, p1 : Principal, p2 : Principal)
+.decl says_canSay_hasCertification(speaker : Principal, delegatee1 : Principal, attribute_prin : Principal, subject : Symbol)
+.decl says_groundedPrin(speaker : Principal, p : Principal)
+.decl says_hasAttribute(speaker : Principal, attribute_prin : Principal, attr_name : Symbol)
+.decl says_hasCertification(speaker : Principal, attribute_prin : Principal, subject : Symbol)
+.decl says_isNumber(speaker : Principal, x : Number)
+.decl says_isPrincipal(speaker : Principal, x : Principal)
+.decl says_isSymbol(speaker : Principal, x : Symbol)
+says_isPrincipal("nationalInstituteOfSoupChefs", "nationalInstituteOfSoupChefs").
+says_isPrincipal("nationalInstituteOfSoupChefs", "chickenSoup").
+says_isPrincipal("nationalInstituteOfSoupChefs", "prin2").
+says_isPrincipal("nationalInstituteOfSoupChefs", "prin3").
+says_isSymbol("nationalInstituteOfSoupChefs", "soupsmithing").
+says_isSymbol("nationalInstituteOfSoupChefs", "aSubstantialMeal").
+says_isPrincipal("nationalInstituteOfSoupChefs", "soup").
+says_isPrincipal("nationalInstituteOfSoupChefs", "prin1").
+says_isPrincipal("nationalInstituteOfSoupChefs", "ketchup").
+says_isPrincipal("nationalInstituteOfSoupChefs", "soupExpert").
+says_isSymbol("nationalInstituteOfSoupChefs", "liquid").
+says_isPrincipal("chickenSoup", "nationalInstituteOfSoupChefs").
+says_isPrincipal("chickenSoup", "chickenSoup").
+says_isPrincipal("chickenSoup", "prin2").
+says_isPrincipal("chickenSoup", "prin3").
+says_isSymbol("chickenSoup", "soupsmithing").
+says_isSymbol("chickenSoup", "aSubstantialMeal").
+says_isPrincipal("chickenSoup", "soup").
+says_isPrincipal("chickenSoup", "prin1").
+says_isPrincipal("chickenSoup", "ketchup").
+says_isPrincipal("chickenSoup", "soupExpert").
+says_isSymbol("chickenSoup", "liquid").
+says_isPrincipal("prin2", "nationalInstituteOfSoupChefs").
+says_isPrincipal("prin2", "chickenSoup").
+says_isPrincipal("prin2", "prin2").
+says_isPrincipal("prin2", "prin3").
+says_isSymbol("prin2", "soupsmithing").
+says_isSymbol("prin2", "aSubstantialMeal").
+says_isPrincipal("prin2", "soup").
+says_isPrincipal("prin2", "prin1").
+says_isPrincipal("prin2", "ketchup").
+says_isPrincipal("prin2", "soupExpert").
+says_isSymbol("prin2", "liquid").
+says_isPrincipal("prin3", "nationalInstituteOfSoupChefs").
+says_isPrincipal("prin3", "chickenSoup").
+says_isPrincipal("prin3", "prin2").
+says_isPrincipal("prin3", "prin3").
+says_isSymbol("prin3", "soupsmithing").
+says_isSymbol("prin3", "aSubstantialMeal").
+says_isPrincipal("prin3", "soup").
+says_isPrincipal("prin3", "prin1").
+says_isPrincipal("prin3", "ketchup").
+says_isPrincipal("prin3", "soupExpert").
+says_isSymbol("prin3", "liquid").
+says_isPrincipal("soup", "nationalInstituteOfSoupChefs").
+says_isPrincipal("soup", "chickenSoup").
+says_isPrincipal("soup", "prin2").
+says_isPrincipal("soup", "prin3").
+says_isSymbol("soup", "soupsmithing").
+says_isSymbol("soup", "aSubstantialMeal").
+says_isPrincipal("soup", "soup").
+says_isPrincipal("soup", "prin1").
+says_isPrincipal("soup", "ketchup").
+says_isPrincipal("soup", "soupExpert").
+says_isSymbol("soup", "liquid").
+says_isPrincipal("prin1", "nationalInstituteOfSoupChefs").
+says_isPrincipal("prin1", "chickenSoup").
+says_isPrincipal("prin1", "prin2").
+says_isPrincipal("prin1", "prin3").
+says_isSymbol("prin1", "soupsmithing").
+says_isSymbol("prin1", "aSubstantialMeal").
+says_isPrincipal("prin1", "soup").
+says_isPrincipal("prin1", "prin1").
+says_isPrincipal("prin1", "ketchup").
+says_isPrincipal("prin1", "soupExpert").
+says_isSymbol("prin1", "liquid").
+says_isPrincipal("ketchup", "nationalInstituteOfSoupChefs").
+says_isPrincipal("ketchup", "chickenSoup").
+says_isPrincipal("ketchup", "prin2").
+says_isPrincipal("ketchup", "prin3").
+says_isSymbol("ketchup", "soupsmithing").
+says_isSymbol("ketchup", "aSubstantialMeal").
+says_isPrincipal("ketchup", "soup").
+says_isPrincipal("ketchup", "prin1").
+says_isPrincipal("ketchup", "ketchup").
+says_isPrincipal("ketchup", "soupExpert").
+says_isPrincipal("soupExpert", "nationalInstituteOfSoupChefs").
+says_isPrincipal("soupExpert", "chickenSoup").
+says_isPrincipal("soupExpert", "prin2").
+says_isPrincipal("soupExpert", "prin3").
+says_isSymbol("soupExpert", "soupsmithing").
+says_isSymbol("soupExpert", "aSubstantialMeal").
+says_isPrincipal("soupExpert", "soup").
+says_isPrincipal("soupExpert", "prin1").
+says_isPrincipal("soupExpert", "ketchup").
+says_isPrincipal("soupExpert", "soupExpert").
+says_isSymbol("soupExpert", "liquid").
+says_isSymbol("ketchup", "liquid").
+says_canActAs("prin1", "chickenSoup", "soup") :- says_canActAs(x__5, "chickenSoup", "soup"), says_canSay_canActAs("prin1", x__5, "chickenSoup", "soup").
+says_canActAs("prin1", "prin2", "soupExpert") :- says_hasCertification("prin1", "prin2", "soupsmithing").
+says_canActAs("prin1", x__2, "soupExpert") :- says_canActAs("prin1", x__2, "prin2"), says_canActAs("prin1", "prin2", "soupExpert").
+says_canActAs("prin1", x__4, "soup") :- says_canActAs("prin1", x__4, "chickenSoup"), says_canActAs("prin1", "chickenSoup", "soup").
+says_canSay_canActAs("prin1", "prin2", "chickenSoup", "soup") :- says_canActAs("prin1", "prin2", "soupExpert"), says_groundedPrin("prin1", "chickenSoup"), says_groundedPrin("prin1", "prin2").
+says_canSay_hasCertification("prin1", "nationalInstituteOfSoupChefs", "prin2", "soupsmithing") :- says_groundedPrin("prin1", "prin2").
+says_hasAttribute("prin1", x__8, "liquid") :- says_canActAs("prin1", x__8, "soup"), says_hasAttribute("prin1", "soup", "liquid").
+says_hasAttribute("prin1", "soup", "liquid").
+says_hasAttribute("prin1", x__9, "aSubstantialMeal") :- says_canActAs("prin1", x__9, "soup"), says_hasAttribute("prin1", "soup", "aSubstantialMeal").
+says_hasAttribute("prin1", "soup", "aSubstantialMeal").
+says_hasCertification("nationalInstituteOfSoupChefs", x__10, "soupsmithing") :- says_canActAs("nationalInstituteOfSoupChefs", x__10, "prin2"), says_hasCertification("nationalInstituteOfSoupChefs", "prin2", "soupsmithing").
+says_hasCertification("nationalInstituteOfSoupChefs", "prin2", "soupsmithing").
+says_hasCertification("prin1", "prin2", "soupsmithing") :- says_hasCertification(x__7, "prin2", "soupsmithing"), says_canSay_hasCertification("prin1", x__7, "prin2", "soupsmithing").
+says_hasCertification("prin1", x__6, "soupsmithing") :- says_canActAs("prin1", x__6, "prin2"), says_hasCertification("prin1", "prin2", "soupsmithing").
+says_canActAs("prin2", x__11, "soup") :- says_canActAs("prin2", x__11, "chickenSoup"), says_canActAs("prin2", "chickenSoup", "soup").
+says_canActAs("prin2", "chickenSoup", "soup").
+says_groundedPrin("prin1", "chickenSoup").
+says_groundedPrin("prin1", "ketchup").
+says_groundedPrin("prin1", "prin2").
+says_groundedPrin("prin1", "prin3").
+q_chicken("dummy_var") :- says_hasAttribute("prin1", "chickenSoup", "aSubstantialMeal"), grounded_dummy("dummy_var").
+q_ketchup("dummy_var") :- says_hasAttribute("prin1", "ketchup", "aSubstantialMeal"), grounded_dummy("dummy_var").
+grounded_dummy("dummy_var").
+.output q_chicken
+.output q_ketchup

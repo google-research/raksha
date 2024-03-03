@@ -141,7 +141,7 @@ ATTRIBUTE: 'attribute';
 // Identifiers wrapped in quotes are constants whereas
 // identifiers without quotes are variables.
 VARIABLE : [_a-zA-Z][_a-zA-Z0-9/.#:]*;
-STRING_LITERAL : '"' [_a-zA-Z%][@_a-zA-Z0-9/.#:-]* '"';
+STRING_LITERAL : '"' ~["]*? '"';
 MULTILINE_STRING_LITERAL : '"""' [\n _a-zA-Z+-][\n _a-zA-Z0-9/.#:+=-]* '"""';
 
 NUMLITERAL : [0-9]+;

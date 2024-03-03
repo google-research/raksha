@@ -1,0 +1,6 @@
+.decl attribute isRelevantFor(subject : Symbol)
+.decl thisUnitTest(factName : Symbol)
+
+"TheTestPrincipal" says "thisOtherThing" isRelevantFor("JustAUnitTest") :-
+    thisUnitTest("isRunning").
+    

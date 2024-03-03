@@ -1,0 +1,6 @@
+q_cond1_f.csv, false 
+q_cond2_t.csv, true
+q_uncond1_t.csv, true
+q_uncond2_f.csv, false
+q_undel1_t.csv, true
+q_undel2_f.csv, false

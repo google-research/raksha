@@ -1,0 +1,59 @@
+.type DummyType <: symbol
+.type Number <: number
+.type Object <: symbol
+.type Principal <: symbol
+.type Sha256Hash <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl q1(dummy_param : DummyType)
+.decl q2(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_canSay_currentTimeIs(speaker : Principal, delegatee1 : Principal, real_time : Number)
+.decl says_canSay_expected_hash(speaker : Principal, delegatee1 : Principal, object : Object, hash : Sha256Hash)
+.decl says_currentTimeIs(speaker : Principal, real_time : Number)
+.decl says_expected_hash(speaker : Principal, object : Object, hash : Sha256Hash)
+.decl says_isNumber(speaker : Principal, x : Number)
+.decl says_isObject(speaker : Principal, x : Object)
+.decl says_isPrincipal(speaker : Principal, x : Principal)
+.decl says_isSha256Hash(speaker : Principal, x : Sha256Hash)
+says_isPrincipal("VerifierSystemClock", "VerifierSystemClock").
+says_isSha256Hash("VerifierSystemClock", "sha256:deadbeef").
+says_isNumber("VerifierSystemClock", 42).
+says_isSha256Hash("VerifierSystemClock", "sha256:cafed00d").
+says_isPrincipal("VerifierSystemClock", "Verifier_OakFunctionsLoader").
+says_isNumber("VerifierSystemClock", 31337).
+says_isNumber("VerifierSystemClock", 1776).
+says_isObject("VerifierSystemClock", "OakFunctionsLoader").
+says_isPrincipal("VerifierSystemClock", "EndorsementFile_OakFunctionsLoader").
+says_isNumber("VerifierSystemClock", 1337).
+says_isPrincipal("Verifier_OakFunctionsLoader", "VerifierSystemClock").
+says_isSha256Hash("Verifier_OakFunctionsLoader", "sha256:deadbeef").
+says_isNumber("Verifier_OakFunctionsLoader", 42).
+says_isSha256Hash("Verifier_OakFunctionsLoader", "sha256:cafed00d").
+says_isPrincipal("Verifier_OakFunctionsLoader", "Verifier_OakFunctionsLoader").
+says_isNumber("Verifier_OakFunctionsLoader", 31337).
+says_isNumber("Verifier_OakFunctionsLoader", 1776).
+says_isObject("Verifier_OakFunctionsLoader", "OakFunctionsLoader").
+says_isPrincipal("Verifier_OakFunctionsLoader", "EndorsementFile_OakFunctionsLoader").
+says_isNumber("Verifier_OakFunctionsLoader", 1337).
+says_isPrincipal("EndorsementFile_OakFunctionsLoader", "VerifierSystemClock").
+says_isSha256Hash("EndorsementFile_OakFunctionsLoader", "sha256:deadbeef").
+says_isNumber("EndorsementFile_OakFunctionsLoader", 42).
+says_isSha256Hash("EndorsementFile_OakFunctionsLoader", "sha256:cafed00d").
+says_isPrincipal("EndorsementFile_OakFunctionsLoader", "Verifier_OakFunctionsLoader").
+says_isNumber("EndorsementFile_OakFunctionsLoader", 31337).
+says_isNumber("EndorsementFile_OakFunctionsLoader", 1776).
+says_isObject("EndorsementFile_OakFunctionsLoader", "OakFunctionsLoader").
+says_isPrincipal("EndorsementFile_OakFunctionsLoader", "EndorsementFile_OakFunctionsLoader").
+says_isNumber("EndorsementFile_OakFunctionsLoader", 1337).
+says_expected_hash("EndorsementFile_OakFunctionsLoader", "OakFunctionsLoader", "sha256:cafed00d") :- says_currentTimeIs("EndorsementFile_OakFunctionsLoader", real_time), real_time>42, real_time<31337.
+says_currentTimeIs("EndorsementFile_OakFunctionsLoader", real_time) :- says_currentTimeIs(x__1, real_time), says_canSay_currentTimeIs("EndorsementFile_OakFunctionsLoader", x__1, real_time).
+says_canSay_currentTimeIs("EndorsementFile_OakFunctionsLoader", "VerifierSystemClock", real_time) :- says_isNumber("EndorsementFile_OakFunctionsLoader", real_time).
+says_expected_hash("EndorsementFile_OakFunctionsLoader", "OakFunctionsLoader", "sha256:deadbeef") :- says_currentTimeIs("EndorsementFile_OakFunctionsLoader", real_time), real_time>42, real_time<1337.
+says_currentTimeIs("VerifierSystemClock", 1776).
+says_expected_hash("Verifier_OakFunctionsLoader", "OakFunctionsLoader", any_hash) :- says_expected_hash(x__2, "OakFunctionsLoader", any_hash), says_canSay_expected_hash("Verifier_OakFunctionsLoader", x__2, "OakFunctionsLoader", any_hash).
+says_canSay_expected_hash("Verifier_OakFunctionsLoader", "EndorsementFile_OakFunctionsLoader", "OakFunctionsLoader", any_hash) :- says_isSha256Hash("Verifier_OakFunctionsLoader", any_hash).
+q1("dummy_var") :- says_expected_hash("Verifier_OakFunctionsLoader", "OakFunctionsLoader", "sha256:cafed00d"), grounded_dummy("dummy_var").
+q2("dummy_var") :- says_expected_hash("Verifier_OakFunctionsLoader", "OakFunctionsLoader", "sha256:deadbeef"), grounded_dummy("dummy_var").
+grounded_dummy("dummy_var").
+.output q1
+.output q2

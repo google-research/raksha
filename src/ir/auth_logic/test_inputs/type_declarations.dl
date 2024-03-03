@@ -1,0 +1,26 @@
+.type CustomType <: symbol
+.type DummyType <: symbol
+.type Number <: number
+.type Principal <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_isCustomType(speaker : Principal, x : CustomType)
+.decl says_isNumber(speaker : Principal, x : Number)
+.decl says_isPrincipal(speaker : Principal, x : Principal)
+.decl says_someFact(speaker : Principal, x : CustomType)
+.decl says_someOtherFact(speaker : Principal, x : CustomType, y : Number)
+.decl says_thirdFact(speaker : Principal, p : Principal)
+says_isPrincipal("TestPrincipal", "TestPrincipal").
+says_isCustomType("TestPrincipal", "abcde").
+says_isCustomType("TestPrincipal", "some_argument").
+says_isNumber("TestPrincipal", "three").
+says_isPrincipal("TestPrincipal", "OtherPrincipal").
+says_isPrincipal("OtherPrincipal", "TestPrincipal").
+says_isCustomType("OtherPrincipal", "abcde").
+says_isCustomType("OtherPrincipal", "some_argument").
+says_isNumber("OtherPrincipal", "three").
+says_isPrincipal("OtherPrincipal", "OtherPrincipal").
+says_someFact("TestPrincipal", "some_argument").
+says_someOtherFact("TestPrincipal", "abcde", "three").
+says_thirdFact("TestPrincipal", "OtherPrincipal").
+grounded_dummy("dummy_var").

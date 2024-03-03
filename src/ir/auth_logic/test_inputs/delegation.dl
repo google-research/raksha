@@ -1,0 +1,58 @@
+.type DummyType <: symbol
+.type Number <: number
+.type Principal <: symbol
+.type Symbol <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl q_cond1_f(dummy_param : DummyType)
+.decl q_cond2_t(dummy_param : DummyType)
+.decl q_uncond1_t(dummy_param : DummyType)
+.decl q_uncond2_f(dummy_param : DummyType)
+.decl q_undel1_t(dummy_param : DummyType)
+.decl q_undel2_f(dummy_param : DummyType)
+.decl says_anotherCondition(speaker : Principal, x : Symbol)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_canSay_conditionallyDelegated(speaker : Principal, delegatee1 : Principal, x : Symbol)
+.decl says_canSay_unconditionallyDelegatedFact(speaker : Principal, delegatee1 : Principal, x : Symbol)
+.decl says_conditionallyDelegated(speaker : Principal, x : Symbol)
+.decl says_grounded(speaker : Principal, x : Symbol)
+.decl says_isNumber(speaker : Principal, x : Number)
+.decl says_isPrincipal(speaker : Principal, x : Principal)
+.decl says_isSymbol(speaker : Principal, x : Symbol)
+.decl says_someCondition(speaker : Principal, x : Symbol)
+.decl says_unconditionallyDelegatedFact(speaker : Principal, x : Symbol)
+.decl says_undelegatedFact(speaker : Principal, x : Symbol)
+says_isPrincipal("prin1", "prin1").
+says_isSymbol("prin1", "someX2").
+says_isSymbol("prin1", "someX1").
+says_isPrincipal("prin1", "prin2").
+says_isPrincipal("prin2", "prin1").
+says_isSymbol("prin2", "someX2").
+says_isSymbol("prin2", "someX1").
+says_isPrincipal("prin2", "prin2").
+says_unconditionallyDelegatedFact("prin1", x) :- says_unconditionallyDelegatedFact(x__1, x), says_canSay_unconditionallyDelegatedFact("prin1", x__1, x).
+says_canSay_unconditionallyDelegatedFact("prin1", "prin2", x) :- says_isSymbol("prin1", x), says_grounded("prin1", x).
+says_conditionallyDelegated("prin1", x) :- says_conditionallyDelegated(x__2, x), says_canSay_conditionallyDelegated("prin1", x__2, x).
+says_canSay_conditionallyDelegated("prin1", "prin2", x) :- says_isSymbol("prin1", x), says_grounded("prin1", x), says_someCondition("prin1", x).
+says_undelegatedFact("prin1", x) :- says_isSymbol("prin1", x), says_anotherCondition("prin1", x).
+says_grounded("prin1", "someX1").
+says_grounded("prin1", "someX2").
+says_unconditionallyDelegatedFact("prin2", "someX1").
+says_someCondition("prin2", "someX1").
+says_someCondition("prin1", "someX2").
+says_conditionallyDelegated("prin2", "someX1").
+says_conditionallyDelegated("prin2", "someX2").
+says_anotherCondition("prin1", "someX1").
+says_anotherCondition("prin2", "someX2").
+q_uncond1_t("dummy_var") :- says_unconditionallyDelegatedFact("prin1", "someX1"), grounded_dummy("dummy_var").
+q_uncond2_f("dummy_var") :- says_unconditionallyDelegatedFact("prin1", "someX2"), grounded_dummy("dummy_var").
+q_cond1_f("dummy_var") :- says_conditionallyDelegated("prin1", "someX1"), grounded_dummy("dummy_var").
+q_cond2_t("dummy_var") :- says_conditionallyDelegated("prin1", "someX2"), grounded_dummy("dummy_var").
+q_undel1_t("dummy_var") :- says_undelegatedFact("prin1", "someX1"), grounded_dummy("dummy_var").
+q_undel2_f("dummy_var") :- says_undelegatedFact("prin1", "someX2"), grounded_dummy("dummy_var").
+grounded_dummy("dummy_var").
+.output q_uncond1_t
+.output q_uncond2_f
+.output q_cond1_f
+.output q_cond2_t
+.output q_undel1_t
+.output q_undel2_f

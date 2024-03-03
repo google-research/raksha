@@ -1,0 +1,31 @@
+.decl someFact(n : Number)
+
+"test_principal" says someFact(1) :- 3 < 5.
+"test_principal" says someFact(2) :- 3 < 0.
+"test_principal" says someFact(3) :- 5 > 0.
+"test_principal" says someFact(4) :- 3 > 999.
+"test_principal" says someFact(5) :- 4 = 4.
+"test_principal" says someFact(6) :- 47 = 42.
+"test_principal" says someFact(7) :- 47 != 42.
+"test_principal" says someFact(8) :- 0 != 0.
+"test_principal" says someFact(9) :- 3 <= 5.
+"test_principal" says someFact(10) :- 3 <= 3.
+"test_principal" says someFact(11) :- 3 <= 0.
+"test_principal" says someFact(12) :- 3 >= 2.
+"test_principal" says someFact(13) :- 3 >= 3.
+"test_principal" says someFact(14) :- 3 >= 5.
+
+q1 = query "test_principal" says someFact(1)?
+q2 = query "test_principal" says someFact(2)?
+q3 = query "test_principal" says someFact(3)?
+q4 = query "test_principal" says someFact(4)?
+q5 = query "test_principal" says someFact(5)?
+q6 = query "test_principal" says someFact(6)?
+q7 = query "test_principal" says someFact(7)?
+q8 = query "test_principal" says someFact(8)?
+q9 = query "test_principal" says someFact(9)?
+q10 = query "test_principal" says someFact(10)?
+q11 = query "test_principal" says someFact(11)?
+q12 = query "test_principal" says someFact(12)?
+q13 = query "test_principal" says someFact(13)?
+q14 = query "test_principal" says someFact(14)?

@@ -1,0 +1,22 @@
+.type DummyType <: symbol
+.type Number <: number
+.type Principal <: symbol
+.type Symbol <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_isNumber(speaker : Principal, x : Number)
+.decl says_isPrincipal(speaker : Principal, x : Principal)
+.decl says_isRelevantFor(speaker : Principal, attribute_prin : Principal, subject : Symbol)
+.decl says_isSymbol(speaker : Principal, x : Symbol)
+.decl says_thisUnitTest(speaker : Principal, factName : Symbol)
+says_isPrincipal("TheTestPrincipal", "TheTestPrincipal").
+says_isSymbol("TheTestPrincipal", "JustAUnitTest").
+says_isPrincipal("TheTestPrincipal", "thisOtherThing").
+says_isSymbol("TheTestPrincipal", "isRunning").
+says_isPrincipal("thisOtherThing", "TheTestPrincipal").
+says_isSymbol("thisOtherThing", "JustAUnitTest").
+says_isPrincipal("thisOtherThing", "thisOtherThing").
+says_isSymbol("thisOtherThing", "isRunning").
+says_isRelevantFor("TheTestPrincipal", x__1, "JustAUnitTest") :- says_canActAs("TheTestPrincipal", x__1, "thisOtherThing"), says_isRelevantFor("TheTestPrincipal", "thisOtherThing", "JustAUnitTest").
+says_isRelevantFor("TheTestPrincipal", "thisOtherThing", "JustAUnitTest") :- says_thisUnitTest("TheTestPrincipal", "isRunning").
+grounded_dummy("dummy_var").

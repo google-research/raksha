@@ -175,9 +175,16 @@ class SouffleEmitter {
     absl::flat_hash_set<std::string> type_names;
     for (const auto& declaration : program.relation_declarations()) {
       for (const auto& argument : declaration.arguments()) {
+        if (argument.argument_type().kind() ==
+            datalog::ArgumentType::Kind::kNumber) {
+          type_names.insert(absl::StrCat(
+              ".type ", argument.argument_type().name(), " <: number"));
+          continue;
+        }
         if (!skip_declarations && argument.argument_type().kind() !=
                                       datalog::ArgumentType::Kind::kCustom)
           continue;
+
         if (!skip_declarations &&
             GetRelationsToNotDeclare().find(argument.argument_type().name()) !=
                 GetRelationsToNotDeclare().end())
@@ -186,8 +193,6 @@ class SouffleEmitter {
             ".type ", argument.argument_type().name(), " <: symbol"));
       }
     }
-    // TODO (#633) work around till we add number types in C++ version.
-    type_names.insert(absl::StrCat(".type Number", " <: symbol"));
     std::vector<absl::string_view> sorted_type_names(type_names.begin(),
                                                      type_names.end());
     std::sort(sorted_type_names.begin(), sorted_type_names.end());

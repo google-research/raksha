@@ -1,0 +1,29 @@
+.type DummyType <: symbol
+.type Number <: number
+.type Principal <: symbol
+.type Symbol <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl q1(dummy_param : DummyType)
+.decl q2(dummy_param : DummyType)
+.decl q3(dummy_param : DummyType)
+.decl says_bar(speaker : Principal, x : Symbol)
+.decl says_baz(speaker : Principal, x : Symbol)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_foo(speaker : Principal, x : Symbol)
+.decl says_isNumber(speaker : Principal, x : Number)
+.decl says_isPrincipal(speaker : Principal, x : Principal)
+.decl says_isSymbol(speaker : Principal, x : Symbol)
+says_isPrincipal("TestPrin", "TestPrin").
+says_isSymbol("TestPrin", "x").
+says_isSymbol("TestPrin", "y").
+says_foo("TestPrin", "x") :- !says_bar("TestPrin", "x").
+says_foo("TestPrin", "y") :- !says_bar("TestPrin", "y").
+says_baz("TestPrin", "x") :- says_bar("TestPrin", "x").
+says_bar("TestPrin", "y").
+q1("dummy_var") :- says_foo("TestPrin", "x"), grounded_dummy("dummy_var").
+q2("dummy_var") :- says_baz("TestPrin", "x"), grounded_dummy("dummy_var").
+q3("dummy_var") :- says_foo("TestPrin", "y"), grounded_dummy("dummy_var").
+grounded_dummy("dummy_var").
+.output q1
+.output q2
+.output q3

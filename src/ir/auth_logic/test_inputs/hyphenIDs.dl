@@ -1,0 +1,24 @@
+.type Builder <: symbol
+.type DummyType <: symbol
+.type Key <: symbol
+.type Number <: number
+.type Principal <: symbol
+.type TestVariable <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_isBuilder(speaker : Principal, x : Builder)
+.decl says_isKey(speaker : Principal, x : Key)
+.decl says_isNumber(speaker : Principal, x : Number)
+.decl says_isPrincipal(speaker : Principal, x : Principal)
+.decl says_isTestVariable(speaker : Principal, x : TestVariable)
+.decl says_ourFavoritePublicKeyIs(speaker : Principal, k : Key)
+.decl says_ourFavoriteTrustedBuilderIs(speaker : Principal, b : Builder)
+.decl says_variablesInsteadOfConstantsWithHyhensAreOKToo(speaker : Principal, v : TestVariable)
+says_isPrincipal("OakTeam", "OakTeam").
+says_isKey("OakTeam", "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErnyr7XY6gxXPnqRGYEpv5lDsbBeXizVFLckaF/cbgBuzx7kfmf1qi2j+3DDOQYgISQOj9/LYt4c1cxbt+XtG4g==-----END PUBLIC KEY-----").
+says_isBuilder("OakTeam", "https://github.com/project-oak/transparent-release").
+says_isBuilder("OakTeam", "https://github.com/Attestations/GitHubHostedActions@v1").
+says_ourFavoritePublicKeyIs("OakTeam", "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErnyr7XY6gxXPnqRGYEpv5lDsbBeXizVFLckaF/cbgBuzx7kfmf1qi2j+3DDOQYgISQOj9/LYt4c1cxbt+XtG4g==-----END PUBLIC KEY-----").
+says_ourFavoriteTrustedBuilderIs("OakTeam", "https://github.com/project-oak/transparent-release").
+says_ourFavoriteTrustedBuilderIs("OakTeam", "https://github.com/Attestations/GitHubHostedActions@v1").
+grounded_dummy("dummy_var").

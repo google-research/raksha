@@ -1,0 +1,33 @@
+.type DummyType <: symbol
+.type Hash <: symbol
+.type Number <: number
+.type Object <: symbol
+.type Principal <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_canSay_expectedHash(speaker : Principal, delegatee1 : Principal, object : Object, hash : Hash)
+.decl says_expectedHash(speaker : Principal, object : Object, hash : Hash)
+.decl says_isHash(speaker : Principal, x : Hash)
+.decl says_isNumber(speaker : Principal, x : Number)
+.decl says_isObject(speaker : Principal, x : Object)
+.decl says_isPrincipal(speaker : Principal, x : Principal)
+.decl test_query1_true(dummy_param : DummyType)
+.decl test_query2_false(dummy_param : DummyType)
+says_isPrincipal("CoolAppEndorsementFile", "CoolAppEndorsementFile").
+says_isHash("CoolAppEndorsementFile", "sha256:cafed00d").
+says_isPrincipal("CoolAppEndorsementFile", "Verifier").
+says_isObject("CoolAppEndorsementFile", "CoolAppBinary").
+says_isHash("CoolAppEndorsementFile", "sha256:deadbeef").
+says_isPrincipal("Verifier", "CoolAppEndorsementFile").
+says_isHash("Verifier", "sha256:cafed00d").
+says_isPrincipal("Verifier", "Verifier").
+says_isObject("Verifier", "CoolAppBinary").
+says_isHash("Verifier", "sha256:deadbeef").
+says_expectedHash("Verifier", "CoolAppBinary", expected_hash) :- says_expectedHash(x__1, "CoolAppBinary", expected_hash), says_canSay_expectedHash("Verifier", x__1, "CoolAppBinary", expected_hash).
+says_canSay_expectedHash("Verifier", "CoolAppEndorsementFile", "CoolAppBinary", expected_hash) :- says_isHash("Verifier", expected_hash).
+says_expectedHash("CoolAppEndorsementFile", "CoolAppBinary", "sha256:cafed00d").
+test_query1_true("dummy_var") :- says_expectedHash("Verifier", "CoolAppBinary", "sha256:cafed00d"), grounded_dummy("dummy_var").
+test_query2_false("dummy_var") :- says_expectedHash("Verifier", "CoolAppBinary", "sha256:deadbeef"), grounded_dummy("dummy_var").
+grounded_dummy("dummy_var").
+.output test_query1_true
+.output test_query2_false

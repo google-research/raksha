@@ -1,0 +1,13 @@
+.decl expectedHash(object : Object, hash : Hash)
+
+"Verifier" says "CoolAppEndorsementFile" canSay
+    expectedHash("CoolAppBinary", expected_hash).
+
+"CoolAppEndorsementFile" says expectedHash("CoolAppBinary", "sha256:cafed00d").
+
+test_query1_true = query "Verifier" says expectedHash("CoolAppBinary", 
+  "sha256:cafed00d")?
+
+test_query2_false = query "Verifier" says expectedHash("CoolAppBinary",
+  "sha256:deadbeef")?
+  
