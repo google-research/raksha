@@ -16,6 +16,10 @@
 #-------------------------------------------------------------------------------
 
 load(
+    "//build_defs:raksha_policy_verifier.bzl",
+    "raksha_policy_verifier_library",
+)
+load(
     "//build_defs:souffle.bzl",
     "gen_souffle_cxx_code",
     "souffle_cc_binary",
@@ -26,10 +30,6 @@ load(
     "core_dl_files",
     "core_dl_files_except_taint",
     "export_dl_files_local",
-)
-load(
-    "//build_defs:raksha_policy_verifier.bzl",
-    "raksha_policy_verifier_library",
 )
 
 package(
