@@ -1,3 +1,5 @@
+load("//build_defs:package_groups.oss.bzl", "frontend_packages")
+
 #-----------------------------------------------------------------------------
 # Copyright 2022 Google LLC
 #
@@ -17,7 +19,6 @@ load(
     "//build_defs:raksha_policy_verifier.bzl",
     "raksha_policy_verifier_library",
 )
-load("//build_defs:package_groups.oss.bzl", "frontend_packages")
 
 package(
     default_visibility = ["//src:__subpackages__"],
