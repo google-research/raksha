@@ -1,0 +1,29 @@
+//-----------------------------------------------------------------------------
+// Copyright 2023 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------------
+
+module m0 {
+  block b0 {
+    %0 = arcsjs.create_store[name: "SimpleRecipe.fingerprintable_texts", type: "List_Text"]()
+    %1 = arcsjs.create_store[name: "SimpleRecipe.output", type: "List_Text"]()
+    %2 = arcsjs.restrict_aggregation[](%0)
+
+    %3 = arcsjs.particle[name: "SimpleRecipe.exfil_particle"]()
+    %4 = arcsjs.connect_input[name: "foo"](%3, %2)
+    %6 = arcsjs.connect_output[name: "baz"](%3, %1)
+    // Policy check passes because we are not publicizing private data.
+    %7 = arcjs.make_public[](%1)
+  }  // block b0
+}  // module m0
