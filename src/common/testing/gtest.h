@@ -13,11 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //----------------------------------------------------------------------------
-#ifndef COMMON_TESTING_TEST_H_
-#define COMMON_TESTING_TEST_H_
+#ifndef SRC_COMMON_TESTING_TEST_H_
+#define SRC_COMMON_TESTING_TEST_H_
 
-#include <gtest/gtest.h>
 // gmock is necessary to get the full set of matchers to use with gtest.
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#endif // COMMON_TESTING_TEST_H_
+#endif  // SRC_COMMON_TESTING_TEST_H_
