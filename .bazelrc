@@ -7,6 +7,11 @@ build --cxxopt='-Werror' --cxxopt='-Wall'
 # are not directly responsible.
 build --features=external_include_paths
 
+# These are needed on systems with GLIBC > 2.34-8 to build google-fuzztest
+# which has these errors.
+build --cxxopt='-Wno-error=sign-compare'
+build --cxxopt='-Wno-error=attributes'
+
 # Why are we doing this when Souffle-generated C++ clearly uses exceptions?
 # Well, Google famously does not like C++ exceptions in its internal codebase,
 # so we will need to explicitly override that in Raksha files everywhere we
