@@ -133,6 +133,7 @@ cc_library(
     deps = [
         ":ir_visitor",
         ":module",
+        ":storage",
         "//src/common/utils:fold",
         "//src/common/utils:types",
     ],
@@ -146,6 +147,8 @@ cc_test(
         ":ir_traversing_visitor",
         ":module",
         "//src/common/testing:gtest",
+        "//src/ir/types",
+        "@com_google_absl//absl/types:span",
     ],
 )
 
@@ -244,6 +247,7 @@ cc_library(
     name = "storage",
     hdrs = ["storage.h"],
     deps = [
+        ":ir_visitor",
         ":value",
         "//src/ir/types",
         "@com_google_absl//absl/container:flat_hash_set",
