@@ -16,42 +16,40 @@
 //-------------------------------------------------------------------------------
 #include "src/parser/ir/ir_parser.h"
 
+#include "fuzztest/fuzztest.h"
 #include "src/common/testing/gtest.h"
+#include "src/ir/ir_grammar.h"
 #include "src/ir/ir_printer.h"
 
 namespace raksha::parser::ir {
 
 using ::raksha::ir::IRPrinter;
 
-class IrParserRoundtripTest : public testing::TestWithParam<absl::string_view> {
-};
-
-TEST_P(IrParserRoundtripTest, SimpleTestOperation) {
-  auto input_program_text = GetParam();
+void IrParserRoundTripTest(std::string input_program_text) {
   auto result = ParseProgram(input_program_text);
   EXPECT_EQ(IRPrinter::ToString(*result.module, *result.ssa_names),
             input_program_text);
 }
 
-INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
-                         ::testing::Values(
-                             R"(module m0 {
+FUZZ_TEST(IrParserRoundTripTest, IrParserRoundTripTest)
+    .WithDomains(InIrGrammar())
+    .WithSeeds({R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
   block b1 {
   }  // block b1
 }  // module m0
-)",
-                             R"(module m0 {
+)"},
+               {R"(module m0 {
   block b0 {
     %0, %1 = core.plus []()
   }  // block b0
   block b1 {
   }  // block b1
 }  // module m0
-)",
-                             R"(module m0 {
+)"},
+               {R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -59,8 +57,8 @@ INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
     %1 = core.plus [access: "private", transform: "no"](<<ANY>>, <<ANY>>)
   }  // block b1
 }  // module m0
-)",
-                             R"(module m0 {
+)"},
+               {R"(module m0 {
   block b0 {
     %0 = core.plus []()
   }  // block b0
@@ -68,8 +66,8 @@ INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
     %1 = core.plus [access: "private", transform: "no"](%1, <<ANY>>)
   }  // block b1
 }  // module m0
-)",
-                             R"(module m0 {
+)"},
+               {R"(module m0 {
   block b0 {
     %0 = core.select []()
     %1 = core.merge [](<<ANY>>, <<ANY>>)
@@ -83,8 +81,8 @@ INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
     %7 = core.floating_value [value: 8]()
   }  // block b1
 }  // module m0
-)",
-                             R"(module m0 {
+)"},
+               {R"(module m0 {
   block b0 {
     %0 = core.select []()
     %1 = core.merge [](<<ANY>>, <<ANY>>)
@@ -95,8 +93,8 @@ INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
     %4 = core.mult_floating [lhs: 3l, rhs: -0.5l]()
   }  // block b1
 }  // module m0
-)",
-                             R"(module m0 {
+)"},
+               {R"(module m0 {
   block b0 {
     %0 = core.select []()
     %2, %1 = core.merge [](<<ANY>>, <<ANY>>)
@@ -107,8 +105,8 @@ INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
     %4, %7 = core.mult_floating [lhs: 3l, rhs: -0.5l]()
   }  // block b1
 }  // module m0
-)",
-                             R"(module m0 {
+)"},
+               {R"(module m0 {
   block b0 {
     %0 = core.plus [access: "private", transform: "no"](%1, <<ANY>>)
     %1 = core.plus []()
@@ -124,7 +122,7 @@ INSTANTIATE_TEST_SUITE_P(IrParserRoundtripTest, IrParserRoundtripTest,
     %0 = core.some_op [attr1: "!@#$%^*()_-+", attr2: "✓ಠ_ಠ|{[}]\(╯°□°)╯︵ ┻━┻"]()
   }  // block b0
 }  // module m0
-)"));
+)"});
 
 struct ParserInputAndExpectedOutput {
   absl::string_view input;
