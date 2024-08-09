@@ -50,7 +50,14 @@ datalog::Predicate PushOntoPredicate(absl::string_view modifier,
 datalog::Predicate PushPrincipal(absl::string_view modifier,
                                  const Principal& principal,
                                  const datalog::Predicate& predicate) {
-  return PushOntoPredicate(modifier, {principal.name()}, predicate);
+  // do not modify predicate when dealing with binary operators
+  static const absl::flat_hash_set<std::string> comparison_operators = {
+      {"<"}, {">"}, {"="}, {"!="}, {"<="}, {">="}};
+
+  return (comparison_operators.find(predicate.name()) ==
+          comparison_operators.end())
+             ? PushOntoPredicate(modifier, {principal.name()}, predicate)
+             : predicate;
 }
 
 datalog::Predicate AttributeToDLIR(const Attribute& attribute) {
@@ -397,6 +404,13 @@ LoweringToDatalogPass::RelationDeclarationToDLIR(
   std::vector<datalog::RelationDeclaration> transformed_declarations =
       LoweringToDatalogPass::TransformAttributeDeclarations(
           relation_declarations);
+  // The transformed relation declarations are the same as the ones from the
+  // surface program plus another one for "canActAs". Declaration being added is
+  //.decl canActAs(p1 : Principal, p2 : Principal)
+  transformed_declarations.push_back(datalog::RelationDeclaration(
+      "canActAs", false,
+      {datalog::Argument("p1", datalog::ArgumentType::MakePrincipalType()),
+       datalog::Argument("p2", datalog::ArgumentType::MakePrincipalType())}));
   // Produce a mapping from predicate names to predicate typings
   // (where a predicate typing is the same as a predicate relation declaration)
   absl::flat_hash_map<std::string_view, datalog::RelationDeclaration>
@@ -407,13 +421,7 @@ LoweringToDatalogPass::RelationDeclarationToDLIR(
   }
   absl::c_move(LoweringToDatalogPass::GetCanSayDeclarations(type_environment),
                std::back_inserter(transformed_declarations));
-  // The transformed relation declarations are the same as the ones from the
-  // surface program plus another one for "canActAs". Declaration being added is
-  //.decl canActAs(p1 : Principal, p2 : Principal)
-  transformed_declarations.push_back(datalog::RelationDeclaration(
-      "canActAs", false,
-      {datalog::Argument("p1", datalog::ArgumentType::MakePrincipalType()),
-       datalog::Argument("p2", datalog::ArgumentType::MakePrincipalType())}));
+
   // The translated declarations are all extended with "says_" and a speaker
   // argument
   std::vector<datalog::RelationDeclaration>

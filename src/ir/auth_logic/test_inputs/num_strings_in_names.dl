@@ -1,0 +1,22 @@
+.type DummyType <: symbol
+.type Number <: number
+.type Principal <: symbol
+.type Words <: symbol
+.decl grounded_dummy(dummy_param : DummyType)
+.decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
+.decl says_isNumber(speaker : Principal, x : Number)
+.decl says_isPrincipal(speaker : Principal, x : Principal)
+.decl says_isWords(speaker : Principal, x : Words)
+.decl says_numbersAre(speaker : Principal, words : Words)
+.decl says_semicolonsAre(speaker : Principal, words : Words)
+says_isPrincipal("123", "123").
+says_isWords("123", "perfectlyFinePrincipalNames").
+says_isPrincipal("123", "sha256:deadbeef").
+says_isWords("123", "alsoFineNames").
+says_isPrincipal("sha256:deadbeef", "123").
+says_isWords("sha256:deadbeef", "perfectlyFinePrincipalNames").
+says_isPrincipal("sha256:deadbeef", "sha256:deadbeef").
+says_isWords("sha256:deadbeef", "alsoFineNames").
+says_numbersAre("123", "perfectlyFinePrincipalNames").
+says_semicolonsAre("sha256:deadbeef", "alsoFineNames").
+grounded_dummy("dummy_var").

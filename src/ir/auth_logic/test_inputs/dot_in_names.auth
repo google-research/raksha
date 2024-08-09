@@ -1,0 +1,11 @@
+.decl are(words : Words, anotherWords : Words)
+.decl areConditionally(words : Words, anotherWords : Words)
+.decl evenIf(words : Words)
+.decl areAlso(words : Words, anotherWords : Words)
+
+"TheTestPrincipal" says  are("names.with.dots.in.them", "prefectly.cromulent").
+
+"TheTestPrincipal" says  areConditionally("names.with.dots.in.them", "cromulent") :-
+    evenIf("dots.are.on.the.rhs").
+
+"TheTest#Principal" says  areAlso("names#with#hashes", "perfectly#cromulent").

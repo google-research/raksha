@@ -61,7 +61,6 @@ Program BuildRelationDeclarationProgram(SaysAssertion assertion) {
 TEST(EmitterTestSuite, EmptyAuthLogicTest) {
   std::string expected =
       R"(.type DummyType <: symbol
-.type Number <: symbol
 .decl grounded_dummy(dummy_param : DummyType)
 .decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
 grounded_dummy("dummy_var").
@@ -74,7 +73,6 @@ grounded_dummy("dummy_var").
 TEST(EmitterTestSuite, SimpleTest) {
   std::string expected =
       R"(.type DummyType <: symbol
-.type Number <: symbol
 .decl grounded_dummy(dummy_param : DummyType)
 .decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
 says_foo(TestPrincipal, bar, baz).
@@ -99,7 +97,6 @@ TEST(EmitterTestSuite, CanSayTest) {
   std::string expected =
       R"(.type DummyType <: symbol
 .type FileName <: symbol
-.type Number <: symbol
 .decl grounded_dummy(dummy_param : DummyType)
 .decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
 .decl says_canSay_grantAccess(speaker : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
@@ -128,7 +125,6 @@ TEST(EmitterTestSuite, FloatCanSayTest) {
   std::string expected =
       R"(.type DummyType <: symbol
 .type FileName <: symbol
-.type Number <: symbol
 .decl grounded_dummy(dummy_param : DummyType)
 .decl says_canActAs(speaker : Principal, p1 : Principal, p2 : Principal)
 .decl says_canSay_canSay_grantAccess(speaker : Principal, delegatee2 : Principal, delegatee1 : Principal, x0 : Principal, x1 : FileName)
