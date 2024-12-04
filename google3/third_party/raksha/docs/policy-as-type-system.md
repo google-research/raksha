@@ -42,7 +42,7 @@ Many real world systems with higher level abstractions (objects, streams, etc.) 
 
 *   Functional reactive programming fits the above and is becoming popular in modern UI and application frameworks.
 *   Cloud functions are also functional reactive and how many modern SaaS applications express their business logic. They are already isolated and just need restricted capabilities to fit this model.
-*   ML models are just that under the hood, for TensorFlow and PyTorch. Newer ML frameworks like [JAX](https://github.com/google/jax) have been used for other computations like [physics simulations](https://github.com/google/brax), going beyond ML.
+*   ML models are just that under the hood, for TensorFlow and PyTorch. Newer ML frameworks like [JAX](https://github.com/jax-ml/jax) have been used for other computations like [physics simulations](https://github.com/google/brax), going beyond ML.
 *   SQL or GraphQL queries can be broken down into a graph of such function calls as well.
 
 [ArcsJS](https://github.com/project-oak/arcsjs-core) is an implementation of the above that isolates Javascript code.
