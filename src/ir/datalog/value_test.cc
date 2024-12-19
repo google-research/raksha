@@ -17,6 +17,10 @@
 #include "src/ir/datalog/value.h"
 
 #include <limits>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <utility>
 
 #include "fuzztest/fuzztest.h"
 #include "absl/strings/numbers.h"

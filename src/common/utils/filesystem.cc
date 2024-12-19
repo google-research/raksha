@@ -16,8 +16,11 @@
 
 #include "src/common/utils/filesystem.h"
 
-#include <cstdio>
 #include <errno.h>
+
+#include <cstdio>
+#include <string>
+#include <system_error>
 
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"

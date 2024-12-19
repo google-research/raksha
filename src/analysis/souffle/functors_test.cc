@@ -16,6 +16,8 @@
 
 #include "src/analysis/souffle/functors.h"
 
+#include <tuple>
+
 #include "souffle/datastructure/RecordTableImpl.h"
 #include "souffle/datastructure/SymbolTableImpl.h"
 #include "src/common/testing/gtest.h"

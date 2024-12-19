@@ -16,6 +16,9 @@
 //-------------------------------------------------------------------------------
 
 #include "src/policy/parser.h"
+
+#include <memory>
+
 #include "src/common/logging/logging.h"
 #include "src/policy/policy_cc_generator_grammar.inc/policy_cc_generator/PolicyLexer.h"
 #include "src/policy/policy_cc_generator_grammar.inc/policy_cc_generator/PolicyParser.h"

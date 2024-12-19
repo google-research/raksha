@@ -16,6 +16,11 @@
 #include "src/frontends/sql/ops/tag_transform_op.h"
 
 #include <algorithm>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/map_iter.h"

@@ -15,6 +15,10 @@
 //----------------------------------------------------------------------------
 #include "src/ir/dot/dot_generator.h"
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "absl/strings/str_split.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/attribute.h"

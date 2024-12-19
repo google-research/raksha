@@ -16,8 +16,10 @@
 #include "src/analysis/taint/abstract_ifc_tags.h"
 
 #include <cstdint>
+#include <string>
 #include <tuple>
 #include <utility>
+#include <vector>
 
 #include "src/common/testing/gtest.h"
 

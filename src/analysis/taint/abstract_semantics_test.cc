@@ -1,6 +1,9 @@
 #include "src/analysis/taint/abstract_semantics.h"
 
 #include <cstdint>
+#include <string>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 #include "src/analysis/taint/abstract_ifc_tags.h"

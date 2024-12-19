@@ -17,6 +17,7 @@
 #include "src/frontends/sql/ops/literal_op.h"
 
 #include <memory>
+#include <string>
 
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/attributes/string_attribute.h"

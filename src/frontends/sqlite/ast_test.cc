@@ -18,6 +18,7 @@
 #include "src/frontends/sqlite/ast.h"
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "absl/log/check.h"

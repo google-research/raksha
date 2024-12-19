@@ -16,11 +16,12 @@
 #include "src/ir/types/schema.h"
 
 #include <optional>
+#include <utility>
 
 #include "src/common/logging/logging.h"
 #include "src/ir/access_path_selectors_set.h"
-#include "src/ir/selector.h"
 #include "src/ir/field_selector.h"
+#include "src/ir/selector.h"
 
 namespace raksha::ir::types {
 

@@ -16,6 +16,7 @@
 #include "src/frontends/sql/ops/literal_op.h"
 
 #include <algorithm>
+#include <memory>
 
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/ops/sql_op.h"

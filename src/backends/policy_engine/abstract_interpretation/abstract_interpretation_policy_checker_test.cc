@@ -1,6 +1,8 @@
 #include "src/backends/policy_engine/abstract_interpretation/abstract_interpretation_policy_checker.h"
 
+#include <string>
 #include <utility>
+#include <vector>
 
 #include "google/protobuf/text_format.h"
 #include "absl/container/flat_hash_map.h"

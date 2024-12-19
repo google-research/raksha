@@ -15,6 +15,8 @@
 //----------------------------------------------------------------------------
 #include "src/ir/attributes/string_attribute.h"
 
+#include <tuple>
+
 #include "src/common/testing/gtest.h"
 
 namespace raksha::ir {

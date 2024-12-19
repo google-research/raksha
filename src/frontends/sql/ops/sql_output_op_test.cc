@@ -15,6 +15,8 @@
 //----------------------------------------------------------------------------
 #include "src/frontends/sql/ops/sql_output_op.h"
 
+#include <memory>
+
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/iterator_range.h"
 #include "src/frontends/sql/ops/example_value_test_helper.h"

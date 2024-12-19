@@ -1,6 +1,9 @@
 #include "src/common/utils/iterator_adapter.h"
 
 #include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"

@@ -16,6 +16,9 @@
 #include "src/ir/types/type_factory.h"
 
 #include <memory>
+#include <optional>
+#include <string>
+#include <utility>
 
 #include "src/ir/types/entity_type.h"
 #include "src/ir/types/primitive_type.h"

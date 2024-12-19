@@ -15,6 +15,9 @@
 //----------------------------------------------------------------------------
 #include "src/ir/attributes/float_attribute.h"
 
+#include <tuple>
+#include <utility>
+
 #include "src/common/testing/gtest.h"
 
 namespace raksha::ir {

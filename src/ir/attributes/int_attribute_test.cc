@@ -15,6 +15,9 @@
 //----------------------------------------------------------------------------
 #include "src/ir/attributes/int_attribute.h"
 
+#include <tuple>
+#include <utility>
+
 #include "src/common/testing/gtest.h"
 
 namespace raksha::ir {

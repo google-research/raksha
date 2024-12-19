@@ -15,6 +15,9 @@
 //----------------------------------------------------------------------------
 #include "src/analysis/common/worklist_fixpoint_iterator.h"
 
+#include <iterator>
+#include <utility>
+
 #include "absl/algorithm/container.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"

@@ -20,6 +20,8 @@
 
 #include <iostream>
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "souffle/SouffleInterface.h"
 #include "absl/strings/match.h"

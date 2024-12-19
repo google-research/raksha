@@ -15,6 +15,8 @@
 //----------------------------------------------------------------------------
 #include "src/analysis/common/module_graph.h"
 
+#include <utility>
+
 #include "absl/strings/string_view.h"
 #include "src/ir/ir_traversing_visitor.h"
 #include "src/ir/value.h"

@@ -17,6 +17,10 @@
 
 #include <iterator>
 #include <limits>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "src/frontends/sql/ops/op_traits.h"
 #include "src/ir/attributes/attribute.h"

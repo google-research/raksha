@@ -18,6 +18,10 @@
 #include <algorithm>
 #include <memory>
 #include <optional>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 #include "google/protobuf/text_format.h"
 #include "absl/container/flat_hash_map.h"

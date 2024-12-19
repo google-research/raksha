@@ -15,8 +15,10 @@
 //-----------------------------------------------------------------------------
 #include "src/common/utils/overloaded.h"
 
-#include <string>
 #include <iostream>
+#include <string>
+#include <utility>
+#include <variant>
 
 #include "src/common/testing/gtest.h"
 

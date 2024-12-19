@@ -16,6 +16,8 @@
 #include "src/ir/types/proto/schema.h"
 
 #include <optional>
+#include <string>
+#include <utility>
 
 #include "src/common/logging/logging.h"
 #include "src/ir/types/proto/type.h"

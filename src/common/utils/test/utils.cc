@@ -14,9 +14,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------------
 #include "src/common/utils/test/utils.h"
+
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/strings/string_view.h"

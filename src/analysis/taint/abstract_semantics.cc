@@ -1,7 +1,10 @@
 #include "src/analysis/taint/abstract_semantics.h"
 
+#include <iterator>
 #include <optional>
+#include <utility>
 #include <variant>
+#include <vector>
 
 #include "absl/algorithm/container.h"
 #include "src/analysis/taint/abstract_ifc_tags.h"

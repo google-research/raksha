@@ -15,9 +15,12 @@
 //----------------------------------------------------------------------------
 #include "src/frontends/sql/ops/merge_op.h"
 
+#include <iterator>
 #include <limits>
 #include <memory>
+#include <string>
 #include <type_traits>
+#include <utility>
 
 #include "absl/algorithm/container.h"
 #include "src/common/utils/iterator_range.h"

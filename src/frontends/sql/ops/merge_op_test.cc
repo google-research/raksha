@@ -16,6 +16,8 @@
 #include "src/frontends/sql/ops/merge_op.h"
 
 #include <algorithm>
+#include <memory>
+#include <tuple>
 
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/iterator_range.h"

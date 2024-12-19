@@ -15,6 +15,11 @@
 //-----------------------------------------------------------------------------
 #include "src/analysis/taint/abstract_ifc_tags.h"
 
+#include <iterator>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "absl/algorithm/container.h"
 #include "src/common/utils/ref_counted.h"
 

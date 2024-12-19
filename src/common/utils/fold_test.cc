@@ -16,6 +16,10 @@
 
 #include "src/common/utils/fold.h"
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "absl/strings/str_join.h"
 #include "src/common/testing/gtest.h"
 

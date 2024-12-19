@@ -15,6 +15,8 @@
 //-----------------------------------------------------------------------------
 #include "src/common/utils/ranges.h"
 
+#include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 

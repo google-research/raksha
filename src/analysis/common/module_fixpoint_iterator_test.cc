@@ -15,6 +15,11 @@
 //----------------------------------------------------------------------------
 #include "src/analysis/common/module_fixpoint_iterator.h"
 
+#include <iterator>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "absl/algorithm/container.h"
 #include "absl/container/btree_set.h"
 #include "src/common/testing/gtest.h"

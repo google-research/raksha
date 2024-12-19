@@ -15,6 +15,9 @@
 //----------------------------------------------------------------------------
 #include "src/ir/attributes/attribute.h"
 
+#include <tuple>
+#include <utility>
+
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/intrusive_ptr.h"
 #include "src/ir/attributes/float_attribute.h"

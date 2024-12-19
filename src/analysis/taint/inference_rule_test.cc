@@ -15,6 +15,8 @@
 //-----------------------------------------------------------------------------
 #include "src/analysis/taint/inference_rule.h"
 
+#include <tuple>
+#include <utility>
 #include <variant>
 
 #include "src/common/testing/gtest.h"

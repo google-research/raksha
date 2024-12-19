@@ -15,6 +15,9 @@
 //----------------------------------------------------------------------------
 #include "src/ir/types/schema.h"
 
+#include <string>
+#include <tuple>
+
 #include "google/protobuf/text_format.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/types/entity_type.h"
