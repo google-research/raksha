@@ -14,6 +14,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
+#include <optional>
+
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/decoder_context.h"

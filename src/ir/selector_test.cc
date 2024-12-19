@@ -15,6 +15,10 @@
 //----------------------------------------------------------------------------
 #include "src/ir/selector.h"
 
+#include <string>
+#include <tuple>
+#include <vector>
+
 #include "absl/hash/hash_testing.h"
 #include "src/common/testing/gtest.h"
 

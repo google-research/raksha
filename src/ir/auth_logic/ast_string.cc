@@ -17,6 +17,11 @@
 
 #include "ast_string.h"
 
+#include <algorithm>
+#include <string>
+#include <variant>
+#include <vector>
+
 #include "src/common/logging/logging.h"
 
 namespace raksha::ir::auth_logic {

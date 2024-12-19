@@ -16,6 +16,8 @@
 #include "src/ir/field_selector.h"
 
 #include <string>
+#include <tuple>
+#include <vector>
 
 #include "absl/hash/hash_testing.h"
 #include "src/common/testing/gtest.h"

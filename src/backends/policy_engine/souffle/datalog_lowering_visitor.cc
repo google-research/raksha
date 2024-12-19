@@ -16,6 +16,11 @@
 
 #include "src/backends/policy_engine/souffle/datalog_lowering_visitor.h"
 
+#include <algorithm>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "src/common/utils/fold.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/attributes/float_attribute.h"

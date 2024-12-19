@@ -15,7 +15,9 @@
 //----------------------------------------------------------------------------
 #include "src/ir/module.h"
 
+#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "fuzztest/fuzztest.h"

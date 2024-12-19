@@ -17,6 +17,8 @@
 #ifndef SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
 #define SRC_BACKENDS_POLICY_ENGINE_SOUFFLE_DATALOG_LOWERING_VISITOR_H_
 
+#include <utility>
+
 #include "src/backends/policy_engine/souffle/raksha_datalog_facts.h"
 #include "src/common/logging/logging.h"
 #include "src/common/utils/types.h"

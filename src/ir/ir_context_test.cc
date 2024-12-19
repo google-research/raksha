@@ -15,6 +15,9 @@
 //----------------------------------------------------------------------------
 #include "src/ir/ir_context.h"
 
+#include <array>
+#include <memory>
+
 #include "src/common/testing/gtest.h"
 #include "src/ir/types/type_factory.h"
 

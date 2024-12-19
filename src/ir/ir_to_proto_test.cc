@@ -17,6 +17,7 @@
 #include "src/ir/ir_to_proto.h"
 
 #include <string>
+#include <string_view>
 
 #include "google/protobuf/text_format.h"
 #include "google/protobuf/util/message_differencer.h"

@@ -1,5 +1,8 @@
 #include "src/ir/value_string_converter.h"
 
+#include <string>
+#include <variant>
+
 #include "src/common/utils/overloaded.h"
 #include "src/ir/storage.h"
 #include "src/ir/value.h"

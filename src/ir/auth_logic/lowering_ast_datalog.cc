@@ -16,7 +16,14 @@
 
 #include "src/ir/auth_logic/lowering_ast_datalog.h"
 
+#include <algorithm>
 #include <iostream>
+#include <iterator>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <variant>
+#include <vector>
 
 #include "absl/algorithm/container.h"
 #include "src/common/utils/map_iter.h"

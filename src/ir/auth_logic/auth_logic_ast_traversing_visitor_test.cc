@@ -17,6 +17,10 @@
 #include "src/ir/auth_logic/auth_logic_ast_traversing_visitor.h"
 
 #include <iostream>
+#include <string>
+#include <utility>
+#include <variant>
+#include <vector>
 
 #include "absl/container/btree_set.h"
 #include "src/common/testing/gtest.h"

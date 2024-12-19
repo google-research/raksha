@@ -16,6 +16,7 @@
 #include "src/ir/ir_traversing_visitor.h"
 
 #include <memory>
+#include <vector>
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/block_builder.h"

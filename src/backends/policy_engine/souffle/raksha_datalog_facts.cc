@@ -19,6 +19,9 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <string>
+#include <system_error>
+#include <vector>
 
 #include "src/backends/policy_engine/souffle/utils.h"
 #include "src/common/logging/logging.h"

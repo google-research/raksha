@@ -16,7 +16,10 @@
 
 #include "src/backends/policy_engine/souffle/utils.h"
 
+#include <cstring>
 #include <fstream>
+#include <ios>
+#include <string>
 
 #include "absl/strings/str_format.h"
 

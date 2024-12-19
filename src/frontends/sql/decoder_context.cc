@@ -16,6 +16,9 @@
 #include "src/frontends/sql/decoder_context.h"
 
 #include <limits>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "src/common/utils/map_iter.h"
 #include "src/frontends/sql/ops/merge_op.h"

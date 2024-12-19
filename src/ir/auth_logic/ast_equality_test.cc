@@ -14,6 +14,9 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
+#include <tuple>
+#include <utility>
+
 #include "src/common/testing/gtest.h"
 #include "src/ir/auth_logic/ast.h"
 

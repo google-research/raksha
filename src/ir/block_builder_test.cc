@@ -16,6 +16,8 @@
 #include "src/ir/block_builder.h"
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/attribute.h"

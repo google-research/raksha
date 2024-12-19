@@ -16,6 +16,8 @@
 
 #include "src/ir/auth_logic/declaration_environment.h"
 
+#include <string>
+
 namespace raksha::ir::auth_logic {
 
 namespace {

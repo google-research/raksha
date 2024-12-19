@@ -16,6 +16,9 @@
 
 #include "src/frontends/sql/decode.h"
 
+#include <optional>
+#include <string>
+
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/ops/sql_output_op.h"
 #include "src/ir/value.h"

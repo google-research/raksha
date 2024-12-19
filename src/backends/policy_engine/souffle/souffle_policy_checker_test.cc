@@ -16,6 +16,7 @@
 #include "src/backends/policy_engine/souffle/souffle_policy_checker.h"
 
 #include <limits>
+#include <memory>
 
 #include "src/backends/policy_engine/dp_parameter_policy.h"
 #include "src/backends/policy_engine/sql_policy_rule_policy.h"

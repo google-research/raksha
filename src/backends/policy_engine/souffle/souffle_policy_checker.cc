@@ -17,6 +17,9 @@
 #include "src/backends/policy_engine/souffle/souffle_policy_checker.h"
 
 #include <cstdlib>
+#include <memory>
+#include <optional>
+#include <string>
 
 #include "souffle/SouffleInterface.h"
 #include "src/backends/policy_engine/policy.h"

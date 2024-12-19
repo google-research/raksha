@@ -1,6 +1,9 @@
 #include "src/frontends/sql/decode_sql_policy_rules.h"
 
 #include <cstdint>
+#include <string>
+#include <tuple>
+#include <vector>
 
 #include "google/protobuf/text_format.h"
 #include "absl/log/die_if_null.h"

@@ -17,6 +17,11 @@
 #ifndef SRC_IR_AUTH_LOGIC_SOUFFLE_EMITTER_H_
 #define SRC_IR_AUTH_LOGIC_SOUFFLE_EMITTER_H_
 
+#include <algorithm>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "absl/container/flat_hash_set.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"

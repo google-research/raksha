@@ -20,6 +20,8 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/map_iter.h"

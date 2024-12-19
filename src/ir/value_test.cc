@@ -15,6 +15,10 @@
 //----------------------------------------------------------------------------
 #include "src/ir/value.h"
 
+#include <tuple>
+#include <utility>
+#include <vector>
+
 #include "absl/hash/hash_testing.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/ir_printer.h"

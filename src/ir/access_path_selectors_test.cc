@@ -16,6 +16,8 @@
 #include "src/ir/access_path_selectors.h"
 
 #include <string>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 #include "absl/hash/hash_testing.h"

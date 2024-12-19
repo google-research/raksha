@@ -16,6 +16,11 @@
 
 #include "src/frontends/sql/decoder_context.h"
 
+#include <algorithm>
+#include <string>
+#include <tuple>
+#include <vector>
+
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/map_iter.h"
 #include "src/frontends/sql/ops/merge_op.h"

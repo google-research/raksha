@@ -14,14 +14,16 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
+#include "src/ir/ir_to_proto.h"
+
+#include <memory>
+#include <string>
+#include <variant>
+
 #include "src/ir/attributes/float_attribute.h"
 #include "src/ir/attributes/int_attribute.h"
 #include "src/ir/attributes/string_attribute.h"
-#include "src/ir/ir_to_proto.h"
 #include "src/ir/ssa_names.h"
-
-#include <memory>
-#include <variant>
 
 namespace raksha::ir {
 

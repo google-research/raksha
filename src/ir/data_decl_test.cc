@@ -15,6 +15,8 @@
 //----------------------------------------------------------------------------
 #include "src/ir/data_decl.h"
 
+#include <string>
+
 #include "src/common/testing/gtest.h"
 #include "src/ir/types/entity_type.h"
 #include "src/ir/types/type.h"

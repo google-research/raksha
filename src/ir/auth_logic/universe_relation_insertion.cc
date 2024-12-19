@@ -16,6 +16,12 @@
 
 #include "src/ir/auth_logic/universe_relation_insertion.h"
 
+#include <iterator>
+#include <string>
+#include <utility>
+#include <variant>
+#include <vector>
+
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "src/ir/auth_logic/auth_logic_ast_traversing_visitor.h"

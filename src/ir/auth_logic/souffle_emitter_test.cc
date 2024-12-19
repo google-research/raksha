@@ -18,6 +18,8 @@
 
 #include <iostream>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "src/common/testing/gtest.h"
 #include "src/ir/auth_logic/ast.h"

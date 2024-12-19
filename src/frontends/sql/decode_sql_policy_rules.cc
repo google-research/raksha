@@ -1,5 +1,9 @@
 #include "src/frontends/sql/decode_sql_policy_rules.h"
 
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "src/analysis/taint/inference_rules.h"

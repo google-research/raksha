@@ -16,6 +16,10 @@
 
 #include "datalog_lowering_visitor.h"
 
+#include <functional>
+#include <memory>
+#include <vector>
+
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"
 #include "src/ir/attributes/float_attribute.h"

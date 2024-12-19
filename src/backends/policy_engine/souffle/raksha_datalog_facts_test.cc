@@ -16,6 +16,9 @@
 #include "src/backends/policy_engine/souffle/raksha_datalog_facts.h"
 
 #include <filesystem>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "src/common/logging/logging.h"
 #include "src/common/testing/gtest.h"

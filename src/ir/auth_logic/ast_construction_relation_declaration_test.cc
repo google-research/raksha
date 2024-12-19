@@ -19,6 +19,8 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"

@@ -16,6 +16,8 @@
 
 #include "src/frontends/sql/driver.h"
 
+#include <string>
+
 #include "google/protobuf/text_format.h"
 #include "src/backends/policy_engine/policy.h"
 #include "src/backends/policy_engine/sql_policy_rule_policy.h"

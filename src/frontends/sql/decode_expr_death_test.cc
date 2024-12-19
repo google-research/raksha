@@ -14,6 +14,8 @@
 // limitations under the License.
 //----------------------------------------------------------------------------
 
+#include <string>
+
 #include "google/protobuf/text_format.h"
 #include "absl/strings/string_view.h"
 #include "src/common/testing/gtest.h"

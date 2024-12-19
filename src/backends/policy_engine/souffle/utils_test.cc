@@ -18,7 +18,9 @@
 
 #include <cstdio>
 #include <fstream>
+#include <ios>
 #include <sstream>
+#include <string>
 
 #include "absl/status/statusor.h"
 #include "src/common/logging/logging.h"
