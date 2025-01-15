@@ -17,7 +17,6 @@
 load("//build_defs:package_groups.oss.bzl", "frontend_packages")
 
 package(
-    default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
     licenses = ["notice"],
 )
