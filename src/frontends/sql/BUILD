@@ -20,6 +20,7 @@ load(
     "proto_library",
     "raksha_cc_proto_library",
 )
+load("//third_party/protobuf/build_defs:kt_jvm_proto_library.bzl", "kt_jvm_lite_proto_library", "kt_jvm_proto_library")
 
 package(
     features = ["layering_check"],
@@ -37,6 +38,28 @@ proto_library(
 
 raksha_cc_proto_library(
     name = "sql_ir_cc_proto",
+    visibility = [
+        "//:__pkg__",
+        "//src/backends/policy_engine/abstract_interpretation:__pkg__",
+    ],
+    deps = [
+        ":sql_ir_proto",
+    ],
+)
+
+kt_jvm_proto_library(
+    name = "sql_ir_kt_proto",
+    visibility = [
+        "//:__pkg__",
+        "//src/backends/policy_engine/abstract_interpretation:__pkg__",
+    ],
+    deps = [
+        ":sql_ir_proto",
+    ],
+)
+
+kt_jvm_lite_proto_library(
+    name = "sql_ir_kt_proto_lite",
     visibility = [
         "//:__pkg__",
         "//src/backends/policy_engine/abstract_interpretation:__pkg__",
