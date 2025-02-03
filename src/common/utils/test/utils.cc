@@ -26,13 +26,14 @@
 namespace raksha::utils::test {
 
 std::filesystem::path GetTestDataDir(std::string path) {
-    absl::string_view test_srcdir_env = std::getenv("TEST_SRCDIR");
-    absl::string_view test_workspace_env = std::getenv("TEST_WORKSPACE");
-    CHECK(test_srcdir_env != "");
-    CHECK(test_workspace_env != "");
-    return std::filesystem::path(test_srcdir_env) /
-        std::filesystem::path(test_workspace_env) /
-        std::move(path);
+  absl::string_view test_srcdir_env =
+      absl::NullSafeStringView(std::getenv("TEST_SRCDIR"));
+  absl::string_view test_workspace_env =
+      absl::NullSafeStringView(std::getenv("TEST_WORKSPACE"));
+  CHECK(test_srcdir_env != "");
+  CHECK(test_workspace_env != "");
+  return std::filesystem::path(test_srcdir_env) /
+         std::filesystem::path(test_workspace_env) / std::move(path);
 }
     
 std::vector<std::string> ReadFileLines(const std::filesystem::path& file) {
