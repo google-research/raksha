@@ -1,3 +1,5 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 #-----------------------------------------------------------------------------
 # Copyright 2022 Google LLC
 #
