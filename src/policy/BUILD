@@ -15,6 +15,8 @@
 #
 #-------------------------------------------------------------------------------
 load("//build_defs:antlr.bzl", "antlr4_cc_combined")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
 package(
     default_visibility = ["//src:__subpackages__"],
