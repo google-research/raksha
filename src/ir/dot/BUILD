@@ -1,3 +1,6 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 #-------------------------------------------------------------------------------
 # Copyright 2022 Google LLC
 #
@@ -15,7 +18,6 @@
 #
 #-------------------------------------------------------------------------------
 package(
-    default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
     licenses = ["notice"],
 )
