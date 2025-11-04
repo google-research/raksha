@@ -14,6 +14,8 @@
 # limitations under the License.
 #----------------------------------------------------------------------------
 
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("//build_defs:souffle.bzl", "gen_souffle_cxx_code", "souffle_cc_library")
 load("//src/analysis/souffle:dl_file_lists.bzl", "core_dl_files_plus_fact_test_helper")
 
@@ -31,8 +33,7 @@ def extracted_datalog_string_test(
       dl_string_lib: String; The library containing the strings to extract.
       visibility: List; List of visibilities.
     """
-
-    native.cc_binary(
+    cc_binary(
         name = "dl_string_test_file_generator_for_" + name,
         testonly = True,
         srcs = ["//src/common/utils/test/dl_string_extractor:dl_string_test_file_generator.cc"],
@@ -74,8 +75,7 @@ def extracted_datalog_string_test(
         src = name + "_cxx",
         testonly = True,
     )
-
-    native.cc_test(
+    cc_test(
         name = name,
         srcs = ["//src/common/utils/test/dl_string_extractor:dl_string_parsing_test_driver.cc"],
         args = [
