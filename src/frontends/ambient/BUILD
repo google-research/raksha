@@ -18,6 +18,8 @@ load(
     "//build_defs:raksha_policy_verifier.bzl",
     "raksha_policy_verifier_library",
 )
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
 licenses(["notice"])
 
