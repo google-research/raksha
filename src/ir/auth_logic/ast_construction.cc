@@ -27,6 +27,7 @@
 #include <variant>
 #include <vector>
 
+#include "absl/log/die_if_null.h"
 #include "absl/strings/str_replace.h"
 #include "src/common/logging/logging.h"
 #include "src/common/utils/map_iter.h"
