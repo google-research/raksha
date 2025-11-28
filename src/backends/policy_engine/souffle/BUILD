@@ -19,6 +19,9 @@ load(
     "//build_defs:raksha_policy_verifier.bzl",
     "raksha_policy_verifier_library",
 )
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
 package(
     default_visibility = ["//src:__subpackages__"],
@@ -419,6 +422,7 @@ cc_library(
         "//src/backends/policy_engine:policy_checker",
         "//src/common/utils:filesystem",
         "//src/ir:module",
+        "@com_google_absl//absl/log:die_if_null",
         "@com_google_absl//absl/strings",
         "@souffle//:souffle_include_lib",
     ],

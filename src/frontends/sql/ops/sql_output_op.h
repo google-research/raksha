@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "absl/log/die_if_null.h"
 #include "src/frontends/sql/ops/sql_op.h"
 #include "src/ir/ir_context.h"
 #include "src/ir/module.h"

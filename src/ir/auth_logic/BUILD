@@ -15,6 +15,9 @@
 #
 #-------------------------------------------------------------------------------
 
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 package(
     default_visibility = ["//src:__subpackages__"],
     features = ["layering_check"],
@@ -248,6 +251,7 @@ cc_library(
         "//src/ir/auth_logic:ast",
         "//src/ir/datalog:program",
         "//src/policy/auth_logic:auth_logic_cc_generator",
+        "@com_google_absl//absl/log:die_if_null",
         "@com_google_absl//absl/strings",
     ],
 )

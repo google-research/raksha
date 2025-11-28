@@ -1,3 +1,5 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 #-------------------------------------------------------------------------------
 # Copyright 2022 Google LLC
 #
@@ -29,5 +31,6 @@ cc_library(
         "//src/frontends/sql/ops:sql_output_op",
         "//src/ir:module",
         "//src/ir:value",
+        "@com_google_absl//absl/log:die_if_null",
     ],
 )

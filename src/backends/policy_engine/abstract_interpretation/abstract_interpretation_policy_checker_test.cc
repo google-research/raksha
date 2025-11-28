@@ -4,6 +4,7 @@
 
 #include "google/protobuf/text_format.h"
 #include "absl/container/flat_hash_map.h"
+#include "absl/log/die_if_null.h"
 #include "src/analysis/taint/abstract_ifc_tags.h"
 #include "src/analysis/taint/inference_rules.h"
 #include "src/backends/policy_engine/sql_policy_rule_policy.h"

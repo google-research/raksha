@@ -18,6 +18,8 @@ load(
     "//build_defs:raksha_policy_verifier.bzl",
     "raksha_policy_verifier_library",
 )
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
 licenses(["notice"])
 
@@ -77,6 +79,7 @@ cc_library(
         "//src/common/utils:iterator_range",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/log:die_if_null",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
         "@souffle//:souffle_include_lib",
