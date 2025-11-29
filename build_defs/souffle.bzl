@@ -14,6 +14,9 @@
 # limitations under the License.
 #-----------------------------------------------------------------------------
 
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 def gen_souffle_cxx_code(
         name,
         src,
@@ -101,7 +104,7 @@ def souffle_cc_library(
       visibility: List; List of visibilities.
       additional_deps: List; List of additional dependencies (e.g. functors).
     """
-    native.cc_library(
+    cc_library(
         name = name,
         srcs = [src],
         testonly = testonly,
@@ -142,7 +145,7 @@ def souffle_cc_binary(
       visibility: List; List of visibilities.
       additional_deps: List; List of additional dependencies (e.g. functors).
     """
-    native.cc_binary(
+    cc_binary(
         name = name,
         srcs = [src],
         testonly = testonly,
