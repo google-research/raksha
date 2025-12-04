@@ -18,6 +18,7 @@
 #include <iterator>
 #include <limits>
 
+#include "absl/log/die_if_null.h"
 #include "src/frontends/sql/ops/op_traits.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/attributes/int_attribute.h"

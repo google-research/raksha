@@ -20,6 +20,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
+#include "absl/log/die_if_null.h"
 #include "src/analysis/common/module_graph.h"
 #include "src/common/utils/map_iter.h"
 #include "src/common/utils/overloaded.h"

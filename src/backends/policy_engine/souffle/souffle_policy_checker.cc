@@ -19,6 +19,7 @@
 #include <cstdlib>
 
 #include "souffle/SouffleInterface.h"
+#include "absl/log/die_if_null.h"
 #include "src/backends/policy_engine/policy.h"
 #include "src/backends/policy_engine/souffle/datalog_lowering_visitor.h"
 #include "src/backends/policy_engine/souffle/utils.h"

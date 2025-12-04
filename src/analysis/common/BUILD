@@ -1,3 +1,6 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 #-------------------------------------------------------------------------------
 # Copyright 2022 Google LLC
 #
@@ -71,6 +74,7 @@ cc_library(
         "//src/ir:value",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/log:die_if_null",
     ],
 )
 
@@ -86,6 +90,7 @@ cc_test(
         "//src/parser/ir:ir_parser",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/container:btree",
+        "@com_google_absl//absl/log:die_if_null",
     ],
 )
 

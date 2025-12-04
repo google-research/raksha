@@ -17,6 +17,7 @@
 
 #include <memory>
 
+#include "absl/log/die_if_null.h"
 #include "src/common/testing/gtest.h"
 #include "src/frontends/sql/ops/op_traits.h"
 #include "src/ir/attributes/attribute.h"

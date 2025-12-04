@@ -22,6 +22,7 @@
 #include <memory>
 
 #include "souffle/SouffleInterface.h"
+#include "absl/log/die_if_null.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
