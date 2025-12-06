@@ -16,12 +16,10 @@
 
 # A Raksha frontend for SQLite
 
-package(
-    default_visibility = [
-        "//:__subpackages__",
-    ],
-    licenses = ["notice"],
-)
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
+package(licenses = ["notice"])
 
 cc_library(
     name = "ast",
