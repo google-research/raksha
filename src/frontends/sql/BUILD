@@ -20,6 +20,8 @@ load(
     "proto_library",
     "raksha_cc_proto_library",
 )
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
 package(
     features = ["layering_check"],
@@ -67,6 +69,7 @@ cc_library(
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/log:die_if_null",
     ],
 )
 

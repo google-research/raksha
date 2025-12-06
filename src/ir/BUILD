@@ -15,6 +15,8 @@
 #
 #-------------------------------------------------------------------------------
 load("//build_defs:package_groups.oss.bzl", "frontend_packages")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
 package(
     default_visibility = [
@@ -50,6 +52,7 @@ cc_test(
         "//src/common/testing:gtest",
         "//src/ir/attributes:attribute",
         "//src/ir/types",
+        "@com_google_absl//absl/log:die_if_null",
     ],
 )
 

@@ -1,3 +1,6 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 #-------------------------------------------------------------------------------
 # Copyright 2022 Google LLC
 #
@@ -52,5 +55,6 @@ cc_test(
         "//src/ir:value_string_converter",
         "//src/parser/ir:ir_parser",
         "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/log:die_if_null",
     ],
 )

@@ -1,3 +1,6 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 #-------------------------------------------------------------------------------
 # Copyright 2022 Google LLC
 #
@@ -49,6 +52,7 @@ cc_library(
         "//src/ir:value",
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:string_attribute",
+        "@com_google_absl//absl/log:die_if_null",
     ],
 )
 
@@ -77,6 +81,7 @@ cc_library(
         "//src/ir/attributes:attribute",
         "//src/ir/attributes:int_attribute",
         "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/log:die_if_null",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -117,6 +122,7 @@ cc_test(
         "//src/ir:ir_context",
         "//src/ir:value",
         "//src/ir/attributes:attribute",
+        "@com_google_absl//absl/log:die_if_null",
     ],
 )
 
@@ -134,6 +140,7 @@ cc_library(
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/log:die_if_null",
     ],
 )
 
@@ -162,6 +169,7 @@ cc_library(
         ":sql_op",
         "//src/ir:ir_context",
         "//src/ir:module",
+        "@com_google_absl//absl/log:die_if_null",
     ],
 )
 

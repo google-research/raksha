@@ -20,6 +20,7 @@
 #include <type_traits>
 
 #include "absl/algorithm/container.h"
+#include "absl/log/die_if_null.h"
 #include "src/common/utils/iterator_range.h"
 #include "src/frontends/sql/ops/sql_op.h"
 #include "src/ir/attributes/attribute.h"

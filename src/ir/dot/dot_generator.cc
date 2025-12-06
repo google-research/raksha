@@ -18,6 +18,7 @@
 #include "absl/container/btree_set.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
+#include "absl/log/die_if_null.h"
 #include "absl/strings/str_format.h"
 #include "src/ir/dot/dot_generator_config.h"
 #include "src/ir/ir_printer.h"
