@@ -20,6 +20,7 @@ load(
     "gen_souffle_cxx_code",
     "souffle_cc_library",
 )
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
 package(
     features = ["layering_check"],

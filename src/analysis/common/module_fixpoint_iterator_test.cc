@@ -17,6 +17,7 @@
 
 #include "absl/algorithm/container.h"
 #include "absl/container/btree_set.h"
+#include "absl/log/die_if_null.h"
 #include "src/common/testing/gtest.h"
 #include "src/common/utils/fold.h"
 #include "src/ir/ssa_names.h"

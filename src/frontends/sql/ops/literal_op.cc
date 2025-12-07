@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "absl/log/die_if_null.h"
 #include "src/ir/attributes/attribute.h"
 #include "src/ir/attributes/string_attribute.h"
 #include "src/ir/ir_context.h"

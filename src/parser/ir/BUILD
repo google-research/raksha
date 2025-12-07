@@ -15,6 +15,9 @@
 #
 #-------------------------------------------------------------------------------
 load("//build_defs:antlr.bzl", "antlr4_cc_combined")
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
 package(
     default_visibility = [
@@ -60,6 +63,7 @@ cc_library(
         "//src/ir/attributes:int_attribute",
         "//src/ir/attributes:string_attribute",
         "@com_google_absl//absl/log:check",
+        "@com_google_absl//absl/log:die_if_null",
     ],
 )
 

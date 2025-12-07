@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/log/die_if_null.h"
 #include "src/frontends/sql/ops/literal_op.h"
 #include "src/frontends/sql/ops/sql_output_op.h"
 #include "src/ir/attributes/string_attribute.h"
