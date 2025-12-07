@@ -33,6 +33,7 @@
 #include <vector>
 
 #include "absl/log/check.h"
+#include "absl/log/die_if_null.h"
 #include "src/common/utils/fold.h"
 #include "src/common/utils/map_iter.h"
 #include "src/common/utils/overloaded.h"

@@ -17,6 +17,7 @@
 #ifndef SRC_FRONTENDS_SQL_TESTING_UTILS_H_
 #define SRC_FRONTENDS_SQL_TESTING_UTILS_H_
 
+#include "absl/log/die_if_null.h"
 #include "src/frontends/sql/decoder_context.h"
 #include "src/frontends/sql/ops/sql_output_op.h"
 #include "src/ir/module.h"
